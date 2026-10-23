@@ -10,6 +10,7 @@ export * from './invoice_lines.entity';
 export * from './invoices.entity';
 export * from './patient_statements.entity';
 export * from './payable_payment_allocations.entity';
+export * from './payment_proofs.entity';
 export * from './payments_made.entity';
 export * from './payments_received.entity';
 export * from './quotation_installments.entity';

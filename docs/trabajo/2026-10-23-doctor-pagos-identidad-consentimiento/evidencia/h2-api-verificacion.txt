@@ -1,0 +1,19 @@
+$ NODE_OPTIONS=--max-old-space-size=10240 yarn typecheck
+typecheck exit=0
+
+$ yarn eslint <archivos tocados del carril>
+lint exit=0
+
+$ yarn build
+build exit=0
+
+$ yarn test src/modules/clinical/services/encounters.service.spec.ts src/modules/billing
+Test Suites: 21 passed, 21 total
+Tests:       143 passed, 143 total
+
+$ PATH=<node 24.11> yarn test:integration test/integration/c01-comprobantes-de-pago.int-spec.ts   (Postgres real 5433)
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+
+Nota de entorno: con Node 22 los int-specs no arrancan ("Jest's require(ESM) requires Node v24.9+").
+Se usó un Node 24.11 descargado al scratchpad, sólo para jest; la API sigue corriendo con el Node del contenedor.

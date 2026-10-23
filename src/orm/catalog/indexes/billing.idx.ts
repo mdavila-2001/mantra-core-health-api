@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `billing`.
- * 167 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 179 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingIndexes: readonly IndexTuple[] = [
@@ -105,6 +105,18 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['payable_payment_allocations', 'ix_payable_payment_allocations_clearing_item_id', ['clearing_item_id'], false, 'btree'],
   ['payable_payment_allocations', 'ix_payable_payment_allocations_currency_concept_id', ['currency_concept_id'], false, 'btree'],
   ['payable_payment_allocations', 'ix_payable_payment_allocations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_encounter_id', ['encounter_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_tenant_id', ['tenant_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_practice_site_id', ['practice_site_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_method_concept_id', ['method_concept_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_file_id', ['file_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_reviewed_by_user_id', ['reviewed_by_user_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['payment_proofs', 'ix_payment_proofs_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['payment_proofs', 'ux_payment_proofs_pending_per_charge', ['encounter_id'], true, 'btree', 'status_concept_id = \'351d39c9-7ffe-598b-96f5-d30125186cfe\''],
+  ['payment_proofs', 'ix_payment_proofs_patient_profile_id_created_at', ['patient_profile_id', 'created_at desc'], false, 'btree'],
   ['payments_made', 'ix_payments_made_practice_id', ['practice_id'], false, 'btree'],
   ['payments_made', 'ix_payments_made_bill_id', ['bill_id'], false, 'btree'],
   ['payments_made', 'ix_payments_made_vendor_id', ['vendor_id'], false, 'btree'],

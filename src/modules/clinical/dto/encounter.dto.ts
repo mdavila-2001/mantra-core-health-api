@@ -7,7 +7,10 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   Min,
+  MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -206,6 +209,31 @@ export class CloseEncounterDto {
   @IsInt()
   @Min(1)
   expectedRowVersion?: number;
+
+  /**
+   * C-01 / Q-P1: cerrar aunque el pago no esté confirmado. Excepción auditada
+   * (`ENCOUNTER_CLOSED_WITHOUT_PAYMENT`) que exige un motivo; sin ella, un
+   * cargo con precio y sin pago responde 412 `PAYMENT_REQUIRED`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Cerrar sin pago confirmado (excepción auditada). Exige closeWithoutPaymentReason.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  closeWithoutPayment?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Motivo de la excepción; obligatorio si closeWithoutPayment es true',
+    minLength: 5,
+    maxLength: 500,
+  })
+  @ValidateIf((o: CloseEncounterDto) => o.closeWithoutPayment === true)
+  @IsString()
+  @MinLength(5)
+  @MaxLength(500)
+  closeWithoutPaymentReason?: string;
 }
 
 /** Respuesta tras un check-in de encuentro. */

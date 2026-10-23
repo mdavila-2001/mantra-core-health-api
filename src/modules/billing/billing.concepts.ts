@@ -54,6 +54,24 @@ export const { seeds: BILLING_CONCEPT_SEEDS, ids: BILL } = defineModuleConcepts(
     METHOD_CASH: { code: 'PM_CASH', display: 'Cash' },
     METHOD_CARD: { code: 'PM_CARD', display: 'Card' },
     METHOD_TRANSFER: { code: 'PM_TRANSFER', display: 'Bank transfer' },
+    METHOD_QR_TRANSFER: {
+      code: 'PM_QR_TRANSFER',
+      display: 'Transfer against the site bank QR',
+    },
+
+    // --- Comprobantes de pago del paciente (payment_proofs.status_concept_id, C-01) ---
+    PROOF_PENDING_REVIEW: {
+      code: 'PROOF_PENDING_REVIEW',
+      display: 'Payment proof pending review',
+    },
+    PROOF_ACCEPTED: {
+      code: 'PROOF_ACCEPTED',
+      display: 'Payment proof accepted',
+    },
+    PROOF_REJECTED: {
+      code: 'PROOF_REJECTED',
+      display: 'Payment proof rejected',
+    },
 
     // --- Tipos de vínculo entre documentos (billing_document_links.relation_type_concept_id) ---
     REL_ENCOUNTER_OF: {

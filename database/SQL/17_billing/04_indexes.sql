@@ -343,3 +343,17 @@ CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_patient_profile_id" ON "b
 CREATE UNIQUE INDEX IF NOT EXISTS "uk_siat_simulated_invoices_practice_number"
     ON "billing"."siat_simulated_invoices" ("practice_id", "invoice_number") WHERE "status" <> 'REJECTED';
 CREATE INDEX IF NOT EXISTS "ix_siat_simulated_outbox_siat_invoice_id" ON "billing"."siat_simulated_outbox" ("siat_invoice_id");
+
+-- + 2026-10-23 · C-01 comprobantes de pago (payment_proofs) · generado por gen_ddl.py 17 / gen_integrity.py en mantra-core-health-model
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_encounter_id" ON "billing"."payment_proofs" ("encounter_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_tenant_id" ON "billing"."payment_proofs" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_patient_profile_id" ON "billing"."payment_proofs" ("patient_profile_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_practice_site_id" ON "billing"."payment_proofs" ("practice_site_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_method_concept_id" ON "billing"."payment_proofs" ("method_concept_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_file_id" ON "billing"."payment_proofs" ("file_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_status_concept_id" ON "billing"."payment_proofs" ("status_concept_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_reviewed_by_user_id" ON "billing"."payment_proofs" ("reviewed_by_user_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_created_by_user_id" ON "billing"."payment_proofs" ("created_by_user_id");
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_updated_by_user_id" ON "billing"."payment_proofs" ("updated_by_user_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_payment_proofs_pending_per_charge" ON "billing"."payment_proofs" ("encounter_id") WHERE status_concept_id = '351d39c9-7ffe-598b-96f5-d30125186cfe';
+CREATE INDEX IF NOT EXISTS "ix_payment_proofs_patient_profile_id_created_at" ON "billing"."payment_proofs" ("patient_profile_id", "created_at" DESC);

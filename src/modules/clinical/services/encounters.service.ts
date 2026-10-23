@@ -24,6 +24,11 @@ import { ClinicalReadService } from './clinical-read.service';
 // P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
 // calcado de `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
+import { AuditTrailService } from '../../audit/services';
+import {
+  chargeSettlement,
+  paymentRequired,
+} from '../../billing/charge-settlement';
 import {
   OwnerType,
   type FileLinkResponseDto,
@@ -64,6 +69,7 @@ export class EncountersService {
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
     private readonly filesService: FilesService,
+    private readonly auditTrail: AuditTrailService,
   ) {
     this.logger.setContext(EncountersService.name);
   }
@@ -358,6 +364,42 @@ export class EncountersService {
             expected: dto.expectedRowVersion,
             actual: encounter.rowVersion,
           },
+        );
+      }
+
+      // C-01 (MD-06): la consulta no se cierra sin el pago confirmado. El
+      // cargo ES el encuentro y «pagado» lo define `charge-settlement.ts`
+      // (cuenta saldada o comprobante aceptado). Una consulta sin precio no
+      // tiene nada que cobrar. La excepción es explícita, con motivo y
+      // auditada; nunca silenciosa.
+      const charge = await chargeSettlement(tx, encounterId);
+      if (charge !== null && paymentRequired(charge)) {
+        const reason = dto.closeWithoutPaymentReason?.trim() ?? '';
+        if (dto.closeWithoutPayment !== true || reason.length === 0) {
+          throw new PreconditionFailedException(
+            'La consulta no tiene el pago confirmado',
+            {
+              reason: 'PAYMENT_REQUIRED',
+              chargeId: charge.encounterId,
+              amountMinor: charge.amountMinor,
+              currency: charge.currency,
+            },
+          );
+        }
+        await this.auditTrail.record(tx, actor, {
+          action: 'ENCOUNTER_CLOSED_WITHOUT_PAYMENT',
+          entity: 'encounter',
+          entityId: encounterId,
+          tenantId: encounter.tenantId,
+        });
+        this.logger.warn(
+          {
+            operation: 'clinical.encounter.close',
+            encounterId,
+            amountMinor: charge.amountMinor,
+            closeWithoutPaymentReason: reason,
+          },
+          'Encounter closed without confirmed payment (audited exception)',
         );
       }
 

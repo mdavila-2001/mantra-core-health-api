@@ -450,3 +450,26 @@ CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_outbox" (
     CONSTRAINT "pk_siat_simulated_outbox" PRIMARY KEY ("id"),
     CONSTRAINT "ck_siat_simulated_outbox_status" CHECK ("status" = 'NOT_SENT_SIMULATED')
 );
+
+-- + 2026-10-23 · C-01 comprobantes de pago (payment_proofs) · generado por gen_ddl.py 17 / gen_integrity.py en mantra-core-health-model
+CREATE TABLE IF NOT EXISTS "billing"."payment_proofs" (
+    "id" uuid NOT NULL,
+    "encounter_id" uuid NOT NULL,
+    "tenant_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "practice_site_id" uuid,
+    "method_concept_id" uuid NOT NULL,
+    "file_id" uuid,
+    "amount_minor" bigint NOT NULL,
+    "currency" varchar NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "rejection_reason" text,
+    "reviewed_by_user_id" uuid,
+    "reviewed_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_payment_proofs" PRIMARY KEY ("id")
+);

@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `billing`.
- * 150 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 160 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -92,6 +92,16 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['payable_payment_allocations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['payable_payment_allocations', 'open_item_id', 'accounting', 'open_items', 'id'],
   ['payable_payment_allocations', 'payment_made_id', 'billing', 'payments_made', 'id'],
+  ['payment_proofs', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['payment_proofs', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['payment_proofs', 'file_id', 'common', 'files', 'id'],
+  ['payment_proofs', 'method_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payment_proofs', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['payment_proofs', 'practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['payment_proofs', 'reviewed_by_user_id', 'iam', 'users', 'id'],
+  ['payment_proofs', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['payment_proofs', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['payment_proofs', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['payments_made', 'bill_id', 'billing', 'bills', 'id'],
   ['payments_made', 'clearing_document_id', 'accounting', 'clearing_documents', 'id'],
   ['payments_made', 'company_bank_account_id', 'accounting', 'company_bank_accounts', 'id'],

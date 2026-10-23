@@ -263,7 +263,10 @@ export class SchedulingBookingsController {
   @ApiOperation({
     summary: 'Marcar el estado de pago de una cita',
     description:
-      'Pendiente de pago, parcialmente pagada o pagada, más la marca separada de uso de seguro. Una cita cancelada o rechazada responde 422.',
+      'Pendiente de pago, parcialmente pagada o pagada, más la marca separada de uso de seguro. Una cita cancelada o rechazada responde 422. ' +
+      'DEPRECADO (C-01, 2026-10-23): para el paciente el estado del cargo se deriva del comprobante aceptado ' +
+      '(`GET /billing/me/charges/:chargeId/payment-context`), no de esta bandera manual.',
+    deprecated: true,
   })
   setPaymentState(
     @Param('id', ParseUUIDPipe) id: string,

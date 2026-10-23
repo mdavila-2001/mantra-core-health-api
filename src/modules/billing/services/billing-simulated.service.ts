@@ -87,7 +87,8 @@ const DECIMAL = /^\d+(\.\d{1,2})?$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Tope de cobros por lectura. */
 const CHARGES_LIMIT = 200;
-const METHOD_REFERENCE = /^SIAT-SIM:MP:(\d+)$/;
+// `SIAT-SIM:MP:n` (caja) y `PROOF:<id>:MP:n` (comprobante aceptado, C-01).
+const METHOD_REFERENCE = /(?:^|:)MP:(\d+)$/;
 
 type Row = Record<string, string | number | Date | null | undefined>;
 
@@ -345,9 +346,17 @@ export class BillingSimulatedService {
               e.primary_practitioner_id AS "practitionerProfileId", e.reason_text AS "reason",
               e.start_at AS "startAt", pr.id AS "practiceId", pr.name AS "practiceName"
          FROM clinical.encounters e
+         -- La práctica del cargo es la del médico que atiende (su asignación
+         -- vigente, la primaria primero); sólo sin ninguna, la primera del tenant.
+         -- Los médicos independientes comparten el tenant por defecto.
+         LEFT JOIN LATERAL (SELECT ra.practice_id FROM practice.practitioner_role_assignments ra
+                             WHERE ra.practitioner_profile_id = e.primary_practitioner_id
+                               AND ra.valid_to IS NULL
+                             ORDER BY ra.is_primary DESC NULLS LAST, ra.created_at, ra.id LIMIT 1) own ON TRUE
          JOIN LATERAL (SELECT p.id, p.name FROM practice.practices p
-                        WHERE p.tenant_id = e.tenant_id
-                        ORDER BY p.created_at, p.id LIMIT 1) pr ON TRUE
+                             WHERE p.id = own.practice_id
+                                OR (own.practice_id IS NULL AND p.tenant_id = e.tenant_id)
+                             ORDER BY p.created_at, p.id LIMIT 1) pr ON TRUE
         WHERE ${where.join(' AND ')}
         ORDER BY e.start_at DESC NULLS LAST, e.id
         LIMIT ${CHARGES_LIMIT}`,
@@ -622,6 +631,51 @@ export class BillingSimulatedService {
       ]);
     }
     const cobro = await this.chargeOrThrow(this.em, scope, chargeId);
+    return this.settle(
+      user,
+      scope,
+      cobro,
+      methodCode,
+      `SIAT-SIM:MP:${methodCode}`,
+    );
+  }
+
+  /**
+   * C-01: el médico aceptó un comprobante del paciente y el cargo queda PAGADO
+   * en el modelo real (cuenta por cobrar + pago asignado), igual que si la
+   * administración hubiera cobrado en caja. No pasa por `ensureEnabled`: el
+   * pago es del modelo real, no de la ruta fiscal simulada.
+   *
+   * Devuelve `null` cuando la consulta no tiene precio (nada que saldar) o ya
+   * estaba saldada; en ambos casos el comprobante aceptado alcanza.
+   */
+  async settleFromProof(
+    user: AuthenticatedUser,
+    chargeId: string,
+    methodCode: number,
+    proofId: string,
+  ): Promise<SimulatedChargeView | null> {
+    const scope = this.scopeOf(user);
+    const cobro = await this.chargeOrThrow(this.em, scope, chargeId);
+    if (cobro.view.payment !== null) return null;
+    if (cents(cobro.view.total) <= 0 || cobro.balanceCents <= 0) return null;
+    return this.settle(
+      user,
+      scope,
+      cobro,
+      methodCode,
+      `PROOF:${proofId}:MP:${methodCode}`,
+    );
+  }
+
+  private async settle(
+    user: AuthenticatedUser,
+    scope: OperatingScope,
+    cobro: ChargeContext,
+    methodCode: number,
+    reference: string,
+  ): Promise<SimulatedChargeView> {
+    const chargeId = cobro.encounterId;
     if (cobro.view.payment !== null) {
       throw new ConflictException('El cobro ya está pagado', {
         reason: 'ALREADY_PAID',
@@ -664,7 +718,7 @@ export class BillingSimulatedService {
         patientProfileId: cobro.patientProfileId,
         amount: fromCents(cobro.balanceCents),
         methodConceptId: methodConcept(methodCode),
-        reference: `SIAT-SIM:MP:${methodCode}`,
+        reference,
         allocations: [
           {
             invoiceId: receivableId,

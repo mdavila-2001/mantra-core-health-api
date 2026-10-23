@@ -1,0 +1,4 @@
+$ PATH=<node 24.11> DOTENV=<api.env> yarn test:integration test/integration/c01-comprobantes-de-pago.int-spec.ts
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Time:        26.811 s, estimated 28 s

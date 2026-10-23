@@ -25,7 +25,15 @@ const actor = { id: 'user-1', roles: [] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  // C-01: el cierre consulta el cargo del encuentro con SQL crudo
+  // (`charge-settlement.ts`). Sin filas = el encuentro no tiene cargo que
+  // revisar; cada prueba del candado de pago lo sobreescribe.
+  const settlementRows: Record<string, unknown>[] = [];
+  const execute = mockFn(() => Promise.resolve(settlementRows));
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    getConnection: () => ({ execute }),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const encountersRepo = {
     findById: mockFn(),
@@ -61,6 +69,8 @@ function build() {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
     listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
+  // C-01: la excepción «cerrar sin pago» sella un eslabón de auditoría.
+  const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
   const service = new EncountersService(
     em as any,
     encountersRepo,
@@ -70,10 +80,13 @@ function build() {
     logger as any,
     clinicalRead as any,
     filesService as any,
+    auditTrail as any,
   );
   return {
     service,
     tx,
+    settlementRows,
+    auditTrail,
     encountersRepo,
     episodesRepo,
     clinicalNotifications,
@@ -333,6 +346,103 @@ describe('EncountersService', () => {
       await expect(
         d.service.close('enc1', { expectedRowVersion: 1 }, actor),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
+    });
+  });
+
+  // C-01 (MD-06): la consulta no se cierra sin el pago confirmado.
+  describe('close · candado de pago (C-01)', () => {
+    const cargoSinPagar = {
+      id: '11111111-1111-4111-8111-111111111111',
+      tenantId: 't1',
+      patientProfileId: 'p1',
+      practitionerProfileId: 'hp1',
+      branchId: null,
+      practiceId: 'pr1',
+      receivableId: null,
+      total: null,
+      balance: null,
+      catalogPrice: '150.00',
+      acceptedProofId: null,
+    };
+
+    it('responde PAYMENT_REQUIRED (422 de la casa) cuando el cargo tiene precio y nadie lo pagó', async () => {
+      const d = build();
+      const enc = encounter();
+      d.encountersRepo.findById.mockResolvedValue(enc);
+      d.settlementRows.push(cargoSinPagar);
+
+      await expect(
+        d.service.close('11111111-1111-4111-8111-111111111111', {}, actor),
+      ).rejects.toMatchObject({
+        details: expect.objectContaining({
+          reason: 'PAYMENT_REQUIRED',
+          amountMinor: 15000,
+        }),
+      });
+      expect(enc.statusConceptId).toBe(CLIN.ENCOUNTER_IN_PROGRESS);
+      expect(d.seal.computeHash).not.toHaveBeenCalled();
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    });
+
+    it('cierra cuando el comprobante del paciente fue aceptado', async () => {
+      const d = build();
+      const enc = encounter();
+      d.encountersRepo.findById.mockResolvedValue(enc);
+      d.settlementRows.push({ ...cargoSinPagar, acceptedProofId: 'proof-1' });
+
+      const res = await d.service.close(
+        '11111111-1111-4111-8111-111111111111',
+        {},
+        actor,
+      );
+
+      expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    });
+
+    it('cierra sin precio definido: no hay nada que cobrar', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter());
+      d.settlementRows.push({ ...cargoSinPagar, catalogPrice: '0.00' });
+
+      const res = await d.service.close(
+        '11111111-1111-4111-8111-111111111111',
+        {},
+        actor,
+      );
+      expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
+    });
+
+    it('la excepción exige motivo y queda auditada (Q-P1)', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter());
+      d.settlementRows.push(cargoSinPagar);
+
+      await expect(
+        d.service.close(
+          '11111111-1111-4111-8111-111111111111',
+          { closeWithoutPayment: true },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      const res = await d.service.close(
+        '11111111-1111-4111-8111-111111111111',
+        {
+          closeWithoutPayment: true,
+          closeWithoutPaymentReason: 'Paciente paga en la próxima sesión',
+        },
+        actor,
+      );
+      expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({
+          action: 'ENCOUNTER_CLOSED_WITHOUT_PAYMENT',
+          entityId: '11111111-1111-4111-8111-111111111111',
+        }),
+      );
     });
   });
 });
