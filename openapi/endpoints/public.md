@@ -23,7 +23,7 @@ Referencia exhaustiva de 2 operación(es) del módulo `public`, derivada del con
 - **Nombre:** Productos que ofrece una farmacia, desde su ficha pública
 - **Operation ID:** `PublicCatalogController_pharmacyProducts`
 - **Autenticación:** Pública
-- **Implementación:** [PublicCatalogController.pharmacyProducts](../../src/modules/public/controllers/public-catalog.controller.ts)
+- **Implementación:** [PublicCatalogController.pharmacyProducts](../../src/modules/public/presentation/controllers/public-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -128,7 +128,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/public/services/public-catalog.service.ts |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/public/application/services/public-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -153,7 +153,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Servicios que ofrece una organización, desde su ficha pública
 - **Operation ID:** `PublicCatalogController_organizationServices`
 - **Autenticación:** Pública
-- **Implementación:** [PublicCatalogController.organizationServices](../../src/modules/public/controllers/public-catalog.controller.ts)
+- **Implementación:** [PublicCatalogController.organizationServices](../../src/modules/public/presentation/controllers/public-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -254,7 +254,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/public/services/public-catalog.service.ts |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/public/application/services/public-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

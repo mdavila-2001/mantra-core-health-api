@@ -7,7 +7,7 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`insurance`](insurance.md) | 19 | 24 | 12 | 31 | 20 |
+| [`insurance`](insurance.md) | 19 | 24 | 14 | 31 | 20 |
 | [`community`](community.md) | 14 | 33 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`consent`](consent.md) | 11 | 11 | 9 | 10 | 16 |
@@ -23,7 +23,7 @@
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 15 | 19 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
-| [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 16 |
+| [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 17 |
 | [`practice`](practice.md) | 6 | 10 | 12 | 11 | 17 |
 | [`billing`](billing.md) | 5 | 13 | 10 | 22 | 14 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
@@ -40,14 +40,14 @@
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`pharmacy`](pharmacy.md) | 3 | 10 | 12 | 9 | 13 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
-| [`qa_lab`](qa_lab.md) | 3 | 3 | 2 | 13 | 1 |
+| [`qa_lab`](qa_lab.md) | 3 | 4 | 2 | 13 | 1 |
 | [`read_models`](read_models.md) | 3 | 3 | 8 | 13 | 5 |
 | [`surveys`](surveys.md) | 3 | 3 | 4 | 7 | 10 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 5 | 3 | 20 | 1 |
-| [`data_catalog`](data_catalog.md) | 2 | 3 | 2 | 8 | 1 |
+| [`data_catalog`](data_catalog.md) | 2 | 4 | 2 | 8 | 4 |
 | [`graph_intelligence`](graph_intelligence.md) | 2 | 3 | 2 | 13 | 1 |
 | [`health_data`](health_data.md) | 2 | 5 | 7 | 34 | 1 |
 | [`integration_contracts`](integration_contracts.md) | 2 | 4 | 9 | 9 | 13 |
@@ -67,7 +67,7 @@
 | [`erp`](erp.md) | 1 | 2 | 3 | 51 | 1 |
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
 | [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
-| [`ops_console`](ops_console.md) | 1 | 1 | 1 | 0 | 0 |
+| [`ops_console`](ops_console.md) | 1 | 2 | 2 | 0 | 0 |
 | [`platform_ops`](platform_ops.md) | 1 | 4 | 5 | 38 | 1 |
 | [`public`](public.md) | 1 | 1 | 1 | 0 | 1 |
 | [`qa_execution`](qa_execution.md) | 1 | 1 | 0 | 4 | 1 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **275** | **417** | **411** | **1263** | **514** |
+| **Total** | **275** | **420** | **414** | **1263** | **518** |

@@ -5,7 +5,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { PartyRatingsReadService, PartyRatingsService } from '../services';
 import {
   MyRatingDto,
@@ -43,6 +43,11 @@ export class PartyRatingsController {
 
   /** Califico (o recalifico) a una parte. Idempotente por respaldo. */
   @Put()
+  @Audited({
+    action: 'PARTY_RATED',
+    entity: 'party_rating',
+    entityId: 'result.id',
+  })
   @ApiOperation({
     summary: 'Calificar con estrellas a un médico, paciente u organización',
     description:

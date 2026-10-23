@@ -2,7 +2,7 @@
 
 API de salud de ALOVIDA (Mantra Core Technologies): historia clínica, agenda, identidad y acceso, perfiles, farmacia, seguros, contabilidad y comunidad, entre otros dominios. Se escribe en **NestJS 11, TypeScript 5 y MikroORM 7 sobre PostgreSQL**; expone rutas HTTP desde `src/main.ts` y ejecuta trabajos programados en **24 procesos worker** independientes (`src/worker-*.ts`). Los dominios viven en `src/modules/` (70 directorios); el catálogo ORM y la verificación del esquema están en `src/orm/`. Redis, MongoDB, OpenSearch, TimescaleDB, pgvector y MinIO sirven funciones específicas según el módulo y el despliegue. Node 24 y Yarn 4 (Corepack).
 
-Este README describe el código de la rama. La [revisión del backend del 2026-10-05](docs/revision-backend-2026-10-04/README.md) registra hallazgos, cobertura real y planes; no implica que todas las rutas hayan sido verificadas.
+Este README describe el código de la rama.
 
 ## Arquitectura y mapa
 
@@ -12,7 +12,7 @@ Este README describe el código de la rama. La [revisión del backend del 2026-1
 | 70 módulos de dominio | `src/modules/<dominio>/` | [Índice de módulos](src/modules/README.md) |
 | Autenticación, errores, tenant y utilidades | `src/common/` | [Common](src/common/README.md) |
 | ORM y catálogo de entidades, índices y FK | `src/orm/` | [ORM](src/orm/README.md) |
-| Workers y jobs | `src/worker/`, `src/worker-*.ts` | [Mapa de 24 workers](src/worker/README.md) |
+| Workers y jobs | `src/worker/`, `src/worker-*.ts` | Un entry point por proceso; ver la tabla siguiente |
 | DDL versionado (copia del modelo; **no se edita aquí**, no hay migraciones en este repo) | `database/SQL/`, `database/NoSQL/` | [`database/README.md`](database/README.md), [ADR-0021](docs/adr/ADR-0021-fuente-unica-de-ddl.md), [Operaciones](docs/operations/deployment.md) |
 | Contratos externos | `openapi/`, `asyncapi/` | [OpenAPI](openapi/CONTRATO-PUBLICO.md), [AsyncAPI](asyncapi/asyncapi.yaml) |
 
@@ -25,7 +25,7 @@ Este README describe el código de la rama. La [revisión del backend del 2026-1
 | Cobros y operación | `billing`, `promotions`, `automation`, `workflow`, `delegated_access`, `consent`, `cross_store_consistency` |
 | Datos y análisis | `data_catalog`, `read_models`, `reporting`, `lakehouse`, `time_series` |
 
-Cada nombre corresponde a `src/worker-<nombre>.ts`; la tabla suma 24. El [mapa de workers](src/worker/README.md) contiene jobs, scripts y límites. `docker-compose.yml` declara 24 servicios worker, algunos bajo perfiles; `docker-compose.coolify.yml` declara cuatro de forma explícita. El número de entrypoints no describe qué está activo en cada ambiente.
+Cada nombre corresponde a `src/worker-<nombre>.ts`; la tabla suma 24. `docker-compose.yml` declara 24 servicios worker, algunos bajo perfiles; `docker-compose.coolify.yml` declara cuatro de forma explícita. El número de entrypoints no describe qué está activo en cada ambiente.
 
 ### Carpetas de la raíz
 
@@ -78,7 +78,7 @@ El detalle y los prerrequisitos están en [test/README.md](test/README.md) y [te
 
 ## Contrato de errores
 
-`src/common/errors/domain.exception.ts` define `DomainException` y subclases con `HttpStatus` y `ErrorCode`; `src/common/filters/all-exceptions.filter.ts` arma la respuesta HTTP con `code`, `message`, `correlationId`, `details`, `timestamp` y `path`. Algunos dominios aportan `details.reason`, pero esta base **no lo exige de forma uniforme**; [el informe del catálogo](docs/revision-backend-2026-10-04/transversal/catalogo-errores.md) describe la brecha y el plan. Para clientes, `code` es más estable que el texto de `message`.
+`src/common/errors/domain.exception.ts` define `DomainException` y subclases con `HttpStatus` y `ErrorCode`; `src/common/filters/all-exceptions.filter.ts` arma la respuesta HTTP con `code`, `message`, `correlationId`, `details`, `timestamp` y `path`. Algunos dominios aportan `details.reason`, pero esta base **no lo exige de forma uniforme**; no verifiqué esa uniformidad en esta rama. Para clientes, `code` es más estable que el texto de `message`.
 
 ## Observabilidad: OpenTelemetry y Jaeger
 

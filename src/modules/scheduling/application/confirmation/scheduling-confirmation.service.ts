@@ -9,6 +9,7 @@ import {
 import { SCHED } from '../../domain/scheduling.concepts';
 import { SchedulingConfirmationRepository } from '../../infrastructure/repositories';
 import type { BookingConfirmationRules } from '../../entities';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 import {
   CreateConfirmationRuleDto,
   ConfirmationRuleResponseDto,
@@ -146,7 +147,11 @@ export class SchedulingConfirmationService {
     return this.em.transactional(async (tx) => {
       const rule = await this.repo.findRuleByIdForUpdate(tx, id);
       if (!rule) {
-        throw new ResourceNotFoundException('Regla no encontrada', { id });
+        throw new ResourceNotFoundException(
+          'Regla no encontrada',
+          { id },
+          SchedulingErrorReason.CONFIRMATION_RULE_NOT_FOUND,
+        );
       }
       rule.enabled = enabled;
       rule.version += 1;

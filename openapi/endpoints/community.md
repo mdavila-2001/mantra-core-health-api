@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 96 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 98 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
 - **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
@@ -81,32 +81,34 @@ Referencia exhaustiva de 96 operación(es) del módulo `community`, derivada del
 68. [GET /community/topics](#68-get-community-topics) — Temas de la comunidad
 69. [GET /f/{slug}](#69-get-f-slug) — Ficha pública de una farmacia
 70. [GET /internal/community/feed/pending](#70-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-71. [POST /internal/community/feed/rebuild](#71-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-72. [GET /internal/community/search/health](#72-get-internal-community-search-health) — Estado del índice del directorio público
-73. [POST /internal/community/search/reindex](#73-post-internal-community-search-reindex) — Reindexar el directorio público
-74. [POST /internal/community/verification/badges](#74-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-75. [POST /internal/community/verification/badges/{targetId}/revoke](#75-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-76. [POST /internal/community/verification/badges/expire-sweep](#76-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-77. [GET /l/{slug}](#77-get-l-slug) — Ficha pública de un laboratorio
-78. [GET /o/{slug}](#78-get-o-slug) — Ficha pública de una organización
-79. [GET /p/{slug}](#79-get-p-slug) — Ficha pública de un profesional
-80. [POST /patients/me/reviews](#80-post-patients-me-reviews) — Calificar una atención recibida
-81. [GET /public/comments/{commentId}/replies](#81-get-public-comments-commentid-replies) — Respuestas de un comentario público
-82. [GET /public/media/{id}](#82-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-83. [GET /public/nearby](#83-get-public-nearby) — Prestadores cercanos, en línea recta
-84. [GET /public/posts](#84-get-public-posts) — Últimas publicaciones de todos los profesionales
-85. [GET /public/posts/{postId}/comments](#85-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-86. [GET /public/posts/{postId}/reactions](#86-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-87. [GET /public/profiles/{prefijo}/{slug}](#87-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-88. [GET /public/profiles/{prefijo}/{slug}/reviews](#88-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-89. [GET /public/search](#89-get-public-search) — Buscador público unificado
-90. [GET /public/search/diagnostic-units](#90-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-91. [GET /public/search/insurers](#91-get-public-search-insurers) — Aseguradoras en el directorio público
-92. [GET /public/search/medications](#92-get-public-search-medications) — Medicamentos ofertados públicamente
-93. [GET /public/search/organizations](#93-get-public-search-organizations) — Organizaciones en el directorio público
-94. [GET /public/search/pharmacies](#94-get-public-search-pharmacies) — Farmacias en el directorio público
-95. [GET /public/search/practitioners](#95-get-public-search-practitioners) — Profesionales en el directorio público
-96. [GET /s/{slug}](#96-get-s-slug) — Ficha pública de una aseguradora
+71. [POST /internal/community/feed/ranking/apply](#71-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
+72. [GET /internal/community/feed/ranking/pending](#72-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
+73. [POST /internal/community/feed/rebuild](#73-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+74. [GET /internal/community/search/health](#74-get-internal-community-search-health) — Estado del índice del directorio público
+75. [POST /internal/community/search/reindex](#75-post-internal-community-search-reindex) — Reindexar el directorio público
+76. [POST /internal/community/verification/badges](#76-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+77. [POST /internal/community/verification/badges/{targetId}/revoke](#77-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+78. [POST /internal/community/verification/badges/expire-sweep](#78-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+79. [GET /l/{slug}](#79-get-l-slug) — Ficha pública de un laboratorio
+80. [GET /o/{slug}](#80-get-o-slug) — Ficha pública de una organización
+81. [GET /p/{slug}](#81-get-p-slug) — Ficha pública de un profesional
+82. [POST /patients/me/reviews](#82-post-patients-me-reviews) — Calificar una atención recibida
+83. [GET /public/comments/{commentId}/replies](#83-get-public-comments-commentid-replies) — Respuestas de un comentario público
+84. [GET /public/media/{id}](#84-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+85. [GET /public/nearby](#85-get-public-nearby) — Prestadores cercanos, en línea recta
+86. [GET /public/posts](#86-get-public-posts) — Últimas publicaciones de todos los profesionales
+87. [GET /public/posts/{postId}/comments](#87-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+88. [GET /public/posts/{postId}/reactions](#88-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+89. [GET /public/profiles/{prefijo}/{slug}](#89-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+90. [GET /public/profiles/{prefijo}/{slug}/reviews](#90-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+91. [GET /public/search](#91-get-public-search) — Buscador público unificado
+92. [GET /public/search/diagnostic-units](#92-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+93. [GET /public/search/insurers](#93-get-public-search-insurers) — Aseguradoras en el directorio público
+94. [GET /public/search/medications](#94-get-public-search-medications) — Medicamentos ofertados públicamente
+95. [GET /public/search/organizations](#95-get-public-search-organizations) — Organizaciones en el directorio público
+96. [GET /public/search/pharmacies](#96-get-public-search-pharmacies) — Farmacias en el directorio público
+97. [GET /public/search/practitioners](#97-get-public-search-practitioners) — Profesionales en el directorio público
+98. [GET /s/{slug}](#98-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -9680,7 +9682,263 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. POST /internal/community/feed/rebuild
+## 71. POST /internal/community/feed/ranking/apply
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-feed`
+- **Nombre:** Aplicar rank_score recalculado
+- **Operation ID:** `CommunityFeedController_rankingApply`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityFeedController.rankingApply](../../src/modules/community/controllers/community-feed.controller.ts)
+
+### Descripción de negocio
+
+Aplicar rank_score recalculado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Aplica los rank_score recalculados por el worker (UC-19-16).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/feed/ranking/apply` en `CommunityFeedController_rankingApply`. El controlador delega en `CommunityFeedService.applyRanking`. Valida el body como `ApplyFeedRankingDto` y consume `application/json`. El tipo de retorno estático es `Promise<FeedRankingApplyResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ApplyFeedRankingDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/community/feed/ranking/apply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "rankScore": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `updates` | Sí | `array<FeedRankingUpdateDto>` | máximo 500 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"feedItemId":"00000000-0000-4000-8000-000000000001","rankScore":"valor-ejemplo"}]` |
+| `updates[].feedItemId` | Sí | `string` | formato `uuid` | Ítem de feed | `00000000-0000-4000-8000-000000000001` |
+| `updates[].rankScore` | Sí | `string` | Sin restricción adicional declarada | Nuevo rank_score, como texto decimal | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/community/feed/ranking/apply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "rankScore": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRankingApplyResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "updated": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `updated` | Sí | `number` | Sin restricción adicional declarada | Ítems actualizados | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/feed/ranking/apply"
+}
+```
+
+---
+
+## 72. GET /internal/community/feed/ranking/pending
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-feed`
+- **Nombre:** Items de feed pendientes de puntuar
+- **Operation ID:** `CommunityFeedController_rankingPending`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityFeedController.rankingPending](../../src/modules/community/controllers/community-feed.controller.ts)
+
+### Descripción de negocio
+
+Items de feed pendientes de puntuar. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lote de ítems de feed pendientes de recalcular su rank_score (UC-19-16). Descubre-y-actúa como `pending`/`rebuild`: este endpoint junta las señales crudas (recencia, interacción) y `ranking/apply` persiste el puntaje que el worker calculó con ellas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /internal/community/feed/ranking/pending` en `CommunityFeedController_rankingPending`. El controlador delega en `CommunityFeedService.pendingRanking`. No recibe body. El tipo de retorno estático es `Promise<FeedRankingPendingResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /internal/community/feed/ranking/pending?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /internal/community/feed/ranking/pending?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRankingPendingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "postId": "00000000-0000-4000-8000-000000000001",
+      "ownerProfileId": "00000000-0000-4000-8000-000000000001",
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "itemCreatedAt": "valor-ejemplo",
+      "postPublishedAt": "valor-ejemplo",
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<FeedRankingPendingItemDto>` | Sin restricción adicional declarada | Lote de ítems a puntuar. | `[{"feedItemId":"00000000-0000-4000-8000-000000000001","postId":"00000000-0000-4000-8000-000000000001","ownerProfileId":"00000000-0000-4000-8000-000000000001","authorProfileId":"00000000-0000-4000-8000-000000000001","itemCreatedAt":"valor-ejemplo","postPublishedAt":"valor-ejemplo","reactionCount":1,"commentCount":1}]` |
+| `items[].feedItemId` | Sí | `string` | formato `uuid` | Ítem de feed | `00000000-0000-4000-8000-000000000001` |
+| `items[].postId` | Sí | `string` | formato `uuid` | Post fuente | `00000000-0000-4000-8000-000000000001` |
+| `items[].ownerProfileId` | Sí | `string` | formato `uuid` | Perfil dueño del feed | `00000000-0000-4000-8000-000000000001` |
+| `items[].authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor | `00000000-0000-4000-8000-000000000001` |
+| `items[].itemCreatedAt` | Sí | `string` | Sin restricción adicional declarada | Alta del ítem | `valor-ejemplo` |
+| `items[].postPublishedAt` | Sí | `string` | admite null | Publicación del post fuente | `valor-ejemplo` |
+| `items[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Reacciones del post | `1` |
+| `items[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Comentarios del post | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/feed/ranking/pending"
+}
+```
+
+---
+
+## 73. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9808,7 +10066,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /internal/community/search/health
+## 74. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9918,7 +10176,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. POST /internal/community/search/reindex
+## 75. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10047,7 +10305,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. POST /internal/community/verification/badges
+## 76. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10171,7 +10429,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. POST /internal/community/verification/badges/{targetId}/revoke
+## 77. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10292,7 +10550,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. POST /internal/community/verification/badges/expire-sweep
+## 78. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10398,7 +10656,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. GET /l/{slug}
+## 79. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10608,7 +10866,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. GET /o/{slug}
+## 80. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10818,7 +11076,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /p/{slug}
+## 81. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11028,7 +11286,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. POST /patients/me/reviews
+## 82. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -11177,7 +11435,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /public/comments/{commentId}/replies
+## 83. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11269,7 +11527,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. GET /public/media/{id}
+## 84. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11362,7 +11620,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /public/nearby
+## 85. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11456,7 +11714,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/posts
+## 86. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11543,7 +11801,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/posts/{postId}/comments
+## 87. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11634,7 +11892,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/posts/{postId}/reactions
+## 88. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11725,7 +11983,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/profiles/{prefijo}/{slug}
+## 89. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11936,7 +12194,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/profiles/{prefijo}/{slug}/reviews
+## 90. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12041,7 +12299,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/search
+## 91. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12140,7 +12398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/search/diagnostic-units
+## 92. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12239,7 +12497,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/search/insurers
+## 93. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12338,7 +12596,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /public/search/medications
+## 94. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12437,7 +12695,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 93. GET /public/search/organizations
+## 95. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12539,7 +12797,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 94. GET /public/search/pharmacies
+## 96. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12638,7 +12896,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 95. GET /public/search/practitioners
+## 97. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12741,7 +12999,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 96. GET /s/{slug}
+## 98. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`

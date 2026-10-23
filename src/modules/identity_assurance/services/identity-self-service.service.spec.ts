@@ -26,7 +26,11 @@ describe('IdentitySelfServiceService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const tx = {
+      flush: fn().mockResolvedValue(undefined),
+      find: fn().mockResolvedValue([{ externalSubject: 'test@example.com' }]),
+      findOne: fn().mockResolvedValue(null),
+    };
     const em = {
       transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
       fork: fn(() => tx),
@@ -72,6 +76,9 @@ describe('IdentitySelfServiceService', () => {
         sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
       })),
     };
+    const notificationsService = {
+      createRequest: fn().mockResolvedValue({ id: 'notif-1' }),
+    };
     const service = new IdentitySelfServiceService(
       em as never,
       casesRepo as never,
@@ -84,6 +91,7 @@ describe('IdentitySelfServiceService', () => {
       manualReviewRepo as never,
       checkResultsRepo as never,
       filesRepo as never,
+      notificationsService as never,
       logger as never,
     );
     return {
@@ -99,6 +107,7 @@ describe('IdentitySelfServiceService', () => {
       manualReviewRepo,
       checkResultsRepo,
       filesRepo,
+      notificationsService,
     };
   }
 
@@ -214,6 +223,23 @@ describe('IdentitySelfServiceService', () => {
       await expect(
         d.service.requestPatientIdentity(dto, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('enqueues a confirmation email to the user when requested', async () => {
+      const d = build();
+
+      await d.service.requestPatientIdentity(dto, actor);
+
+      expect(d.notificationsService.createRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientUserId: actor.id,
+          recipientAddress: 'test@example.com',
+          payloadJson: expect.objectContaining({
+            subject: 'Confirmación de solicitud de verificación - AloVida',
+          }),
+        }),
+        actor,
+      );
     });
   });
 

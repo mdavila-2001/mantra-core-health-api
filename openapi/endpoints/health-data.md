@@ -801,7 +801,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `reason` | Sí | `string` | Sin restricción adicional declarada | Por qué se retira | `Texto descriptivo de ejemplo` |
+| `reason` | Sí | `string` | longitud máxima 1000 | Por qué se retira | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1246,7 +1246,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `decision` | Sí | `string` | valores: `MATCH`, `NO_MATCH` | Sin descripción específica en el contrato OpenAPI. | `MATCH` |
-| `reasonText` | Sí | `string` | Sin restricción adicional declarada | Por qué se decide así | `Texto descriptivo de ejemplo` |
+| `reasonText` | Sí | `string` | longitud máxima 1000 | Por qué se decide así | `Texto descriptivo de ejemplo` |
 | `evidenceJson` | No | `object` | Sin restricción adicional declarada | Evidencia en la que se apoya la decisión | `{}` |
 | `memberRoleConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
@@ -2114,7 +2114,7 @@ Content-Type: application/json
 | `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organizationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `title` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `summaryRedacted` | No | `string` | Sin restricción adicional declarada | Resumen ya redactado según el consentimiento; nunca el dato clínico en claro | `valor-ejemplo` |
+| `summaryRedacted` | No | `string` | longitud máxima 2000 | Resumen ya redactado según el consentimiento; nunca el dato clínico en claro | `valor-ejemplo` |
 | `clinicalPriorityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientVisibilityConceptId` | No | `string` | formato `uuid` | Visibilidad para el paciente | `00000000-0000-4000-8000-000000000001` |
 | `securityLabelsJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
@@ -2262,7 +2262,7 @@ Content-Type: application/json
 | `issues[].severity` | No | `string` | valores: `FATAL`, `ERROR`, `WARNING`, `INFORMATION` | Sin descripción específica en el contrato OpenAPI. | `FATAL` |
 | `issues[].issueCode` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `issues[].expressionPath` | No | `string` | longitud máxima 500 | Ruta FHIRPath del hallazgo | `valor-ejemplo` |
-| `issues[].diagnosticsText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issues[].diagnosticsText` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issues[].locationJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `summaryJson` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
 

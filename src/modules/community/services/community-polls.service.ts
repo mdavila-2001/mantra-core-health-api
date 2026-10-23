@@ -10,6 +10,7 @@ import {
 } from '../../../common';
 import { PollsRepository, PostsRepository } from '../repositories';
 import { COMM } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CreatePollDto,
   CreateVoteDto,
@@ -50,7 +51,11 @@ export class CommunityPollsService {
     return this.em.transactional(async (tx) => {
       const post = await this.postsRepo.findById(tx, postId);
       if (!post)
-        throw new ResourceNotFoundException('Post no encontrado', { postId });
+        throw new ResourceNotFoundException(
+          'Post no encontrado',
+          { postId },
+          CommunityErrorReason.POLL_POST_NOT_FOUND,
+        );
 
       const poll = this.pollsRepo.createPoll(tx, {
         postId,
@@ -92,16 +97,24 @@ export class CommunityPollsService {
     return this.em.transactional(async (tx) => {
       const poll = await this.pollsRepo.findPollById(tx, pollId);
       if (!poll)
-        throw new ResourceNotFoundException('Encuesta no encontrada', {
-          pollId,
-        });
+        throw new ResourceNotFoundException(
+          'Encuesta no encontrada',
+          {
+            pollId,
+          },
+          CommunityErrorReason.POLL_NOT_FOUND,
+        );
       if (
         poll.statusConceptId !== COMM.POLL_OPEN ||
         (poll.closesAt && poll.closesAt.getTime() <= Date.now())
       ) {
-        throw new PreconditionFailedException('La encuesta está cerrada', {
-          pollId,
-        });
+        throw new PreconditionFailedException(
+          'La encuesta está cerrada',
+          {
+            pollId,
+          },
+          CommunityErrorReason.POLL_CLOSED,
+        );
       }
 
       const option = await this.pollsRepo.findOptionById(tx, dto.pollOptionId);
@@ -109,6 +122,7 @@ export class CommunityPollsService {
         throw new ResourceNotFoundException(
           'La opción no pertenece a la encuesta',
           { pollOptionId: dto.pollOptionId },
+          CommunityErrorReason.POLL_OPTION_NOT_IN_POLL,
         );
       }
 
@@ -119,9 +133,13 @@ export class CommunityPollsService {
         dto.voterProfileId,
       );
       if (dupOption)
-        throw new ConflictException('Ya votó por esta opción', {
-          pollOptionId: dto.pollOptionId,
-        });
+        throw new ConflictException(
+          'Ya votó por esta opción',
+          {
+            pollOptionId: dto.pollOptionId,
+          },
+          CommunityErrorReason.DUPLICATE_VOTE_OPTION,
+        );
 
       if (!poll.allowsMultiple) {
         const already = await this.pollsRepo.countVotesByVoter(
@@ -133,6 +151,7 @@ export class CommunityPollsService {
           throw new ConflictException(
             'La encuesta admite un único voto por votante',
             { pollId },
+            CommunityErrorReason.POLL_SINGLE_VOTE_ONLY,
           );
         }
       }

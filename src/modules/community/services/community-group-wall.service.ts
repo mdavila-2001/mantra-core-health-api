@@ -19,6 +19,7 @@ import type {
 import type { Comments } from '../entities';
 import { CommunityGroupAccessService } from './community-group-access.service';
 import { CommunityGroupNotificationsService } from './community-group-notifications.service';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 /** Tope de respuestas que se traen por página de muro. */
 const REPLIES_PER_PAGE = 200;
@@ -99,9 +100,13 @@ export class CommunityGroupWallService {
 
       const author = await this.profilesRepo.findById(tx, dto.authorProfileId);
       if (!author)
-        throw new ResourceNotFoundException('Perfil autor no encontrado', {
-          profileId: dto.authorProfileId,
-        });
+        throw new ResourceNotFoundException(
+          'Perfil autor no encontrado',
+          {
+            profileId: dto.authorProfileId,
+          },
+          CommunityErrorReason.POST_AUTHOR_PROFILE_NOT_FOUND,
+        );
 
       let parentCommentId: string | undefined;
       let rootCommentId: string | undefined;
@@ -122,6 +127,7 @@ export class CommunityGroupWallService {
           throw new ResourceNotFoundException(
             'La publicación a la que responde no es de este grupo',
             { groupId, parentCommentId: dto.parentCommentId },
+            CommunityErrorReason.GROUP_WALL_PARENT_NOT_IN_GROUP,
           );
 
         parentCommentId = parent.id;

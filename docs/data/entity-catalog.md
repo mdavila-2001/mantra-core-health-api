@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1262 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1263 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1198/1262** entidades tienen descripción de negocio
+> repositorio. **1198/1263** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe 1356 entidades en total
-> — la diferencia (94) son entidades diseñadas pero no materializadas aún en
+> — la diferencia (93) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (63 schemas · 1262 entidades)
+## Por schema (63 schemas · 1263 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -440,7 +440,7 @@
 | `files` | `Files` | 15 | `id` | ✅ | files es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `identifiers` | `Identifiers` | 19 | `id` | ✅ | identifiers es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 
-### `community` (40 entidades, módulo `community`)
+### `community` (41 entidades, módulo `community`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -466,6 +466,7 @@
 | `moderation_decisions` | `ModerationDecisions` | 13 | `id` | ✅ | moderation_decisions es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `moderation_queue` | `ModerationQueue` | 16 | `id` | ✅ | moderation_queue es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `moderation_strikes` | `ModerationStrikes` | 12 | `id` | ✅ | moderation_strikes es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
+| `party_ratings` | `PartyRatings` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `poll_options` | `PollOptions` | 10 | `id` | ✅ | poll_options es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `poll_votes` | `PollVotes` | 9 | `id` | ✅ | poll_votes es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `polls` | `Polls` | 12 | `id` | ✅ | polls es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
@@ -648,7 +649,7 @@
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `branch_memberships` | `BranchMemberships` | 10 | `id` | ✅ | branch_memberships es una tabla de asociación del módulo 04 · directory (dominio Núcleo y Terminología): conecta entidades (`tenant_memberships`, `branches`) para representar relaciones muchos-a-muchos. |
-| `branches` | `Branches` | 14 | `id` | ✅ | branches es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
+| `branches` | `Branches` | 16 | `id` | ✅ | branches es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
 | `tenant_affiliation_documents` | `TenantAffiliationDocuments` | 23 | `id` | ✅ | tenant_affiliation_documents es un wrap gobernado sobre el archivo (`common.files`) del módulo 04 · directory (dominio Núcleo y Terminología): envuelve cada documento legal de afiliación de la empresa y le agrega tipo de… |
 | `tenant_legal_representatives` | `TenantLegalRepresentatives` | 16 | `id` | ✅ | tenant_legal_representatives es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
 | `tenant_memberships` | `TenantMemberships` | 15 | `id` | ✅ | tenant_memberships es una tabla de asociación del módulo 04 · directory (dominio Núcleo y Terminología): conecta entidades (`branch_memberships`, `tenants`) para representar relaciones muchos-a-muchos. |
@@ -735,7 +736,7 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `dynamic_field_definitions` | `DynamicFieldDefinitions` | 31 | `id` | ✅ | dynamic_field_definitions es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
+| `dynamic_field_definitions` | `DynamicFieldDefinitions` | 35 | `id` | ✅ | dynamic_field_definitions es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
 | `dynamic_field_sections` | `DynamicFieldSections` | 11 | `id` | ✅ | dynamic_field_sections es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
 | `extension_target_policies` | `ExtensionTargetPolicies` | 15 | `id` | ✅ | extension_target_policies guarda reglas y configuración de gobierno del módulo 09 · forms (dominio Clínico y Diagnóstico): parametriza el comportamiento del negocio sin tocar código. |
 | `field_assignments` | `FieldAssignments` | 21 | `id` | ✅ | field_assignments es una tabla de asociación del módulo 09 · forms (dominio Clínico y Diagnóstico): conecta entidades (`field_values`, `dynamic_field_definitions`, `dynamic_field_sections`) para representar relaciones mu… |
@@ -749,7 +750,7 @@
 | `field_value_access_rules` | `FieldValueAccessRules` | 15 | `id` | ✅ | field_value_access_rules guarda reglas y configuración de gobierno del módulo 09 · forms (dominio Clínico y Diagnóstico): parametriza el comportamiento del negocio sin tocar código. |
 | `field_value_audit` | `FieldValueAudit` | 9 | `id` | — | field_value_audit es un ledger inmutable (append-only) del módulo 09 · forms (dominio Clínico y Diagnóstico): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `field_value_provenance` | `FieldValueProvenance` | 14 | `id` | — | field_value_provenance es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
-| `field_values` | `FieldValues` | 34 | `id` | ✅ | field_values es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
+| `field_values` | `FieldValues` | 35 | `id` | ✅ | field_values es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
 | `form_instances` | `FormInstances` | 12 | `id` | ✅ | form_instances es un registro central de negocio del módulo 09 · forms (formularios dinámicos y gobierno de extensibilidad), dominio Clínico y Diagnóstico. |
 
 ### `geo` (6 entidades, módulo `geo`)
@@ -1259,7 +1260,7 @@
 | `practice_settings` | `PracticeSettings` | 10 | `id` | ✅ | practice_settings guarda reglas y configuración de gobierno del módulo 14 · practice (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `practice_sites` | `PracticeSites` | 18 | `id` | ✅ | practice_sites es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practices` | `Practices` | 15 | `id` | ✅ | practices es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
-| `practitioner_role_assignments` | `PractitionerRoleAssignments` | 19 | `id` | ✅ | practitioner_role_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`) para representar r… |
+| `practitioner_role_assignments` | `PractitionerRoleAssignments` | 20 | `id` | ✅ | practitioner_role_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`) para representar r… |
 | `practitioner_support_assignments` | `PractitionerSupportAssignments` | 13 | `id` | ✅ | practitioner_support_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_role_assignments`) para representar relaciones muchos-a-muchos. |
 
 ### `procedures_perioperative` (37 entidades, módulo `procedures_perioperative`)

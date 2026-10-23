@@ -138,6 +138,25 @@ export class FieldValues {
   valueConceptId?: string;
 
   /**
+   * La opción elegida de un campo `code` **sin** `valueSetId`: texto libre
+   * tecleado por quien armó el formulario (o lo que el paciente escribió al
+   * elegir «Otro»), no un concepto del catálogo.
+   *
+   * No reusa `value_concept_id` a propósito: esa columna es `uuid` con FK a
+   * `terminology.catalog_concepts`, y una opción como «Ex fumador» no es un
+   * concepto — insertarla ahí violaría el tipo y la FK. Exclusiva con
+   * `value_concept_id` dentro del mismo `value[x]`: un campo `code` llena una
+   * u otra según declare `valueSetId` u {@link DynamicFieldDefinitions.options},
+   * nunca las dos.
+   *
+   * Adelanta la entidad al esquema (ver `database/README.md`): se crea de
+   * forma aditiva por `ORM_SCHEMA_SYNC=safe` hasta que se promueva el DDL
+   * canónico en `mantra-core-health-model`.
+   */
+  @Property({ fieldName: 'value_code', columnType: 'text', nullable: true })
+  valueCode?: string;
+
+  /**
    * Valor de value reference type mantenido por la instancia.
    */
   @Property({

@@ -33,6 +33,7 @@ import type {
   AffiliationRequestListDto,
   RejectAffiliationDto,
 } from '../../presentation/dto';
+import { ProfilesErrorReason } from '../../profiles.error-reasons';
 
 /**
  * Los tres estados del vínculo, con los conceptos que **hoy** existen.
@@ -229,9 +230,13 @@ export class ProfilesAffiliationsService {
 
     const site = await this.organizations.findSite(em, practiceSiteId);
     if (!site) {
-      throw new ResourceNotFoundException('La sede indicada no existe', {
-        practiceSiteId,
-      });
+      throw new ResourceNotFoundException(
+        'La sede indicada no existe',
+        {
+          practiceSiteId,
+        },
+        ProfilesErrorReason.PRACTICE_SITE_NOT_FOUND,
+      );
     }
 
     const tenantId = site.managingTenantId;
@@ -459,9 +464,13 @@ export class ProfilesAffiliationsService {
 
       const request = await this.affiliationsRepo.findById(tx, affiliationId);
       if (!request) {
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          affiliationId,
-        });
+        throw new ResourceNotFoundException(
+          'Solicitud no encontrada',
+          {
+            affiliationId,
+          },
+          ProfilesErrorReason.AFFILIATION_REQUEST_NOT_FOUND,
+        );
       }
 
       // La solicitud tiene que ser de una sede de ESTA organización. Sin esto,
@@ -478,16 +487,26 @@ export class ProfilesAffiliationsService {
         // 404 y no 403: para quien administra esta organización, una solicitud
         // de otra sencillamente no existe. Decir «prohibido» confirmaría que
         // existe, que es la mitad de lo que un sondeo busca.
-        throw new ResourceNotFoundException('Solicitud no encontrada', {
-          affiliationId,
-        });
+        throw new ResourceNotFoundException(
+          'Solicitud no encontrada',
+          {
+            affiliationId,
+          },
+          ProfilesErrorReason.AFFILIATION_REQUEST_NOT_FOUND,
+        );
       }
 
       if (!isStatus(request.statusConceptId, decision.desde)) {
-        throw new PreconditionFailedException(decision.siNoEsta, {
-          affiliationId,
-          statusConceptId: request.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          decision.siNoEsta,
+          {
+            affiliationId,
+            statusConceptId: request.statusConceptId,
+          },
+          decision.desde === 'APROBADO'
+            ? ProfilesErrorReason.AFFILIATION_NOT_APPROVED
+            : ProfilesErrorReason.AFFILIATION_REQUEST_ALREADY_DECIDED,
+        );
       }
 
       request.statusConceptId = decision.destino;

@@ -7,6 +7,7 @@ import { ProfilesModule } from '../profiles/profiles.module';
 import { DirectoryModule } from '../directory/directory.module';
 import { CommunityModule } from '../community/community.module';
 import { CommonModule } from '../common/common.module';
+import { MessagingModule } from '../messaging/messaging.module';
 import {
   IdentityAuthoritiesController,
   IdentityPoliciesController,
@@ -63,6 +64,8 @@ import {
     // no importa `identity_assurance`.
     CommunityModule,
     CommonModule,
+    // Envío de correo de confirmación de solicitud de verificación por autoservicio.
+    MessagingModule,
   ],
   controllers: [
     IdentityAuthoritiesController,

@@ -46,6 +46,18 @@ export interface CreateTemplateFieldData {
   dataType: string;
   /** Value set de valores permitidos, si aplica. */
   valueSetId?: string;
+  /** Opciones propias de un campo de elección sin `valueSetId`. */
+  options?: string[];
+  /** Si el campo admite marcar varias opciones. */
+  multiple?: boolean;
+  /** Si el campo ofrece además «Otro», con texto libre. */
+  allowOther?: boolean;
+  /** La ayuda que se lee bajo la pregunta. */
+  description?: string;
+  /** Casillas: marcar al menos N. Sólo con `multiple`. */
+  cardinalityMin?: number;
+  /** Casillas: marcar como máximo N. Sólo con `multiple`. */
+  cardinalityMax?: number;
   /** Concept id del estado inicial. */
   stateConceptId: string;
   /** Identificador asociado a actor user. */

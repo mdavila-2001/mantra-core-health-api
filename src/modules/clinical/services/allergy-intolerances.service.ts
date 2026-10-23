@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -106,6 +107,7 @@ export class AllergyIntolerancesService {
             patientProfileId: dto.patientProfileId,
             substanceConceptId: dto.substanceConceptId,
           },
+          ClinicalErrorReason.ALLERGY_ALREADY_ACTIVE,
         );
       }
 

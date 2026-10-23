@@ -8,18 +8,37 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `auth.env.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `auth.module.ts` | Composición de dependencias del módulo NestJS. |
-| `authenticated-user.interface.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `current-user.decorator.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `jwt-auth.guard.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `jwt-payload.interface.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `jwt.strategy.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `public.decorator.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `auth-token.module.ts` | Sólo `TokenService`/`JwtModule`, sin los `APP_GUARD`; lo usan los workers para firmar su propio token `SYSTEM`. |
+| `auth.env.ts` | Esquema Joi y lectura de `process.env` para secreto, TTL y algoritmo. |
+| `auth.module.ts` | Composición del módulo; registra los `APP_GUARD` en orden (ver abajo). |
+| `authenticated-user.interface.ts` | `AuthenticatedUser` y `AuthenticatedRequest`: el contrato que ven controladores y servicios. |
+| `current-user.decorator.ts` | `@CurrentUser()`: inyecta `request.user`. |
+| `jwt-auth.guard.ts` | Guard global de autenticación; deja pasar `@Public()` sin verificar token. |
+| `jwt-payload.interface.ts` | Claims firmados dentro del access token (`JwtPayload`). |
+| `jwt.strategy.ts` | Verifica firma, expiración y tipo del access token, exige sesión viva y reconstruye `AuthenticatedUser`. |
+| `public.decorator.ts` | `@Public()`: exime un handler de `JwtAuthGuard`. |
 | `refresh-cookie.ts` | Entrega del refresh token como cookie httpOnly (ver abajo). |
-| `roles.decorator.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `roles.guard.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `token.service.ts` | Casos de uso y reglas de negocio. |
+| `requires-verified-identity.decorator.ts` | `@RequiresVerifiedIdentity()`: exige identidad probada, por encima del rol. |
+| `roles.decorator.ts` | `@Roles(...)`: roles exigidos por un handler. |
+| `roles.guard.ts` | Autorización por rol, respetando el tenant de los roles con ámbito (`scopedRoles`); `SUPERADMIN` es comodín. |
+| `session-validator.ts` | Comprueba contra `iam.sessions` que el token siga respaldado por una sesión viva (MCH-004). |
+| `tenant-scope.guard.ts` | Resuelve el tenant activo antes de que `RolesGuard` autorice (MCH-001). |
+| `token.service.ts` | Firma de access tokens y emisión/hash de refresh tokens. |
+| `verified-identity.guard.ts` | Exige una aserción de identidad vigente en los handlers con `@RequiresVerifiedIdentity()`. |
+| `ws-jwt.guard.ts` | Autentica los sockets de mensajería con el mismo access token que la API HTTP. |
+
+## Orden de los guards globales
+
+`auth.module.ts` registra, en este orden, `JwtAuthGuard` → `TenantScopeGuard` →
+`RolesGuard` → `VerifiedIdentityGuard`. Cada uno asume que el anterior ya pobló
+`request.user` (y el tenant resuelto) o dejó pasar la petición.
+
+## Revocación: qué corta `logout`
+
+`JwtStrategy.validate` consulta `iam.sessions` en cada petición
+(`SessionValidator`): un `logout`, un bloqueo de cuenta o el retiro de un rol
+cortan también el access token ya emitido, sin esperar a que expire
+(`JWT_ACCESS_TTL`, 15 minutos por defecto). No hay caché a propósito.
 
 ## Criterios de mantenimiento
 

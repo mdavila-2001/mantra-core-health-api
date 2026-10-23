@@ -59695,7 +59695,9 @@ paths:
         - name: sortBy
           required: false
           in: query
-          description: Campo de ordenamiento
+          description: >-
+            Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio
+            aplica además su propia allowlist de columnas ordenables
           schema:
             default: createdAt
             type: string
@@ -61596,6 +61598,7 @@ components:
         profilePhotoBase64:
           type: string
           description: Foto de perfil en formato Base64 (Data URI o base64 plano)
+          maxLength: 2800000
         signatureFileId:
           type: string
           format: uuid
@@ -62550,6 +62553,7 @@ components:
         profilePhotoBase64:
           type: string
           description: Foto de perfil en formato Base64 (Data URI o base64 plano)
+          maxLength: 2800000
         signatureFileId:
           type: string
           format: uuid
@@ -67365,6 +67369,7 @@ components:
         reasonText:
           type: string
           description: Motivo de consulta
+          maxLength: 1000
         participants:
           type: array
           items:
@@ -67432,6 +67437,7 @@ components:
         valueText:
           type: string
           description: Valor de texto
+          maxLength: 1000
         valueConceptId:
           type: string
           description: Valor codificado (concept id)
@@ -67489,6 +67495,7 @@ components:
         text:
           type: string
           description: Texto libre del rango
+          maxLength: 300
       additionalProperties: false
     CreateObservationDto:
       type: object
@@ -67506,6 +67513,7 @@ components:
         valueText:
           type: string
           description: Valor de texto
+          maxLength: 1000
         valueConceptId:
           type: string
           description: Valor codificado (concept id)
@@ -67603,6 +67611,7 @@ components:
         valueText:
           type: string
           description: Valor de texto
+          maxLength: 1000
         valueConceptId:
           type: string
           description: Valor codificado (concept id)
@@ -67617,6 +67626,7 @@ components:
         note:
           type: string
           description: Nota que justifica la enmienda
+          maxLength: 1000
         expectedRowVersion:
           type: number
           description: row_version esperado (bloqueo optimista)
@@ -67940,6 +67950,7 @@ components:
         description:
           type: string
           description: Descripción libre
+          maxLength: 1000
       required:
         - manifestationConceptId
       additionalProperties: false
@@ -68029,6 +68040,7 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración (concept id)
@@ -68036,6 +68048,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -68054,6 +68067,7 @@ components:
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)
+          maxLength: 2000
         indicationConditionId:
           type: string
           description: >-
@@ -68140,6 +68154,7 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración (concept id)
@@ -68147,6 +68162,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -68173,6 +68189,7 @@ components:
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente impresas en la receta (Patch v4.1.3)
+          maxLength: 2000
       additionalProperties: false
     InvalidateMedicationRequestDto:
       type: object
@@ -68180,6 +68197,7 @@ components:
         reasonText:
           type: string
           description: Motivo de la invalidación (obligatorio)
+          maxLength: 1000
       required:
         - reasonText
       additionalProperties: false
@@ -68189,6 +68207,7 @@ components:
         reasonText:
           type: string
           description: Motivo de la corrección/reemplazo (obligatorio)
+          maxLength: 1000
         medicationConceptId:
           type: string
           description: Medicamento (concept id)
@@ -68200,6 +68219,7 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración (concept id)
@@ -68207,6 +68227,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -68231,9 +68252,11 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -68308,6 +68331,7 @@ components:
         followUpText:
           type: string
           description: Seguimiento en texto libre
+          maxLength: 2000
       required:
         - custodianTenantId
         - patientProfileId
@@ -73404,6 +73428,7 @@ components:
         provisionTypeConceptId:
           type: string
           description: Tipo de provisión (concept id); por defecto la base
+          format: uuid
       required:
         - action
       additionalProperties: false
@@ -78174,6 +78199,27 @@ components:
           type: string
           format: uuid
           description: Value set de valores permitidos (campos de selección)
+        options:
+          description: Opciones propias de un campo de elección (dataType "code" sin valueSetId)
+          type: array
+          items:
+            type: string
+        multiple:
+          type: boolean
+          description: Admite varias respuestas en vez de una sola
+        allowOther:
+          type: boolean
+          description: Ofrece «Otro», con texto libre
+        description:
+          type: string
+          description: Ayuda que se lee bajo la pregunta (se sirve como "hint")
+          maxLength: 1000
+        cardinalityMin:
+          type: number
+          description: Cardinalidad mínima (sólo con multiple)
+        cardinalityMax:
+          type: number
+          description: Cardinalidad máxima (sólo con multiple)
         required:
           type: boolean
           default: false
@@ -78298,6 +78344,7 @@ components:
         messageTemplate:
           type: string
           description: Plantilla del mensaje de alerta
+          maxLength: 2000
       required:
         - code
         - name
@@ -78399,8 +78446,10 @@ components:
           description: Severidad (concept id)
         mechanismText:
           type: string
+          maxLength: 2000
         managementText:
           type: string
+          maxLength: 2000
       required:
         - substanceAConceptId
         - substanceBConceptId
@@ -78672,6 +78721,7 @@ components:
         doseText:
           type: string
           description: Posología por defecto
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración por defecto
@@ -78679,6 +78729,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia por defecto
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad por defecto
@@ -78689,6 +78740,7 @@ components:
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente por defecto, separadas de la posología
+          maxLength: 2000
       required:
         - name
         - medicationConceptId
@@ -81662,6 +81714,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ValidationRuleInputDto'
+        options:
+          description: Opciones propias de un campo de elección (dataType "code" sin valueSetId)
+          type: array
+          items:
+            type: string
+        multiple:
+          type: boolean
+          description: Admite varias respuestas en vez de una sola
+          default: false
+        allowOther:
+          type: boolean
+          description: Ofrece «Otro», con texto libre
+          default: false
+        description:
+          type: string
+          description: Ayuda que se lee bajo la pregunta (se sirve como "hint")
+          maxLength: 1000
       required:
         - code
         - name
@@ -81691,6 +81760,22 @@ components:
             - reference
             - code
           description: Tipo de dato técnico; con valores capturados no se cambia (409)
+        options:
+          description: Opciones, reemplazadas enteras
+          type: array
+          items:
+            type: string
+        multiple:
+          type: boolean
+          description: Admite varias respuestas
+        allowOther:
+          type: boolean
+          description: Ofrece «Otro», con texto libre
+        description:
+          type: object
+          description: Ayuda bajo la pregunta; null la quita
+          maxLength: 1000
+          nullable: true
       additionalProperties: false
     CreateFieldDependencyDto:
       type: object
@@ -83382,6 +83467,7 @@ components:
           maxLength: 500
         diagnosticsText:
           type: string
+          maxLength: 2000
         locationJson:
           type: object
       required:
@@ -83481,6 +83567,7 @@ components:
         reasonText:
           type: string
           description: Por qué se decide así
+          maxLength: 1000
         evidenceJson:
           type: object
           description: Evidencia en la que se apoya la decisión
@@ -83528,6 +83615,7 @@ components:
         summaryRedacted:
           type: string
           description: Resumen ya redactado según el consentimiento; nunca el dato clínico en claro
+          maxLength: 2000
         clinicalPriorityConceptId:
           type: string
           format: uuid
@@ -83602,6 +83690,7 @@ components:
         reason:
           type: string
           description: Por qué se retira
+          maxLength: 1000
       required:
         - reason
       additionalProperties: false
@@ -89012,6 +89101,7 @@ components:
         expiresAt:
           type: string
           description: Fecha de expiración del lote (ISO)
+          format: date
       required:
         - pharmacyPurchaseOrderLineId
         - pharmacyProductId

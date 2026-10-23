@@ -115,6 +115,7 @@ interface PatientIdentifierRecord {
   updatedAt: Date;
   updatedByUserId?: string;
 }
+import { ProfilesErrorReason } from '../../profiles.error-reasons';
 
 /**
  * Deja fuera de la respuesta los campos sin valor.
@@ -375,9 +376,13 @@ export class ProfilesPatientsService {
           },
           'Rejected patient creation: patient_code already exists',
         );
-        throw new ConflictException('El patient_code ya está en uso', {
-          patientCode: dto.patientCode,
-        });
+        throw new ConflictException(
+          'El patient_code ya está en uso',
+          {
+            patientCode: dto.patientCode,
+          },
+          ProfilesErrorReason.PATIENT_CODE_ALREADY_IN_USE,
+        );
       }
 
       const person = this.personsRepo.create(tx, {
@@ -1289,15 +1294,21 @@ export class ProfilesPatientsService {
     if (!link) {
       throw new PreconditionFailedException(
         'La cuenta no tiene una persona vinculada',
+        {},
+        ProfilesErrorReason.ACCOUNT_WITHOUT_LINKED_PERSON,
       );
     }
 
     const person = await this.personsRepo.findById(em, link.personId);
     const patient = await this.patientProfilesRepo.findById(em, link.personId);
     if (!person || !patient) {
-      throw new ResourceNotFoundException('Paciente no encontrado', {
-        personId: link.personId,
-      });
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        {
+          personId: link.personId,
+        },
+        ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+      );
     }
 
     return { person, patient };
@@ -1808,6 +1819,8 @@ export class ProfilesPatientsService {
     ) {
       throw new PreconditionFailedException(
         'Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes',
+        {},
+        ProfilesErrorReason.PATIENT_SEARCH_CRITERIA_REQUIRED,
       );
     }
 
@@ -1889,9 +1902,13 @@ export class ProfilesPatientsService {
 
     const patient = await this.patientProfilesRepo.findById(em, profileId);
     if (!patient) {
-      throw new ResourceNotFoundException('Paciente no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        {
+          profileId,
+        },
+        ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+      );
     }
     // `person_profiles.id` es el mismo uuid que `patient_profiles.profile_id`
     // (1:1), y ese id es a su vez el de la persona: por eso se busca la persona
@@ -1904,9 +1921,13 @@ export class ProfilesPatientsService {
         { operation: 'profiles.patient.read', profileId },
         'Perfil de paciente sin persona en el catálogo',
       );
-      throw new ResourceNotFoundException('Paciente no encontrado', {
-        profileId,
-      });
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        {
+          profileId,
+        },
+        ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+      );
     }
 
     const related = await this.relatedPersonsRepo.findActiveByPatient(
@@ -1966,13 +1987,21 @@ export class ProfilesPatientsService {
     return this.em.transactional(async (tx) => {
       const person = await this.personsRepo.findById(tx, personId);
       if (!person)
-        throw new ResourceNotFoundException('Persona no encontrada', {
-          personId,
-        });
+        throw new ResourceNotFoundException(
+          'Persona no encontrada',
+          {
+            personId,
+          },
+          ProfilesErrorReason.PERSON_NOT_FOUND,
+        );
       if (person.personStatusConceptId !== PROF.PERSON_ACTIVE) {
-        throw new PreconditionFailedException('La persona no está activa', {
-          personId,
-        });
+        throw new PreconditionFailedException(
+          'La persona no está activa',
+          {
+            personId,
+          },
+          ProfilesErrorReason.PERSON_NOT_ACTIVE,
+        );
       }
 
       const now = new Date();
@@ -2013,9 +2042,13 @@ export class ProfilesPatientsService {
     return this.em.transactional(async (tx) => {
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
       if (!patient)
-        throw new ResourceNotFoundException('Paciente no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Paciente no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+        );
 
       const verificationStatus = dto.verified
         ? PROF.IDENTITY_VERIFIED
@@ -2089,6 +2122,7 @@ export class ProfilesPatientsService {
           {
             profileId: dto.survivingPatientProfileId,
           },
+          ProfilesErrorReason.MERGE_SAME_PATIENT,
         );
       }
       const surviving = await this.patientProfilesRepo.findById(
@@ -2101,6 +2135,7 @@ export class ProfilesPatientsService {
           {
             profileId: dto.survivingPatientProfileId,
           },
+          ProfilesErrorReason.MERGE_SURVIVING_PATIENT_NOT_FOUND,
         );
       }
       const merged = await this.patientProfilesRepo.findById(
@@ -2113,12 +2148,17 @@ export class ProfilesPatientsService {
           {
             profileId: dto.mergedPatientProfileId,
           },
+          ProfilesErrorReason.MERGE_TARGET_PATIENT_NOT_FOUND,
         );
       }
       if (merged.recordLinkageStatusConceptId === PROF.LINKAGE_MERGED) {
-        throw new ConflictException('El paciente ya fue fusionado', {
-          profileId: dto.mergedPatientProfileId,
-        });
+        throw new ConflictException(
+          'El paciente ya fue fusionado',
+          {
+            profileId: dto.mergedPatientProfileId,
+          },
+          ProfilesErrorReason.PATIENT_ALREADY_MERGED,
+        );
       }
 
       const now = new Date();
@@ -2228,15 +2268,20 @@ export class ProfilesPatientsService {
     return this.em.transactional(async (tx) => {
       const original = await this.mergeEventsRepo.findById(tx, eventId);
       if (!original)
-        throw new ResourceNotFoundException('Evento de fusión no encontrado', {
-          eventId,
-        });
+        throw new ResourceNotFoundException(
+          'Evento de fusión no encontrado',
+          {
+            eventId,
+          },
+          ProfilesErrorReason.MERGE_EVENT_NOT_FOUND,
+        );
       if (original.decisionStatusConceptId !== PROF.MERGE_APPROVED) {
         throw new PreconditionFailedException(
           'Solo se puede revertir una fusión aprobada',
           {
             eventId,
           },
+          ProfilesErrorReason.MERGE_NOT_APPROVED,
         );
       }
       const alreadyReversed = await this.mergeEventsRepo.findByReversalOf(
@@ -2244,7 +2289,11 @@ export class ProfilesPatientsService {
         eventId,
       );
       if (alreadyReversed) {
-        throw new ConflictException('La fusión ya fue revertida', { eventId });
+        throw new ConflictException(
+          'La fusión ya fue revertida',
+          { eventId },
+          ProfilesErrorReason.MERGE_ALREADY_REVERSED,
+        );
       }
 
       const now = new Date();
@@ -2300,9 +2349,13 @@ export class ProfilesPatientsService {
       await this.ownership.assertOwnsPatientProfile(tx, profileId, actor);
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
       if (!patient)
-        throw new ResourceNotFoundException('Paciente no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Paciente no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+        );
 
       if (dto.isLegalGuardian) {
         const guardian = await this.relatedPersonsRepo.findActiveGuardian(
@@ -2313,6 +2366,7 @@ export class ProfilesPatientsService {
           throw new ConflictException(
             'El paciente ya tiene un tutor legal activo',
             { profileId },
+            ProfilesErrorReason.PATIENT_ALREADY_HAS_LEGAL_GUARDIAN,
           );
         }
       }
@@ -2324,6 +2378,7 @@ export class ProfilesPatientsService {
           throw new ResourceNotFoundException(
             'Persona relacionada no encontrada',
             { personId },
+            ProfilesErrorReason.RELATED_PERSON_NOT_FOUND,
           );
         }
       } else {
@@ -2373,9 +2428,13 @@ export class ProfilesPatientsService {
     return this.em.transactional(async (tx) => {
       const patient = await this.patientProfilesRepo.findById(tx, profileId);
       if (!patient)
-        throw new ResourceNotFoundException('Paciente no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Paciente no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+        );
 
       if (dto.relatedPersonId) {
         const related = await this.relatedPersonsRepo.findById(
@@ -2386,6 +2445,7 @@ export class ProfilesPatientsService {
           throw new PreconditionFailedException(
             'La persona relacionada no pertenece al paciente',
             { relatedPersonId: dto.relatedPersonId },
+            ProfilesErrorReason.RELATED_PERSON_MISMATCH,
           );
         }
       }
@@ -2434,13 +2494,18 @@ export class ProfilesPatientsService {
     return this.em.transactional(async (tx) => {
       const person = await this.personsRepo.findById(tx, personId);
       if (!person)
-        throw new ResourceNotFoundException('Persona no encontrada', {
-          personId,
-        });
+        throw new ResourceNotFoundException(
+          'Persona no encontrada',
+          {
+            personId,
+          },
+          ProfilesErrorReason.PERSON_NOT_FOUND,
+        );
       if (person.vitalStatusConceptId === PROF.VITAL_DECEASED) {
         throw new ConflictException(
           'La persona ya está registrada como fallecida',
           { personId },
+          ProfilesErrorReason.PERSON_ALREADY_DECEASED,
         );
       }
 

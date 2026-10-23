@@ -56,7 +56,7 @@ Referencia exhaustiva de 35 operación(es) del módulo `iam`, derivada del contr
 - **Nombre:** Activar la cuenta con el token de un solo uso y fijar la contraseña
 - **Operation ID:** `IamAuthController_activate`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.activate](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.activate](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -151,9 +151,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Token de activación inválido | Excepción explícita en src/modules/iam/services/iam-assisted-registration.service.ts |
-| 401 | `UNAUTHENTICATED` | El token de activación ya fue utilizado | Excepción explícita en src/modules/iam/services/iam-assisted-registration.service.ts |
-| 401 | `UNAUTHENTICATED` | El token de activación expiró | Excepción explícita en src/modules/iam/services/iam-assisted-registration.service.ts |
+| 401 | `UNAUTHENTICATED` | Token de activación inválido | Excepción explícita en src/modules/iam/application/services/iam-assisted-registration.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de activación ya fue utilizado | Excepción explícita en src/modules/iam/application/services/iam-assisted-registration.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de activación expiró | Excepción explícita en src/modules/iam/application/services/iam-assisted-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -179,7 +179,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cambiar la contraseña de la propia cuenta
 - **Operation ID:** `IamAccountSecurityController_changePassword`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamAccountSecurityController.changePassword](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+- **Implementación:** [IamAccountSecurityController.changePassword](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
 
 ### Descripción de negocio
 
@@ -277,9 +277,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una contraseña que cambiar | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
-| 422 | `PRECONDITION_FAILED` | La contraseña actual no coincide | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
-| 422 | `PRECONDITION_FAILED` | La contraseña nueva tiene que ser distinta de la actual | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una contraseña que cambiar | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña actual no coincide | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña nueva tiene que ser distinta de la actual | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -304,7 +304,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Solicitar el restablecimiento de la contraseña
 - **Operation ID:** `IamAuthController_forgotPassword`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.forgotPassword](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.forgotPassword](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -423,7 +423,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Iniciar sesión con email o documento de identidad y contraseña
 - **Operation ID:** `IamAuthController_login`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.login](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.login](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -520,9 +520,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Credenciales inválidas | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | {         message: 'Se requiere el código de verificación en dos pasos',         details: { reason: 'MFA_REQUIRED' },       } | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | {       message: 'El código de verificación no es válido',       details: { reason: 'MFA_INVALID' },     } | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Credenciales inválidas | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {         message: 'Se requiere el código de verificación en dos pasos',         details: { reason: 'MFA_REQUIRED' },       } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {       message: 'El código de verificación no es válido',       details: { reason: 'MFA_INVALID' },     } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -548,7 +548,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cerrar la sesión actual del usuario
 - **Operation ID:** `IamAuthController_logout`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamAuthController.logout](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.logout](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -651,7 +651,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cerrar todas las sesiones del usuario actual
 - **Operation ID:** `IamAuthController_logoutAll`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamAuthController.logoutAll](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.logoutAll](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -753,7 +753,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar una organización con su cuenta owner
 - **Operation ID:** `IamAuthController_registerOrganization`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.registerOrganization](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.registerOrganization](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -1146,8 +1146,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 409 | `CONFLICT` | El código de organización ya existe | Excepción explícita en src/modules/iam/services/iam-organization-self-registration.service.ts |
-| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-organization-self-registration.service.ts |
+| 409 | `CONFLICT` | El código de organización ya existe | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1197,7 +1197,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrarse como paciente con documento de identidad
 - **Operation ID:** `IamAuthController_registerPatient`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.registerPatient](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.registerPatient](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -1370,7 +1370,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/services/iam-patient-self-registration.service.ts |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1402,7 +1402,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrarse como profesional de salud con su matrícula
 - **Operation ID:** `IamAuthController_registerPractitioner`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.registerPractitioner](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.registerPractitioner](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -1487,10 +1487,10 @@ Content-Type: application/json
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
 | `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `profilePhotoBase64` | No | `string` | Sin restricción adicional declarada | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
+| `profilePhotoBase64` | No | `string` | longitud máxima 2800000 | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
 | `signatureFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sealFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
+| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"contactPhone":"+591 72123456"}` |
 | `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
 | `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
@@ -1500,6 +1500,7 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ownSite.contactPhone` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
 | `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1579,7 +1580,8 @@ Content-Type: application/json
       "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
       "latitude": 1,
       "longitude": 1
-    }
+    },
+    "contactPhone": "+591 72123456"
   },
   "credentials": [
     {
@@ -1655,20 +1657,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
@@ -1706,7 +1708,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reenviar el enlace de verificación del correo
 - **Operation ID:** `IamAuthController_resendVerification`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.resendVerification](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.resendVerification](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -1825,7 +1827,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Fijar una contraseña nueva con el token recibido por correo
 - **Operation ID:** `IamAuthController_resetPassword`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.resetPassword](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.resetPassword](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -1918,9 +1920,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Token de restablecimiento inválido | Excepción explícita en src/modules/iam/services/iam-password-reset.service.ts |
-| 401 | `UNAUTHENTICATED` | El token de restablecimiento ya fue utilizado | Excepción explícita en src/modules/iam/services/iam-password-reset.service.ts |
-| 401 | `UNAUTHENTICATED` | El token de restablecimiento expiró | Excepción explícita en src/modules/iam/services/iam-password-reset.service.ts |
+| 401 | `UNAUTHENTICATED` | Token de restablecimiento inválido | Excepción explícita en src/modules/iam/application/services/iam-password-reset.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de restablecimiento ya fue utilizado | Excepción explícita en src/modules/iam/application/services/iam-password-reset.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de restablecimiento expiró | Excepción explícita en src/modules/iam/application/services/iam-password-reset.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1946,7 +1948,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Expirar sesiones y tokens vencidos
 - **Operation ID:** `IamAuthController_purge`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamAuthController.purge](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.purge](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -2051,7 +2053,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Rotar el refresh token
 - **Operation ID:** `IamAuthController_refresh`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.refresh](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.refresh](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -2140,10 +2142,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | Reuso de refresh token detectado | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | Refresh token expirado | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Reuso de refresh token detectado | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Refresh token expirado | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 20, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2169,7 +2171,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Pre-cargar un PDF para un registro de organización o profesional
 - **Operation ID:** `IamAuthController_uploadRegistrationDocument`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.uploadRegistrationDocument](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.uploadRegistrationDocument](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -2291,7 +2293,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Pre-cargar una imagen de firma o sello para el registro
 - **Operation ID:** `IamAuthController_uploadRegistrationSignatureImage`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.uploadRegistrationSignatureImage](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.uploadRegistrationSignatureImage](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -2388,7 +2390,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La imagen supera el límite de 2 MB | Excepción explícita en src/modules/iam/services/iam-registration-document-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | La imagen supera el límite de 2 MB | Excepción explícita en src/modules/iam/application/services/iam-registration-document-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
@@ -2416,7 +2418,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Verificar el correo con el token recibido
 - **Operation ID:** `IamAuthController_verifyEmail`
 - **Autenticación:** Pública
-- **Implementación:** [IamAuthController.verifyEmail](../../src/modules/iam/controllers/iam-auth.controller.ts)
+- **Implementación:** [IamAuthController.verifyEmail](../../src/modules/iam/presentation/controllers/iam-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -2505,9 +2507,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Token de verificación inválido | Excepción explícita en src/modules/iam/services/iam-patient-self-registration.service.ts |
-| 401 | `UNAUTHENTICATED` | El token de verificación ya fue utilizado | Excepción explícita en src/modules/iam/services/iam-patient-self-registration.service.ts |
-| 401 | `UNAUTHENTICATED` | El token de verificación expiró | Excepción explícita en src/modules/iam/services/iam-patient-self-registration.service.ts |
+| 401 | `UNAUTHENTICATED` | Token de verificación inválido | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de verificación ya fue utilizado | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
+| 401 | `UNAUTHENTICATED` | El token de verificación expiró | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2533,7 +2535,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar mis sesiones abiertas
 - **Operation ID:** `IamAccountSecurityController_listSessions`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamAccountSecurityController.listSessions](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+- **Implementación:** [IamAccountSecurityController.listSessions](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
 
 ### Descripción de negocio
 
@@ -2638,7 +2640,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cerrar una de mis sesiones
 - **Operation ID:** `IamAccountSecurityController_revokeSession`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamAccountSecurityController.revokeSession](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+- **Implementación:** [IamAccountSecurityController.revokeSession](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
 
 ### Descripción de negocio
 
@@ -2722,7 +2724,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2747,7 +2749,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listado paginado de usuarios
 - **Operation ID:** `IamUsersController_searchUsers`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.searchUsers](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.searchUsers](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -2880,7 +2882,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crear un usuario con credencial de contraseña y rol inicial
 - **Operation ID:** `IamUsersController_createUser`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.createUser](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.createUser](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -2992,7 +2994,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | El email ya tiene una credencial de contraseña activa | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
+| 409 | `CONFLICT` | El email ya tiene una credencial de contraseña activa | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3018,7 +3020,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Ficha de un usuario
 - **Operation ID:** `IamUsersController_getUser`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.getUser](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.getUser](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3119,7 +3121,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3144,7 +3146,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Anonimizar (DSAR) la cuenta
 - **Operation ID:** `IamUsersController_anonymize`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.anonymize](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.anonymize](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3228,7 +3230,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3253,7 +3255,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Credenciales del usuario
 - **Operation ID:** `IamUsersController_listCredentials`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.listCredentials](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.listCredentials](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3357,7 +3359,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3382,7 +3384,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Revocar una credencial del usuario
 - **Operation ID:** `IamUsersController_revokeCredential`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.revokeCredential](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.revokeCredential](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3467,7 +3469,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Credencial no encontrada para el usuario | Excepción explícita en src/modules/iam/services/iam-credentials.service.ts |
+| 404 | `NOT_FOUND` | Credencial no encontrada para el usuario | Excepción explícita en src/modules/iam/application/services/iam-credentials.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3492,7 +3494,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Enlazar una credencial de identidad federada
 - **Operation ID:** `IamUsersController_linkFederated`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.linkFederated](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.linkFederated](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3599,8 +3601,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-credentials.service.ts |
-| 409 | `CONFLICT` | La credencial federada ya existe | Excepción explícita en src/modules/iam/services/iam-credentials.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-credentials.service.ts |
+| 409 | `CONFLICT` | La credencial federada ya existe | Excepción explícita en src/modules/iam/application/services/iam-credentials.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3626,7 +3628,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Dispositivos del usuario
 - **Operation ID:** `IamUsersController_listDevices`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.listDevices](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.listDevices](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3726,7 +3728,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3751,7 +3753,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar un dispositivo del usuario
 - **Operation ID:** `IamUsersController_registerDevice`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.registerDevice](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.registerDevice](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3858,7 +3860,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-devices.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-devices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3884,7 +3886,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Roles globales del usuario
 - **Operation ID:** `IamUsersController_listGlobalRoles`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.listGlobalRoles](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.listGlobalRoles](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -3980,7 +3982,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4005,7 +4007,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Conceder o revocar un rol global
 - **Operation ID:** `IamUsersController_changeGlobalRole`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.changeGlobalRole](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.changeGlobalRole](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -4106,9 +4108,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
-| 404 | `NOT_FOUND` | El usuario no tiene ese rol activo | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
-| 409 | `CONFLICT` | El rol ya está concedido | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | El usuario no tiene ese rol activo | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
+| 409 | `CONFLICT` | El rol ya está concedido | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4134,7 +4136,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Bloquear la cuenta y revocar sus sesiones
 - **Operation ID:** `IamUsersController_lock`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.lock](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.lock](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -4230,7 +4232,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4256,7 +4258,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Factores de MFA del usuario
 - **Operation ID:** `IamUsersController_listMfaFactors`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.listMfaFactors](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.listMfaFactors](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -4354,7 +4356,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4379,7 +4381,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Enrolar o verificar un factor MFA
 - **Operation ID:** `IamUsersController_mfaFactor`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.mfaFactor](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.mfaFactor](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -4492,15 +4494,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | No tiene acceso a los factores MFA de esta cuenta | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
-| 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
+| 403 | `FORBIDDEN` | No tiene acceso a los factores MFA de esta cuenta | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | factorId es obligatorio para verificar | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
-| 422 | `PRECONDITION_FAILED` | code es obligatorio para verificar | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
-| 422 | `PRECONDITION_FAILED` | El factor no tiene un secreto TOTP asociado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
-| 422 | `PRECONDITION_FAILED` | Código MFA inválido | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
-| 422 | `PRECONDITION_FAILED` | factorType es obligatorio para enrolar | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | factorId es obligatorio para verificar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | code es obligatorio para verificar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | El factor no tiene un secreto TOTP asociado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | Código MFA inválido | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | factorType es obligatorio para enrolar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4525,7 +4527,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Sesiones del usuario
 - **Operation ID:** `IamUsersController_listSessions`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.listSessions](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.listSessions](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -4625,7 +4627,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-users-read.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-users-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4650,7 +4652,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Alta administrativa de un profesional (devuelve token de activación)
 - **Operation ID:** `IamUsersController_assistedPractitionerRegistration`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.assistedPractitionerRegistration](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.assistedPractitionerRegistration](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -4736,10 +4738,10 @@ Content-Type: application/json
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
 | `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `profilePhotoBase64` | No | `string` | Sin restricción adicional declarada | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
+| `profilePhotoBase64` | No | `string` | longitud máxima 2800000 | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
 | `signatureFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sealFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
+| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"contactPhone":"+591 72123456"}` |
 | `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
 | `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
@@ -4749,6 +4751,7 @@ Content-Type: application/json
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ownSite.contactPhone` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
 | `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -4830,7 +4833,8 @@ Content-Type: application/json
       "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
       "latitude": 1,
       "longitude": 1
-    }
+    },
+    "contactPhone": "+591 72123456"
   },
   "credentials": [
     {
@@ -4897,20 +4901,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
@@ -4948,7 +4952,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registro asistido de un paciente (devuelve token de activación)
 - **Operation ID:** `IamUsersController_assistedRegistration`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [IamUsersController.assistedRegistration](../../src/modules/iam/controllers/iam-users.controller.ts)
+- **Implementación:** [IamUsersController.assistedRegistration](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
@@ -5068,7 +5072,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado | Excepción explícita en src/modules/iam/services/iam-assisted-registration.service.ts |
+| 409 | `CONFLICT` | Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado | Excepción explícita en src/modules/iam/application/services/iam-assisted-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

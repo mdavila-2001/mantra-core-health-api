@@ -13,6 +13,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { PromotionsErrorReason } from '../promotions.error-reasons';
 import { PromotionsLoyaltyRepository } from '../repositories';
 import { WalletsService } from '../../payments/services';
 import {
@@ -196,10 +197,14 @@ export class PromotionsLoyaltyService {
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe un programa con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe un programa con ese código',
+        {
+          tenantId: dto.tenantId,
+          code: dto.code,
+        },
+        PromotionsErrorReason.PROGRAM_CODE_ALREADY_EXISTS,
+      );
     }
 
     const expiryPolicy = dto.expiryPolicy ?? 'NEVER';
@@ -207,6 +212,7 @@ export class PromotionsLoyaltyService {
       throw new PreconditionFailedException(
         'Una política de vencimiento ROLLING necesita días de vigencia',
         { code: dto.code },
+        PromotionsErrorReason.ROLLING_EXPIRY_REQUIRES_DAYS,
       );
     }
     for (const rule of dto.earningRules ?? []) {
@@ -307,13 +313,18 @@ export class PromotionsLoyaltyService {
         throw new ResourceNotFoundException(
           'Programa de lealtad no encontrado',
           { programId },
+          PromotionsErrorReason.PROGRAM_NOT_FOUND,
         );
       }
       if (program.stateConceptId !== CONCEPTS.LOYALTY_ACTIVE) {
-        throw new PreconditionFailedException('El programa no está activo', {
-          programId,
-          stateConceptId: program.stateConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El programa no está activo',
+          {
+            programId,
+            stateConceptId: program.stateConceptId,
+          },
+          PromotionsErrorReason.PROGRAM_NOT_ACTIVE,
+        );
       }
 
       const memberTypeConceptId = REWARD_MEMBER_CONCEPT[dto.memberType];
@@ -340,6 +351,7 @@ export class PromotionsLoyaltyService {
           {
             programId,
           },
+          PromotionsErrorReason.PROGRAM_HAS_NO_TIERS,
         );
       }
 
@@ -417,14 +429,22 @@ export class PromotionsLoyaltyService {
         membershipId,
       );
       if (!membership) {
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          membershipId,
-        });
+        throw new ResourceNotFoundException(
+          'Membresía no encontrada',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_FOUND,
+        );
       }
       if (membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE) {
-        throw new PreconditionFailedException('La membresía no está activa', {
-          membershipId,
-        });
+        throw new PreconditionFailedException(
+          'La membresía no está activa',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_ACTIVE,
+        );
       }
 
       const rule = await this.loyaltyRepo.findEarningRuleById(
@@ -437,6 +457,7 @@ export class PromotionsLoyaltyService {
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_NOT_FOUND,
         );
       }
       if (rule.loyaltyProgramId !== membership.loyaltyProgramId) {
@@ -445,6 +466,7 @@ export class PromotionsLoyaltyService {
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_WRONG_PROGRAM,
         );
       }
       const now = new Date();
@@ -454,6 +476,7 @@ export class PromotionsLoyaltyService {
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_NOT_ACTIVE,
         );
       }
       if (
@@ -465,12 +488,17 @@ export class PromotionsLoyaltyService {
           {
             earningRuleId: dto.earningRuleId,
           },
+          PromotionsErrorReason.EARNING_RULE_OUT_OF_VALIDITY,
         );
       }
       if (!rule.pointsAmount || Number(rule.pointsAmount) <= 0) {
-        throw new PreconditionFailedException('La regla no otorga puntos', {
-          earningRuleId: dto.earningRuleId,
-        });
+        throw new PreconditionFailedException(
+          'La regla no otorga puntos',
+          {
+            earningRuleId: dto.earningRuleId,
+          },
+          PromotionsErrorReason.EARNING_RULE_GRANTS_NO_POINTS,
+        );
       }
 
       await this.assertUnderCap(
@@ -548,6 +576,7 @@ export class PromotionsLoyaltyService {
         {
           points: dto.points,
         },
+        PromotionsErrorReason.REDEMPTION_POINTS_MUST_BE_POSITIVE,
       );
     }
 
@@ -569,23 +598,35 @@ export class PromotionsLoyaltyService {
         membershipId,
       );
       if (!membership) {
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          membershipId,
-        });
+        throw new ResourceNotFoundException(
+          'Membresía no encontrada',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_FOUND,
+        );
       }
       if (membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE) {
-        throw new PreconditionFailedException('La membresía no está activa', {
-          membershipId,
-        });
+        throw new PreconditionFailedException(
+          'La membresía no está activa',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_ACTIVE,
+        );
       }
 
       const balance = Number(membership.pointsBalance ?? '0');
       if (balance < Number(dto.points)) {
-        throw new PreconditionFailedException('Saldo de puntos insuficiente', {
-          membershipId,
-          pointsBalance: membership.pointsBalance,
-          requested: dto.points,
-        });
+        throw new PreconditionFailedException(
+          'Saldo de puntos insuficiente',
+          {
+            membershipId,
+            pointsBalance: membership.pointsBalance,
+            requested: dto.points,
+          },
+          PromotionsErrorReason.INSUFFICIENT_POINTS_BALANCE,
+        );
       }
 
       const balanceAfter = this.round(balance - Number(dto.points));
@@ -624,9 +665,13 @@ export class PromotionsLoyaltyService {
         membershipId,
       );
       if (!membership) {
-        throw new ResourceNotFoundException('Membresía no encontrada', {
-          membershipId,
-        });
+        throw new ResourceNotFoundException(
+          'Membresía no encontrada',
+          {
+            membershipId,
+          },
+          PromotionsErrorReason.MEMBERSHIP_NOT_FOUND,
+        );
       }
 
       const ledger = await this.loyaltyRepo.findLedgerByMembership(
@@ -786,6 +831,7 @@ export class PromotionsLoyaltyService {
           {
             referralProgramId,
           },
+          PromotionsErrorReason.REFERRAL_PROGRAM_NOT_FOUND,
         );
       }
       if (program.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
@@ -794,6 +840,7 @@ export class PromotionsLoyaltyService {
           {
             referralProgramId,
           },
+          PromotionsErrorReason.REFERRAL_PROGRAM_NOT_ACTIVE,
         );
       }
       const now = new Date();
@@ -806,6 +853,7 @@ export class PromotionsLoyaltyService {
           {
             referralProgramId,
           },
+          PromotionsErrorReason.REFERRAL_PROGRAM_OUT_OF_VALIDITY,
         );
       }
 
@@ -822,6 +870,7 @@ export class PromotionsLoyaltyService {
               referralProgramId,
               maxReferralsPerUser: program.maxReferralsPerUser,
             },
+            PromotionsErrorReason.REFERRAL_LIMIT_REACHED,
           );
         }
       }
@@ -869,15 +918,23 @@ export class PromotionsLoyaltyService {
         referralId,
       );
       if (!referral) {
-        throw new ResourceNotFoundException('Referido no encontrado', {
-          referralId,
-        });
+        throw new ResourceNotFoundException(
+          'Referido no encontrado',
+          {
+            referralId,
+          },
+          PromotionsErrorReason.REFERRAL_NOT_FOUND,
+        );
       }
       if (referral.statusConceptId !== CONCEPTS.REFERRAL_PENDING) {
-        throw new ConflictException('El referido ya fue calificado', {
-          referralId,
-          statusConceptId: referral.statusConceptId,
-        });
+        throw new ConflictException(
+          'El referido ya fue calificado',
+          {
+            referralId,
+            statusConceptId: referral.statusConceptId,
+          },
+          PromotionsErrorReason.REFERRAL_ALREADY_QUALIFIED,
+        );
       }
       // Auto-referirse convertiría el programa en una fuente de puntos gratis.
       if (referral.referrerUserId === dto.refereeUserId) {
@@ -886,6 +943,7 @@ export class PromotionsLoyaltyService {
           {
             referralId,
           },
+          PromotionsErrorReason.REFERRAL_SELF_NOT_ALLOWED,
         );
       }
 
@@ -899,6 +957,7 @@ export class PromotionsLoyaltyService {
           {
             referralProgramId: referral.referralProgramId,
           },
+          PromotionsErrorReason.REFERRAL_PROGRAM_NOT_FOUND,
         );
       }
       const eventConceptId = QUALIFYING_EVENT_CONCEPT[dto.qualifyingEvent];
@@ -909,6 +968,7 @@ export class PromotionsLoyaltyService {
         throw new PreconditionFailedException(
           'El evento recibido no es el que califica en este programa',
           { referralId, qualifyingEvent: dto.qualifyingEvent },
+          PromotionsErrorReason.REFERRAL_EVENT_MISMATCH,
         );
       }
 
@@ -1020,6 +1080,7 @@ export class PromotionsLoyaltyService {
         {
           membershipId,
         },
+        PromotionsErrorReason.REWARD_MEMBERSHIP_NOT_FOUND,
       );
     }
 
@@ -1076,6 +1137,7 @@ export class PromotionsLoyaltyService {
       throw new PreconditionFailedException(
         'El programa de referidos no define moneda para el crédito de billetera',
         { referralId },
+        PromotionsErrorReason.REFERRAL_WALLET_CREDIT_MISSING_CURRENCY,
       );
     }
 
@@ -1089,6 +1151,7 @@ export class PromotionsLoyaltyService {
         {
           membershipId,
         },
+        PromotionsErrorReason.REWARD_MEMBERSHIP_NOT_FOUND,
       );
     }
 
@@ -1146,6 +1209,7 @@ export class PromotionsLoyaltyService {
           earningRuleId,
           capPerPeriod,
         },
+        PromotionsErrorReason.EARNING_RULE_CAP_REACHED,
       );
     }
   }
@@ -1249,6 +1313,7 @@ export class PromotionsLoyaltyService {
         {
           ruleCode,
         },
+        PromotionsErrorReason.POINTS_RULE_REQUIRES_AMOUNT,
       );
     }
     if (awardType === 'WALLET_CREDIT' && !creditAmount) {
@@ -1257,6 +1322,7 @@ export class PromotionsLoyaltyService {
         {
           ruleCode,
         },
+        PromotionsErrorReason.CREDIT_RULE_REQUIRES_AMOUNT,
       );
     }
   }
@@ -1557,6 +1623,7 @@ export class PromotionsLoyaltyService {
     throw new ConflictException(
       'No se pudo generar un código de referido libre',
       {},
+      PromotionsErrorReason.REFERRAL_CODE_GENERATION_EXHAUSTED,
     );
   }
 }

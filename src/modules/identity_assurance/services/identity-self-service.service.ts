@@ -31,6 +31,12 @@ import {
   IdentityManualReviewCasesRepository,
   IdentityVerificationCasesRepository,
 } from '../repositories';
+import { NotificationsService } from '../../messaging/services';
+import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
+import {
+  AuthenticationCredentials,
+  EmailVerifications,
+} from '../../iam/entities';
 import type { IdentityVerificationCases } from '../entities';
 import type {
   CaseCheckDto,
@@ -118,6 +124,7 @@ export class IdentitySelfServiceService {
     private readonly manualReviewRepo: IdentityManualReviewCasesRepository,
     private readonly checkResultsRepo: IdentityCheckResultsRepository,
     private readonly filesRepo: FilesRepository,
+    private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentitySelfServiceService.name);
@@ -549,6 +556,9 @@ export class IdentitySelfServiceService {
       },
       'Verification requested by its own subject',
     );
+
+    await this.sendConfirmationEmail(tx, kase, actor);
+
     return {
       caseId: kase.id,
       checkId: check.id,
@@ -666,5 +676,103 @@ export class IdentitySelfServiceService {
       { fileId: values[3]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_LEFT },
       { fileId: values[4]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_RIGHT },
     ];
+  }
+
+  /**
+   * Envía un correo de confirmación de solicitud de verificación si el usuario
+   * tiene una dirección de correo electrónico registrada.
+   *
+   * @param tx - Transacción o EntityManager activo.
+   * @param kase - Caso de verificación recién abierto.
+   * @param actor - Usuario solicitante.
+   */
+  private async sendConfirmationEmail(
+    tx: EntityManager,
+    kase: IdentityVerificationCases,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      const email = await this.findEmailForUser(tx, actor.id);
+      if (!email) {
+        this.logger.info(
+          {
+            operation: 'ida.self-service.confirm-email',
+            caseId: kase.id,
+            userId: actor.id,
+          },
+          'El usuario no tiene correo registrado; no se envió confirmación',
+        );
+        return;
+      }
+
+      await this.notificationsService.createRequest(
+        {
+          channelId: MESSAGING_SEED.emailChannelId,
+          recipientUserId: actor.id,
+          recipientAddress: email,
+          payloadJson: {
+            subject: 'Confirmación de solicitud de verificación - AloVida',
+            bodyText:
+              'Estimado/a usuario/a,\n\n' +
+              'Hemos recibido su solicitud de verificación de identidad.\n\n' +
+              `Código de solicitud: ${kase.id}\n` +
+              'Estado: En verificación\n\n' +
+              'Nuestro equipo y el sistema revisarán la documentación aportada. ' +
+              'Le notificaremos cuando el proceso haya concluido.\n\n' +
+              'Atentamente,\n' +
+              'Equipo de AloVida',
+          },
+        },
+        actor,
+      );
+
+      this.logger.info(
+        {
+          operation: 'ida.self-service.confirm-email',
+          caseId: kase.id,
+          userId: actor.id,
+          email,
+        },
+        'Correo de confirmación de verificación encolado exitosamente',
+      );
+    } catch (error) {
+      this.logger.warn(
+        {
+          operation: 'ida.self-service.confirm-email',
+          caseId: kase.id,
+          userId: actor.id,
+          err: error,
+        },
+        'No se pudo encolar el correo de confirmación de verificación',
+      );
+    }
+  }
+
+  /**
+   * Resuelve la dirección de correo electrónico vinculada a un usuario.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Identificador del usuario.
+   */
+  private async findEmailForUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string | null> {
+    const credentials = await em.find(AuthenticationCredentials, { userId });
+    const byCredential = credentials
+      .map((credential) => credential.externalSubject)
+      .find(
+        (subject): subject is string =>
+          typeof subject === 'string' && subject.includes('@'),
+      );
+    if (byCredential !== undefined) return byCredential.trim();
+
+    const verification = await em.findOne(
+      EmailVerifications,
+      { userId },
+      { orderBy: { createdAt: 'desc' } },
+    );
+    const declared = verification?.email?.trim();
+    return declared === undefined || declared === '' ? null : declared;
   }
 }

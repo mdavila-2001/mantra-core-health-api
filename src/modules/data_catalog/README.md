@@ -5,9 +5,49 @@ Dos mitades que no se mezclan. `admin/portal/*` sirve el **inventario generado**
 el **catálogo vivo**: lo que un escaneo de `pg_catalog` observa de la base primaria y lo que el
 equipo de datos curó encima (fichas, evidencia, revisiones), sobre el esquema `data_catalog`.
 
-Ambas son de plataforma, no de una organización (`@TenantAgnostic()`). Lectura: `SECURITY_ADMIN`,
-`PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`. Escritura y escaneos: sólo
-`GOVERNANCE_ADMIN` y `DATA_PLATFORM_ADMIN`. La API es la autoridad; la pantalla no autoriza.
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/data_catalog -name '*.controller.ts' | wc -l
+  find src/modules/data_catalog -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/data_catalog -name '*.entity.ts' | wc -l
+  find src/modules/data_catalog -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 22 rutas HTTP, 8 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `catalog_annotation_revisions`, `catalog_annotations`, `catalog_change_events`, `catalog_columns`, `catalog_evidence_items`, `catalog_objects`, `catalog_review_decisions`, `catalog_scan_runs`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /internal/catalog/scans/run-next` | SYSTEM | `data-catalog-internal` |
+| `GET /admin/catalog/schemas` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects/:objectId` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects/:objectId/columns` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects/:objectId/changes` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects/:objectId/impact` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects/:objectId/history` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/columns/:columnId/history` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `PUT /admin/catalog/objects/:objectId/annotation` | ...CATALOG_EDIT_ROLES | `data-catalog` |
+| `PUT /admin/catalog/columns/:columnId/annotation` | ...CATALOG_EDIT_ROLES | `data-catalog` |
+| `POST /admin/catalog/annotations/:annotationId/review` | ...CATALOG_REVIEW_ROLES | `data-catalog` |
+| `GET /admin/catalog/objects/:objectId/evidence` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `POST /admin/catalog/objects/:objectId/evidence` | ...CATALOG_EDIT_ROLES | `data-catalog` |
+| `GET /admin/catalog/columns/:columnId/evidence` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `POST /admin/catalog/columns/:columnId/evidence` | ...CATALOG_EDIT_ROLES | `data-catalog` |
+| `GET /admin/catalog/coverage` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `POST /admin/catalog/scans` | ...CATALOG_SCAN_ROLES | `data-catalog` |
+| `GET /admin/catalog/scans` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/scans/:scanId` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `GET /admin/catalog/scans/:scanId/changes` | ...CATALOG_READ_ROLES | `data-catalog` |
+| `POST /admin/catalog/scans/:scanId/cancel` | ...CATALOG_SCAN_ROLES | `data-catalog` |
+
+## Endpoints
 
 ## Casos de uso cubiertos (31)
 

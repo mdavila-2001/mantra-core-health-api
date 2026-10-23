@@ -3,14 +3,13 @@ import { MikroORM } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 
 import { ConflictException } from '../errors/domain.exception';
-import { deterministicId } from '../constants/concepts';
+import { deterministicId, SEED } from '../constants/concepts';
 import { AuthenticationCredentials, Users } from '../../modules/iam/entities';
 import {
   PersonAccountLinks,
   PractitionerAffiliations,
 } from '../../modules/profiles/entities';
 import { PROF } from '../../modules/profiles/profiles.concepts';
-import { SEED } from '../constants/concepts';
 import { runWithTenant } from '../tenant/tenant-context';
 import { IamPractitionerSelfRegistrationService } from '../../modules/iam/application/services';
 import type { RegisterPractitionerDto } from '../../modules/iam/presentation/dto';

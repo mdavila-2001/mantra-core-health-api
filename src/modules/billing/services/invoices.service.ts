@@ -11,6 +11,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   InvoicesRepository,
   BillingDocumentLinksRepository,
@@ -85,6 +86,7 @@ export class InvoicesService {
           {
             invoiceNumber,
           },
+          BillingErrorReason.INVOICE_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -182,9 +184,13 @@ export class InvoicesService {
     return this.em.transactional(async (tx) => {
       const original = await this.invoicesRepo.findById(tx, invoiceId);
       if (!original)
-        throw new ResourceNotFoundException('Factura no encontrada', {
-          invoiceId,
-        });
+        throw new ResourceNotFoundException(
+          'Factura no encontrada',
+          {
+            invoiceId,
+          },
+          BillingErrorReason.INVOICE_CREDIT_NOTE_ORIGINAL_NOT_FOUND,
+        );
 
       // Total del reverso (positivo); se registra en la NC con signo negativo.
       const reverseCents = dto.lines.reduce((acc, l) => {
@@ -202,6 +208,7 @@ export class InvoicesService {
             reverse: fromCents(reverseCents),
             balance: original.balance,
           },
+          BillingErrorReason.INVOICE_CREDIT_NOTE_EXCEEDS_BALANCE,
         );
       }
 
@@ -280,9 +287,13 @@ export class InvoicesService {
     return this.em.transactional(async (tx) => {
       const source = await this.invoicesRepo.findById(tx, dto.sourceInvoiceId);
       if (!source) {
-        throw new ResourceNotFoundException('Factura origen no encontrada', {
-          invoiceId: dto.sourceInvoiceId,
-        });
+        throw new ResourceNotFoundException(
+          'Factura origen no encontrada',
+          {
+            invoiceId: dto.sourceInvoiceId,
+          },
+          BillingErrorReason.INVOICE_PAYMENT_PLAN_SOURCE_NOT_FOUND,
+        );
       }
 
       const balanceCents = toCents(source.balance ?? '0');
@@ -292,6 +303,7 @@ export class InvoicesService {
           {
             invoiceId: source.id,
           },
+          BillingErrorReason.INVOICE_PAYMENT_PLAN_SOURCE_NO_BALANCE,
         );
       }
 
@@ -306,6 +318,7 @@ export class InvoicesService {
             balance: source.balance,
             installments: fromCents(installmentsCents),
           },
+          BillingErrorReason.INVOICE_PAYMENT_PLAN_INSTALLMENTS_MISMATCH,
         );
       }
 

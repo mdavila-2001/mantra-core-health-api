@@ -1,6 +1,6 @@
 # Reporte — Auditoría de fallos de integración por datos locales
 
-- Fecha: 2026-10-11 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/integration-data-audit-api`
+- Fecha: 2026-10-11 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/integration-data-audit-test`
 - Peldaño de evidencia alcanzado: TESTED para la corrida de los specs; consultas de diagnóstico de sólo lectura confirmaron el estado del catálogo local. La funcionalidad no queda verificada.
 - Avance: 4 / 4 microtareas (100 %).
 

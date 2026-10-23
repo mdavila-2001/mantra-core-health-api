@@ -112,7 +112,7 @@ Content-Type: application/json
 | `reactions` | No | `array<AllergyReactionInput>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"manifestationConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo"}]` |
 | `reactions[].manifestationConceptId` | No | `string` | formato `uuid` | Manifestación (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `reactions[].severityConceptId` | No | `string` | formato `uuid` | Severidad (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `reactions[].description` | No | `string` | Sin restricción adicional declarada | Descripción libre | `Texto descriptivo de ejemplo` |
+| `reactions[].description` | No | `string` | longitud máxima 1000 | Descripción libre | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -2035,7 +2035,7 @@ Content-Type: application/json
 | `appointmentId` | No | `string` | formato `uuid` | Cita que origina el check-in | `00000000-0000-4000-8000-000000000001` |
 | `classConceptId` | No | `string` | formato `uuid` | Clase del encuentro (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `typeConceptId` | No | `string` | formato `uuid` | Tipo del encuentro (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `reasonText` | No | `string` | Sin restricción adicional declarada | Motivo de consulta | `Texto descriptivo de ejemplo` |
+| `reasonText` | No | `string` | longitud máxima 1000 | Motivo de consulta | `Texto descriptivo de ejemplo` |
 | `participants` | No | `array<EncounterParticipantInput>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleConceptId":"00000000-0000-4000-8000-000000000001","isResponsible":true}]` |
 | `participants[].practitionerProfileId` | No | `string` | formato `uuid` | Profesional participante | `00000000-0000-4000-8000-000000000001` |
 | `participants[].roleConceptId` | No | `string` | formato `uuid` | Rol del participante (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -2766,14 +2766,14 @@ Content-Type: application/json
 | `medicationConceptId` | Sí | `string` | formato `uuid` | Medicamento (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `substanceAtcConceptId` | No | `string` | formato `uuid` | Sustancia ATC (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `prescriberProfileId` | No | `string` | formato `uuid` | Profesional prescriptor | `00000000-0000-4000-8000-000000000001` |
-| `doseText` | No | `string` | Sin restricción adicional declarada | Dosis en texto libre | `valor-ejemplo` |
+| `doseText` | No | `string` | longitud máxima 500 | Dosis en texto libre | `valor-ejemplo` |
 | `routeConceptId` | No | `string` | formato `uuid` | Vía de administración (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia en texto libre | `valor-ejemplo` |
+| `frequencyText` | No | `string` | longitud máxima 500 | Frecuencia en texto libre | `valor-ejemplo` |
 | `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad prescrita | `1` |
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Inicio de vigencia | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Fin de vigencia | `2026-07-31T12:00:00.000Z` |
-| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3) | `valor-ejemplo` |
+| `patientInstructionsText` | No | `string` | longitud máxima 2000 | Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3) | `valor-ejemplo` |
 | `indicationConditionId` | No | `string` | formato `uuid` | Condición clínica que motiva la prescripción — para qué es la receta. Debe pertenecer al mismo paciente (Patch v4.1.6) | `00000000-0000-4000-8000-000000000001` |
 | `indicationText` | No | `string` | longitud máxima 200 | Motivo de la receta escrito a mano («Otro motivo»). Excluyente con indicationConditionId: si viajan los dos, gana la condición (P24) | `valor-ejemplo` |
 
@@ -3215,16 +3215,16 @@ Content-Type: application/json
 | `medicationConceptId` | No | `string` | formato `uuid` | Medicamento (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `substanceAtcConceptId` | No | `string` | formato `uuid` | Sustancia ATC (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `prescriberProfileId` | No | `string` | formato `uuid` | Profesional prescriptor | `00000000-0000-4000-8000-000000000001` |
-| `doseText` | No | `string` | Sin restricción adicional declarada | Dosis en texto libre | `valor-ejemplo` |
+| `doseText` | No | `string` | longitud máxima 500 | Dosis en texto libre | `valor-ejemplo` |
 | `routeConceptId` | No | `string` | formato `uuid` | Vía de administración (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia en texto libre | `valor-ejemplo` |
+| `frequencyText` | No | `string` | longitud máxima 500 | Frecuencia en texto libre | `valor-ejemplo` |
 | `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad prescrita | `1` |
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Inicio de vigencia | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Fin de vigencia | `2026-07-31T12:00:00.000Z` |
 | `indicationConditionId` | No | `string` | formato `uuid` | Condición que motiva la prescripción; debe ser del mismo paciente (Patch v4.1.6) | `00000000-0000-4000-8000-000000000001` |
 | `indicationText` | No | `string` | longitud máxima 200 | Motivo de la receta escrito a mano. Excluyente con indicationConditionId (P24) | `valor-ejemplo` |
-| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente impresas en la receta (Patch v4.1.3) | `valor-ejemplo` |
+| `patientInstructionsText` | No | `string` | longitud máxima 2000 | Indicaciones al paciente impresas en la receta (Patch v4.1.3) | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -3384,7 +3384,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `reasonText` | Sí | `string` | Sin restricción adicional declarada | Motivo de la invalidación (obligatorio) | `Texto descriptivo de ejemplo` |
+| `reasonText` | Sí | `string` | longitud máxima 1000 | Motivo de la invalidación (obligatorio) | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -3661,8 +3661,8 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `doseText` | No | `string` | Sin restricción adicional declarada | Dosis en texto libre | `valor-ejemplo` |
-| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia en texto libre | `valor-ejemplo` |
+| `doseText` | No | `string` | longitud máxima 500 | Dosis en texto libre | `valor-ejemplo` |
+| `frequencyText` | No | `string` | longitud máxima 500 | Frecuencia en texto libre | `valor-ejemplo` |
 | `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad prescrita | `1` |
 | `validFrom` | No | `string` | formato `date-time` | Inicio de vigencia | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Fin de vigencia | `2026-07-31T12:00:00.000Z` |
@@ -3812,12 +3812,12 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `reasonText` | Sí | `string` | Sin restricción adicional declarada | Motivo de la corrección/reemplazo (obligatorio) | `Texto descriptivo de ejemplo` |
+| `reasonText` | Sí | `string` | longitud máxima 1000 | Motivo de la corrección/reemplazo (obligatorio) | `Texto descriptivo de ejemplo` |
 | `medicationConceptId` | No | `string` | formato `uuid` | Medicamento (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `substanceAtcConceptId` | No | `string` | formato `uuid` | Sustancia ATC (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `doseText` | No | `string` | Sin restricción adicional declarada | Dosis en texto libre | `valor-ejemplo` |
+| `doseText` | No | `string` | longitud máxima 500 | Dosis en texto libre | `valor-ejemplo` |
 | `routeConceptId` | No | `string` | formato `uuid` | Vía de administración (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia en texto libre | `valor-ejemplo` |
+| `frequencyText` | No | `string` | longitud máxima 500 | Frecuencia en texto libre | `valor-ejemplo` |
 | `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad prescrita | `1` |
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Inicio de vigencia | `2026-07-31T12:00:00.000Z` |
@@ -4103,7 +4103,7 @@ Content-Type: application/json
 | `valueTypeConceptId` | No | `string` | formato `uuid` | Tipo de valor (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `valueDecimal` | No | `number` | Sin restricción adicional declarada | Valor decimal | `1` |
 | `valueBoolean` | No | `boolean` | Sin restricción adicional declarada | Valor booleano | `true` |
-| `valueText` | No | `string` | Sin restricción adicional declarada | Valor de texto | `valor-ejemplo` |
+| `valueText` | No | `string` | longitud máxima 1000 | Valor de texto | `valor-ejemplo` |
 | `valueConceptId` | No | `string` | formato `uuid` | Valor codificado (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `quantityValue` | No | `number` | Sin restricción adicional declarada | Magnitud de la cantidad | `1` |
 | `quantityUnitConceptId` | No | `string` | formato `uuid` | Unidad de la cantidad (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -4123,7 +4123,7 @@ Content-Type: application/json
 | `components[].valueTypeConceptId` | No | `string` | formato `uuid` | Tipo de valor (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `components[].valueDecimal` | No | `number` | Sin restricción adicional declarada | Valor decimal | `1` |
 | `components[].valueBoolean` | No | `boolean` | Sin restricción adicional declarada | Valor booleano | `true` |
-| `components[].valueText` | No | `string` | Sin restricción adicional declarada | Valor de texto | `valor-ejemplo` |
+| `components[].valueText` | No | `string` | longitud máxima 1000 | Valor de texto | `valor-ejemplo` |
 | `components[].valueConceptId` | No | `string` | formato `uuid` | Valor codificado (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `components[].quantityValue` | No | `number` | Sin restricción adicional declarada | Magnitud de la cantidad | `1` |
 | `components[].quantityUnitConceptId` | No | `string` | formato `uuid` | Unidad de la cantidad (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -4137,8 +4137,8 @@ Content-Type: application/json
 | `referenceRanges[].lowValue` | No | `number` | Sin restricción adicional declarada | Límite inferior | `1` |
 | `referenceRanges[].highValue` | No | `number` | Sin restricción adicional declarada | Límite superior | `1` |
 | `referenceRanges[].unitConceptId` | No | `string` | formato `uuid` | Unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `referenceRanges[].text` | No | `string` | Sin restricción adicional declarada | Texto libre del rango | `valor-ejemplo` |
-| `notes` | No | `array<string>` | Sin restricción adicional declarada | Notas de la observación | `["Texto descriptivo de ejemplo"]` |
+| `referenceRanges[].text` | No | `string` | longitud máxima 300 | Texto libre del rango | `valor-ejemplo` |
+| `notes` | No | `array<string>` | longitud máxima 1000 | Notas de la observación | `["Texto descriptivo de ejemplo"]` |
 
 ### Payload completo de ejemplo
 
@@ -4320,11 +4320,11 @@ Content-Type: application/json
 | `valueTypeConceptId` | No | `string` | formato `uuid` | Tipo de valor (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `valueDecimal` | No | `number` | Sin restricción adicional declarada | Valor decimal | `1` |
 | `valueBoolean` | No | `boolean` | Sin restricción adicional declarada | Valor booleano | `true` |
-| `valueText` | No | `string` | Sin restricción adicional declarada | Valor de texto | `valor-ejemplo` |
+| `valueText` | No | `string` | longitud máxima 1000 | Valor de texto | `valor-ejemplo` |
 | `valueConceptId` | No | `string` | formato `uuid` | Valor codificado (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `quantityValue` | No | `number` | Sin restricción adicional declarada | Magnitud de la cantidad | `1` |
 | `quantityUnitConceptId` | No | `string` | formato `uuid` | Unidad de la cantidad (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `note` | Sí | `string` | Sin restricción adicional declarada | Nota que justifica la enmienda | `valor-ejemplo` |
+| `note` | Sí | `string` | longitud máxima 1000 | Nota que justifica la enmienda | `valor-ejemplo` |
 | `expectedRowVersion` | No | `number` | mínimo 1 | row_version esperado (bloqueo optimista) | `1` |
 | `interpretationConceptId` | No | `string` | formato `uuid` | Interpretación revisada (concept id) | `00000000-0000-4000-8000-000000000001` |
 
@@ -5276,7 +5276,7 @@ Content-Type: application/json
 | `occurrenceStartAt` | No | `string` | formato `date-time` | Inicio de la ocurrencia | `2026-07-31T12:00:00.000Z` |
 | `occurrenceEndAt` | No | `string` | formato `date-time` | Fin de la ocurrencia | `2026-07-31T12:00:00.000Z` |
 | `operativeReportFileId` | No | `string` | formato `uuid` | Reporte operatorio (common.files) | `00000000-0000-4000-8000-000000000001` |
-| `followUpText` | No | `string` | Sin restricción adicional declarada | Seguimiento en texto libre | `valor-ejemplo` |
+| `followUpText` | No | `string` | longitud máxima 2000 | Seguimiento en texto libre | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 

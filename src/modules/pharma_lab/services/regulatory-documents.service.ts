@@ -24,6 +24,7 @@ import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
 import { PharmaLabOrganizationService } from './pharma-lab-organization.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * UC-17-31 a UC-17-33: repositorio documental legal y regulatorio
@@ -139,6 +140,7 @@ export class RegulatoryDocumentsService {
         throw new ConflictException(
           'Un documento invalidado no admite versiones nuevas',
           { documentId },
+          PharmaLabErrorReason.DOCUMENT_INVALIDATED_NO_NEW_VERSIONS,
         );
       }
 
@@ -198,9 +200,11 @@ export class RegulatoryDocumentsService {
       const lab = await this.access.requireLab(tx, pharmaLabId);
       const document = await this.requireDocument(tx, pharmaLabId, documentId);
       if (document.statusConceptId === PHL.DOC_INVALIDATED) {
-        throw new ConflictException('El documento ya está invalidado', {
-          documentId,
-        });
+        throw new ConflictException(
+          'El documento ya está invalidado',
+          { documentId },
+          PharmaLabErrorReason.DOCUMENT_ALREADY_INVALIDATED,
+        );
       }
       document.statusConceptId = PHL.DOC_INVALIDATED;
       touch(document, actor.id);
@@ -288,10 +292,11 @@ export class RegulatoryDocumentsService {
       const versions = await this.repo.listVersions(tx, document.id);
       const version = versions.find((candidate) => candidate.id === versionId);
       if (!version) {
-        throw new ResourceNotFoundException('Versión no encontrada', {
-          documentId,
-          versionId,
-        });
+        throw new ResourceNotFoundException(
+          'Versión no encontrada',
+          { documentId, versionId },
+          PharmaLabErrorReason.DOCUMENT_VERSION_NOT_FOUND,
+        );
       }
       this.repo.appendAccess(tx, {
         regulatoryDocumentId: document.id,
@@ -429,6 +434,7 @@ export class RegulatoryDocumentsService {
       throw new ResourceNotFoundException(
         'Documento no encontrado en el laboratorio',
         { pharmaLabId, documentId },
+        PharmaLabErrorReason.DOCUMENT_NOT_FOUND,
       );
     }
     return document;

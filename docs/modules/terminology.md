@@ -31,7 +31,7 @@ referenciadas por FK (`*_concept_id`), resueltas desde `CONCEPTS` (`src/common`)
   find src/modules/terminology -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **7 controllers, 24 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **7 controllers, 23 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -46,7 +46,6 @@ Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `catalog_concepts`, `c
 | `POST /terminology/code-systems` | SECURITY_ADMIN | `terminology-code-systems` |
 | `POST /terminology/code-systems/:id/versions` | SECURITY_ADMIN | `terminology-code-systems` |
 | `GET /terminology/concepts` | sesión | `terminology-concepts` |
-| `GET /terminology/concepts/glossary-graph` | sesión | `terminology-concepts` |
 | `GET /terminology/concepts/:conceptId/glossary-neighborhood` | sesión | `terminology-concepts` |
 | `GET /terminology/concepts/:conceptId` | sesión | `terminology-concepts` |
 | `POST /terminology/concepts/:conceptId/designations` | SECURITY_ADMIN | `terminology-concepts` |

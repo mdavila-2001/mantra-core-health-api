@@ -8,6 +8,7 @@ import {
 import { AuditTrailService } from '../../audit/services';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { PeriopDentalRepository } from '../repositories';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 import {
   DENTAL_PROCEDURE_CODE_KEYS,
   DENTAL_QUADRANT_KEYS,
@@ -100,6 +101,7 @@ export class PeriopDentalService {
       throw new PreconditionFailedException(
         'El sitio tiene que ser una pieza dentaria o un cuadrante del catálogo odontológico',
         { toothSiteConceptId: dto.toothSiteConceptId },
+        ProceduresPerioperativeErrorReason.INVALID_DENTAL_SITE,
       );
     }
 
@@ -109,6 +111,7 @@ export class PeriopDentalService {
       throw new PreconditionFailedException(
         'No se puede precisar la cara tratada sin decir sobre qué pieza',
         { siteDetail: dto.siteDetail },
+        ProceduresPerioperativeErrorReason.SITE_DETAIL_REQUIRES_TOOTH_SITE,
       );
     }
 

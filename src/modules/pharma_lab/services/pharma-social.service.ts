@@ -23,6 +23,7 @@ import { AnalyticsRepository, CatalogRepository } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * UC-17-35 y UC-17-36: publicaciones individuales de visitadores sujetas a
@@ -84,12 +85,14 @@ export class PharmaSocialService {
           throw new ResourceNotFoundException(
             'Material informativo no encontrado en el laboratorio',
             { informationalMaterialId: dto.informationalMaterialId },
+            PharmaLabErrorReason.MATERIAL_NOT_FOUND,
           );
         }
         if (material.statusConceptId !== PHL.MATERIAL_APPROVED) {
           throw new PreconditionFailedException(
             'Solo se puede adjuntar material científico aprobado',
             { informationalMaterialId: material.id },
+            PharmaLabErrorReason.MATERIAL_NOT_APPROVED_FOR_SOCIAL_POST,
           );
         }
       }
@@ -136,15 +139,18 @@ export class PharmaSocialService {
       const lab = await this.access.requireLab(tx, pharmaLabId);
       const submission = await this.repo.findPostSubmission(tx, submissionId);
       if (!submission || submission.pharmaLabId !== pharmaLabId) {
-        throw new ResourceNotFoundException('Propuesta no encontrada', {
-          pharmaLabId,
-          submissionId,
-        });
+        throw new ResourceNotFoundException(
+          'Propuesta no encontrada',
+          { pharmaLabId, submissionId },
+          PharmaLabErrorReason.POST_SUBMISSION_NOT_FOUND,
+        );
       }
       if (submission.statusConceptId !== PHL.POST_SUBMISSION_PENDING) {
-        throw new ConflictException('La propuesta ya fue resuelta', {
-          submissionId,
-        });
+        throw new ConflictException(
+          'La propuesta ya fue resuelta',
+          { submissionId },
+          PharmaLabErrorReason.POST_SUBMISSION_ALREADY_RESOLVED,
+        );
       }
       if (
         dto.statusConceptId !== PHL.POST_SUBMISSION_APPROVED &&
@@ -153,6 +159,7 @@ export class PharmaSocialService {
         throw new PreconditionFailedException(
           'La decisión debe ser aprobar o rechazar',
           { submissionId },
+          PharmaLabErrorReason.POST_SUBMISSION_DECISION_INVALID,
         );
       }
 

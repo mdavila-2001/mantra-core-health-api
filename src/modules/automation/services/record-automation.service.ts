@@ -9,6 +9,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import {
   AgentsRepository,
   AutomationGovernanceRepository,
@@ -97,12 +98,14 @@ export class RecordAutomationService {
         throw new ResourceNotFoundException(
           'Ejecución de agente no encontrada.',
           { agentRunId },
+          AutomationErrorReason.AGENT_RUN_NOT_FOUND,
         );
       }
       if (agentRun.statusConceptId !== CONCEPTS.AUTO_AGENT_RUN_RUNNING) {
         throw new PreconditionFailedException(
           'La ejecución del agente no está en marcha; no puede escribir registros.',
           { agentRunId, statusConceptId: agentRun.statusConceptId },
+          AutomationErrorReason.AGENT_RUN_NOT_RUNNING_FOR_RECORD_WRITE,
         );
       }
 
@@ -117,6 +120,7 @@ export class RecordAutomationService {
           {
             recordAutomationId,
           },
+          AutomationErrorReason.RECORD_AUTOMATION_NOT_FOUND,
         );
       }
       if (!automation.isActive) {
@@ -125,6 +129,7 @@ export class RecordAutomationService {
           {
             recordAutomationId,
           },
+          AutomationErrorReason.RECORD_AUTOMATION_NOT_ACTIVE,
         );
       }
       // Una automatización atada a un agente concreto no la puede ejecutar otro:
@@ -133,6 +138,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'La automatización de registro pertenece a otro agente.',
           { recordAutomationId, agentId: agentRun.agentId },
+          AutomationErrorReason.RECORD_AUTOMATION_WRONG_AGENT,
         );
       }
 
@@ -144,6 +150,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'El agente no tiene identidad de servicio; su escritura no sería atribuible.',
           { agentId: agentRun.agentId },
+          AutomationErrorReason.AGENT_MISSING_SERVICE_IDENTITY_FOR_RECORD_WRITE,
         );
       }
 
@@ -164,6 +171,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'Un modo de escritura `upsert` necesita una clave de deduplicación.',
           { recordAutomationId },
+          AutomationErrorReason.UPSERT_MISSING_DEDUPE_KEY,
         );
       }
 
@@ -251,6 +259,8 @@ export class RecordAutomationService {
     if (!fieldMappingJson || typeof fieldMappingJson !== 'object') {
       throw new PreconditionFailedException(
         'La automatización de registro no declara mapeo de campos.',
+        undefined,
+        AutomationErrorReason.FIELD_MAPPING_NOT_DECLARED,
       );
     }
 
@@ -262,6 +272,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'El mapeo de campos tiene una regla que no se entiende.',
           { column },
+          AutomationErrorReason.FIELD_MAPPING_RULE_INVALID,
         );
       }
 
@@ -271,6 +282,7 @@ export class RecordAutomationService {
           throw new PreconditionFailedException(
             'El origen de un campo mapeado tiene que ser una ruta.',
             { column },
+            AutomationErrorReason.FIELD_MAPPING_SOURCE_NOT_STRING,
           );
         }
         value = this.readPath(payload, rule.from);
@@ -280,6 +292,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'Una regla de mapeo tiene que declarar `from` o `value`.',
           { column },
+          AutomationErrorReason.FIELD_MAPPING_RULE_MISSING_SOURCE,
         );
       }
 
@@ -287,6 +300,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'Falta un campo obligatorio del mapeo.',
           { column },
+          AutomationErrorReason.FIELD_MAPPING_REQUIRED_VALUE_MISSING,
         );
       }
       if (value === undefined) continue;
@@ -330,6 +344,7 @@ export class RecordAutomationService {
         throw new PreconditionFailedException(
           'La validación de la automatización exige un campo que no llegó.',
           { column },
+          AutomationErrorReason.VALIDATION_REQUIRED_FIELD_MISSING,
         );
       }
     }

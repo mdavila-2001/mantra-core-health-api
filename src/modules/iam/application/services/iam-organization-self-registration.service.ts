@@ -19,6 +19,7 @@ import { Pharmacies } from '../../../pharmacy/entities/pharmacies.entity';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
 import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
 import { NotificationsService } from '../../../messaging/services';
+import { IamErrorReason } from '../../iam.error-reasons';
 import {
   BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
@@ -217,9 +218,11 @@ export class IamOrganizationSelfRegistrationService {
           },
           'Rejected self-registration: organization code already exists',
         );
-        throw new ConflictException('El código de organización ya existe', {
-          code: dto.organization.code,
-        });
+        throw new ConflictException(
+          'El código de organización ya existe',
+          { code: dto.organization.code },
+          IamErrorReason.ORGANIZATION_CODE_IN_USE,
+        );
       }
 
       const emailClash = await this.credentialsRepo.findLivePasswordBySubject(
@@ -234,7 +237,11 @@ export class IamOrganizationSelfRegistrationService {
           },
           'Rejected self-registration: owner email already registered',
         );
-        throw new ConflictException('Ya existe una cuenta con ese correo');
+        throw new ConflictException(
+          'Ya existe una cuenta con ese correo',
+          undefined,
+          IamErrorReason.EMAIL_ALREADY_REGISTERED,
+        );
       }
 
       // El tipo declarado y sus datos se validan antes de escribir nada —ni

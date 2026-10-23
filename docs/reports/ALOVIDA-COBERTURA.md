@@ -1,6 +1,6 @@
 # Informe de cobertura ALOVIDA (estático)
 
-- Commit: `dd025a608caff30d0fc57ad0cb17094b0bdd00db` (2026-10-09T00:34:48-04:00)
+- Commit: `9743bbe607df61a9d7f708ea16981748346fb826` (2026-10-09T01:07:27-04:00)
 - Regenerar: `node tools/alovida/coverage-report.mjs` (o `yarn alovida:coverage`)
 - Método: lectura estática del código. No arranca la app, no toca la base y **no ejecuta ninguna ruta**.
 
@@ -10,9 +10,9 @@
 |---|---:|---|
 | Directorios de módulo en `src/modules` | 70 | Todos, tengan o no entidades. |
 | Módulos con entidades | 63 | Directorios con al menos una clase en `entities/`. |
-| Clases de entidad | 1262 | Clases exportadas en `entities/` de `src/modules`. No es un conteo de tablas de la base. |
-| Endpoints **declarados** | 1462 | Decoradores `@Get/@Post/@Put/@Patch/@Delete` en 273 controllers de `src/modules`. |
-| Operaciones **registradas** | 1471 | Operaciones de `openapi/openapi.json`, que se genera arrancando la app (`generate-openapi.mjs`). Incluye rutas de fuera de `src/modules` (`/health`, `/readiness`…), así que no se compara 1:1 con las declaradas. Vale para el commit en que se regeneró ese archivo. |
+| Clases de entidad | 1261 | Clases exportadas en `entities/` de `src/modules`. No es un conteo de tablas de la base. |
+| Endpoints **declarados** | 1452 | Decoradores `@Get/@Post/@Put/@Patch/@Delete` en 270 controllers de `src/modules`. |
+| Operaciones **registradas** | 1461 | Operaciones de `openapi/openapi.json`, que se genera arrancando la app (`generate-openapi.mjs`). Incluye rutas de fuera de `src/modules` (`/health`, `/readiness`…), así que no se compara 1:1 con las declaradas. Vale para el commit en que se regeneró ese archivo. |
 | Rutas **verificadas en runtime** | no medido | Este script no ejecuta rutas. Ninguna cifra de esta tabla es evidencia de que un endpoint funcione. |
 
 ## ORPHAN_TABLE — entidades sin consumidor fuera de `entities/` (4)
@@ -22,7 +22,7 @@
 - `pharmacy_inventory` · PurchaseQuotations (src/modules/pharmacy_inventory/entities/purchase_quotations.entity.ts)
 - `system_ops` · AcceptedRisks (src/modules/system_ops/entities/accepted_risks.entity.ts)
 
-## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (25)
+## ORPHAN_ENDPOINT — mutantes sin @Roles ni @Public (24)
 - src/modules/audio_assets/controllers/audio-assets.controller.ts:28 — @Post 'resolve'
 - src/modules/clinical/controllers/clinical-medical-aspects.controller.ts:47 — @Put 
 - src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57 — @Post 
@@ -39,17 +39,16 @@
 - src/modules/insurance/controllers/insurer-patients.controller.ts:31 — @Post 'search'
 - src/modules/insurance/controllers/insurer-patients.controller.ts:66 — @Post 'conversation'
 - src/modules/insurance/controllers/insurer-received-claims.controller.ts:90 — @Post ':id/decision'
-- src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:48 — @Post ':noticeId/read'
-- src/modules/profiles/controllers/practitioner-signature-assets.controller.ts:30 — @Put 
-- src/modules/profiles/controllers/profiles-dependent-requests.controller.ts:68 — @Post 'patients/me/dependent-requests'
-- src/modules/profiles/controllers/profiles-dependent-requests.controller.ts:147 — @Post 'patients/me/dependent-requests/:id/accept'
-- src/modules/profiles/controllers/profiles-dependent-requests.controller.ts:169 — @Post 'patients/me/dependent-requests/:id/reject'
+- src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:49 — @Post ':noticeId/read'
+- src/modules/profiles/controllers/profiles-dependent-requests.controller.ts:66 — @Post 'patients/me/dependent-requests'
+- src/modules/profiles/controllers/profiles-dependent-requests.controller.ts:145 — @Post 'patients/me/dependent-requests/:id/accept'
+- src/modules/profiles/controllers/profiles-dependent-requests.controller.ts:165 — @Post 'patients/me/dependent-requests/:id/reject'
 - src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts:69 — @Post ':tenantId/practitioner-requests/:affiliationId/approve'
 - src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts:81 — @Post ':tenantId/practitioner-requests/:affiliationId/reject'
 - src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts:104 — @Post ':tenantId/practitioner-requests/:affiliationId/revoke'
 - src/modules/surveys/controllers/surveys-patient.controller.ts:61 — @Post ':id/responses'
 
-## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (53)
+## DIRECT_CROSS_DOMAIN_ACCESS — repos que importan entidades de otro dominio (52)
 - src/modules/chart/repositories/chart-templates.repository.ts → `forms`
 - src/modules/community/repositories/reviews.repository.ts → `profiles`
 - src/modules/community/repositories/verified-badges.repository.ts → `audit`
@@ -102,4 +101,3 @@
 - src/modules/quotations/repositories/quotations.repository.ts → `billing`
 - src/modules/scheduling/repositories/scheduling-notice.repository.ts → `profiles`
 - src/modules/scheduling/repositories/scheduling-notice.repository.ts → `iam`
-- src/modules/scheduling/repositories/scheduling-offerings.repository.ts → `billing`

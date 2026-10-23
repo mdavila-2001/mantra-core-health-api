@@ -9,7 +9,7 @@
 # Módulo `qa_lab`
 
 **Fuente:** [`src/modules/qa_lab/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_lab/README.md)
-· 3 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
+· 3 controllers · 4 services · 2 repositories · 13 entidades · 1 DTO
 
 ---
 
@@ -186,3 +186,12 @@ aprobadas durante la revisión.
 
 Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo; ver
 [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_lab.md).
+
+## Catálogo de flujos (2026-10-17)
+
+`GET /admin/qa/flows` y `GET /admin/qa/flows/:flowId` leen los recorridos del usuario declarados en
+`flows/catalog/*.flow.json` (ver `flows/README.md`) y los cruzan con dos cosas vivas: las rutas que la API
+monta ahora (`contract: DECLARED | MISSING`, sin atender el nombre del parámetro) y lo que `qa_lab` sabe de la
+suite `FLOW-<id>` (casos sembrados, deriva respecto del artefacto y último veredicto por rama). Son sólo
+lectura, con los mismos roles que el resto del laboratorio, y no devuelven cuerpos ni cabeceras de los casos.
+Las suites se siembran con `SEED_QA_FLOWS=true` (`src/common/seed/qa-flows-seed.service.ts`).

@@ -8,6 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { SchedulingCatalogRepository } from '../../infrastructure/repositories';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 import {
   SchedulingNoticeRepository,
   type BookingNoticeSnapshot,
@@ -90,7 +91,11 @@ export class SchedulingDelayService {
     const em = this.em.fork();
     const booking = await this.noticeRepo.describeBooking(em, bookingId);
     if (!booking) {
-      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
+      throw new ResourceNotFoundException(
+        'Cita no encontrada',
+        { bookingId },
+        SchedulingErrorReason.BOOKING_NOT_FOUND,
+      );
     }
     await this.assertOperatesAgenda(em, booking.resourceId, actor);
 
@@ -133,9 +138,13 @@ export class SchedulingDelayService {
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException('Recurso no encontrado', {
-        resourceId,
-      });
+      throw new ResourceNotFoundException(
+        'Recurso no encontrado',
+        {
+          resourceId,
+        },
+        SchedulingErrorReason.RESOURCE_NOT_FOUND,
+      );
     }
     await this.assertOperatesAgenda(em, resourceId, actor);
 
@@ -145,6 +154,7 @@ export class SchedulingDelayService {
       throw new PreconditionFailedException(
         'La ventana de la demora termina antes de empezar',
         { resourceId },
+        SchedulingErrorReason.DELAY_WINDOW_INVERTED,
       );
     }
 
@@ -241,6 +251,7 @@ export class SchedulingDelayService {
       throw new PreconditionFailedException(
         'Una demora mayor a cuatro horas se resuelve reprogramando la cita, no avisando',
         { failureCode: 'DELAY_TOO_LONG', maxMinutes: MAX_DELAY_MINUTES },
+        SchedulingErrorReason.DELAY_TOO_LONG,
       );
     }
   }
