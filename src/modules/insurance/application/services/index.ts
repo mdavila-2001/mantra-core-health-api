@@ -3,6 +3,7 @@ export * from './coverage.service';
 export * from './prior-auth.service';
 export * from './prior-auth-read.service';
 export * from './claims.service';
+export * from './claim-coverage-policy';
 export * from './appeals.service';
 export * from './reconciliation.service';
 export * from './broker-commission.service';

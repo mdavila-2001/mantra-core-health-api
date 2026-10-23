@@ -161,6 +161,25 @@ function fixture() {
   const orders = { lockAndResolve: fn().mockResolvedValue(snapshot) };
   const coverageRepo = { findCoverage: fn().mockResolvedValue(coverage) };
   const catalog = { findPlanForCarrier: fn().mockResolvedValue(plan) };
+  // La regla de cobertura tiene su propio spec; acá devuelve la parte del
+  // paciente que trae la línea para que estas pruebas midan lo de siempre.
+  const coveragePolicy = {
+    evaluate: fn().mockImplementation(
+      async (
+        _tx: unknown,
+        claim: {
+          lines: {
+            lineSequence: number;
+            patientResponsibilityAmount?: string;
+          }[];
+        },
+      ) =>
+        claim.lines.map((line) => ({
+          lineSequence: line.lineSequence,
+          patientAmount: line.patientResponsibilityAmount,
+        })),
+    ),
+  };
   const service = new ClaimsService(
     em as never,
     repo as never,
@@ -170,6 +189,7 @@ function fixture() {
     { setContext: fn(), info: fn() } as never,
     orders as never,
     access as never,
+    coveragePolicy as never,
   );
   return {
     service,

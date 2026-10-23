@@ -162,6 +162,7 @@ function fixture(overVersion: Record<string, unknown> = {}) {
     { setContext: fn(), info: fn() } as never,
     orders as never,
     access as never,
+    {} as never,
   );
   return { service, claim, line, version, tx, repo, versionsCreated };
 }
