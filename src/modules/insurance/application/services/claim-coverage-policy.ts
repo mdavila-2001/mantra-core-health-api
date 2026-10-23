@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager, LockMode } from '@mikro-orm/postgresql';
 import {
   PreconditionFailedException,
   mismosDecimales,
+  sumarDecimales,
 } from '../../../../common';
 import {
+  InsuranceClaimLines,
+  InsuranceClaims,
   InsurancePlanBenefits,
   PriorAuthorizationDeterminations,
   PriorAuthorizationItems,
@@ -95,10 +98,13 @@ export class ClaimCoveragePolicy {
     claim: ClaimToEvaluate,
   ): Promise<EvaluatedClaimLine[]> {
     const evaluated: EvaluatedClaimLine[] = [];
+    // Lo que este mismo cobro ya cargó contra cada ítem de la aprobación: dos
+    // líneas no pueden repartirse un tope que cada una por separado no supera.
+    const billedInThisClaim = new Map<string, string>();
     for (const line of claim.lines) {
       const benefit = await this.benefitFor(tx, claim, line);
       if (benefit.requiresPriorAuthorization) {
-        await this.assertPriorAuthorization(tx, claim, line);
+        await this.assertPriorAuthorization(tx, claim, line, billedInThisClaim);
       }
       const split = this.split(line, benefit);
       if (
@@ -193,11 +199,17 @@ export class ClaimCoveragePolicy {
   /**
    * La aprobación previa del cobro cubre este servicio y está aprobada,
    * vigente y por un monto suficiente.
+   *
+   * El tope aprobado es acumulado: cuenta lo que ya se cobró con esa aprobación
+   * en otros reclamos activos y en las líneas anteriores de este mismo cobro. La
+   * fila de la aprobación se bloquea (`FOR UPDATE`) hasta el fin de la
+   * transacción, así dos cobros simultáneos no pueden gastar el mismo saldo.
    */
   private async assertPriorAuthorization(
     tx: EntityManager,
     claim: ClaimToEvaluate,
     line: ClaimLineToEvaluate,
+    billedInThisClaim: Map<string, string>,
   ): Promise<void> {
     if (!claim.priorAuthorizationRequestId) {
       throw reject(
@@ -206,9 +218,11 @@ export class ClaimCoveragePolicy {
         line,
       );
     }
-    const request = await tx.findOne(PriorAuthorizationRequests, {
-      id: claim.priorAuthorizationRequestId,
-    });
+    const request = await tx.findOne(
+      PriorAuthorizationRequests,
+      { id: claim.priorAuthorizationRequestId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
     if (
       !request ||
       request.patientCoverageId !== claim.patientCoverageId ||
@@ -266,17 +280,50 @@ export class ClaimCoveragePolicy {
         line,
       );
     }
-    if (
-      determination.approvedAmount != null &&
-      exceeds(line.billedAmount, determination.approvedAmount)
-    ) {
+    const earlierInClaim = billedInThisClaim.get(item.id) ?? '0';
+    const cumulative =
+      sumarDecimales([earlierInClaim, line.billedAmount]) ?? line.billedAmount;
+    billedInThisClaim.set(item.id, cumulative);
+    if (determination.approvedAmount == null) return;
+    const billedBefore = await this.billedUnderAuthorization(
+      tx,
+      request.id,
+      line.serviceConceptId!,
+    );
+    const total = sumarDecimales([billedBefore, cumulative]) ?? cumulative;
+    if (exceeds(total, determination.approvedAmount)) {
       throw reject(
         'El monto supera lo que aprobó la aseguradora',
         CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED,
         line,
-        { approvedAmount: determination.approvedAmount },
+        {
+          approvedAmount: determination.approvedAmount,
+          alreadyBilledAmount: billedBefore,
+          requestedTotalAmount: total,
+        },
       );
     }
+  }
+
+  /**
+   * Lo ya cobrado con esta aprobación, para este servicio, en reclamos que no
+   * fueron revertidos.
+   */
+  private async billedUnderAuthorization(
+    tx: EntityManager,
+    requestId: string,
+    serviceConceptId: string,
+  ): Promise<string> {
+    const claims = await tx.find(InsuranceClaims, {
+      priorAuthorizationRequestId: requestId,
+      statusConceptId: { $ne: INS.CLAIM_REVERSED },
+    });
+    if (claims.length === 0) return '0';
+    const lines = await tx.find(InsuranceClaimLines, {
+      insuranceClaimId: { $in: claims.map((claim) => claim.id) },
+      serviceConceptId,
+    });
+    return sumarDecimales(lines.map((line) => line.billedAmount)) ?? '0';
   }
 
   /**

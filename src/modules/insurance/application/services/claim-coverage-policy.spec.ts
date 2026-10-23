@@ -1,5 +1,7 @@
 import { PreconditionFailedException } from '../../../../common';
 import {
+  InsuranceClaimLines,
+  InsuranceClaims,
   InsurancePlanBenefits,
   PriorAuthorizationDeterminations,
   PriorAuthorizationItems,
@@ -47,7 +49,14 @@ function memoryEm(tables: Map<unknown, Row[]>) {
         typeof expected === 'object' &&
         !(expected instanceof Date)
       ) {
-        const op = expected as { $lte?: Date; $gte?: Date };
+        const op = expected as {
+          $lte?: Date;
+          $gte?: Date;
+          $ne?: unknown;
+          $in?: unknown[];
+        };
+        if ('$ne' in op) return actual !== op.$ne;
+        if ('$in' in op) return (op.$in ?? []).includes(actual);
         if (actual == null) return false;
         if (op.$lte && (actual as Date).getTime() > op.$lte.getTime())
           return false;
@@ -61,11 +70,17 @@ function memoryEm(tables: Map<unknown, Row[]>) {
     (tables.get(entity) ?? []).filter((row) => matches(row, filter));
   return {
     find: async (entity: unknown, filter: Row) => query(entity, filter),
-    findOne: async (
+    locks: [] as unknown[],
+    findOne: async function (
+      this: { locks: unknown[] },
       entity: unknown,
       filter: Row,
-      options?: { orderBy?: Record<string, 'desc' | 'asc'> },
-    ) => {
+      options?: {
+        orderBy?: Record<string, 'desc' | 'asc'>;
+        lockMode?: unknown;
+      },
+    ) {
+      if (options?.lockMode !== undefined) this.locks.push(entity);
       const rows = query(entity, filter);
       const order = options?.orderBy && Object.entries(options.orderBy)[0];
       if (order) {
@@ -138,14 +153,19 @@ function setup(rows: {
   requests?: Row[];
   items?: Row[];
   determinations?: Row[];
+  claims?: Row[];
+  claimLines?: Row[];
 }) {
   const tables = new Map<unknown, Row[]>([
     [InsurancePlanBenefits, rows.benefits ?? [benefit()]],
     [PriorAuthorizationRequests, rows.requests ?? []],
     [PriorAuthorizationItems, rows.items ?? []],
     [PriorAuthorizationDeterminations, rows.determinations ?? []],
+    [InsuranceClaims, rows.claims ?? []],
+    [InsuranceClaimLines, rows.claimLines ?? []],
   ]);
-  return { policy: new ClaimCoveragePolicy(), em: memoryEm(tables) as never };
+  const memory = memoryEm(tables);
+  return { policy: new ClaimCoveragePolicy(), em: memory as never, memory };
 }
 
 function claim(overrides: Partial<ClaimToEvaluate> = {}): ClaimToEvaluate {
@@ -495,6 +515,162 @@ describe('ClaimCoveragePolicy', () => {
       await expect(policy.evaluate(em, surgeryClaim())).resolves.toHaveLength(
         1,
       );
+    });
+
+    describe('el tope aprobado es acumulado (revisión de seguridad)', () => {
+      const partial800 = () => [
+        determination({
+          decisionConceptId: INS.DECISION_PARTIAL,
+          approvedAmount: '1000.00',
+        }),
+      ];
+
+      it('dos líneas del mismo servicio no se reparten un tope que juntas superan', async () => {
+        const { policy, em } = withSurgery({
+          requests: [paRequest()],
+          items: [paItem()],
+          determinations: partial800(),
+        });
+        const reason = await rejectionOf(
+          policy.evaluate(
+            em,
+            surgeryClaim({
+              lines: [
+                {
+                  lineSequence: 1,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '600.00',
+                },
+                {
+                  lineSequence: 2,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '600.00',
+                },
+              ],
+            }),
+          ),
+        );
+        expect(reason).toBe(CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED);
+      });
+
+      it('descuenta lo ya cobrado con la misma aprobación en otro reclamo', async () => {
+        const { policy, em } = withSurgery({
+          requests: [paRequest()],
+          items: [paItem()],
+          determinations: partial800(),
+          claims: [
+            {
+              id: 'claim-anterior',
+              priorAuthorizationRequestId: PA,
+              statusConceptId: INS.CLAIM_SUBMITTED,
+            },
+          ],
+          claimLines: [
+            {
+              insuranceClaimId: 'claim-anterior',
+              serviceConceptId: SURGERY,
+              billedAmount: '600.00',
+            },
+          ],
+        });
+        const reason = await rejectionOf(
+          policy.evaluate(
+            em,
+            surgeryClaim({
+              lines: [
+                {
+                  lineSequence: 1,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '500.00',
+                },
+              ],
+            }),
+          ),
+        );
+        expect(reason).toBe(CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED);
+      });
+
+      it('un reclamo revertido no consume el tope', async () => {
+        const { policy, em } = withSurgery({
+          requests: [paRequest()],
+          items: [paItem()],
+          determinations: partial800(),
+          claims: [
+            {
+              id: 'claim-revertido',
+              priorAuthorizationRequestId: PA,
+              statusConceptId: INS.CLAIM_REVERSED,
+            },
+          ],
+          claimLines: [
+            {
+              insuranceClaimId: 'claim-revertido',
+              serviceConceptId: SURGERY,
+              billedAmount: '900.00',
+            },
+          ],
+        });
+        await expect(
+          policy.evaluate(
+            em,
+            surgeryClaim({
+              lines: [
+                {
+                  lineSequence: 1,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '1000.00',
+                },
+              ],
+            }),
+          ),
+        ).resolves.toHaveLength(1);
+      });
+
+      it('lo cobrado antes más lo nuevo, hasta el tope exacto, pasa', async () => {
+        const { policy, em } = withSurgery({
+          requests: [paRequest()],
+          items: [paItem()],
+          determinations: partial800(),
+          claims: [
+            {
+              id: 'claim-anterior',
+              priorAuthorizationRequestId: PA,
+              statusConceptId: INS.CLAIM_SUBMITTED,
+            },
+          ],
+          claimLines: [
+            {
+              insuranceClaimId: 'claim-anterior',
+              serviceConceptId: SURGERY,
+              billedAmount: '600.00',
+            },
+          ],
+        });
+        await expect(
+          policy.evaluate(
+            em,
+            surgeryClaim({
+              lines: [
+                {
+                  lineSequence: 1,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '400.00',
+                },
+              ],
+            }),
+          ),
+        ).resolves.toHaveLength(1);
+      });
+
+      it('bloquea la fila de la aprobación mientras valida', async () => {
+        const { policy, em, memory } = withSurgery({
+          requests: [paRequest()],
+          items: [paItem()],
+          determinations: [determination()],
+        });
+        await policy.evaluate(em, surgeryClaim());
+        expect(memory.locks).toContain(PriorAuthorizationRequests);
+      });
     });
 
     it('un servicio sin aprobación exigida no la pide', async () => {
