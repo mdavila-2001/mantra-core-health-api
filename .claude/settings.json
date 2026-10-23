@@ -28,5 +28,17 @@
     "motion-framer@claude-design-skillstack": true,
     "fullstack-dev-skills@fullstack-dev-skills": true,
     "frontend@jezweb-skills": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.githooks/graphify-refresh.sh\" --session"
+          }
+        ]
+      }
+    ]
   }
 }
