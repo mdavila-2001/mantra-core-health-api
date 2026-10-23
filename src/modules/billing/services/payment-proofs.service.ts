@@ -15,6 +15,8 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { AuditTrailService } from '../../audit/services';
+import { FileUploadService } from '../../common/services/file-upload.service';
+import type { FileContentDto } from '../../common/dto';
 import { NotificationsService } from '../../messaging/services';
 import { PROF } from '../../profiles/profiles.concepts';
 import { BILL } from '../billing.concepts';
@@ -88,6 +90,7 @@ export class PaymentProofsService {
     private readonly simulated: BillingSimulatedService,
     private readonly auditTrail: AuditTrailService,
     private readonly notifications: NotificationsService,
+    private readonly uploads: FileUploadService,
     @Inject(PATIENT_SHARE_PORT)
     private readonly patientShare: PatientSharePort,
     private readonly logger: PinoLogger,
@@ -379,6 +382,10 @@ export class PaymentProofsService {
       where.push('e.tenant_id IN (?)');
       params.push([...scope.tenantIds]);
     }
+    if (query.patientProfileId !== undefined) {
+      where.push('e.patient_profile_id = ?');
+      params.push(query.patientProfileId);
+    }
     if (query.from !== undefined) {
       where.push('e.start_at >= ?');
       params.push(new Date(query.from));
@@ -495,6 +502,45 @@ export class PaymentProofsService {
           : this.encodeCursor(this.iso(last['startAt']), String(last['id'])),
       totals,
     };
+  }
+
+  /**
+   * La imagen del comprobante, para quien lo revisa (o para el paciente que lo
+   * subió). `GET /common/files/:id/content` sólo sirve el archivo a quien lo
+   * subió: el médico no lo subió y es justamente quien tiene que verlo. Acá
+   * se autoriza por CONTEXTO —el comprobante está en el alcance del actor— y
+   * recién después se piden los bytes (`downloadForAuthorizedContext`).
+   */
+  async proofFile(
+    user: AuthenticatedUser,
+    proofId: string,
+  ): Promise<FileContentDto> {
+    let proof: PaymentProofs;
+    const esPaciente =
+      user.patientProfileId !== undefined && user.roles.includes('PATIENT');
+    if (operatingScope(user) !== null) {
+      proof = await this.proofInScopeOrThrow(this.scopeOf(user), proofId);
+    } else if (esPaciente) {
+      const propio = /^[0-9a-f-]{36}$/i.test(proofId)
+        ? await this.proofs.findById(this.em.fork(), proofId)
+        : null;
+      if (
+        propio === null ||
+        propio.patientProfileId !== user.patientProfileId
+      ) {
+        throw new ResourceNotFoundException('El comprobante no existe');
+      }
+      proof = propio;
+    } else {
+      throw new ForbiddenException('Su rol no permite ver comprobantes');
+    }
+    if (proof.fileId === undefined || proof.fileId === null) {
+      throw new ResourceNotFoundException('El comprobante no tiene imagen');
+    }
+    return this.uploads.downloadForAuthorizedContext(
+      proof.fileId,
+      'billing.paymentProof.file',
+    );
   }
 
   // ---- alcance --------------------------------------------------------------

@@ -4,6 +4,7 @@ import * as entities from './entities';
 import { PracticeModule } from '../practice/practice.module';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
+import { CommonModule } from '../common/common.module';
 import {
   NoCoveragePatientShare,
   PATIENT_SHARE_PORT,
@@ -67,6 +68,8 @@ import {
     // la cadena de auditoría y avisa al paciente por la campana.
     AuditModule,
     MessagingModule,
+    // C-01 — la imagen del comprobante se sirve autorizada por contexto.
+    CommonModule,
   ],
   controllers: [
     BillingReceivablesController,

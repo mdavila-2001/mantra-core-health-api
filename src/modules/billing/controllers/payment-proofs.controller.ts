@@ -2,13 +2,16 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { PaymentProofsService } from '../services/payment-proofs.service';
@@ -83,6 +86,28 @@ export class PaymentProofsController {
     @Param('chargeId', ParseUUIDPipe) chargeId: string,
   ) {
     return this.service.listForCharge(user, chargeId);
+  }
+
+  @Audited({
+    action: 'PAYMENT_PROOF_FILE_READ',
+    entity: 'payment_proof',
+    entityId: 'param:id',
+  })
+  @Get('payment-proofs/:id/file')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary:
+      'La imagen del comprobante, para quien lo revisa o para el paciente que lo subió',
+  })
+  async proofFile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.service.proofFile(user, id);
+    res.setHeader('Content-Type', content.mimeType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(content.buffer);
   }
 
   @Audited({

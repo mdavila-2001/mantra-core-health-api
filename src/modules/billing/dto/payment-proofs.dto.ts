@@ -62,6 +62,15 @@ export class ProviderPaymentTableQueryDto {
   @IsISO8601()
   to?: string;
 
+  @ApiPropertyOptional({
+    description:
+      'Sólo las sesiones de esta persona (la caja «Pagos» de la consulta)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  patientProfileId?: string;
+
   @ApiPropertyOptional({ description: 'Cursor opaco de la página anterior' })
   @IsOptional()
   @IsString()

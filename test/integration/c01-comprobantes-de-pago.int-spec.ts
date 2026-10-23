@@ -411,6 +411,26 @@ describe('C-01 · comprobantes de pago del paciente, de punta a punta', () => {
       fileId: expect.any(String),
     });
 
+    // La imagen: la médica la ve (no la subió; se autoriza por contexto),
+    // el otro médico no (404), el paciente que la subió sí.
+    const imagen = await http()
+      .get(`/billing/payment-proofs/${primerComprobante}/file`)
+      .set(bearer(medica.token))
+      .expect(200);
+    expect(imagen.headers['content-type']).toContain('image/png');
+    await http()
+      .get(`/billing/payment-proofs/${primerComprobante}/file`)
+      .set(bearer(otroMedico.token))
+      .expect(404);
+    await http()
+      .get(`/billing/payment-proofs/${primerComprobante}/file`)
+      .set(bearer(paciente.token))
+      .expect(200);
+    await http()
+      .get(`/billing/payment-proofs/${primerComprobante}/file`)
+      .set(bearer(otroPaciente.token))
+      .expect(404);
+
     await http()
       .get(`/billing/charges/${chargeId}/payment-proofs`)
       .set(bearer(otroMedico.token))
@@ -602,6 +622,20 @@ describe('C-01 · comprobantes de pago del paciente, de punta a punta', () => {
       proof: expect.objectContaining({ status: 'ACCEPTED', method: 'CASH' }),
     });
     expect(todas.body.totals.sessions).toBeGreaterThanOrEqual(2);
+
+    // Filtrada por persona (la caja «Pagos» de la consulta): sólo sus sesiones.
+    const dePaciente = await http()
+      .get('/billing/me/provider-payment-table')
+      .query({ patientProfileId: paciente.profileId })
+      .set(bearer(medica.token))
+      .expect(200);
+    expect(
+      dePaciente.body.items.every(
+        (i: { patientProfileId: string }) =>
+          i.patientProfileId === paciente.profileId,
+      ),
+    ).toBe(true);
+    expect(dePaciente.body.items).toHaveLength(1);
 
     // Otro médico no ve las sesiones de la médica; el paciente no tiene tabla.
     const ajena = await http()
