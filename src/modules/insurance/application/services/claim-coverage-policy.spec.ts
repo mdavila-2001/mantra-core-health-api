@@ -662,6 +662,96 @@ describe('ClaimCoveragePolicy', () => {
         ).resolves.toHaveLength(1);
       });
 
+      it('una decisión de pedido es un solo saldo para todos sus servicios', async () => {
+        const IMAGING = 'service-imaging';
+        const { policy, em } = setup({
+          benefits: [
+            surgeryBenefit(),
+            surgeryBenefit({
+              id: 'benefit-imaging',
+              serviceConceptId: IMAGING,
+            }),
+          ],
+          requests: [paRequest()],
+          items: [
+            paItem(),
+            paItem({ id: 'pa-item-2', serviceConceptId: IMAGING }),
+          ],
+          determinations: [
+            determination({
+              priorAuthorizationItemId: null,
+              decisionConceptId: INS.DECISION_PARTIAL,
+              approvedAmount: '1000.00',
+            }),
+          ],
+        });
+        const reason = await rejectionOf(
+          policy.evaluate(
+            em,
+            surgeryClaim({
+              lines: [
+                {
+                  lineSequence: 1,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '600.00',
+                },
+                {
+                  lineSequence: 2,
+                  serviceConceptId: IMAGING,
+                  billedAmount: '600.00',
+                },
+              ],
+            }),
+          ),
+        );
+        expect(reason).toBe(CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED);
+      });
+
+      it('una decisión de pedido descuenta lo cobrado antes en otro servicio', async () => {
+        const IMAGING = 'service-imaging';
+        const { policy, em } = setup({
+          benefits: [surgeryBenefit()],
+          requests: [paRequest()],
+          items: [paItem()],
+          determinations: [
+            determination({
+              priorAuthorizationItemId: null,
+              decisionConceptId: INS.DECISION_PARTIAL,
+              approvedAmount: '1000.00',
+            }),
+          ],
+          claims: [
+            {
+              id: 'claim-imagen',
+              priorAuthorizationRequestId: PA,
+              statusConceptId: INS.CLAIM_SUBMITTED,
+            },
+          ],
+          claimLines: [
+            {
+              insuranceClaimId: 'claim-imagen',
+              serviceConceptId: IMAGING,
+              billedAmount: '700.00',
+            },
+          ],
+        });
+        const reason = await rejectionOf(
+          policy.evaluate(
+            em,
+            surgeryClaim({
+              lines: [
+                {
+                  lineSequence: 1,
+                  serviceConceptId: SURGERY,
+                  billedAmount: '500.00',
+                },
+              ],
+            }),
+          ),
+        );
+        expect(reason).toBe(CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED);
+      });
+
       it('bloquea la fila de la aprobación mientras valida', async () => {
         const { policy, em, memory } = withSurgery({
           requests: [paRequest()],

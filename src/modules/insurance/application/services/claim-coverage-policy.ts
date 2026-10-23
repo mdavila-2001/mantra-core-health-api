@@ -280,15 +280,20 @@ export class ClaimCoveragePolicy {
         line,
       );
     }
-    const earlierInClaim = billedInThisClaim.get(item.id) ?? '0';
+    // El tope vale para lo que la aseguradora decidió: el ítem, o el pedido
+    // entero si la decisión no nombra un ítem. Una decisión de pedido es un solo
+    // saldo para todos sus servicios.
+    const requestLevel = determination.priorAuthorizationItemId == null;
+    const scopeKey = requestLevel ? `request:${request.id}` : `item:${item.id}`;
+    const earlierInClaim = billedInThisClaim.get(scopeKey) ?? '0';
     const cumulative =
       sumarDecimales([earlierInClaim, line.billedAmount]) ?? line.billedAmount;
-    billedInThisClaim.set(item.id, cumulative);
+    billedInThisClaim.set(scopeKey, cumulative);
     if (determination.approvedAmount == null) return;
     const billedBefore = await this.billedUnderAuthorization(
       tx,
       request.id,
-      line.serviceConceptId!,
+      requestLevel ? null : line.serviceConceptId!,
     );
     const total = sumarDecimales([billedBefore, cumulative]) ?? cumulative;
     if (exceeds(total, determination.approvedAmount)) {
@@ -306,13 +311,14 @@ export class ClaimCoveragePolicy {
   }
 
   /**
-   * Lo ya cobrado con esta aprobación, para este servicio, en reclamos que no
-   * fueron revertidos.
+   * Lo ya cobrado con esta aprobación en reclamos que no fueron revertidos: para
+   * un servicio si la decisión es por ítem, o para todo el pedido si
+   * `serviceConceptId` es `null`.
    */
   private async billedUnderAuthorization(
     tx: EntityManager,
     requestId: string,
-    serviceConceptId: string,
+    serviceConceptId: string | null,
   ): Promise<string> {
     const claims = await tx.find(InsuranceClaims, {
       priorAuthorizationRequestId: requestId,
@@ -321,7 +327,7 @@ export class ClaimCoveragePolicy {
     if (claims.length === 0) return '0';
     const lines = await tx.find(InsuranceClaimLines, {
       insuranceClaimId: { $in: claims.map((claim) => claim.id) },
-      serviceConceptId,
+      ...(serviceConceptId ? { serviceConceptId } : {}),
     });
     return sumarDecimales(lines.map((line) => line.billedAmount)) ?? '0';
   }
