@@ -132,6 +132,8 @@
 \ir 11_system_ops/03_fk_intra.sql
 \echo >>> 11_system_ops/04_indexes.sql
 \ir 11_system_ops/04_indexes.sql
+\echo >>> 11_system_ops/05_constraints.sql
+\ir 11_system_ops/05_constraints.sql
 
 -- ═══ módulo 12_integrations ═══
 \echo >>> 12_integrations/01_schema.sql
@@ -416,6 +418,8 @@
 \ir 41_scheduling/03_fk_intra.sql
 \echo >>> 41_scheduling/04_indexes.sql
 \ir 41_scheduling/04_indexes.sql
+\echo >>> 41_scheduling/05_constraints.sql
+\ir 41_scheduling/05_constraints.sql
 
 -- ═══ módulo 42_payments ═══
 \echo >>> 42_payments/01_schema.sql
@@ -618,6 +622,36 @@
 \ir 66_medical_groups/04_indexes.sql
 \echo >>> 66_medical_groups/05_constraints.sql
 \ir 66_medical_groups/05_constraints.sql
+
+-- ═══ módulo 67_data_catalog ═══
+\echo >>> 67_data_catalog/01_schema.sql
+\ir 67_data_catalog/01_schema.sql
+\echo >>> 67_data_catalog/02_tables.sql
+\ir 67_data_catalog/02_tables.sql
+\echo >>> 67_data_catalog/03_fk_intra.sql
+\ir 67_data_catalog/03_fk_intra.sql
+\echo >>> 67_data_catalog/04_indexes.sql
+\ir 67_data_catalog/04_indexes.sql
+
+-- ═══ módulo 68_qa_execution ═══
+\echo >>> 68_qa_execution/01_schema.sql
+\ir 68_qa_execution/01_schema.sql
+\echo >>> 68_qa_execution/02_tables.sql
+\ir 68_qa_execution/02_tables.sql
+\echo >>> 68_qa_execution/03_fk_intra.sql
+\ir 68_qa_execution/03_fk_intra.sql
+\echo >>> 68_qa_execution/04_indexes.sql
+\ir 68_qa_execution/04_indexes.sql
+
+-- ═══ módulo 69_pharma_lab ═══
+\echo >>> 69_pharma_lab/01_schema.sql
+\ir 69_pharma_lab/01_schema.sql
+\echo >>> 69_pharma_lab/02_tables.sql
+\ir 69_pharma_lab/02_tables.sql
+\echo >>> 69_pharma_lab/03_fk_intra.sql
+\ir 69_pharma_lab/03_fk_intra.sql
+\echo >>> 69_pharma_lab/04_indexes.sql
+\ir 69_pharma_lab/04_indexes.sql
 
 -- 90_fk_deferred.sql OMITIDOS a propósito.
 \echo === apply_all completado (sin 90_fk_deferred) ===

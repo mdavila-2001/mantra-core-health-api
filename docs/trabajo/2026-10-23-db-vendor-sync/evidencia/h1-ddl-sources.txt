@@ -1,0 +1,6 @@
+# ddl:sources (check_ddl_sources.py)
+ANTES : faltan 29 · sobran 16 · difieren 31   (76 archivos)
+DESPUÉS: faltan 0  · sobran 16 · difieren 14   (30 archivos)
+exit=1 en ambos: los 30 restantes son DDL propio de la API que el modelo no tiene
+
+# apply_all.sql / apply_deferred.sql: 324 referencias, 0 faltantes
