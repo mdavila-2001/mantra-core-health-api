@@ -2,12 +2,13 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `billing`.
- * 150 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 153 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
   ['billing_document_links', 'bill_id', 'billing', 'bills', 'id'],
+  ['billing_document_links', 'claim_id', 'insurance', 'insurance_claims', 'id'],
   ['billing_document_links', 'contract_id', 'erp', 'contracts', 'id'],
   ['billing_document_links', 'created_by_user_id', 'iam', 'users', 'id'],
   ['billing_document_links', 'encounter_id', 'clinical', 'encounters', 'id'],
@@ -78,6 +79,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['invoice_lines', 'cost_center_id', 'accounting', 'cost_centers', 'id'],
   ['invoice_lines', 'created_by_user_id', 'iam', 'users', 'id'],
   ['invoice_lines', 'income_account_id', 'accounting', 'accounts', 'id'],
+  ['invoice_lines', 'insurance_claim_line_id', 'insurance', 'insurance_claim_lines', 'id'],
   ['invoice_lines', 'invoice_id', 'billing', 'invoices', 'id'],
   ['invoice_lines', 'sales_order_item_id', 'erp', 'sales_order_items', 'id'],
   ['invoice_lines', 'tax_code_id', 'billing', 'tax_codes', 'id'],
@@ -129,6 +131,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['receivable_payment_allocations', 'invoice_id', 'billing', 'invoices', 'id'],
   ['receivable_payment_allocations', 'open_item_id', 'accounting', 'open_items', 'id'],
   ['receivable_payment_allocations', 'payment_received_id', 'billing', 'payments_received', 'id'],
+  ['reimbursements', 'claim_id', 'insurance', 'insurance_claims', 'id'],
   ['reimbursements', 'created_by_user_id', 'iam', 'users', 'id'],
   ['reimbursements', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reimbursements', 'transaction_id', 'accounting', 'journal_transactions', 'id'],
