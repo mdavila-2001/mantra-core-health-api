@@ -1,0 +1,153 @@
+{
+ "responseHeader": {
+  "status": 0,
+  "QTime": 29
+ },
+ "response": {
+  "numFound": 2,
+  "docs": [
+   {
+    "hgnc_id": "HGNC:5",
+    "locus_type": "gene with protein product",
+    "status": "Approved",
+    "gene_group": [
+     "Immunoglobulin like domain containing"
+    ],
+    "date_approved_reserved": "1989-06-30",
+    "date_modified": "2023-01-20",
+    "omim_id": [
+     "138670"
+    ],
+    "ensembl_gene_id": "ENSG00000121410",
+    "name": "alpha-1-B glycoprotein",
+    "ucsc_id": "uc002qsd.5",
+    "uniprot_ids": [
+     "P04217"
+    ],
+    "gene_group_id": [
+     594
+    ],
+    "merops": "I43.950",
+    "ccds_id": [
+     "CCDS12976"
+    ],
+    "refseq_accession": [
+     "NM_130786"
+    ],
+    "vega_id": "OTTHUMG00000183507",
+    "location": "19q13.43",
+    "agr": "HGNC:5",
+    "pubmed_id": [
+     2591067
+    ],
+    "entrez_id": "1",
+    "uuid": "8d8bb7eb-2689-4bb5-800e-b0e46d318c52",
+    "mane_select": [
+     "ENST00000263100.8",
+     "NM_130786.4"
+    ],
+    "locus_group": "protein-coding gene",
+    "rgd_id": [
+     "RGD:69417"
+    ],
+    "mgd_id": [
+     "MGI:2152878"
+    ],
+    "symbol": "A1BG"
+   },
+   {
+    "mgd_id": [
+     "MGI:104537"
+    ],
+    "rgd_id": [
+     "RGD:2218"
+    ],
+    "symbol": "BRCA1",
+    "entrez_id": "672",
+    "pubmed_id": [
+     1676470,
+     25472942
+    ],
+    "mane_select": [
+     "ENST00000357654.9",
+     "NM_007294.4"
+    ],
+    "cosmic": "BRCA1",
+    "locus_group": "protein-coding gene",
+    "uuid": "4b4faa8a-5c8f-4f90-aaaf-c0eeae458b8b",
+    "date_name_changed": "2019-01-22",
+    "agr": "HGNC:1100",
+    "vega_id": "OTTHUMG00000157426",
+    "location": "17q21.31",
+    "ccds_id": [
+     "CCDS11453",
+     "CCDS11454",
+     "CCDS11455",
+     "CCDS11456",
+     "CCDS11459"
+    ],
+    "refseq_accession": [
+     "NM_007294"
+    ],
+    "ucsc_id": "uc002ict.4",
+    "name": "BRCA1 DNA repair associated",
+    "gene_group_id": [
+     58,
+     548,
+     694,
+     1328,
+     1335,
+     1336
+    ],
+    "orphanet": 119068,
+    "uniprot_ids": [
+     "P38398"
+    ],
+    "prev_name": [
+     "breast cancer 1, early onset",
+     "breast cancer 1"
+    ],
+    "alias_symbol": [
+     "RNF53",
+     "BRCC1",
+     "PPP1R53",
+     "FANCS"
+    ],
+    "ena": [
+     "U14680"
+    ],
+    "omim_id": [
+     "113705"
+    ],
+    "date_modified": "2023-03-15",
+    "ensembl_gene_id": "ENSG00000012048",
+    "lsdb": [
+     "Breast Cancer|http://research.nhgri.nih.gov/bic/",
+     "Fanconi Anaemia Mutation Database|http://www2.rockefeller.edu/fanconi",
+     "BRCA1 database at LOVD-China|http://genomed.org/LOVD/BC/home.php?select_db=BRCA1",
+     "Global Variome shared LOVD|https://databases.lovd.nl/shared/genes/BRCA1",
+     "LOVD - Leiden Open Variation Database|http://proteomics.bio21.unimelb.edu.au/lovd/genes/BRCA1",
+     "LRG_292|http://ftp.ebi.ac.uk/pub/databases/lrgex/LRG_292.xml"
+    ],
+    "status": "Approved",
+    "date_approved_reserved": "1991-02-20",
+    "gencc": "HGNC:1100",
+    "gene_group": [
+     "Ring finger proteins",
+     "FA complementation groups",
+     "Protein phosphatase 1 regulatory subunits",
+     "BRCA1 A complex",
+     "BRCA1 B complex",
+     "BRCA1 C complex"
+    ],
+    "locus_type": "gene with protein product",
+    "hgnc_id": "HGNC:1100",
+    "alias_name": [
+     "BRCA1/BRCA2-containing complex, subunit 1",
+     "protein phosphatase 1, regulatory subunit 53",
+     "Fanconi anemia, complementation group S"
+    ]
+   }
+  ]
+ }
+}

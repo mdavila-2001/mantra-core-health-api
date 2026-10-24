@@ -252,3 +252,12 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
+
+## Diccionarios médicos generales (2026-10-24)
+
+Anatomía (Uberon, FMA), embriología, histología, genética (HGNC, SO), microbiología (NCBI Taxonomy de
+interés médico, ARO), salud pública, estadística, profesiones, exposiciones, fisiología y abreviaturas
+clínicas desde ontologías abiertas con procedencia por concepto: ver
+[`dictionaries/README.md`](dictionaries/README.md), [`dictionaries/SOURCES.md`](dictionaries/SOURCES.md) y
+`docs/seed-research/medical-dictionaries.md`. Carga por defecto 111 389 conceptos (medido en Postgres
+desechable, idempotente); lo que no sirve a una consulta del producto queda construido y opt-in.

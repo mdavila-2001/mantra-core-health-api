@@ -796,6 +796,8 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   LANG_ES: def('terminology:language:es', 'ES', 'Spanish'),
   LANG_EN: def('terminology:language:en', 'EN', 'English'),
+  // Latín de la Terminologia Anatomica (nombres que FMA declara `language: Latin`).
+  LANG_LA: def('terminology:language:la', 'LA', 'Latin'),
   DESIG_PREFERRED: def(
     'terminology:designation-type:preferred',
     'DESIG_PREFERRED',
@@ -808,6 +810,36 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   REL_IS_A: def('terminology:relationship:is-a', 'IS_A', 'Is a'),
   REL_PART_OF: def('terminology:relationship:part-of', 'PART_OF', 'Part of'),
+  // 2026-10-24: relaciones que publican las ontologías de los diccionarios
+  // médicos (tools/terminology-import/dictionaries/), aditivas. Cada una es un
+  // predicado de la Relation Ontology verificado contra el [Typedef] del archivo:
+  //  - DEVELOPS_FROM (RO:0002202): la estructura origen se desarrolla a partir
+  //    de la destino (embriología: Uberon, EHDAA2, CL).
+  //  - LOCATED_IN (RO:0001025): el origen está ubicado en el destino.
+  //  - INFECTIOUS_AGENT (RO:0014001; IDO:0000664 con un taxón en DOID): la
+  //    enfermedad origen tiene como agente infeccioso al organismo destino.
+  //  - TRANSMITTED_BY (RO:0002451): la enfermedad origen se transmite por el
+  //    organismo destino (vector).
+  REL_DEVELOPS_FROM: def(
+    'terminology:relationship:develops-from',
+    'DEVELOPS_FROM',
+    'Develops from',
+  ),
+  REL_LOCATED_IN: def(
+    'terminology:relationship:located-in',
+    'LOCATED_IN',
+    'Located in',
+  ),
+  REL_INFECTIOUS_AGENT: def(
+    'terminology:relationship:infectious-agent',
+    'REL_INFECTIOUS_AGENT',
+    'Has infectious agent',
+  ),
+  REL_TRANSMITTED_BY: def(
+    'terminology:relationship:transmitted-by',
+    'REL_TRANSMITTED_BY',
+    'Transmitted by',
+  ),
   // --- Terminology: relaciones tipadas del glosario médico (Carril 03) ------
   // Aditivas a `REL_IS_A`/`REL_PART_OF`: la jerarquía genérica del catálogo no
   // alcanza para expresar «este síntoma se asocia a esta enfermedad» o «este
