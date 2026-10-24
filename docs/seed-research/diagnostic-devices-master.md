@@ -263,6 +263,20 @@ detiene con dos pasadas seguidas en 0.
   - Taxonomía: sin cambios (33 616 nodos, 218 mapeos). No hizo falta recargar.
 - **Descartadas**: ninguna.
 
+### Pasada 7 (2026-10-24)
+
+- **Regiones**: `us` @`1792086f`: `fda-maude` pasó de 2 727 a 12 930 (pasada 8 de `us`). `us` dio su región por saturada: sus pasadas 9 y 10 aportaron 0. `eu` y `row` sin cambios; las tres hermanas cerraron.
+- **Fuentes nuevas propias**: ninguna.
+- **Nuevos tras deduplicar** (contra la pasada 6):
+  - Registros: +9 792 (261 339).
+  - Fabricantes: +763 (20 755).
+  - Marcas: +7 966 (88 948).
+  - Modelos: +8 609 (175 070).
+  - Modelos en 2 jurisdicciones: +23 (308).
+  - Taxonomía: sin cambios.
+- **Descartadas**: ninguna.
+- **Nota**: el PR #696 se mergeó con las pasadas 1 a 5. Las pasadas 6 y siguientes van en un PR nuevo, desde `dev` actualizado, en la rama `justin/seed-dx-devices-master-p6`: el force push sobre la rama original fue denegado.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

@@ -26,7 +26,7 @@
 ## A medias
 ### H5 — Saturación con /loop
 - Qué anda: cinco pasadas registradas en `docs/seed-research/diagnostic-devices-master.md`, una sección por pasada, con fuentes, nuevos tras deduplicar y descartes. `row` cerró su región (sus pasadas 3 y 4 aportaron 0) y `eu` también.
-- Qué no anda: la condición de corte (dos pasadas seguidas en 0) no se cumplió. La pasada 5 sumó 62 636 registros (licencias «Test Kit» de MDALL, LIVD y las fuentes nuevas de `us`) y la 6 sumó 1 396 (reportes MAUDE nuevos de `us`). Estado tras la pasada 6: 251 547 registros, 19 992 fabricantes, 166 461 modelos.
+- Qué no anda: la condición de corte (dos pasadas seguidas en 0) no se cumplió. La pasada 5 sumó 62 636 registros (licencias «Test Kit» de MDALL, LIVD y las fuentes nuevas de `us`) y la 6 sumó 1 396 (reportes MAUDE nuevos de `us`). La 7 sumó 9 792 (MAUDE). Estado tras la pasada 7: 261 339 registros, 20 755 fabricantes, 175 070 modelos. Las tres regiones hermanas ya cerraron.
 - Qué falta exactamente: correr `build.mjs` con `git fetch origin` hasta que dos pasadas seguidas no sumen nada. `us` sigue empujando.
 - Dónde quedó: `justin/seed-dx-devices-master`; el `/loop` de esta sesión sigue programado.
 
