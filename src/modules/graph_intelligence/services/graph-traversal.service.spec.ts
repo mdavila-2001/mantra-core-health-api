@@ -8,10 +8,56 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import {
+  DomainException,
+  ErrorCode,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { HttpStatus } from '@nestjs/common';
 import { GraphTraversalService } from './graph-traversal.service';
 
 const actor = { id: 'user-1', roles: ['GRAPH_ANALYST'] } as any;
 const TENANT_ID = '11111111-1111-1111-1111-111111111111';
+
+const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+
+/**
+ * Afirma que la promesa falla como "no existe": 404, `GRAPH_RESOURCE_OUT_OF_SCOPE` y sin `details`.
+ *
+ * @param promise - Operación bajo prueba.
+ */
+async function expectOutOfScope(promise: Promise<unknown>): Promise<void> {
+  const error: any = await promise.then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.code).toBe('NOT_FOUND');
+  expect(error.reason).toBe('GRAPH_RESOURCE_OUT_OF_SCOPE');
+  expect(error.details).toBeUndefined();
+}
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant activo del contexto.
+ * @returns Proxy que fija el tenant en cada llamada.
+ */
+function scoped<S extends object>(service: S, tenantId: string): S {
+  return new Proxy(service, {
+    get(target, key) {
+      const value = (target as any)[key];
+      return typeof value === 'function'
+        ? (...args: unknown[]) =>
+            runWithTenant(tenantId, () => value.apply(target, args))
+        : value;
+    },
+  });
+}
 const NODE_A = '22222222-2222-2222-2222-222222222222';
 const NODE_B = '33333333-3333-3333-3333-333333333333';
 const NODE_C = '44444444-4444-4444-4444-444444444444';
@@ -83,6 +129,7 @@ function build() {
   const outbox = {
     publishDomainEvent: mockFn(async () => ({ duplicate: false })),
   };
+  const consentGate = { assertAllowed: mockFn(async () => undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new GraphTraversalService(
@@ -90,9 +137,19 @@ function build() {
     analyticsRepo as any,
     projectionRepo as any,
     outbox as any,
+    consentGate as any,
     logger as any,
   );
-  return { service, em, tx, analyticsRepo, projectionRepo, outbox, logger };
+  return {
+    service: scoped(service, TENANT_ID),
+    em,
+    tx,
+    analyticsRepo,
+    projectionRepo,
+    outbox,
+    consentGate,
+    logger,
+  };
 }
 
 const TRAVERSE_DTO = {
@@ -445,6 +502,90 @@ describe('GraphTraversalService', () => {
           .relationshipFilterHash;
 
       expect(hash1).toBe(hash2);
+    });
+  });
+
+  describe('alcance por tenant (GRAPH-01)', () => {
+    it('operador de A no suspende el scope de B ni publica evento para B', async () => {
+      const d = build();
+      const s = scope({ tenantId: OTHER_TENANT });
+      d.analyticsRepo.findScopeById.mockResolvedValue(s);
+      await expectOutOfScope(
+        d.service.updateAccessScope(SCOPE_ID, { state: 'suspended' }, actor),
+      );
+      expect(s.state).toBe('active');
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('consentimiento del paciente (GRAPH-02)', () => {
+    const PATIENT = '88888888-8888-8888-8888-888888888888';
+    const withPatient = { ...TRAVERSE_DTO, patientProfileId: PATIENT };
+    const deny = () =>
+      new DomainException(
+        HttpStatus.FORBIDDEN,
+        ErrorCode.FORBIDDEN,
+        'denegado',
+        undefined,
+        'GRAPH_CONSENT_REQUIRED',
+      );
+
+    it('sin contexto de paciente no consulta la compuerta', async () => {
+      const d = build();
+      await d.service.traverse(TRAVERSE_DTO, actor);
+      expect(d.consentGate.assertAllowed).not.toHaveBeenCalled();
+    });
+
+    it('con consentimiento vigente recorre y poda por scope', async () => {
+      const d = build();
+      d.analyticsRepo.findScopeByCodeForUpdate.mockResolvedValue(
+        scope({ requiresPatientContext: true }),
+      );
+      d.projectionRepo.findActiveEdgesFrom.mockResolvedValue([
+        {
+          edgeId: 'e1',
+          fromNodeId: NODE_A,
+          toNodeId: NODE_B,
+          relationshipType: 'referred',
+        },
+      ]);
+      d.projectionRepo.findNodesByIds.mockResolvedValue([
+        node(NODE_B, { nodeType: 'device' }),
+      ]);
+
+      const result = await d.service.traverse(withPatient, actor);
+
+      expect(d.consentGate.assertAllowed).toHaveBeenCalledWith(d.tx, {
+        tenantId: TENANT_ID,
+        patientProfileId: PATIENT,
+        purposeOfUse: 'FRAUD_INVESTIGATION',
+        actorId: actor.id,
+      });
+      expect(result.nodes.map((n) => n.nodeId)).toEqual([NODE_A]);
+    });
+
+    it('traverse denegado no consulta nodos ni aristas', async () => {
+      const d = build();
+      d.consentGate.assertAllowed.mockRejectedValue(deny());
+      await expect(
+        d.service.traverse(withPatient, actor),
+      ).rejects.toMatchObject({ reason: 'GRAPH_CONSENT_REQUIRED' });
+      expect(d.projectionRepo.findNodeById).not.toHaveBeenCalled();
+      expect(d.projectionRepo.findActiveEdgesFrom).not.toHaveBeenCalled();
+    });
+
+    it('findPath denegado no lee ni escribe la caché de rutas', async () => {
+      const d = build();
+      d.consentGate.assertAllowed.mockRejectedValue(deny());
+      const error: any = await d.service
+        .findPath({ ...withPatient, endNodeId: NODE_B }, actor)
+        .catch((e: unknown) => e);
+      expect(error.getStatus()).toBe(403);
+      expect(error.code).toBe('FORBIDDEN');
+      expect(error.reason).toBe('GRAPH_CONSENT_REQUIRED');
+      expect(d.analyticsRepo.findCachedPath).not.toHaveBeenCalled();
+      expect(d.analyticsRepo.createCachedPath).not.toHaveBeenCalled();
+      expect(d.projectionRepo.findActiveEdgesFrom).not.toHaveBeenCalled();
     });
   });
 });

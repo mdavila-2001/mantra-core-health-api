@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
+import { runWithTenant } from '../../../../common';
 import { ClaimsService } from './claims.service';
 import {
   InsuranceClaims,
@@ -17,6 +18,7 @@ import type {
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);
+const TENANT = '11111111-1111-4111-8111-111111111111';
 const actor = { id: 'user', roles: ['USER'] };
 const claimInput: CreateClaimDto = {
   insuranceCarrierId: 'carrier',
@@ -185,7 +187,10 @@ function fixture() {
     repo as never,
     coverageRepo as never,
     catalog as never,
-    {} as never,
+    // El alta genérica exige que la práctica facturadora sea del tenant activo.
+    {
+      findActivePracticeIdsForTenant: fn().mockResolvedValue(['pharmacy']),
+    } as never,
     { setContext: fn(), info: fn() } as never,
     orders as never,
     access as never,
@@ -458,13 +463,15 @@ describe('ClaimsService linked orders', () => {
   });
   it('mantiene la respuesta genérica y el facturador práctica para plataforma', async () => {
     const f = fixture();
-    const response = await f.service.submitClaim(
-      {
-        ...claimInput,
-        inventoryReservationId: undefined,
-        lines: [{ lineSequence: 1, billedAmount: '100' }],
-      },
-      { id: 'platform', roles: ['SUPERADMIN'] },
+    const response = await runWithTenant(TENANT, () =>
+      f.service.submitClaim(
+        {
+          ...claimInput,
+          inventoryReservationId: undefined,
+          lines: [{ lineSequence: 1, billedAmount: '100' }],
+        },
+        { id: 'platform', roles: ['SUPERADMIN'] },
+      ),
     );
     expect(response).not.toHaveProperty('lineIds');
     expect(f.repo.createClaim).toHaveBeenCalledWith(
@@ -484,14 +491,16 @@ describe('ClaimsService linked orders', () => {
     const f = fixture();
     f.repo.findByIdempotency.mockResolvedValue(f.claim);
     await expect(
-      f.service.submitClaim(
-        {
-          ...claimInput,
-          inventoryReservationId: undefined,
-          idempotencyKey: 'same-key',
-          lines: [{ lineSequence: 1, billedAmount: '100' }],
-        },
-        { id: 'platform', roles: ['SUPERADMIN'] },
+      runWithTenant(TENANT, () =>
+        f.service.submitClaim(
+          {
+            ...claimInput,
+            inventoryReservationId: undefined,
+            idempotencyKey: 'same-key',
+            lines: [{ lineSequence: 1, billedAmount: '100' }],
+          },
+          { id: 'platform', roles: ['SUPERADMIN'] },
+        ),
       ),
     ).rejects.toThrow('Reclamo duplicado');
     expect(f.repo.createClaim).not.toHaveBeenCalled();

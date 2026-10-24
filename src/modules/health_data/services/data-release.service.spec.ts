@@ -13,7 +13,13 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ClinicalAccessGrants } from '../../authz/entities';
+import { Consents } from '../../consent/entities';
+import { CONS } from '../../consent/consent.concepts';
+import { CohortDefinitions } from '../../lakehouse/entities';
+import { HealthDataErrorReason } from '../health_data.error-reasons';
 
 const actor = { id: 'user-1', roles: ['PRIVACY_OFFICER'] };
 const PROFILE = '11111111-1111-1111-1111-111111111111';
@@ -25,13 +31,93 @@ const TENANT = '66666666-6666-6666-6666-666666666666';
 const TYPE = '77777777-7777-7777-7777-777777777777';
 const CLUSTER = '88888888-8888-8888-8888-888888888888';
 const MANIFEST_FILE = '99999999-9999-9999-9999-999999999999';
+const OTHER_TENANT = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const COHORT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+const CONSENT = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant activo del contexto.
+ * @returns Proxy que fija el tenant en cada llamada.
+ */
+function scoped<S extends object>(service: S, tenantId: string): S {
+  return new Proxy(service, {
+    get(target, key) {
+      const value = (target as any)[key];
+      return typeof value === 'function'
+        ? (...args: unknown[]) =>
+            runWithTenant(tenantId, () => value.apply(target, args))
+        : value;
+    },
+  });
+}
+
+/**
+ * Afirma que la promesa falla como "no existe": 404, el `reason` dado y sin `details`.
+ *
+ * @param promise - Operación bajo prueba.
+ * @param reason - Sub-código esperado.
+ */
+async function expectNotAvailable(
+  promise: Promise<unknown>,
+  reason: HealthDataErrorReason,
+): Promise<void> {
+  const error: any = await promise.then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.code).toBe('NOT_FOUND');
+  expect(error.reason).toBe(reason);
+  expect(error.details).toBeUndefined();
+}
+
+/**
+ * Acceso clínico vigente del actor sobre el paciente en el tenant activo.
+ *
+ * @param overrides - Campos a sobreescribir.
+ * @returns Fila de `authz.clinical_access_grants`.
+ */
+function grant(overrides: Record<string, unknown> = {}): any {
+  return {
+    patientProfileId: PATIENT,
+    grantedUserId: 'user-1',
+    tenantId: TENANT,
+    stateConceptId: CONCEPTS.STATE_ACTIVE,
+    validFrom: new Date('2020-01-01'),
+    validTo: new Date('2099-01-01'),
+    ...overrides,
+  };
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn() };
+  // Filas que ven las consultas directas de la política (accesos, consent, cohorte).
+  const db: { grants: any[]; consent: any; cohort: any } = {
+    grants: [grant()],
+    consent: null,
+    cohort: null,
+  };
+  const tx = {
+    flush: mockFn(),
+    find: mockFn(async (entity: unknown) =>
+      entity === ClinicalAccessGrants ? db.grants : [],
+    ),
+    findOne: mockFn(async (entity: unknown) =>
+      entity === Consents
+        ? db.consent
+        : entity === CohortDefinitions
+          ? db.cohort
+          : null,
+    ),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const releaseRepo = {
     createDeidProfile: mockFn(),
@@ -51,9 +137,11 @@ function build() {
   const resourcesRepo = {
     findResourcesByPatient: mockFn(() => Promise.resolve([])),
     findVersionsByIds: mockFn(() => Promise.resolve([])),
+    findResourcesByIds: mockFn(() => Promise.resolve([])),
+    existsResourceByPatient: mockFn(() => Promise.resolve(false)),
   };
   const identityRepo = {
-    findLiveMembershipByProfile: mockFn(() => Promise.resolve(null)),
+    findLiveMembershipInTenant: mockFn(() => Promise.resolve(null)),
     findLiveMembers: mockFn(() => Promise.resolve([])),
   };
   const provenanceRepo = {
@@ -62,7 +150,7 @@ function build() {
     createLineageEdge: mockFn(() => ({ id: 'edge-1' })),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DataReleaseService(
+  const raw = new DataReleaseService(
     em as any,
     releaseRepo,
     resourcesRepo as any,
@@ -71,7 +159,9 @@ function build() {
     logger as any,
   );
   return {
-    service,
+    service: scoped(raw, TENANT),
+    rawService: raw,
+    db,
     tx,
     releaseRepo,
     resourcesRepo,
@@ -130,6 +220,14 @@ describe('DataReleaseService', () => {
     it('draws one lineage edge per source version', async () => {
       const d = build();
       d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+
+      d.resourcesRepo.findVersionsByIds.mockResolvedValue([
+        { id: VERSION, canonicalHealthResourceId: RESOURCE },
+        { id: 'version-2', canonicalHealthResourceId: RESOURCE },
+      ]);
+      d.resourcesRepo.findResourcesByIds.mockResolvedValue([
+        { id: RESOURCE, custodianTenantId: TENANT },
+      ]);
 
       const res = await d.service.recordDeidRun(
         { ...dto, sourceVersionIds: [VERSION, 'version-2'] },
@@ -229,12 +327,14 @@ describe('DataReleaseService', () => {
 
     it('accepts a cohort instead of a patient', async () => {
       const d = build();
+      d.db.cohort = { id: COHORT, deidentificationProfileId: PROFILE };
+      d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
 
       const res = await d.service.exportBundle(
         {
           ...dto,
           patientProfileId: undefined,
-          cohortDefinitionId: OTHER_PATIENT,
+          cohortDefinitionId: COHORT,
         },
         actor,
       );
@@ -257,6 +357,7 @@ describe('DataReleaseService', () => {
       const d = build();
       d.releaseRepo.findDeidRunById.mockResolvedValue({
         id: 'deid-run-1',
+        tenantId: TENANT,
         statusConceptId: CONCEPTS.DEID_COMPLETED,
       });
 
@@ -272,6 +373,7 @@ describe('DataReleaseService', () => {
       const d = build();
       d.releaseRepo.findDeidRunById.mockResolvedValue({
         id: 'deid-run-1',
+        tenantId: TENANT,
         statusConceptId: CONCEPTS.DEID_FAILED,
       });
 
@@ -343,7 +445,7 @@ describe('DataReleaseService', () => {
 
     it('expands the identity cluster to every profile of the same person', async () => {
       const d = build();
-      d.identityRepo.findLiveMembershipByProfile.mockResolvedValue({
+      d.identityRepo.findLiveMembershipInTenant.mockResolvedValue({
         patientIdentityClusterId: CLUSTER,
       });
       d.identityRepo.findLiveMembers.mockResolvedValue([
@@ -408,6 +510,288 @@ describe('DataReleaseService', () => {
 
       expect(res.total).toBe(0);
       expect(res.entries).toEqual([]);
+    });
+  });
+
+  describe('alcance por tenant (HD-01 / HD-03)', () => {
+    const everythingActor = { id: 'user-1', roles: ['INTEROP_CONSUMER'] };
+
+    it('HD-01: un consumidor sin acceso clínico al paciente recibe 404 uniforme y no se consulta nada', async () => {
+      const d = build();
+      d.db.grants = [];
+      await expectNotAvailable(
+        d.service.serveEverything(PATIENT, undefined, everythingActor),
+        HealthDataErrorReason.PATIENT_NOT_AVAILABLE,
+      );
+      expect(d.resourcesRepo.findResourcesByPatient).not.toHaveBeenCalled();
+    });
+
+    it('HD-01: el acceso clínico de otro tenant o vencido no autoriza', async () => {
+      const d = build();
+      d.db.grants = [grant({ validTo: new Date('2020-06-01') })];
+      await expectNotAvailable(
+        d.service.serveEverything(PATIENT, undefined, everythingActor),
+        HealthDataErrorReason.PATIENT_NOT_AVAILABLE,
+      );
+    });
+
+    it('HD-01: un custodio de la query distinto del tenant activo se trata como paciente no disponible', async () => {
+      const d = build();
+      await expectNotAvailable(
+        d.service.serveEverything(PATIENT, OTHER_TENANT, everythingActor),
+        HealthDataErrorReason.PATIENT_NOT_AVAILABLE,
+      );
+      expect(d.resourcesRepo.findResourcesByPatient).not.toHaveBeenCalled();
+    });
+
+    it('HD-01: sin custodio en la query se acota igualmente al tenant del contexto', async () => {
+      const d = build();
+      await d.service.serveEverything(PATIENT, undefined, everythingActor);
+      expect(d.resourcesRepo.findResourcesByPatient).toHaveBeenCalledWith(
+        d.tx,
+        TENANT,
+        [PATIENT],
+        CONCEPTS.RESOURCE_ACTIVE,
+      );
+    });
+
+    it('HD-01: el clúster se resuelve dentro del tenant activo', async () => {
+      const d = build();
+      await d.service.serveEverything(PATIENT, undefined, everythingActor);
+      expect(d.identityRepo.findLiveMembershipInTenant).toHaveBeenCalledWith(
+        d.tx,
+        PATIENT,
+        TENANT,
+      );
+    });
+
+    it('HD-01: HEALTH_DATA_ADMIN del tenant lee a un paciente con huella en el tenant', async () => {
+      const d = build();
+      d.db.grants = [];
+      d.resourcesRepo.findResourcesByPatient.mockResolvedValue([
+        { id: RESOURCE, resourceTypeConceptId: TYPE },
+      ]);
+      const res = await d.service.serveEverything(PATIENT, undefined, {
+        id: 'admin-1',
+        roles: ['HEALTH_DATA_ADMIN'],
+      });
+      expect(res.total).toBe(0);
+      expect(d.resourcesRepo.findResourcesByPatient).toHaveBeenCalled();
+    });
+
+    it('HD-01: HEALTH_DATA_ADMIN no obtiene un paciente sin clúster ni recursos en su tenant (404)', async () => {
+      const d = build();
+      d.db.grants = [];
+      await expectNotAvailable(
+        d.service.serveEverything(PATIENT, undefined, {
+          id: 'admin-1',
+          roles: ['HEALTH_DATA_ADMIN'],
+        }),
+        HealthDataErrorReason.PATIENT_NOT_AVAILABLE,
+      );
+    });
+
+    it('HD-01: un HEALTH_DATA_ADMIN con el rol acotado a otro tenant no lee', async () => {
+      const d = build();
+      d.db.grants = [];
+      await expectNotAvailable(
+        d.service.serveEverything(PATIENT, undefined, {
+          id: 'admin-1',
+          roles: ['HEALTH_DATA_ADMIN'],
+          scopedRoles: { [OTHER_TENANT]: ['HEALTH_DATA_ADMIN'] },
+        }),
+        HealthDataErrorReason.PATIENT_NOT_AVAILABLE,
+      );
+    });
+
+    it('HD-01: sin tenant en el contexto se rechaza (412) antes de consultar', async () => {
+      const d = build();
+      await expect(
+        d.rawService.serveEverything(PATIENT, undefined, everythingActor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.tx.find).not.toHaveBeenCalled();
+    });
+
+    it('HD-01: el registro de acceso lleva decisión y fundamento, sin contenido clínico', async () => {
+      const d = build();
+      await d.service.serveEverything(PATIENT, undefined, everythingActor);
+      expect(d.logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          decision: 'CLINICAL_ACCESS_GRANT',
+          tenantId: TENANT,
+          patientProfileId: PATIENT,
+        }),
+        expect.any(String),
+      );
+    });
+
+    it('HD-03: el perfil de de-identificación de otro tenant responde como inexistente y no crea la corrida', async () => {
+      const d = build();
+      d.releaseRepo.findDeidProfileById.mockResolvedValue(
+        activeProfile({ tenantId: OTHER_TENANT }),
+      );
+      await expectNotAvailable(
+        d.service.recordDeidRun(
+          {
+            healthDeidentificationProfileId: PROFILE,
+            purposeConceptId: TYPE,
+            startedAt: '2026-07-20T10:00:00.000Z',
+            outcome: 'COMPLETED',
+            outputManifestFileId: MANIFEST_FILE,
+          } as any,
+          actor,
+        ),
+        HealthDataErrorReason.DEID_PROFILE_NOT_AVAILABLE,
+      );
+      expect(d.releaseRepo.createDeidRun).not.toHaveBeenCalled();
+      expect(d.provenanceRepo.createProvenanceRecord).not.toHaveBeenCalled();
+    });
+
+    it('HD-03: una versión de origen de otro custodio no entra al linaje', async () => {
+      const d = build();
+      d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+      d.resourcesRepo.findVersionsByIds.mockResolvedValue([
+        { id: VERSION, canonicalHealthResourceId: RESOURCE },
+      ]);
+      d.resourcesRepo.findResourcesByIds.mockResolvedValue([
+        { id: RESOURCE, custodianTenantId: OTHER_TENANT },
+      ]);
+      await expectNotAvailable(
+        d.service.recordDeidRun(
+          {
+            healthDeidentificationProfileId: PROFILE,
+            purposeConceptId: TYPE,
+            startedAt: '2026-07-20T10:00:00.000Z',
+            outcome: 'COMPLETED',
+            outputManifestFileId: MANIFEST_FILE,
+            sourceVersionIds: [VERSION],
+          } as any,
+          actor,
+        ),
+        HealthDataErrorReason.RESOURCE_VERSION_NOT_AVAILABLE,
+      );
+      expect(d.releaseRepo.createDeidRun).not.toHaveBeenCalled();
+      expect(d.provenanceRepo.createLineageEdge).not.toHaveBeenCalled();
+    });
+
+    const exportDto: any = {
+      exportTypeConceptId: TYPE,
+      purposeOfUseConceptId: TYPE,
+      contentHash: 'a'.repeat(64),
+      recordCount: '412',
+      patientProfileId: PATIENT,
+    };
+
+    it('HD-03: exportar un paciente sin acceso ni huella en el tenant responde como inexistente y no crea salida', async () => {
+      const d = build();
+      d.db.grants = [];
+      await expectNotAvailable(
+        d.service.exportBundle(exportDto, actor),
+        HealthDataErrorReason.PATIENT_NOT_AVAILABLE,
+      );
+      expect(d.releaseRepo.createExportJob).not.toHaveBeenCalled();
+      expect(d.releaseRepo.createExportManifest).not.toHaveBeenCalled();
+      expect(d.provenanceRepo.createProvenanceRecord).not.toHaveBeenCalled();
+    });
+
+    it('HD-03: el trabajo de exportación y la procedencia llevan el tenant del contexto', async () => {
+      const d = build();
+      await d.service.exportBundle(exportDto, actor);
+      expect(d.releaseRepo.createExportJob).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT }),
+      );
+      expect(d.provenanceRepo.createProvenanceRecord).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ custodianTenantId: TENANT }),
+      );
+    });
+
+    it('HD-03: una corrida de de-identificación de otro tenant responde como inexistente', async () => {
+      const d = build();
+      d.releaseRepo.findDeidRunById.mockResolvedValue({
+        id: 'deid-run-1',
+        tenantId: OTHER_TENANT,
+        statusConceptId: CONCEPTS.DEID_COMPLETED,
+      });
+      await expectNotAvailable(
+        d.service.exportBundle(
+          { ...exportDto, deidentificationRunId: 'deid-run-1' },
+          actor,
+        ),
+        HealthDataErrorReason.DEID_RUN_NOT_AVAILABLE,
+      );
+      expect(d.releaseRepo.createExportJob).not.toHaveBeenCalled();
+    });
+
+    it('HD-03: una cohorte cuyo perfil es de otro tenant responde como inexistente', async () => {
+      const d = build();
+      d.db.cohort = { id: COHORT, deidentificationProfileId: PROFILE };
+      d.releaseRepo.findDeidProfileById.mockResolvedValue(
+        activeProfile({ tenantId: OTHER_TENANT }),
+      );
+      await expectNotAvailable(
+        d.service.exportBundle(
+          {
+            ...exportDto,
+            patientProfileId: undefined,
+            cohortDefinitionId: COHORT,
+          },
+          actor,
+        ),
+        HealthDataErrorReason.COHORT_NOT_AVAILABLE,
+      );
+      expect(d.releaseRepo.createExportJob).not.toHaveBeenCalled();
+    });
+
+    it('HD-03: una cohorte inexistente responde igual que una ajena', async () => {
+      const d = build();
+      d.db.cohort = null;
+      await expectNotAvailable(
+        d.service.exportBundle(
+          {
+            ...exportDto,
+            patientProfileId: undefined,
+            cohortDefinitionId: COHORT,
+          },
+          actor,
+        ),
+        HealthDataErrorReason.COHORT_NOT_AVAILABLE,
+      );
+    });
+
+    it('HD-03: el consentimiento citado debe ser vigente, del tenant y del paciente exportado', async () => {
+      const dtoWithConsent = { ...exportDto, consentDirectiveId: CONSENT };
+      const ok = build();
+      ok.db.consent = {
+        id: CONSENT,
+        tenantId: TENANT,
+        patientProfileId: PATIENT,
+        statusConceptId: CONS.CONSENT_ACTIVE,
+      };
+      await expect(
+        ok.service.exportBundle(dtoWithConsent, actor),
+      ).resolves.toMatchObject({ id: 'export-job-1' });
+
+      for (const bad of [
+        { tenantId: OTHER_TENANT },
+        { patientProfileId: OTHER_PATIENT },
+        { statusConceptId: CONS.CONSENT_WITHDRAWN },
+      ]) {
+        const d = build();
+        d.db.consent = {
+          id: CONSENT,
+          tenantId: TENANT,
+          patientProfileId: PATIENT,
+          statusConceptId: CONS.CONSENT_ACTIVE,
+          ...bad,
+        };
+        await expectNotAvailable(
+          d.service.exportBundle(dtoWithConsent, actor),
+          HealthDataErrorReason.CONSENT_NOT_AVAILABLE,
+        );
+        expect(d.releaseRepo.createExportJob).not.toHaveBeenCalled();
+      }
     });
   });
 });

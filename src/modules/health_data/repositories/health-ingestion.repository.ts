@@ -113,6 +113,35 @@ export class HealthIngestionRepository {
   }
 
   /**
+   * Conexión de origen por id, sin bloqueo: la usan las comprobaciones de
+   * coherencia (lote ↔ conexión ↔ sistema).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Id de la conexión.
+   * @returns La conexión o `null`.
+   */
+  findConnectionById(
+    em: EntityManager,
+    id: string,
+  ): Promise<HealthSourceConnections | null> {
+    return em.findOne(HealthSourceConnections, { id });
+  }
+
+  /**
+   * Sistema de origen por id: porta el tenant del que cuelgan sus conexiones.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Id del sistema de origen.
+   * @returns El sistema o `null`.
+   */
+  findSourceSystemById(
+    em: EntityManager,
+    id: string,
+  ): Promise<HealthSourceSystems | null> {
+    return em.findOne(HealthSourceSystems, { id });
+  }
+
+  /**
    * Sistema de origen por código dentro del tenant.
    *
    * @param em - Contexto de persistencia o transacción activa.

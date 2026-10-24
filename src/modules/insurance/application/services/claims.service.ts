@@ -85,7 +85,7 @@ export class ClaimsService {
         dto.inventoryReservationId || dto.serviceRequestId,
       );
       if (linked) await this.linkedAccess.assertAdministrator(tx, actor);
-      else assertLegacyClaimRoles(actor);
+      else await this.assertProviderClaimScope(tx, actor, dto);
       if (dto.inventoryReservationId && dto.serviceRequestId)
         throw new PreconditionFailedException(
           'Un reclamo sólo puede representar un pedido',
@@ -307,6 +307,71 @@ export class ClaimsService {
     };
   }
 
+  /**
+   * Política del alta legacy (sin pedido vinculado): `assertProviderClaimScope`.
+   *
+   * Además del rol, exige tenant activo y que la práctica facturadora que declara
+   * el cuerpo sea una práctica activa de ese tenant. Una práctica ajena y una
+   * inexistente responden igual (`claimAccessDenied`), como en el camino
+   * vinculado. El cuerpo ya no decide por sí solo quién factura.
+   *
+   * La cobertura y el plan se contrastan después contra la aseguradora indicada
+   * (`findPlanForCarrier`) y las líneas contra el plan (`ClaimCoveragePolicy`).
+   *
+   * @param tx - Transacción activa.
+   * @param actor - Quien presenta el reclamo.
+   * @param dto - Reclamo solicitado.
+   * @throws ForbiddenException uniforme si el rol o la práctica no corresponden.
+   */
+  private async assertProviderClaimScope(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    dto: Pick<CreateClaimDto, 'billingProviderEntityId'>,
+  ): Promise<void> {
+    assertLegacyClaimRoles(actor);
+    const tenantId = requireTenantId();
+    const practiceIds =
+      await this.practiceLookup.findActivePracticeIdsForTenant(tenantId);
+    const authorized = claimBelongsToPractices(
+      {
+        billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
+        billingProviderEntityId: dto.billingProviderEntityId,
+      },
+      practiceIds,
+    );
+    if (!authorized) throw claimAccessDenied();
+  }
+
+  /**
+   * Quién puede mutar un reclamo legacy ya presentado: el rol no basta. Tiene que
+   * actuar en nombre del prestador que lo presentó (una práctica activa del
+   * tenant) o de la aseguradora que lo recibe (la del tenant).
+   *
+   * @param tx - Transacción activa.
+   * @param actor - Quien muta el reclamo.
+   * @param claim - Reclamo cargado por UUID.
+   * @throws ForbiddenException si el rol o el tenant no son parte del reclamo.
+   */
+  private async assertLegacyClaimParty(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    claim: Pick<
+      InsuranceClaims,
+      | 'billingProviderTypeConceptId'
+      | 'billingProviderEntityId'
+      | 'insuranceCarrierId'
+    >,
+  ): Promise<void> {
+    assertLegacyClaimRoles(actor);
+    const tenantId = requireTenantId();
+    const practiceIds =
+      await this.practiceLookup.findActivePracticeIdsForTenant(tenantId);
+    if (claimBelongsToPractices(claim, practiceIds)) return;
+    const carrier = await this.catalog.findCarrierByTenantId(tx, tenantId);
+    if (carrier && carrier.id === claim.insuranceCarrierId) return;
+    throw claimAccessDenied();
+  }
+
   private canonicalLines(
     dto: CreateClaimDto,
     snapshot: LinkedOrderSnapshot,
@@ -384,7 +449,9 @@ export class ClaimsService {
     const initial = await this.repo.findClaim(tx, claimId);
     if (!initial) throw claimAccessDenied();
     if (!initial.inventoryReservationId && !initial.serviceRequestId) {
-      await authorizeClaimResource(() => assertLegacyClaimRoles(actor));
+      await authorizeClaimResource(() =>
+        this.assertLegacyClaimParty(tx, actor, initial),
+      );
       return { claim: initial, snapshot: null, lines: null };
     }
     await authorizeClaimResource(() =>
