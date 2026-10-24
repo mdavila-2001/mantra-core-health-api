@@ -31,6 +31,8 @@ import {
   fromGudidXml,
   fromLivd,
   fromMaudeDevices,
+  fromMaudeReports,
+  maudeComboKey,
   fromRecall,
   fromRlFlat,
   fromFdadataPma,
@@ -396,6 +398,7 @@ if (livd) {
 }
 
 // --- 2e. MAUDE (openFDA device/event, espejo Tonystathoulis) -------------------------
+const maudeCombos = new Map();
 const maudeCsv = mirrorFile('tonystathoulis-maude', 'medical device safety intelligence/data/processed/maude_devices.csv');
 if (maudeCsv) {
   const prov = mirrorProv('tonystathoulis-maude', 'medical device safety intelligence/data/processed/maude_devices.csv', 'openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13');
@@ -404,7 +407,28 @@ if (maudeCsv) {
   const received = new Map(rep ? parseCsv(readFileSync(rep, 'utf8').replace(/^\uFEFF/, '')).map((r) => [String(r.mdr_report_key), r.date_received || null]) : []);
   const out = fromMaudeDevices(rows, table, prov, received);
   out.forEach(add);
+  for (const r of out) maudeCombos.set(maudeComboKey({ device_report_product_code: r.deviceTypeCode, manufacturer_d_name: r.manufacturerName, brand_name: r.brandName, model_number: r.model }), r);
   inputs.push({ source: 'mirror tonystathoulis-maude', version: prov.sourceVersion, records: rows.length, inScopeCombinations: out.length });
+}
+// Extracto MAUDE de dispositivos con IA (2020–2026): las combinaciones ya vistas se suman a la existente.
+const aiMaude = mirrorFile('hayden-farquhar-maude-ai', '.converted/linked_reports.ndjson');
+if (aiMaude) {
+  const prov = mirrorProv('hayden-farquhar-maude-ai', '.converted/linked_reports.ndjson', 'openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04');
+  const rows = readFileSync(aiMaude, 'utf8').split('\n').filter(Boolean).map(JSON.parse);
+  let added = 0;
+  let merged = 0;
+  for (const { key, row } of fromMaudeReports(rows, table, prov)) {
+    const prev = maudeCombos.get(key);
+    if (prev) {
+      prev.extra = { ...prev.extra, alsoIn: [...(prev.extra.alsoIn ?? []), { ...prov.via, sourceRecordId: row.sourceRecordId, reportCount: row.extra.reportCount }] };
+      merged++;
+    } else {
+      add(row);
+      maudeCombos.set(key, row);
+      added++;
+    }
+  }
+  inputs.push({ source: 'mirror hayden-farquhar-maude-ai', version: prov.sourceVersion, records: rows.length, newCombinations: added, mergedIntoExisting: merged });
 }
 
 // --- 2f. Retiros del mercado (openFDA enforcement/recall) -----------------------------

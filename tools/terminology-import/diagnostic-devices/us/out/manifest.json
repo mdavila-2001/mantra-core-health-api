@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T04:12:35.287Z",
+ "generatedAt": "2026-10-24T04:53:10.803Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -47,10 +47,10 @@
   {
    "path": "fda-maude-0001.ndjson.gz",
    "source": "fda-maude",
-   "sourceVersion": "openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
-   "rows": 1336,
-   "bytes": 130955,
-   "sha256": "40e3904d43a1893be96ee8459d347f59a679f7091cc433dbb29211c4e89b1584"
+   "sourceVersion": "openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04 corte 2026-05-28 vía espejo https://github.com/hayden-farquhar/MAUDE-AI-Devices@355566d7211b + openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
+   "rows": 2727,
+   "bytes": 218233,
+   "sha256": "c5fbf75445f317f4adabd4d7fdb1f7b41958bc52c003af3849af2c908ee63c14"
   },
   {
    "path": "fda-recall-0001.ndjson.gz",
@@ -146,6 +146,13 @@
    "version": "openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
    "records": 62533,
    "inScopeCombinations": 1336
+  },
+  {
+   "source": "mirror hayden-farquhar-maude-ai",
+   "version": "openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04 corte 2026-05-28 vía espejo https://github.com/hayden-farquhar/MAUDE-AI-Devices@355566d7211b",
+   "records": 21923,
+   "newCombinations": 1391,
+   "mergedIntoExisting": 0
   },
   {
    "source": "mirror hxlvvm-recalltrace",
@@ -464,6 +471,40 @@
     "url": "https://www.accessdata.fda.gov/premarket/ftparea/foiclass.zip",
     "exportDate": null,
     "note": "foiclass.txt crudo (delimitado por `|` aunque se llame .csv); fecha de corte = commit del espejo"
+   }
+  },
+  {
+   "id": "hayden-farquhar-maude-ai",
+   "repo": "https://github.com/hayden-farquhar/MAUDE-AI-Devices",
+   "commit": "355566d7211b08d0fba048c38c898c470e4a9a32",
+   "commitDate": "2026-05-28T08:19:14+10:00",
+   "files": [
+    {
+     "path": "data/processed/linked_reports.parquet",
+     "bytes": 9955222,
+     "sha256": "3579600b72fd8683a649dac0d0011266b941df807c8f2354a5abbdb182fe4444"
+    },
+    {
+     "path": "LICENSE",
+     "bytes": 1407,
+     "sha256": "3ac17956e156f6e0762860d0c1949675f3ec96f2ef285755079d4955035e1f7c"
+    },
+    {
+     "path": "README.md",
+     "bytes": 8642,
+     "sha256": "92df69c7a22f4ddcf0338cd1654e3b46f40c0970358e732bb6d08ac16fac3d0b"
+    },
+    {
+     "path": ".converted/linked_reports.ndjson",
+     "derivedFrom": "data/processed/linked_reports.parquet",
+     "bytes": 7962418,
+     "sha256": "a82476bc1d84a85e2f30466715a24e2f67b4e95ee4d692e22a05c048735fb431"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/event.json",
+    "exportDate": null,
+    "note": "informes recibidos 2020-01-01 a 2026-04-30; las columnas matched_* son un cruce del autor y NO se usan"
    }
   },
   {

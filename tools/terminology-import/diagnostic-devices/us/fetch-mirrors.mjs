@@ -58,7 +58,7 @@ for (const m of MIRRORS) {
     const out = join(dir, '.converted', c.out);
     ensureDir(join(dir, '.converted'));
     const py = process.env.DX_PYTHON ?? 'python3';
-    const [script, src, obj] = c.rda ? ['rda_to_ndjson.py', c.rda, c.object] : ['xlsx_to_ndjson.py', c.xlsx, c.sheet];
+    const [script, src, obj] = c.rda ? ['rda_to_ndjson.py', c.rda, c.object] : c.parquet ? ['parquet_to_ndjson.py', c.parquet, c.columns ?? '*'] : ['xlsx_to_ndjson.py', c.xlsx, c.sheet];
     console.log(execFileSync(py, ['-I', fileURLToPath(new URL(`./lib/${script}`, import.meta.url)), join(dir, src), obj, out], { encoding: 'utf8' }).trim());
     files.push({ path: `.converted/${c.out}`, derivedFrom: src, bytes: statSync(out).size, sha256: await sha256File(out) });
   }

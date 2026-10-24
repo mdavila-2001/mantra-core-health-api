@@ -4,6 +4,7 @@
 // en `null`. El alcance diagnóstico lo decide `scope.mjs` por product code.
 // =============================================================================
 
+import { createHash } from 'node:crypto';
 import { clean, fdaRiskClass, isoDate, makeRecord, verbatim } from './format.mjs';
 import { classifyScope, panelCode } from './scope.mjs';
 import { OFFICIAL_RECORD_URL, authorizationKind } from './sources.mjs';
@@ -819,6 +820,58 @@ export function fromLivd(rows, prov, discarded = []) {
  * marca, modelo) exactos: una fila por combinación. El id de origen es el
  * informe más antiguo (menor MDR_REPORT_KEY) de la combinación.
  */
+/** Clave de combinación MAUDE (igualdad exacta, no parecido). */
+export function maudeComboKey(r) {
+  return [clean(r.device_report_product_code)?.toUpperCase(), verbatim(r.manufacturer_d_name), verbatim(r.brand_name) ?? '', verbatim(r.model_number) ?? ''].join('\u0001');
+}
+
+/**
+ * Variante para extractos que sólo traen `report_number` (sin MDR_REPORT_KEY):
+ * una fila por combinación; id = menor número de informe; URL = API openFDA.
+ */
+export function fromMaudeReports(rows, table, prov) {
+  const groups = new Map();
+  for (const r of rows) {
+    const pc = clean(r.device_report_product_code)?.toUpperCase();
+    if (!pc || !verbatim(r.manufacturer_d_name) || !table.scope(pc).include) continue;
+    if (!verbatim(r.brand_name) && !verbatim(r.model_number)) continue;
+    const key = maudeComboKey(r);
+    const g = groups.get(key) ?? { reports: [], first: r };
+    g.reports.push(String(r.report_number));
+    if (String(r.report_number) < String(g.first.report_number)) g.first = r;
+    groups.set(key, g);
+  }
+  return [...groups.entries()].map(([key, { reports, first: r }]) => {
+    const pc = clean(r.device_report_product_code).toUpperCase();
+    const keys = [...new Set(reports)].sort();
+    return {
+      key,
+      row: makeRecord(
+        {
+          source: 'fda-maude',
+          // Un informe puede traer varios dispositivos: el id lleva un sufijo estable de la combinación.
+          sourceRecordId: `${r.report_number}#${createHash('sha1').update(key).digest('hex').slice(0, 8)}`,
+          sourceUrl: OFFICIAL_RECORD_URL.MAUDE_REPORT(r.report_number),
+          sourceVersion: prov.sourceVersion,
+          retrievedAt: prov.retrievedAt,
+          ...typeFields(table, pc),
+          manufacturerName: verbatim(r.manufacturer_d_name),
+          manufacturerCountry: null,
+          manufacturerRegistryId: null,
+          brandName: verbatim(r.brand_name),
+          model: verbatim(r.model_number),
+          udiDi: null,
+          riskClass: fdaRiskClass(table.get(pc)?.deviceClass),
+          authorizationId: null,
+          authorizationDate: null,
+          status: null,
+        },
+        { recordLevel: 'adverse_event_device', ...scopeExtra(table, pc), genericName: verbatim(r.generic_name), catalogNumber: verbatim(r.catalog_number), reportCount: keys.length, reportNumbersSample: keys.slice(0, 20), firstReportReceived: isoDate(r.date_received), via: prov.via },
+      ),
+    };
+  });
+}
+
 export function fromMaudeDevices(rows, table, prov, receivedByKey = new Map()) {
   const groups = new Map();
   for (const r of rows) {
