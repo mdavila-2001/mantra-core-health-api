@@ -1,0 +1,75 @@
+# Plan — Catálogo de análisis: pasadas con la red abierta (LOINC, GTR)
+
+- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` · Predecesor: PR #681 (mergeado),
+  `tools/terminology-import/lab-tests/`, `docs/seed-research/lab-tests.md`
+- Resultado observable: el catálogo `lab-catalog-*` incluye LOINC (clase como categoría,
+  CLASSTYPE, estado, pedible/observación, nombres en castellano oficiales, miembros de paneles,
+  unidades) y los tests del NCBI Genetic Testing Registry, cargables con el mismo
+  `load-lab-tests.mjs` y versionados en `data/`.
+- Kill-test: `load-lab-tests.mjs` (dry-run) no muestra capa `loinc` con más de 50 000 conceptos,
+  o una segunda carga contra Postgres inserta más de 0 filas de catálogo.
+
+## Alcance
+
+- IN: `tools/terminology-import/lab-tests/` (nuevos `fetch-loinc-txfhir.mjs`, `fetch-loinc-ctss.mjs`,
+  `fetch-gtr.mjs`, `lib/gtr.mjs`, adaptadores en `build-lab-tests.mjs`, `data/`, `SOURCES.md`, `README.md`),
+  `tools/terminology-import/test/lab-tests.test.mjs` + fixtures, `docs/seed-research/lab-tests.md`, este directorio.
+- OUT: DDL; `src/` (binding `service-request-code`); importadores ajenos (`import-loinc.mjs` queda como está).
+- Ambigüedades registradas:
+  1. LOINC sale de **tx.fhir.org** (servidor de terminología de HL7, LOINC 2.82) y de **NLM Clinical
+     Tables**, no del zip oficial (loinc.org sigue en 403 y exige cuenta). Supuesto: válido con la
+     licencia LOINC y su aviso; se declara la vía en `source_name`. Confirmar con el propietario.
+  2. tx.fhir.org es un servidor comunitario: se consulta a ≤ 2 pedidos/s, con caché en disco y
+     particionando por filtros oficiales (`CLASS`, `COMPONENT`), sin `$lookup` masivo.
+  3. GTR registra **ofertas de laboratorios** (un test por laboratorio), no análisis abstractos.
+     Supuesto: se cargan los vigentes como su propio code system, dominio genética. Confirmar con el propietario.
+
+## H5 — LOINC con la red abierta
+**CA:** Dado tx.fhir.org y NLM accesibles, cuando corre el build, entonces la capa `loinc` tiene
+cada término con clase, CLASSTYPE, estado, ORDER_OBS, nombres es-MX / es-AR cuando existen, y los
+paneles tienen sus miembros.
+**DoD:** `build-lab-tests.mjs --loinc-txfhir` → capa `lab-tests-loinc` con su conteo; tests verdes.
+**Estado:** TODO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H5.S1.M1 | Descubrir todas las clases LOINC (regex por inicial + exclusión de las halladas) | Ninguna inicial devuelve códigos fuera de las clases halladas | `fetch-loinc-txfhir.mjs` → «clases: N, residuo 0» | TODO |
+| H5.S1.M2 | Enumerar los términos de cada clase con designaciones | Clase > 3 000 se parte por `COMPONENT` sin perder códigos | log por clase: «códigos = suma de particiones» | TODO |
+| H5.S1.M3 | Estado y ORDER_OBS por clase | Cada término lleva STATUS y ORDER_OBS o queda en el valor por omisión documentado | conteos por valor en el meta | TODO |
+| H5.S2.M1 | NLM: COMPONENT, PROPERTY, METHOD_TYP, unidades (con rango si la fuente lo trae) | Prefijos con total ≤ 7 500 | `fetch-loinc-ctss.mjs` → total = suma de hojas | TODO |
+| H5.S2.M2 | NLM: miembros de paneles (`loinc_form_definitions`) | Cada panel incluido tiene su definición o queda registrado sin ella | conteo en el meta | TODO |
+| H5.S3.M1 | Adaptador tx.fhir.org + NLM → filas de `loincRecords` | Test con recorte real | `node --test …` → ok | TODO |
+| H5.S3.M2 | Carga en Postgres desechable, 2 corridas | 2.ª = 0 | `evidencia/` | TODO |
+
+## H6 — NCBI Genetic Testing Registry
+**CA:** Dado `test_version.gz` del FTP de GTR, cuando corre el build, entonces cada test vigente
+es un concepto con laboratorio, país, métodos, categorías de método, genes y condiciones.
+**DoD:** capa `lab-tests-gtr` con su conteo; test con filas reales; carga idempotente.
+**Estado:** TODO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H6.S1.M1 | Descargar GTR con SHA-256 | Archivo y hash en el manifiesto | `fetch-gtr.mjs` | TODO |
+| H6.S1.M2 | Parser por cabecera; sólo la versión vigente de cada test | Un test aparece una vez | test con filas reales | TODO |
+| H6.S1.M3 | Categoría = categoría mayor de método (archivo oficial `tests_by_method_category.txt`) | Sin categorías inventadas | test | TODO |
+
+## H7 — Entrega por pasada
+**CA:** Dada cada pasada, cuando termina, entonces está commiteada y empujada, y `data/` y el
+registro de pasadas están al día.
+**DoD:** `git push` por pasada; PR contra `dev` (no draft, sin mergear); REPORTE.md.
+**Estado:** TODO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H7.S1.M1 | Push tras H5 | rama remota = local | `git rev-parse HEAD origin/<rama>` | TODO |
+| H7.S1.M2 | Push tras H6 | idem | idem | TODO |
+| H7.S1.M3 | PR y REPORTE | PR abierto, no draft | link | TODO |
+
+## Riesgos y bloqueos previstos
+
+| Riesgo | Impacto | Mitigación |
+|---|---|---|
+| tx.fhir.org limita o cae | LOINC incompleto | Caché en disco y reanudación; el residuo se reporta |
+| Una partición por `COMPONENT` sigue > 3 000 | Códigos sin enumerar | Partición recursiva por segundo carácter; los que queden se reportan |
+| `$lookup` de la clase hecho sobre un término sin clase | Bucle de descubrimiento | Se registra y se excluye |
+| GTR trae datos de laboratorios (no de pacientes) | — | Sin PHI: datos organizacionales públicos |

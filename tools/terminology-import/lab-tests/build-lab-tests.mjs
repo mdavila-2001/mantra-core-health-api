@@ -18,6 +18,7 @@
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
+import { gunzipSync } from 'node:zlib';
 import { basename, join, relative } from 'node:path';
 
 import { BUILD_DIR, ensureDir, nowIso, sha256File, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
@@ -34,6 +35,7 @@ import {
   parseTop2000,
   parseUniversalLabOrders,
 } from './lib/loinc.mjs';
+import { GTR_CODE_SYSTEM, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv, TEST_VERSION_COLUMNS } from './lib/gtr.mjs';
 import { DOMAINS, assertRecord } from './lib/records.mjs';
 import { GAPS, SOURCES } from './lib/sources.mjs';
 import { TARIFF_EXCLUSIONS, TARIFF_RULES, fonasaItems, pamiItems, pcsItems, sigtapItems, tariffRecords, tussItems } from './lib/tariffs.mjs';
@@ -256,6 +258,29 @@ async function buildTariff(key) {
   return { layer: key, records, stats };
 }
 
+// --- Capa NCBI GTR --------------------------------------------------------------
+async function buildGtr() {
+  const dir = join(SRC, SOURCES['gtr-ncbi'].dir);
+  const files = ['test_version.gz', 'test_condition_gene.txt', 'tests_by_method_category.txt'].map((f) => join(dir, f));
+  if (!files.every(existsSync)) return { layer: GTR_CODE_SYSTEM, missing: 'archivos de GTR no descargados (fetch-gtr.mjs)' };
+  const m = manifest['gtr-ncbi'];
+  if (!m) throw new Error('Falta gtr-ncbi en manifest.json: corré fetch-gtr.mjs.');
+  const versions = parseTsv(gunzipSync(readFileSync(files[0])).toString('utf8'), TEST_VERSION_COLUMNS, 'test_version.gz');
+  const { records, stats } = gtrRecords(versions, conditionGeneMap(readFileSync(files[1], 'utf8')), methodCategoryMap(readFileSync(files[2], 'utf8')), {
+    sourceVersion: `FTP de NCBI, test_version.gz sha256 ${m.files['test_version.gz'].sha256.slice(0, 12)} (${m.retrievedAt.slice(0, 10)})`,
+    sourceFile: relative(BUILD_DIR, files[0]),
+    sourceSha256: m.files['test_version.gz'].sha256,
+    retrievedAt: m.retrievedAt,
+  });
+  await writeLayer(GTR_CODE_SYSTEM, records, {
+    source: { ftp: 'https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/' },
+    codeSystems: [{ internalCode: GTR_CODE_SYSTEM, name: SOURCES['gtr-ncbi'].name, canonicalUrl: 'https://www.ncbi.nlm.nih.gov/gtr/', version: m.retrievedAt.slice(0, 10), sourceKey: 'gtr-ncbi', records: records.length }],
+    files: Object.fromEntries(Object.entries(m.files).map(([k, v]) => [k, { file: relative(BUILD_DIR, join(dir, k)), sha256: v.sha256, url: v.url }])),
+    stats,
+  });
+  return { layer: GTR_CODE_SYSTEM, records, stats };
+}
+
 function coverage(results) {
   const byDomain = Object.fromEntries(Object.keys(DOMAINS).map((d) => [d, 0]));
   const byCategory = {};
@@ -301,6 +326,7 @@ function coverage(results) {
 async function main() {
   const results = [await buildLoinc(), await buildTho(), await buildUcum()];
   for (const key of Object.keys(TARIFF_LAYERS)) results.push(await buildTariff(key));
+  results.push(await buildGtr());
   for (const r of results) if (r.missing) console.log(`[build] ${r.layer}: SIN DATOS — ${r.missing}`);
   const cov = coverage(results);
   writeJson(join(OUT, 'lab-tests-coverage.json'), cov, true);

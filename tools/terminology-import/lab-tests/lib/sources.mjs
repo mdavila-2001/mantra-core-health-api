@@ -95,6 +95,16 @@ export const SOURCES = {
     dir: 'medical-codes-mcp-server',
     redistributor: 'https://www.npmjs.com/package/@cyanheads/medical-codes-mcp-server',
   },
+  'gtr-ncbi': {
+    sourceCode: 'NCBI_GTR',
+    name: 'NCBI Genetic Testing Registry (GTR)',
+    owner: 'National Center for Biotechnology Information (NCBI), U.S. National Library of Medicine',
+    officialUrl: 'https://www.ncbi.nlm.nih.gov/gtr/',
+    license:
+      'Dominio público (información del gobierno de EE. UU., NCBI/NLM). NCBI pide atribución: enlace a https://www.ncbi.nlm.nih.gov/gtr/ y cita de Rubinstein WS et al., Nucleic Acids Res. 2013;41:D925.',
+    obtain: 'ftp',
+    dir: 'gtr',
+  },
   'pami-nomenclador': {
     sourceCode: 'PAMI_NOMENCLADOR',
     name: 'PAMI — Nomenclador de prácticas médicas (Argentina)',

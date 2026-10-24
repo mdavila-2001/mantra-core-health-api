@@ -6,6 +6,17 @@
       "lab-tests-fonasa-mle.ndjson.gz"
     ]
   },
+  "lab-tests-gtr-ncbi": {
+    "sha256": "51f72f5cc578c32281d26dabcfef13bdb282b3b5d00e90c08c090939384282d8",
+    "lines": 63919,
+    "files": [
+      "lab-tests-gtr-ncbi.part01.ndjson.gz",
+      "lab-tests-gtr-ncbi.part02.ndjson.gz",
+      "lab-tests-gtr-ncbi.part03.ndjson.gz",
+      "lab-tests-gtr-ncbi.part04.ndjson.gz",
+      "lab-tests-gtr-ncbi.part05.ndjson.gz"
+    ]
+  },
   "lab-tests-hl7-tho": {
     "sha256": "5de7f408dd229c0c4e6d3a3a1fa63f46b410eaf146425a2df85a4f87bbf0f2ad",
     "lines": 479,

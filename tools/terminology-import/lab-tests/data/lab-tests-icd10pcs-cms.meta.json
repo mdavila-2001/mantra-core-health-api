@@ -1,6 +1,6 @@
 {
   "layer": "icd10pcs-cms",
-  "builtAt": "2026-10-24T01:16:09.369Z",
+  "builtAt": "2026-10-24T16:44:13.764Z",
   "records": 4397,
   "source": {
     "name": "@cyanheads/medical-codes-mcp-server",

@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-10-24T01:16:09.510Z",
+  "builtAt": "2026-10-24T16:44:30.660Z",
   "totals": {
     "loinc": 0,
     "hl7-tho": 479,
@@ -8,13 +8,14 @@
     "sigtap-sus": 1108,
     "tuss-ans": 2211,
     "icd10pcs-cms": 4397,
-    "pami-nomenclador": 3034
+    "pami-nomenclador": 3034,
+    "gtr-ncbi": 63919
   },
   "byDomain": {
     "laboratory": 5084,
     "imaging": 4460,
     "pathology": 112,
-    "genetics": 189,
+    "genetics": 64108,
     "functional": 1291
   },
   "byCategory": {
@@ -47,6 +48,41 @@
       "display": "Prefijo 1001",
       "domain": "functional",
       "count": 5
+    },
+    "gtr-major-method-category:Biochemical Genetics": {
+      "display": "Biochemical Genetics",
+      "domain": "genetics",
+      "count": 379
+    },
+    "gtr-major-method-category:Biochemical Genetics|Cytogenetics": {
+      "display": "Biochemical Genetics|Cytogenetics",
+      "domain": "genetics",
+      "count": 1
+    },
+    "gtr-major-method-category:Biochemical Genetics|Cytogenetics|Molecular Genetics": {
+      "display": "Biochemical Genetics|Cytogenetics|Molecular Genetics",
+      "domain": "genetics",
+      "count": 7
+    },
+    "gtr-major-method-category:Biochemical Genetics|Molecular Genetics": {
+      "display": "Biochemical Genetics|Molecular Genetics",
+      "domain": "genetics",
+      "count": 172
+    },
+    "gtr-major-method-category:Cytogenetics": {
+      "display": "Cytogenetics",
+      "domain": "genetics",
+      "count": 490
+    },
+    "gtr-major-method-category:Cytogenetics|Molecular Genetics": {
+      "display": "Cytogenetics|Molecular Genetics",
+      "domain": "genetics",
+      "count": 51
+    },
+    "gtr-major-method-category:Molecular Genetics": {
+      "display": "Molecular Genetics",
+      "domain": "genetics",
+      "count": 62819
     },
     "hl7-tho:observation-category": {
       "display": "HL7 FHIR — Categoría de la observación",
@@ -586,7 +622,8 @@
     "sigtap-sus": 1108,
     "tuss-ans": 2211,
     "icd10pcs-cms": 4397,
-    "pami-nomenclador": 3034
+    "pami-nomenclador": 3034,
+    "gtr-ncbi": 63919
   },
   "loinc": {
     "present": false,

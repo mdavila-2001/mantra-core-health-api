@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 
 import { md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { loincDomain } from '../lab-tests/lib/domains.mjs';
+import { TEST_VERSION_COLUMNS, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv } from '../lab-tests/lib/gtr.mjs';
 import { thoRecords } from '../lab-tests/lib/hl7-tho.mjs';
 import { RELATION, buildPlan, planSummary } from '../lab-tests/lib/load-plan.mjs';
 import { loincRecords, parseLinguisticIndex, parseLinguisticVariant, parseLoincTable, parsePanels } from '../lab-tests/lib/loinc.mjs';
@@ -195,4 +196,28 @@ test('ICD-10-PCS (recorte real): B imagen, C1 imagen, C7 terapia fuera, 4A y F0 
   assert.equal(by['4A0002Z'].domain, 'functional');
   assert.equal(by.F003GKZ.domain, 'functional');
   assert.equal(ruleFor('icd10pcs-cms', 'CW70NZZ'), null);
+});
+
+// --- NCBI GTR (recorte real de test_version.gz / test_condition_gene.txt) ------
+test('GTR (recorte real): sólo la versión vigente, con tipo, genes, condiciones y categoría mayor oficial', () => {
+  const g = json('gtr.recorte.json');
+  const versions = parseTsv(g.test_version, TEST_VERSION_COLUMNS, 'test_version');
+  const { records, stats } = gtrRecords(versions, conditionGeneMap(g.test_condition_gene), methodCategoryMap(g.tests_by_method_category), { sourceVersion: 'test', sourceFile: 'fixture', sourceSha256: 'f'.repeat(64), retrievedAt: '2026-10-24T00:00:00.000Z' });
+  records.forEach(assertRecord);
+  assert.equal(new Set(records.map((r) => r.code)).size, records.length);
+  assert.equal(stats.current, records.length);
+  const fx = records.find((r) => r.code === 'GTR000004006');
+  assert.ok(fx, 'el test vigente de GTR000004006 está');
+  assert.equal(fx.domain, 'genetics');
+  assert.equal(fx.properties.gtr_test_type, 'Clinical');
+  assert.ok(fx.properties.gtr_genes.some((x) => x.symbol === 'FMR1' && x.geneId === '2332'));
+  assert.ok(fx.properties.gtr_conditions.some((x) => x.medgenCui === 'C0016667'));
+  assert.equal(fx.provenance.sourceUrl, 'https://www.ncbi.nlm.nih.gov/gtr/tests/4006/');
+  // GTR000053361.5 trae una categoría con caracteres mal codificados en la propia fuente («Karyotypingâ„¢»):
+  // no se adivina su categoría mayor, se reporta; las demás categorías del test sí resuelven.
+  const sky = records.find((r) => r.code === 'GTR000053361');
+  assert.ok(sky.properties.gtr_major_method_categories.includes('Molecular Genetics'));
+  assert.equal(Object.keys(stats.unmappedMethodCategories).length, 1);
+  assert.match(Object.keys(stats.unmappedMethodCategories)[0], /Karyotyping/);
+  assert.throws(() => parseTsv('a\tb\n1\t2\n', TEST_VERSION_COLUMNS, 'x'), /Cabeceras encontradas: a, b/);
 });
