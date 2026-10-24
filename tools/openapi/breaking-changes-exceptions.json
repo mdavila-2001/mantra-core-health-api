@@ -123,5 +123,40 @@
     "id": "new_required_request_field:POST /surveys/assignments:targetId",
     "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAssignmentDto homónimo de otro módulo. El DTO real de surveys ya valida el campo como obligatorio (@IsUUID sin @IsOptional) y el servidor ya respondía 400 sin él.",
     "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema SurveysCreateAssignmentDto."
+  },
+  {
+    "id": "removed_response:POST /iam/auth/upload-registration-signature-image:401",
+    "reason": "Corrección del contrato, no del comportamiento: la ruta lleva @Public() en el controlador y nunca exigió JWT, así que nunca pudo responder 401/403 por autenticación. El contrato anterior los documentaba porque la ruta faltaba en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en esta ruta sigue funcionando; esas respuestas nunca se emitían."
+  },
+  {
+    "id": "removed_response:POST /iam/auth/upload-registration-signature-image:403",
+    "reason": "Corrección del contrato, no del comportamiento: la ruta lleva @Public() en el controlador y nunca exigió JWT, así que nunca pudo responder 401/403 por autenticación. El contrato anterior los documentaba porque la ruta faltaba en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en esta ruta sigue funcionando; esas respuestas nunca se emitían."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/o/{slug}/services:401",
+    "reason": "Corrección del contrato, no del comportamiento: la ruta lleva @Public() en el controlador y nunca exigió JWT, así que nunca pudo responder 401/403 por autenticación. El contrato anterior los documentaba porque la ruta faltaba en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en esta ruta sigue funcionando; esas respuestas nunca se emitían."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/o/{slug}/services:403",
+    "reason": "Corrección del contrato, no del comportamiento: la ruta lleva @Public() en el controlador y nunca exigió JWT, así que nunca pudo responder 401/403 por autenticación. El contrato anterior los documentaba porque la ruta faltaba en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en esta ruta sigue funcionando; esas respuestas nunca se emitían."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/f/{slug}/products:401",
+    "reason": "Corrección del contrato, no del comportamiento: la ruta lleva @Public() en el controlador y nunca exigió JWT, así que nunca pudo responder 401/403 por autenticación. El contrato anterior los documentaba porque la ruta faltaba en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en esta ruta sigue funcionando; esas respuestas nunca se emitían."
+  },
+  {
+    "id": "removed_response:GET /public/profiles/f/{slug}/products:403",
+    "reason": "Corrección del contrato, no del comportamiento: la ruta lleva @Public() en el controlador y nunca exigió JWT, así que nunca pudo responder 401/403 por autenticación. El contrato anterior los documentaba porque la ruta faltaba en KNOWN_PUBLIC_OPERATIONS de generate-openapi.mjs.",
+    "migrationNote": "Ninguna: un cliente que manejaba 401/403 en esta ruta sigue funcionando; esas respuestas nunca se emitían."
+  },
+  {
+    "id": "changed_type:PUT /practitioners/me/sites/{siteId}/contact-phone:request.contactPhone: object -> string",
+    "reason": "Corrección del contrato, no del comportamiento: contactPhone es string | null y el DTO ya lo valida con @IsString(); la reflexión de TypeScript lo emitía como object porque faltaba type: String en @ApiProperty.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: un valor que no fuera texto o null ya era rechazado con 400. Los clientes generados desde el contrato deben regenerarse para tipar el campo como string."
   }
 ]

@@ -91,7 +91,12 @@ export class SetSiteBankQrDto {
 
 /** Teléfono del profesional en una sede vinculada; `null` lo elimina. */
 export class SetSiteContactPhoneDto {
-  @ApiProperty({ type: String, nullable: true, maxLength: 40, example: '+591 72123456' })
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    maxLength: 40,
+    example: '+591 72123456',
+  })
   @ValidateIf((dto: SetSiteContactPhoneDto) => dto.contactPhone !== null)
   @IsString()
   @Matches(SITE_CONTACT_PHONE_PATTERN)
