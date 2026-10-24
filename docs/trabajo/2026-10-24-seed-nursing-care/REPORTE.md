@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `justin/seed-nursing-care` (desde `origin/dev` 08a7ff8a)
 - Peldaño de evidencia alcanzado: `VERIFIED` para el importador (carga real en PostgreSQL 16 desechable con el DDL del módulo 03, dos corridas, conteos y consultas de contenido); `TESTED` para parsers y plan (11 pruebas dirigidas). No `REGRESSION_VERIFIED`: no se corrió contra el stack completo ni con la API arrancada (prerrequisitos emulados).
-- Avance: 14 / 15 microtareas HECHO (93 %). Pendiente: H3.S2.M2 (PR) — se abre al cerrar este reporte.
+- Avance: 15 / 15 microtareas HECHO (100 %). PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/684 (sin mergear).
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -20,6 +20,7 @@
 | H3.S1.M1 | Bitácora de pasadas | `docs/seed-research/nursing-care.md` | 8 pasadas; 5–8 con 0 aportes |
 | H3.S1.M2 | `link-check.mjs` | `node tools/terminology-import/nursing-care/link-check.mjs --db` | 3 ramas hermanas ausentes (pendiente); `seed-procedures-treatments`: 0 menciones de enfermería en sus 23 archivos |
 | H3.S1.M3 | Fuente CMDIC (Ministerio de Sanidad) | tests + carga | 58 arquetipos, 617 conceptos, informe de enfermería con 16 ranuras |
+| H3.S2.M2 | PR contra `dev` | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/684 |
 | H3.S2.M1 | typecheck y lint | `NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck` / `… lint` | exit 0 / exit 0 |
 
 ## A medias
@@ -28,7 +29,6 @@ ninguna
 ## Pendiente
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H3.S2.M2 | EN CURSO | abrir el PR contra `dev` (sin mergear; lo mergea Justin) |
 | Validación con ramas hermanas | BLOQUEADO | que existan `justin/seed-diseases`, `justin/seed-symptoms`, `justin/seed-medical-dictionaries`; correr `link-check.mjs --db` con todo cargado |
 | Omaha System | BLOQUEADO | habilitar `www.omahasystem.org` en la red del entorno |
 | Licencias CCC, ICNP, NANDA-I/NIC/NOC, escalas | BLOQUEADO | decisión y contratos del propietario |

@@ -49,7 +49,7 @@
 | H3.S1.M2 | Script de validación de enlaces con ramas hermanas (`link-check.mjs`) | listo; ramas ausentes → pendiente declarado | corrida → exit 0 | HECHO |
 | H3.S2.M1 | `corepack yarn typecheck` y `corepack yarn lint` | exit 0 | salida pegada | HECHO |
 | H3.S1.M3 | (agregada) Fuente CMDIC del Ministerio de Sanidad (ISO 13606) | 58 arquetipos, informe de enfermería con sus ranuras | test dirigido + carga | HECHO |
-| H3.S2.M2 | PR contra `dev` (sin mergear) + `REPORTE.md` | PR abierto | URL | EN CURSO |
+| H3.S2.M2 | PR contra `dev` (sin mergear) + `REPORTE.md` | PR abierto | URL | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
