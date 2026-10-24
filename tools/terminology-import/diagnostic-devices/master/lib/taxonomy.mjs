@@ -225,14 +225,12 @@ export class Taxonomy {
       if (!to || to.diagnostic === null || to.basis?.startsWith('crosswalk'))
         continue;
       if (!targets.has(cw.from)) targets.set(cw.from, []);
-      targets
-        .get(cw.from)
-        .push({
-          to: cw.to,
-          diagnostic: to.diagnostic,
-          branch: to.branch,
-          records: cw.records,
-        });
+      targets.get(cw.from).push({
+        to: cw.to,
+        diagnostic: to.diagnostic,
+        branch: to.branch,
+        records: cw.records,
+      });
     }
     let changed = 0;
     for (const [from, list] of targets) {

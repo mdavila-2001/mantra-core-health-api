@@ -2,105 +2,117 @@ TAP version 13
 # Subtest: classifyRegulation: subpartes diagnósticas, de monitoreo e IVD
 ok 1 - classifyRegulation: subpartes diagnósticas, de monitoreo e IVD
   ---
-  duration_ms: 4.545564
+  duration_ms: 2.279705
   type: 'test'
   ...
 # Subtest: classifyRegulation: lo no diagnóstico y lo que no se puede decidir
 ok 2 - classifyRegulation: lo no diagnóstico y lo que no se puede decidir
   ---
-  duration_ms: 0.811094
+  duration_ms: 0.431946
   type: 'test'
   ...
 # Subtest: parsePcd + pcdNode sobre el recorte real de foiclass
 ok 3 - parsePcd + pcdNode sobre el recorte real de foiclass
   ---
-  duration_ms: 5.472218
+  duration_ms: 3.467888
   type: 'test'
   ...
 # Subtest: ivdPanelsFrom exige que TODOS los códigos con regulación del panel estén en 862/864/866
 ok 4 - ivdPanelsFrom exige que TODOS los códigos con regulación del panel estén en 862/864/866
   ---
-  duration_ms: 0.275807
+  duration_ms: 0.166685
   type: 'test'
   ...
 # Subtest: validateRow: acepta una fila completa y rechaza lo incompleto
 ok 5 - validateRow: acepta una fila completa y rechaza lo incompleto
   ---
-  duration_ms: 1.966185
+  duration_ms: 1.027147
   type: 'test'
   ...
 # Subtest: writeNdjsonGzSharded parte sin cortar líneas y se relee igual
 ok 6 - writeNdjsonGzSharded parte sin cortar líneas y se relee igual
   ---
-  duration_ms: 134.848163
+  duration_ms: 103.999735
   type: 'test'
   ...
 # Subtest: parseCsv respeta comillas con comas y saltos de línea
 ok 7 - parseCsv respeta comillas con comas y saltos de línea
   ---
-  duration_ms: 0.462048
+  duration_ms: 0.421893
   type: 'test'
   ...
 # Subtest: aimlRows convierte el recorte real al formato común
 ok 8 - aimlRows convierte el recorte real al formato común
   ---
-  duration_ms: 1.084545
+  duration_ms: 0.980428
   type: 'test'
   ...
 # Subtest: emdnParent sigue la estructura publicada del código
 ok 9 - emdnParent sigue la estructura publicada del código
   ---
-  duration_ms: 0.514799
+  duration_ms: 0.515635
   type: 'test'
   ...
 # Subtest: Taxonomy: EMDN W es IVD; los ancestros estructurales no reciben nombre inventado
 ok 10 - Taxonomy: EMDN W es IVD; los ancestros estructurales no reciben nombre inventado
   ---
-  duration_ms: 0.814206
+  duration_ms: 0.861888
   type: 'test'
   ...
 # Subtest: Taxonomy: un mapeo publicado (misma fila con dos tipos) propaga la decisión solo si es unánime
 ok 11 - Taxonomy: un mapeo publicado (misma fila con dos tipos) propaga la decisión solo si es unánime
   ---
-  duration_ms: 1.320731
+  duration_ms: 1.246329
   type: 'test'
   ...
 # Subtest: normalizeManufacturerName quita sufijos societarios y conserva el núcleo
 ok 12 - normalizeManufacturerName quita sufijos societarios y conserva el núcleo
   ---
-  duration_ms: 2.289536
+  duration_ms: 2.165143
   type: 'test'
   ...
 # Subtest: resolveManufacturers: fusiona por id publicado y por nombre+país; lo dudoso va a revisión
 ok 13 - resolveManufacturers: fusiona por id publicado y por nombre+país; lo dudoso va a revisión
   ---
-  duration_ms: 11.132194
+  duration_ms: 10.242776
   type: 'test'
   ...
 # Subtest: resolveManufacturers: grupos solo por relaciones publicadas
 ok 14 - resolveManufacturers: grupos solo por relaciones publicadas
   ---
-  duration_ms: 0.573971
+  duration_ms: 0.445017
   type: 'test'
   ...
 # Subtest: consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registro
 ok 15 - consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registro
   ---
-  duration_ms: 3.775324
+  duration_ms: 2.947683
   type: 'test'
   ...
 # Subtest: regions: lee una carpeta out/ local y descarta el archivo cuyo sha256 no coincide
 ok 16 - regions: lee una carpeta out/ local y descarta el archivo cuyo sha256 no coincide
   ---
-  duration_ms: 2.421074
+  duration_ms: 2.209644
   type: 'test'
   ...
-1..16
-# tests 16
+# Subtest: EMDN: las dos copias reales se leen igual (comillas, saltos dentro de comillas, comillas sin escapar)
+ok 17 - EMDN: las dos copias reales se leen igual (comillas, saltos dentro de comillas, comillas sin escapar)
+  ---
+  duration_ms: 2.711617
+  type: 'test'
+  ...
+# Subtest: EMDN: W es IVD, un título de grupo diagnóstico decide y uno mixto no
+ok 18 - EMDN: W es IVD, un título de grupo diagnóstico decide y uno mixto no
+  ---
+  duration_ms: 1.454153
+  type: 'test'
+  ...
+1..18
+# tests 18
 # suites 0
-# pass 16
+# pass 18
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 321.671237
+# duration_ms 228.96812

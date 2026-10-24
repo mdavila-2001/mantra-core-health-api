@@ -25,7 +25,7 @@ const git = (args, cwd) =>
   execFileSync('git', args, {
     cwd,
     stdio: ['ignore', 'pipe', 'pipe'],
-    maxBuffer: 1 << 31,
+    maxBuffer: 2 ** 31,
   });
 const tryGit = (args, cwd) => {
   try {

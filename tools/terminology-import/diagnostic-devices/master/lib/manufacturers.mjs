@@ -543,15 +543,13 @@ export function resolveManufacturers(rows, { groupLinks = [] } = {}) {
     const c = entityOfRegistryId.get(g.child);
     const p = entityOfRegistryId.get(g.parent);
     if (c)
-      entityById
-        .get(c)
-        .groups.push({
-          relation: g.relation,
-          parentId: g.parent,
-          parentEntityId: p ?? null,
-          source: g.source,
-          url: g.url,
-        });
+      entityById.get(c).groups.push({
+        relation: g.relation,
+        parentId: g.parent,
+        parentEntityId: p ?? null,
+        source: g.source,
+        url: g.url,
+      });
   }
 
   // Sugerencias de grupo por primera palabra distintiva (solo revisión).

@@ -42,6 +42,13 @@ import {
   readRegionManifest,
   readRegionRows,
 } from '../lib/regions.mjs';
+import {
+  compareEmdnCopies,
+  emdnGroupTitleDecision,
+  emdnNodes,
+  parseEmdn,
+  parseEmdnTsv,
+} from '../lib/emdn.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const RETRIEVED = '2026-10-24T03:00:00Z';
@@ -605,4 +612,56 @@ test('regions: lee una carpeta out/ local y descarta el archivo cuyo sha256 no c
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// --- EMDN ---------------------------------------------------------------------------
+
+test('EMDN: las dos copias reales se leen igual (comillas, saltos dentro de comillas, comillas sin escapar)', () => {
+  const a = parseEmdn(readFileSync(join(FX, 'emdn.sample.csv'), 'utf8'));
+  const b = parseEmdnTsv(readFileSync(join(FX, 'emdn.sample.tsv'), 'utf8'));
+  assert.equal(a.length, 29);
+  assert.equal(b.length, 30);
+  const cmp = compareEmdnCopies(a, b);
+  assert.deepEqual(cmp.onlyA, []);
+  assert.deepEqual(cmp.onlyB, ['V020303'], 'TEATS falta en la copia CSV');
+  assert.deepEqual(cmp.differ, []);
+  assert.equal(
+    a.find((r) => r.code === 'H01010102').term,
+    'MULTIFILAMENT SYNTHETIC ABSORBABLE SUTURES',
+  );
+  assert.match(b.find((r) => r.code === 'H010101030303').term, /\("BARBED"\)$/);
+});
+
+test('EMDN: W es IVD, un título de grupo diagnóstico decide y uno mixto no', () => {
+  const rows = parseEmdn(readFileSync(join(FX, 'emdn.sample.csv'), 'utf8'));
+  const { nodes, problems } = emdnNodes(rows, { source: 'ec-emdn' });
+  assert.deepEqual(problems, []);
+  const n = (c) => nodes.find((x) => x.code === c);
+  assert.equal(n('W0101060101').basis, 'emdn-category-w');
+  assert.equal(n('L16').basis, 'emdn-group-title');
+  assert.equal(n('L1601').diagnostic, true);
+  assert.equal(
+    n('Z1103').diagnostic,
+    null,
+    'DIAGNOSTIC AND INTERVENTIONAL: mixto',
+  );
+  assert.equal(n('Z1103').basis, 'emdn-group-title-mixed');
+  assert.equal(n('Z110390').diagnostic, null);
+  assert.equal(
+    n('Z120302').basis,
+    'emdn-group-title',
+    'el subgrupo decide aunque el padre sea mixto',
+  );
+  assert.equal(
+    n('Z12030202').basis,
+    'emdn-group-title',
+    'grupo no terminal con título propio',
+  );
+  assert.equal(n('W01').basis, 'emdn-category-w');
+  assert.equal(n('Z11').diagnostic, null);
+  assert.equal(n('H010101030303').diagnostic, null);
+  assert.equal(
+    emdnGroupTitleDecision('CARDIAC DIAGNOSTIC DEVICES').basis,
+    'emdn-group-title',
+  );
 });

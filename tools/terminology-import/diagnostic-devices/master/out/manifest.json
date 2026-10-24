@@ -1,17 +1,100 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T03:31:04Z",
+  "generatedAt": "2026-10-24T03:41:52Z",
   "regions": [
     {
       "region": "us",
-      "status": "pending",
-      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/us/out/manifest.json"
+      "status": "consolidated",
+      "ref": "origin/justin/seed-dx-devices-us",
+      "commit": "c5efecb6e91f8a129279f48170fd25c6c84019d1",
+      "commitDate": "2026-10-24T03:37:09+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/compassionate-brown-tr71nn"
+      ],
+      "manifestGeneratedAt": "2026-10-24T03:27:50.039Z",
+      "rowsRead": 77971,
+      "gaps": [
+        {
+          "source": "fda-rl",
+          "url": "https://download.open.fda.gov/device/registrationlisting/",
+          "reason": "403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento."
+        },
+        {
+          "source": "fda-gudid",
+          "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+          "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
+        }
+      ]
     },
     {
       "region": "eu",
-      "status": "pending",
-      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/eu/out/manifest.json"
+      "status": "consolidated",
+      "ref": "origin/claude/adoring-curie-xdkt83",
+      "commit": "14f81a41725a794be29cd072a9bb0f50ebf1b8dd",
+      "commitDate": "2026-10-24T03:36:10+00:00",
+      "dir": null,
+      "alternatives": [],
+      "manifestGeneratedAt": "2026-10-24T03:31:17Z",
+      "rowsRead": 0,
+      "gaps": [
+        {
+          "source": "ec-emdn",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        },
+        {
+          "source": "eudamed-udi",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "url": "https://developer.datalake.sante.service.ec.europa.eu/"
+        },
+        {
+          "source": "eudamed-certificates",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "url": "https://ec.europa.eu/tools/eudamed/"
+        },
+        {
+          "source": "mhra-pard",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
+          "url": "https://pard.mhra.gov.uk/"
+        },
+        {
+          "source": "swissmedic-swissdamed",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "url": "https://swissdamed.ch/"
+        },
+        {
+          "source": "it-salute-bdrdm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
+        },
+        {
+          "source": "it-salute-cnd",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/"
+        },
+        {
+          "source": "ec-nando",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+        },
+        {
+          "source": "de-bfarm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+        },
+        {
+          "source": "es-aemps-ccps",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.aemps.gob.es/"
+        },
+        {
+          "source": "fr-ansm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No aplica.",
+          "url": "https://ansm.sante.fr/"
+        }
+      ]
     },
     {
       "region": "row",
@@ -22,45 +105,45 @@
   "files": [
     {
       "path": "taxonomy-nodes.ndjson.gz",
-      "rows": 7088,
-      "bytes": 677638,
-      "sha256": "0fcb58ee2ad3c1fa53331d089dcb153d37467239886f68eeb670085bb73c1614"
+      "rows": 15624,
+      "bytes": 956996,
+      "sha256": "30b5ebe22f7d9b6ff7068289470db35c48f9f13aa6acb44d0746e5e5336828a8"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
-      "rows": 0,
-      "bytes": 20,
-      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+      "rows": 218,
+      "bytes": 6118,
+      "sha256": "693b9ff457457334ef14ebae655365ca92ca59fb5cff315ef6151a4c134691e7"
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 541,
-      "bytes": 56215,
-      "sha256": "f2c1d5b82344167744f9c3b74ad861ca055198dbdc5d73aceda10e7ffba53292"
+      "rows": 13303,
+      "bytes": 1986630,
+      "sha256": "4c2081eafb817117025f1845b01e9955f3f1a4f846434a9635971646902bb5eb"
     },
     {
       "path": "models.ndjson.gz",
-      "rows": 1192,
-      "bytes": 113761,
-      "sha256": "1d76bbce701a66e6966b5f3d47407ecae295baa41958cebefc4da021119aba39"
+      "rows": 73333,
+      "bytes": 6195232,
+      "sha256": "89b4e014233627503e14f6cbb70c56e65ddea73e1360bc64081eb1ce9c6b65ac"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
-      "rows": 29,
-      "bytes": 3108,
-      "sha256": "f7166755bb3bb7bdadd0b66fda1efd870a0da21ae490660ef01a555cf5983108"
+      "rows": 2274,
+      "bytes": 197378,
+      "sha256": "5aceb3dffe32f7fd0d9341acd4e92f5fadc41b43b1a3b8e7c5931ae2c1bae2ff"
     },
     {
       "path": "industry-mentions.ndjson.gz",
       "rows": 552,
-      "bytes": 22054,
-      "sha256": "e868a8213d8eaa243085d3990e46dd604b8452c96797958d9e1cc79e76c4f8fb"
+      "bytes": 25112,
+      "sha256": "125f35228fde529f359b9dc4aa90fbe7baf0a220eeeb6535a86f06fc520a1f95"
     },
     {
       "path": "industry-candidates.ndjson.gz",
-      "rows": 330,
-      "bytes": 15853,
-      "sha256": "3e72dfb09895f66c0529698c588caf494f6887d012fef7db8c03811ed2ab0062"
+      "rows": 240,
+      "bytes": 12067,
+      "sha256": "3b9590430f5bd51f322bbdb7151487b31b75133d31ab8c2ad42524da7be009a2"
     }
   ]
 }

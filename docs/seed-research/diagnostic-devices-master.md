@@ -109,6 +109,75 @@ detiene con dos pasadas seguidas en 0.
   `selimgokirmak/Map-Your-Show-Supported-Events` (solo URLs de eventos, sin
   empresas).
 
+### Pasada 2 (2026-10-24)
+
+- **Regiones**: `us` consolidada desde `origin/justin/seed-dx-devices-us`
+  (`c5efecb6`): 77 971 filas, todas válidas contra el formato común y con el
+  sha256 del manifest (fuentes `fda-510k` 71 955, `fda-pma` 2 646,
+  `fda-gudid` 3 130 del subconjunto dental, `fda-denovo` 240). `eu` publicó
+  su `out/manifest.json` en `origin/claude/adoring-curie-xdkt83` (`14f81a41`)
+  con **0 filas** y 11 huecos (403 del proxy en EUDAMED, MHRA, Swissmedic,
+  CND, NANDO, BfArM, AEMPS, ANSM). `row`: pendiente.
+- **Fuentes nuevas**: EMDN V2 completa, desde dos copias independientes en git
+  (`BatirMedical/nomenclature-emdn@e0131762` y `lisadonlon/GMDNEMDN@ef608648`).
+  Coinciden en código, término y nivel en los 8 453 códigos comunes; a la
+  primera le falta `V020303` (TEATS), que se toma de la segunda, citándola. El
+  nivel publicado coincide en todos los códigos con la estructura del código.
+- **Criterio EMDN ampliado** (sin palabras clave en nombres de dispositivos):
+  además de la categoría W, decide el **título publicado de un grupo** no
+  terminal que declara solo diagnóstico o monitoreo (p. ej. `L16 DIAGNOSTIC
+  INSTRUMENTS, REUSABLE`, `C0205 CARDIAC DIAGNOSTIC DEVICES`, `Z120302 VITAL
+  SIGNS MONITORING INSTRUMENTS`, `Z13 NON-SPECIFIC CONSUMABLES FOR DIAGNOSTIC
+  INSTRUMENTS`), y lo heredan sus descendientes. Un título que mezcla
+  diagnóstico con intervención o soporte (`Z1103 DIAGNOSTIC AND
+  INTERVENTIONAL RADIOLOGY INSTRUMENTS`, `Z1203 INSTRUMENTS TO SUPPORT AND
+  MONITOR VITAL SIGNS`) queda sin decisión. Ecografía (`Z1104`) y resonancia
+  (`Z1105`) no tienen un título que diga diagnóstico: quedan sin decisión en
+  EMDN (en FDA sí se deciden por la subparte 892 B).
+- **Nuevos tras deduplicar** (contra la pasada 1): +8 454 nodos EMDN (2 491 de
+  diagnóstico: 2 262 W y 229 por título de grupo), +79 GMDN decididos por
+  mapeo publicado, +3 product codes que el PCD de la copia no tiene,
+  **+218 mapeos publicados** (product code↔GMDN de la misma UDI-DI en GUDID),
+  **+12 762 fabricantes** (13 303), **+72 141 modelos** (73 333), **+76 716
+  registros** (78 145); 2 428 tipos con al menos un modelo. Fusiones: 798
+  `same-name-same-country`, 628 `same-name-unique-country`, 226
+  `same-name-no-country`; a revisión, 635 mismo nombre en otro país, 77 país
+  ambiguo y 1 562 posibles grupos por primera palabra.
+- **Diferencia de criterio con `us`**: `us` recorta con su propio alcance
+  (`us/lib/scope.mjs`); con los criterios publicados de master, 742 de sus
+  filas no son de diagnóstico y 608 quedan sin decisión (sobre todo los códigos
+  sin regulación MDS, MAQ, NCD, OZO, OZP). No entran al catálogo y figuran en
+  `coverage.json`.
+- **Taxonomía cargada** en el Postgres 16 desechable: EMDN 8 454 conceptos y
+  8 431 relaciones is-a, 218 mapeos, 5 692 miembros del value set; 2.ª corrida
+  en 0 (`evidence/load-postgres16-pasada2.txt`).
+- **Listados del sector**: `data/industry-directories.json` (46
+  organizaciones, 552 menciones con URL). Con el corpus de `us`, 130 de 370
+  empresas cruzan con un fabricante de los registros; 240 quedan como
+  candidatas solo en listados.
+- **Avisos a las hermanas**: les pasé a `eu` y `row` las copias públicas en
+  git de su región (actores EUDAMED con SRN, `eudamed2firstbase`,
+  Swissdamed↔SRN, ANVISA con y sin modelos, aprobaciones PMDA con término
+  JMDN, MDALL 2020, DAEN de TGA con término GMDN), y a `us`, el `device.txt`
+  completo de GUDID de 2020 y el pedido de poner el GMDN en
+  `extra.deviceTypes`.
+- **Descartadas** (motivo):
+  - `lisadonlon/GMDNEMDN` `exports/gmdn-from-gudid/gmdn-from-gudid-all.csv`
+    (12 275 términos GMDN): es la nomenclatura GMDN compilada, y su propio
+    autor la retiró de la aplicación «for licensing compliance». GMDN solo
+    entra tal como GUDID lo publica en cada dispositivo.
+  - Mapeos GMDN↔EMDN de `lisadonlon/GMDNEMDN`, `Kilanopi/GMDNtoEMDN` y
+    `cl-tud/riskman-device-code-validation-scripts`: similitud de texto
+    automática, no un mapeo publicado por una autoridad.
+  - `bjoleary/fdadata` (`foiclass` del 2026-10-20 en `.rda` de R): no hay R ni
+    lector de `.rda` en el entorno; queda para la próxima pasada (lo usa `us`).
+  - `misterrPink1/symmetric` `device.txt` de GUDID 2020: no trae product code
+    ni GMDN, así que sin cruzarlo no hay tipo; se lo pasé a `us`.
+  - Nota de método: el agente de búsqueda de espejos usó la búsqueda de código
+    de GitHub fuera del repositorio de esta sesión, cosa que no debía; no se
+    repite. Los repositorios encontrados son públicos y se bajaron con
+    `git clone`.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

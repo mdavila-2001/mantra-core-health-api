@@ -42,6 +42,12 @@ import {
   readRegionRows,
 } from './lib/regions.mjs';
 import { coverageReport } from './lib/coverage.mjs';
+import {
+  compareEmdnCopies,
+  emdnNodes,
+  parseEmdn,
+  parseEmdnTsv,
+} from './lib/emdn.mjs';
 import { loadIndustryDirectories, matchIndustry } from './lib/industry.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -93,6 +99,62 @@ const pcdProvenance = {
 for (const r of pcdRows) taxonomy.addNode(pcdNode(r, pcdProvenance, ivdPanels));
 console.log(
   `taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
+);
+
+// --- 1b. EMDN completa (copia fijada + verificación con una segunda copia) ---
+const emdnFile = MIRRORS['batirmedical-emdn'].files.emdn;
+const emdnRowsA = parseEmdn(
+  readFileSync(mirrorFilePath('batirmedical-emdn', 'emdn'), 'utf8'),
+);
+const emdnRowsB = parseEmdnTsv(
+  readFileSync(mirrorFilePath('lisadonlon-emdn', 'emdn'), 'utf8'),
+);
+const emdnCheck = compareEmdnCopies(emdnRowsA, emdnRowsB);
+// Términos distintos entre copias del mismo archivo: no se elige uno, se para.
+if (emdnCheck.differ.length)
+  throw new Error(
+    `EMDN: las copias difieren en ${emdnCheck.differ.slice(0, 10).join(', ')}`,
+  );
+// Un código que falta en una copia (pérdida al extraer) se toma de la otra, citándola.
+const onlyB = new Set(emdnCheck.onlyB);
+const emdnRows = [...emdnRowsA, ...emdnRowsB.filter((r) => onlyB.has(r.code))];
+const fromB = new Set(emdnCheck.onlyB);
+const emdn = emdnNodes(emdnRows, {
+  source: emdnFile.source,
+  sourceUrl: emdnFile.officialUrl,
+  sourceVersion: `EMDN V2 · ${mirrorVersion('batirmedical-emdn')}`,
+  retrievedAt,
+  mirror: {
+    repo: MIRRORS['batirmedical-emdn'].repo,
+    commit: MIRRORS['batirmedical-emdn'].commit,
+    path: emdnFile.path,
+    sha256: emdnFile.sha256,
+  },
+  verifiedAgainst: {
+    repo: MIRRORS['lisadonlon-emdn'].repo,
+    commit: MIRRORS['lisadonlon-emdn'].commit,
+    path: MIRRORS['lisadonlon-emdn'].files.emdn.path,
+  },
+});
+if (emdn.problems.length)
+  throw new Error(
+    `EMDN: estructura inconsistente: ${emdn.problems.slice(0, 5).join('; ')}`,
+  );
+for (const n of emdn.nodes) {
+  if (fromB.has(n.code))
+    n.provenance = {
+      ...n.provenance,
+      mirror: {
+        repo: MIRRORS['lisadonlon-emdn'].repo,
+        commit: MIRRORS['lisadonlon-emdn'].commit,
+        path: MIRRORS['lisadonlon-emdn'].files.emdn.path,
+      },
+      note: 'falta en la copia principal',
+    };
+  taxonomy.addNode(n);
+}
+console.log(
+  `taxonomía EMDN: ${emdn.nodes.length} términos (copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})`,
 );
 
 // --- 2. Filas ---------------------------------------------------------------
@@ -223,6 +285,7 @@ const coverage = coverageReport({
   catalog,
   resolution,
   industry: industry.stats,
+  emdnCheck,
   sourceStats: [...sourceStats.values()],
   regionStatus,
   panelParts,

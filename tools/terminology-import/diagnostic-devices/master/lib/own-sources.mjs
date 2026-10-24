@@ -20,7 +20,7 @@ export const AIML_COLUMNS = Object.freeze([
 ]);
 
 /** CSV con comillas dobles (RFC 4180): campos con coma, comillas o saltos. */
-export function parseCsv(text) {
+export function parseCsv(text, delimiter = ',') {
   const rows = [];
   let row = [];
   let field = '';
@@ -34,8 +34,10 @@ export function parseCsv(text) {
           i++;
         } else quoted = false;
       } else field += ch;
-    } else if (ch === '"') quoted = true;
-    else if (ch === ',') {
+    } else if (ch === '"' && field === '') quoted = true;
+    // Una comilla en medio de un campo sin comillas es literal (la copia TSV
+    // de la EMDN trae `("BARBED")` sin escapar).
+    else if (ch === delimiter) {
       row.push(field);
       field = '';
     } else if (ch === '\n' || ch === '\r') {

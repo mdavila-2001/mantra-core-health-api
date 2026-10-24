@@ -48,6 +48,45 @@ export const MIRRORS = Object.freeze({
       },
     },
   },
+  'batirmedical-emdn': {
+    repo: 'https://github.com/BatirMedical/nomenclature-emdn.git',
+    commit: 'e0131762b3385c1085b97da9c5f74d32edb89df3',
+    commitDate: '2025-04-02T22:15:06+02:00',
+    license:
+      'Repositorio MIT; los datos son la EMDN de la Comisión Europea («EMDN Version 2, as published by the European Commission», RELEASE.md), de libre acceso y reutilización.',
+    files: {
+      emdn: {
+        path: 'EMDN_BatirMedical.csv',
+        sha256:
+          '7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379',
+        source: 'ec-emdn',
+        name: 'European Medical Device Nomenclature (EMDN), versión 2',
+        officialUrl:
+          'https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en',
+        rows: 8453,
+      },
+    },
+  },
+  // Segunda copia independiente de la misma EMDN V2: solo se usa para verificar
+  // que la primera reproduce el archivo (mismos códigos, términos y niveles).
+  'lisadonlon-emdn': {
+    repo: 'https://github.com/lisadonlon/GMDNEMDN.git',
+    commit: 'ef6086489b942d96ff0d2e18f9f1f8434a94f954',
+    commitDate: '2025-10-30T21:33:12+00:00',
+    license: 'Repositorio MIT; datos EMDN de la Comisión Europea.',
+    files: {
+      emdn: {
+        path: 'data/EMDN.txt',
+        sha256:
+          '033572eb47bb3f595c3fd9b1e8494680fd2dd189c4ee21261b4d64e3cab26f3f',
+        source: 'ec-emdn',
+        name: 'EMDN V2 (copia de verificación, separada por tabuladores)',
+        officialUrl:
+          'https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en',
+        rows: 8453,
+      },
+    },
+  },
 });
 
 /** `sourceVersion` de un archivo espejo: sha del commit + fecha del commit. */

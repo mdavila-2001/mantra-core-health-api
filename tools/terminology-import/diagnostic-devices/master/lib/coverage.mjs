@@ -22,6 +22,7 @@ export function coverageReport({
   catalog,
   resolution,
   industry = null,
+  emdnCheck = null,
   sourceStats,
   regionStatus,
   panelParts,
@@ -96,6 +97,7 @@ export function coverageReport({
       reviewByKind: count(resolution.review, (r) => r.kind),
     },
     industry,
+    emdnCopies: emdnCheck,
     mirrors: Object.fromEntries(
       Object.entries(mirrors).map(([k, m]) => [
         k,
