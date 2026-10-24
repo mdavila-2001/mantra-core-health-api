@@ -1,0 +1,14 @@
+taxonomía FDA: 7088 product codes; paneles IVD medidos: IM, MG, PA, TX
+taxonomía EMDN: 8454 términos (copia A 8453, copia B 8454; solo en A: —; solo en B: V020303)
+fuente propia fda-ai-enabled-devices: 1524 filas (0 descartadas al leer)
+región us: 205487 filas desde origin/justin/seed-dx-devices-us (0 archivos con sha256 distinto, descartados)
+región eu: 716 filas desde origin/claude/adoring-curie-xdkt83 (0 archivos con sha256 distinto, descartados)
+región row: 3534775 filas desde origin/claude/inspiring-planck-xhpf4w (0 archivos con sha256 distinto, descartados)
+identidades de fabricantes publicadas (actores): 26583
+filas válidas 3742502; de diagnóstico 251547 (355 por ser del mismo modelo); fabricantes 19992; modelos 166461; nodos heredados por mapeo 79
+listados del sector: 552 menciones, 370 empresas (193 cruzan con un registro, 177 solo en listados)
+out/ → 8 archivos de datos + coverage.{json,md} + manifest.json
+
+real	5m35.651s
+user	5m20.365s
+sys	0m55.545s

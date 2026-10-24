@@ -1,20 +1,21 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T04:35:02Z",
+  "generatedAt": "2026-10-24T05:28:57Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
-      "commitDate": "2026-10-24T04:13:39+00:00",
+      "commit": "db3b648b46e66758908e9661807149e5d70e5614",
+      "commitDate": "2026-10-24T05:03:03+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/compassionate-brown-tr71nn"
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/dev"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
-      "rowsRead": 204096,
+      "manifestGeneratedAt": "2026-10-24T04:53:10.803Z",
+      "rowsRead": 205487,
       "gaps": [
         {
           "source": "fda-gudid",
@@ -31,7 +32,11 @@
       "commitDate": "2026-10-24T03:59:33+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/adoring-curie-xdkt83-test"
+        "origin/justin/practice-ownership-report",
+        "origin/claude/adoring-curie-xdkt83-test",
+        "origin/dev",
+        "origin/justin/fix-dev-red-gates",
+        "origin/test"
       ],
       "manifestGeneratedAt": "2026-10-24T03:48:44Z",
       "rowsRead": 716,
@@ -100,7 +105,11 @@
       "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
       "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
-      "alternatives": [],
+      "alternatives": [
+        "origin/justin/practice-ownership-report",
+        "origin/dev",
+        "origin/justin/fix-dev-red-gates"
+      ],
       "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
       "rowsRead": 3534775,
       "gaps": [
@@ -206,8 +215,8 @@
     {
       "path": "taxonomy-nodes.ndjson.gz",
       "rows": 33616,
-      "bytes": 1831432,
-      "sha256": "e2cd23c56d8c59e7bcde9bd5ec07ac517071945a075fce6056455171beafe87f"
+      "bytes": 1831502,
+      "sha256": "17ad02ab1a6a6fadf02e98ffee2420a89055db2fb57358efd53e4a0c838a7f8d"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -217,39 +226,39 @@
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 19941,
-      "bytes": 3813288,
-      "sha256": "592d836e24c32c352b540d463f762a38a7d33dbfebd56047d155c57a950ab9a0"
+      "rows": 19992,
+      "bytes": 3842710,
+      "sha256": "2e9cbc99ab4783796af86a24e0626731c5a029df83620a71ff5dfa6e9188014d"
     },
     {
       "path": "models-0001.ndjson.gz",
-      "rows": 136309,
-      "bytes": 10092254,
-      "sha256": "247d7ef0d7b557ba600ce79a51f55e2af2c8a147241cc7a883adef1972fa8efc"
+      "rows": 136354,
+      "bytes": 10104529,
+      "sha256": "b3f306ad577aaf6154f59bc80498f48bd31d0cf7ce362ed8c1f2299780f81c52"
     },
     {
       "path": "models-0002.ndjson.gz",
-      "rows": 28886,
-      "bytes": 2238514,
-      "sha256": "96b36b765f5981e13b1dd708c566c6bd2577bb83c0571785b8556252a33dc4c9"
+      "rows": 30107,
+      "bytes": 2340288,
+      "sha256": "e10c5bf0bb9af92bfb7c3e13fce448bdd0215d6580ebfc63f294027c3fa96632"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
-      "rows": 9558,
-      "bytes": 1136910,
-      "sha256": "43e53b2f0e3620b50333ce01f9df45a6c96b4afc4ee562750032fd7abcf5ad16"
+      "rows": 9561,
+      "bytes": 1139284,
+      "sha256": "3a54f1aac4daa6eefae96851a96e668080e17bb97306a64e218a0a116af0d76f"
     },
     {
       "path": "industry-mentions.ndjson.gz",
       "rows": 552,
-      "bytes": 26845,
-      "sha256": "e0aa5de17a9e5cab76a611a2795fbcc680fa29a1b2c868f0799f732cc8524cc8"
+      "bytes": 26873,
+      "sha256": "7511d040823d97ca0e73f79e89008539d31b45c8b45bb74d4e40b2048f4fae65"
     },
     {
       "path": "industry-candidates.ndjson.gz",
-      "rows": 178,
-      "bytes": 9815,
-      "sha256": "7675ad1549f9b14b3af5a973d4571aed332e2abe777df5fe2bb5471b9f46ccad"
+      "rows": 177,
+      "bytes": 9807,
+      "sha256": "a33ca2a57113042c0ce52d8ed508bb06c1d8bb9d8973f9b99fcee8df0173a418"
     }
   ]
 }
