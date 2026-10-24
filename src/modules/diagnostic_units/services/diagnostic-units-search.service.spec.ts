@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DiagnosticUnitsSearchService } from './diagnostic-units-search.service';
+import { BadRequestException } from '@nestjs/common';
 import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Una unidad publicada mínima, con lo que la proyección lee. */
@@ -39,6 +40,7 @@ function build() {
     countVisible: mockFn().mockResolvedValue(0),
     findUnitIdsOfferingStudy: mockFn().mockResolvedValue([]),
     findUnitIdsWithInsurerAgreement: mockFn().mockResolvedValue([]),
+    findOfferedConcepts: mockFn().mockResolvedValue(new Map()),
     findActiveSites: mockFn().mockResolvedValue([]),
     findActiveOfferings: mockFn().mockResolvedValue([]),
     findConcepts: mockFn().mockResolvedValue([]),
@@ -266,5 +268,226 @@ describe('DiagnosticUnitsSearchService', () => {
 
     const [, , limit] = d.readRepo.searchVisible.mock.calls[0];
     expect(limit).toBe(100);
+  });
+});
+
+describe('DiagnosticUnitsSearchService.searchCoverage', () => {
+  /** Origen del paciente: plaza 24 de Septiembre, Santa Cruz. */
+  const ORIGIN = { lat: -17.7834, lng: -63.1821 };
+
+  /**
+   * Arma tres centros de imagen con sede, dirección y coordenadas.
+   *
+   * - `cerca`: a ~1 km, ofrece solo RX.
+   * - `lejos`: a ~6 km, ofrece RX y ECO.
+   * - `sin-coordenadas`: ofrece RX y ECO, sin coordenadas cargadas.
+   *
+   * @returns El sistema bajo prueba con esos centros.
+   */
+  function threeCenters() {
+    const d = build();
+    const units = [
+      unit({ id: 'cerca', name: 'Imagen Cerca' }),
+      unit({ id: 'lejos', name: 'Imagen Lejos' }),
+      unit({ id: 'sin-coordenadas', name: 'Imagen Sin Mapa' }),
+    ];
+    d.readRepo.findOfferedConcepts.mockResolvedValue(
+      new Map([
+        ['cerca', new Set(['rx'])],
+        ['lejos', new Set(['rx', 'eco'])],
+        ['sin-coordenadas', new Set(['rx', 'eco'])],
+      ]),
+    );
+    d.readRepo.countVisible.mockResolvedValue(units.length);
+    d.readRepo.searchVisible.mockResolvedValue(units);
+    d.readRepo.findActiveSites.mockResolvedValue([
+      { id: 's-cerca', diagnosticUnitId: 'cerca', practiceSiteId: 'ps-cerca' },
+      { id: 's-lejos', diagnosticUnitId: 'lejos', practiceSiteId: 'ps-lejos' },
+      {
+        id: 's-sin',
+        diagnosticUnitId: 'sin-coordenadas',
+        practiceSiteId: 'ps-sin',
+      },
+    ]);
+    d.readRepo.findPracticeSites.mockResolvedValue([
+      { id: 'ps-cerca', addressId: 'a-cerca' },
+      { id: 'ps-lejos', addressId: 'a-lejos' },
+      { id: 'ps-sin', addressId: 'a-sin' },
+    ]);
+    d.readRepo.findAddresses.mockResolvedValue([
+      {
+        id: 'a-cerca',
+        lines: 'Calle Junín 120',
+        city: 'Santa Cruz',
+        latitude: '-17.7900',
+        longitude: '-63.1800',
+      },
+      {
+        id: 'a-lejos',
+        lines: 'Av. Banzer km 5',
+        city: 'Santa Cruz',
+        latitude: '-17.7300',
+        longitude: '-63.1700',
+      },
+      { id: 'a-sin', lines: 'Calle Sucre 45', city: 'Santa Cruz' },
+    ]);
+    return d;
+  }
+
+  it('completos primero, por distancia, y los que no tienen distancia al final', async () => {
+    const d = threeCenters();
+
+    const res = await d.service.searchCoverage({
+      studyConceptIds: ['rx', 'eco'],
+      lat: ORIGIN.lat,
+      lng: ORIGIN.lng,
+    });
+
+    // El completo lejano va antes que el incompleto cercano: lo que se busca
+    // es dónde hacerse todo, no el lugar más cerca para hacerse la mitad.
+    expect(res.items.map((item) => item.id)).toEqual([
+      'lejos',
+      'sin-coordenadas',
+      'cerca',
+    ]);
+    expect(res.total).toBe(3);
+  });
+
+  it('cada centro dice qué le falta, contado contra lo pedido', async () => {
+    const d = threeCenters();
+
+    const res = await d.service.searchCoverage({
+      studyConceptIds: ['rx', 'eco'],
+      lat: ORIGIN.lat,
+      lng: ORIGIN.lng,
+    });
+    const byId = new Map(res.items.map((item) => [item.id, item]));
+
+    expect(byId.get('lejos')).toMatchObject({
+      complete: true,
+      missingStudyConceptIds: [],
+      addressText: 'Av. Banzer km 5, Santa Cruz',
+      latitude: -17.73,
+      longitude: -63.17,
+    });
+    expect(byId.get('cerca')).toMatchObject({
+      complete: false,
+      missingStudyConceptIds: ['eco'],
+    });
+    expect(byId.get('cerca')?.distanceKm).toBeLessThan(
+      byId.get('lejos')?.distanceKm as number,
+    );
+    expect(byId.get('sin-coordenadas')).toMatchObject({
+      distanceKm: null,
+      latitude: null,
+      longitude: null,
+      addressText: 'Calle Sucre 45, Santa Cruz',
+    });
+  });
+
+  it('sin origen no hay distancia y, entre completos, ordena por nombre', async () => {
+    const d = threeCenters();
+
+    const res = await d.service.searchCoverage({
+      studyConceptIds: ['rx', 'eco'],
+    });
+
+    expect(res.items.every((item) => item.distanceKm === null)).toBe(true);
+    expect(res.items.map((item) => item.id)).toEqual([
+      'lejos',
+      'sin-coordenadas',
+      'cerca',
+    ]);
+  });
+
+  it('la página se corta después de ordenar, y el total cuenta todos', async () => {
+    const d = threeCenters();
+
+    const res = await d.service.searchCoverage({
+      studyConceptIds: ['rx', 'eco'],
+      lat: ORIGIN.lat,
+      lng: ORIGIN.lng,
+      limit: 1,
+      offset: 1,
+    });
+
+    expect(res.items.map((item) => item.id)).toEqual(['sin-coordenadas']);
+    expect(res).toMatchObject({ total: 3, limit: 1, offset: 1 });
+    // Para ordenar hay que traerlos todos: el repositorio no recibe la página.
+    const [, , limit, offset] = d.readRepo.searchVisible.mock.calls[0];
+    expect([limit, offset]).toEqual([3, 0]);
+  });
+
+  it('la sede con rol principal gana sobre la primera sede activa', async () => {
+    const d = threeCenters();
+    d.readRepo.searchVisible.mockResolvedValue([unit({ id: 'lejos' })]);
+    d.readRepo.countVisible.mockResolvedValue(1);
+    d.readRepo.findActiveSites.mockResolvedValue([
+      {
+        id: 's-toma',
+        diagnosticUnitId: 'lejos',
+        practiceSiteId: 'ps-cerca',
+        siteRoleConceptId: DUNIT.SITE_ROLE_COLLECTION,
+      },
+      {
+        id: 's-principal',
+        diagnosticUnitId: 'lejos',
+        practiceSiteId: 'ps-lejos',
+        siteRoleConceptId: DUNIT.SITE_ROLE_PRIMARY,
+      },
+    ]);
+
+    const res = await d.service.searchCoverage({ studyConceptIds: ['rx'] });
+
+    expect(res.items[0].addressText).toBe('Av. Banzer km 5, Santa Cruz');
+  });
+
+  it('solo entran los centros que ofrecen alguno de los estudios pedidos', async () => {
+    const d = threeCenters();
+
+    await d.service.searchCoverage({ studyConceptIds: ['rx', 'eco'] });
+
+    const [, criteria] = d.readRepo.searchVisible.mock.calls[0];
+    expect([...criteria.restrictToUnitIds].sort()).toEqual([
+      'cerca',
+      'lejos',
+      'sin-coordenadas',
+    ]);
+  });
+
+  it('se combina con los demás filtros del buscador', async () => {
+    const d = threeCenters();
+    d.readRepo.findUnitIdsWithInsurerAgreement.mockResolvedValue([
+      'lejos',
+      'otro',
+    ]);
+
+    await d.service.searchCoverage({
+      studyConceptIds: ['rx', 'eco'],
+      insurerTenantId: 'ins-1',
+      kind: 'IMAGING',
+    });
+
+    const [, criteria] = d.readRepo.searchVisible.mock.calls[0];
+    expect(criteria.restrictToUnitIds).toEqual(['lejos']);
+    expect(criteria.diagnosticUnitTypeConceptId).toBe(DUNIT.UNIT_TYPE_IMAGING);
+  });
+
+  it('si ningún centro ofrece ninguno, responde vacío sin buscar unidades', async () => {
+    const d = build();
+
+    const res = await d.service.searchCoverage({ studyConceptIds: ['rx'] });
+
+    expect(res).toEqual({ items: [], total: 0, limit: 20, offset: 0 });
+    expect(d.readRepo.searchVisible).not.toHaveBeenCalled();
+  });
+
+  it('lat sin lng es un pedido a medias y se rechaza', async () => {
+    const d = build();
+
+    await expect(
+      d.service.searchCoverage({ studyConceptIds: ['rx'], lat: ORIGIN.lat }),
+    ).rejects.toThrow(BadRequestException);
+    expect(d.readRepo.findOfferedConcepts).not.toHaveBeenCalled();
   });
 });

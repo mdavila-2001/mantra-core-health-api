@@ -2936,13 +2936,13 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio busca en la ciudad, no en su institución.
+Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio busca en la ciudad, no en su institución. Con `studyConceptIds` responde por cobertura —cada centro con `complete`, `missingStudyConceptIds` y `distanceKm`—: completos primero, después por distancia en línea recta desde `lat`/`lng`.
 
-Contexto declarado en el controlador: El buscador del paciente: centros publicados de toda la plataforma — CARRIL 11. Va declarado **antes** que `:id` por el mismo motivo que la consola de administración: el parámetro lleva `ParseUUIDPipe` y se comería `search`. No lleva `@Roles` porque es un directorio de prestadores publicados, no datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol lo dejaría fuera del alcance del paciente, que es para quien existe.
+Contexto declarado en el controlador: El buscador del paciente: centros publicados de toda la plataforma — CARRIL 11. Va declarado **antes** que `:id` por el mismo motivo que la consola de administración: el parámetro lleva `ParseUUIDPipe` y se comería `search`. No lleva `@Roles` porque es un directorio de prestadores publicados, no datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol lo dejaría fuera del alcance del paciente, que es para quien existe. Con `studyConceptIds` responde por cobertura: si cada centro tiene todos los estudios pedidos, cuáles le faltan y a qué distancia queda. Sin ese parámetro la respuesta es la de siempre.
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /diagnostic-units/search` en `DiagnosticUnitsController_search`. El controlador delega en `DiagnosticUnitsSearchService.search`. No recibe body. El tipo de retorno estático es `Promise<SearchDiagnosticUnitsResponseDto>`.
+NestJS resuelve `GET /diagnostic-units/search` en `DiagnosticUnitsController_search`. El controlador delega en `DiagnosticUnitsSearchService.searchCoverage`, `DiagnosticUnitsSearchService.search`. No recibe body. El tipo de retorno estático es `Promise<SearchDiagnosticUnitsResponseDto>`.
 
 ### Parámetros
 
@@ -2952,6 +2952,9 @@ NestJS resuelve `GET /diagnostic-units/search` en `DiagnosticUnitsController_sea
 | `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `kind` | query | No | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en OpenAPI. | `LABORATORY` |
 | `studyCode` | query | No | `string` | Sin restricción adicional declarada | Código del estudio buscado | `CODIGO_EJEMPLO` |
+| `studyConceptIds` | query | No | `string` | Sin restricción adicional declarada | Conceptos de estudio separados por coma (uuid). Activa la búsqueda por cobertura. | `1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d` |
+| `lat` | query | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en OpenAPI. | `1` |
+| `lng` | query | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en OpenAPI. | `1` |
 | `insurerTenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `homeCollection` | query | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `true` |
 | `walkIn` | query | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `true` |
@@ -2984,7 +2987,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostic-units/search?q=valor-ejemplo&tenantId=00000000-0000-4000-8000-000000000001&kind=LABORATORY&studyCode=CODIGO_EJEMPLO&insurerTenantId=00000000-0000-4000-8000-000000000001&homeCollection=true&walkIn=true&acceptsExternalOrders=true&maxAmount=1&minRating=1&limit=20&offset=0 HTTP/1.1
+GET /diagnostic-units/search?q=valor-ejemplo&tenantId=00000000-0000-4000-8000-000000000001&kind=LABORATORY&studyCode=CODIGO_EJEMPLO&studyConceptIds=1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c%2C2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d&lat=1&lng=1&insurerTenantId=00000000-0000-4000-8000-000000000001&homeCollection=true&walkIn=true&acceptsExternalOrders=true&maxAmount=1&minRating=1&limit=20&offset=0 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -3026,7 +3029,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "minAmountCurrency": {},
       "cities": [
         "valor-ejemplo"
-      ]
+      ],
+      "complete": true,
+      "missingStudyConceptIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "distanceKm": 1,
+      "addressText": "valor-ejemplo",
+      "latitude": 1,
+      "longitude": 1
     }
   ],
   "total": 1,
@@ -3039,7 +3050,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<DiagnosticUnitSearchItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{},"tenantId":"00000000-0000-4000-8000-000000000001","rating":{},"ratingCount":1,"minAmount":{},"minAmountCurrency":{},"cities":["valor-ejemplo"]}]` |
+| `items` | Sí | `array<DiagnosticUnitSearchItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{},"tenantId":"00000000-0000-4000-8000-000000000001","rating":{},"ratingCount":1,"minAmount":{},"minAmountCurrency":{},"cities":["valor-ejemplo"],"complete":true,"missingStudyConceptIds":["00000000-0000-4000-8000-000000000001"],"distanceKm":1,"addressText":"valor-ejemplo","latitude":1,"longitude":1}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -3058,6 +3069,12 @@ Campos de la respuesta:
 | `items[].minAmount` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].minAmountCurrency` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].cities` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].complete` | No | `boolean` | Sin restricción adicional declarada | Solo con `studyConceptIds`: ofrece todos los estudios pedidos | `true` |
+| `items[].missingStudyConceptIds` | No | `array<string>` | Sin restricción adicional declarada | Solo con `studyConceptIds`: los estudios pedidos que no ofrece | `["00000000-0000-4000-8000-000000000001"]` |
+| `items[].distanceKm` | No | `number` | admite null | Solo con `studyConceptIds`: km en línea recta desde `lat`/`lng` hasta la sede principal | `1` |
+| `items[].addressText` | No | `string` | admite null | Solo con `studyConceptIds`: dirección de la sede principal | `valor-ejemplo` |
+| `items[].latitude` | No | `number` | admite null | Solo con `studyConceptIds`: latitud de la sede principal | `1` |
+| `items[].longitude` | No | `number` | admite null | Solo con `studyConceptIds`: longitud de la sede principal | `1` |
 | `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `offset` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |

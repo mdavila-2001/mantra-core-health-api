@@ -197,6 +197,11 @@ export type { ConceptName } from './constants/concepts';
 export { STICKER_PACK, STICKER_PACK_FILE_IDS } from './constants/sticker-pack';
 export type { StickerPackEntry } from './constants/sticker-pack';
 
+// Distancia en línea recta (ver el JSDoc del módulo: convive con las copias
+// locales de farmacia, comunidad y marketplace, no las reemplaza)
+export { straightLineKm, coordinateOf } from './geo/straight-line-distance';
+export type { GeoPoint } from './geo/straight-line-distance';
+
 // Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
 // de accounting y billing, no las reemplaza)
 export {
