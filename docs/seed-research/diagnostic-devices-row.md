@@ -84,3 +84,36 @@ Fuentes descartadas en esta pasada:
 |---|---|
 | `misterrPink1/symmetric/AccessGUDID.zip` | Es GUDID de la FDA: corresponde a la región `us/`. |
 | Apify (actores de ANVISA y Health Canada) | Servicio pago de terceros, no es un archivo oficial ni una copia de uno. |
+
+## Pasada 2 — búsqueda de espejos por país (2026-10-24)
+
+Búsquedas web (`site:github.com` y sin restricción) por registro: NMPA, MFDS,
+TFDA, INVIMA, OMS PQ, ARTG, CDSCO, COFEPRIS, HSA, SFDA y ANMAT. Candidatos
+clonados y revisados en `dx-devices-build/row/candidates/` (fuera de git).
+
+| Fuente | Espejo | Filas nuevas | Fabricantes nuevos (exacto) | Marcas nuevas (exacto) |
+|---|---|--:|--:|--:|
+| `cdsco-import-licences` | vishnuu-patil/india-meddevice-intelligence `62e88588` (licencias hasta 2026-10-01) | 25 792 | 3 013 | 13 888 |
+| **Total acumulado** | | **3 534 775** | **26 968** | **240 458** (pares fabricante+marca) |
+
+Fabricantes y marcas nuevos = diferencia de los totales exactos entre la
+pasada 1 y la 2 (los 3 367 fabricantes de CDSCO incluyen 354 que ya
+figuraban, con el mismo texto, en otra fuente).
+
+Candidatos descartados:
+
+| Candidato | Motivo |
+|---|---|
+| masalu0105-gif/taiwan-laboratory-mcp, release `data-20261023` (TFDA, 104 891 licencias de data.gov.tw/9576) | Los assets de releases solo se bajan con el repo adjuntado con credenciales; esa acción fue denegada en esta sesión. Queda como hueco con la ubicación exacta. |
+| xesxoo3417/medical-device-search `medical_devices_500.csv` | Es la clasificación de productos de MFDS (품목분류, 500 ítems), no registros de dispositivos. |
+| hylussd/NMPA-Search | Herramienta de consulta por navegador; solo trae registros de muestra en el README. |
+| Contextual-Intelligence/orsd | Agregador de alertas regulatorias; no trae registros de dispositivos. |
+| thakorakash04-cell/meddevice-research-platform | El clon pide credenciales (repo privado o borrado). |
+| anoukkim/emedi-crawler (MFDS) | Es un recolector con Selenium; no publica datos. |
+| MightyAli98/pms-quality-control-room (SFDA) | Alertas de seguridad, no el registro nacional de dispositivos. |
+| JediLin/Taiwan-*-permit-license-data-table-generator | Generadores que bajan el XML de TFDA en cada corrida; no traen los datos. |
+| Apify, kmong y otros servicios pagos | No son archivos oficiales ni copias de uno. |
+
+Sin espejo encontrado (siguen como hueco en `manifest.gaps`): NMPA, MFDS,
+TFDA, INVIMA, COFEPRIS, ANMAT, ISP, DIGEMID, AGEMED, HSA, SFDA, AMAR, Thai FDA,
+MDA, SAHPRA, OMS PQ, UNICEF, ARTG completo.

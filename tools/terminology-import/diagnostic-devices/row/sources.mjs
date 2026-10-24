@@ -75,6 +75,17 @@ export const MIRRORS = Object.freeze({
       },
     ],
   },
+  'vishnuu-patil/india-meddevice-intelligence': {
+    url: 'https://github.com/vishnuu-patil/india-meddevice-intelligence',
+    commit: '62e88588be6ce521c9f38d2530f0cf732f8cd810',
+    pins: [
+      {
+        path: 'Data/MD - Medical Devices.xlsx',
+        kind: 'sha256',
+        hash: 'df21440356cf3da7f3fc8a4fa9e148209662b30be370d4100234657581f4511c',
+      },
+    ],
+  },
 });
 
 /** URL del archivo leído, fijada al commit del espejo. */
@@ -108,6 +119,7 @@ export const OFFICIAL = Object.freeze({
   hcMdallApi:
     'https://health-products.canada.ca/api/documentation/mdall-documentation-en.html',
   tgaDaen: 'https://apps.tga.gov.au/Prod/devices/daen-entry.aspx',
+  cdsco: 'https://cdscomdonline.gov.in/',
 });
 
 /** Fuentes buscadas que NO se pudieron obtener: van a `manifest.gaps`. */
@@ -142,12 +154,14 @@ export const GAPS = Object.freeze([
   },
   {
     source: 'tfda-devices',
-    reason: '403 del proxy (data.gov.tw)',
+    reason:
+      '403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión',
     url: 'https://data.gov.tw/dataset/9576',
   },
   {
     source: 'cdsco-devices',
-    reason: '403 del proxy (cdsco.gov.in)',
+    reason:
+      '403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales',
     url: 'https://cdsco.gov.in/',
   },
   {

@@ -1,6 +1,6 @@
 # Cobertura · equipos de diagnóstico · resto del mundo (ROW)
 
-Generado por `coverage.mjs` desde `out/manifest.json` (2026-10-24T03:54:33.975Z). No editar a mano.
+Generado por `coverage.mjs` desde `out/manifest.json` (2026-10-24T04:04:55.458Z). No editar a mano.
 
 Fabricantes y marcas se cuentan por texto exacto, sin normalizar; la unión entre fuentes la hace `master/`.
 Las filas incluyen todos los dispositivos de cada registro: el recorte a «diagnóstico» lo hace `master/` (ver `SOURCES.md`).
@@ -14,7 +14,8 @@ Las filas incluyen todos los dispositivos de cada registro: el recorte a «diagn
 | `pmda-approvals` | JP | 35.298 | 0 | 2.716 | 31.127 | 2.093 |
 | `hc-mdall` | CA | 2.333.236 | 2.333.233 | 6.236 | 57.356 | 1 |
 | `tga-daen` | AU | 18.917 | 13.358 | 1.674 | 16.091 | 1.777 |
-| **Total** | | **3.508.983** | | **23.955** | **226.570** (fabricante+marca) | |
+| `cdsco-import-licences` | IN | 25.792 | 22.888 | 3.367 | 12.710 | 11.966 |
+| **Total** | | **3.534.775** | | **26.968** | **240.458** (fabricante+marca) | |
 
 ## `anvisa-produtos`
 
@@ -192,6 +193,46 @@ US 2.764 · CA 954 · DE 405 · GB 296 · CN 236 · FR 231 · IL 158 · IT 132 �
 
 (sin país) 1.674
 
+## `cdsco-import-licences`
+
+### Tipos más frecuentes (de 11.966)
+
+| Tipo (verbatim) | Filas |
+|---|--:|
+| Catheter | 141 |
+| Anchor with Suture | 78 |
+| Hip System | 72 |
+| Soft Contact Lens | 72 |
+| Sutures | 70 |
+| Implantable Cardioverter Defibrillator | 65 |
+| Suture Anchor | 65 |
+| Pacemaker | 63 |
+| Intraocular Lens | 54 |
+| Cardiac Resynchronization Therapy Defibrillator | 53 |
+| Diagnostic Ultrasound System | 52 |
+| Electrophysiology Catheter | 51 |
+| Electrocardiograph | 50 |
+| Media used for in vitro fertilisation | 50 |
+| Patient Monitor | 50 |
+| Infusion Pump | 48 |
+| Mesh | 45 |
+| Blood Pressure Monitoring Device | 44 |
+| Dental Implants | 43 |
+| Prefillable Glass barrel with Needle | 43 |
+| Ventilator | 43 |
+| Contact Lens | 42 |
+| Guidewire | 40 |
+| Computed Tomography | 38 |
+| Suture | 38 |
+
+### Clase de riesgo
+
+`in:B` 10.478 · `in:C` 10.246 · `in:D` 4.300 · `in:A` 768
+
+### Fabricantes por país del fabricante
+
+US 725 · CN 697 · DE 306 · KR 264 · IT 167 · FR 163 · CH 123 · JP 109 · GB 104 · IL 101 · TR 44 · DK 39 · ES 39 · NL 39 · SE 36 · IE 33 · TW 33 · AU 32 · CA 32 · PL 25 · BE 24 · BR 22 · MY 20 · AT 19 · SG 18 · FI 17 · CZ 13 · HU 11 · RU 11 · AR 9 · SI 7 · TH 7 · ZA 7 · MU 6 · HK 5 · NO 5 · SK 5 · GR 4 · LV 4 · NZ 4 · PT 4 · BD 3 · CR 3 · EG 3 · GE 3 · ID 3 · LT 3 · MX 3 · PH 3 · AE 2 · IN 2 · SZ 2 · VN 2 · BB 1 · BG 1 · CY 1 · EE 1 · LI 1 · LK 1 · LU 1
+
 ## Huecos
 
 | Fuente | Motivo | URL |
@@ -201,8 +242,8 @@ US 2.764 · CA 954 · DE 405 · GB 296 · CN 236 · FR 231 · IL 158 · IT 132 �
 | `tga-artg` | 403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial | https://www.tga.gov.au/resources/artg |
 | `nmpa-udi` | 403 del proxy (udi.nmpa.gov.cn) | https://udi.nmpa.gov.cn/ |
 | `mfds-devices` | 403 del proxy (www.data.go.kr, emedi.mfds.go.kr) | https://www.data.go.kr/ |
-| `tfda-devices` | 403 del proxy (data.gov.tw) | https://data.gov.tw/dataset/9576 |
-| `cdsco-devices` | 403 del proxy (cdsco.gov.in) | https://cdsco.gov.in/ |
+| `tfda-devices` | 403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión | https://data.gov.tw/dataset/9576 |
+| `cdsco-devices` | 403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales | https://cdsco.gov.in/ |
 | `hsa-smdr` | 403 del proxy (data.gov.sg) | https://data.gov.sg/ |
 | `amar-devices` | 403 del proxy (data.gov.il) | https://data.gov.il/ |
 | `sfda-mdma` | 403 del proxy (medicaldevice.sfda.gov.sa) | https://medicaldevice.sfda.gov.sa/ |

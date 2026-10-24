@@ -23,6 +23,7 @@ const REGISTRY_COUNTRY = {
   'pmda-approvals': 'JP',
   'hc-mdall': 'CA',
   'tga-daen': 'AU',
+  'cdsco-import-licences': 'IN',
 };
 
 const TOP = 25;

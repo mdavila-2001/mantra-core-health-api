@@ -20,6 +20,7 @@ import {
   anvisaUpdateStamp,
   splitSemicolonCsv,
 } from './lib/anvisa.mjs';
+import { cdscoRows } from './lib/cdsco.mjs';
 import { indexMdall, mdallRows } from './lib/hc-mdall.mjs';
 import { PartWriter } from './lib/out.mjs';
 import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
@@ -229,12 +230,44 @@ async function buildDaen() {
   };
 }
 
+async function buildCdsco() {
+  const repo = 'vishnuu-patil/india-meddevice-intelligence';
+  const path = 'Data/MD - Medical Devices.xlsx';
+  const sheetRows = readFileSync(
+    join(EXTRACTED_DIR, 'cdsco', 'md-medical-devices.jsonl'),
+    'utf8',
+  )
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+  const ctx = {
+    sourceUrl: mirrorFileUrl(repo, path),
+    sourceVersion: '',
+    retrievedAt: retrievedAt(repo),
+    mirror: mirrorRef(repo, path),
+    officialPortal: OFFICIAL.cdsco,
+  };
+  const probe = cdscoRows(sheetRows, { ...ctx, sourceVersion: 'probe' });
+  const lastIssued = probe.rows
+    .map((r) => r.authorizationDate)
+    .filter(Boolean)
+    .sort()
+    .pop();
+  const sourceVersion = `MD - Medical Devices, licencias emitidas hasta ${lastIssued} (espejo ${short(repo)})`;
+  const { rows, skipped } = cdscoRows(sheetRows, { ...ctx, sourceVersion });
+  return {
+    files: await writeSource('cdsco-import-licences', sourceVersion, rows),
+    stats: { sheetRows: sheetRows.length, rows: rows.length, ...skipped },
+  };
+}
+
 const BUILDERS = {
   'anvisa-produtos': buildAnvisaProdutos,
   'anvisa-produtos-modelos': buildAnvisaModelos,
   'pmda-approvals': buildPmda,
   'hc-mdall': buildMdall,
   'tga-daen': buildDaen,
+  'cdsco-import-licences': buildCdsco,
 };
 
 async function main() {

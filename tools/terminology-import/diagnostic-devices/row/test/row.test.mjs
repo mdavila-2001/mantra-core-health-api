@@ -18,6 +18,7 @@ import {
   anvisaUpdateStamp,
   splitSemicolonCsv,
 } from '../lib/anvisa.mjs';
+import { cdscoRows, expandShowMore, parseCdscoLicence } from '../lib/cdsco.mjs';
 import { indexMdall, mdallRows } from '../lib/hc-mdall.mjs';
 import { PartWriter } from '../lib/out.mjs';
 import { pmdaRows } from '../lib/pmda.mjs';
@@ -257,4 +258,50 @@ test('salida: partes gzip legibles, filas completas y sha256 en el manifiesto', 
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('CDSCO: fabricante legal y país del sitio, «Show More» resuelto y clase A–D', () => {
+  const sheet = fixture('cdsco-md-medical-devices.jsonl')
+    .split('\n')
+    .filter(Boolean)
+    .map((l) => JSON.parse(l));
+  const { rows, skipped } = cdscoRows(sheet, CTX);
+  assert.equal(rows.length, 4);
+  assert.deepEqual(skipped, { badLicence: 0, withoutManufacturer: 0 });
+  const [bandage, valve, , needles] = rows;
+  assert.equal(bandage.sourceRecordId, 'IMP/MD/2018/000001#1');
+  assert.equal(bandage.authorizationDate, '2018-03-16');
+  assert.equal(bandage.manufacturerName, 'Facet Technologies,LLC');
+  assert.equal(bandage.manufacturerCountry, 'US');
+  assert.equal(bandage.riskClass, 'in:B');
+  assert.equal(bandage.model, '85200 - Sureseal XL Pressure Bandage');
+  assert.equal(
+    valve.manufacturerName,
+    'Cardiamed B V',
+    'el sitio legal gana aunque aparezca segundo',
+  );
+  assert.equal(valve.manufacturerCountry, 'NL');
+  assert.deepEqual(
+    valve.extra.manufacturingSites.map((s) => [s.role, s.name, s.country]),
+    [
+      ['actual', 'ZAO NPP MedEng', 'RU'],
+      ['legal', 'Cardiamed B V', 'NL'],
+    ],
+  );
+  assert.ok(
+    !valve.model.includes('Show More') &&
+      valve.model.endsWith('diameters 21mm'),
+  );
+  assert.equal(needles.model, null, '«NIL» es vacío');
+  assert.equal(needles.manufacturerName, 'M/s Novo Nordisk A/S');
+});
+
+test('CDSCO: licencia y artefacto de la página', () => {
+  assert.deepEqual(
+    parseCdscoLicence('Licence no: IMP/MD/2018/000005 Issued on: 18-SEP-2023'),
+    { number: 'IMP/MD/2018/000005', date: '2023-09-18' },
+  );
+  assert.equal(parseCdscoLicence('IMP/MD/2018/000005'), null);
+  assert.equal(expandShowMore('A, B... Show MoreA, B, C Show Less'), 'A, B, C');
+  assert.equal(expandShowMore('sin botón'), 'sin botón');
 });
