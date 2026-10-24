@@ -5,6 +5,7 @@ import { ConflictException, type AuthenticatedUser } from '../../../common';
 import { OrganizationDataBoundariesRepository } from '../repositories';
 import { CreateDataBoundaryDto, DataBoundaryResponseDto } from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
+import { resolveOwnerTenantId } from '../organization_extensions.tenant-scope';
 
 /**
  * Caso de uso de frontera de datos (residencia/RLS): definición (UC-22-08). El
@@ -34,8 +35,9 @@ export class OrgextDataBoundariesService {
     dto: CreateDataBoundaryDto,
     actor: AuthenticatedUser,
   ): Promise<DataBoundaryResponseDto> {
+    const tenantId = resolveOwnerTenantId(dto.tenantId);
     this.logger.info(
-      { operation: 'orgext.data-boundary.define', tenantId: dto.tenantId },
+      { operation: 'orgext.data-boundary.define', tenantId },
       'Defining organization data boundary',
     );
     return this.em.transactional(async (tx) => {
@@ -43,7 +45,7 @@ export class OrgextDataBoundariesService {
         dto.boundaryTypeConceptId ?? ORGEXT.BOUNDARY_TYPE_RESIDENCY;
       const existing = await this.boundariesRepo.findActiveByTenantAndType(
         tx,
-        dto.tenantId,
+        tenantId,
         boundaryTypeConceptId,
         ORGEXT.BOUNDARY_ACTIVE,
       );
@@ -57,12 +59,12 @@ export class OrgextDataBoundariesService {
         );
         throw new ConflictException(
           'Ya existe una frontera de datos activa de ese tipo para el tenant',
-          { tenantId: dto.tenantId },
+          { tenantId },
         );
       }
 
       const boundary = this.boundariesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         boundaryTypeConceptId,
         dataControllerTenantId: dto.dataControllerTenantId,
         dataProcessorTenantId: dto.dataProcessorTenantId,

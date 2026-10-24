@@ -4,11 +4,18 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { PharmaciesRepository, PharmacySitesRepository } from '../repositories';
+import {
+  PharmaciesRepository,
+  PharmacyReferencesRepository,
+  PharmacySitesRepository,
+} from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
+import {
+  assertReferenceInScope,
+  requireManagedPharmacy,
+} from './pharmacy-scope';
 import { CreateSiteDto, SiteResponseDto } from '../dto';
 
 /**
@@ -23,12 +30,14 @@ export class PharmacySitesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param pharmaciesRepo - Valor de pharmacies repo requerido por la operación.
    * @param sitesRepo - Valor de sites repo requerido por la operación.
+   * @param referencesRepo - Comprobación de propiedad de las referencias del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly pharmaciesRepo: PharmaciesRepository,
     private readonly sitesRepo: PharmacySitesRepository,
+    private readonly referencesRepo: PharmacyReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PharmacySitesService.name);
@@ -45,16 +54,26 @@ export class PharmacySitesService {
       'Creating pharmacy site',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
         throw new PreconditionFailedException('La farmacia no está activa', {
           pharmacyId,
         });
       }
+
+      // La sede de práctica debe ser de una práctica del tenant de la farmacia.
+      assertReferenceInScope(
+        await this.referencesRepo.practiceSiteBelongsToTenant(
+          tx,
+          dto.practiceSiteId,
+          pharmacy.tenantId,
+        ),
+      );
 
       const clash = await this.sitesRepo.findByPharmacyAndCode(
         tx,

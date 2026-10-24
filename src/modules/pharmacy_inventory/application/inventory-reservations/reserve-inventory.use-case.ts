@@ -19,6 +19,7 @@ import {
   numericQuantity,
   recomputeAvailableQuantity,
 } from '../../domain/counting/stock-quantity';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Reserva stock y registra el movimiento contable en una sola transacción. */
 @Injectable()
@@ -28,6 +29,7 @@ export class ReserveInventoryUseCase {
     private readonly reservations: ReservationsRepository,
     private readonly stock: StockPositionsRepository,
     private readonly ledger: LedgerRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -45,6 +47,27 @@ export class ReserveInventoryUseCase {
       'Reserving stock',
     );
     return this.em.transactional(async (tx) => {
+      // Toda la cadena se resuelve antes de la primera escritura: farmacia del
+      // tenant, sede, ubicaciones, productos, lotes, paciente y receta.
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        pharmacyId,
+        actor,
+      );
+      const site = await this.scope.requireSite(
+        tx,
+        pharmacy,
+        dto.pharmacySiteId,
+      );
+      await this.scope.requirePatientContext(
+        tx,
+        dto.patientProfileId,
+        dto.medicationRequestId,
+      );
+      for (const line of dto.lines) {
+        await this.scope.requireStockKey(tx, site, line);
+      }
+
       const expiresAt = new Date(
         Date.now() + (dto.expiresInMinutes ?? 60) * 60_000,
       );

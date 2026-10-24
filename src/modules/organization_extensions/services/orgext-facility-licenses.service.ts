@@ -4,7 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -16,6 +16,10 @@ import {
   StatusResultDto,
 } from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
+import {
+  requireOrgextResource,
+  resolveOwnerTenantId,
+} from '../organization_extensions.tenant-scope';
 
 /**
  * Casos de uso de licencias de instalación: registro (UC-22-05) y verificación /
@@ -44,8 +48,9 @@ export class OrgextFacilityLicensesService {
     dto: CreateFacilityLicenseDto,
     actor: AuthenticatedUser,
   ): Promise<FacilityLicenseResponseDto> {
+    const tenantId = resolveOwnerTenantId(dto.tenantId);
     this.logger.info(
-      { operation: 'orgext.license.register', tenantId: dto.tenantId },
+      { operation: 'orgext.license.register', tenantId },
       'Registering facility license',
     );
     return this.em.transactional(async (tx) => {
@@ -53,7 +58,7 @@ export class OrgextFacilityLicensesService {
         dto.licenseTypeConceptId ?? ORGEXT.LICENSE_TYPE_OPERATING;
       const clash = await this.licensesRepo.findByNumber(
         tx,
-        dto.tenantId,
+        tenantId,
         licenseTypeConceptId,
         dto.licenseNumber,
       );
@@ -69,7 +74,7 @@ export class OrgextFacilityLicensesService {
       }
 
       const license = this.licensesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         practiceSiteId: dto.practiceSiteId,
         facilityTypeConceptId:
           dto.facilityTypeConceptId ?? ORGEXT.FACILITY_TYPE_HOSPITAL,
@@ -100,16 +105,18 @@ export class OrgextFacilityLicensesService {
     dto: VerifyLicenseDto,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'orgext.license.verify', licenseId, decision: dto.decision },
       'Verifying facility license',
     );
     return this.em.transactional(async (tx) => {
-      const license = await this.licensesRepo.findById(tx, licenseId);
-      if (!license)
-        throw new ResourceNotFoundException('Licencia no encontrada', {
-          licenseId,
-        });
+      const found = await this.licensesRepo.findByIdInTenant(
+        tx,
+        licenseId,
+        tenantId,
+      );
+      const license = requireOrgextResource(found, found?.tenantId, tenantId);
 
       if (license.verificationStatusConceptId !== ORGEXT.LICENSE_PENDING) {
         throw new PreconditionFailedException(

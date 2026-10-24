@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
   PreconditionFailedException,
   touch,
   type AuthenticatedUser,
@@ -19,6 +18,7 @@ import {
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
 import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 const num = (v: string | null | undefined): number =>
   v == null ? 0 : Number(v);
@@ -38,6 +38,7 @@ export class DispenseMedicationUseCase {
     private readonly reservationsRepo: ReservationsRepository,
     private readonly stockRepo: StockPositionsRepository,
     private readonly ledgerRepo: LedgerRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -56,6 +57,12 @@ export class DispenseMedicationUseCase {
       'Dispensing medication',
     );
     return this.em.transactional(async (tx) => {
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        pharmacyId,
+        actor,
+      );
+
       // Idempotencia: un retry con la misma clave devuelve la dispensación ya
       // creada SIN repetir el descuento de stock ni los asientos del ledger.
       if (dto.idempotencyKey) {
@@ -81,15 +88,34 @@ export class DispenseMedicationUseCase {
         }
       }
 
+      // Sede, ubicaciones, productos, lotes, paciente y receta: toda la cadena
+      // se resuelve antes de la primera escritura.
+      const site = await this.scope.requireSite(
+        tx,
+        pharmacy,
+        dto.pharmacySiteId,
+      );
+      await this.scope.requirePatientContext(
+        tx,
+        dto.patientProfileId,
+        dto.medicationRequestId,
+      );
+      for (const line of dto.lines) {
+        await this.scope.requireStockKey(tx, site, line);
+      }
+
       if (dto.inventoryReservationId) {
         const reservation = await this.reservationsRepo.findById(
           tx,
           dto.inventoryReservationId,
         );
-        if (!reservation) {
-          throw new ResourceNotFoundException('Reserva no encontrada', {
-            reservationId: dto.inventoryReservationId,
-          });
+        // La reserva debe ser de esta farmacia y de esta sede.
+        if (
+          !reservation ||
+          reservation.pharmacyId !== pharmacy.pharmacyId ||
+          reservation.pharmacySiteId !== site.siteId
+        ) {
+          throw this.scope.notAvailable();
         }
         // Un pedido de paciente NO se dispensa por acá: su entrega exige el
         // código de retiro y acumula por línea (FAR-E3). Esta ruta cierra la
