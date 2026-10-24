@@ -35,6 +35,68 @@ export function lastModifiedOf(headersText) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+/**
+ * Dataset Socrata (datos.gov.co, …) en páginas CSV de `pageSize` filas,
+ * ordenadas por `:id` para que la paginación sea estable. Cada página queda
+ * como `<name>-NNNN.csv` con su sha256; los metadatos del dataset
+ * (`/api/views/<id>.json`, con `rowsUpdatedAt` y licencia) van al lado.
+ */
+async function fetchSocrata(dir, group, file) {
+  const { domain, id, pageSize = 50000 } = file.socrata;
+  const metaPath = join(dir, `${file.name}.meta.json`);
+  execFileSync('curl', [
+    '-sS',
+    '--fail',
+    '-L',
+    '--retry',
+    '4',
+    '-m',
+    '300',
+    '-o',
+    metaPath,
+    `https://${domain}/api/views/${id}.json`,
+  ]);
+  const pages = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const name = `${file.name}-${String(pages.length + 1).padStart(4, '0')}.csv`;
+    const path = join(dir, name);
+    const url = `https://${domain}/resource/${id}.csv?$limit=${pageSize}&$offset=${offset}&$order=:id`;
+    execFileSync('curl', [
+      '-sS',
+      '--fail',
+      '-L',
+      '--retry',
+      '4',
+      '--retry-delay',
+      '5',
+      '-m',
+      '1800',
+      '-o',
+      path,
+      url,
+    ]);
+    const lines =
+      readFileSync(path, 'utf8')
+        .split('\n')
+        .filter((l) => l !== '').length - 1;
+    pages.push({ name, offset, sha256: await sha256File(path) });
+    console.log(`${group}  ${name}  offset ${offset}`);
+    if (lines < pageSize) break;
+  }
+  const meta = readJson(metaPath);
+  return {
+    group,
+    path: join(group, file.name),
+    dataset: `https://${domain}/d/${id}`,
+    rowsUpdatedAt: meta.rowsUpdatedAt
+      ? new Date(meta.rowsUpdatedAt * 1000).toISOString()
+      : null,
+    license: meta.license?.name ?? null,
+    pages,
+    retrievedAt: new Date().toISOString(),
+  };
+}
+
 async function main() {
   const retrieved = existsSync(OFFICIAL_RETRIEVED)
     ? readJson(OFFICIAL_RETRIEVED)
@@ -43,6 +105,10 @@ async function main() {
     if (only !== null && !only.has(group)) continue;
     const dir = ensureDir(join(OFFICIAL_DIR, group));
     for (const file of files) {
+      if (file.socrata) {
+        retrieved[file.socrata.url] = await fetchSocrata(dir, group, file);
+        continue;
+      }
       const path = join(dir, file.name);
       const headersPath = `${path}.headers`;
       if (!(skipExisting && existsSync(path) && existsSync(headersPath))) {

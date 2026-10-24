@@ -1,6 +1,6 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T17:12:06.410Z",
+  "generatedAt": "2026-10-24T17:21:08.356Z",
   "formatVersion": 1,
   "files": [
     {
@@ -106,6 +106,14 @@
       "rows": 688258,
       "bytes": 22298119,
       "sha256": "86e9ee6af3951fb76222f5976760094ab2c062be2a29c4593fc4b62df66dd473"
+    },
+    {
+      "path": "invima-dispositivos.ndjson.gz",
+      "source": "invima-dispositivos",
+      "sourceVersion": "datos.gov.co y4qt-w6tk rowsUpdatedAt 2026-10-16T12:28:35.000Z",
+      "rows": 71434,
+      "bytes": 12923050,
+      "sha256": "3c143da6196bcb19cb562359a850ce0aad7d8d1723d7fe502a59c3a71f80e8a2"
     }
   ],
   "nomenclatures": [
@@ -181,6 +189,60 @@
       "rows": 688258,
       "withoutLicence": 41,
       "duplicates": 0
+    },
+    "invima-dispositivos": {
+      "inputLines": 433404,
+      "rows": 71434,
+      "groups": 71434,
+      "manufacturerFromHolder": 27869,
+      "withoutName": 0,
+      "pages": [
+        {
+          "name": "y4qt-w6tk-0001.csv",
+          "offset": 0,
+          "sha256": "dd0813bac308f8b47990b470fbd08188f0cd1a09aec6b40f8f70b7a000509a76"
+        },
+        {
+          "name": "y4qt-w6tk-0002.csv",
+          "offset": 50000,
+          "sha256": "2cc558b190317fb19a72bf9fd36871b58db5afa5b8cc59283291088b226a43be"
+        },
+        {
+          "name": "y4qt-w6tk-0003.csv",
+          "offset": 100000,
+          "sha256": "b767b141542fe145b77a985c0ee700aa3a5201518bf1b8a0ddf0be9e3c1db7e1"
+        },
+        {
+          "name": "y4qt-w6tk-0004.csv",
+          "offset": 150000,
+          "sha256": "9c5dfb567b17300038b14046acb2a3daacbce8f7ec3eb9656d3bc1fb7c2f3ea2"
+        },
+        {
+          "name": "y4qt-w6tk-0005.csv",
+          "offset": 200000,
+          "sha256": "edcb2e2010f5758d6d6ee9a49bf06b7c763e7186fda39f8fc689e3bc4d6fffb3"
+        },
+        {
+          "name": "y4qt-w6tk-0006.csv",
+          "offset": 250000,
+          "sha256": "17590972246bbd7005039a5249a3415dc149f0d97615443575a1495b5baaf2e3"
+        },
+        {
+          "name": "y4qt-w6tk-0007.csv",
+          "offset": 300000,
+          "sha256": "d09d7e97d9c8dc9e76af73351fc6149acee6e4d115744ed3ab35d848628ebd4e"
+        },
+        {
+          "name": "y4qt-w6tk-0008.csv",
+          "offset": 350000,
+          "sha256": "01a7d4f099d32774e49a54c210b6d46756849565a5cc90f7cfc80abddddf766f"
+        },
+        {
+          "name": "y4qt-w6tk-0009.csv",
+          "offset": 400000,
+          "sha256": "69f6b93060217e175d5c2da958284ece545f3bb7d38ddf527dc8d85fcaf5cdc0"
+        }
+      ]
     }
   },
   "gaps": [
@@ -233,11 +295,6 @@
       "source": "mda-medcast",
       "reason": "403 del proxy (portal.mda.gov.my)",
       "url": "https://portal.mda.gov.my/"
-    },
-    {
-      "source": "invima-dispositivos",
-      "reason": "403 del proxy (www.datos.gov.co)",
-      "url": "https://www.datos.gov.co/"
     },
     {
       "source": "cofepris-dispositivos",

@@ -34,6 +34,7 @@ import {
   rowErrors,
   textOrNull,
 } from '../lib/row.mjs';
+import { invimaDate, invimaRows, invimaText } from '../lib/invima.mjs';
 import {
   splitTfdaCategory,
   tfdaDate,
@@ -479,4 +480,30 @@ test('JMDN: la ficha de PMDA (Shift_JIS) se parte en código, clase, 類別, 中
     rows.every((r) => r.riskClass === null && r.deviceTypeCode === null),
     'la unión por nombre no rellena campos principales',
   );
+});
+
+test('INVIMA: grupo y nivel de riesgo propios, fabricante por rol y titular si no hay fabricante', () => {
+  const { rows, stats } = invimaRows(parseCsv(fixture('invima-y4qt.csv')), CTX);
+  const roche = rows.find((r) => r.authorizationId === 'INVIMA 2018RD-0004850');
+  assert.equal(roche.deviceTypeSystem, 'co:invima-grupo');
+  assert.equal(roche.deviceTypeName, 'REACTIVO DIAGNOSTICO');
+  assert.equal(roche.manufacturerName, 'ROCHE DIAGNOSTICS GMBH');
+  assert.equal(roche.manufacturerCountry, 'DE');
+  assert.equal(roche.riskClass, 'co:II');
+  assert.equal(
+    roche.brandName,
+    null,
+    'el literal «null» de la exportación es vacío',
+  );
+  assert.equal(roche.extra.productName, 'ELECSYS B-AMYLOID (1-42) CSF');
+  assert.equal(roche.extra.validUntil, '2028-03-26');
+  assert.ok(roche.extra.roles.some((r) => r.role === 'IMPORTADOR'));
+  const fromHolder = rows.filter(
+    (r) => r.extra.manufacturerNameFrom === 'TITULAR',
+  );
+  assert.equal(fromHolder.length, stats.manufacturerFromHolder);
+  assert.ok(fromHolder.length >= 1);
+  assert.equal(fromHolder[0].manufacturerName, fromHolder[0].extra.holder.name);
+  assert.equal(invimaDate('07/18/2029 12:00:00 AM'), '2029-07-18');
+  assert.equal(invimaText('null'), null);
 });

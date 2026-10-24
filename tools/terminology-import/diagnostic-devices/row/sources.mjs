@@ -109,6 +109,16 @@ export const OFFICIAL = Object.freeze({
  */
 const ANVISA_DADOS = 'https://dados.anvisa.gov.br/dados/';
 export const OFFICIAL_DOWNLOADS = Object.freeze({
+  invima: [
+    {
+      name: 'y4qt-w6tk',
+      socrata: {
+        domain: 'www.datos.gov.co',
+        id: 'y4qt-w6tk',
+        url: 'https://www.datos.gov.co/d/y4qt-w6tk',
+      },
+    },
+  ],
   tfda: [
     {
       name: 'export68-csv.zip',
@@ -207,11 +217,6 @@ export const GAPS = Object.freeze([
     source: 'mda-medcast',
     reason: '403 del proxy (portal.mda.gov.my)',
     url: 'https://portal.mda.gov.my/',
-  },
-  {
-    source: 'invima-dispositivos',
-    reason: '403 del proxy (www.datos.gov.co)',
-    url: 'https://www.datos.gov.co/',
   },
   {
     source: 'cofepris-dispositivos',

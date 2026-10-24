@@ -198,3 +198,12 @@ estaba en una release de GitHub que no se pudo bajar).
 
 0 filas de dispositivos nuevas (es enriquecimiento). La base no tiene descarga
 masiva: se recorre por clase y por lotes, con pausa.
+
+## Pasada 8 — Colombia INVIMA (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas | Notas |
+|---|---|--:|---|
+| `invima-dispositivos` | datos.gov.co `y4qt-w6tk` (`rowsUpdatedAt` 2026-10-16), 433 404 líneas en 9 páginas | 71 434 | 34 053 registros sanitarios; grupo y nivel de riesgo propios de INVIMA |
+
+La descarga directa del CSV completo se cortaba a los 32 MB (curl 18); se baja
+paginada por la API Socrata, ordenada por `:id`. Licencia CC BY-SA 4.0.

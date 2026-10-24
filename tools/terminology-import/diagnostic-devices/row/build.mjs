@@ -31,6 +31,7 @@ import { PartWriter } from './lib/out.mjs';
 import { parseJmdnPage } from './lib/jmdn.mjs';
 import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
 import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
+import { invimaRows } from './lib/invima.mjs';
 import { tfdaRows, tudidRows } from './lib/tfda.mjs';
 import { daenDate, daenRows } from './lib/tga-daen.mjs';
 import {
@@ -450,6 +451,36 @@ async function buildTfda() {
   };
 }
 
+async function buildInvima() {
+  const meta = officialRetrieved['https://www.datos.gov.co/d/y4qt-w6tk'];
+  if (meta === undefined)
+    throw new Error('INVIMA: falta correr fetch-official.mjs --only invima');
+  const lines = meta.pages.flatMap((p) =>
+    parseCsv(readFileSync(join(OFFICIAL_DIR, 'invima', p.name), 'utf8')),
+  );
+  const sourceVersion = `datos.gov.co y4qt-w6tk rowsUpdatedAt ${meta.rowsUpdatedAt}`;
+  const { rows, stats } = invimaRows(lines, {
+    sourceUrl: meta.dataset,
+    sourceVersion,
+    retrievedAt: meta.retrievedAt,
+    officialFile: {
+      dataset: meta.dataset,
+      rowsUpdatedAt: meta.rowsUpdatedAt,
+      license: meta.license,
+    },
+    officialPortal: 'https://www.datos.gov.co/',
+  });
+  return {
+    files: await writeSource('invima-dispositivos', sourceVersion, rows),
+    stats: {
+      inputLines: lines.length,
+      rows: rows.length,
+      ...stats,
+      pages: meta.pages,
+    },
+  };
+}
+
 const BUILDERS = {
   'anvisa-produtos': buildAnvisaProdutos,
   'anvisa-produtos-modelos': buildAnvisaModelos,
@@ -459,6 +490,7 @@ const BUILDERS = {
   'cdsco-import-licences': buildCdsco,
   'tfda-devices': buildTfda,
   'tfda-tudid': buildTfdaTudid,
+  'invima-dispositivos': buildInvima,
 };
 
 async function main() {

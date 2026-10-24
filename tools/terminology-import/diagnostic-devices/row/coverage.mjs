@@ -26,6 +26,7 @@ const REGISTRY_COUNTRY = {
   'cdsco-import-licences': 'IN',
   'tfda-devices': 'TW',
   'tfda-tudid': 'TW',
+  'invima-dispositivos': 'CO',
 };
 
 const TOP = 25;
