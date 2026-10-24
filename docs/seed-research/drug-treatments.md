@@ -3,7 +3,7 @@
 - Rama: `justin/seed-drug-treatments` · importador: `tools/terminology-import/drug-treatments/` · fuentes y licencias: `tools/terminology-import/drug-treatments/SOURCES.md`
 - Depende de: `justin/seed-diseases` (enfermedades) y del catálogo de medicamentos ya existente (`vademecum`, ATC nivel 5).
 - Sesión hermana: `justin/seed-procedures-treatments` (procedimientos y terapias no farmacológicas).
-- Última actualización: 2026-10-24.
+- Última actualización: 2026-10-24 (iteración de `/loop` 1: hosts oficiales siguen en 403; `justin/seed-diseases` aún no existe; ramas hermanas visibles: `seed-clinical-pharmacology`, `seed-procedures-treatments`, `seed-nursing-care`, ninguna trae un cruce a ATC).
 
 > **Esto es una base de relaciones publicadas, no un recomendador.** Cada relación conserva el
 > tipo exacto de su fuente (indicación rotulada, modificador de la enfermedad, sintomático, no
@@ -64,8 +64,9 @@ dos pasadas seguidas aportan 0.
 | 2 | MAxO annotations (Monarch) | 38 | **33** | Orphadata (red), CIViC (red), PharmGKB/ClinPGx (red), Inxight Drugs (red). |
 | 3 | Hetionet v1.0 (`hetio/hetionet`) y `dhimmel/drugcentral` (`rephetio/indications.tsv`) | 671 filas medidas, no cargadas | **0 relaciones publicadas nuevas** | Derivados: `CtD/CpD` de Hetionet = PharmacotherapyDB `DM/SYM` (además las aristas están en Git LFS, no descargable). `rephetio/indications.tsv` toma `drug_indication.tsv` de `olegursu/drugtarget` (ya cargado) y lo **recodifica a DOID con un mapeo de terceros**: sus 82 «pares nuevos» aparentes son todos de categoría vacía (DrugCentral sin curación) y difieren sólo en el código de enfermedad. No se cargan: sería presentar un remapeo ajeno como relación publicada. |
 | 4 | Drug Repurposing Hub (Broad, `s3.amazonaws.com/data.clue.io`, 2020-03-24) | 0 | **0** | `!Restrictions: The Drug Repurposing Hub data is provided for non-commercial use only.` y la indicación es texto libre sin código (codificarla sería inferencia). |
+| 5 | GitHub de autores: `unmtransinfo/drugcentral-tools`, `unmtransinfo/TCRD` (UNM, DrugCentral/Pharos), `griffithlab/civic-v2` (CIViC), `opentargets/platform-input-support`, `Knowledge-Graph-Hub/kg-idg` | 0 | **0** | Sólo código y esquemas SQL, sin datos de indicaciones (las descargas están en hosts bloqueados). `kg-idg` trae mapas (UMLS → MONDO), no relaciones fármaco → enfermedad. Repos supuestos inexistentes comprobados con `git ls-remote`: `unmtransinfo/drugcentral`, `chembl/chembl_drug_indications`, `WorldHealthOrganization/eml`, `nlm/medrt`. |
 
-**Estado:** dos pasadas seguidas (3 y 4) aportan 0 → **saturado dentro de lo alcanzable desde este
+**Estado:** tres pasadas seguidas (3, 4 y 5) aportan 0 → **saturado dentro de lo alcanzable desde este
 entorno. NO está saturado respecto de internet**: las fuentes oficiales más grandes están bloqueadas
 por la red (§2) y quedan como huecos (§5). El `/loop` de la sesión re-sondea esos hosts en cada
 iteración; si se habilitan, cada fuente nueva abre una pasada nueva.
