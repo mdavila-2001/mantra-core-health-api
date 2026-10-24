@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T01:24:05.108Z",
+  "generatedAt": "2026-10-24T02:01:57.719Z",
   "passes": [
     {
       "pass": 1,
@@ -26,7 +26,7 @@
         "NCI Thesaurus (signos y síntomas)",
         "Mondo disease_has_feature"
       ],
-      "newTerms": 1054,
+      "newTerms": 1040,
       "overlapsByPublishedXref": 19,
       "newRelations": 589
     },
@@ -52,7 +52,7 @@
       "sources": [
         "NCI Thesaurus — hallazgos clínicos por sitio o sistema (C36278, tipo semántico Finding)"
       ],
-      "newTerms": 2632,
+      "newTerms": 2628,
       "newRelations": 0
     }
   ]

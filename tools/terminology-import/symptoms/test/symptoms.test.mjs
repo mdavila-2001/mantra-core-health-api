@@ -15,7 +15,7 @@ import { mondoEquivalences, normalizeDiseaseCurie, termOverlaps } from '../lib/c
 import { hpoIdResolver, hpoRows, parseBabelon } from '../lib/hpo.mjs';
 import { conceptId, designationsFor, displayOf, glossaryFor, isGlossaryTerm, propertiesFor } from '../lib/load-plan.mjs';
 import { applyTag, readObo } from '../lib/obo.mjs';
-import { sympRows } from '../lib/obo-sources.mjs';
+import { ncitRows, sympRows } from '../lib/obo-sources.mjs';
 import { REL, phenotypeResolver, relationsPlan } from '../lib/relations-plan.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
@@ -192,4 +192,16 @@ test('sistemas de enfermedad por defecto = formatos confirmados por seed-disease
   assert.deepEqual(D.MONDO.codes('0007739'), ['MONDO:0007739']);
   assert.deepEqual(D.DOID.codes('9351'), ['DOID:9351']);
   assert.deepEqual([D.MESH.internalCodes, D.MESH.codes('D003920')], [['mesh'], ['D003920']]);
+});
+
+test('NCIt: signos por tipo semántico, sin los descendientes de C2991 (los carga seed-diseases)', async () => {
+  const terms = new Map();
+  const header = await readObo(join(FX, 'ncit-excerpt.obo'), (t) => terms.set(t.id, t));
+  const { rows, stats } = ncitRows(terms, header, PROV);
+  const codes = rows.map((r) => r.code);
+  assert.ok(codes.includes('C3038'), 'Fever (Sign) entra');
+  assert.equal(codes.includes('C34494'), false, 'Colic cuelga de C2991: no se duplica');
+  assert.deepEqual(stats.excludedAsDiseaseCodes, ['C34494']);
+  assert.equal(rows.find((r) => r.code === 'C3038').version, '24.04e');
+  assert.deepEqual(rows.find((r) => r.code === 'C3038').parents, ['C53458']);
 });

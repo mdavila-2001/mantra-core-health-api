@@ -10,6 +10,9 @@
 //   - hallazgos clínicos: descendientes de C36278 «Finding by Site or System»
 //     cuyo tipo semántico sea «Finding» o «Sign or Symptom» (quedan fuera los
 //     que NCIt tipa como resultado de laboratorio, enfermedad o neoplasia).
+// Quedan fuera los descendientes de C2991 «Disease or Disorder» (NCIt es
+// polijerárquico: «Colic» cuelga de Sign y de Disease): los carga la sesión
+// `seed-diseases` como code system `ncit-disease` y no se duplican.
 // El criterio sale de la fuente; no se elige concepto por concepto. Cada fila
 // dice por qué regla entró (`scopeRule`).
 // =============================================================================
@@ -20,6 +23,7 @@ export const NCIT_ROOTS = ['NCIT:C100104', 'NCIT:C176707', 'NCIT:C83119'];
 export const NCIT_SEMANTIC_TYPE = 'Sign or Symptom';
 export const NCIT_FINDING_ROOT = 'NCIT:C36278';
 export const NCIT_FINDING_TYPES = ['Finding', 'Sign or Symptom'];
+export const NCIT_DISEASE_ROOT = 'NCIT:C2991';
 
 const stringPv = (term, prop) =>
   term.propertyValues
@@ -106,15 +110,18 @@ export function ncitScope(terms) {
   const byRoots = descendants(kids, NCIT_ROOTS);
   const bySemType = new Set([...terms.values()].filter((t) => stringPv(t, 'NCIT:P106').includes(NCIT_SEMANTIC_TYPE)).map((t) => t.id));
   const findings = [...descendants(kids, [NCIT_FINDING_ROOT])].filter((id) => live(id) && stringPv(terms.get(id), 'NCIT:P106').some((x) => NCIT_FINDING_TYPES.includes(x)));
+  const diseases = descendants(kids, [NCIT_DISEASE_ROOT]);
   const scope = new Map();
   for (const id of [...byRoots, ...bySemType]) if (live(id)) scope.set(id, 'sign-symptom');
   for (const id of findings) if (!scope.has(id)) scope.set(id, 'finding-by-site-or-system');
-  return { scope, byRoots: byRoots.size, bySemanticType: bySemType.size, findingsBySite: findings.length };
+  const excludedAsDisease = [...scope.keys()].filter((id) => diseases.has(id)).sort();
+  for (const id of excludedAsDisease) scope.delete(id);
+  return { scope, byRoots: byRoots.size, bySemanticType: bySemType.size, findingsBySite: findings.length, excludedAsDisease };
 }
 
 /** NCIt (subconjunto) → filas. */
 export function ncitRows(terms, header, provenance) {
-  const { scope, byRoots, bySemanticType, findingsBySite } = ncitScope(terms);
+  const { scope, byRoots, bySemanticType, findingsBySite, excludedAsDisease } = ncitScope(terms);
   const systemsOf = firstLevelUnder(terms, [...NCIT_ROOTS, NCIT_FINDING_ROOT]);
   const rows = [];
   for (const id of [...scope.keys()].sort()) {
@@ -151,5 +158,5 @@ export function ncitRows(terms, header, provenance) {
       source: 'ncit',
     });
   }
-  return { rows, stats: { inScope: scope.size, byRoots, bySemanticType, findingsBySite, byRule: { signSymptom: rows.filter((r) => r.scopeRule === 'sign-symptom').length, findingBySiteOrSystem: rows.filter((r) => r.scopeRule === 'finding-by-site-or-system').length } } };
+  return { rows, stats: { inScope: scope.size, byRoots, bySemanticType, findingsBySite, excludedAsDisease: excludedAsDisease.length, excludedAsDiseaseCodes: excludedAsDisease.map((x) => x.replace(/^NCIT:/, '')), byRule: { signSymptom: rows.filter((r) => r.scopeRule === 'sign-symptom').length, findingBySiteOrSystem: rows.filter((r) => r.scopeRule === 'finding-by-site-or-system').length } } };
 }

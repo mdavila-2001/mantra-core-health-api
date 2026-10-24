@@ -13,40 +13,41 @@ ok 11 - cruces: prefijo Orphanet de Monarch = ORPHA de HPOA; CUI compartido marc
 ok 12 - plan de términos: display ES oficial, sólo sinónimos EXACT como designación, ids deterministas
 ok 13 - plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia HPO resuelta
 ok 14 - sistemas de enfermedad por defecto = formatos confirmados por seed-diseases (\#688)
-ok 15 - deterministicId replica exacta de src/common/constants/concepts.ts
-ok 16 - md5uuid equivale a md5(key)::uuid de Postgres
-ok 17 - slugify y htmlToText
-ok 18 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
-ok 19 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
-ok 20 - taxonomías: ATC, capítulos y grupos MedlinePlus
-ok 21 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
-ok 22 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
-ok 23 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
-ok 24 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
-ok 25 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
-ok 26 - plan de carga: membresías a los value sets del glosario con los ids del backend
-ok 27 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
-ok 28 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
-ok 29 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
-ok 30 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
-ok 31 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
-ok 32 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
-ok 33 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
-ok 34 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
-ok 35 - CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
-ok 36 - CIMA: revocado o suspendido no es seleccionable
-ok 37 - CIMA: lo que la fuente no declara queda en null
-ok 38 - ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
-ok 39 - ANVISA: una fila sin nº de registro no tiene identidad y se descarta
-ok 40 - INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
-ok 41 - INVIMA: la muestra médica no entra como presentación vendible
-ok 42 - ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
-ok 43 - ATC: sólo nivel 5 exacto
-ok 44 - CSV: comillas, comillas escapadas, saltos de línea y BOM
-ok 45 - plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
-ok 46 - plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
-ok 47 - propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
-ok 48 - plan de carga: un code system sin definición falla en voz alta
-# tests 48
-# pass 48
+ok 15 - NCIt: signos por tipo semántico, sin los descendientes de C2991 (los carga seed-diseases)
+ok 16 - deterministicId replica exacta de src/common/constants/concepts.ts
+ok 17 - md5uuid equivale a md5(key)::uuid de Postgres
+ok 18 - slugify y htmlToText
+ok 19 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
+ok 20 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
+ok 21 - taxonomías: ATC, capítulos y grupos MedlinePlus
+ok 22 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
+ok 23 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
+ok 24 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
+ok 25 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
+ok 26 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
+ok 27 - plan de carga: membresías a los value sets del glosario con los ids del backend
+ok 28 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
+ok 29 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
+ok 30 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
+ok 31 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
+ok 32 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
+ok 33 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
+ok 34 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
+ok 35 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
+ok 36 - CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
+ok 37 - CIMA: revocado o suspendido no es seleccionable
+ok 38 - CIMA: lo que la fuente no declara queda en null
+ok 39 - ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
+ok 40 - ANVISA: una fila sin nº de registro no tiene identidad y se descarta
+ok 41 - INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
+ok 42 - INVIMA: la muestra médica no entra como presentación vendible
+ok 43 - ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
+ok 44 - ATC: sólo nivel 5 exacto
+ok 45 - CSV: comillas, comillas escapadas, saltos de línea y BOM
+ok 46 - plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
+ok 47 - plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
+ok 48 - propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
+ok 49 - plan de carga: un code system sin definición falla en voz alta
+# tests 49
+# pass 49
 # fail 0

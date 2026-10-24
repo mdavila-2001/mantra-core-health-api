@@ -46,9 +46,9 @@
 |---|---|---|---|---|
 | H3.S1.M1 | HPO → filas (ES sólo OFFICIAL) | `HP:0001250` → «Convulsiones», sistema `HP:0000707` | test «HPO: nombre ES sólo…» | HECHO |
 | H3.S1.M2 | SYMP → filas | obsoletos fuera, sistema de primer nivel | test «SYMP: términos vigentes…» | HECHO |
-| H3.S1.M3 | NCIt subconjunto por criterio de la fuente | 3 712 términos con `scopeRule` | `build-symptoms-corpus.mjs` → `ncit.inScope = 3712` | HECHO |
+| H3.S1.M3 | NCIt subconjunto por criterio de la fuente | 3 694 términos con `scopeRule`, sin descendientes de C2991 | `build-symptoms-corpus.mjs` → `ncit.inScope = 3694`, `excludedAsDisease = 18` | HECHO |
 | H3.S2.M1 | Plan de carga en seco | conteos por sistema sin base | `load-symptoms.mjs` → plan escrito | HECHO |
-| H3.S2.M2 | Carga en Postgres desechable | 24 501 conceptos | `load-symptoms.mjs --apply --glossary` → `[load]` por sistema | HECHO |
+| H3.S2.M2 | Carga en Postgres desechable | 24 483 conceptos | `load-symptoms.mjs --apply --glossary` → `[load]` por sistema | HECHO |
 | H3.S2.M3 | Idempotencia | segunda corrida = 0 | idem → todos los contadores en 0 | HECHO |
 | H3.S3.M1 | Extensión opcional al glosario | 37 292 membresías con `--glossary` | idem → `glossaryMembers: 37292` | HECHO |
 | H3.S3.M2 | Deduplicar contra fichas `wikidata-sintoma` | cruce por P3841 | SPARQL a Wikidata | BLOQUEADO |

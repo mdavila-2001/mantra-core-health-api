@@ -259,7 +259,7 @@ Corpus en `symptoms/` (fuentes y licencias en `symptoms/SOURCES.md`; investigaci
 pasadas de saturación, cobertura y huecos en `docs/seed-research/symptoms.md`).
 Tres sistemas de códigos: **HPO** (19 894 términos, 19 345 con nombre oficial en
 castellano), **Symptom Ontology** (895) y **NCIt** signos, síntomas y hallazgos
-clínicos (3 712), con su jerarquía is-a. Relaciones enfermedad → síntoma **sólo de
+clínicos (3 694), con su jerarquía is-a. Relaciones enfermedad → síntoma **sólo de
 anotaciones publicadas** (HPOA con OMIM/Orphanet/DECIPHER, Mondo, Disease
 Ontology, anotaciones de enfermedades comunes de HPO), con frecuencia y evidencia.
 
@@ -270,4 +270,4 @@ Ontology, anotaciones de enfermedades comunes de HPO), con frecuencia y evidenci
 | 2 | `symptoms/load-symptoms.mjs` | Términos a `terminology.*` (dry-run por defecto; `--apply`; `--glossary` opcional) |
 | 3 | `symptoms/load-disease-phenotypes.mjs` | Relaciones. **Bloqueado por el modelo**: exige `terminology.concept_relationship_evidence` (propuesta en `symptoms/proposal/`) |
 
-Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (13, con recortes reales).
+Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (15, con recortes reales).
