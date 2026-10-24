@@ -1,18 +1,27 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T14:01:03Z",
+  "generatedAt": "2026-10-24T16:08:47Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "1792086f99b3bdc0529958d402c4dcf9093cf3b2",
-      "commitDate": "2026-10-24T06:04:43+00:00",
+      "commit": "b699958585e53ad25ee2d2f2db031a41dea7c26a",
+      "commitDate": "2026-10-24T14:00:48+00:00",
       "dir": null,
       "alternatives": [
-        "origin/dev",
+        "origin/master",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/justin/seed-dx-devices-master-p6",
         "origin/claude/compassionate-brown-tr71nn",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/dev",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/itzan/fix-forms-entity-registration"
       ],
@@ -34,8 +43,20 @@
       "commitDate": "2026-10-24T03:59:33+00:00",
       "dir": null,
       "alternatives": [
-        "origin/test",
+        "origin/master",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
         "origin/dev",
+        "origin/test",
+        "origin/codex/upload-health-api-20261015",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/justin/practice-ownership-report",
         "origin/justin/fix-dev-failing-specs",
@@ -113,6 +134,17 @@
       "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
       "alternatives": [
+        "origin/master",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
         "origin/dev",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/justin/practice-ownership-report",
@@ -225,9 +257,9 @@
   "files": [
     {
       "path": "taxonomy-nodes.ndjson.gz",
-      "rows": 33616,
-      "bytes": 1831970,
-      "sha256": "a09b114ce4f4f70cc69e0928491251186a06ab20320b6b2360a96260ab45d9ee"
+      "rows": 33624,
+      "bytes": 1834625,
+      "sha256": "d237881d72af8704ea0c9944351d535d5c3ee81840bc1d834c35085f91ce5871"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -238,20 +270,20 @@
     {
       "path": "manufacturers.ndjson.gz",
       "rows": 20755,
-      "bytes": 4106512,
-      "sha256": "8f53dbae2edb90505694fd3fcceb4a611115f5195c5abd8fe111768cd17520e1"
+      "bytes": 4106544,
+      "sha256": "3706fb0d756858cec3c1d423e1738d1c1b5d9a71df2e366644fc4dfa9fde44fa"
     },
     {
       "path": "models-0001.ndjson.gz",
       "rows": 136807,
-      "bytes": 10330700,
-      "sha256": "d5806b937c64c8227f32ae893335a0f31d32854be8d78320e0655c54a8e04b41"
+      "bytes": 10330924,
+      "sha256": "03d133310cb25d5cf5b31af88336c990a34bf6f5edc96da362734b4f6e316617"
     },
     {
       "path": "models-0002.ndjson.gz",
-      "rows": 38263,
-      "bytes": 2936171,
-      "sha256": "c931daf75792991cd2e76c1b486c3de57fb70e6a437f1142030cf7c4acaad06a"
+      "rows": 38264,
+      "bytes": 2936184,
+      "sha256": "1417b7ccb9b8e8e23ca60e3fabe0c6b4e86230b23fb826a5aec98a177190b994"
     },
     {
       "path": "review-manufacturers.ndjson.gz",

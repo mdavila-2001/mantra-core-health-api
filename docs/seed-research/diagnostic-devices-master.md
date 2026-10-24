@@ -277,6 +277,26 @@ detiene con dos pasadas seguidas en 0.
 - **Descartadas**: ninguna.
 - **Nota**: el PR #696 se mergeó con las pasadas 1 a 5. Las pasadas 6 y siguientes van en un PR nuevo, desde `dev` actualizado, en la rama `justin/seed-dx-devices-master-p6`: el force push sobre la rama original fue denegado.
 
+### Pasada 8 (2026-10-24)
+
+- **Regiones**: sin filas nuevas. `us` @`14a6d974` (215 690 filas), `eu` y `row` sin cambios; las tres cerraron.
+- **Fuente nueva propia**: suplemento del PCD de la FDA, tomado del `foiclass` del 2026-10-20 en `bjoleary/fdadata@227bdaa2` (`data/product_codes.rda`, sha256 `4423c192…`, MIT).
+  - No es una copia literal: los paneles van por nombre y la regulación como número. Por eso no reemplaza a la copia literal de `ej86`.
+  - `extract-pcd-supplement.py` toma solo los 9 product codes que la copia literal no tiene y reconstruye la sección a 4 dígitos. El resultado está en `data/fda-pcd-supplement.json`.
+- **Nuevos tras deduplicar** (contra la pasada 7):
+  - Taxonomía: +9 product codes (33 624 nodos). +1 de diagnóstico: `SJD`, «Integrated Continuous Glucose Ketone Monitoring System», 862.1354, parte IVD.
+  - Catálogo: +1 registro (261 340) y +1 modelo (175 071), del De Novo que declara `SJD`.
+  - Cargado en el Postgres desechable: +8 conceptos (`SJD` ya existía como nodo sin decisión); la 2.ª corrida da 0.
+- **Descartadas**: ninguna.
+
+### Pasada 9 (2026-10-24): 0
+
+- **Regiones**: sin cambios desde la pasada 8. Último commit con `out/`: `us` `14a6d974`, `eu` `e1601ac2`, `row` `33e67ca1`.
+- **Fuentes propias**: `git ls-remote` de las cuatro copias fijadas (`ej86`, `BatirMedical`, `lisadonlon`, `bjoleary`) da el mismo HEAD que el commit fijado.
+- **Búsqueda de fuentes nuevas**: hay una EMDN posterior a la V2 (el paquete MDCG 2026-1/2/3; la historia de versiones tiene 8 535 registros), pero solo en el sitio de la Comisión, que da 403; no hay copia en git. La lista de IA de la FDA más nueva tampoco tiene copia en git.
+- **Nuevos tras deduplicar: 0.**
+- **Estado de la saturación**: primera pasada en 0. La regla pide dos seguidas: falta una más (pasada 10) con las entradas sin cambios.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

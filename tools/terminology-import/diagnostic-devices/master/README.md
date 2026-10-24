@@ -18,6 +18,7 @@ modelo tenga dónde guardarlos.
 |---|---|---|---|
 | 0 | `fetch-sources.mjs` | sí (git) | Baja los archivos fijados en `lib/sources.mjs` (repo + commit + sha256) a `<GLOSSARY_BUILD_DIR>/diagnostic-devices-master/cache/`. Rechaza un archivo cuyo hash no coincide. |
 | — | `git fetch origin` | sí (git) | Trae las ramas de las regiones. `build.mjs` las lee con `git show`, sin checkout. |
+| — | `extract-pcd-supplement.py` | no | Solo si cambia el suplemento del PCD: saca de `bjoleary/fdadata` (`.rda`) los product codes que la copia literal no tiene → `data/fda-pcd-supplement.json` (necesita `pyreadr` y `pandas`). |
 | 1 | `build.mjs` | no | Taxonomía + filas propias + filas de las regiones → `out/` (NDJSON gzip < 50 MB por archivo), `out/coverage.{json,md}`, `out/manifest.json`. |
 | 2 | `load-taxonomy.mjs` | no (base) | `out/taxonomy-*` → `terminology.*`. `--dry-run` no toca la base. Idempotente. |
 | — | `node --test "tools/terminology-import/diagnostic-devices/master/test/*.test.mjs"` | no | Tests con recortes reales (`test/fixtures/`). |

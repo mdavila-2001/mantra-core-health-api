@@ -1,16 +1,25 @@
 {
-  "generatedAt": "2026-10-24T14:01:02Z",
+  "generatedAt": "2026-10-24T16:08:46Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "1792086f99b3bdc0529958d402c4dcf9093cf3b2",
-      "commitDate": "2026-10-24T06:04:43+00:00",
+      "commit": "b699958585e53ad25ee2d2f2db031a41dea7c26a",
+      "commitDate": "2026-10-24T14:00:48+00:00",
       "dir": null,
       "alternatives": [
-        "origin/dev",
+        "origin/master",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/justin/seed-dx-devices-master-p6",
         "origin/claude/compassionate-brown-tr71nn",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/dev",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/itzan/fix-forms-entity-registration"
       ],
@@ -32,8 +41,20 @@
       "commitDate": "2026-10-24T03:59:33+00:00",
       "dir": null,
       "alternatives": [
-        "origin/test",
+        "origin/master",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
         "origin/dev",
+        "origin/test",
+        "origin/codex/upload-health-api-20261015",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/justin/practice-ownership-report",
         "origin/justin/fix-dev-failing-specs",
@@ -111,6 +132,17 @@
       "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
       "alternatives": [
+        "origin/master",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
         "origin/dev",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/justin/practice-ownership-report",
@@ -250,7 +282,7 @@
       "valid": 240,
       "invalid": 0,
       "duplicates": 0,
-      "diagnostic": 235,
+      "diagnostic": 236,
       "attachedBySameModel": 0,
       "invalidSamples": []
     },
@@ -399,32 +431,32 @@
     }
   ],
   "taxonomy": {
-    "nodes": 33616,
+    "nodes": 33624,
     "bySystem": {
       "in:cdsco-device-name": 11371,
       "emdn": 8455,
-      "fda-product-code": 7091,
+      "fda-product-code": 7099,
       "br:anvisa-nome-tecnico": 2785,
       "jmdn": 2092,
       "gmdn-pt": 1743,
       "gmdn": 79
     },
     "diagnosticBySystem": {
-      "fda-product-code": 3122,
+      "fda-product-code": 3123,
       "emdn": 2492,
       "gmdn": 79
     },
     "byDecision": {
       "in:cdsco-device-name:null:null": 11371,
       "emdn:null:null": 5786,
-      "fda-product-code:false:cfr-non-diagnostic-subpart": 3089,
+      "fda-product-code:false:cfr-non-diagnostic-subpart": 3096,
       "br:anvisa-nome-tecnico:null:null": 2785,
       "emdn:true:emdn-category-w": 2263,
       "jmdn:null:null": 2092,
-      "fda-product-code:true:cfr-ivd-part": 2076,
+      "fda-product-code:true:cfr-ivd-part": 2077,
       "gmdn-pt:null:null": 1743,
       "fda-product-code:true:cfr-subpart-title": 975,
-      "fda-product-code:null:no-regulation": 831,
+      "fda-product-code:null:no-regulation": 832,
       "emdn:true:emdn-group-title-inherited": 199,
       "emdn:null:emdn-group-title-mixed-inherited": 173,
       "gmdn:true:crosswalk-published": 79,
@@ -434,11 +466,11 @@
       "fda-product-code:false:cfr-non-device-part": 5,
       "emdn:null:emdn-group-title-mixed": 4,
       "fda-product-code:null:cfr-section-outside-verified-ranges": 4,
-      "fda-product-code:null:fda-code-not-in-pcd": 3
+      "fda-product-code:null:fda-code-not-in-pcd": 2
     },
     "diagnosticByBranch": {
       "emdn:ivd": 2263,
-      "fda-product-code:ivd": 2147,
+      "fda-product-code:ivd": 2148,
       "fda-product-code:diagnostic": 777,
       "emdn:diagnostic": 229,
       "fda-product-code:monitoring": 198,
@@ -450,7 +482,7 @@
       "fda-product-code→gmdn": 109,
       "gmdn→fda-product-code": 109
     },
-    "diagnosticTypesWithModels": 3038,
+    "diagnosticTypesWithModels": 3039,
     "ivdPanelsMeasured": [
       "IM",
       "MG",
@@ -606,10 +638,10 @@
     }
   },
   "catalog": {
-    "rowsIncluded": 261339,
+    "rowsIncluded": 261340,
     "rowsNotDiagnostic": 2769,
     "rowsAttachedBySameModel": 400,
-    "rowsUndetermined": 3488597,
+    "rowsUndetermined": 3488596,
     "rowsWithoutType": 2286254,
     "undeterminedTopTypes": {
       "(sin tipo)": 2286254,
@@ -664,16 +696,16 @@
       "br:anvisa-nome-tecnico|name:FIXADORES EXTERNOS": 4179
     },
     "manufacturers": 20755,
-    "brands": 88948,
-    "models": 175070,
-    "registrations": 261339,
+    "brands": 88949,
+    "models": 175071,
+    "registrations": 261340,
     "modelsByJurisdictionCount": {
-      "1": 174755,
+      "1": 174756,
       "2": 308,
       "3": 7
     },
     "modelsByJurisdiction": {
-      "US": 130411,
+      "US": 130412,
       "CA": 43847,
       "EU": 434,
       "AU": 420,
