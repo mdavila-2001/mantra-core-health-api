@@ -252,3 +252,22 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
+
+## Síntomas, signos y fenotipos, con su relación a enfermedades (2026-10-24)
+
+Corpus en `symptoms/` (fuentes y licencias en `symptoms/SOURCES.md`; investigación,
+pasadas de saturación, cobertura y huecos en `docs/seed-research/symptoms.md`).
+Tres sistemas de códigos: **HPO** (19 894 términos, 19 345 con nombre oficial en
+castellano), **Symptom Ontology** (895) y **NCIt** signos, síntomas y hallazgos
+clínicos (3 712), con su jerarquía is-a. Relaciones enfermedad → síntoma **sólo de
+anotaciones publicadas** (HPOA con OMIM/Orphanet/DECIPHER, Mondo, Disease
+Ontology, anotaciones de enfermedades comunes de HPO), con frecuencia y evidencia.
+
+| Etapa | Script | Qué hace |
+|---|---|---|
+| 0 | `symptoms/fetch-symptom-sources.mjs` | Baja las fuentes a `glossary-data-build/symptoms-sources/` + `manifest.json` (SHA-256, versión) |
+| 1 | `symptoms/build-symptoms-corpus.mjs` | NDJSON normalizado + `coverage.json` + `saturation.json`. Sin red ni base |
+| 2 | `symptoms/load-symptoms.mjs` | Términos a `terminology.*` (dry-run por defecto; `--apply`; `--glossary` opcional) |
+| 3 | `symptoms/load-disease-phenotypes.mjs` | Relaciones. **Bloqueado por el modelo**: exige `terminology.concept_relationship_evidence` (propuesta en `symptoms/proposal/`) |
+
+Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (13, con recortes reales).
