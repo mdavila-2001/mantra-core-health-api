@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-10-24T03:10:32Z",
+  "regions": [
+    {
+      "region": "us",
+      "status": "pending",
+      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/us/out/manifest.json"
+    },
+    {
+      "region": "eu",
+      "status": "pending",
+      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/eu/out/manifest.json"
+    },
+    {
+      "region": "row",
+      "status": "pending",
+      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/row/out/manifest.json"
+    }
+  ],
+  "sources": [
+    {
+      "source": "fda-ai-enabled-devices",
+      "region": "master",
+      "read": 1524,
+      "valid": 1524,
+      "invalid": 0,
+      "duplicates": 0,
+      "invalidSamples": []
+    }
+  ],
+  "taxonomy": {
+    "nodes": 7088,
+    "bySystem": {
+      "fda-product-code": 7088
+    },
+    "diagnosticBySystem": {
+      "fda-product-code": 3122
+    },
+    "byDecision": {
+      "fda-product-code:false:cfr-non-diagnostic-subpart": 3089,
+      "fda-product-code:true:cfr-ivd-part": 2076,
+      "fda-product-code:true:cfr-subpart-title": 975,
+      "fda-product-code:null:no-regulation": 831,
+      "fda-product-code:true:fda-review-panel-ivd": 71,
+      "fda-product-code:false:cfr-blood-establishment": 37,
+      "fda-product-code:false:cfr-non-device-part": 5,
+      "fda-product-code:null:cfr-section-outside-verified-ranges": 4
+    },
+    "diagnosticByBranch": {
+      "fda-product-code:ivd": 2147,
+      "fda-product-code:diagnostic": 777,
+      "fda-product-code:monitoring": 198
+    },
+    "crosswalks": 0,
+    "crosswalksBySystems": {},
+    "diagnosticTypesWithModels": 137,
+    "ivdPanelsMeasured": [
+      "IM",
+      "MG",
+      "PA",
+      "TX"
+    ],
+    "panelParts": {
+      "AN": {
+        "868": 220,
+        "870": 8,
+        "872": 1,
+        "874": 1,
+        "876": 2,
+        "878": 3,
+        "882": 2,
+        "890": 1
+      },
+      "CH": {
+        "862": 472,
+        "864": 8,
+        "866": 4,
+        "868": 1,
+        "880": 5
+      },
+      "CV": {
+        "868": 1,
+        "870": 316,
+        "876": 1,
+        "878": 4,
+        "880": 1,
+        "892": 1
+      },
+      "DE": {
+        "872": 317,
+        "878": 3,
+        "880": 2,
+        "890": 3
+      },
+      "EN": {
+        "868": 3,
+        "872": 3,
+        "874": 229,
+        "878": 1,
+        "880": 2,
+        "882": 2,
+        "892": 4
+      },
+      "GU": {
+        "870": 5,
+        "876": 528,
+        "878": 10,
+        "880": 1,
+        "882": 1,
+        "884": 5,
+        "890": 1,
+        "892": 1
+      },
+      "HE": {
+        "660": 3,
+        "862": 1,
+        "864": 223,
+        "866": 11,
+        "868": 1,
+        "880": 1
+      },
+      "HO": {
+        "864": 2,
+        "868": 3,
+        "870": 7,
+        "872": 1,
+        "876": 7,
+        "878": 46,
+        "880": 295,
+        "882": 1,
+        "890": 6,
+        "892": 2
+      },
+      "IM": {
+        "862": 2,
+        "864": 6,
+        "866": 247
+      },
+      "MG": {
+        "864": 1,
+        "866": 4
+      },
+      "MI": {
+        "610": 2,
+        "862": 5,
+        "864": 1,
+        "866": 508
+      },
+      "NE": {
+        "870": 9,
+        "874": 2,
+        "878": 2,
+        "882": 211,
+        "888": 6,
+        "890": 7
+      },
+      "OB": {
+        "862": 1,
+        "870": 2,
+        "876": 2,
+        "878": 2,
+        "884": 240,
+        "890": 1
+      },
+      "OP": {
+        "876": 3,
+        "878": 2,
+        "880": 1,
+        "886": 308,
+        "892": 5
+      },
+      "OR": {
+        "878": 16,
+        "882": 6,
+        "888": 268,
+        "890": 2
+      },
+      "PA": {
+        "864": 265,
+        "866": 33
+      },
+      "PM": {
+        "882": 3,
+        "888": 1,
+        "890": 199
+      },
+      "RA": {
+        "872": 6,
+        "876": 1,
+        "884": 9,
+        "892": 184
+      },
+      "SU": {
+        "868": 1,
+        "870": 1,
+        "874": 2,
+        "876": 21,
+        "878": 466,
+        "880": 12,
+        "882": 2,
+        "890": 4,
+        "892": 2
+      },
+      "TX": {
+        "862": 316,
+        "864": 2,
+        "866": 1
+      }
+    }
+  },
+  "catalog": {
+    "rowsIncluded": 1429,
+    "rowsNotDiagnostic": 86,
+    "rowsUndetermined": 9,
+    "rowsWithoutType": 0,
+    "undeterminedTopTypes": {
+      "fda-product-code|OTE": 2,
+      "fda-product-code|SHH": 1,
+      "fda-product-code|MVK": 1,
+      "fda-product-code|QZS": 1,
+      "fda-product-code|LDK": 1,
+      "fda-product-code|QNK": 1,
+      "fda-product-code|OEE": 1,
+      "fda-product-code|MWM": 1
+    },
+    "manufacturers": 541,
+    "brands": 1192,
+    "models": 1192,
+    "registrations": 1429,
+    "modelsByJurisdictionCount": {
+      "1": 1192
+    },
+    "modelsByJurisdiction": {
+      "US": 1192
+    },
+    "manufacturersByCountry": {
+      "(sin país)": 541
+    }
+  },
+  "manufacturers": {
+    "entitiesAll": 584,
+    "mergesByRule": {
+      "same-name-no-country": 192
+    },
+    "reviewByKind": {
+      "possible-group-shared-first-word": 29
+    }
+  },
+  "mirrors": {
+    "ej86-fda-ai": {
+      "repo": "https://github.com/ej86/fda-ai-medical-device-analytics.git",
+      "commit": "8840a03632ffdc346a8bf05a459236c913b9198c",
+      "files": [
+        {
+          "path": "foiclass.csv",
+          "sha256": "ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de",
+          "officialUrl": "https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files"
+        },
+        {
+          "path": "aiml-devices-csv.csv",
+          "sha256": "4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d",
+          "officialUrl": "https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices"
+        }
+      ]
+    }
+  }
+}

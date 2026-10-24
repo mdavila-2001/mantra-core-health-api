@@ -1,0 +1,54 @@
+{
+  "region": "master",
+  "formatVersion": 1,
+  "generatedAt": "2026-10-24T03:10:32Z",
+  "regions": [
+    {
+      "region": "us",
+      "status": "pending",
+      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/us/out/manifest.json"
+    },
+    {
+      "region": "eu",
+      "status": "pending",
+      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/eu/out/manifest.json"
+    },
+    {
+      "region": "row",
+      "status": "pending",
+      "reason": "ninguna rama remota tiene tools/terminology-import/diagnostic-devices/row/out/manifest.json"
+    }
+  ],
+  "files": [
+    {
+      "path": "taxonomy-nodes.ndjson.gz",
+      "rows": 7088,
+      "bytes": 677638,
+      "sha256": "0fcb58ee2ad3c1fa53331d089dcb153d37467239886f68eeb670085bb73c1614"
+    },
+    {
+      "path": "taxonomy-crosswalks.ndjson.gz",
+      "rows": 0,
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "manufacturers.ndjson.gz",
+      "rows": 541,
+      "bytes": 56215,
+      "sha256": "f2c1d5b82344167744f9c3b74ad861ca055198dbdc5d73aceda10e7ffba53292"
+    },
+    {
+      "path": "models.ndjson.gz",
+      "rows": 1192,
+      "bytes": 113761,
+      "sha256": "de94779d61ee5e3ce260b4867b83784d4f06458134891268b1220a178bb2faa3"
+    },
+    {
+      "path": "review-manufacturers.ndjson.gz",
+      "rows": 29,
+      "bytes": 3108,
+      "sha256": "f7166755bb3bb7bdadd0b66fda1efd870a0da21ae490660ef01a555cf5983108"
+    }
+  ]
+}
