@@ -13,7 +13,7 @@ versión declarada. La tabla es la corrida del **2026-10-24**.
 | `symp` | [symp.obo](https://raw.githubusercontent.com/DiseaseOntology/SymptomOntology/main/src/ontology/symp.obo) | 2026-07-30 | 231 641 | `09ac08ff1595e671` | CC0 1.0 (encabezado del archivo) |
 | `doid-owl` | [doid.owl](https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/main/src/ontology/doid.owl) | 2026-09-30 | 28 804 846 | `7b80ccc70f5d84e7` | CC0 1.0 (encabezado del archivo) |
 | `mondo` | [mondo.obo](https://github.com/monarch-initiative/mondo/releases/latest/download/mondo.obo) | 2026-10-06 | 53 320 617 | `2631e8e165d41def` | CC BY 4.0 (encabezado: `terms:license`) |
-| `ncit` | [ncit.obo](https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/latest/download/ncit.obo) | 24.04e (2024-05-07) | 283 269 323 | `e90ebb7e55f49cf2` | la edición OBO **no declara licencia**; términos de uso del NCI EVS ³ |
+| `ncit` | [ncit.obo](https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo) | 26.02d (2026-03-19) | 248 162 694 | `8fdc2d29c9ebd91a` | la edición OBO **no declara licencia**; términos de uso del NCI EVS ³ |
 | `hpo-common-disease` | [common_disease_annot.tar.gz](https://storage.googleapis.com/data-public-monarchinitiative/hpo/common_disease_annot.tar.gz) | 2015 (Groza et al., AJHG 97:111) | 6 724 219 | `4c871573d57199cd` | HPO license ¹ (README del bucket) |
 | `monarch-hpoa-edges` | [hpoa_disease_to_phenotype_edges.tsv](https://storage.googleapis.com/data-public-monarchinitiative/monarch-kg/latest/transform_output/hpoa_disease_to_phenotype_edges.tsv) | KG 2026-10-07 | 73 917 456 | `ea89c38c162ab7d3` | sólo para medir saturación; no se carga |
 
@@ -37,7 +37,10 @@ http://www.orphadata.com»*. El archivo directo `en_product4.xml` no se pudo baj
 (403 del proxy de red) y queda como hueco documentado en
 `docs/seed-research/symptoms.md`.
 
-³ **NCIt** — `ncit.obo` no trae `license` en su cabecera. El NCI EVS publica el
+³ **NCIt** — release fijada del repo oficial `ncit-obo-org` (la misma que usa
+`seed-diseases` para `ncit-disease`, así el corte contra C2991 coincide; el repo
+anterior `NCI-Thesaurus/thesaurus-obo-edition` quedó en 24.04e). `ncit.obo` no
+trae `license` en su cabecera. El NCI EVS publica el
 NCIt con términos de uso abiertos con atribución (se conoce como CC BY 4.0),
 **sin verificar en esta corrida** (`evs.nci.nih.gov` bloqueado). Verificar antes
 de publicar contenido de NCIt.

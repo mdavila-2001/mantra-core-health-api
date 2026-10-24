@@ -8,12 +8,12 @@ Investigación y corpus de la sesión `seed-symptoms` (2026-10-24). Importadores
 
 | | Cantidad |
 |---|---:|
-| Términos (síntomas, signos, hallazgos y fenotipos), 3 sistemas de códigos | **24 483** |
+| Términos (síntomas, signos, hallazgos y fenotipos), 3 sistemas de códigos | **24 777** |
 | — HPO (todas las subontologías) | 19 894 |
 | — con nombre **oficial** en castellano (HPO Translation Project) | 19 345 |
 | — Symptom Ontology (SYMP) | 895 |
-| — NCI Thesaurus: signos/síntomas + hallazgos clínicos por sistema | 3 694 |
-| Aristas jerárquicas is-a (sistema/órgano → tipo → término) | 29 120 |
+| — NCI Thesaurus: signos/síntomas + hallazgos clínicos por sistema | 3 988 |
+| Aristas jerárquicas is-a (sistema/órgano → tipo → término) | 29 428 |
 | Filas de relación enfermedad → síntoma leídas (4 fuentes publicadas) | 422 493 |
 | — que son síntoma/fenotipo (aspecto P), positivas y negadas | 404 266 |
 | Enfermedades humanas de Mondo con al menos un síntoma enlazado | **12 625 de 23 263 (54,3 %)** |
@@ -22,8 +22,8 @@ Investigación y corpus de la sesión `seed-symptoms` (2026-10-24). Importadores
 Estado de la carga:
 
 - **Términos: listos y medidos.** `load-symptoms.mjs` corrió contra un Postgres 16
-  desechable con el DDL real del módulo 03: 24 483 conceptos, 70 180
-  designaciones, 363 462 propiedades, 29 120 relaciones is-a; segunda corrida
+  desechable con el DDL real del módulo 03: 24 777 conceptos, 70 747
+  designaciones, 367 171 propiedades, 29 428 relaciones is-a; segunda corrida
   = 0 filas nuevas.
 - **Relaciones: bloqueadas por el modelo.** `concept_relationships` no puede
   guardar fuente, frecuencia ni evidencia por arista (§ Modelo). El cargador
@@ -78,7 +78,7 @@ Propuesta completa en
 
 Validación de la propuesta en la base desechable: 344 981 aristas
 enfermedad → síntoma (344 258 `REL_SYMPTOM` + 723 `REL_SYMPTOM_EXCLUDED`) y
-372 528 filas de evidencia en 56 s; segunda corrida 0/0 en 35 s. Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
+372 528 filas de evidencia en 57 s; segunda corrida 0/0 en 33 s. Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
 desde `OMIM:154700` y con «Muy frecuente» TAS desde `ORPHA:558`, en la misma
 arista.
 
@@ -96,10 +96,10 @@ cuentan relaciones de aspecto P no negadas. Cálculo reproducible en
 |---:|---|---:|---:|---|
 | 1 | HPO `hp.json` 2026-09-01 + `hp-es.babelon.tsv` + `phenotype.hpoa` 2026-09-02 | 19 894 | 248 404 | OMIM 8 478, Orphanet 4 355, DECIPHER 47 enfermedades |
 | 2 | Symptom Ontology 2026-07-30 + Human Disease Ontology 2026-09-30 (`RO:0002452 has symptom`) | 895 | 2 268 | 873 enfermedades DOID |
-| 3 | NCIt 24.04e, signos y síntomas + Mondo 2026-10-06 (`disease_has_feature`/`has_characteristic` → HP) | 1 040 | 589 | 19 términos NCIt ya estaban (mismo CUI que SYMP) |
+| 3 | NCIt 26.02d, signos y síntomas + Mondo 2026-10-06 (`disease_has_feature`/`has_characteristic` → HP) | 1 093 | 589 | 20 términos NCIt ya estaban (mismo CUI que SYMP) |
 | 4 | Anotaciones HPO de enfermedades comunes (Groza 2015) | 0 | 124 591 | evidencia `ITM` (minería de texto de la fuente), ver abajo |
 | 5 | Monarch KG `hpoa_disease_to_phenotype_edges.tsv` (2026-10-07) | 0 | **0** | misma fuente que la pasada 1, re-transformada: lo confirma |
-| 6 | NCIt, hallazgos clínicos por sitio o sistema (C36278, tipo semántico *Finding*) | 2 628 | 0 | criterio de la fuente; quedan fuera resultados de laboratorio, enfermedades y neoplasias |
+| 6 | NCIt, hallazgos clínicos por sitio o sistema (C36278, tipo semántico *Finding*) | 2 868 | 0 | criterio de la fuente; quedan fuera resultados de laboratorio, enfermedades y neoplasias |
 | 7 | Monarch `phenopacket_ingest_edges.tsv`, `cureid_edges.tsv` | **0** | **0** | casos individuales y tratamientos; los 7 HP «faltantes» son `alt_id` |
 | 8 | Hetionet v1.0, OAE, `hp-es.synonyms.tsv`, `hp-international.obo`, HPO `src/mappings` | **0** | **0** | co-ocurrencia estadística, eventos adversos, archivo vacío, sinónimos sin idioma, licencias de terceros |
 
@@ -161,15 +161,15 @@ clínico 356, antecedentes 208, fenotipo de muestra biológica 94, modo de heren
 SYMP (895): sistema nervioso 148, cabeza y cuello 116, abdominal 79, piel 76,
 general 67, neurológico-fisiológico 62, respiratorio 60, digestivo 59,
 musculoesquelético 56, hemático-inmune 53, nutrición-metabolismo 40, urinario 36,
-cardiovascular 34, reproductor 19. NCIt (3 694): 1 059 por la regla de signos y
-síntomas y 2 635 hallazgos clínicos por sistema (cardiovascular 819, reproductor
-451, digestivo 274, cabeza y cuello 240, nervioso 236, tejido conectivo 231,
-hematopoyético 179…). Se excluyen 18 conceptos que NCIt también clasifica bajo
+cardiovascular 34, reproductor 19. NCIt 26.02d (3 988): 1 113 por la regla de signos y
+síntomas y 2 875 hallazgos clínicos por sistema (cardiovascular 905, reproductor
+466, digestivo 282, cabeza y cuello 281, tejido conectivo 251, nervioso 243,
+hematopoyético 199…). Se excluyen 19 conceptos que NCIt también clasifica bajo
 C2991 «Disease or Disorder» (p. ej. «Colic», «Erectile Dysfunction»): los carga
 `seed-diseases` como `ncit-disease` y no se duplican.
 
 **Idioma.** Sólo HPO publica nombres oficiales en castellano (19 345 de 19 894).
-SYMP y NCIt no tienen traducción oficial: sus 4 589 términos quedan con el nombre
+SYMP y NCIt no tienen traducción oficial: sus 4 883 términos quedan con el nombre
 en inglés de la fuente, declarado como tal en la designación. No se tradujo nada.
 Las definiciones son las de la fuente, en inglés, en la propiedad
 `source_definition` con su idioma (no en la columna `definition`, que la API
@@ -257,9 +257,9 @@ como sustituto de `seed-diseases`.
 
 | Paso | Filas nuevas | Tiempo | Re-corrida |
 |---|---|---:|---|
-| `load-symptoms.mjs --apply --glossary` | 24 483 conceptos · 70 180 designaciones · 363 462 propiedades · 29 120 is-a · 37 292 membresías | 19 s | 0 filas, 11 s |
+| `load-symptoms.mjs --apply --glossary` | 24 777 conceptos · 70 747 designaciones · 367 171 propiedades · 29 428 is-a · 37 292 membresías | 18 s | 0 filas, 13 s |
 | `load-disease-phenotypes.mjs --apply` sin la tabla propuesta | 0 (aborta, salida 2) | 5 s | — |
-| idem con la tabla propuesta aplicada en la base desechable | 344 981 aristas · 372 528 evidencias | 56 s | 0 filas, 35 s |
+| idem con la tabla propuesta aplicada en la base desechable | 344 981 aristas · 372 528 evidencias | 57 s | 0 filas, 33 s |
 
 Tamaño de la base tras todo (incluido el andamio de Mondo): 639 MB. `catalog_import_batches` suma una fila por
 corrida y sistema (es el registro de cada corrida, no dato).
@@ -278,7 +278,6 @@ corrida y sistema (es el registro de cada corrida, no dato).
 | CIAP-2 / ICPC-2 (WONCA) | motivos de consulta de atención primaria | © WONCA; uso comercial con licencia. No se usaron copias de terceros |
 | PubMed / Europe PMC | detectar huecos en la literatura | `eutils.ncbi.nlm.nih.gov` y `www.ebi.ac.uk` bloqueados |
 | Página de licencia de HPO y términos de uso del NCIt | texto vigente de las condiciones | `hpo.jax.org` y `evs.nci.nih.gov` bloqueados: verificar antes de publicar |
-| NCIt vigente | NCIt 26.x | la edición OBO más reciente en GitHub es 24.04e (2024-05-07) |
 
 ## Cómo correr
 

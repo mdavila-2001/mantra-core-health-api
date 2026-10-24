@@ -81,8 +81,12 @@ export const SOURCE_FILES = [
   {
     key: 'ncit',
     file: 'ncit/ncit.obo',
-    url: 'https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/latest/download/ncit.obo',
-    owner: 'NCI Thesaurus (National Cancer Institute, EVS) — edición OBO',
+    // Repo oficial vigente de la edición OBO (ncit-obo-org); el anterior
+    // (NCI-Thesaurus/thesaurus-obo-edition) quedó en 24.04e. Release fijada: es la
+    // misma que usa seed-diseases para `ncit-disease`, así el corte contra C2991
+    // coincide en los dos lados.
+    url: 'https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo',
+    owner: 'NCI Thesaurus (National Cancer Institute, EVS) — edición OBO (ncit-obo-org)',
     license: 'NCI Thesaurus: la edición OBO no declara licencia; términos de uso del NCI EVS (https://evs.nci.nih.gov/) — verificar antes de publicar',
     versionFrom: 'obo-data-version',
   },

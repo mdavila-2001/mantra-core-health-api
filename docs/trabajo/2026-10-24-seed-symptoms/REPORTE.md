@@ -12,8 +12,8 @@
 |---|---|---|---|
 | H1.S1.M2 | `concept_relationships` no guarda fuente/frecuencia/evidencia | `awk '/concept_relationships/,/\);/' database/SQL/03_terminology/02_tables.sql` | sólo `source_concept_id`, `target_concept_id`, `relationship_type_concept_id`, `ordinal` + auditoría |
 | H2.S1.M1 | Fuentes fuera de git con manifiesto | `fetch-symptom-sources.mjs` | `evidencia/manifest.json`: 9 archivos con sha256 y versión |
-| H3.S1.M1–M3 | Corpus de términos: HPO 19 894 (19 345 ES oficial), SYMP 895, NCIt 3 694 (18 excluidos por ser C2991, de `seed-diseases`) | `build-symptoms-corpus.mjs` | `evidencia/coverage-resumen.json` |
-| H3.S2.M2 | Términos cargados | `load-symptoms.mjs --apply --glossary` | hpo 19 894 · symp 895 · ncit 3 694 conceptos (log abajo) |
+| H3.S1.M1–M3 | Corpus de términos: HPO 19 894 (19 345 ES oficial), SYMP 895, NCIt 26.02d 3 988 (19 excluidos por ser C2991, de `seed-diseases`; misma edición que `ncit-disease`) | `build-symptoms-corpus.mjs` | `evidencia/coverage-resumen.json` |
+| H3.S2.M2 | Términos cargados | `load-symptoms.mjs --apply --glossary` | hpo 19 894 · symp 895 · ncit 3 988 conceptos (log abajo) |
 | H3.S2.M3 | Idempotente | idem, segunda vez | todos los contadores en 0 |
 | H3.S3.M1 | Extensión opcional al glosario | idem | `glossaryMembers: 37292` (18 646 términos × 2 value sets) |
 | H4.S1.M1–M4 | Corpus de relaciones: HPOA 286 651, Mondo 974, DOID 2 268, enfermedades comunes 132 600 | build + pruebas | 49/49 pruebas |
@@ -64,21 +64,21 @@ Postgres 16 desechable (DDL `00_shared` + `03_terminology`; andamio descrito en 
 ### terms run 1
 [load] {"codeSystem":"hpo",...,"concepts":19894,"designations":61927,"properties":309294,"isA":24436,"maps":0,"glossaryMembers":37292,...}
 [load] {"codeSystem":"symp",...,"concepts":895,"designations":1138,"properties":8892,"isA":898,...}
-[load] {"codeSystem":"ncit",...,"concepts":3694,"designations":7115,"properties":45276,"isA":3786,...}
-(19 s)
+[load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":3988,"designations":7682,"properties":48985,"isA":4094,...}
+(18 s)
 ### terms run 2
 [load] {"codeSystem":"hpo",...,"concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,...}
-(11 s)
+(13 s)
 ### relations without model
 BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (columnas ausentes: id, relationship_id, …)
 ### relations run 1
     "relationships": 344981,
     "evidence": 372528
-(56 s)
+(57 s)
 ### relations run 2
     "relationships": 0,
     "evidence": 0
-(35 s)
+(33 s)
 ```
 
 `evidencia/postgres-desechable-check-formato-688.txt` (omim/orphanet/decipher con código sin prefijo):
@@ -100,6 +100,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 - **Plan escrito después de implementar.** `AGENTS.md` estaba en el repo desde el inicio y no se leyó en el discovery (se buscaron `CLAUDE.md` y `.claude/rules/`, que no existen; `.claude/` sólo tiene `settings.json`). PLAN y REPORTE se agregaron al detectarlo, antes del cierre.
 - **Rama `claude/amazing-ptolemy-sin3nw` en lugar de `justin/seed-symptoms`.** La asignó el entorno de ejecución, que prohíbe empujar a otra rama sin permiso explícito.
 - **Instalación de dependencias.** `cdn.sheetjs.com` está bloqueado. Para poder instalar, se cambió `xlsx` a `0.18.5` del registro npm **sólo localmente**, y se restauraron `package.json` y `yarn.lock` sin commitearlos. Typecheck, lint y build corrieron con esa versión.
+- **NCIt cambiado a la edición 26.02d** (repo oficial `ncit-obo-org`, release v2026-03-19, SHA-256 verificado `8fdc2d29…`) a pedido de `seed-diseases`, para que el corte contra C2991 sea el mismo en los dos code systems. Antes se usaba 24.04e del repo anterior.
 - **NCIt ampliado en la pasada 6.** Se sumaron los hallazgos clínicos por sistema (C36278, tipo semántico *Finding*) porque el pedido incluye «hallazgos clínicos».
 
 ## Riesgos residuales

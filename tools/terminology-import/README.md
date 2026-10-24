@@ -259,7 +259,7 @@ Corpus en `symptoms/` (fuentes y licencias en `symptoms/SOURCES.md`; investigaci
 pasadas de saturación, cobertura y huecos en `docs/seed-research/symptoms.md`).
 Tres sistemas de códigos: **HPO** (19 894 términos, 19 345 con nombre oficial en
 castellano), **Symptom Ontology** (895) y **NCIt** signos, síntomas y hallazgos
-clínicos (3 694), con su jerarquía is-a. Relaciones enfermedad → síntoma **sólo de
+clínicos (3 988, NCIt 26.02d), con su jerarquía is-a. Relaciones enfermedad → síntoma **sólo de
 anotaciones publicadas** (HPOA con OMIM/Orphanet/DECIPHER, Mondo, Disease
 Ontology, anotaciones de enfermedades comunes de HPO), con frecuencia y evidencia.
 
