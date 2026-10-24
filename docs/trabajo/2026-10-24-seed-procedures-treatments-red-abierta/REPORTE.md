@@ -1,6 +1,6 @@
 # Reporte — Procedimientos y tratamientos no farmacológicos: fase 2 y pasadas con la red abierta
 
-- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/seed-procedures-treatments` (reiniciada desde `dev` tras el merge de #689)
+- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/seed-procedures-treatments` (reiniciada desde `dev` tras el merge de #689; #721 mergeó hasta la pasada 6 y las pasadas 7+ van en un PR nuevo, con la rama rebasada sobre `dev`)
 - Peldaño de evidencia alcanzado: `TESTED` en el importador (20 tests dirigidos en verde, build determinista) y carga verificada en PostgreSQL 16 desechable con idempotencia medida. No `VERIFIED` de punta a punta: el modelo vigente no puede guardar la procedencia de las relaciones (las relaciones solo se cargaron en la base con la tabla propuesta).
 - Avance: 13 / 17 microtareas HECHO (76,5 %). Estado vivo: se reescribe en cada pasada.
 
@@ -59,6 +59,7 @@ load.mjs --apply, base con tabla propuesta y claves de las hermanas
 
 ## Desvíos del plan
 - La clasificación MeSH de la pasada 5 contaba métodos de investigación (E05) y conceptos de tiempo/estrategia como procedimientos; se depuró en la pasada 6 y las cifras de la 5 quedaron corregidas (ClinicalTrials.gov: 41 094 → 34 083).
+- Pasada 8: el primer intento de descarga de ensayos aleatorizados lo frenó el chequeo de suma de particiones (435 206 contra 673 366): los tramos mensuales terminaban en el día 31 y PubMed responde 0 («No items found») a una fecha inexistente como `2015/04/31`. Se corrigió con el último día real del mes; el chequeo cumplió su función.
 - Pasada 7: `fetch-pubmed-cochrane.mjs` se generalizó a `fetch-pubmed.mjs --subset <cochrane|guidelines|rct>`; las particiones pasaron de `[PDAT]` (se solapaban: 47 122 contra 44 031) a `[EDAT]` (fecha de alta, única por registro), y bajan a mes y día cuando un año supera 10 000.
 - Cochrane entra por MEDLINE (indexación MeSH de NLM) porque el sitio de Cochrane responde 403; solo metadatos, sin texto de las revisiones.
 - Wikidata P924 se agregó como fuente **colaborativa** (no oficial) con un tipo propio (`collaborative-referenced`) y solo con referencia real; la propuesta para el modelo suma esa clase de afirmación.

@@ -74,6 +74,9 @@ const esearch = (term, history = false) =>
   ).esearchresult;
 const range = (a, b) => `"${a}"[EDAT] : "${b}"[EDAT]`;
 const pad = (n) => String(n).padStart(2, '0');
+// Último día real del mes: PubMed responde 0 («No items found») a una fecha
+// inexistente como 2015/04/31 en vez de recortarla.
+const lastDay = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
 
 /** Tramos disjuntos de fecha de alta con menos de 10 000 registros cada uno (año → mes → día). */
 function partitions(term) {
@@ -95,13 +98,13 @@ function partitions(term) {
       continue;
     }
     for (let m = 1; m <= 12; m++) {
-      const mr = range(`${y}/${pad(m)}/01`, `${y}/${pad(m)}/31`);
+      const mr = range(`${y}/${pad(m)}/01`, `${y}/${pad(m)}/${lastDay(y, m)}`);
       const mn = count(mr);
       if (mn <= LIMIT) {
         if (mn) out.push({ tag: `y${y}m${pad(m)}`, range: mr, count: mn });
         continue;
       }
-      for (let d = 1; d <= 31; d++) {
+      for (let d = 1; d <= lastDay(y, m); d++) {
         const dr = range(
           `${y}/${pad(m)}/${pad(d)}`,
           `${y}/${pad(m)}/${pad(d)}`,
