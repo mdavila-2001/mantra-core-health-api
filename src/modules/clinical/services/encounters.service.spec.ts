@@ -10,9 +10,12 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { EncountersService } from './encounters.service';
 import {
   ConcurrencyConflictException,
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
+import { OwnerType } from '../../common/dto';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -32,6 +35,10 @@ function build() {
     createLocation: mockFn(),
     findActiveParticipants: mockFn().mockResolvedValue([]),
     findActiveLocations: mockFn().mockResolvedValue([]),
+    findAppointmentForUpdate: mockFn().mockResolvedValue(null),
+    findByAppointmentId: mockFn().mockResolvedValue([]),
+    findLatestIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
+    findIdsByAppointmentIds: mockFn().mockResolvedValue(new Map()),
   };
   const episodesRepo = { findById: mockFn() };
   // Carril P1: el aviso in-app del cierre. Se dobla con un espía que no hace
@@ -39,15 +46,41 @@ function build() {
   const clinicalNotifications = {
     encounterClosed: mockFn(() => Promise.resolve({ suppressed: false })),
   };
+  // El sello se cubre por su propio spec (`encounter-seal.service.spec.ts`);
+  // acá se dobla para probar sólo el cableado del cierre.
+  const seal = {
+    computeHash: mockFn().mockResolvedValue('a'.repeat(64)),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const clinicalRead = {
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+  };
+  // P25: adjuntos del encuentro.
+  const filesService = {
+    createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
+    listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
+  };
   const service = new EncountersService(
     em as any,
     encountersRepo,
     episodesRepo as any,
     clinicalNotifications as any,
+    seal as any,
     logger as any,
+    clinicalRead as any,
+    filesService as any,
   );
-  return { service, tx, encountersRepo, episodesRepo, clinicalNotifications };
+  return {
+    service,
+    tx,
+    encountersRepo,
+    episodesRepo,
+    clinicalNotifications,
+    seal,
+    clinicalRead,
+    filesService,
+  };
 }
 
 /**
@@ -62,10 +95,67 @@ const encounter = () => ({
   startAt: new Date(),
   endAt: undefined,
   createdAt: new Date(),
+  contentHash: undefined,
+  sealedAt: undefined,
   rowVersion: 1,
 });
 
 describe('EncountersService', () => {
+  // P25 / CL-05 — adjuntos del encuentro por su ruta clínica.
+  // P25 / BR-11 §1.C — listar adjuntos es leer la historia.
+  describe('listAttachments (P25)', () => {
+    it('lista por la ruta clínica tras la política de lectura', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter());
+      await d.service.listAttachments('enc1', actor);
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.listLinkedFilesOf).toHaveBeenCalledWith(
+        OwnerType.ENCOUNTER,
+        'enc1',
+      );
+    });
+
+    it('responde 404 cuando el encuentro no existe', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.listAttachments('nope', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.filesService.listLinkedFilesOf).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('attachFile (P25)', () => {
+    it('liga el archivo con OWNER_ENCOUNTER tras autorizar por el paciente de la fila', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter());
+      const res = await d.service.attachFile('enc1', { fileId: 'f1' }, actor);
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.filesService.createLink).toHaveBeenCalledWith(
+        'f1',
+        { ownerType: OwnerType.ENCOUNTER, ownerId: 'enc1' },
+        actor,
+      );
+      expect(res).toEqual({ id: 'link-1' });
+    });
+
+    it('responde 404 antes de autorizar cuando el encuentro no existe', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.attachFile('nope', { fileId: 'f1' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      expect(d.filesService.createLink).not.toHaveBeenCalled();
+    });
+  });
+
   describe('checkIn (UC-08-02)', () => {
     it('opens an encounter without participants', async () => {
       const d = build();
@@ -112,6 +202,80 @@ describe('EncountersService', () => {
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+
+    it('reuses the in-progress encounter already open for the appointment', async () => {
+      const d = build();
+      const enc = { ...encounter(), id: 'enc-existing' };
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([enc]);
+      d.encountersRepo.findActiveParticipants.mockResolvedValue([
+        { id: 'part1' },
+      ]);
+      d.encountersRepo.findActiveLocations.mockResolvedValue([{ id: 'loc1' }]);
+
+      const res = await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      expect(res.id).toBe('enc-existing');
+      expect(res.participantIds).toEqual(['part1']);
+      expect(res.locationIds).toEqual(['loc1']);
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects with 409 when the appointment already has a finished encounter', async () => {
+      const d = build();
+      const enc = {
+        ...encounter(),
+        id: 'enc-finished',
+        statusConceptId: CLIN.ENCOUNTER_FINISHED,
+        endAt: new Date(),
+      };
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([enc]);
+
+      const promise = d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      await expect(promise).rejects.toBeInstanceOf(ConflictException);
+      await expect(promise).rejects.toMatchObject({
+        details: {
+          encounterId: 'enc-finished',
+          status: 'ENC_FINISHED',
+        },
+      });
+      expect(d.encountersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('creates a new encounter when the appointment has none', async () => {
+      const d = build();
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([]);
+      d.encountersRepo.create.mockReturnValue(encounter());
+
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1', appointmentId: 'appt1' },
+        actor,
+      );
+
+      expect(d.encountersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ appointmentId: 'appt1' }),
+      );
+    });
+
+    it('does not look up the appointment when none is given', async () => {
+      const d = build();
+      d.encountersRepo.create.mockReturnValue(encounter());
+
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1' },
+        actor,
+      );
+
+      expect(d.encountersRepo.findAppointmentForUpdate).not.toHaveBeenCalled();
+      expect(d.encountersRepo.findByAppointmentId).not.toHaveBeenCalled();
+    });
   });
 
   describe('close (UC-08-14)', () => {
@@ -133,6 +297,11 @@ describe('EncountersService', () => {
         CLIN.LOCATION_COMPLETED,
       );
       expect(res.status).toBe(CLIN.ENCOUNTER_FINISHED);
+      expect(d.seal.computeHash).toHaveBeenCalledWith(d.tx, enc);
+      expect(enc.contentHash).toBe('a'.repeat(64));
+      expect(enc.sealedAt).toBeInstanceOf(Date);
+      expect(res.contentHash).toBe('a'.repeat(64));
+      expect(res.sealedAt).toBeInstanceOf(Date);
     });
 
     it('throws when the encounter does not exist', async () => {
@@ -143,7 +312,7 @@ describe('EncountersService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
-    it('rejects closing an encounter that is not in progress', async () => {
+    it('rejects closing an encounter that is not in progress, and does not seal it', async () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue({
         ...encounter(),
@@ -152,6 +321,7 @@ describe('EncountersService', () => {
       await expect(d.service.close('enc1', {}, actor)).rejects.toBeInstanceOf(
         PreconditionFailedException,
       );
+      expect(d.seal.computeHash).not.toHaveBeenCalled();
     });
 
     it('rejects on optimistic version mismatch', async () => {
@@ -164,5 +334,27 @@ describe('EncountersService', () => {
         d.service.close('enc1', { expectedRowVersion: 1 }, actor),
       ).rejects.toBeInstanceOf(ConcurrencyConflictException);
     });
+  });
+});
+
+describe('EncountersService · MCH-007, cierre por id', () => {
+  it('pregunta por el paciente del encuentro y, sin permiso, no lo cierra ni lo sella', async () => {
+    const d = build();
+    const enc = { ...encounter(), patientProfileId: 'paciente-ajeno' };
+    d.encountersRepo.findById.mockResolvedValue(enc);
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(d.service.close('enc1', {}, actor)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(enc.statusConceptId).toBe(CLIN.ENCOUNTER_IN_PROGRESS);
+    expect(d.seal.computeHash).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });

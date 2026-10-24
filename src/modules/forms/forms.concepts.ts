@@ -53,6 +53,15 @@ export const { seeds: FORMS_CONCEPT_SEEDS, ids: FORMS } = defineModuleConcepts(
       code: 'FORMS_ASSIGNMENT_ACTIVE',
       display: 'Field assignment active',
     },
+    /**
+     * Baja lógica de una asignación (CL-61): el campo deja de ofrecerse en el
+     * formulario, pero sus valores históricos siguen legibles. Nunca se borra
+     * la fila: `valid_to` se cierra y el estado pasa a retirado.
+     */
+    ASSIGNMENT_RETIRED: {
+      code: 'FORMS_ASSIGNMENT_RETIRED',
+      display: 'Field assignment retired',
+    },
 
     // --- Reglas de validación (field_validation_rules) ---
     RULE_TYPE_REQUIRED: {

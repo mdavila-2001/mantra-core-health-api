@@ -14,6 +14,7 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  SEED,
 } from '../../../common';
 
 const actor = { id: 'u-1', roles: [] } as any;
@@ -66,6 +67,20 @@ describe('AttachableFileService', () => {
     expect(version.id).toBe('v1');
   });
 
+  it('contextual validation checks state/version without requiring uploader ownership', async () => {
+    const d = build();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      createdByUserId: 'otro-usuario',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.assertUsableForAuthorizedContext(em, 'f1'),
+    ).resolves.toMatchObject({ file: { id: 'f1' }, version: { id: 'v1' } });
+  });
+
   it('accepts a file whose scan has not run yet', async () => {
     // En este despliegue no hay antivirus cableado: exigir SCAN_CLEAN dejaría
     // inservible toda la media. Lo pendiente pasa; lo infectado no.
@@ -100,6 +115,39 @@ describe('AttachableFileService', () => {
     // Que el rechazo quede registrado importa: enumerar uuids ajenos es
     // exactamente la señal que alguien tiene que poder ver después.
     expect(d.logger.warn).toHaveBeenCalled();
+  });
+
+  it('AG-17: admite un archivo ajeno si su id está en la allowlist', async () => {
+    const d = build();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'sticker-1',
+      createdByUserId: 'system-worker',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.assertUsableBy(em, 'sticker-1', actor, {
+        allowIfFileIdIn: ['sticker-1', 'sticker-2'],
+      }),
+    ).resolves.toMatchObject({ file: { id: 'sticker-1' } });
+    expect(d.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('AG-17: un archivo ajeno fuera de la allowlist sigue rechazado', async () => {
+    const d = build();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'otro-1',
+      createdByUserId: 'otro-usuario',
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.assertUsableBy(em, 'otro-1', actor, {
+        allowIfFileIdIn: ['sticker-1', 'sticker-2'],
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('refuses a soft-deleted file', async () => {
@@ -199,5 +247,182 @@ describe('AttachableFileService', () => {
         { subject: 'El archivo de la foto', notFound: 'No existe esa foto' },
       ),
     ).rejects.toThrow('El archivo de la foto no le pertenece');
+  });
+});
+
+describe('AttachableFileService.claimAnonymousUpload', () => {
+  const claim = { tenantId: 'tenant-1', ownerUserId: 'owner-1' };
+
+  /** Un archivo anónimo, en el tenant DEFAULT, con versión PDF vigente y sin escanear. */
+  function buildAnonymousUpload() {
+    const filesRepo = {
+      findById: mockFn(() =>
+        Promise.resolve({
+          id: 'f1',
+          tenantId: SEED.tenantId,
+          createdByUserId: null, // MikroORM hidrata así una FK nullable sin valor
+          categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          currentVersionId: 'v1',
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        }),
+      ),
+    };
+    const fileVersionsRepo = {
+      findById: mockFn(() =>
+        Promise.resolve({
+          id: 'v1',
+          mimeType: 'application/pdf',
+          malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+        }),
+      ),
+    };
+    const logger = { setContext: mockFn(), warn: mockFn(), info: mockFn() };
+    const service = new AttachableFileService(
+      filesRepo as any,
+      fileVersionsRepo as any,
+      logger as any,
+    );
+    return { service, filesRepo, fileVersionsRepo, logger };
+  }
+
+  it('reclama un archivo anónimo válido y le asigna tenant y dueño', async () => {
+    const d = buildAnonymousUpload();
+
+    const { file } = await d.service.claimAnonymousUpload(em, 'f1', claim, {
+      allowedMimeTypes: ['application/pdf'],
+    });
+
+    expect(file.tenantId).toBe('tenant-1');
+    expect(file.createdByUserId).toBe('owner-1');
+    expect(file.updatedByUserId).toBe('owner-1');
+  });
+
+  it('rechaza un archivo inexistente', async () => {
+    const d = buildAnonymousUpload();
+    d.filesRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'fantasma', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza un archivo que ya tiene dueño', async () => {
+    const d = buildAnonymousUpload();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      tenantId: SEED.tenantId,
+      createdByUserId: 'alguien-ya-lo-reclamó',
+      categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza un archivo que ya no está en el tenant DEFAULT', async () => {
+    const d = buildAnonymousUpload();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      tenantId: 'otro-tenant',
+      createdByUserId: null, // MikroORM hidrata así una FK nullable sin valor
+      categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza una categoría distinta de la exigida', async () => {
+    const d = buildAnonymousUpload();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      tenantId: SEED.tenantId,
+      createdByUserId: null, // MikroORM hidrata así una FK nullable sin valor
+      categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+      currentVersionId: 'v1',
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim, {
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza un archivo borrado', async () => {
+    const d = buildAnonymousUpload();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      tenantId: SEED.tenantId,
+      createdByUserId: null, // MikroORM hidrata así una FK nullable sin valor
+      categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+      currentVersionId: 'v1',
+      deletedAt: new Date('2026-01-01'),
+      lifecycleStatusConceptId: CONCEPTS.FILE_DELETED,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza un archivo sin versión vigente', async () => {
+    const d = buildAnonymousUpload();
+    d.filesRepo.findById.mockResolvedValue({
+      id: 'f1',
+      tenantId: SEED.tenantId,
+      createdByUserId: null, // MikroORM hidrata así una FK nullable sin valor
+      categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+      lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza un archivo infectado', async () => {
+    const d = buildAnonymousUpload();
+    d.fileVersionsRepo.findById.mockResolvedValue({
+      id: 'v1',
+      mimeType: 'application/pdf',
+      malwareScanStatusConceptId: CONCEPTS.SCAN_INFECTED,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('rechaza un archivo que no es PDF', async () => {
+    const d = buildAnonymousUpload();
+    d.fileVersionsRepo.findById.mockResolvedValue({
+      id: 'v1',
+      mimeType: 'image/png',
+      malwareScanStatusConceptId: CONCEPTS.SCAN_PENDING,
+    });
+
+    await expect(
+      d.service.claimAnonymousUpload(em, 'f1', claim, {
+        allowedMimeTypes: ['application/pdf'],
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('no flushea: la asignación queda en la unidad de trabajo del llamador', async () => {
+    const d = buildAnonymousUpload();
+
+    const { file } = await d.service.claimAnonymousUpload(em, 'f1', claim);
+
+    // El objeto devuelto ya trae los cambios en memoria; persistirlos es
+    // responsabilidad de la transacción de quien llama.
+    expect(file.tenantId).toBe('tenant-1');
   });
 });

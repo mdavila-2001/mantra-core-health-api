@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { ControllingAreas } from '../entities';
+import {
+  ControllingAreas,
+  CostCenters,
+  ProfitCenters,
+  AccountingSegments,
+} from '../entities';
 
 /**
  * Acceso de solo-catálogo a las áreas de control (`accounting.controlling_areas`).
@@ -34,6 +39,40 @@ export class AccountingControllingRepository {
   ): Promise<ControllingAreas[]> {
     return em.find(
       ControllingAreas,
+      { tenantId },
+      { orderBy: { code: 'asc' } },
+    );
+  }
+
+  /** Centros de coste de una práctica (D-9), ordenados por código. */
+  listCostCentersByPractice(
+    em: EntityManager,
+    practiceId: string,
+  ): Promise<CostCenters[]> {
+    return em.find(CostCenters, { practiceId }, { orderBy: { code: 'asc' } });
+  }
+
+  /**
+   * Centros de beneficio de un tenant (D-9: `profit_centers` no tiene
+   * `practice_id`, así que no hay puente por práctica), ordenados por código.
+   */
+  listProfitCentersByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<ProfitCenters[]> {
+    return em.find(ProfitCenters, { tenantId }, { orderBy: { code: 'asc' } });
+  }
+
+  /**
+   * Segmentos de un tenant (D-9: `segments` no tiene `practice_id`, así que
+   * no hay puente por práctica), ordenados por código.
+   */
+  listSegmentsByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<AccountingSegments[]> {
+    return em.find(
+      AccountingSegments,
       { tenantId },
       { orderBy: { code: 'asc' } },
     );

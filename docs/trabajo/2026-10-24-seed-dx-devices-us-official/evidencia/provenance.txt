@@ -1,0 +1,21 @@
+{
+ "n": 1098516,
+ "missingProvenance": 0,
+ "bySourceVia": {
+  "cdc-livd-sars-cov-2 mirror": 483,
+  "fda-510k official+alsoIn": 71935,
+  "fda-510k mirror": 20,
+  "fda-denovo official+alsoIn": 240,
+  "fda-gudid official": 635097,
+  "fda-maude mirror": 12311,
+  "fda-maude mirror+alsoIn": 619,
+  "fda-pma official": 104,
+  "fda-pma official+alsoIn": 2639,
+  "fda-pma mirror": 7,
+  "fda-recall mirror": 13392,
+  "fda-recall mirror+alsoIn": 300,
+  "fda-rl official": 335048,
+  "fda-rl official+alsoIn": 26321
+ }
+}
+{"prev":215690,"cur":1098516,"goneBySource":{"fda-rl":110614}}

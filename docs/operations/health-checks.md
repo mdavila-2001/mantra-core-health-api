@@ -2,27 +2,21 @@
 
 > Fase 14. Estado real, verificado en código — no lo que "debería" haber.
 
-## Lo que existe: liveness únicamente
+## API: liveness y readiness
 
-`GET /health` (`src/app.controller.ts`, `@Public()`) responde `{ status: 'ok' }` mientras el
-proceso esté vivo y aceptando conexiones. El propio comentario del código lo declara sin
-ambigüedad: *"Sonda de liveness pública... No exige JWT ni toca la base: responde 200 mientras el
-proceso esté vivo. La readiness con verificación de base de datos queda pendiente."*
+- `GET /health` y `GET /liveness` (`src/app.controller.ts`, `@Public()`) responden mientras el
+  proceso esté vivo, sin tocar dependencias: una dependencia caída no debe provocar reinicios.
+- `GET /readiness` (`AppReadinessService`, `src/app-readiness.service.ts`) prueba PostgreSQL,
+  MongoDB, Redis y OpenSearch con un plazo de 3 s cada uno y, con `RLS_ENFORCE=true`, que el rol de
+  runtime no tenga `BYPASSRLS` ni sea superusuario. Si alguna falla responde `503`
+  `DEPENDENCY_UNAVAILABLE` con el estado de cada chequeo.
 
-## Lo que no existe: readiness
+`@nestjs/terminus` figura en `package.json`, pero la readiness no lo usa.
 
-No hay un endpoint que verifique conectividad real a PostgreSQL/MongoDB/Redis/OpenSearch/MinIO
-antes de declarar el proceso "listo para recibir tráfico". Un contenedor puede reportar `200` en
-`/health` mientras su conexión a la base está caída.
+## Workers
 
-## `@nestjs/terminus` — dependencia sin usar
-
-`package.json` declara `@nestjs/terminus` (biblioteca estándar de Nest para health checks
-enriquecidos: `TypeOrmHealthIndicator`, `HttpHealthIndicator`, etc.) como dependencia, pero **no
-se encontró ningún import de `@nestjs/terminus` en `src/`** — está instalada pero no integrada.
-Hallazgo real de esta auditoría, no una suposición: probablemente destinada a una implementación
-de readiness que no se completó, o dependencia obsoleta. Se documenta como brecha, no se asume
-cuál de las dos.
+Cada worker expone `GET /health`/`/liveness`, `/readiness` y `/status` en `WORKER_HEALTH_PORT`
+(9100 por defecto) — ver `src/worker/README.md`.
 
 ## Registro de health checks a nivel de datos (`platform_ops`)
 
@@ -32,23 +26,12 @@ consultable como historial. No es el mismo concepto que un endpoint HTTP de read
 Kubernetes/Docker; es más cercano a un log estructurado de resultados de chequeos, posiblemente
 ejecutados por un worker o proceso externo no identificado en esta fase.
 
-## `docker-compose.yml` — sin healthcheck propio para `api` ni los workers
+## `docker-compose.yml`
 
-Los 5 almacenes de datos (`postgres`, `mongodb`, `redis`, `opensearch`) declaran `healthcheck:` en
-`docker-compose.yml`. **`api` y los 20 `worker-*` no tienen bloque `healthcheck:` propio** — solo
-`restart: always`, que reinicia ante un *crash*, no ante un proceso colgado mientras sigue vivo.
-
-## Consecuencia real
-
-Sin readiness, un despliegue puede enrutar tráfico a una instancia de `api` que arrancó pero no
-puede hablar con PostgreSQL — el liveness la reportaría sana. Es un riesgo operativo real,
-clasificado como brecha en esta auditoría, no un problema teórico.
-
-## Acción recomendada
-
-1. Completar la integración de `@nestjs/terminus` (o remover la dependencia si no se va a usar) e
-   implementar `GET /health/ready` con verificación real de los 5 almacenes.
-2. Añadir `healthcheck:` a los servicios `api`/`worker-*` en `docker-compose.yml`.
+Los almacenes de datos, la API y los workers declaran `healthcheck:`. La API consulta
+`http://localhost:3000/health` y cada worker `http://localhost:9100/health` con el `fetch` nativo
+de Node (la imagen no trae `curl`). Es una sonda de liveness: un contenedor sano puede seguir sin
+poder hablar con una dependencia, y eso sólo lo dice `/readiness`.
 
 ## Ver también
 

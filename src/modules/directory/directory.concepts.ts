@@ -140,7 +140,8 @@ export type TenantTypeCode =
   | 'MEDICAL_OFFICE'
   | 'NURSING'
   | 'HEALTH_OTHER'
-  | 'HEALTH_BUSINESS';
+  | 'HEALTH_BUSINESS'
+  | 'DIAGNOSTIC_CENTER';
 
 /** Mapea el código de tipo de organización (DTO) a su concept id. */
 export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
@@ -162,12 +163,35 @@ export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
   // clínica (óptica, ortopedia, distribuidora de insumos). No es institución
   // asistencial, así que no cabe en `HEALTH_OTHER`.
   HEALTH_BUSINESS: CONCEPTS.TENANT_TYPE_HEALTH_BUSINESS,
+  // Centro de diagnóstico por imágenes o laboratorio clínico (subtarea 1.5).
+  // Territorial como los de arriba, y con fila propia en `diagnostic_units`
+  // (ver `TenantTypeProfileService.materializeProfile`).
+  DIAGNOSTIC_CENTER: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
 };
 
 /** Los códigos válidos, para `@IsIn` y para la documentación OpenAPI. */
 export const TENANT_TYPE_CODES = Object.keys(
   TENANT_TYPE_CONCEPT_BY_CODE,
 ) as TenantTypeCode[];
+
+/**
+ * El inverso de {@link TENANT_TYPE_CONCEPT_BY_CODE}: concept id → código.
+ *
+ * Se deriva del mapa de ida para que las dos direcciones no puedan discrepar
+ * (mismo patrón que `BIRTH_SEX_CODE_BY_CONCEPT` en `profiles.concepts.ts`).
+ * Un `tenant_type_concept_id` que no esté en el catálogo (la columna admite
+ * cualquier uuid, ver `DirectoryTenantsService.resolveTenantType`) simplemente
+ * no tiene entrada acá: quien lo consulte lo trata como tipo desconocido, no
+ * como error.
+ */
+export const TENANT_TYPE_CODE_BY_CONCEPT_ID: Readonly<
+  Record<string, TenantTypeCode>
+> = Object.fromEntries(
+  Object.entries(TENANT_TYPE_CONCEPT_BY_CODE).map(([code, conceptId]) => [
+    conceptId,
+    code as TenantTypeCode,
+  ]),
+);
 
 /**
  * Tipos que operan atendiendo o formando en un territorio, y que por eso deben
@@ -186,6 +210,7 @@ export const TERRITORIAL_TENANT_TYPES: readonly TenantTypeCode[] = [
   'NURSING',
   'HEALTH_OTHER',
   'HEALTH_BUSINESS',
+  'DIAGNOSTIC_CENTER',
 ];
 
 /** Mapea el código de rol de tenant (DTO) a su concept id. */

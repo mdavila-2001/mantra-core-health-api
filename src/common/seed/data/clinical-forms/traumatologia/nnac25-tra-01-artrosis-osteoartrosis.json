@@ -1,0 +1,167 @@
+{
+  "code": "NNAC25_TRA_01_ARTROSIS_OSTEOARTROSIS",
+  "name": "Artrosis (NNAC 2025)",
+  "specialty": {
+    "code": "TRAUMATOLOGIA",
+    "display": "Traumatología y ortopedia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Traumatología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/965-norma-nacional-de-atencion-clinica-de-traumatologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 1, pág. 19; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dolor: es el síntoma predominante de la osteoartritis y es el que hace que los pacientes acudan al médico",
+        "Rigidez articular: los pacientes experimentan rigidez por la mañana o después de un periodo de inactividad, dura menos de 30 minutos",
+        "Crepitación: sensación de crujido percibido en la articulación al realizar movimientos, ya sean pasivos o activos",
+        "Limitación de la función: los pacientes reportan síntomas que limitan sus actividades diarias"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 19."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Grado 0: Normal",
+        "Grado 1: Dudoso: Dudoso estrechamiento del espacio articular",
+        "Grado 2: Leve: Posible estrechamiento del espacio articular",
+        "Grado 3: Moderado: Estrechamiento del espacio articular",
+        "GRADO 0: Sin anormalidades",
+        "GRADO 1: Reblandecimiento y tumefacción del cartílago",
+        "GRADO 2: Fragmentación o fisuración en una zona de 1 cm de diámetro o menos",
+        "GRADO 3: La zona afectada es superior a 1 cm de diámetro",
+        "GRADO 4: Erosionado el cartílago hasta el hueso"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ultrasonido: Su principal ventaja consiste en permitir la visualización de estructuras de tejidos blandos (como el tejido sinovial)",
+        "Resonancia magnética: Proporciona una evaluación objetiva de la morfología (volumen, área y grosor) y la integridad (calidad) del cartílago articular"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "M19: Otras artrosis [Para el código de sitio ver las subclasificaciones antes de M00–M25]",
+        "M19.0: Artrosis primaria de otras articulaciones",
+        "M19.1: Artrosis postraumática de otras articulaciones",
+        "M19.2: Otras artrosis secundarias",
+        "M19.8: Otras artrosis especificadas",
+        "M19.9: Artrosis, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 1, pág. 19); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

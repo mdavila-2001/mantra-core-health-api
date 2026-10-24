@@ -3,7 +3,14 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
+import { INS } from '../../modules/insurance/domain/insurance.concepts';
+import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
+import {
+  CONTAINER_TYPE_CONCEPTS,
+  SPECIMEN_TYPE_CONCEPTS,
+} from '../../modules/diagnostics/diagnostics.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
+import { ALLERGY_DYNAMIC_ENUMS } from './data/allergies/allergy-dynamic-enums';
 
 /**
  * Catálogo declarativo de las enumeraciones bien conocidas de la plataforma.
@@ -145,6 +152,85 @@ export const CONCEPT_INDEX_BY_ID: ReadonlyMap<
  * no se podían pintar. Ampliarlo es añadir una entrada.
  */
 export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
+  // --- insurance: consola de planes y coberturas ---
+  {
+    code: 'insurance-plan-currency',
+    name: 'Moneda del plan de seguro',
+    description: 'Moneda en la que se expresan copagos, deducibles y topes.',
+    concepts: [CONCEPTS.CURRENCY_BOB, CONCEPTS.CURRENCY_USD],
+    defaultConceptId: CONCEPTS.CURRENCY_BOB,
+    targets: ['insurance.insurance_plans.currency_concept_id'],
+  },
+  {
+    code: 'insurance-benefit-category',
+    name: 'Categoría de cobertura',
+    description: 'Grupo asistencial al que pertenece una cobertura del plan.',
+    concepts: [
+      INS.BENEFIT_CATEGORY_GENERAL,
+      INS.BENEFIT_CATEGORY_OUTPATIENT,
+      INS.BENEFIT_CATEGORY_EMERGENCY,
+      INS.BENEFIT_CATEGORY_HOSPITALIZATION,
+      INS.BENEFIT_CATEGORY_LAB_IMAGING,
+      INS.BENEFIT_CATEGORY_PHARMACY,
+    ],
+    defaultConceptId: INS.BENEFIT_CATEGORY_GENERAL,
+    targets: ['insurance.insurance_plan_benefits.benefit_category_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-status',
+    name: 'Estado de la campaña preventiva',
+    description:
+      'Ciclo de vida de una campaña preventiva de la aseguradora (Tarea 4).',
+    concepts: [
+      INS.CAMPAIGN_DRAFT,
+      INS.CAMPAIGN_ACTIVE,
+      INS.CAMPAIGN_PAUSED,
+      INS.CAMPAIGN_EXPIRED,
+    ],
+    defaultConceptId: INS.CAMPAIGN_DRAFT,
+    targets: ['insurance.insurance_campaigns.status_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-type',
+    name: 'Tipo de campaña preventiva',
+    description: 'Con qué tipo de prestador se hace la campaña preventiva.',
+    concepts: [
+      INS.CAMPAIGN_TYPE_LABORATORY,
+      INS.CAMPAIGN_TYPE_PHARMACY,
+      INS.CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING,
+      INS.CAMPAIGN_TYPE_VACCINATION,
+    ],
+    defaultConceptId: INS.CAMPAIGN_TYPE_LABORATORY,
+    targets: ['insurance.insurance_campaigns.campaign_type_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-partner-role',
+    name: 'Rol del aliado de la campaña',
+    description:
+      'Si el aliado auspicia la campaña (SPONSOR) o presta el servicio (PROVIDER).',
+    concepts: [
+      INS.CAMPAIGN_PARTNER_ROLE_SPONSOR,
+      INS.CAMPAIGN_PARTNER_ROLE_PROVIDER,
+    ],
+    defaultConceptId: INS.CAMPAIGN_PARTNER_ROLE_PROVIDER,
+    targets: ['insurance.insurance_campaign_partners.partner_role_concept_id'],
+  },
+  {
+    code: 'insurance-campaign-partner-type',
+    name: 'Tipo de aliado de la campaña',
+    description:
+      'Qué clase de organización es el aliado de la campaña preventiva.',
+    concepts: [
+      INS.CAMPAIGN_PARTNER_TYPE_IMPORTER,
+      INS.CAMPAIGN_PARTNER_TYPE_MANUFACTURER,
+      INS.CAMPAIGN_PARTNER_TYPE_LABORATORY,
+      INS.CAMPAIGN_PARTNER_TYPE_PHARMACY,
+      INS.CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER,
+    ],
+    defaultConceptId: INS.CAMPAIGN_PARTNER_TYPE_LABORATORY,
+    targets: ['insurance.insurance_campaign_partners.partner_type_concept_id'],
+  },
+
   // --- profiles: persona y paciente ---
   {
     code: 'administrative-gender',
@@ -232,7 +318,21 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'related-person-relationship',
     name: 'Parentesco de la persona relacionada',
     description: 'Relación de la persona de contacto con el paciente.',
-    concepts: [PROF.RELATIONSHIP_GUARDIAN],
+    // El orden es el que se ofrece en pantalla, y va de lo más frecuente a lo
+    // más general: la familia directa primero, la salida del catálogo al final.
+    // `RELATIONSHIP_GUARDIAN` encabeza porque es el valor que el alta escribe
+    // cuando no se declara parentesco, y el único que existía hasta ahora.
+    concepts: [
+      PROF.RELATIONSHIP_GUARDIAN,
+      PROF.RELATIONSHIP_MOTHER,
+      PROF.RELATIONSHIP_FATHER,
+      PROF.RELATIONSHIP_SPOUSE,
+      PROF.RELATIONSHIP_CHILD,
+      PROF.RELATIONSHIP_SIBLING,
+      PROF.RELATIONSHIP_OTHER_RELATIVE,
+      PROF.RELATIONSHIP_FRIEND,
+      PROF.RELATIONSHIP_OTHER,
+    ],
     targets: ['profiles.related_persons.relationship_concept_id'],
   },
   {
@@ -247,7 +347,12 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'portal-proxy-status',
     name: 'Estado del apoderado de portal',
     description: 'Si la representación en el portal sigue vigente.',
-    concepts: [PROF.PROXY_ACTIVE, PROF.PROXY_REVOKED],
+    concepts: [
+      PROF.PROXY_ACTIVE,
+      PROF.PROXY_REVOKED,
+      PROF.PROXY_PENDING,
+      PROF.PROXY_REJECTED,
+    ],
     defaultConceptId: PROF.PROXY_ACTIVE,
     targets: ['profiles.patient_portal_proxies.status_concept_id'],
   },
@@ -411,8 +516,13 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'legal-entity-type',
     name: 'Forma societaria',
     description:
-      'Figura jurídica con la que la organización está constituida, según el derecho comercial boliviano.',
+      'Figura jurídica con la que la organización está constituida. Las ocho primeras son del ' +
+      'derecho comercial boliviano; las siguientes son de otras jurisdicciones (subtarea 1.1, ' +
+      'diccionario internacional) — país y categoría canónica de cada una viajan como propiedades ' +
+      'del concepto (`legal-entity-country` / `legal-entity-canonical-category`), no acá.',
     concepts: [
+      // Bolivia — orden histórico, no se reordena: cambiar el ordinal de un
+      // concepto ya sembrado desplaza el `isDefault`/posición en bases vivas.
       CONCEPTS.LEGAL_ENTITY_SOLE_PROPRIETORSHIP,
       CONCEPTS.LEGAL_ENTITY_SRL,
       CONCEPTS.LEGAL_ENTITY_LTDA,
@@ -421,6 +531,22 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CONCEPTS.LEGAL_ENTITY_LIMITED_PARTNERSHIP,
       CONCEPTS.LEGAL_ENTITY_PARTNERSHIP_BY_SHARES,
       CONCEPTS.LEGAL_ENTITY_FOREIGN_BRANCH,
+      // Brasil
+      CONCEPTS.LEGAL_ENTITY_BR_LTDA,
+      CONCEPTS.LEGAL_ENTITY_BR_SA,
+      CONCEPTS.LEGAL_ENTITY_BR_MEI,
+      CONCEPTS.LEGAL_ENTITY_BR_EI,
+      CONCEPTS.LEGAL_ENTITY_BR_SLU,
+      CONCEPTS.LEGAL_ENTITY_BR_FILIAL_EST,
+      // Estados Unidos
+      CONCEPTS.LEGAL_ENTITY_US_LLC,
+      CONCEPTS.LEGAL_ENTITY_US_CORP,
+      CONCEPTS.LEGAL_ENTITY_US_SOLE_PROP,
+      CONCEPTS.LEGAL_ENTITY_US_LLP,
+      CONCEPTS.LEGAL_ENTITY_US_BRANCH,
+      // Argentina y México
+      CONCEPTS.LEGAL_ENTITY_AR_SAS,
+      CONCEPTS.LEGAL_ENTITY_MX_S_RL,
     ],
     // Sin preseleccionado: la forma societaria es un hecho registral, y el que
     // viniera puesto por omisión sería el que más filas tendría al final sin que
@@ -1137,13 +1263,18 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'service-request-status',
     name: 'Estado de la orden',
     description:
-      'Ciclo de vida de la orden: borrador, activa, en espera, revocada o completada.',
+      'Ciclo de vida de la orden: borrador, activa, en espera, revocada, completada o satisfecha por un informe previo.',
     concepts: [
       CLIN.SERVICE_REQUEST_DRAFT,
       CLIN.SERVICE_REQUEST_ACTIVE,
       CLIN.SERVICE_REQUEST_ON_HOLD,
       CLIN.SERVICE_REQUEST_REVOKED,
       CLIN.SERVICE_REQUEST_COMPLETED,
+      // La antiduplicación (v4.2.17) añadió este estado y su traducción, pero
+      // no lo publicó acá: `ServiceRequestsService` lo asigna de verdad, así
+      // que había órdenes con un `status_concept_id` que su propio conjunto de
+      // valores no declaraba y el glosario no podía resolver.
+      CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR,
     ],
     defaultConceptId: CLIN.SERVICE_REQUEST_DRAFT,
     targets: ['clinical.service_requests.status_concept_id'],
@@ -1188,6 +1319,93 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     defaultConceptId: CHART.RELEASE_NOT_RELEASED,
     targets: ['chart.clinical_note_headers.patient_release_status_concept_id'],
   },
+  // --- Alta pública de laboratorios y centros de imagenología (BR-09) -------
+  // El alta es anónima y sus selectores necesitan los ids de estos conceptos:
+  // sin estas enumeraciones el front tendría que hardcodearlos. Se publican por
+  // los mismos `GET /system-context/dynamic-enums` (públicos) que el resto.
+  {
+    code: 'diagnostic-unit-type',
+    name: 'Tipo de unidad diagnóstica',
+    description:
+      'Si la unidad es un laboratorio clínico o un centro de diagnóstico por imágenes.',
+    concepts: [DUNIT.UNIT_TYPE_LABORATORY, DUNIT.UNIT_TYPE_IMAGING],
+    targets: [
+      'diagnostic_units.diagnostic_units.diagnostic_unit_type_concept_id',
+    ],
+  },
+  {
+    code: 'diagnostic-modality',
+    name: 'Modalidad diagnóstica',
+    description:
+      'Las modalidades que un alta puede declarar (`diagnostic-unit-modalities.ts`); una fuera de la lista responde 422.',
+    concepts: [
+      DUNIT.MODALITY_LABORATORY,
+      DUNIT.MODALITY_XRAY,
+      DUNIT.MODALITY_ULTRASOUND,
+      DUNIT.MODALITY_CT,
+      DUNIT.MODALITY_MRI,
+      DUNIT.MODALITY_MAMMOGRAPHY,
+      DUNIT.MODALITY_BONE_DENSITOMETRY,
+    ],
+    targets: [
+      'diagnostic_units.diagnostic_study_offerings.modality_concept_id',
+    ],
+  },
+  {
+    code: 'tenant-country',
+    name: 'País de la organización',
+    description:
+      'Los tipos territoriales (laboratorio, imagenología, hospital) exigen país. Hoy sólo Bolivia: no es el `VS_COUNTRY` universal, que sigue sin miembros.',
+    concepts: [CONCEPTS.COUNTRY_BO],
+    defaultConceptId: CONCEPTS.COUNTRY_BO,
+    targets: ['directory.tenants.country_concept_id'],
+  },
+  /* --- BR-16 (CL-36) ---------------------------------------------------------
+     `chart-documents.service.ts` ya acepta y persiste `patientVisibilityConceptId`
+     (default `VISIBILITY_PROVIDER_ONLY`) desde antes de este carril; lo que
+     faltaba era publicarlo para que una pantalla pudiera ofrecerlo como
+     selector en vez de tener que adivinar el uuid. Sin columna ni tabla nueva:
+     los dos conceptos ya existen en `chart.concepts.ts`. */
+  {
+    code: 'chart-document-patient-visibility',
+    name: 'Visibilidad del documento para el paciente',
+    description:
+      'Si el titular puede ver este documento del expediente en su propia historia.',
+    concepts: [
+      CHART.VISIBILITY_PATIENT_VISIBLE,
+      CHART.VISIBILITY_PROVIDER_ONLY,
+    ],
+    defaultConceptId: CHART.VISIBILITY_PROVIDER_ONLY,
+    targets: ['chart.document_records.patient_visibility_concept_id'],
+  },
+  /* --- Recepción de muestras del laboratorio (M20) ---------------------------
+     `POST /diagnostics/specimens` y `POST .../containers` pedían un uuid de
+     tipo de espécimen y de contenedor que nada sembraba: la pantalla de
+     recepción no tenía de dónde ofrecer «Sangre venosa» ni «Tubo tapa lila».
+     Los conceptos los declara `diagnostics.concepts.ts` (HL7 v2-0487 para el
+     espécimen; color de tapa ISO 6710 para el tubo). Sin DDL: lo materializa el
+     seed al arrancar. El tipo de contenedor gobierna las dos columnas que lo
+     guardan: la del contenedor y la copia en el propio espécimen. */
+  {
+    code: 'specimen-type',
+    name: 'Tipo de espécimen',
+    description:
+      'Qué muestra se tomó al paciente: sangre, suero, orina, heces, líquido cefalorraquídeo, etc.',
+    concepts: SPECIMEN_TYPE_CONCEPTS,
+    targets: ['diagnostics.specimens.specimen_type_concept_id'],
+  },
+  {
+    code: 'specimen-container-type',
+    name: 'Tipo de contenedor de la muestra',
+    description:
+      'Tubo o frasco en el que viaja la muestra; en los tubos, el color de la tapa indica el aditivo.',
+    concepts: CONTAINER_TYPE_CONCEPTS,
+    targets: [
+      'diagnostics.specimen_containers.container_type_concept_id',
+      'diagnostics.specimens.container_type_concept_id',
+    ],
+  }, // --- clinical: alergias e intolerancias (HL7 FHIR AllergyIntolerance) ---
+  ...ALLERGY_DYNAMIC_ENUMS,
 ];
 
 /**

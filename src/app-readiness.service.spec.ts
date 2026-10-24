@@ -50,4 +50,68 @@ describe('AppReadinessService', () => {
       },
     });
   });
+
+  // MCH-013: la sonda no puede anunciar aislamiento por tenant que no existe.
+  describe('rls (MCH-013)', () => {
+    const previous = process.env.RLS_ENFORCE;
+    afterEach(() => {
+      if (previous === undefined) delete process.env.RLS_ENFORCE;
+      else process.env.RLS_ENFORCE = previous;
+    });
+
+    it('no consulta nada cuando RLS_ENFORCE no está activado (sin cambio de comportamiento hoy)', async () => {
+      delete process.env.RLS_ENFORCE;
+      const { service, execute } = build();
+
+      const result = await service.check();
+
+      expect(result.checks.rls).toMatchObject({ status: 'up' });
+      // Una sola llamada: la del postgresql. No se agrega una consulta nueva
+      // para un modo que ni siquiera está activado.
+      expect(execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('con RLS_ENFORCE=true y el rol de runtime sin BYPASSRLS ni superusuario: up', async () => {
+      process.env.RLS_ENFORCE = 'true';
+      const { service, execute } = build();
+      execute.mockImplementation((async (sql: string) =>
+        sql.includes('pg_roles')
+          ? [{ rolbypassrls: false, rolsuper: false }]
+          : [{ '?column?': 1 }]) as never);
+
+      const result = await service.check();
+
+      expect(result.checks.rls).toMatchObject({ status: 'up' });
+    });
+
+    it('con RLS_ENFORCE=true pero el rol de runtime tiene BYPASSRLS: down, no ok falso', async () => {
+      process.env.RLS_ENFORCE = 'true';
+      const { service, execute } = build();
+      execute.mockImplementation((async (sql: string) =>
+        sql.includes('pg_roles')
+          ? [{ rolbypassrls: true, rolsuper: false }]
+          : [{ '?column?': 1 }]) as never);
+
+      await expect(service.check()).rejects.toMatchObject({
+        status: 503,
+        response: {
+          details: { checks: { rls: { status: 'down' } } },
+        },
+      });
+    });
+
+    it('con RLS_ENFORCE=true y rol superusuario: down (superusuario ignora RLS igual que BYPASSRLS)', async () => {
+      process.env.RLS_ENFORCE = 'true';
+      const { service, execute } = build();
+      execute.mockImplementation((async (sql: string) =>
+        sql.includes('pg_roles')
+          ? [{ rolbypassrls: false, rolsuper: true }]
+          : [{ '?column?': 1 }]) as never);
+
+      await expect(service.check()).rejects.toMatchObject({
+        status: 503,
+        response: { details: { checks: { rls: { status: 'down' } } } },
+      });
+    });
+  });
 });

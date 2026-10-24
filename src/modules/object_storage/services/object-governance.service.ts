@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  guardStorageMutation,
+} from '../../../common/storage/storage-publication.service';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -13,6 +17,7 @@ import {
 } from '../repositories';
 import {
   CHECKSUM_ALGORITHM_SHA256,
+  CHECKSUM_SOURCE_SCAN,
   CHECKSUM_VERIFICATION,
   DELETION_VERIFICATION,
   INTEGRITY_CHECK,
@@ -60,6 +65,7 @@ export class ObjectGovernanceService {
     private readonly governanceRepo: ObjectGovernanceRepository,
     private readonly storageRepo: ObjectStorageRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(ObjectGovernanceService.name);
   }
@@ -87,6 +93,7 @@ export class ObjectGovernanceService {
     }
 
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const version = await this.storageRepo.findVersionById(tx, versionId);
       if (!version) {
         throw new ResourceNotFoundException('Versión no encontrada', {
@@ -173,6 +180,7 @@ export class ObjectGovernanceService {
     actor: AuthenticatedUser,
   ): Promise<LegalHoldResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const version = await this.storageRepo.findVersionById(tx, versionId);
       if (!version) {
         throw new ResourceNotFoundException('Versión no encontrada', {
@@ -239,6 +247,7 @@ export class ObjectGovernanceService {
     actor: AuthenticatedUser,
   ): Promise<LegalHoldResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const hold = await this.governanceRepo.findLegalHoldForUpdate(tx, holdId);
       if (!hold) {
         throw new ResourceNotFoundException('Retención legal no encontrada', {
@@ -371,6 +380,10 @@ export class ObjectGovernanceService {
         checksum.verificationStatus = passed
           ? CHECKSUM_VERIFICATION.VERIFIED
           : CHECKSUM_VERIFICATION.MISMATCH;
+        // MCH-021: la emisión de acceso sólo sirve versiones con un checksum
+        // de origen confiable. El verificador lo es; al pasar, el checksum
+        // queda firmado por él y no por el cliente que lo declaró al subir.
+        if (passed) checksum.source = CHECKSUM_SOURCE_SCAN;
       }
 
       const location = await this.storageRepo.findPrimaryLocationForUpdate(
@@ -418,6 +431,7 @@ export class ObjectGovernanceService {
     dto: BuildArchiveJobDto,
   ): Promise<ArchiveJobResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const manifest = await this.storageRepo.findManifestForUpdate(
         tx,
         dto.objectManifestId,
@@ -512,6 +526,7 @@ export class ObjectGovernanceService {
     actor: AuthenticatedUser,
   ): Promise<DeletionMarkerResponseDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const manifest = await this.storageRepo.findManifestForUpdate(
         tx,
         manifestId,

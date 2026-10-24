@@ -9,10 +9,17 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CurrentUser,
+  ParseOptionalLimitPipe,
   Roles,
   requireTenantId,
   type AuthenticatedUser,
@@ -46,6 +53,7 @@ import {
   StatusResultDto,
   SelfRequestRoleAssignmentDto,
   MedicalOrganizationConsoleDto,
+  ListPracticeRoleAssignmentsResponseDto,
 } from '../dto';
 
 /**
@@ -103,9 +111,15 @@ export class PracticesController {
     'CLINICIAN',
     'ACCOUNTING_APPROVER',
   )
-  @ApiOperation({ summary: 'Listar las prácticas activas del tenant' })
-  listPractices(): Promise<PracticeSummaryDto[]> {
-    return this.sitesService.listPractices(requireTenantId());
+  @ApiOperation({
+    summary: 'Listar las prácticas activas del tenant',
+    description:
+      'Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.',
+  })
+  listPractices(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PracticeSummaryDto[]> {
+    return this.sitesService.listPractices(requireTenantId(), actor);
   }
 
   /**
@@ -119,7 +133,7 @@ export class PracticesController {
    * Los roles son los mismos que ya admite `GET /practices`: quien puede
    * enumerar las prácticas del tenant puede ver la estructura de la suya. El
    * aislamiento real lo hace el servicio, que responde 404 ante una práctica de
-   * otra organización.
+   * otra organización o, para un `PRACTITIONER`, sin vinculación ACTIVE.
    */
   @Get(':practiceId/organization')
   @Roles(
@@ -136,10 +150,12 @@ export class PracticesController {
   })
   getOrganizationConsole(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MedicalOrganizationConsoleDto> {
     return this.organizationReadService.getConsole(
       practiceId,
       requireTenantId(),
+      actor,
     );
   }
 
@@ -159,6 +175,45 @@ export class PracticesController {
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
   ): Promise<SiteSummaryDto[]> {
     return this.sitesService.listSites(practiceId, requireTenantId());
+  }
+
+  /**
+   * Vinculaciones profesional-organización de la práctica, paginadas por
+   * cursor (CV-14). Antes de esto, `POST …/role-assignments/:roleId/approve`
+   * existía sin ninguna forma de ver qué había pendiente: el administrador
+   * tenía que conseguir el uuid por otro canal.
+   */
+  @Get(':practiceId/role-assignments')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listar las vinculaciones profesional-organización de la práctica',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Concepto de estado (p. ej. la vinculación pendiente)',
+  })
+  @ApiQuery({
+    name: 'cursor',
+    required: false,
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Vinculaciones por página',
+  })
+  listRoleAssignments(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @Query('status') statusConceptId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<ListPracticeRoleAssignmentsResponseDto> {
+    return this.workforceService.listPracticeAssignments(
+      practiceId,
+      requireTenantId(),
+      { statusConceptId, cursor, limit },
+    );
   }
 
   @Post()

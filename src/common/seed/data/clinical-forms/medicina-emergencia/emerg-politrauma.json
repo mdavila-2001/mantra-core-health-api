@@ -1,0 +1,163 @@
+{
+  "code": "EMERG_POLITRAUMA",
+  "name": "Paciente politraumatizado: evaluación primaria",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Evaluación primaria ABCDE con control cervical y Glasgow."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "mecanismo",
+      "name": "Mecanismo",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "via_aerea",
+      "name": "A — vía aérea con control cervical",
+      "dataType": "string",
+      "required": true,
+      "options": ["Permeable", "Comprometida"]
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "respiracion",
+      "name": "B — respiración",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Adecuada",
+        "Neumotórax sospechado",
+        "Dificultad respiratoria"
+      ]
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "circulacion",
+      "name": "C — circulación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Estable", "Hemorragia activa", "Shock"]
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "glasgow_ocular",
+      "name": "Glasgow — apertura ocular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "4 — espontánea",
+        "3 — a la voz",
+        "2 — al dolor",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "glasgow_verbal",
+      "name": "Glasgow — respuesta verbal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "5 — orientada",
+        "4 — confusa",
+        "3 — palabras inapropiadas",
+        "2 — sonidos incomprensibles",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "glasgow_motora",
+      "name": "Glasgow — respuesta motora",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "6 — obedece órdenes",
+        "5 — localiza el dolor",
+        "4 — retira al dolor",
+        "3 — flexión anormal",
+        "2 — extensión",
+        "1 — ninguna"
+      ]
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "lesiones",
+      "name": "Lesiones",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Craneoencefálica",
+        "Torácica",
+        "Abdominal",
+        "Pélvica",
+        "Extremidades",
+        "Columna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: politraumatismo",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,0 +1,157 @@
+{
+  "code": "REUMA_CTRL_GOTA",
+  "name": "Control de gota",
+  "specialty": { "code": "REUMATOLOGIA", "display": "Reumatología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones EULAR",
+    "organization": "European Alliance of Associations for Rheumatology (EULAR)",
+    "url": "https://www.eular.org/recommendations",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Crisis, tofos y meta de uricemia < 6 mg/dL."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de gota",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: gota",
+      "code": "crisis_gota_anio",
+      "name": "Crisis en el último año",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: gota",
+      "code": "acido_urico",
+      "name": "Ácido úrico (mg/dL)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: gota",
+      "code": "tofos",
+      "name": "Tofos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: gota",
+      "code": "gota_comorbilidades",
+      "name": "Comorbilidades",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión",
+        "Enfermedad renal",
+        "Diabetes",
+        "Obesidad",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Ácido úrico < 6 mg/dL", "Sin crisis", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Reducir alcohol y bebidas azucaradas",
+        "No suspender el alopurinol en una crisis"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

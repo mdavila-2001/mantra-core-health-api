@@ -183,6 +183,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "community"."conversations"
+        ADD CONSTRAINT "fk_conversations_pinned_message_id" FOREIGN KEY ("pinned_message_id")
+        REFERENCES "community"."direct_messages" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "community"."conversation_participants"
         ADD CONSTRAINT "fk_conversation_participants_conversation_id" FOREIGN KEY ("conversation_id")
         REFERENCES "community"."conversations" ("id");
@@ -199,6 +205,12 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_conversation_participants_last_read_message_id" FOREIGN KEY ("last_read_message_id")
         REFERENCES "community"."direct_messages" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "community"."chat_auto_replies"
+        ADD CONSTRAINT "fk_chat_auto_replies_public_profile_id" FOREIGN KEY ("public_profile_id")
+        REFERENCES "community"."public_profiles" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 DO $$ BEGIN
     ALTER TABLE "community"."direct_messages"
@@ -324,4 +336,10 @@ DO $$ BEGIN
     ALTER TABLE "community"."feedback_ticket_events"
         ADD CONSTRAINT "fk_feedback_ticket_events_feedback_ticket_id" FOREIGN KEY ("feedback_ticket_id")
         REFERENCES "community"."feedback_tickets" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "community"."comment_media"
+        ADD CONSTRAINT "fk_comment_media_comment_id" FOREIGN KEY ("comment_id")
+        REFERENCES "community"."comments" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

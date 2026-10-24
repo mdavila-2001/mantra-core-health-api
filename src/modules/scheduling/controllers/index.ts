@@ -1,6 +1,0 @@
-export { SchedulingController } from './scheduling.controller';
-export { SchedulingBookingsController } from './scheduling-bookings.controller';
-export { SchedulingInternalController } from './scheduling-internal.controller';
-export { SchedulingConfirmationController } from './scheduling-confirmation.controller';
-export { SchedulingAgendaController } from './scheduling-agenda.controller';
-export * from './tenant-agenda.controller';

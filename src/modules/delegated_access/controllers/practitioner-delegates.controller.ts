@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   PractitionerDelegatesService,
   AccessRequestsService,
@@ -43,6 +48,11 @@ export class PractitionerDelegatesController {
   ) {}
 
   /** UC-29-03. */
+  @Audited({
+    action: 'PRACTITIONER_DELEGATE_CREATED',
+    entity: 'practitioner_delegate_assignment',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -55,6 +65,11 @@ export class PractitionerDelegatesController {
   }
 
   /** UC-29-04. */
+  @Audited({
+    action: 'PRACTITIONER_DELEGATE_ACCESS_REQUESTED',
+    entity: 'delegated_access_approval_request',
+    entityId: 'result.id',
+  })
   @Post(':id/access-requests')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -68,6 +83,11 @@ export class PractitionerDelegatesController {
   }
 
   /** UC-29-06. */
+  @Audited({
+    action: 'PRACTITIONER_DELEGATE_GRANT_ISSUED',
+    entity: 'delegated_access_grant',
+    entityId: 'result.id',
+  })
   @Post(':id/grants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -81,6 +101,11 @@ export class PractitionerDelegatesController {
   }
 
   /** UC-29-07. */
+  @Audited({
+    action: 'PRACTITIONER_DELEGATE_REVOKED',
+    entity: 'practitioner_delegate_assignment',
+    entityId: 'param:id',
+  })
   @Post(':id/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

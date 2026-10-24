@@ -49,7 +49,7 @@ describe('GoogleEmailClient', () => {
       const result = await d.client.sendEmail({
         to: 'paciente@example.com',
         subject: 'Código de verificación',
-        bodyText: 'Tu código es 123456',
+        bodyText: 'Su código es 123456',
       });
 
       expect(result).toEqual({ messageId: 'gmail-id-1' });
@@ -72,7 +72,7 @@ describe('GoogleEmailClient', () => {
       const decoded = decodeRaw(gmailBody.raw);
       expect(decoded).toContain('From: no-reply@example.com');
       expect(decoded).toContain('To: paciente@example.com');
-      expect(decoded).toContain('Tu código es 123456');
+      expect(decoded).toContain('Su código es 123456');
     });
 
     it('cachea el access_token: una segunda llamada no vuelve a pedir token', async () => {

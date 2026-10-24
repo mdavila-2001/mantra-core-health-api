@@ -54,12 +54,12 @@ export class FormsInstancesService {
    * las fichas por especialidad —que se abren SOBRE la consulta— quedaban
    * diciendo algo que no eran.
    */
-  private async tipoDelRecurso(
+  private async resourceType(
     tx: EntityManager,
     resourceId: string,
   ): Promise<string> {
-    const encuentro = await tx.findOne(Encounters, { id: resourceId });
-    return encuentro === null
+    const encounter = await tx.findOne(Encounters, { id: resourceId });
+    return encounter === null
       ? FORMS.RESOURCE_TYPE_PATIENT
       : FORMS.RESOURCE_TYPE_ENCOUNTER;
   }
@@ -76,7 +76,7 @@ export class FormsInstancesService {
     return this.em.transactional(async (tx) => {
       const resourceTypeConceptId =
         dto.resourceTypeConceptId ??
-        (await this.tipoDelRecurso(tx, dto.resourceId));
+        (await this.resourceType(tx, dto.resourceId));
       const schemaVersion = dto.schemaVersion ?? 1;
 
       // El duplicado se busca por recurso y versión, SIN el tipo: un mismo

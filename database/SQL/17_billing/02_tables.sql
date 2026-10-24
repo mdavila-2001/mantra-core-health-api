@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS "billing"."service_catalog" (
     "practice_id" uuid NOT NULL,
     "code" varchar NOT NULL,
     "name" varchar NOT NULL,
+    "description_text" text,
+    "image_file_id" uuid,
     "service_concept_id" uuid,
     "default_price" numeric NOT NULL,
     "currency_concept_id" uuid,
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS "billing"."invoice_lines" (
     "id" uuid NOT NULL,
     "invoice_id" uuid NOT NULL,
     "service_id" uuid,
+    "insurance_claim_line_id" uuid,
     "description" varchar,
     "quantity" numeric NOT NULL,
     "unit_price" numeric NOT NULL,
@@ -200,6 +203,46 @@ CREATE TABLE IF NOT EXISTS "billing"."payments_made" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_payments_made" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_invoices" (
+    "id" uuid NOT NULL,
+    "invoice_id" uuid NOT NULL,
+    "encounter_id" uuid,
+    "practice_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "issuer_nit" varchar(20) NOT NULL,
+    "invoice_number" integer NOT NULL,
+    "cuf" varchar(200) NOT NULL,
+    "cufd" varchar(200) NOT NULL,
+    "issued_at_text" varchar(23) NOT NULL,
+    "cabecera" jsonb NOT NULL,
+    "detalle" jsonb NOT NULL,
+    "xml" text NOT NULL,
+    "hash_archivo" varchar(64) NOT NULL,
+    "compressed_bytes" integer NOT NULL,
+    "status" varchar(12) NOT NULL,
+    "status_at_reception" varchar(12) NOT NULL,
+    "siat_response" jsonb NOT NULL,
+    "events" jsonb NOT NULL,
+    "simulated" boolean NOT NULL DEFAULT true,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_siat_simulated_invoices" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_outbox" (
+    "id" uuid NOT NULL,
+    "siat_invoice_id" uuid NOT NULL,
+    "to_email" varchar(320) NOT NULL,
+    "attachments" jsonb NOT NULL,
+    "status" varchar(24) NOT NULL,
+    "queued_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_siat_simulated_outbox" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "billing"."reimbursements" (
@@ -367,4 +410,40 @@ CREATE TABLE IF NOT EXISTS "billing"."dunning_items" (
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     CONSTRAINT "pk_dunning_items" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."quotations" (
+    "id" uuid NOT NULL,
+    "practice_id" uuid NOT NULL,
+    "patient_profile_id" uuid NOT NULL,
+    "created_by_practitioner_profile_id" uuid NOT NULL,
+    "attention_date" date NOT NULL,
+    "appointment_id" uuid,
+    "service_catalog_id" uuid NOT NULL,
+    "service_name_snapshot" varchar NOT NULL,
+    "offered_price" numeric NOT NULL,
+    "currency_concept_id" uuid,
+    "payment_plan_installment_count" integer NOT NULL,
+    "down_payment_amount" numeric NOT NULL,
+    "payment_frequency" varchar NOT NULL,
+    "valid_until" date NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_quotations" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "billing"."quotation_installments" (
+    "id" uuid NOT NULL,
+    "quotation_id" uuid NOT NULL,
+    "installment_number" integer NOT NULL,
+    "due_date" date NOT NULL,
+    "amount" numeric NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_quotation_installments" PRIMARY KEY ("id")
 );

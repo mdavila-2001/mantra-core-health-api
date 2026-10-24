@@ -39,6 +39,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "clinical"."allergy_intolerances"
+        ADD CONSTRAINT "fk_allergy_intolerances_encounter_id" FOREIGN KEY ("encounter_id")
+        REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+DO $$ BEGIN
     ALTER TABLE "clinical"."allergy_reactions"
         ADD CONSTRAINT "fk_allergy_reactions_allergy_id" FOREIGN KEY ("allergy_id")
         REFERENCES "clinical"."allergy_intolerances" ("id");
@@ -48,6 +54,12 @@ DO $$ BEGIN
     ALTER TABLE "clinical"."service_requests"
         ADD CONSTRAINT "fk_service_requests_encounter_id" FOREIGN KEY ("encounter_id")
         REFERENCES "clinical"."encounters" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "clinical"."service_requests"
+        ADD CONSTRAINT "fk_service_requests_previous_diagnostic_report_id" FOREIGN KEY ("previous_diagnostic_report_id")
+        REFERENCES "clinical"."diagnostic_reports" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN

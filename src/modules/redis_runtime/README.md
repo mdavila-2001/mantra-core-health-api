@@ -4,6 +4,29 @@ Runtime de baja latencia sobre Redis **real** (contenedor `mantra-redesa-redis-1
 `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` del entorno; por defecto
 `localhost:6380`). Vía `ioredis`.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/redis_runtime -name '*.controller.ts' | wc -l
+  find src/modules/redis_runtime -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/redis_runtime -name '*.entity.ts' | wc -l
+  find src/modules/redis_runtime -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 5 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /redis-runtime/cache` | PLATFORM_OPERATOR | `redis-runtime` |
+| `GET /redis-runtime/cache/:key` | PLATFORM_OPERATOR | `redis-runtime` |
+| `DELETE /redis-runtime/cache/:key` | PLATFORM_OPERATOR | `redis-runtime` |
+| `POST /redis-runtime/locks` | PLATFORM_OPERATOR | `redis-runtime` |
+| `DELETE /redis-runtime/locks/:key` | PLATFORM_OPERATOR | `redis-runtime` |
+
 ## Qué ofrece
 
 - **Caché con TTL**: `setWithTtl` / `get` / `del`.
@@ -41,10 +64,16 @@ lo cierra limpiamente en `onModuleDestroy` (`quit()`). Exporta
 > de la tarea). Para activarlo, añadir `RedisRuntimeModule` a los `imports` del
 > `AppModule`.
 
+## Auditoría vigente
+
+El consumo de challenges usa `GET` y `DEL` separados: no es atómico, así que no sirve para OTP ni confirmaciones.
+
+```bash
+corepack yarn test src/modules/redis_runtime --runInBand --silent
+```
+
 ## Gancho de integración (bonus, no implementado aquí)
 
-`common/services/contact-points.service.ts` marca hoy `verified=true` a ciegas.
-Con este módulo puede exigir un OTP real: emitir con `putChallenge(tenant,
-'contact:{contactPointId}', otp, ttl)` y confirmar con `verifyChallenge(...)`
-antes de marcar verificado. La modificación de `contact-points` queda para otra
-fase.
+`common/services/contact-points.service.ts` marca `verified=true` a ciegas: no usa
+este módulo. Un OTP real se emitiría con `putChallenge(tenant,
+'contact:{contactPointId}', otp, ttl)` y se confirmaría con `verifyChallenge(...)`.

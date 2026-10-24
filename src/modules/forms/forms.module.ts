@@ -27,13 +27,21 @@ import {
 } from './repositories';
 
 /**
+ * El barrel también re-exporta los contratos de las columnas jsonb (ADR-0022),
+ * que incluyen funciones; al ORM se registran solo las clases de entidad.
+ */
+const entityClasses = Object.values(entities).filter((value) =>
+  /^class\b/.test(Function.prototype.toString.call(value)),
+);
+
+/**
  * Módulo Forms (09): formularios dinámicos y gobernanza de extensibilidad.
  * Cubre definición de sets/versiones, campos con reglas y dependencias,
  * localizaciones, asignaciones gobernadas, instancias y captura/curación de
  * valores, y migración de esquema.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [MikroOrmModule.forFeature(entityClasses)],
   controllers: [
     FormsDefinitionSetsController,
     FormsFieldsController,

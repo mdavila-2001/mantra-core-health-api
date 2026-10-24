@@ -144,12 +144,66 @@ desplegar() {
   return 0
 }
 
+# Un `fetch` falla por dos motivos que piden respuestas opuestas: se cayó la red —se cura sola y
+# no hay nada que hacer— o la credencial dejó de valer —no se cura nunca y hace falta una persona—.
+# Meter las dos en el mismo saco («sin red o sin remoto») es lo que dejó el despliegue congelado
+# 32 h el 04/09/2026: el token de `gh` se invalidó, cada pasada anotó la misma línea tranquila
+# 1072 veces, y la API siguió sirviendo el commit de anteayer con `/health` en 200.
+fallo_de_fetch() {
+  local motivo="$1" detalle="$2" n
+  n=$(( $(cat "$ESTADO/FALLOS_FETCH" 2>/dev/null || echo 0) + 1 ))
+  echo "$n" > "$ESTADO/FALLOS_FETCH"
+
+  # Ruidoso la primera pasada y luego una vez por hora. Es la única señal de que el despliegue
+  # está parado: los contenedores viejos siguen en pie contestando 200 tan campantes.
+  local grita=0
+  { [ "$n" -eq 1 ] || [ $((n % 30)) -eq 0 ]; } && grita=1
+
+  if [ "$motivo" = credencial ]; then
+    if [ "$grita" = 1 ]; then
+      log "✗✗ CREDENCIAL INVÁLIDA — EL DESPLIEGUE ESTÁ PARADO Y NO SE CURA SOLO (pasada $n)"
+      log "   sigue sirviendo $(cut -c1-12 "$ESTADO/COMMIT_DESPLEGADO" 2>/dev/null || echo '—')"
+      log "   se arregla con: gh auth login -h github.com"
+    else
+      log "✗ credencial inválida; el despliegue sigue parado (pasada $n)"
+    fi
+  elif [ "$grita" = 1 ]; then
+    log "✗ sin acceso a $REMOTO/$RAMA desde hace ~$((n * 2)) min: ${detalle%%$'\n'*}"
+  fi
+}
+
+# El token de `gh` se comprueba aparte y con límite porque quien se cuelga cuando no vale es el
+# propio helper (`gh auth git-credential`), no git: `GIT_TERMINAL_PROMPT=0` sólo apaga el prompt
+# de git y no llega a tiempo. Sin esto la pasada se comía el `TimeoutStartSec` de 45 min —que
+# está dimensionado para la construcción— y el temporizador se quedaba sin reprogramar (`n/a`).
+# Sólo aplica al caso en que la credencial ES la de `gh`: con remoto SSH no hay nada que mirar.
+credencial_rota() {
+  command -v gh >/dev/null 2>&1 || return 1
+  git -C "$RAIZ" remote get-url "$REMOTO" 2>/dev/null | grep -q '^https://github.com/' || return 1
+  ! timeout 20 gh auth status -h github.com >/dev/null 2>&1
+}
+
 una_vez() {
   exec 9>"$ESTADO/una-vez.lock"
   flock -n 9 || { log "PASADA: ya hay una en curso; esta se retira"; exit 0; }
 
-  git -C "$RAIZ" fetch -q "$REMOTO" "$RAMA" 2>>"$LOG" || {
-    log "sin red o sin remoto; se reintenta en la próxima pasada"; exit 0; }
+  if credencial_rota; then
+    fallo_de_fetch credencial ""
+    exit 0
+  fi
+
+  local salida_fetch
+  if ! salida_fetch="$(GIT_TERMINAL_PROMPT=0 timeout 120 git -C "$RAIZ" fetch -q "$REMOTO" "$RAMA" 2>&1)"; then
+    printf '%s\n' "$salida_fetch" >> "$LOG"
+    case "$salida_fetch" in
+      *"could not read Username"*|*"Authentication failed"*|*"terminal prompts disabled"*)
+        fallo_de_fetch credencial "$salida_fetch" ;;
+      *)
+        fallo_de_fetch red "$salida_fetch" ;;
+    esac
+    exit 0
+  fi
+  rm -f "$ESTADO/FALLOS_FETCH"
   local remoto desplegado fallido
   remoto="$(git -C "$RAIZ" rev-parse "$REMOTO/$RAMA" 2>/dev/null)" || exit 0
   desplegado="$(cat "$ESTADO/COMMIT_DESPLEGADO" 2>/dev/null || echo '')"

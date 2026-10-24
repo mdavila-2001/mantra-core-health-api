@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_carriers" (
     "legal_name" varchar NOT NULL,
     "sigla" varchar,
     "address" varchar,
+    "whatsapp_number" varchar,
+    "call_center_phone" varchar,
+    "support_email" varchar,
     "regulator_identifier" varchar,
     "jurisdiction_concept_id" uuid,
     "public_profile_id" uuid,
@@ -97,6 +100,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_plans" (
     "name" varchar NOT NULL,
     "plan_type_concept_id" uuid,
     "currency_concept_id" uuid,
+    "monthly_premium_amount" numeric,
     "effective_from" date,
     "effective_to" date,
     "policy_document_file_id" uuid,
@@ -170,6 +174,43 @@ CREATE TABLE IF NOT EXISTS "insurance"."network_provider_memberships" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_network_provider_memberships" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "insurance"."insurance_campaigns" (
+    "id" uuid NOT NULL,
+    "insurance_carrier_id" uuid NOT NULL,
+    "code" varchar NOT NULL,
+    "title" varchar NOT NULL,
+    "description" text,
+    "campaign_type_concept_id" uuid NOT NULL,
+    "target_condition_concept_id" uuid,
+    "copay_bonus_percentage" numeric NOT NULL,
+    "valid_from" date NOT NULL,
+    "valid_to" date NOT NULL,
+    "status_concept_id" uuid NOT NULL,
+    "activated_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_insurance_campaigns" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "insurance"."insurance_campaign_partners" (
+    "id" uuid NOT NULL,
+    "insurance_campaign_id" uuid NOT NULL,
+    "partner_role_concept_id" uuid NOT NULL,
+    "partner_type_concept_id" uuid NOT NULL,
+    "partner_name" varchar NOT NULL,
+    "partner_tenant_id" uuid,
+    "network_provider_membership_id" uuid,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_insurance_campaign_partners" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "insurance"."patient_coverages" (
@@ -262,6 +303,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."prior_authorization_requests" (
     "patient_coverage_id" uuid NOT NULL,
     "service_request_id" uuid,
     "medication_request_id" uuid,
+    "inventory_reservation_id" uuid,
     "requesting_provider_type_concept_id" uuid NOT NULL,
     "requesting_provider_entity_id" uuid NOT NULL,
     "status_concept_id" uuid NOT NULL,
@@ -299,6 +341,8 @@ CREATE TABLE IF NOT EXISTS "insurance"."prior_authorization_determinations" (
     "approved_quantity" numeric,
     "approved_amount" numeric,
     "denial_reason_concept_id" uuid,
+    "policy_clause_reference" varchar,
+    "denial_rationale" text,
     "valid_from" date,
     "valid_to" date,
     "supporting_file_id" uuid,
@@ -315,6 +359,8 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_claims" (
     "billing_provider_entity_id" uuid NOT NULL,
     "encounter_id" uuid,
     "prior_authorization_request_id" uuid,
+    "inventory_reservation_id" uuid,
+    "service_request_id" uuid,
     "claim_identifier" varchar NOT NULL,
     "status_concept_id" uuid NOT NULL,
     "submitted_at" timestamptz,
@@ -336,6 +382,7 @@ CREATE TABLE IF NOT EXISTS "insurance"."insurance_claim_lines" (
     "service_concept_id" uuid,
     "diagnostic_study_offering_id" uuid,
     "medication_dispensation_line_id" uuid,
+    "inventory_reservation_line_id" uuid,
     "quantity" numeric,
     "billed_amount" numeric,
     "patient_responsibility_amount" numeric,
@@ -368,6 +415,8 @@ CREATE TABLE IF NOT EXISTS "insurance"."claim_line_adjudications" (
     "patient_amount" numeric,
     "denied_amount" numeric,
     "reason_concept_id" uuid,
+    "policy_clause_reference" varchar,
+    "denial_rationale" text,
     "created_at" timestamptz NOT NULL,
     CONSTRAINT "pk_claim_line_adjudications" PRIMARY KEY ("id")
 );

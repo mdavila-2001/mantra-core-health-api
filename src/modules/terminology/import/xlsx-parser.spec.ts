@@ -1,0 +1,130 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import * as XLSX from 'xlsx';
+
+import { CsvParser } from './csv-parser';
+import { IMPORT_PROFILES } from './import-profiles';
+import { XlsxParser } from './xlsx-parser';
+
+const FIXTURES = join(process.cwd(), 'test', 'fixtures', 'terminology-import');
+
+function read(name: string): Buffer {
+  return readFileSync(join(FIXTURES, name));
+}
+
+const csv = new CsvParser();
+const xlsx = new XlsxParser();
+const profile = IMPORT_PROFILES.conceptos;
+
+/**
+ * Los 12 fixtures gemelos de §4 del contrato: el `.xlsx` tiene que producir
+ * el mismo `ResultadoDeParseo` que el `.csv` sobre el mismo `CsvParser` de
+ * Itzan. `vacio-solo-encabezado` sigue al `CsvParser` (que devuelve
+ * `{ filas: [], problemas: [] }` sobre un archivo sin filas de datos; el
+ * «sin filas» lo declara el servicio, no el parseador), no a la tabla del
+ * contrato, que describe el comportamiento observable end-to-end.
+ */
+const TWINS = [
+  'ok-50',
+  'con-errores',
+  'vacio-solo-encabezado',
+  'bom',
+  'separador-punto-y-coma',
+  'comillas-y-saltos',
+  'unicode',
+  'columnas-desordenadas',
+  'columna-desconocida',
+  'sin-encabezado',
+  'fila-vacia-al-final',
+  'duplicado-en-archivo',
+];
+
+describe('XlsxParser · igualdad contra el CsvParser sobre los gemelos', () => {
+  it.each(TWINS)('%s.xlsx produce el mismo resultado que %s.csv', (name) => {
+    const resultCsv = csv.parse(read(`${name}.csv`), profile);
+    const resultXlsx = xlsx.parse(read(`${name}.xlsx`), profile);
+    expect(resultXlsx).toEqual(resultCsv);
+  });
+});
+
+describe('XlsxParser · celda-numerica (sólo XLSX, sin gemelo CSV)', () => {
+  const result = xlsx.parse(read('celda-numerica.xlsx'), profile);
+
+  it('convierte un code numérico a texto sin notación científica', () => {
+    expect(result.filas[0]?.valores['code']).toBe('10');
+  });
+
+  it('toma el valor cacheado de una fórmula', () => {
+    expect(result.filas[1]?.valores['display']).toBe('2');
+  });
+
+  it('reporta un problema cuando la fórmula no tiene valor cacheado', () => {
+    const problem = result.problemas.find((p) => p.fila === 4);
+    expect(problem?.motivo).toBe('la fórmula no tiene valor calculado');
+    expect(result.filas[2]?.valores['display']).toBe('');
+  });
+});
+
+describe('XlsxParser · hoja preferida', () => {
+  it('elige la hoja «conceptos» aunque no sea la primera', () => {
+    const wb = XLSX.utils.book_new();
+    const other = XLSX.utils.aoa_to_sheet([
+      ['code', 'display', 'definition'],
+      ['ZZ-999', 'No debería leerse', ''],
+    ]);
+    const concepts = XLSX.utils.aoa_to_sheet([
+      ['code', 'display', 'definition'],
+      ['ZZ-001', 'Sí debería leerse', ''],
+    ]);
+    XLSX.utils.book_append_sheet(wb, other, 'otra');
+    XLSX.utils.book_append_sheet(wb, concepts, 'conceptos');
+    const buffer = XLSX.write(wb, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    }) as Buffer;
+
+    const result = xlsx.parse(buffer, profile);
+    expect(result.filas).toHaveLength(1);
+    expect(result.filas[0]?.valores['code']).toBe('ZZ-001');
+  });
+});
+
+describe('XlsxParser · límite de filas', () => {
+  it('parsea 10 000 filas en menos de 5 segundos', () => {
+    const before = process.memoryUsage().heapUsed;
+    const start = performance.now();
+    const result = xlsx.parse(read('grande-10k.xlsx'), profile);
+    const durationMs = performance.now() - start;
+    const after = process.memoryUsage().heapUsed;
+
+    expect(result.filas).toHaveLength(10_000);
+    expect(durationMs).toBeLessThan(5_000);
+
+    console.log(
+      `grande-10k: ${durationMs.toFixed(0)} ms, heapUsed antes=${before} después=${after} (+${after - before} bytes)`,
+    );
+  });
+
+  it('rechaza un archivo con más filas que MAX_FILAS_XLSX', () => {
+    const rows = Array.from({ length: 100_002 }, (_, i) => [
+      `ZZ-${i}`,
+      'x',
+      '',
+    ]);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['code', 'display', 'definition'],
+      ...rows,
+    ]);
+    XLSX.utils.book_append_sheet(wb, ws, 'conceptos');
+    const buffer = XLSX.write(wb, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    }) as Buffer;
+
+    const result = xlsx.parse(buffer, profile);
+    expect(result.filas).toHaveLength(0);
+    expect(result.problemas[0]?.motivo).toMatch(/más de 100000 filas/);
+  });
+});

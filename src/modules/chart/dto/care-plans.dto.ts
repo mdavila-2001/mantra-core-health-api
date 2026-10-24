@@ -81,6 +81,20 @@ export class CreateCarePlanDto {
   encounterId?: string;
 
   /**
+   * P43: instancia del formulario médico (cerrada) de la que sale el registro.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instancia CERRADA del formulario médico (forms.form_instances) de la que ' +
+      'sale el plan. Opcional: desde la historia se emite sin formulario. Si viaja, ' +
+      'debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  formInstanceId?: string;
+
+  /**
    * Identificador asociado a intent concept.
    */
   @ApiPropertyOptional({
@@ -191,6 +205,17 @@ export class CarePlanResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   id!: string;
+
+  /**
+   * P43: instancia de formulario de origen (nula si no salió de un formulario).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instancia del formulario médico de la que salió el plan (nulo = sin formulario)',
+    format: 'uuid',
+    nullable: true,
+  })
+  formInstanceId?: string | null;
 
   /**
    * Identificador asociado a status concept.

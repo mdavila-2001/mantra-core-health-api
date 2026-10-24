@@ -112,6 +112,30 @@ describe('AuthzGrantsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
+    // MCH-034: el mismo rol en un tenant distinto no es un conflicto.
+    it('allows the same role in a different tenant (no false conflict)', async () => {
+      const d = build();
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        isAssignable: true,
+      });
+      d.assignmentsRepo.findActive.mockResolvedValue(null);
+      d.assignmentsRepo.create.mockReturnValue({ id: 'assignment-2' });
+
+      await d.service.assignRole(
+        'user-1',
+        { roleId: 'role-1', tenantId: 'tenant-B' } as any,
+        actor,
+      );
+
+      expect(d.assignmentsRepo.findActive).toHaveBeenCalledWith(
+        d.tx,
+        'user-1',
+        'role-1',
+        { tenantId: 'tenant-B', branchId: undefined, practiceId: undefined },
+      );
+    });
+
     it('throws when the role is missing', async () => {
       const d = build();
       d.rolesRepo.findById.mockResolvedValue(null);

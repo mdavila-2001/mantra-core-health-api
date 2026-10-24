@@ -30,14 +30,19 @@ function build() {
     createProvenance: mockFn(),
   };
   const instancesRepo = { findById: mockFn() };
+  const fieldsRepo = {
+    findFieldsByIds: mockFn().mockResolvedValue([]),
+    findFieldById: mockFn().mockResolvedValue(null),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new FormsValuesService(
     em as any,
     valuesRepo as any,
     instancesRepo as any,
+    fieldsRepo as any,
     logger as any,
   );
-  return { service, tx, valuesRepo, instancesRepo };
+  return { service, tx, valuesRepo, instancesRepo, fieldsRepo };
 }
 
 const openInstance = {

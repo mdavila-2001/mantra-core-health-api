@@ -788,7 +788,7 @@ Ejemplo de error normalizado:
 
 Por campo destino o por código; devuelve `conceptId` para escribir y `display` para pintar.
 
-Contexto declarado en el controlador: Cara de lectura de UC-45-05: las opciones válidas de un campo de catálogo. Se pide por la ruta del campo (`target=profiles.persons.administrative_gender_concept_id`) o por el código de la enumeración (`code=administrative-gender`). Los dos son constantes del código fuente; ninguno es un uuid sembrado por entorno, que es lo que impedía poblar un selector.
+Contexto declarado en el controlador: Cara de lectura de UC-45-05: las opciones válidas de un campo de catálogo. Se pide por la ruta del campo (`target=profiles.persons.administrative_gender_concept_id`) o por el código de la enumeración (`code=administrative-gender`). Los dos son constantes del código fuente; ninguno es un uuid sembrado por entorno, que es lo que impedía poblar un selector. Es `@Public()` por la misma razón por la que `listEnumBindings` no exige rol: quien más necesita estas opciones es el alta anónima de paciente, que todavía no tiene sesión con la que pedirlas.
 
 ### Descripción del sistema
 
@@ -859,6 +859,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "conceptId": "00000000-0000-4000-8000-000000000001",
       "code": "CODIGO_EJEMPLO",
       "display": "valor-ejemplo",
+      "displayEs": "valor-ejemplo",
       "ordinal": 1,
       "isDefault": true
     }
@@ -880,10 +881,11 @@ Campos de la respuesta:
 | `schemaVersion` | Sí | `string` | Sin restricción adicional declarada | Versión de esquema que la versión vigente declara. Se repite al redactar. | `valor-ejemplo` |
 | `cacheToken` | No | `string` | Sin restricción adicional declarada | Testigo de caché de la versión publicada. | `valor-ejemplo` |
 | `allowCustomValue` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo admite un valor fuera del conjunto. | `true` |
-| `options` | Sí | `array<DynamicEnumOptionItemDto>` | Sin restricción adicional declarada | Opciones habilitadas, en el orden en que se ofrecen. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","ordinal":1,"isDefault":true}]` |
+| `options` | Sí | `array<DynamicEnumOptionItemDto>` | Sin restricción adicional declarada | Opciones habilitadas, en el orden en que se ofrecen. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","display":"valor-ejemplo","displayEs":"valor-ejemplo","ordinal":1,"isDefault":true}]` |
 | `options[].conceptId` | Sí | `string` | formato `uuid` | Concepto que respalda la opción; es el valor que se envía al escribir. | `00000000-0000-4000-8000-000000000001` |
 | `options[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del concepto. | `CODIGO_EJEMPLO` |
 | `options[].display` | Sí | `string` | Sin restricción adicional declarada | Rótulo legible de la opción. | `valor-ejemplo` |
+| `options[].displayEs` | No | `string` | Sin restricción adicional declarada | Nombre en castellano (designación `ES` preferida del concepto), si existe. `display` es el rótulo del sistema de codificación y está en inglés («Complete blood count»); el selector prefiere éste cuando viene. | `valor-ejemplo` |
 | `options[].ordinal` | No | `number` | Sin restricción adicional declarada | Posición en la que se ofrece, empezando en cero. | `1` |
 | `options[].isDefault` | Sí | `boolean` | Sin restricción adicional declarada | Si la opción viene preseleccionada. | `true` |
 

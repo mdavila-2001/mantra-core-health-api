@@ -86,7 +86,29 @@ CREATE INDEX IF NOT EXISTS "ix_dunning_items_status_concept_id" ON "billing"."du
 
 CREATE INDEX IF NOT EXISTS "ix_dunning_items_status_overdue" ON "billing"."dunning_items" ("status_concept_id", "days_overdue" DESC);
 
+CREATE INDEX IF NOT EXISTS "ix_quotations_practice_id" ON "billing"."quotations" ("practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_patient_profile_id" ON "billing"."quotations" ("patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_created_by_practitioner_profile_id" ON "billing"."quotations" ("created_by_practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_appointment_id" ON "billing"."quotations" ("appointment_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_service_catalog_id" ON "billing"."quotations" ("service_catalog_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_currency_concept_id" ON "billing"."quotations" ("currency_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_status_concept_id" ON "billing"."quotations" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_created_by_user_id" ON "billing"."quotations" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotations_updated_by_user_id" ON "billing"."quotations" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_quotation_installments_quotation_id" ON "billing"."quotation_installments" ("quotation_id");
+
 CREATE INDEX IF NOT EXISTS "ix_service_catalog_practice_id" ON "billing"."service_catalog" ("practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_service_catalog_image_file_id" ON "billing"."service_catalog" ("image_file_id");
 
 CREATE INDEX IF NOT EXISTS "ix_service_catalog_service_concept_id" ON "billing"."service_catalog" ("service_concept_id");
 
@@ -131,6 +153,10 @@ CREATE INDEX IF NOT EXISTS "ix_invoices_patient_profile_id_updated_at" ON "billi
 CREATE INDEX IF NOT EXISTS "ix_invoice_lines_invoice_id" ON "billing"."invoice_lines" ("invoice_id");
 
 CREATE INDEX IF NOT EXISTS "ix_invoice_lines_service_id" ON "billing"."invoice_lines" ("service_id");
+
+CREATE INDEX IF NOT EXISTS "ix_invoice_lines_insurance_claim_line_id" ON "billing"."invoice_lines" ("insurance_claim_line_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_invoice_lines_insurance_claim_line_id" ON "billing"."invoice_lines" ("insurance_claim_line_id") WHERE insurance_claim_line_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS "ix_invoice_lines_tax_code_id" ON "billing"."invoice_lines" ("tax_code_id");
 
@@ -263,6 +289,16 @@ CREATE INDEX IF NOT EXISTS "ix_reimbursements_status_concept_id" ON "billing"."r
 CREATE INDEX IF NOT EXISTS "ix_reimbursements_created_by_user_id" ON "billing"."reimbursements" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_reimbursements_updated_by_user_id" ON "billing"."reimbursements" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_invoice_id" ON "billing"."siat_simulated_invoices" ("invoice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_encounter_id" ON "billing"."siat_simulated_invoices" ("encounter_id");
+
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_patient_profile_id" ON "billing"."siat_simulated_invoices" ("patient_profile_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_siat_simulated_invoices_practice_number" ON "billing"."siat_simulated_invoices" ("practice_id", "invoice_number") WHERE "status" <> 'REJECTED';
+
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_outbox_siat_invoice_id" ON "billing"."siat_simulated_outbox" ("siat_invoice_id");
 
 CREATE INDEX IF NOT EXISTS "ix_tax_codes_practice_id" ON "billing"."tax_codes" ("practice_id");
 

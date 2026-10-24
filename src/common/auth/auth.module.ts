@@ -3,7 +3,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { AuthTokenModule } from './auth-token.module';
 import { JwtStrategy } from './jwt.strategy';
+import { SessionValidator } from './session-validator';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { TenantScopeGuard } from './tenant-scope.guard';
 import { RolesGuard } from './roles.guard';
 import { VerifiedIdentityGuard } from './verified-identity.guard';
 
@@ -32,11 +34,15 @@ import { VerifiedIdentityGuard } from './verified-identity.guard';
 @Module({
   imports: [PassportModule, AuthTokenModule],
   providers: [
+    SessionValidator,
     JwtStrategy,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // Entre autenticación y autorización a propósito (MCH-001): resuelve el
+    // tenant antes de que RolesGuard compare roles con ámbito.
+    { provide: APP_GUARD, useClass: TenantScopeGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: VerifiedIdentityGuard },
   ],
-  exports: [AuthTokenModule],
+  exports: [AuthTokenModule, SessionValidator],
 })
 export class AuthModule {}

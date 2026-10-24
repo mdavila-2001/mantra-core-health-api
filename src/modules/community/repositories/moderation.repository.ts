@@ -336,6 +336,52 @@ export class ModerationRepository {
     );
   }
 
+  /**
+   * El strike de esa decisión cuyo sujeto es este perfil, si existe (AG-18).
+   *
+   * Es el vínculo que faltaba entre «quién apela» y «a quién sancionó la
+   * decisión»: sin esto, `assertActsAsProfile` sólo comprobaba que el
+   * `appellantProfileId` fuera del actor, nunca que fuera el sancionado. Una
+   * decisión `DISMISSED` no genera strike (`decide()` no lo crea si
+   * `dto.decision === 'DISMISSED'`) y por lo tanto no tiene nada adverso que
+   * apelar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param moderationDecisionId - La decisión que se quiere apelar.
+   * @param subjectProfileId - El perfil que dice ser el sancionado.
+   * @returns El strike, o `null` si esa decisión no lo sancionó a él.
+   */
+  findStrikeByDecisionAndSubject(
+    em: EntityManager,
+    moderationDecisionId: string,
+    subjectProfileId: string,
+  ): Promise<ModerationStrikes | null> {
+    return em.findOne(ModerationStrikes, {
+      moderationDecisionId,
+      subjectProfileId,
+    });
+  }
+
+  /**
+   * Todos los strikes de un perfil, sin importar la decisión (BR-27, «Mis
+   * sanciones»).
+   *
+   * Un perfil acumula pocos —son sanciones, no actividad— así que se trae la
+   * lista entera y la paginación de `listMyDecisions` corta en memoria, en vez
+   * de escribir una consulta con `JOIN` sólo para un puñado de filas por
+   * persona.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param subjectProfileId - El perfil sancionado.
+   * @returns Los strikes de ese perfil, sin orden garantizado.
+   */
+  listStrikesBySubject(
+    em: EntityManager,
+    subjectProfileId: string,
+  ): Promise<ModerationStrikes[]> {
+    return em.find(ModerationStrikes, { subjectProfileId });
+  }
+
   // --- Appeals ---
   /**
    * Crea create appeal.
@@ -422,7 +468,7 @@ export class ModerationRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param tenantId - Organización cuya cola se lee.
-   * @param filtros - Estado, prioridad, tipo de contenido y antigüedad mínima.
+   * @param filters - Estado, prioridad, tipo de contenido y antigüedad mínima.
    * @param after - Clave de continuación `(queuedAt, id)`.
    * @param limit - Tope de filas.
    * @returns Página de entradas de cola.
@@ -430,7 +476,7 @@ export class ModerationRepository {
   async listQueuePage(
     em: EntityManager,
     tenantId: string,
-    filtros: {
+    filters: {
       /** Estados admitidos; vacío o ausente significa todos. */
       statusConceptIds?: string[];
       /** Prioridades admitidas; vacío o ausente significa todas. */
@@ -444,17 +490,17 @@ export class ModerationRepository {
     limit: number,
   ): Promise<ModerationQueue[]> {
     const where: Record<string, unknown> = { tenantId };
-    if (filtros.statusConceptIds?.length) {
-      where.statusConceptId = { $in: filtros.statusConceptIds };
+    if (filters.statusConceptIds?.length) {
+      where.statusConceptId = { $in: filters.statusConceptIds };
     }
-    if (filtros.priorityConceptIds?.length) {
-      where.priorityConceptId = { $in: filtros.priorityConceptIds };
+    if (filters.priorityConceptIds?.length) {
+      where.priorityConceptId = { $in: filters.priorityConceptIds };
     }
-    if (filtros.contentTypeConceptIds?.length) {
-      where.contentTypeConceptId = { $in: filtros.contentTypeConceptIds };
+    if (filters.contentTypeConceptIds?.length) {
+      where.contentTypeConceptId = { $in: filters.contentTypeConceptIds };
     }
-    if (filtros.queuedBefore) {
-      where.queuedAt = { $lte: filtros.queuedBefore };
+    if (filters.queuedBefore) {
+      where.queuedAt = { $lte: filters.queuedBefore };
     }
     if (after) {
       // Keyset sobre `(queuedAt, id)` ascendente: lo más viejo primero.
@@ -506,13 +552,13 @@ export class ModerationRepository {
     if (contentRefIds.length === 0) return [];
     // Un marcador por id: el driver no traduce un arreglo de JavaScript a un
     // arreglo de Postgres. Ver la nota en `ReactionsRepository`.
-    const marcadores = contentRefIds.map(() => '?').join(', ');
+    const markers = contentRefIds.map(() => '?').join(', ');
     const rows = await em
       .getConnection()
       .execute<Array<{ target_id: string; count: number }>>(
         `select target_id, count(*)::int as count
            from community.content_reports
-          where target_id in (${marcadores})
+          where target_id in (${markers})
           group by target_id`,
         [...contentRefIds],
         'all',
@@ -524,14 +570,14 @@ export class ModerationRepository {
    * Página de decisiones tomadas, de la más reciente hacia atrás.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Cola concreta o decisión concreta, si se acota.
+   * @param filters - Cola concreta o decisión concreta, si se acota.
    * @param after - Clave de continuación `(decidedAt, id)`.
    * @param limit - Tope de filas.
    * @returns Página de decisiones.
    */
   listDecisionsPage(
     em: EntityManager,
-    filtros: {
+    filters: {
       /** Acota a una entrada de cola. */
       moderationQueueId?: string;
       /** Acota a un tipo de decisión. */
@@ -541,11 +587,11 @@ export class ModerationRepository {
     limit: number,
   ): Promise<ModerationDecisions[]> {
     const where: Record<string, unknown> = {};
-    if (filtros.moderationQueueId) {
-      where.moderationQueueId = filtros.moderationQueueId;
+    if (filters.moderationQueueId) {
+      where.moderationQueueId = filters.moderationQueueId;
     }
-    if (filtros.decisionConceptIds?.length) {
-      where.decisionConceptId = { $in: filtros.decisionConceptIds };
+    if (filters.decisionConceptIds?.length) {
+      where.decisionConceptId = { $in: filters.decisionConceptIds };
     }
     if (after) {
       // Descendente: lo último decidido es lo que un moderador quiere revisar.
@@ -583,14 +629,14 @@ export class ModerationRepository {
    * **pendiente**, y el trabajo pendiente se atiende por orden de llegada.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Estado y apelante, si se acota.
+   * @param filters - Estado y apelante, si se acota.
    * @param after - Clave de continuación `(createdAt, id)`.
    * @param limit - Tope de filas.
    * @returns Página de apelaciones.
    */
   listAppealsPage(
     em: EntityManager,
-    filtros: {
+    filters: {
       /** Estados admitidos; vacío o ausente significa todos. */
       statusConceptIds?: string[];
       /** Acota a un apelante concreto. */
@@ -600,11 +646,11 @@ export class ModerationRepository {
     limit: number,
   ): Promise<ModerationAppeals[]> {
     const where: Record<string, unknown> = {};
-    if (filtros.statusConceptIds?.length) {
-      where.statusConceptId = { $in: filtros.statusConceptIds };
+    if (filters.statusConceptIds?.length) {
+      where.statusConceptId = { $in: filters.statusConceptIds };
     }
-    if (filtros.appellantProfileId) {
-      where.appellantProfileId = filtros.appellantProfileId;
+    if (filters.appellantProfileId) {
+      where.appellantProfileId = filters.appellantProfileId;
     }
     if (after) {
       where.$or = [

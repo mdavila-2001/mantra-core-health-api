@@ -8,18 +8,37 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `auth.env.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `auth.module.ts` | Composición de dependencias del módulo NestJS. |
-| `authenticated-user.interface.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `current-user.decorator.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `jwt-auth.guard.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `jwt-payload.interface.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `jwt.strategy.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `public.decorator.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `auth-token.module.ts` | Sólo `TokenService`/`JwtModule`, sin los `APP_GUARD`; lo usan los workers para firmar su propio token `SYSTEM`. |
+| `auth.env.ts` | Esquema Joi y lectura de `process.env` para secreto, TTL y algoritmo. |
+| `auth.module.ts` | Composición del módulo; registra los `APP_GUARD` en orden (ver abajo). |
+| `authenticated-user.interface.ts` | `AuthenticatedUser` y `AuthenticatedRequest`: el contrato que ven controladores y servicios. |
+| `current-user.decorator.ts` | `@CurrentUser()`: inyecta `request.user`. |
+| `jwt-auth.guard.ts` | Guard global de autenticación; deja pasar `@Public()` sin verificar token. |
+| `jwt-payload.interface.ts` | Claims firmados dentro del access token (`JwtPayload`). |
+| `jwt.strategy.ts` | Verifica firma, expiración y tipo del access token, exige sesión viva y reconstruye `AuthenticatedUser`. |
+| `public.decorator.ts` | `@Public()`: exime un handler de `JwtAuthGuard`. |
 | `refresh-cookie.ts` | Entrega del refresh token como cookie httpOnly (ver abajo). |
-| `roles.decorator.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `roles.guard.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `token.service.ts` | Casos de uso y reglas de negocio. |
+| `requires-verified-identity.decorator.ts` | `@RequiresVerifiedIdentity()`: exige identidad probada, por encima del rol. |
+| `roles.decorator.ts` | `@Roles(...)`: roles exigidos por un handler. |
+| `roles.guard.ts` | Autorización por rol, respetando el tenant de los roles con ámbito (`scopedRoles`); `SUPERADMIN` es comodín. |
+| `session-validator.ts` | Comprueba contra `iam.sessions` que el token siga respaldado por una sesión viva (MCH-004). |
+| `tenant-scope.guard.ts` | Resuelve el tenant activo antes de que `RolesGuard` autorice (MCH-001). |
+| `token.service.ts` | Firma de access tokens y emisión/hash de refresh tokens. |
+| `verified-identity.guard.ts` | Exige una aserción de identidad vigente en los handlers con `@RequiresVerifiedIdentity()`. |
+| `ws-jwt.guard.ts` | Autentica los sockets de mensajería con el mismo access token que la API HTTP. |
+
+## Orden de los guards globales
+
+`auth.module.ts` registra, en este orden, `JwtAuthGuard` → `TenantScopeGuard` →
+`RolesGuard` → `VerifiedIdentityGuard`. Cada uno asume que el anterior ya pobló
+`request.user` (y el tenant resuelto) o dejó pasar la petición.
+
+## Revocación: qué corta `logout`
+
+`JwtStrategy.validate` consulta `iam.sessions` en cada petición
+(`SessionValidator`): un `logout`, un bloqueo de cuenta o el retiro de un rol
+cortan también el access token ya emitido, sin esperar a que expire
+(`JWT_ACCESS_TTL`, 15 minutos por defecto). No hay caché a propósito.
 
 ## Criterios de mantenimiento
 
@@ -43,10 +62,14 @@ decisión coordinada con el front, no el efecto colateral de un despliegue.
 | Variable | Default | Qué hace |
 | --- | --- | --- |
 | `AUTH_REFRESH_COOKIE_ENABLED` | `false` | `true` entrega el refresh token como cookie httpOnly y deja de devolverlo en el cuerpo. |
+| `AUTH_REFRESH_COOKIE_NAME` | `redesa_refresh` | Nombre de la cookie. El default es el nombre que ya tenía (TX-28); declarar `mch_refresh` lo cambia y el refresh la lee con ese nombre. |
+| `AUTH_REFRESH_COOKIE_PATH` | `/iam/auth/token/refresh` | `Path` de la cookie. Detrás de un prefijo de proxy (`/api/...`) hay que declararlo igual. |
+| `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | `strict`, `lax` o `none`. |
+| `AUTH_MFA_CHALLENGE_ENABLED` | `false` | Con `true`, el login de una cuenta con factor MFA verificado exige `mfaCode`: sin él, `401 details.reason = MFA_REQUIRED`; con uno que no valida, `MFA_INVALID` (TX-29). |
 | `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | Fuerza o quita el atributo `Secure`. Sólo hace falta declararlo en pruebas o tras un proxy que termina TLS. |
 
-La cookie se llama `redesa_refresh` y va con `HttpOnly`, `SameSite=Strict`,
-`Path=/iam/auth/token/refresh` y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
+Por defecto la cookie se llama `redesa_refresh` y va con `HttpOnly`, `SameSite=Strict`,
+`Path=/iam/auth/token/refresh` (los tres se pueden declarar, ver arriba) y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
 El `Path` acotado es deliberado: la cookie no viaja en ninguna otra petición del
 API.
 
@@ -80,7 +103,38 @@ Cubierto por `test/integration/refresh-cookie.int-spec.ts`.
 4. **El cuerpo del refresco va vacío** (`{}`). Mandar `refreshToken` no rompe
    nada, pero se ignora.
 
-### Lo que hay que ajustar en la API antes de encenderlo
+### Mismo origen (TX-20)
+
+El despliegue previsto sirve el front y la API bajo **el mismo origen** (nginx
+delante, `apiBaseUrl` vacío en el front): la cookie `SameSite=Strict` viaja sin
+CORS. **No se abre CORS** para esto. Si algún día se separan dominios, la
+allowlist con `credentials: true` se declara en la API en un cambio aparte; el
+bloque de abajo describe ese caso y **no aplica** al despliegue de mismo origen.
+
+### Límite de tasa de las rutas de sesión (TX-19)
+
+`AuthThrottlerGuard` (guard global) usa como cubo: `ip + identificador` con hash
+en `login` y `forgot-password`, y el hash del refresh token (cuerpo o cookie) en
+`token/refresh`. Doce cuentas detrás de la misma IP no chocan entre sí; once
+contraseñas malas sobre una cuenta en un minuto dan `429 RATE_LIMITED` con
+`Retry-After`.
+
+### Tenant sin resolver (TX-16)
+
+Cuando no hay tenant resoluble, la API responde con el status de siempre (403 en
+`TenantContextInterceptor`, 422 en `requireTenantId`) y
+`details.reason = TENANT_REQUIRED` (o `TENANT_AMBIGUOUS` si el actor tiene varias
+membresías y no mandó `X-Tenant-Id`). El cliente abre el selector de organización.
+
+### Seguridad de la cuenta (ID-24)
+
+`POST /iam/auth/change-password` (contraseña actual + nueva; revoca las otras
+sesiones en la misma transacción), `GET /iam/me/sessions` y
+`POST /iam/me/sessions/:id/revoke`. Cualquier sesión autenticada; la titularidad
+sale del token. Errores de contraseña: 422 con `details.reason`
+(`CURRENT_PASSWORD_INVALID`, `PASSWORD_UNCHANGED`), nunca 401.
+
+### Lo que hay que ajustar en la API antes de encenderlo (sólo si se separan dominios)
 
 `main.ts` declara hoy `app.enableCors({ origin: false })` —CORS denegado por
 defecto, que es lo correcto mientras no haya un frontend con origen conocido—.

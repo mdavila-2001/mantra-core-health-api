@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -24,6 +25,7 @@ import {
 } from '../dto';
 import type { MedicalVisitors } from '../entities';
 import { MedicalVisitorsService } from '../services';
+import { PharmaLabScopeGuard } from '../guards';
 
 /**
  * Visitadores médicos de un laboratorio (UC-17-06 a UC-17-10).
@@ -35,6 +37,7 @@ import { MedicalVisitorsService } from '../services';
 @ApiTags('pharma-lab-visitors')
 @ApiBearerAuth()
 @Roles('PHARMA_LAB_ADMIN', 'BUSINESS_ADMIN', 'PLATFORM_ADMIN')
+@UseGuards(PharmaLabScopeGuard)
 @Controller('pharma-labs/:pharmaLabId/medical-visitors')
 export class MedicalVisitorsController {
   /**

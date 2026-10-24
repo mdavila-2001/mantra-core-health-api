@@ -1,0 +1,194 @@
+{
+  "code": "ONCO_CTRL_PALIATIVOS",
+  "name": "Control de cuidados paliativos",
+  "specialty": { "code": "ONCOLOGIA", "display": "Oncología" },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "ECOG Performance Status Scale",
+    "organization": "ECOG-ACRIN Cancer Research Group",
+    "url": "https://ecog-acrin.org/resources/ecog-performance-status/",
+    "license": "De uso libre, citando la fuente",
+    "retrievedAt": "2026-10-02",
+    "note": "Intensidad de síntomas, dolor por la escala de la OMS y estado funcional. Ampliación internacional (2026-10-24): escala de Karnofsky desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de enfermedad avanzada",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "ecog",
+      "name": "ECOG",
+      "dataType": "string",
+      "required": true,
+      "options": ["0", "1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "karnofsky",
+      "name": "Estado funcional de Karnofsky",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "100 — Normal; sin quejas; sin evidencia de enfermedad",
+        "90 — Capaz de realizar su actividad normal; signos o síntomas menores de enfermedad",
+        "80 — Actividad normal con esfuerzo; algunos signos o síntomas de enfermedad",
+        "70 — Se vale por sí mismo; incapaz de realizar su actividad normal o trabajo activo",
+        "60 — Requiere asistencia ocasional, pero puede atender la mayoría de sus necesidades",
+        "50 — Requiere asistencia considerable y atención médica frecuente",
+        "40 — Incapacitado; requiere cuidados y asistencia especiales",
+        "30 — Gravemente incapacitado; está indicada la internación aunque la muerte no es inminente",
+        "20 — Muy enfermo; internación necesaria; tratamiento de soporte activo necesario",
+        "10 — Moribundo; procesos fatales que progresan rápidamente",
+        "0 — Fallecido"
+      ],
+      "description": "Fuente: escala de Karnofsky (Karnofsky DA, Burchenal JH. 1949), según el arquetipo openEHR openEHR-EHR-OBSERVATION.karnofsky_performance_status_scale.v1 (rev. 1.0.2, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "dolor_intensidad",
+      "name": "Dolor (0 a 10)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "escalon_analgesico",
+      "name": "Escalón analgésico de la OMS",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 — no opioide", "2 — opioide débil", "3 — opioide fuerte"]
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "sintomas_paliativos",
+      "name": "Síntomas que molestan",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Disnea",
+        "Náuseas",
+        "Constipación",
+        "Insomnio",
+        "Ansiedad",
+        "Delirium",
+        "Anorexia"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "voluntades",
+      "name": "Se conversaron las voluntades anticipadas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "lugar_preferido",
+      "name": "Lugar donde prefiere ser atendido",
+      "dataType": "string",
+      "required": false,
+      "options": ["Domicilio", "Hospital", "No lo decidió"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Dolor ≤ 3", "Síntomas controlados", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Opioides: uso y efectos", "Apoyo a la familia"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

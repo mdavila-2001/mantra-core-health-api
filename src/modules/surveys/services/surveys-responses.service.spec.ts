@@ -75,7 +75,15 @@ function build() {
     templatesRepo as any,
     logger as any,
   );
-  return { service, tx, invitationsRepo, responsesRepo, templatesRepo, logger };
+  return {
+    service,
+    em,
+    tx,
+    invitationsRepo,
+    responsesRepo,
+    templatesRepo,
+    logger,
+  };
 }
 
 /** Invitación pendiente del paciente de la prueba. */
@@ -162,7 +170,7 @@ describe('SurveysResponsesService', () => {
       });
       d.templatesRepo.findTemplateById.mockResolvedValue({
         id: 'tpl-1',
-        title: 'Cómo fue tu consulta',
+        title: 'Cómo fue su consulta',
         description: 'Tres preguntas',
       });
 
@@ -175,7 +183,7 @@ describe('SurveysResponsesService', () => {
       expect(result).toEqual([
         expect.objectContaining({
           id: 'inv-1',
-          title: 'Cómo fue tu consulta',
+          title: 'Cómo fue su consulta',
           status: 'PENDING',
         }),
       ]);
@@ -262,10 +270,18 @@ describe('SurveysResponsesService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('rechaza fuera de plazo y deja la invitación vencida', async () => {
+    it('rechaza fuera de plazo y deja la invitación vencida en una transacción que SÍ confirma', async () => {
       const d = build();
       const invitation = pendingInvitation({ expiresAt: PAST });
       d.invitationsRepo.findById.mockResolvedValue(invitation);
+      // `em.transactional` revierte ante cualquier excepción del callback: sólo
+      // cuenta como guardado el estado que había cuando la transacción confirmó.
+      const committedStatuses: string[] = [];
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        const result = await cb(d.tx);
+        committedStatuses.push(invitation.statusConceptId);
+        return result;
+      });
 
       await expect(
         withTenant(() =>
@@ -276,7 +292,8 @@ describe('SurveysResponsesService', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(invitation.statusConceptId).toBe(SURVEYS.INVITATION_EXPIRED);
+      expect(committedStatuses).toEqual([SURVEYS.INVITATION_EXPIRED]);
+      expect(d.responsesRepo.createResponse).not.toHaveBeenCalled();
     });
 
     it('exige las preguntas obligatorias', async () => {
@@ -491,6 +508,10 @@ describe('SurveysResponsesService', () => {
           valueText: 'Bien',
         }),
       );
+      // FT-29: la encuesta de satisfacción es anónima para el profesional a
+      // propósito — de quién es la respuesta no debe cruzar hacia el DTO,
+      // aunque la fila de la base sí lo guarde para trazabilidad interna.
+      expect(res[0]).not.toHaveProperty('patientProfileId');
     });
   });
 });

@@ -1,0 +1,187 @@
+{
+  "code": "REUMA_CTRL_LES",
+  "name": "Control de lupus eritematoso sistémico",
+  "specialty": { "code": "REUMATOLOGIA", "display": "Reumatología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones EULAR",
+    "organization": "European Alliance of Associations for Rheumatology (EULAR)",
+    "url": "https://www.eular.org/recommendations",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Órganos comprometidos, actividad y vigilancia renal."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de lupus eritematoso sistémico",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "les_actividad",
+      "name": "Manifestaciones activas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Artritis",
+        "Lesiones cutáneas",
+        "Úlceras orales",
+        "Serositis",
+        "Nefritis",
+        "Citopenias",
+        "Neurológico",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "proteinuria_24h",
+      "name": "Proteinuria de 24 h (g)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "creatinina",
+      "name": "Creatinina (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "complemento",
+      "name": "Complemento C3/C4",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "anti_dna",
+      "name": "Anti-ADN",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "hidroxicloroquina",
+      "name": "Recibe hidroxicloroquina",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lupus eritematoso sistémico",
+      "code": "control_oftalmologico",
+      "name": "Control oftalmológico anual",
+      "dataType": "string",
+      "required": false,
+      "options": ["Al día", "Pendiente"],
+      "showWhen": { "field": "hidroxicloroquina", "equals": true }
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin actividad",
+        "Corticoide ≤ 5 mg/día de prednisona",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fotoprotección",
+        "Anticoncepción y planificación del embarazo"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

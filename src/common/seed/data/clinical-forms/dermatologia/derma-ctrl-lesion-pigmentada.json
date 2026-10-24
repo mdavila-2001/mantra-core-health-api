@@ -1,0 +1,115 @@
+{
+  "code": "DERMA_CTRL_LESION_PIGMENTADA",
+  "name": "Evaluación de lesión pigmentada",
+  "specialty": { "code": "DERMATOLOGIA", "display": "Dermatología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Regla ABCDE del melanoma y dermatoscopía."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lesión pigmentada",
+      "code": "localizacion",
+      "name": "Localización",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: lesión pigmentada",
+      "code": "abcde",
+      "name": "Criterios ABCDE",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Asimetría",
+        "Bordes irregulares",
+        "Color heterogéneo",
+        "Diámetro > 6 mm",
+        "Evolución (cambió)",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: lesión pigmentada",
+      "code": "fototipo",
+      "name": "Fototipo de Fitzpatrick",
+      "dataType": "string",
+      "required": false,
+      "options": ["I", "II", "III", "IV", "V", "VI"]
+    },
+    {
+      "section": "Evaluación: lesión pigmentada",
+      "code": "antecedente_melanoma",
+      "name": "Antecedente personal o familiar de melanoma",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lesión pigmentada",
+      "code": "dermatoscopia",
+      "name": "Dermatoscopía — hallazgo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lesión pigmentada",
+      "code": "conducta_lesion",
+      "name": "Conducta",
+      "dataType": "string",
+      "required": false,
+      "options": ["Control", "Biopsia", "Extirpación"]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Fotoprotección", "Autoexamen de la piel"],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

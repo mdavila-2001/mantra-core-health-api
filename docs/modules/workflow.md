@@ -3,12 +3,12 @@
   Fuente real: src/modules/workflow/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `workflow`
 
-**Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/workflow/README.md)
+**Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/workflow/README.md)
 · 3 controllers · 3 services · 3 repositories · 8 entidades · 1 DTO
 
 ---
@@ -18,6 +18,37 @@
 Un solo sitio donde se declara qué estados puede tener un agregado, qué comandos lo mueven de uno a
 otro, qué hay que cumplir para moverlo y qué pasa después de moverlo. Y un solo sitio donde eso se
 ejecuta, con idempotencia, compensación, reintento y vencimiento.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/workflow -name '*.controller.ts' | wc -l
+  find src/modules/workflow -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/workflow -name '*.entity.ts' | wc -l
+  find src/modules/workflow -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 11 rutas HTTP, 8 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `state_definitions`, `state_machine_definitions`, `state_transition_definitions`, `state_transition_events`, `transition_guards`, `transition_side_effects`, `workflow_instances`, `workflow_tasks`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /workflow/state-machines` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/states` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/transitions` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/publish` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/instances/sweep-timeouts` | SYSTEM, PLATFORM_ADMIN | `workflow-instances` |
+| `POST /workflow/instances` | CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `workflow-instances` |
+| `POST /workflow/tasks/:id/complete` | CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN | `workflow-instances` |
+| `GET /workflow/aggregates/:aggregateId/transitions` | AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:commandCode` | CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:eventId/compensate` | SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:eventId/retry` | SYSTEM, PLATFORM_ADMIN | `workflow-transitions` |
 
 ## Casos de uso cubiertos (13)
 
@@ -165,8 +196,8 @@ guarda ni el contenido de `payloadJson`.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/workflow` — 87 pruebas (17 definición + 31 ejecución +
-19 instancias + 9 del repositorio de agregado + 11 de delegación de los tres controladores).
+`corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
+aprobadas durante la revisión.
 
 ## Divergencia con el caso de uso v3.9
 
@@ -176,26 +207,27 @@ guarda ni el contenido de `payloadJson`.
   posición del segmento, así que `{id}:retry` declararía un parámetro llamado `id}:retry`. Se
   publican como segmentos separados.
 
-## Pendiente
+## Fuera de este módulo
 
 - **UC-32-07, el relay**: el caso de uso lo marca explícitamente como *worker interno, no REST
   público*. La parte transaccional está aquí (un mensaje de outbox por efecto, dentro de la
-  transacción de la transición); despacharlos es
-  `POST /internal/outbox/relay/run` del módulo 35, ya implementado. Lo que falta es que ese relay lea
-  `transition_side_effects.action_spec_json` y `execution_mode_concept_id` para elegir el despacho:
-  hoy publica el mensaje con el modo en `metadataJson` y el consumidor decide.
+  transacción de la transición); despacharlos es `POST /internal/outbox/relay/run` del módulo 35.
+  El relay publica el mensaje con el modo de ejecución en `metadataJson` y el consumidor decide; no
+  lee `transition_side_effects.action_spec_json` ni `execution_mode_concept_id`.
 - **Efectos sin `outbox_event_type`** (crear tarea, notificar): se registran en la definición pero no
   se ejecutan. `action_spec_json` no tiene gramática declarada en el modelo, y ejecutarlos a ciegas
   sería inventarla.
 - **`redis_runtime.idempotency_entries`** (UC-32-06, cortocircuito rápido con TTL): aquí la
-  idempotencia la da el unique parcial sobre `state_transition_events`, que es la garantía dura. La
-  caché de Redis es del módulo 56, **sin asignar**.
-- **`transition_timeout_seconds`**: se guarda en la definición pero el barrido usa `workflow_instances.due_at`
-  y `workflow_tasks.due_at`. Calcular el vencimiento por transición exige un planificador que
-  programe el `due_at` al aplicar la transición.
+  idempotencia la da el unique parcial sobre `state_transition_events`, que es la garantía dura.
+- **`transition_timeout_seconds`**: se guarda en la definición pero el barrido usa
+  `workflow_instances.due_at` y `workflow_tasks.due_at`; el vencimiento no se calcula por
+  transición.
 - **Tablas `*_history`**: el caso de uso las declara junto a `audit.audit_events`. El registro de
   auditoría es del módulo 06; las tablas de historial por entidad no están generadas en este esquema.
 - **`purpose_of_use_concept_id`**: se guarda en la definición de la transición y se exige que exista,
   pero no se contrasta contra el propósito declarado por el llamante. Eso vive en `authz`
-  (`access_policies`), que es de la parte de Pablo.
+  (`access_policies`).
 
+## Revisión ALOVIDA
+
+El propósito de uso configurado en una transición no se comprueba contra la política del actor.

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   CareSpaces,
@@ -27,9 +30,10 @@ import type {
   OrganizationStaffMemberDto,
   PracticeConceptDto,
 } from '../dto';
+import { PracticeAccessService } from './practice-access.service';
 
 /** Milisegundos de un día, para los días que faltan hasta un vencimiento. */
-const UN_DIA_MS = 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * La lectura de la consola de organización médica (CARRIL 13).
@@ -54,6 +58,13 @@ const UN_DIA_MS = 24 * 60 * 60 * 1000;
  * leer nada, y una práctica ajena responde el mismo 404 que una inexistente:
  * distinguirlas convertiría el endpoint en un detector de qué identificadores
  * existen en otras organizaciones.
+ *
+ * ## Aislamiento por vinculación
+ *
+ * El tenant no alcanza para un `PRACTITIONER`: los médicos auto-registrados
+ * comparten el tenant `DEFAULT`. Un profesional sin vinculación ACTIVE con la
+ * práctica recibe también el mismo 404 (`PracticeAccessService`), por el mismo
+ * motivo: no debe poder sondear qué prácticas existen.
  */
 @Injectable()
 export class PracticeOrganizationReadService {
@@ -63,11 +74,13 @@ export class PracticeOrganizationReadService {
    * @param em - Contexto de persistencia.
    * @param practicesRepo - Lectura de la práctica y su tenant.
    * @param readRepo - Consultas por lote del árbol de la organización.
+   * @param access - Qué prácticas puede ver el actor.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,
     private readonly readRepo: PracticeOrganizationReadRepository,
+    private readonly access: PracticeAccessService,
   ) {}
 
   /**
@@ -75,17 +88,23 @@ export class PracticeOrganizationReadService {
    *
    * @param practiceId - Práctica consultada.
    * @param tenantId - Tenant del contexto, que debe ser el dueño.
+   * @param actor - Actor autenticado; un profesional necesita vinculación ACTIVE.
    * @returns Su ficha, sedes, áreas, espacios, servicios, plantilla,
    *   documentación legal e inventario.
-   * @throws ResourceNotFoundException si la práctica no existe o es de otro tenant.
+   * @throws ResourceNotFoundException si la práctica no existe, es de otro
+   *   tenant o el profesional no tiene vinculación ACTIVE con ella.
    */
   async getConsole(
     practiceId: string,
     tenantId: string,
+    actor: AuthenticatedUser,
   ): Promise<MedicalOrganizationConsoleDto> {
     const em = this.em.fork();
-    const practice = await this.practicesRepo.findById(em, practiceId);
-    if (!practice || practice.tenantId !== tenantId) {
+    const [practice, allowed] = await Promise.all([
+      this.practicesRepo.findById(em, practiceId),
+      this.access.canAccess(actor, practiceId),
+    ]);
+    if (!practice || practice.tenantId !== tenantId || !allowed) {
       throw new ResourceNotFoundException('Práctica no encontrada', {
         practiceId,
       });
@@ -105,13 +124,13 @@ export class PracticeOrganizationReadService {
       this.readRepo.findCareSpaces(em, siteIds),
       this.readRepo.findPractitionerNames(
         em,
-        unicos(staff.map((row) => row.practitionerProfileId)),
+        unique(staff.map((row) => row.practitionerProfileId)),
       ),
     ]);
 
-    const conceptos = await this.readRepo.findConcepts(
+    const concepts = await this.readRepo.findConcepts(
       em,
-      conceptIdsDe({
+      conceptIds({
         practice: {
           typeConceptId: practice.typeConceptId,
           statusConceptId: practice.statusConceptId,
@@ -126,40 +145,40 @@ export class PracticeOrganizationReadService {
         inventory,
       }),
     );
-    const porId = new Map(conceptos.map((concepto) => [concepto.id, concepto]));
+    const byId = new Map(concepts.map((concept) => [concept.id, concept]));
 
-    const unidadesPorSede = contarPor(units, (unit) => unit.practiceSiteId);
-    const espaciosPorSede = contarPor(spaces, (space) => space.practiceSiteId);
-    const hoy = new Date();
+    const unitsBySite = countBy(units, (unit) => unit.practiceSiteId);
+    const spacesBySite = countBy(spaces, (space) => space.practiceSiteId);
+    const today = new Date();
 
     return {
-      organization: this.cabecera(practice, porId),
+      organization: this.header(practice, byId),
       sites: sites.map((site) =>
-        this.sede(
+        this.site(
           site,
-          porId,
-          unidadesPorSede.get(site.id) ?? 0,
-          espaciosPorSede.get(site.id) ?? 0,
+          byId,
+          unitsBySite.get(site.id) ?? 0,
+          spacesBySite.get(site.id) ?? 0,
         ),
       ),
-      clinicalUnits: units.map((unit) => this.area(unit, porId)),
-      careSpaces: spaces.map((space) => this.espacio(space, porId)),
+      clinicalUnits: units.map((unit) => this.area(unit, byId)),
+      careSpaces: spaces.map((space) => this.space(space, byId)),
       healthcareServices: services.map((service) =>
-        this.servicio(service, porId),
+        this.service(service, byId),
       ),
       staff: staff.map((row) =>
-        this.integrante(
+        this.member(
           row,
-          porId,
+          byId,
           practitionerNames.get(row.practitionerProfileId),
         ),
       ),
-      legalDocuments: documents.map((doc) => this.documento(doc, porId, hoy)),
-      inventory: inventory.map((item) => this.insumo(item, porId)),
+      legalDocuments: documents.map((doc) => this.document(doc, byId, today)),
+      inventory: inventory.map((item) => this.supply(item, byId)),
     };
   }
 
-  private cabecera(
+  private header(
     practice: {
       readonly id: string;
       readonly code: string;
@@ -169,22 +188,22 @@ export class PracticeOrganizationReadService {
       readonly timeZone?: string;
       readonly currencyConceptId?: string;
     },
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): OrganizationHeaderDto {
     return {
       id: practice.id,
       code: practice.code,
       name: practice.name,
-      type: concepto(conceptos, practice.typeConceptId),
-      status: concepto(conceptos, practice.statusConceptId),
+      type: concept(concepts, practice.typeConceptId),
+      status: concept(concepts, practice.statusConceptId),
       timeZone: practice.timeZone ?? null,
-      currency: conceptoOpcional(conceptos, practice.currencyConceptId),
+      currency: optionalConcept(concepts, practice.currencyConceptId),
     };
   }
 
-  private sede(
+  private site(
     site: PracticeSites,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     clinicalUnitCount: number,
     careSpaceCount: number,
   ): OrganizationSiteDto {
@@ -192,13 +211,13 @@ export class PracticeOrganizationReadService {
       id: site.id,
       code: site.code,
       name: site.name,
-      type: concepto(conceptos, site.siteTypeConceptId),
-      physicalType: conceptoOpcional(conceptos, site.physicalTypeConceptId),
-      operationalStatus: conceptoOpcional(
-        conceptos,
+      type: concept(concepts, site.siteTypeConceptId),
+      physicalType: optionalConcept(concepts, site.physicalTypeConceptId),
+      operationalStatus: optionalConcept(
+        concepts,
         site.operationalStatusConceptId,
       ),
-      status: concepto(conceptos, site.statusConceptId),
+      status: concept(concepts, site.statusConceptId),
       timeZone: site.timeZone ?? null,
       branchId: site.branchId ?? null,
       clinicalUnitCount,
@@ -208,7 +227,7 @@ export class PracticeOrganizationReadService {
 
   private area(
     unit: ClinicalUnits,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): OrganizationClinicalUnitDto {
     return {
       id: unit.id,
@@ -216,16 +235,16 @@ export class PracticeOrganizationReadService {
       parentUnitId: unit.parentUnitId ?? null,
       code: unit.code,
       name: unit.name,
-      type: concepto(conceptos, unit.unitTypeConceptId),
-      specialty: conceptoOpcional(conceptos, unit.specialtyConceptId),
-      serviceMode: conceptoOpcional(conceptos, unit.serviceModeConceptId),
-      status: concepto(conceptos, unit.statusConceptId),
+      type: concept(concepts, unit.unitTypeConceptId),
+      specialty: optionalConcept(concepts, unit.specialtyConceptId),
+      serviceMode: optionalConcept(concepts, unit.serviceModeConceptId),
+      status: concept(concepts, unit.statusConceptId),
     };
   }
 
-  private espacio(
+  private space(
     space: CareSpaces,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): OrganizationCareSpaceDto {
     return {
       id: space.id,
@@ -234,36 +253,36 @@ export class PracticeOrganizationReadService {
       parentSpaceId: space.parentSpaceId ?? null,
       code: space.code,
       name: space.name,
-      type: concepto(conceptos, space.spaceTypeConceptId),
+      type: concept(concepts, space.spaceTypeConceptId),
       capacity: space.capacity ?? null,
-      operationalStatus: conceptoOpcional(
-        conceptos,
+      operationalStatus: optionalConcept(
+        concepts,
         space.operationalStatusConceptId,
       ),
-      status: concepto(conceptos, space.statusConceptId),
+      status: concept(concepts, space.statusConceptId),
     };
   }
 
-  private servicio(
+  private service(
     service: HealthcareServices,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): OrganizationHealthcareServiceDto {
     return {
       id: service.id,
       siteId: service.practiceSiteId ?? null,
       clinicalUnitId: service.clinicalUnitId ?? null,
-      service: concepto(conceptos, service.serviceConceptId),
-      specialty: conceptoOpcional(conceptos, service.specialtyConceptId),
+      service: concept(concepts, service.serviceConceptId),
+      specialty: optionalConcept(concepts, service.specialtyConceptId),
       referralRequired: service.referralRequired ?? null,
       appointmentRequired: service.appointmentRequired ?? null,
       telehealthAvailable: service.telehealthAvailable ?? null,
-      status: concepto(conceptos, service.statusConceptId),
+      status: concept(concepts, service.statusConceptId),
     };
   }
 
-  private integrante(
+  private member(
     row: PractitionerRoleAssignments,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
     practitionerName: string | undefined,
   ): OrganizationStaffMemberDto {
     return {
@@ -273,51 +292,51 @@ export class PracticeOrganizationReadService {
       siteId: row.practiceSiteId ?? null,
       clinicalUnitId: row.clinicalUnitId ?? null,
       healthcareServiceId: row.healthcareServiceId ?? null,
-      role: concepto(conceptos, row.roleConceptId),
-      specialty: conceptoOpcional(conceptos, row.specialtyConceptId),
+      role: concept(concepts, row.roleConceptId),
+      specialty: optionalConcept(concepts, row.specialtyConceptId),
       isPrimary: row.isPrimary ?? null,
-      validFrom: soloFecha(row.validFrom),
-      validTo: soloFecha(row.validTo),
-      status: concepto(conceptos, row.statusConceptId),
+      validFrom: onlyDate(row.validFrom),
+      validTo: onlyDate(row.validTo),
+      status: concept(concepts, row.statusConceptId),
     };
   }
 
-  private documento(
+  private document(
     doc: PracticeAccreditations,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
-    hoy: Date,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
+    today: Date,
   ): OrganizationLegalDocumentDto {
     return {
       id: doc.id,
       siteId: doc.practiceSiteId ?? null,
-      type: concepto(conceptos, doc.accreditationTypeConceptId),
+      type: concept(concepts, doc.accreditationTypeConceptId),
       number: doc.accreditationNumber ?? null,
       issuerName: doc.issuerName ?? null,
       evidenceFileId: doc.evidenceFileId ?? null,
-      validFrom: soloFecha(doc.validFrom),
-      validTo: soloFecha(doc.validTo),
-      daysToExpiry: diasHasta(doc.validTo, hoy),
-      verificationStatus: concepto(conceptos, doc.verificationStatusConceptId),
+      validFrom: onlyDate(doc.validFrom),
+      validTo: onlyDate(doc.validTo),
+      daysToExpiry: daysUntil(doc.validTo, today),
+      verificationStatus: concept(concepts, doc.verificationStatusConceptId),
     };
   }
 
-  private insumo(
+  private supply(
     item: InventoryItems,
-    conceptos: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, CatalogConcepts>,
   ): OrganizationInventoryItemDto {
     return {
       id: item.id,
       name: item.name,
       lotNumber: item.lotNumber ?? null,
-      expiryDate: soloFecha(item.expiryDate),
+      expiryDate: onlyDate(item.expiryDate),
       quantityOnHand: item.quantityOnHand,
-      unit: conceptoOpcional(conceptos, item.unitConceptId),
+      unit: optionalConcept(concepts, item.unitConceptId),
       reorderLevel: item.reorderLevel ?? null,
-      belowReorderLevel: bajoElPuntoDeReposicion(
+      belowReorderLevel: restockPointLow(
         item.quantityOnHand,
         item.reorderLevel,
       ),
-      status: concepto(conceptos, item.statusConceptId),
+      status: concept(concepts, item.statusConceptId),
     };
   }
 }
@@ -329,25 +348,25 @@ export class PracticeOrganizationReadService {
  * columna «Estado» no le dice nada a nadie, y esconder la fila entera perdería
  * un registro que sí existe. Mismo criterio que el directorio del módulo 23.
  */
-function concepto(
-  conceptos: ReadonlyMap<string, CatalogConcepts>,
+function concept(
+  concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): PracticeConceptDto {
-  const valor = id === undefined ? undefined : conceptos.get(id);
-  return valor
-    ? { code: valor.code, display: valor.display }
+  const value = id === undefined ? undefined : concepts.get(id);
+  return value
+    ? { code: value.code, display: value.display }
     : { code: 'UNKNOWN', display: 'Sin registrar' };
 }
 
-function conceptoOpcional(
-  conceptos: ReadonlyMap<string, CatalogConcepts>,
+function optionalConcept(
+  concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): PracticeConceptDto | null {
-  return id === undefined ? null : concepto(conceptos, id);
+  return id === undefined ? null : concept(concepts, id);
 }
 
-function soloFecha(valor: Date | undefined): string | null {
-  return valor?.toISOString().slice(0, 10) ?? null;
+function onlyDate(value: Date | undefined): string | null {
+  return value?.toISOString().slice(0, 10) ?? null;
 }
 
 /**
@@ -357,19 +376,19 @@ function soloFecha(valor: Date | undefined): string | null {
  * no `-1` por unas horas de diferencia: la alerta la lee una persona que piensa
  * en días de calendario, no en instantes.
  */
-function diasHasta(valor: Date | undefined, hoy: Date): number | null {
-  if (valor === undefined) return null;
-  const vence = Date.UTC(
-    valor.getUTCFullYear(),
-    valor.getUTCMonth(),
-    valor.getUTCDate(),
+function daysUntil(value: Date | undefined, today: Date): number | null {
+  if (value === undefined) return null;
+  const expires = Date.UTC(
+    value.getUTCFullYear(),
+    value.getUTCMonth(),
+    value.getUTCDate(),
   );
-  const referencia = Date.UTC(
-    hoy.getUTCFullYear(),
-    hoy.getUTCMonth(),
-    hoy.getUTCDate(),
+  const reference = Date.UTC(
+    today.getUTCFullYear(),
+    today.getUTCMonth(),
+    today.getUTCDate(),
   );
-  return Math.round((vence - referencia) / UN_DIA_MS);
+  return Math.round((expires - reference) / ONE_DAY_MS);
 }
 
 /**
@@ -379,37 +398,37 @@ function diasHasta(valor: Date | undefined, hoy: Date): number | null {
  * precisión; se comparan como número porque el umbral es una comparación de
  * magnitud, no de texto. Sin umbral configurado no hay faltante que declarar.
  */
-function bajoElPuntoDeReposicion(
+function restockPointLow(
   quantityOnHand: string,
   reorderLevel: string | undefined,
 ): boolean {
   if (reorderLevel === undefined) return false;
-  const existencias = Number(quantityOnHand);
-  const umbral = Number(reorderLevel);
-  if (Number.isNaN(existencias) || Number.isNaN(umbral)) return false;
-  return existencias <= umbral;
+  const stock = Number(quantityOnHand);
+  const threshold = Number(reorderLevel);
+  if (Number.isNaN(stock) || Number.isNaN(threshold)) return false;
+  return stock <= threshold;
 }
 
-function unicos(valores: readonly string[]): string[] {
-  return [...new Set(valores)];
+function unique(values: readonly string[]): string[] {
+  return [...new Set(values)];
 }
 
-function contarPor<T>(
-  filas: readonly T[],
-  claveDe: (fila: T) => string | undefined,
+function countBy<T>(
+  rows: readonly T[],
+  keyOf: (row: T) => string | undefined,
 ): Map<string, number> {
-  const resultado = new Map<string, number>();
-  for (const fila of filas) {
-    const clave = claveDe(fila);
-    if (clave !== undefined) {
-      resultado.set(clave, (resultado.get(clave) ?? 0) + 1);
+  const result = new Map<string, number>();
+  for (const row of rows) {
+    const key = keyOf(row);
+    if (key !== undefined) {
+      result.set(key, (result.get(key) ?? 0) + 1);
     }
   }
-  return resultado;
+  return result;
 }
 
 /** Todos los `*_concept_id` del árbol, sin repetir, para una única lectura. */
-function conceptIdsDe(fuentes: {
+function conceptIds(sources: {
   readonly practice: {
     readonly typeConceptId: string;
     readonly statusConceptId: string;
@@ -423,43 +442,43 @@ function conceptIdsDe(fuentes: {
   readonly documents: readonly PracticeAccreditations[];
   readonly inventory: readonly InventoryItems[];
 }): string[] {
-  return unicos(
+  return unique(
     [
-      fuentes.practice.typeConceptId,
-      fuentes.practice.statusConceptId,
-      fuentes.practice.currencyConceptId,
-      ...fuentes.sites.flatMap((site) => [
+      sources.practice.typeConceptId,
+      sources.practice.statusConceptId,
+      sources.practice.currencyConceptId,
+      ...sources.sites.flatMap((site) => [
         site.siteTypeConceptId,
         site.physicalTypeConceptId,
         site.operationalStatusConceptId,
         site.statusConceptId,
       ]),
-      ...fuentes.units.flatMap((unit) => [
+      ...sources.units.flatMap((unit) => [
         unit.unitTypeConceptId,
         unit.specialtyConceptId,
         unit.serviceModeConceptId,
         unit.statusConceptId,
       ]),
-      ...fuentes.spaces.flatMap((space) => [
+      ...sources.spaces.flatMap((space) => [
         space.spaceTypeConceptId,
         space.operationalStatusConceptId,
         space.statusConceptId,
       ]),
-      ...fuentes.services.flatMap((service) => [
+      ...sources.services.flatMap((service) => [
         service.serviceConceptId,
         service.specialtyConceptId,
         service.statusConceptId,
       ]),
-      ...fuentes.staff.flatMap((row) => [
+      ...sources.staff.flatMap((row) => [
         row.roleConceptId,
         row.specialtyConceptId,
         row.statusConceptId,
       ]),
-      ...fuentes.documents.flatMap((doc) => [
+      ...sources.documents.flatMap((doc) => [
         doc.accreditationTypeConceptId,
         doc.verificationStatusConceptId,
       ]),
-      ...fuentes.inventory.flatMap((item) => [
+      ...sources.inventory.flatMap((item) => [
         item.unitConceptId,
         item.statusConceptId,
       ]),

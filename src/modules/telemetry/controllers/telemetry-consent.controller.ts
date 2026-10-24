@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -15,6 +17,7 @@ import {
   DisclosureAcceptanceResponseDto,
   CreateTrackingConsentDto,
   TrackingConsentResponseDto,
+  MyTrackingConsentStatusDto,
   ProvisionAnalyticsSubjectDto,
   AnalyticsSubjectResponseDto,
 } from '../dto';
@@ -56,6 +59,16 @@ export class TelemetryConsentController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TrackingConsentResponseDto> {
     return this.consent.grantConsent(dto, actor);
+  }
+
+  /** Estado de mi consentimiento de tracking para un propósito. */
+  @Get('tracking-consents/me')
+  @ApiOperation({ summary: 'Estado vigente de mi consentimiento de tracking' })
+  getMyConsent(
+    @Query('purposeDefinitionId', ParseUUIDPipe) purposeDefinitionId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyTrackingConsentStatusDto> {
+    return this.consent.getMyStatus(purposeDefinitionId, actor);
   }
 
   /** UC-28-06 (interno del worker de ingesta). */

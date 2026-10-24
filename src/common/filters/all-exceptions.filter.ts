@@ -16,11 +16,18 @@ import {
 } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 import {
   APP_ATTR,
   TracingService,
   applyTraceHeader,
 } from '../../observability';
+import {
+  describeForDiagnostics,
+  errorDiagnosticsEnabled,
+  violationsForLog,
+  type ErrorDiagnostics,
+} from './error-diagnostics';
 
 /**
  * Códigos 5xx cuyo cuerpo **sí** se le devuelve al cliente tal cual.
@@ -62,6 +69,14 @@ interface ErrorResponseBody {
    */
   details?: unknown;
   /**
+   * Sub-código de negocio estable del catálogo del módulo que lanzó el error
+   * (ej. `ACCOUNTING_PERIOD_NOT_OPEN`), cuando la excepción lo declara. `code`
+   * agrupa el tipo HTTP; `reason` dice cuál error concreto de ese tipo fue, y es
+   * lo que un front debe usar para mostrar un mensaje o acción específica en
+   * vez de ramificar sobre el texto de `message`.
+   */
+  reason?: string;
+  /**
    * Valor de timestamp mantenido por la instancia.
    */
   timestamp: string;
@@ -69,6 +84,12 @@ interface ErrorResponseBody {
    * Valor de path mantenido por la instancia.
    */
   path: string;
+  /**
+   * Sólo con `API_ERROR_DIAGNOSTICS=true` (entornos locales o de prueba con
+   * datos sintéticos): qué excepción fue, su mensaje interno y dónde se
+   * originó. Ver `error-diagnostics.ts`.
+   */
+  diagnostics?: ErrorDiagnostics;
 }
 
 /**
@@ -94,6 +115,19 @@ function toCorrelationId(value: unknown): string | undefined {
   return typeof single === 'number' && Number.isFinite(single)
     ? String(single)
     : undefined;
+}
+
+/**
+ * El usuario autenticado de la petición, si lo hay.
+ *
+ * Lo deja `JwtAuthGuard` en `request.user`, que Express tipa como `any`; se lee
+ * como `unknown` para no confiar en una forma que en una ruta pública no existe.
+ */
+function userIdOf(request: { user?: unknown }): string | undefined {
+  const user: unknown = request.user;
+  if (typeof user !== 'object' || user === null) return undefined;
+  const id: unknown = (user as { id?: unknown }).id;
+  return typeof id === 'string' ? id : undefined;
 }
 
 /**
@@ -147,6 +181,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         id?: string | number;
       }
     >();
+    const userId = userIdOf(request);
 
     // pino-http asigna `req.id`; se reutiliza como correlationId para hilar el
     // error del cliente con la línea de log del servidor.
@@ -158,7 +193,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       request.id ?? request.headers['x-request-id'],
     );
 
-    const { status, code, message, details, internals } =
+    const { status, code, message, details, reason, internals } =
       this.normalize(exception);
 
     const body: ErrorResponseBody = {
@@ -166,6 +201,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
       correlationId,
       details,
+      reason,
       timestamp: new Date().toISOString(),
       path: request.url,
     };
@@ -185,6 +221,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           correlationId,
           path: request.url,
           method: request.method,
+          userId,
         },
         'Unhandled exception',
       );
@@ -192,15 +229,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
         body.message = 'Error interno del servidor';
         body.code = ErrorCode.INTERNAL;
         body.details = undefined;
+        body.reason = undefined;
       }
     } else {
       this.logger.warn(
         {
           correlationId,
           code,
+          reason,
           path: request.url,
           method: request.method,
           status,
+          userId,
+          // Qué campos del cuerpo fallaron y por qué restricción. Sin esto el
+          // log de un 400 decía sólo «Error de validación», y saber qué campo
+          // había rechazado el DTO exigía reproducir el envío.
+          ...violationsForLog(details),
           // Restricción, tabla y columna del error del driver. Van al log y NO
           // a la respuesta: el nombre de una FK y el valor de la clave que la
           // violó describen el esquema y los datos, y el cliente no ramifica
@@ -210,6 +254,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         },
         message,
       );
+    }
+
+    // Después de la censura de los 5xx a propósito: el diagnóstico es para
+    // quien depura, y sólo existe con el interruptor encendido.
+    if (errorDiagnosticsEnabled()) {
+      body.diagnostics = describeForDiagnostics(exception, internals);
     }
 
     response.status(status).json(body);
@@ -262,6 +312,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
      */
     details?: unknown;
     /**
+     * Sub-código de negocio estable propio del módulo que lanzó la excepción.
+     */
+    reason?: string;
+    /**
      * Contexto interno del error del driver (restricción, tabla, columna).
      * Se registra en el log y **nunca** viaja en la respuesta.
      */
@@ -277,6 +331,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: (obj.code as string) ?? this.defaultCode(status),
           message: this.extractMessage(obj) ?? exception.message,
           details: obj.details ?? this.extractValidationDetails(obj),
+          reason:
+            typeof obj.reason === 'string'
+              ? obj.reason
+              : Array.isArray(obj.message)
+                ? SystemErrorReason.VALIDATION_PIPE_REJECTED
+                : undefined,
         };
       }
       return { status, code: this.defaultCode(status), message: String(res) };
@@ -288,6 +348,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONCURRENCY_CONFLICT,
         message: 'El recurso fue modificado por otra operación; reintente',
+        reason: SystemErrorReason.OPTIMISTIC_LOCK_CONFLICT,
       };
     }
 
@@ -300,6 +361,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus.CONFLICT,
         code: ErrorCode.CONFLICT,
         message: 'El valor ya está en uso por otro registro',
+        reason: SystemErrorReason.UNIQUE_CONSTRAINT_VIOLATION,
         internals: this.constraintInternals(exception),
       };
     }
@@ -334,6 +396,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: httpish,
         code: this.defaultCode(httpish),
         message: this.messageForHttpish(httpish),
+        reason:
+          httpish === HttpStatus.PAYLOAD_TOO_LARGE
+            ? SystemErrorReason.REQUEST_BODY_TOO_LARGE
+            : SystemErrorReason.REQUEST_BODY_MALFORMED,
       };
     }
 
@@ -459,6 +525,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status: HttpStatus;
         code: string;
         message: string;
+        reason?: string;
         internals?: unknown;
       }
     | undefined {
@@ -472,18 +539,27 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message:
           'La petición referencia un recurso que no existe: ' +
           'verifique los identificadores enviados',
+        reason: SystemErrorReason.FOREIGN_KEY_VIOLATION,
         internals: this.constraintInternals(exception),
       };
     }
 
-    if (
-      exception instanceof NotNullConstraintViolationException ||
-      exception instanceof CheckConstraintViolationException
-    ) {
+    if (exception instanceof NotNullConstraintViolationException) {
       return {
         status: HttpStatus.BAD_REQUEST,
         code: ErrorCode.VALIDATION_FAILED,
         message: 'La petición trae un valor ausente o inválido para el modelo',
+        reason: SystemErrorReason.REQUIRED_FIELD_VIOLATION,
+        internals: this.constraintInternals(exception),
+      };
+    }
+
+    if (exception instanceof CheckConstraintViolationException) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        code: ErrorCode.VALIDATION_FAILED,
+        message: 'La petición trae un valor ausente o inválido para el modelo',
+        reason: SystemErrorReason.MALFORMED_VALUE,
         internals: this.constraintInternals(exception),
       };
     }
@@ -498,6 +574,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: ErrorCode.CONCURRENCY_CONFLICT,
         message:
           'La operación entró en conflicto con otra concurrente; reintente',
+        reason: SystemErrorReason.DEADLOCK_DETECTED,
       };
     }
 
@@ -510,6 +587,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: ErrorCode.DEPENDENCY_UNAVAILABLE,
         message:
           'La base de datos no está disponible; reintente en unos segundos',
+        reason: SystemErrorReason.DATABASE_CONNECTION_UNAVAILABLE,
       };
     }
 
@@ -540,23 +618,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: string;
         /** Mensaje legible para el cliente. */
         message: string;
+        /** Sub-código de sistema del catálogo `SystemErrorReason`. */
+        reason?: string;
         /** Restricción, tabla y columna implicadas: sólo para el log. */
         internals?: unknown;
       }
     | undefined {
-    const causa = this.findSqlState(exception);
-    if (!causa) {
+    const cause = this.findSqlState(exception);
+    if (!cause) {
       return undefined;
     }
 
     const internals = {
-      constraint: causa.constraint,
-      table: causa.table,
-      column: causa.column,
-      detail: causa.detail,
+      constraint: cause.constraint,
+      table: cause.table,
+      column: cause.column,
+      detail: cause.detail,
     };
 
-    switch (causa.sqlstate) {
+    switch (cause.sqlstate) {
       // Clave foránea inexistente. Es 422 y por tanto **no** puede llevar
       // `VALIDATION_FAILED`, que el contrato publica como 400: un cliente que
       // ramifique por `code` para decidir si reintenta con otro cuerpo recibía
@@ -568,6 +648,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message:
             'La petición referencia un recurso que no existe: ' +
             'verifique los identificadores enviados',
+          reason: SystemErrorReason.FOREIGN_KEY_VIOLATION,
           internals,
         };
       case '23505':
@@ -575,6 +656,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
           status: HttpStatus.CONFLICT,
           code: ErrorCode.CONFLICT,
           message: 'Ya existe un recurso con esa clave',
+          reason: SystemErrorReason.UNIQUE_CONSTRAINT_VIOLATION,
+          internals,
+        };
+      // Restricción EXCLUDE (`ex_appointments_practitioner_time`, carril 12
+      // REQ-017): dos citas del mismo profesional se pisan en el tiempo. Sin
+      // este caso caía al 500 genérico del `default`, y quien movía un horario
+      // veía "Ocurrió un error inesperado" en vez de que hubo un choque —el
+      // pedido explícito era mostrar el conflicto, no esconderlo.
+      case '23P01':
+        return {
+          status: HttpStatus.CONFLICT,
+          code: ErrorCode.CONFLICT,
+          message:
+            'Ese horario se pisa con otra cita ya confirmada del mismo profesional',
+          reason: SystemErrorReason.EXCLUSION_CONSTRAINT_VIOLATION,
           internals,
         };
       // Valor ausente, fuera de restricción o con sintaxis inválida: es un
@@ -589,6 +685,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: ErrorCode.VALIDATION_FAILED,
           message:
             'La petición trae un valor ausente o inválido para el modelo',
+          reason:
+            cause.sqlstate === '22P02'
+              ? SystemErrorReason.MALFORMED_VALUE
+              : SystemErrorReason.REQUIRED_FIELD_VIOLATION,
           internals,
         };
       // Contención: la operación es válida y reintentarla funciona.
@@ -602,6 +702,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: ErrorCode.CONCURRENCY_CONFLICT,
           message:
             'La operación entró en conflicto con otra concurrente; reintente',
+          reason:
+            cause.sqlstate === '40P01'
+              ? SystemErrorReason.DEADLOCK_DETECTED
+              : cause.sqlstate === '55P03'
+                ? SystemErrorReason.ROW_LOCKED
+                : SystemErrorReason.SERIALIZATION_FAILURE,
         };
       // `57014` consulta cancelada por `statement_timeout`. Es un plazo
       // agotado, no un error de la petición ni un fallo del servidor: el
@@ -611,6 +717,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           status: HttpStatus.GATEWAY_TIMEOUT,
           code: ErrorCode.TIMEOUT,
           message: 'La consulta excedió el tiempo máximo de ejecución',
+          reason: SystemErrorReason.QUERY_TIMEOUT,
         };
       // `53300` sin conexiones libres, `53200` sin memoria, `57P03` arrancando.
       // La base está viva pero saturada: 503 y reintento, nunca 500.
@@ -622,6 +729,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code: ErrorCode.DEPENDENCY_UNAVAILABLE,
           message:
             'La base de datos no admite más trabajo ahora mismo; reintente',
+          reason: SystemErrorReason.DATABASE_SATURATED,
         };
       default:
         return undefined;

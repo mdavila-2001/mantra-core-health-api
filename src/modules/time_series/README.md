@@ -4,6 +4,40 @@ Doce flujos de medición append-only sobre TimescaleDB: ingesta por lote, normal
 dispositivo con promoción al registro clínico, administración física de las particiones (chunks,
 compresión, retención), agregados continuos y consulta de rango con downsampling.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/time_series -name '*.controller.ts' | wc -l
+  find src/modules/time_series -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/time_series -name '*.entity.ts' | wc -l
+  find src/modules/time_series -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 14 rutas HTTP, 12 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 12 de 12 archivos `*.entity.ts`): `ads_delivery_event_series`, `ai_runtime_metric_series`, `application_tracking_series`, `audit_access_metric_series`, `device_raw_reading_series`, `ingestion_pipeline_metric_series`, `lab_analyzer_event_series`, `location_ping_series`, `normalized_vital_series`, `payment_gateway_metric_series`, `service_sli_series`, `telemetry_event_series`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /ts/series/:seriesId/query` | ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/series/:seriesId/points/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/series/:seriesId/backfill/governed` | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `series` |
+| `POST /ts/devices/:deviceId/readings/ingest` | INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/normalize/run` | SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/ads/events/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/metrics/:dataset/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/location/pings/batch-ingest` | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `series` |
+| `POST /ts/admin/hypertables` | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `PATCH /ts/admin/hypertables/:table` | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/compression/run` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/retention/policies` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/rollups/audit-daily/refresh` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+| `POST /ts/admin/rollups/:name/refresh` | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `timescale-admin` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |
@@ -161,9 +195,8 @@ ni `raw_value`.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/time_series` — 89 pruebas (18 ingesta + 8 normalización +
-15 administración + 16 consulta + 18 del repositorio de Timescale + 14 de delegación de los dos
-controladores).
+`corepack yarn test src/modules/time_series --runInBand --silent` — 6 suites y 89 pruebas
+aprobadas durante la revisión.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -180,24 +213,25 @@ controladores).
   ejecuta el descarte con la ventana recibida y lo registra; la política vigente no se guarda porque
   no hay dónde.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Tabla de catálogo de políticas** de retención y compresión: no existe en el modelo, así que hoy
-  cada llamada lleva su umbral. Cuando se declare, estos endpoints pasarían a leerla en vez de
-  recibirla.
+- **Tabla de catálogo de políticas** de retención y compresión: no existe en el modelo, así que cada
+  llamada lleva su umbral.
 - **Definición de los agregados continuos en el modelo**: `continuous_sli_hourly`,
-  `continuous_sli_daily` y `continuous_audit_daily` sólo están descritos en el texto del caso de uso.
-  Aquí viven en `ROLLUPS`, dentro del módulo. Si el modelo los declara como objetos, esa constante
-  sobra.
+  `continuous_sli_daily` y `continuous_audit_daily` sólo están descritos en el texto del caso de uso;
+  aquí viven en `ROLLUPS`, dentro del módulo.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-58-01, 05, 12): aquí lo
-  cubren las claves naturales y la clave de idempotencia del outbox. Ese esquema es del módulo 56,
-  **sin asignar**.
+  cubren las claves naturales y la clave de idempotencia del outbox.
 - **Comprobación de consentimiento contra `consent.consents`** (UC-58-09, 13): el consentimiento se
-  exige y se propaga, pero no se contrasta contra el módulo 07. Esa comprobación es de `authz` y
-  `consent`, que son de la parte de Pablo.
+  exige y se propaga, pero no se contrasta contra el módulo 07.
 - **`audit.audit_events` en la lectura de datos sensibles** (UC-58-09): el caso de uso pide registrar
   la consulta. El registro de auditoría es del módulo 06.
 - **Re-materialización automática de los rollups afectados por un backfill** (UC-58-12): el evento
   `GovernedBackfillApplied` sale al outbox con la ventana; encadenar el refresco es del worker.
 - **`lab_analyzer_event_series` y `payment_gateway_metric_series`** se pueden ingerir por
   `points/batch-ingest` y consultar, pero ningún caso de uso del módulo 58 les da un endpoint propio.
+
+## Revisión ALOVIDA
+
+La referencia de consentimiento de ubicación se exige pero no se verifica contra la política
+canónica.

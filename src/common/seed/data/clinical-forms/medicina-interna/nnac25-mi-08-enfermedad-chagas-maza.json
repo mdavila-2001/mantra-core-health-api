@@ -1,0 +1,205 @@
+{
+  "code": "NNAC25_MI_08_ENFERMEDAD_CHAGAS_MAZA",
+  "name": "Enfermedad de chagas (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 8, pág. 85; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "La infección aguda por T. Cruzi en áreas endémicas suele ocurrir en la infancia y puede ser asintomática",
+        "Manifiesta con trastornos de la conducción que incluyen bloqueo de rama derecha o bloqueo del fascículo anterior izquierdo",
+        "Síntomas semejantes a los de la acalasia o enfermedad de Hirschsprung",
+        "El mega esófago chagásico se manifiesta con disfagia y puede producir infecciones pulmonares por aspiración o asociadas con la grave desnutrición",
+        "El megacolon puede determinar que el paciente experimente largos periodos de estreñimiento y vólvulo intestinal",
+        "Clínico",
+        "Epidemiológico",
+        "Laboratorio"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 85. También denominada Tripanosomiasis Americana, es una antropozoonosis causada por un parasito denominado Tripanosoma Cruzi, un protozoo hemoflag elado que afecta tanto a humanos como a otros mamíferos."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Aguda",
+        "Crónica Indeterminada",
+        "Crónica con compromiso Organico: Afectacion cardiaca o del tracto intestinal"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Habitantes de zonas endémicas",
+        "Alimentos o líquidos contaminados",
+        "La transmisión congénita (de una mujer embarazada a su bebé)",
+        "Transfusiones sanguíneas",
+        "Trasplante de órganos y de células hematopoyéticas",
+        "Exposición ocupacional, especialmente en trabajadores de la salud que manipulan materiales biológicos"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "El número de tripomastigotes en el frotis de sangre periférica es elevado durante la fase aguda de la enfermedad de Chagas",
+        "Pueden detectarse fácilmente durante el examen de los frotis o estudios de gota gruesa",
+        "El diagnóstico definitivo de la enfermedad de Chagas en estadio agudo también se puede realizar al examinar el tejido de los ganglios linfáticos o el corazón",
+        "Anticuerpos fluorescentes indirectos (AFI)",
+        "Inmunoensayos enzimáticos (EIA) o enzimoinmunoanálisis (ELISA)",
+        "En pacientes con leishmaniasis u otras enfermedades",
+        "Microscopía óptica de frotis de sangre o una muestra de tejido para confirmar el diagnóstico",
+        "Electrocardiograma con un trazo largo en Derivación DII",
+        "Radiografía de tórax",
+        "Ecocardiografía",
+        "Radiografía del sistema digestivo para ver megacolon y megaesófago",
+        "Estudios gastrointestinales con contraste o endoscopia"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "B57: Enfermedad de Chagas",
+        "B57.1: Enfermedad de Chagas aguda que no afecta al corazón",
+        "B57.2: Enfermedad de Chagas (crónica) que afecta al corazón",
+        "B57.3: Enfermedad de Chagas (crónica) que afecta al sistema digestivo",
+        "B57.4: Enfermedad de Chagas (crónica) que afecta al sistema nervioso",
+        "B57.5: Enfermedad de Chagas (crónica) que afecta otros órganos"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Muerte súbita",
+        "Insuficiencia cardiaca",
+        "Vólvulo de sigmoides",
+        "Tromboembolia pulmonar",
+        "Accidente cerebro vascular isquémico"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 8, pág. 85); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -7,12 +7,13 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
-import { PharmacyProcurementService } from './pharmacy-procurement.service';
+import { PharmacyProcurementService } from '../application/pharmacy-procurement/pharmacy-procurement.service';
+import { PharmacyProcurementUseCases } from '../application/pharmacy-procurement/pharmacy-procurement.use-cases';
 import {
   ResourceNotFoundException,
   PreconditionFailedException,
 } from '../../../common';
-import { PINV } from '../pharmacy_inventory.concepts';
+import { PINV } from '../domain/pharmacy_inventory.concepts';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -51,7 +52,7 @@ function build() {
     create: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new PharmacyProcurementService(
+  const useCases = new PharmacyProcurementUseCases(
     em as any,
     suppliersRepo,
     ordersRepo,
@@ -62,6 +63,7 @@ function build() {
     stockRepo as any,
     logger as any,
   );
+  const service = new PharmacyProcurementService(useCases, logger as any);
   return {
     service,
     tx,

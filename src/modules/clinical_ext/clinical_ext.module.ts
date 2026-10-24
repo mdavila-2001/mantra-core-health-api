@@ -35,19 +35,26 @@ import {
   ReferenceRangesRepository,
   PrescriptionFavoritesRepository,
 } from './repositories';
-import { ServiceRequestsRepository } from '../clinical/repositories';
+import {
+  EncountersRepository,
+  ServiceRequestsRepository,
+} from '../clinical/repositories';
+// BR-14 (CL-09): `ClinicalRecordAccessGuard` (y `ClinicalReadService`, que lo
+// resuelve) para exigir acceso al paciente en `cds/evaluate` y
+// `cds/check-interactions`.
+import { ClinicalModule } from '../clinical/clinical.module';
 // Los favoritos de prescripción cuelgan del perfil profesional de quien pide, y
 // `ProfileOwnershipService` es quien resuelve de quién es la sesión. Se provee la
 // clase con sus tres repositorios —todos sin estado, reciben el EntityManager por
 // parámetro— en vez de importar `ProfilesModule` entero, por lo mismo que hace
 // `clinical`: importar el módulo cerraría un ciclo (perfiles ya lee lo que el
 // profesional asentó acá) y duplicaría fuente de verdad.
-import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../profiles/application/services/profile-ownership.service';
 import {
   PersonAccountLinksRepository,
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo Clinical-Ext (18): coordinación de cuidado (equipos), decisión clínica
@@ -55,7 +62,14 @@ import {
  * referencias, brechas de cuidado / inmunizaciones y telesalud.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // BR-14 (CL-09): `cds/evaluate` y `cds/check-interactions` usan
+    // `ClinicalRecordAccessGuard`, que Nest resuelve en ESTE contenedor y
+    // necesita a `ClinicalReadService` visible como export propio de
+    // `ClinicalModule` (mismo motivo documentado en `chart.module.ts`).
+    ClinicalModule,
+  ],
   controllers: [
     CareTeamsController,
     CdsController,
@@ -82,6 +96,7 @@ import {
     PrescriptionFavoritesRepository,
     // Repositorio de otro módulo (clinical) reutilizado por el fan-out de order sets
     ServiceRequestsRepository,
+    EncountersRepository,
     // Titularidad del perfil profesional (ver el comentario del import)
     ProfileOwnershipService,
     PersonAccountLinksRepository,

@@ -81,6 +81,28 @@ export class CreateProductDto {
    * Identificador asociado a medication concept.
    */
   @ApiPropertyOptional({
+    description:
+      'Producto del catálogo universal de medicamentos (id de `GET /pharmacy/catalog-products`). ' +
+      'Con él, marca, genérico, concentración, forma, presentación, receta y el medicamento ' +
+      'del vademécum los deriva el servidor y mandarlos es un 400.',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  catalogProductId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Presentación elegida del producto del catálogo (su `code`: CN, CUM…). Sólo con `catalogProductId`.',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  catalogPresentationCode?: string;
+
+  @ApiPropertyOptional({
     description: 'Concept id del medicamento',
     format: 'uuid',
   })

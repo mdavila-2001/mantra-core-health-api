@@ -1,0 +1,332 @@
+{
+  "code": "EMERG_ACV",
+  "name": "Código ACV en emergencia",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "NIH Stroke Scale",
+    "organization": "National Institute of Neurological Disorders and Stroke (NINDS/NIH)",
+    "url": "https://www.ninds.nih.gov/health-information/stroke/assess-and-treat/nih-stroke-scale",
+    "license": "Dominio público (Gobierno de los EE. UU.)",
+    "retrievedAt": "2026-10-02",
+    "note": "Hora de inicio, Cincinnati, NIHSS, glucemia e imagen para decidir trombólisis. Ampliación internacional (2026-10-24): los 15 ítems de la NIH Stroke Scale (traducción propia, no la versión certificada en castellano) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "hora_inicio",
+      "name": "Hora de inicio o de la última vez visto bien",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "cincinnati",
+      "name": "Cincinnati",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Asimetría facial",
+        "Caída de un brazo",
+        "Alteración del habla"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_1a_conciencia",
+      "name": "1a. Nivel de conciencia",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Alerta; responde con viveza",
+        "1 — No alerta, pero despierta con estímulos menores para obedecer, responder o reaccionar",
+        "2 — No alerta; requiere estímulos repetidos para atender, u obnubilado y requiere estímulos fuertes o dolorosos para moverse",
+        "3 — Responde sólo con reflejos motores o autonómicos, o sin respuesta, flácido y arrefléxico"
+      ],
+      "description": "El texto del valor 2 está truncado en el arquetipo; se completó con la redacción de la escala del NINDS («para moverse»). Los ítems «NE» no suman al total. Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_1b_preguntas",
+      "name": "1b. Preguntas (mes y edad)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Responde ambas preguntas correctamente",
+        "1 — Responde una pregunta correctamente",
+        "2 — No responde ninguna correctamente"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_1c_ordenes",
+      "name": "1c. Órdenes (abrir y cerrar ojos, apretar la mano)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Realiza ambas tareas correctamente",
+        "1 — Realiza una tarea correctamente",
+        "2 — No realiza ninguna correctamente"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_2_mirada",
+      "name": "2. Mirada conjugada",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Normal",
+        "1 — Parálisis parcial de la mirada en uno o ambos ojos, sin desviación forzada ni paresia total",
+        "2 — Desviación forzada o paresia total de la mirada que no se vence con la maniobra oculocefálica"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_3_campo_visual",
+      "name": "3. Campo visual",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin pérdida visual",
+        "1 — Hemianopsia parcial",
+        "2 — Hemianopsia completa",
+        "3 — Hemianopsia bilateral (ceguera, incluida la cortical)"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_4_paralisis_facial",
+      "name": "4. Parálisis facial",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Movimientos normales y simétricos",
+        "1 — Paresia menor (surco nasogeniano borrado, asimetría al sonreír)",
+        "2 — Paresia parcial (parálisis total o casi total de la parte inferior de la cara)",
+        "3 — Parálisis completa de uno o ambos lados (sin movimiento en la parte superior e inferior de la cara)"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_5a_brazo_izquierdo",
+      "name": "5a. Motor — brazo izquierdo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin caída; mantiene 90° (o 45°) los 10 segundos completos",
+        "1 — Caída; mantiene 90° (o 45°) pero cae antes de los 10 segundos, sin tocar la cama u otro apoyo",
+        "2 — Algún esfuerzo contra la gravedad; no alcanza o no mantiene 90° (o 45°) y cae a la cama, con algún esfuerzo contra la gravedad",
+        "3 — Sin esfuerzo contra la gravedad; el miembro cae",
+        "4 — Sin movimiento",
+        "NE — No evaluable: amputación o anquilosis"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_5b_brazo_derecho",
+      "name": "5b. Motor — brazo derecho",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin caída; mantiene 90° (o 45°) los 10 segundos completos",
+        "1 — Caída; mantiene 90° (o 45°) pero cae antes de los 10 segundos, sin tocar la cama u otro apoyo",
+        "2 — Algún esfuerzo contra la gravedad; no alcanza o no mantiene 90° (o 45°) y cae a la cama, con algún esfuerzo contra la gravedad",
+        "3 — Sin esfuerzo contra la gravedad; el miembro cae",
+        "4 — Sin movimiento",
+        "NE — No evaluable: amputación o anquilosis"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_6a_pierna_izquierda",
+      "name": "6a. Motor — pierna izquierda",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin caída; mantiene 30° los 5 segundos completos",
+        "1 — Caída; cae al final de los 5 segundos sin tocar la cama",
+        "2 — Algún esfuerzo contra la gravedad; cae a la cama antes de los 5 segundos, con algún esfuerzo contra la gravedad",
+        "3 — Sin esfuerzo contra la gravedad; cae a la cama de inmediato",
+        "4 — Sin movimiento",
+        "NE — No evaluable: amputación o anquilosis"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_6b_pierna_derecha",
+      "name": "6b. Motor — pierna derecha",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin caída; mantiene 30° los 5 segundos completos",
+        "1 — Caída; cae al final de los 5 segundos sin tocar la cama",
+        "2 — Algún esfuerzo contra la gravedad; cae a la cama antes de los 5 segundos, con algún esfuerzo contra la gravedad",
+        "3 — Sin esfuerzo contra la gravedad; cae a la cama de inmediato",
+        "4 — Sin movimiento",
+        "NE — No evaluable: amputación o anquilosis"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_7_ataxia",
+      "name": "7. Ataxia de miembros",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "1 — Presente en un miembro",
+        "2 — Presente en dos miembros",
+        "NE — No evaluable: amputación o anquilosis (explicar en observaciones)"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_8_sensibilidad",
+      "name": "8. Sensibilidad",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Normal; sin pérdida sensitiva",
+        "1 — Pérdida leve a moderada: siente el pinchazo menos agudo o romo del lado afectado, o no siente el dolor superficial pero sí que lo tocan",
+        "2 — Pérdida grave o total: no se da cuenta de que lo tocan en la cara, el brazo y la pierna"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_9_lenguaje",
+      "name": "9. Lenguaje",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin afasia; normal",
+        "1 — Afasia leve a moderada: pérdida evidente de fluidez o comprensión, sin limitación importante de las ideas expresadas",
+        "2 — Afasia grave: comunicación fragmentaria; el examinador no puede identificar el material presentado por la respuesta del paciente",
+        "3 — Mutismo o afasia global; sin lenguaje útil ni comprensión auditiva"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_10_disartria",
+      "name": "10. Disartria",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Normal",
+        "1 — Leve a moderada: arrastra algunas palabras y, en el peor caso, se le entiende con alguna dificultad",
+        "2 — Grave: el habla es ininteligible, sin relación o desproporcionada con una disfasia, o mutismo/anartria",
+        "NE — No evaluable: intubado u otra barrera física"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss_11_extincion",
+      "name": "11. Extinción e inatención (negligencia)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin alteración",
+        "1 — Inatención visual, táctil, auditiva, espacial o personal, o extinción a la estimulación bilateral simultánea en una modalidad sensorial",
+        "2 — Hemiinatención profunda o extinción en más de una modalidad; no reconoce su propia mano o se orienta sólo hacia un lado del espacio"
+      ],
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "nihss",
+      "name": "NIHSS (0–42)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "glucemia",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "tac",
+      "name": "TAC de cerebro — hallazgo y hora",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular agudo",
+      "code": "trombolisis",
+      "name": "Trombólisis",
+      "dataType": "string",
+      "required": false,
+      "options": ["Indicada", "Contraindicada", "Fuera de ventana"]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

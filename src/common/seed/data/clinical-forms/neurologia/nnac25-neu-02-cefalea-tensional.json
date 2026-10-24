@@ -1,0 +1,168 @@
+{
+  "code": "NNAC25_NEU_02_CEFALEA_TENSIONAL",
+  "name": "Cefalea tensional (NNAC 2025)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Neurología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/967-norma-nacional-de-atencion-clinica-de-neurologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 2, pág. 29; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Al menos 10 episodios de cefalea que aparezcan con frecuencia de menos de un día al mes (menos de 12 días al año) y que cumplen los criterios B-D",
+        "Cefalea con duración de 30 minutos a 7 días",
+        "Localización bilateral",
+        "Calidad opresiva o tensiva (no pulsátil)",
+        "Intensidad leve o moderada",
+        "No empeora con la actividad física habitual, como andar o subir escaleras",
+        "Sin náuseas ni vómitos",
+        "Puede asociar fotofobia o fonofobia (no ambas)",
+        "Cefalea que se presenta con frecuencia de ≥ 15 días al mes durante más de 3 meses (≥ 180 días por año) y cumple los criterios B-D",
+        "Duración de minutos a días, o sin remisión",
+        "De intensidad leve o moderada",
+        "Solamente uno de los siguientes síntomas: fotofobia, fonofobia o nauseas leves",
+        "Ni nauseas moderadas o intensas ni vómitos",
+        "Cefalea localización bilateral, Calidad opresiva o tensiva, Intensidad leve o moderada, no empeora con la actividad física habitual, como andar o subir"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 29. La cefalea tensional (CT) es una cefalea primaria caracterizada por un dolor bilateral, no pulsátil, de intensidad leve a moderada y generalmente sin otros síntomas asociados."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cefalea episódica infrecuente de tipo tensional: 1.1 Cefalea episódica infrecuente de tipo tensional con hipersensibilidad pericraneal",
+        "Cefalea episódica frecuente de tipo tensional: 2.1 Cefalea episódica frecuente de tipo tensional con hipersensibilidad pericraneal"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pacientes con cefalea súbita e intensa necesita estudios de neuroimagen ante la sospecha de hemorragia subaracnoidea",
+        "Pacientes con un hallazgo anormal inexplicable en el examen neurológico, es decir síntomas o signos neurológicos nuevos o inexplicables",
+        "Pacientes con cefaleas atípicas o cefaleas que no cumplen la definición estricta de migraña u otro trastorno de dolor de cabeza primario",
+        "La “primera o la peor” cefalea en su vida",
+        "Cambio significativo reciente en el patrón, la frecuencia o la gravedad de dolores de cabeza",
+        "Dolor de cabeza siempre en el mismo lado",
+        "Dolores de cabeza que no responden al tratamiento",
+        "Dolores de cabeza de inicio reciente después de los 50 años",
+        "Dolores de cabeza de inicio reciente en pacientes con cáncer o infección por VIH",
+        "Síntomas y signos asociados tales como fiebre, tortícolis, papiledema, deterioro cognitivo o cambios de personalidad"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["G44.2: Cefalea debida a tensión"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 29); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

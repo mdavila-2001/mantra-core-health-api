@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { CommunityModerationReadService } from './community-moderation-read.service';
 import { decodeKeysetCursor, runWithTenant } from '../../../common';
 import {
@@ -32,18 +33,26 @@ function build() {
     listDecisionsPage: mockFn().mockResolvedValue([]),
     listDecisionsByIds: mockFn().mockResolvedValue([]),
     listAppealsPage: mockFn().mockResolvedValue([]),
+    listStrikesBySubject: mockFn().mockResolvedValue([]),
+    findOpenAppealForDecision: mockFn().mockResolvedValue(null),
+  };
+  const visibility = {
+    assertOwnProfile: mockFn(() => Promise.resolve(undefined)),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new CommunityModerationReadService(
     em as any,
     moderationRepo as any,
+    visibility as any,
     logger as any,
   );
-  return { service, moderationRepo };
+  return { service, moderationRepo, visibility };
 }
 
+const actor = { id: 'user-1', roles: [] } as any;
+
 /** Una fila de cola mínima. */
-const fila = (id: string, extra: Record<string, unknown> = {}) => ({
+const row = (id: string, extra: Record<string, unknown> = {}) => ({
   id,
   contentTypeConceptId: COMM.CONTENT_TYPE_POST,
   contentRefId: `post-${id}`,
@@ -70,7 +79,7 @@ const TENANT = '3f2b6c14-0000-5000-8000-000000000001';
  * @param limit - Tope efectivo.
  * @returns La página, como la devuelve el servicio.
  */
-const listQueueEnTenant = (d: any, query: any, limit: number): Promise<any> =>
+const listQueueInTenant = (d: any, query: any, limit: number): Promise<any> =>
   runWithTenant(TENANT, () => d.service.listQueue(query, limit));
 
 describe('CommunityModerationReadService', () => {
@@ -83,7 +92,7 @@ describe('CommunityModerationReadService', () => {
 
     it('acota la cola al tenant del contexto', async () => {
       const d = build();
-      await listQueueEnTenant(d, {} as any, 20);
+      await listQueueInTenant(d, {} as any, 20);
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
@@ -96,7 +105,7 @@ describe('CommunityModerationReadService', () => {
 
     it('pide una fila más que el tope, para saber si hay siguiente', async () => {
       const d = build();
-      await listQueueEnTenant(d, {} as any, 20);
+      await listQueueInTenant(d, {} as any, 20);
 
       expect(d.moderationRepo.listQueuePage).toHaveBeenCalledWith(
         expect.anything(),
@@ -113,7 +122,7 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce los códigos de filtro a conceptos', async () => {
       const d = build();
-      await listQueueEnTenant(
+      await listQueueInTenant(
         d,
         {
           status: ['QUEUED', 'IN_REVIEW'],
@@ -145,22 +154,22 @@ describe('CommunityModerationReadService', () => {
      */
     it('traduce la antigüedad en horas a un instante', async () => {
       const d = build();
-      await listQueueEnTenant(d, { minAgeHours: 24 } as any, 20);
+      await listQueueInTenant(d, { minAgeHours: 24 } as any, 20);
 
-      const filtros = d.moderationRepo.listQueuePage.mock.calls[0][2];
-      expect(filtros.queuedBefore).toBeInstanceOf(Date);
-      const horas =
-        (Date.now() - (filtros.queuedBefore as Date).getTime()) /
+      const filters = d.moderationRepo.listQueuePage.mock.calls[0][2];
+      expect(filters.queuedBefore).toBeInstanceOf(Date);
+      const hours =
+        (Date.now() - (filters.queuedBefore as Date).getTime()) /
         (60 * 60 * 1000);
-      expect(horas).toBeGreaterThanOrEqual(23.9);
-      expect(horas).toBeLessThanOrEqual(24.1);
+      expect(hours).toBeGreaterThanOrEqual(23.9);
+      expect(hours).toBeLessThanOrEqual(24.1);
     });
 
     it('no emite cursor cuando la página no está llena', async () => {
       const d = build();
-      d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
+      d.moderationRepo.listQueuePage.mockResolvedValue([row('q1')]);
 
-      const page = await listQueueEnTenant(d, {} as any, 20);
+      const page = await listQueueInTenant(d, {} as any, 20);
 
       expect(page.count).toBe(1);
       expect(page.nextCursor).toBeNull();
@@ -168,12 +177,9 @@ describe('CommunityModerationReadService', () => {
 
     it('emite cursor y recorta la fila extra cuando hay más', async () => {
       const d = build();
-      d.moderationRepo.listQueuePage.mockResolvedValue([
-        fila('q1'),
-        fila('q2'),
-      ]);
+      d.moderationRepo.listQueuePage.mockResolvedValue([row('q1'), row('q2')]);
 
-      const page = await listQueueEnTenant(d, {} as any, 1);
+      const page = await listQueueInTenant(d, {} as any, 1);
 
       expect(page.count).toBe(1);
       expect(page.items[0]!.id).toBe('q1');
@@ -190,14 +196,14 @@ describe('CommunityModerationReadService', () => {
     it('el cursor cae en createdAt si la fila no tiene queuedAt', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([
-        fila('q1', {
+        row('q1', {
           queuedAt: undefined,
           createdAt: new Date('2026-08-01T08:00:00Z'),
         }),
-        fila('q2'),
+        row('q2'),
       ]);
 
-      const page = await listQueueEnTenant(d, {} as any, 1);
+      const page = await listQueueInTenant(d, {} as any, 1);
 
       expect(decodeKeysetCursor(page.nextCursor!)).toEqual({
         queuedAt: '2026-08-01T08:00:00.000Z',
@@ -212,7 +218,7 @@ describe('CommunityModerationReadService', () => {
     it('trae el recuento de reportes y el reporte que la originó', async () => {
       const d = build();
       d.moderationRepo.listQueuePage.mockResolvedValue([
-        fila('q1', { contentReportId: 'rep-1' }),
+        row('q1', { contentReportId: 'rep-1' }),
       ]);
       d.moderationRepo.countReportsByContent.mockResolvedValue([
         { targetId: 'post-q1', count: 7 },
@@ -226,7 +232,7 @@ describe('CommunityModerationReadService', () => {
         },
       ]);
 
-      const page = await listQueueEnTenant(d, {} as any, 20);
+      const page = await listQueueInTenant(d, {} as any, 20);
 
       expect(page.items[0]!.reportCount).toBe(7);
       expect(page.items[0]!.report?.detailText).toBe(
@@ -236,9 +242,9 @@ describe('CommunityModerationReadService', () => {
 
     it('una entrada sin reporte asociado trae report en null, no undefined', async () => {
       const d = build();
-      d.moderationRepo.listQueuePage.mockResolvedValue([fila('q1')]);
+      d.moderationRepo.listQueuePage.mockResolvedValue([row('q1')]);
 
-      const page = await listQueueEnTenant(d, {} as any, 20);
+      const page = await listQueueInTenant(d, {} as any, 20);
 
       expect(page.items[0]!.report).toBeNull();
       expect(page.items[0]!.reportCount).toBe(0);
@@ -282,6 +288,118 @@ describe('CommunityModerationReadService', () => {
         decidedAt: '2026-08-12T15:00:00.000Z',
         id: 'dec1',
       });
+    });
+  });
+
+  describe('listMyDecisions (AG-18, «Mis sanciones»)', () => {
+    it('exige la titularidad del perfil antes de leer nada', async () => {
+      const d = build();
+
+      await d.service.listMyDecisions(
+        'pp-1',
+        { profileId: 'pp-1' } as any,
+        20,
+        actor,
+      );
+
+      expect(d.visibility.assertOwnProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'pp-1',
+        actor,
+      );
+    });
+
+    it('un perfil ajeno no llega a leer strikes ni decisiones', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('ajeno'),
+      );
+
+      await expect(
+        d.service.listMyDecisions(
+          'pp-ajeno',
+          { profileId: 'pp-ajeno' } as any,
+          20,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.moderationRepo.listStrikesBySubject).not.toHaveBeenCalled();
+    });
+
+    it('sólo trae decisiones con strike propio, sin denunciante ni moderador', async () => {
+      const d = build();
+      d.moderationRepo.listStrikesBySubject.mockResolvedValue([
+        {
+          id: 'strike-1',
+          moderationDecisionId: 'dec1',
+          subjectProfileId: 'pp-1',
+        },
+      ]);
+      const decision = {
+        id: 'dec1',
+        moderationQueueId: 'q1',
+        decisionConceptId: MODERATION_DECISION_BY_CODE.REMOVED.decision,
+        policyConceptId: COMM.POLICY_COMMUNITY_GUIDELINES,
+        rationaleText: 'Contenido que viola las normas',
+        decidedByUserId: 'mod-1',
+        decidedAt: new Date('2026-08-12T15:00:00Z'),
+        createdAt: new Date('2026-08-12T15:00:00Z'),
+      };
+      d.moderationRepo.listDecisionsByIds.mockResolvedValue([decision]);
+
+      const page = await d.service.listMyDecisions(
+        'pp-1',
+        { profileId: 'pp-1' } as any,
+        20,
+        actor,
+      );
+
+      expect(page.items).toEqual([
+        {
+          decisionId: 'dec1',
+          policyConceptId: COMM.POLICY_COMMUNITY_GUIDELINES,
+          decisionConceptId: MODERATION_DECISION_BY_CODE.REMOVED.decision,
+          rationaleText: 'Contenido que viola las normas',
+          decidedAt: decision.decidedAt,
+          appealable: true,
+        },
+      ]);
+      // Nunca decidedByUserId (el moderador) ni nada del denunciante.
+      expect('decidedByUserId' in page.items[0]!).toBe(false);
+    });
+
+    it('appealable es false si ya hay una apelación abierta', async () => {
+      const d = build();
+      d.moderationRepo.listStrikesBySubject.mockResolvedValue([
+        {
+          id: 'strike-1',
+          moderationDecisionId: 'dec1',
+          subjectProfileId: 'pp-1',
+        },
+      ]);
+      d.moderationRepo.listDecisionsByIds.mockResolvedValue([
+        {
+          id: 'dec1',
+          moderationQueueId: 'q1',
+          decisionConceptId: MODERATION_DECISION_BY_CODE.REMOVED.decision,
+          policyConceptId: COMM.POLICY_COMMUNITY_GUIDELINES,
+          decidedByUserId: 'mod-1',
+          decidedAt: new Date('2026-08-12T15:00:00Z'),
+          createdAt: new Date('2026-08-12T15:00:00Z'),
+        },
+      ]);
+      d.moderationRepo.findOpenAppealForDecision.mockResolvedValue({
+        id: 'appeal-1',
+      });
+
+      const page = await d.service.listMyDecisions(
+        'pp-1',
+        { profileId: 'pp-1' } as any,
+        20,
+        actor,
+      );
+
+      expect(page.items[0]!.appealable).toBe(false);
     });
   });
 

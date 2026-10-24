@@ -1199,8 +1199,11 @@ Content-Type: application/json
   "consentId": "00000000-0000-4000-8000-000000000001",
   "pings": [
     {
-      "latitude": -12.0464,
-      "longitude": -77.0428
+      "time": "2026-07-31T12:00:00.000Z",
+      "subjectType": "valor-ejemplo",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "latitude": 1,
+      "longitude": 1
     }
   ]
 }
@@ -1220,17 +1223,16 @@ Content-Type: application/json
 | `ingestionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `seriesId` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `consentId` | Sí | `string` | formato `uuid` | Consentimiento vigente que ampara el registro de ubicación del sujeto | `00000000-0000-4000-8000-000000000001` |
-| `pings` | Sí | `array<LocationPingDto>` | mínimo 1 elemento(s); máximo 5000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"latitude":-12.0464,"longitude":-77.0428,"accuracyM":1,"altitudeM":1,"speedMps":1,"headingDeg":1,"batteryPct":1,"network":"CELLULAR","deviceId":"00000000-0000-4000-8000-000000000001","capturedAt":"2026-07-31T12:00:00.000Z"}]` |
-| `pings[].latitude` | Sí | `number` | mínimo -90; máximo 90 | Latitud en grados decimales | `-12.0464` |
-| `pings[].longitude` | Sí | `number` | mínimo -180; máximo 180 | Longitud en grados decimales | `-77.0428` |
-| `pings[].accuracyM` | No | `number` | mínimo 0 | Precisión horizontal (m) | `1` |
-| `pings[].altitudeM` | No | `number` | Sin restricción adicional declarada | Altitud (m) | `1` |
-| `pings[].speedMps` | No | `number` | mínimo 0 | Velocidad (m/s) | `1` |
-| `pings[].headingDeg` | No | `number` | Sin restricción adicional declarada | Rumbo (grados) | `1` |
-| `pings[].batteryPct` | No | `number` | mínimo 0; máximo 100 | Batería (%) | `1` |
-| `pings[].network` | No | `string` | valores: `CELLULAR`, `WIFI` | Red de captura | `CELLULAR` |
-| `pings[].deviceId` | No | `string` | formato `uuid` | Dispositivo que capturó el ping | `00000000-0000-4000-8000-000000000001` |
-| `pings[].capturedAt` | No | `string` | formato `date-time` | Instante de captura en el dispositivo | `2026-07-31T12:00:00.000Z` |
+| `pings` | Sí | `array<TimeSeriesLocationPingDto>` | mínimo 1 elemento(s); máximo 5000 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"time":"2026-07-31T12:00:00.000Z","subjectType":"valor-ejemplo","subjectId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1,"altitudeM":1,"accuracyM":1,"speedMps":1,"geohash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `pings[].time` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `pings[].subjectType` | Sí | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `pings[].subjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `pings[].latitude` | Sí | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `pings[].longitude` | Sí | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `pings[].altitudeM` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `pings[].accuracyM` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `pings[].speedMps` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `pings[].geohash` | No | `string` | longitud máxima 20 | Sin descripción específica en el contrato OpenAPI. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
 
 ### Payload completo de ejemplo
 
@@ -1249,16 +1251,15 @@ Content-Type: application/json
   "consentId": "00000000-0000-4000-8000-000000000001",
   "pings": [
     {
-      "latitude": -12.0464,
-      "longitude": -77.0428,
-      "accuracyM": 1,
+      "time": "2026-07-31T12:00:00.000Z",
+      "subjectType": "valor-ejemplo",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "latitude": 1,
+      "longitude": 1,
       "altitudeM": 1,
+      "accuracyM": 1,
       "speedMps": 1,
-      "headingDeg": 1,
-      "batteryPct": 1,
-      "network": "CELLULAR",
-      "deviceId": "00000000-0000-4000-8000-000000000001",
-      "capturedAt": "2026-07-31T12:00:00.000Z"
+      "geohash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     }
   ]
 }

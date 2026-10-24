@@ -5,6 +5,12 @@ import {
   ReviewDimensionScores,
   ReviewResponses,
 } from '../entities';
+// El autor de una reseña es una persona de `profiles`: el módulo ya cruza
+// esa frontera en otros puntos (`PROF` en `public-search.repository`,
+// `PersonAccountLinksRepository` en las notificaciones), y la alternativa
+// —duplicar el nombre en `community`— sería un segundo lugar donde guardar
+// el mismo hecho.
+import { Persons } from '../../profiles/entities';
 import { createdBy } from '../../../common';
 
 /**
@@ -125,22 +131,26 @@ export class ReviewsRepository {
   }
 
   /**
-   * Reviews publicadas de un perfil (UC-19-11, cara de lectura).
+   * Página de reseñas publicadas de un perfil, de la más nueva a la más vieja.
    *
-   * Sólo lo publicado: una review retirada por moderación no vuelve a la ficha
-   * pública del profesional.
+   * **Excluye las removidas por moderación.** Antes no lo hacía, y el promedio
+   * de la ficha sí las excluye (`ratingsByProfile`): una reseña retirada por un
+   * moderador desaparecía del promedio y seguía leyéndose en la lista, que es
+   * la única de las dos cosas que el visitante realmente lee.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param targetPublicProfileId - Perfil calificado.
-   * @param publishedStatusConceptId - Estado de publicación visible.
+   * @param publishedStatusConceptId - Estado de publicación que se acepta.
+   * @param removedModerationStatusConceptId - Estado de moderación que se descarta.
    * @param after - Clave de continuación `(createdAt, id)`.
    * @param limit - Tope de filas.
-   * @returns Página de reviews, de la más reciente a la más antigua.
+   * @returns Las reseñas de la página.
    */
   listByTargetPage(
     em: EntityManager,
     targetPublicProfileId: string,
     publishedStatusConceptId: string,
+    removedModerationStatusConceptId: string,
     after: { createdAt: string; id: string } | undefined,
     limit: number,
   ): Promise<ServiceReviews[]> {
@@ -149,6 +159,7 @@ export class ReviewsRepository {
       {
         targetPublicProfileId,
         publicationStatusConceptId: publishedStatusConceptId,
+        moderationStatusConceptId: { $ne: removedModerationStatusConceptId },
         ...(after
           ? {
               $or: [
@@ -160,6 +171,40 @@ export class ReviewsRepository {
       },
       { orderBy: { createdAt: 'DESC', id: 'DESC' }, limit },
     );
+  }
+
+  /**
+   * El nombre con el que firma cada autor, por perfil de paciente.
+   *
+   * `reviewer_patient_profile_id` es el id de la **persona**
+   * (`patient_profiles.profile_id` es FK a `profiles.persons(id)`), así que la
+   * consulta va directo contra `persons` sin pasar por la tabla intermedia.
+   *
+   * Es una consulta por lote y no una por reseña: una ficha con veinte reseñas
+   * haría veinte viajes, y es la clase de N+1 que no se nota hasta que la ficha
+   * es popular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personIds - Los autores de la página.
+   * @returns Un mapa `personId → nombre`, sin entrada para quien no tenga uno.
+   */
+  async displayNamesByPerson(
+    em: EntityManager,
+    personIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const output = new Map<string, string>();
+    if (personIds.length === 0) return output;
+
+    const persons = await em.find(
+      Persons,
+      { id: { $in: [...new Set(personIds)] } },
+      { fields: ['id', 'displayName'] },
+    );
+    for (const persona of persons) {
+      const name = persona.displayName?.trim();
+      if (name) output.set(persona.id, name);
+    }
+    return output;
   }
 
   /** Puntuaciones por dimensión de un lote de reviews. */
@@ -251,12 +296,12 @@ export class ReviewsRepository {
       }
     >
   > {
-    const resultado = new Map<string, { average: number; count: number }>();
+    const result = new Map<string, { average: number; count: number }>();
     if (targetPublicProfileIds.length === 0) {
-      return resultado;
+      return result;
     }
 
-    const filas = await em.find(
+    const rows = await em.find(
       ServiceReviews,
       {
         targetPublicProfileId: { $in: [...targetPublicProfileIds] },
@@ -265,21 +310,21 @@ export class ReviewsRepository {
       { fields: ['targetPublicProfileId', 'overallRating'] },
     );
 
-    const acumulado = new Map<string, { total: number; count: number }>();
-    for (const fila of filas) {
-      const previo = acumulado.get(fila.targetPublicProfileId) ?? {
+    const accumulated = new Map<string, { total: number; count: number }>();
+    for (const row of rows) {
+      const previous = accumulated.get(row.targetPublicProfileId) ?? {
         total: 0,
         count: 0,
       };
-      acumulado.set(fila.targetPublicProfileId, {
-        total: previo.total + fila.overallRating,
-        count: previo.count + 1,
+      accumulated.set(row.targetPublicProfileId, {
+        total: previous.total + row.overallRating,
+        count: previous.count + 1,
       });
     }
-    for (const [profileId, { total, count }] of acumulado) {
-      resultado.set(profileId, { average: total / count, count });
+    for (const [profileId, { total, count }] of accumulated) {
+      result.set(profileId, { average: total / count, count });
     }
-    return resultado;
+    return result;
   }
 
   create(em: EntityManager, data: CreateReviewData): ServiceReviews {

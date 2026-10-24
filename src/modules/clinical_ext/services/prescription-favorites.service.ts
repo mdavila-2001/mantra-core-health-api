@@ -11,7 +11,7 @@ import {
   MAX_FAVORITES_PER_PRACTITIONER,
   PrescriptionFavoritesRepository,
 } from '../repositories';
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
 import { PrescriptionFavorites } from '../entities';
 import {
   CreatePrescriptionFavoriteDto,
@@ -117,23 +117,23 @@ export class PrescriptionFavoritesService {
       const practitionerProfileId =
         await this.ownership.requireOwnPractitionerProfileId(tx, actor);
 
-      const cuantos = await this.favoritesRepo.countByPractitioner(
+      const howMany = await this.favoritesRepo.countByPractitioner(
         tx,
         practitionerProfileId,
       );
-      if (cuantos >= MAX_FAVORITES_PER_PRACTITIONER) {
+      if (howMany >= MAX_FAVORITES_PER_PRACTITIONER) {
         throw new PreconditionFailedException(
-          'La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro',
+          'La lista de favoritos llegó a su máximo; borre alguno antes de guardar otro',
           { max: MAX_FAVORITES_PER_PRACTITIONER },
         );
       }
 
-      const existentes = await this.favoritesRepo.findByPractitioner(
+      const existing = await this.favoritesRepo.findByPractitioner(
         tx,
         practitionerProfileId,
       );
-      if (existentes.some((favorite) => favorite.name === dto.name)) {
-        throw new ConflictException('Ya tenés un favorito con ese nombre', {
+      if (existing.some((favorite) => favorite.name === dto.name)) {
+        throw new ConflictException('Ya tiene un favorito con ese nombre', {
           name: dto.name,
         });
       }

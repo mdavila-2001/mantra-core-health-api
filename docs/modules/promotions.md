@@ -3,13 +3,13 @@
   Fuente real: src/modules/promotions/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `promotions`
 
-**Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/promotions/README.md)
-· 2 controllers · 2 services · 2 repositories · 11 entidades · 1 DTO
+**Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/promotions/README.md)
+· 2 controllers · 3 services · 2 repositories · 11 entidades · 1 DTO
 
 ---
 
@@ -17,6 +17,45 @@
 
 Programas de lealtad con niveles y ledger de puntos, promociones con reglas de descuento, cupones,
 redenciones sobre el checkout y programa de referidos.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/promotions -name '*.controller.ts' | wc -l
+  find src/modules/promotions -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/promotions -name '*.entity.ts' | wc -l
+  find src/modules/promotions -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 19 rutas HTTP, 11 entidad y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`PaymentsModule`).
+
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `coupons`, `discount_rules`, `earning_rules`, `loyalty_memberships`, `loyalty_programs`, `loyalty_tiers`, `member_referrals`, `points_ledger_entries`, `promotions`, `redemptions`, `referral_programs`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /loyalty/programs` | SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty` |
+| `GET /loyalty/me` | PATIENT | `loyalty` |
+| `GET /loyalty/me/points` | PATIENT | `loyalty` |
+| `POST /loyalty/me/points/redeem` | PATIENT | `loyalty` |
+| `POST /loyalty/programs` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty` |
+| `POST /loyalty/programs/:id/memberships` | PROMOTIONS_ADMIN, MEMBER | `loyalty` |
+| `POST /loyalty/memberships/:id/points/earn` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /loyalty/memberships/:id/points/redeem` | MEMBER, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /loyalty/memberships/:id/recompute` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /loyalty/jobs/expire-points` | SYSTEM | `loyalty` |
+| `POST /referral-programs/:id/referrals` | MEMBER, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /referrals/:id/qualify` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
+| `GET /promotions/me` | PATIENT | `promotions` |
+| `POST /promotions` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `promotions` |
+| `POST /promotions/:id/coupons/batch` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `promotions` |
+| `POST /coupons/validate` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| `POST /redemptions` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| `POST /checkout/:orderId/apply-discount` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| `POST /redemptions/:id/reverse` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
 
 ## Casos de uso cubiertos (13)
 
@@ -110,20 +149,19 @@ que procesa por lotes y no debe esperar a otra pasada. `row_version` aporta bloq
 
 ## Pruebas
 
-`yarn test --testPathPatterns=promotions` — 71 pruebas de servicio + delegación de los dos
-controladores.
+`corepack yarn test src/modules/promotions --runInBand --silent` — 4 suites y 118 pruebas
+aprobadas durante la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Crédito de billetera**: cuando el premio de una regla o de un referido es `wallet_credit`, este
   módulo no acredita nada — `payments.wallets` pertenece al módulo 42B. La redención y el referido
-  quedan registrados y el crédito se liquidará por outbox.
+  quedan registrados.
 - **Importe del intento de pago**: `apply-discount` registra la redención con `payment_intent_id` y
-  **devuelve** el importe neto, pero no muta `payments.payment_intents`: la escritura cruzada de
-  esquemas la resuelve payments al consumir el evento (misma frontera que el
+  **devuelve** el importe neto, pero no muta `payments.payment_intents` (misma frontera que el
   `journal_transaction_id` de ERP).
-- **Línea de descuento en facturación**: `billing.bill_lines` se poblará desde billing con el mismo
-  criterio.
-- **Outbox**: `PointsEarned`, `CouponRedeemed`, `DiscountApplied`, `ReferralQualified`… se emitirán
-  cuando exista el módulo 35.
+- **Línea de descuento en facturación**: `billing.bill_lines` la escribe billing, no este módulo.
 
+## Revisión ALOVIDA
+
+Las operaciones administrativas por UUID no comparan la pertenencia de tenant.

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+// BR-14 (CL-09): `checkInteractions` deja de persistir alertas (ver el
+// método). Los ids de la respuesta son efímeros, no de una fila guardada.
+import { randomUUID } from 'node:crypto';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -77,6 +80,7 @@ export class CdsService {
       { operation: 'clinical_ext.cds_rule.create', code: dto.code },
       'Creating CDS rule',
     );
+    if (dto.logicJson !== undefined) this.assertLogicReadable(dto.logicJson);
     return this.em.transactional(async (tx) => {
       const clash = await this.rulesRepo.findByCode(tx, dto.code);
       if (clash)
@@ -125,6 +129,9 @@ export class CdsService {
         rule.messageTemplate = dto.messageTemplate;
       if (dto.severityConceptId !== undefined)
         rule.severityConceptId = dto.severityConceptId;
+      // Una regla activa que no se puede leer nunca dispara, y eso no se
+      // distingue de una que no aplica: no se publica.
+      this.assertLogicReadable(rule.logicJson);
       rule.isActive = true;
       rule.statusConceptId = CEXT.CDS_RULE_ACTIVE;
       touch(rule, actor.id);
@@ -194,7 +201,10 @@ export class CdsService {
         dto.tenantId,
       );
       const context = this.buildContext(dto);
-      const matched = rules.filter((rule) => this.ruleMatches(rule, context));
+      const unevaluatedRuleIds: string[] = [];
+      const matched = rules.filter((rule) =>
+        this.ruleMatches(rule, context, unevaluatedRuleIds),
+      );
 
       const now = new Date();
       const alerts = matched.map((rule) =>
@@ -220,10 +230,12 @@ export class CdsService {
           operation: 'clinical_ext.cds.evaluate',
           evaluated: rules.length,
           generated: alerts.length,
+          unevaluated: unevaluatedRuleIds.length,
         },
         'CDS evaluation completed',
       );
       return {
+        ...(unevaluatedRuleIds.length > 0 ? { unevaluatedRuleIds } : {}),
         alerts: alerts.map((a) => ({
           id: a.id,
           alertTypeConceptId: a.alertTypeConceptId,
@@ -235,10 +247,20 @@ export class CdsService {
     });
   }
 
-  /** UC-18-04: detecta interacciones entre las sustancias y levanta alertas. */
+  /**
+   * UC-18-04: detecta interacciones entre las sustancias, antes de prescribir.
+   *
+   * BR-14 (CL-09) — D-BR14-03: **ya no persiste** ninguna fila en
+   * `clinical_ext.clinical_alerts`. Antes, cada llamada —incluida la que un
+   * clínico dispara sólo para ver si dos sustancias interactúan, sin llegar a
+   * prescribir— dejaba una alerta activa por cada par con interacción, aunque
+   * la receta se cancelara después: el chequeo previo ensuciaba la tabla de
+   * alertas del paciente con filas que no correspondían a nada prescrito.
+   * `evaluate` (UC-18-03) sigue siendo el único camino que persiste alertas.
+   */
   async checkInteractions(
     dto: CheckInteractionsDto,
-    actor: AuthenticatedUser,
+    _actor: AuthenticatedUser,
   ): Promise<AlertBatchResponseDto> {
     this.logger.info(
       {
@@ -247,49 +269,30 @@ export class CdsService {
       },
       'Checking drug interactions',
     );
-    return this.em.transactional(async (tx) => {
-      const substances = dto.substanceConceptIds;
-      const now = new Date();
-      const alerts = [];
+    const substances = dto.substanceConceptIds;
+    const alerts: {
+      id: string;
+      alertTypeConceptId: string;
+      severityConceptId: string;
+    }[] = [];
 
-      for (let i = 0; i < substances.length; i++) {
-        for (let j = i + 1; j < substances.length; j++) {
-          const interaction = await this.interactionsRepo.findByPair(
-            tx,
-            substances[i],
-            substances[j],
-          );
-          if (!interaction) continue;
-          const alert = this.alertsRepo.create(tx, {
-            patientProfileId: dto.patientProfileId,
-            encounterId: dto.encounterId,
-            alertTypeConceptId: CEXT.ALERT_TYPE_DRUG_INTERACTION,
-            severityConceptId: interaction.severityConceptId,
-            sourceResourceType: 'medication_request',
-            sourceResourceId: dto.medicationRequestId,
-            triggerConceptId: CEXT.TRIGGER_CLINICAL_EVENT,
-            detailText: [interaction.mechanismText, interaction.managementText]
-              .filter(Boolean)
-              .join(' — '),
-            statusConceptId: CEXT.ALERT_ACTIVE,
-            detectedAt: now,
-            actorUserId: actor.id,
-          });
-          alerts.push(alert);
-        }
+    for (let i = 0; i < substances.length; i++) {
+      for (let j = i + 1; j < substances.length; j++) {
+        const interaction = await this.interactionsRepo.findByPair(
+          this.em,
+          substances[i],
+          substances[j],
+        );
+        if (!interaction) continue;
+        alerts.push({
+          id: randomUUID(),
+          alertTypeConceptId: CEXT.ALERT_TYPE_DRUG_INTERACTION,
+          severityConceptId: interaction.severityConceptId,
+        });
       }
-      await tx.flush();
+    }
 
-      return {
-        alerts: alerts.map((a) => ({
-          id: a.id,
-          alertTypeConceptId: a.alertTypeConceptId,
-          severityConceptId: a.severityConceptId,
-          ruleId: a.ruleId,
-        })),
-        count: alerts.length,
-      };
-    });
+    return { alerts, count: alerts.length };
   }
 
   /** Registra un par de interacción medicamentosa (dato de referencia para UC-18-04). */
@@ -349,11 +352,14 @@ export class CdsService {
       logicJson?: unknown;
     },
     context: CdsEvalContext,
+    unevaluatedRuleIds: string[],
   ): boolean {
     try {
       return this.evaluateLogic(rule.logicJson, context);
     } catch (err) {
-      this.logger.warn(
+      if (!(err instanceof UnparseableCdsRuleError)) throw err;
+      unevaluatedRuleIds.push(rule.id);
+      this.logger.error(
         {
           operation: 'clinical_ext.cds.evaluate',
           ruleId: rule.id,
@@ -377,6 +383,51 @@ export class CdsService {
    * Cualquier nodo que no encaje en esta gramática lanza
    * {@link UnparseableCdsRuleError} para que la regla falle cerrado.
    */
+  /**
+   * Comprueba que `logic_json` respete la gramática de {@link evaluateLogic},
+   * recorriendo TODOS los nodos (la evaluación corta en el primer `all`/`any`
+   * resuelto y podría no ver un nodo roto).
+   *
+   * @throws PreconditionFailedException (422, `field: logicJson`) si no se entiende.
+   */
+  private assertLogicReadable(logic: unknown): void {
+    try {
+      this.walkLogic(logic);
+    } catch (err) {
+      if (!(err instanceof UnparseableCdsRuleError)) throw err;
+      throw new PreconditionFailedException(
+        'La lógica de la regla no se puede interpretar',
+        { field: 'logicJson', reason: err.message },
+      );
+    }
+  }
+
+  private walkLogic(logic: unknown): void {
+    if (logic === null || typeof logic !== 'object') {
+      throw new UnparseableCdsRuleError('logic_json no es un objeto');
+    }
+    const node = logic as Record<string, unknown>;
+    if (Array.isArray(node.all) || Array.isArray(node.any)) {
+      const children = (node.all ?? node.any) as unknown[];
+      for (const child of children) this.walkLogic(child);
+      return;
+    }
+    if ('not' in node) {
+      this.walkLogic(node.not);
+      return;
+    }
+    if (typeof node.field === 'string' && typeof node.op === 'string') {
+      // Los chequeos de forma de una hoja no dependen del dato: se evalúa
+      // contra un contexto vacío sólo para que lance si está mal declarada.
+      this.evaluateLeaf(node.field, node.op, node.value, {
+        medications: [],
+        observations: {},
+      });
+      return;
+    }
+    throw new UnparseableCdsRuleError('nodo de lógica no reconocido');
+  }
+
   private evaluateLogic(logic: unknown, context: CdsEvalContext): boolean {
     if (logic === null || typeof logic !== 'object') {
       throw new UnparseableCdsRuleError('logic_json no es un objeto');

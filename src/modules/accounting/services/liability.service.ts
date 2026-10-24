@@ -8,6 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { LiabilityRepository } from '../repositories';
 import { PostingHelper, type PostingLine } from './posting.helper';
 import { toCents, fromCents } from './money';
@@ -67,37 +68,54 @@ export class LiabilityService {
           principalComponent: dto.principalComponent,
           interestComponent: dto.interestComponent,
         },
+        AccountingErrorReason.LIABILITY_PAYMENT_COMPONENTS_MISMATCH,
       );
     }
     if (amountCents <= 0) {
-      throw new PreconditionFailedException('El pago debe ser positivo', {});
+      throw new PreconditionFailedException(
+        'El pago debe ser positivo',
+        {},
+        AccountingErrorReason.LIABILITY_PAYMENT_AMOUNT_NOT_POSITIVE,
+      );
     }
 
     return this.em.transactional(async (tx) => {
       const liability = await this.liabilityRepo.findById(tx, liabilityId);
       if (!liability) {
-        throw new ResourceNotFoundException('Pasivo no encontrado', {
-          liabilityId,
-        });
+        throw new ResourceNotFoundException(
+          'Pasivo no encontrado',
+          {
+            liabilityId,
+          },
+          AccountingErrorReason.LIABILITY_NOT_FOUND,
+        );
       }
       if (liability.statusConceptId !== ACCT.LIABILITY_ACTIVE) {
-        throw new PreconditionFailedException('El pasivo no está ACTIVO', {
-          liabilityId,
-          status: liability.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El pasivo no está ACTIVO',
+          {
+            liabilityId,
+            status: liability.statusConceptId,
+          },
+          AccountingErrorReason.LIABILITY_NOT_ACTIVE,
+        );
       }
       if (!liability.accountId) {
         throw new PreconditionFailedException(
           'El pasivo no tiene cuenta contable',
           { liabilityId },
+          AccountingErrorReason.LIABILITY_ACCOUNT_MISSING,
         );
       }
 
       let schedule = null;
       if (dto.liabilityScheduleId) {
+        // `FOR UPDATE`: dos pagos simultáneos de la misma cuota se serializan
+        // acá, y el segundo la ve ya PAGADA (T26 · AC-26-13).
         schedule = await this.liabilityRepo.findScheduleById(
           tx,
           dto.liabilityScheduleId,
+          { forUpdate: true },
         );
         if (!schedule || schedule.liabilityId !== liabilityId) {
           throw new ResourceNotFoundException(
@@ -105,7 +123,17 @@ export class LiabilityService {
             {
               liabilityScheduleId: dto.liabilityScheduleId,
             },
+            AccountingErrorReason.LIABILITY_SCHEDULE_NOT_FOUND,
           );
+        }
+        // Idempotencia por cuota: una cuota se paga una sola vez. Repetir el
+        // pago no crea una segunda fila en `liability_payments` ni un segundo
+        // asiento; responde 422, que es distinto de "no encontrada".
+        if (schedule.statusConceptId === ACCT.LIAB_SCHEDULE_PAID) {
+          throw new PreconditionFailedException('La cuota ya está pagada', {
+            liabilityScheduleId: dto.liabilityScheduleId,
+            installmentNumber: schedule.installmentNumber,
+          });
         }
       }
 

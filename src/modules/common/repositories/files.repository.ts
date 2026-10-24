@@ -5,6 +5,8 @@ import { createdBy } from '../../../common';
 
 /** Datos mínimos para dar de alta el agregado archivo (sin su primera versión). */
 export interface CreateFileData {
+  /** Coordinator target, allocated before the physical write. Not a public DTO field. */
+  id?: string;
   /**
    * Identificador asociado a tenant.
    */
@@ -50,6 +52,7 @@ export class FilesRepository {
     return em.create(
       Files,
       {
+        ...(data.id ? { id: data.id } : {}),
         tenantId: data.tenantId,
         categoryConceptId: data.categoryConceptId,
         originalName: data.originalName,

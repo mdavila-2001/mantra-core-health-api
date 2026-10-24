@@ -11,6 +11,11 @@ import {
 } from '../../../common';
 import { Users } from '../../iam/entities';
 import { AuditTrailService } from '../../audit/services/audit-trail.service';
+import { AuthzGrantsService } from '../../authz/services';
+import {
+  RolesRepository,
+  UserRoleAssignmentsRepository,
+} from '../../authz/repositories';
 import {
   CreateMedicalVisitorDto,
   CreatedResourceDto,
@@ -32,6 +37,7 @@ import {
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
 import { PharmaLabNotificationsService } from './pharma-lab-notifications.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * UC-17-06 a UC-17-10: ciclo de vida del visitador médico y su dependencia
@@ -58,6 +64,9 @@ export class MedicalVisitorsService {
    * @param access - Comprobaciones de vinculación y estado.
    * @param notifications - Buzón de avisos dentro del producto.
    * @param audit - Cadena WORM de auditoría.
+   * @param authzGrants - Asigna MEDICAL_VISITOR al vincular (AG-31).
+   * @param rolesRepo - Resuelve el rol MEDICAL_VISITOR por código.
+   * @param assignmentsRepo - Revoca la asignación al desvincular (AG-31).
    * @param logger - Registro estructurado.
    */
   constructor(
@@ -69,9 +78,66 @@ export class MedicalVisitorsService {
     private readonly access: PharmaLabAccessService,
     private readonly notifications: PharmaLabNotificationsService,
     private readonly audit: AuditTrailService,
+    private readonly authzGrants: AuthzGrantsService,
+    private readonly rolesRepo: RolesRepository,
+    private readonly assignmentsRepo: UserRoleAssignmentsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MedicalVisitorsService.name);
+  }
+
+  /**
+   * Asigna MEDICAL_VISITOR al vincular, con ámbito del tenant del laboratorio
+   * (AG-31, decisión D-PharmaLab-1: asignación en `authz` al
+   * vincular, no rol derivado de la membresía en el login).
+   *
+   * No lanza si ya lo tenía asignado en ese mismo ámbito (`relinkVisitor` puede
+   * encontrar una asignación que el `unlinkVisitor` anterior no llegó a
+   * revocar en una corrida vieja, o una asignada a mano): el objetivo es que
+   * el token la traiga, no que esta sea la única vía posible.
+   */
+  private async assignVisitorRole(
+    tx: EntityManager,
+    userId: string,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      await this.authzGrants.assignRole(
+        userId,
+        { roleCode: 'MEDICAL_VISITOR', tenantId },
+        actor,
+      );
+    } catch (error) {
+      if (error instanceof ConflictException) return;
+      throw error;
+    }
+  }
+
+  /**
+   * Revoca MEDICAL_VISITOR al desvincular, en el mismo tenant en que se
+   * concedió (AG-31). Sin asignación activa que revocar, no hace nada: no es
+   * un error, es el estado de una cuenta que nunca inició sesión desde que se
+   * vinculó.
+   */
+  private async revokeVisitorRole(
+    tx: EntityManager,
+    userId: string,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const role = await this.rolesRepo.findByCode(tx, 'MEDICAL_VISITOR');
+    if (!role) return;
+    const assignment = await this.assignmentsRepo.findActive(
+      tx,
+      userId,
+      role.id,
+      {
+        tenantId,
+      },
+    );
+    if (!assignment) return;
+    this.assignmentsRepo.revoke(tx, assignment, actor.id);
   }
 
   /**
@@ -95,15 +161,18 @@ export class MedicalVisitorsService {
 
       const user = await tx.findOne(Users, { id: dto.userId });
       if (!user) {
-        throw new ResourceNotFoundException('Cuenta no encontrada', {
-          userId: dto.userId,
-        });
+        throw new ResourceNotFoundException(
+          'Cuenta no encontrada',
+          { userId: dto.userId },
+          PharmaLabErrorReason.USER_ACCOUNT_NOT_FOUND,
+        );
       }
       const already = await this.repo.findVisitorByUser(tx, dto.userId);
       if (already) {
         throw new ConflictException(
           'La cuenta ya está registrada como visitador',
           { userId: dto.userId, medicalVisitorId: already.id },
+          PharmaLabErrorReason.VISITOR_ALREADY_REGISTERED,
         );
       }
       const codeClash = await this.repo.findVisitorByCode(
@@ -115,6 +184,7 @@ export class MedicalVisitorsService {
         throw new ConflictException(
           'El código interno ya está en uso en el laboratorio',
           { pharmaLabId, internalCode: dto.internalCode },
+          PharmaLabErrorReason.VISITOR_INTERNAL_CODE_TAKEN,
         );
       }
 
@@ -172,6 +242,11 @@ export class MedicalVisitorsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+
+      // AG-31: sin esto, el login de la cuenta no traía MEDICAL_VISITOR y
+      // GET /visit-requests/mine (que exige ese rol) respondía 403 aunque el
+      // alta hubiera salido bien.
+      await this.assignVisitorRole(tx, dto.userId, lab.tenantId, actor);
 
       await this.audit.record(tx, actor, {
         action: 'MEDICAL_VISITOR_LINKED',
@@ -352,9 +427,11 @@ export class MedicalVisitorsService {
         medicalVisitorId,
       );
       if (visitor.statusConceptId === PHL.LINK_TERMINATED) {
-        throw new ConflictException('El visitador ya está desvinculado', {
-          medicalVisitorId,
-        });
+        throw new ConflictException(
+          'El visitador ya está desvinculado',
+          { medicalVisitorId },
+          PharmaLabErrorReason.VISITOR_ALREADY_UNLINKED,
+        );
       }
 
       const now = new Date();
@@ -457,6 +534,12 @@ export class MedicalVisitorsService {
       });
       await tx.flush();
 
+      // AG-31: sin esto, MEDICAL_VISITOR le seguía funcionando después de
+      // desvinculado — la cuenta quedaba bloqueada (paso 4) pero el rol, que
+      // es lo que un futuro desbloqueo o una sesión ya emitida seguiría
+      // trayendo, no se tocaba.
+      await this.revokeVisitorRole(tx, visitor.userId, lab.tenantId, actor);
+
       await this.audit.record(tx, actor, {
         action: 'MEDICAL_VISITOR_UNLINKED',
         entity: 'medical_visitors',
@@ -512,9 +595,11 @@ export class MedicalVisitorsService {
         medicalVisitorId,
       );
       if (visitor.statusConceptId === PHL.LINK_ACTIVE) {
-        throw new ConflictException('El visitador ya está vinculado', {
-          medicalVisitorId,
-        });
+        throw new ConflictException(
+          'El visitador ya está vinculado',
+          { medicalVisitorId },
+          PharmaLabErrorReason.VISITOR_ALREADY_LINKED,
+        );
       }
 
       visitor.statusConceptId = PHL.LINK_ACTIVE;
@@ -543,6 +628,12 @@ export class MedicalVisitorsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+
+      // AG-31: la revinculación es un alta nueva (JSDoc de arriba), y una
+      // desvinculación anterior ya revocó el rol — sin esto, la cuenta
+      // reactivada seguía sin MEDICAL_VISITOR hasta que alguien lo asignara a
+      // mano.
+      await this.assignVisitorRole(tx, visitor.userId, lab.tenantId, actor);
 
       await this.audit.record(tx, actor, {
         action: 'MEDICAL_VISITOR_RELINKED',
@@ -578,6 +669,7 @@ export class MedicalVisitorsService {
       throw new ResourceNotFoundException(
         'La cuenta no corresponde a un visitador médico',
         { userId: actor.id },
+        PharmaLabErrorReason.VISITOR_PROFILE_NOT_FOUND,
       );
     }
     return visitor;
@@ -596,6 +688,7 @@ export class MedicalVisitorsService {
       throw new PreconditionFailedException(
         'Algún producto no pertenece al catálogo del laboratorio',
         { pharmaLabId },
+        PharmaLabErrorReason.VISITOR_PRODUCT_NOT_IN_LAB_CATALOG,
       );
     }
   }

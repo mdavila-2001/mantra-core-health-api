@@ -1,0 +1,213 @@
+{
+  "code": "NNAC25_TI_11_TRAUMA_ABDOMINAL_PELVICO",
+  "name": "Trauma abdominal y pélvico (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Terapia Intensiva (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/964-norma-nacional-de-atencion-clinica-de-terapia-intensiva?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 11, pág. 126; niveles de atención II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Clínico",
+        "Imagenológico",
+        "Antecedentes de traumatismo",
+        "Dolor abdominal",
+        "Náuseas y vómitos",
+        "Palidez",
+        "Equimosis u otros signos visibles de lesión de pared abdominal",
+        "Signos de irritación peritoneal",
+        "Signo de Jobert positivo (sustitución de la matidez hepática a la percusión por timpanismo)",
+        "Silencio abdominal",
+        "Hematuria",
+        "Hemorragia genital",
+        "Lesiones óseas",
+        "Trastornos hemodinámicos",
+        "Choque",
+        "Hemorragia digestiva alta o baja",
+        "Herida visible en abdomen",
+        "Evisceración",
+        "Hemorragia en cuantía variable",
+        "Signos de infección localizada",
+        "Sepsis"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 126. Lesión traumática abdominal producida por agentes agresores directos o indirectos, que afecta a sus paredes y/o a las vísceras que contiene. Puede ser cerrado o abierto, se diferencian también en hemodinámica y mecánicamente estables e inestables."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pared abdominal (con desgarro músculo-aponeurótico, hematomas)",
+        "Vísceras macizas (hígado, páncreas y bazo)",
+        "Vísceras huecas (estómago, intestino delgado y grueso)",
+        "Diafragma",
+        "Aparato genitourinario",
+        "Útero y producto gestacional",
+        "Vasos",
+        "Paredes abdominales",
+        "Leve (WSES grado I): que comprende lesiones hemodinámica y mecánicamente estables",
+        "Moderado (WSES grado II, III): que comprende lesiones hemodinámicas entre estables y mecánicamente inestables"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Lactato y Exceso de bases [Grado 1B]",
+        "Hemograma con recuento de plaquetas",
+        "Clasificación de grupo sanguíneo y factor Rh",
+        "Glicemia",
+        "Urea",
+        "Creatinina",
+        "Amilasa sérica",
+        "Pruebas de coagulación (tiempos de coagulación, sangría y protrombina)",
+        "Radiografía PA de tórax",
+        "Radiografía de pelvis ósea",
+        "Ecografía abdominal; presencia de líquido libre en cavidad abdominal",
+        "Eco-FAST",
+        "Hematuria",
+        "Tomografía axial computarizada de abdomen. [Grado 1B]",
+        "Uretrografía retrógrada o/y una uretrocistografía con tomografía computarizada de contraste",
+        "Laparocentesis",
+        "Laparoscopía diagnóstica",
+        "Lavado peritoneal diagnóstico",
+        "Proctoscopia"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "S30: Traumatismo superficial del abdomen, de la región lumbosacra y de la pelvis",
+        "S30.0: Contusión de la región lumbosacra y de la pelvis",
+        "S30.1: Contusión de la pared abdominal",
+        "S30.2: Contusión de órganos genitales externos",
+        "S30.7: Traumatismos superficiales múltiples del abdomen, de la región lumbosacra y de la",
+        "S30.8: Otros traumatismos superficiales del abdomen, de la región lumbosacra y de la pelvis",
+        "S30.9: Traumatismo superficial del abdomen, de la región lumbosacra y de la pelvis, parte"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": ["Peritonitis", "Sepsis", "Choque"],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 11, pág. 126); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

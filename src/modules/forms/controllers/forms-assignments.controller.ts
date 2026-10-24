@@ -1,11 +1,15 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   ParseUUIDPipe,
+  Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -15,10 +19,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
   getCurrentTenantId,
+  AccessLogged,
   type AuthenticatedUser,
 } from '../../../common';
 import { FormsAssignmentsService, FormsReadService } from '../services';
@@ -27,6 +33,9 @@ import {
   ExtensionBudgetResponseDto,
   FieldAssignmentListResponseDto,
   IdResponseDto,
+  OkResultDto,
+  ReorderAssignmentsDto,
+  UpdateAssignmentDto,
 } from '../dto';
 
 /**
@@ -60,6 +69,7 @@ export class FormsAssignmentsController {
 
   /** Fase 1 de lecturas: asignaciones visibles, con secciones resueltas. */
   @Get()
+  @AccessLogged({ resourceType: 'FORM_ASSIGNMENTS' })
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Listar asignaciones de campo (globales y del tenant)',
@@ -128,6 +138,11 @@ export class FormsAssignmentsController {
   }
 
   /** UC-09-06. */
+  @Audited({
+    action: 'FORM_ASSIGNMENT_CREATED',
+    entity: 'field_assignment',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -139,5 +154,60 @@ export class FormsAssignmentsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
     return this.assignmentsService.createAssignment(dto, actor);
+  }
+
+  /**
+   * CL-61: reordena los campos propios de un target. **Declarada antes** que
+   * las rutas con `:id` para que `order` nunca se lea como un identificador.
+   */
+  @Audited({
+    action: 'FORM_ASSIGNMENTS_REORDERED',
+    entity: 'field_assignment',
+    entityId: 'result.id',
+  })
+  @Put('order')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reordenar los campos propios de un formulario' })
+  reorderAssignments(
+    @Body() dto: ReorderAssignmentsDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.assignmentsService.reorderAssignments(dto, actor);
+  }
+
+  /** CL-61: cambia lo obligatorio, visible o editable de un campo propio. */
+  @Audited({
+    action: 'FORM_ASSIGNMENT_UPDATED',
+    entity: 'field_assignment',
+    entityId: 'param:id',
+  })
+  @Patch(':id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Editar una asignación propia' })
+  updateAssignment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateAssignmentDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.assignmentsService.updateAssignment(id, dto, actor);
+  }
+
+  /** CL-61: descuelga un campo propio (baja lógica; los valores siguen). */
+  @Audited({
+    action: 'FORM_ASSIGNMENT_RETIRED',
+    entity: 'field_assignment',
+    entityId: 'param:id',
+  })
+  @Delete(':id')
+  @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Quitar una asignación propia (baja lógica)' })
+  retireAssignment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.assignmentsService.retireAssignment(id, actor);
   }
 }

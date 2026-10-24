@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { io, type Socket } from 'socket.io-client';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  camposObligatoriosDePaciente,
+  identidadProfesional,
+} from './harness';
 
 /**
  * El gateway WS de mensajería (`CommunityMessagingGateway`), de punta a punta:
@@ -25,6 +31,10 @@ import { bootstrapTestApp, bearer, type TestContext } from './harness';
  */
 describe('Mensajería en tiempo real — gateway WS (integración)', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   let doctorToken: string;
@@ -72,6 +82,7 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp({ realtime: true });
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     const sufijo = randomUUID().slice(0, 8);
 
@@ -80,6 +91,7 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
     await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(emailDoctor),
         email: emailDoctor,
         password: 'S3cret-passw0rd',
         name: 'Renata',
@@ -111,6 +123,7 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
     await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId,
         password: 'S3cret-passw0rd',
         name: 'Iván',
@@ -154,13 +167,28 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
   it('sin token, el socket no queda conectado', async () => {
     const socket = connect(undefined);
     try {
-      const desconectado = await waitFor(socket, 'disconnect');
-      const conectoError = await new Promise<boolean>((resolve) => {
-        socket.once('connect_error', () => resolve(true));
-        setTimeout(() => resolve(false), 100);
+      // La autenticación corre como middleware del namespace (ver
+      // `CommunityMessagingGateway.afterInit`), antes del handshake: un socket
+      // sin token nunca llega a `connect` y sólo dispara `connect_error`. Antes
+      // corría en `handleConnection` (después de conectar) y el rechazo salía
+      // como `connect` seguido de `disconnect`. Los dos listeners se declaran
+      // ANTES de esperar nada, y en la misma promesa, porque cuál de los dos
+      // dispara depende de esa carrera y ya no se puede asumir un orden.
+      const resultado = await new Promise<
+        'disconnect' | 'connect_error' | null
+      >((resolve) => {
+        const timer = setTimeout(() => resolve(null), 4000);
+        socket.once('disconnect', () => {
+          clearTimeout(timer);
+          resolve('disconnect');
+        });
+        socket.once('connect_error', () => {
+          clearTimeout(timer);
+          resolve('connect_error');
+        });
       });
       expect(socket.connected).toBe(false);
-      expect(desconectado !== null || conectoError).toBe(true);
+      expect(resultado).not.toBeNull();
     } finally {
       socket.disconnect();
     }
@@ -220,7 +248,10 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
       await http()
         .post(`/community/conversations/${conversacionAjena.body.id}/messages`)
         .set(bearer(doctorToken))
-        .send({ senderProfileId: doctorProfileId, bodyText: 'no es para vos' })
+        .send({
+          senderProfileId: doctorProfileId,
+          bodyText: 'no es para usted',
+        })
         .expect(201);
       expect(await mensajePromise).toBeNull();
     } finally {
@@ -248,7 +279,7 @@ describe('Mensajería en tiempo real — gateway WS (integración)', () => {
       // Sin esto la unión podría no haber terminado cuando se manda el REST.
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      const textoEnviado = `Hola, ¿cómo estás? ${randomUUID().slice(0, 6)}`;
+      const textoEnviado = `Hola, ¿cómo está? ${randomUUID().slice(0, 6)}`;
       const mensajeEsperado = waitFor<{ bodyText: string }>(
         socketPaciente,
         'conversation:message',

@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsDateString,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
 
 /** Cuerpo de `POST /clinical/conditions` (UC-08-08). */
 export class CreateConditionDto {
@@ -87,6 +97,22 @@ export class CreateConditionDto {
   clinicalCourseConceptId?: string;
 
   /**
+   * Estado de verificación con el que nace el diagnóstico.
+   *
+   * Sólo se admiten `COND_PROVISIONAL` (presuntivo: queda «en estudio» hasta
+   * que `POST conditions/:id/verification` lo confirme o lo rechace) y
+   * `COND_CONFIRMED`. Sin el campo nace confirmado, como siempre.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Estado de verificación del alta: COND_PROVISIONAL (presuntivo) o COND_CONFIRMED. Por omisión, confirmado',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  verificationStatusConceptId?: string;
+
+  /**
    * Valor de onset at mantenido por la instancia.
    */
   @ApiPropertyOptional({
@@ -135,10 +161,17 @@ export class ChangeConditionClinicalStatusDto {
   newClinicalStatusConceptId!: string;
 
   /**
-   * Valor de reason text mantenido por la instancia.
+   * Motivo del cambio de estado (BR-14/CL-10: obligatorio y acotado; vacío
+   * responde 400).
    */
-  @ApiProperty({ description: 'Motivo del cambio de estado (obligatorio)' })
+  @ApiProperty({
+    description:
+      'Motivo del cambio de estado (obligatorio, hasta 500 caracteres)',
+    maxLength: 500,
+  })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
   reasonText!: string;
 }
 
@@ -191,4 +224,112 @@ export class ConditionResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+}
+
+/**
+ * Cuerpo de `POST /clinical/conditions/:id/attachments` (ALV-033, reemplazo
+ * de ALV-032). El archivo ya tiene que existir —se sube antes con
+ * `POST /common/files`—; esto sólo lo liga a ESTE diagnóstico puntual, no al
+ * paciente en general.
+ */
+export class AttachFileToConditionDto {
+  /**
+   * El archivo ya subido (`common.files.id`), pendiente de vincular.
+   */
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}
+
+/** Decisión terminal sobre un diagnóstico presuntivo (C3 / P41). */
+export const DIAGNOSIS_OUTCOMES = ['CONFIRMED', 'REFUTED'] as const;
+/** Una de {@link DIAGNOSIS_OUTCOMES}. */
+export type DiagnosisOutcome = (typeof DIAGNOSIS_OUTCOMES)[number];
+
+/** Clases de evidencia que respaldan la decisión. */
+export const DIAGNOSIS_EVIDENCE_KINDS = ['NOTE', 'ANALYSIS'] as const;
+/** Una de {@link DIAGNOSIS_EVIDENCE_KINDS}. */
+export type DiagnosisEvidenceKind = (typeof DIAGNOSIS_EVIDENCE_KINDS)[number];
+
+/**
+ * La evidencia que respalda la decisión: una nota clínica, o un análisis
+ * (orden de estudio y/o su informe). Todos los identificadores tienen que ser
+ * del mismo paciente que la condición; eso lo comprueba el servicio.
+ */
+export class DiagnosisEvidenceDto {
+  /** `NOTE` exige `noteId`; `ANALYSIS`, orden o informe. */
+  @ApiProperty({ enum: DIAGNOSIS_EVIDENCE_KINDS })
+  @IsIn(DIAGNOSIS_EVIDENCE_KINDS)
+  kind!: DiagnosisEvidenceKind;
+
+  /** Nota clínica (`chart.clinical_note_headers`). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  noteId?: string;
+
+  /** Encuentro en el que se tomó la decisión, si la nota cuelga de uno. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  encounterId?: string;
+
+  /** Orden de estudio (`clinical.service_requests`). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  serviceRequestId?: string;
+
+  /** Informe del estudio (`clinical.diagnostic_reports`). */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  diagnosticReportId?: string;
+}
+
+/**
+ * Cuerpo de `POST /clinical/conditions/:id/verification` (C3 / P41): confirma
+ * o refuta un diagnóstico presuntivo.
+ *
+ * Lo que la forma no puede expresar —motivo **o** evidencia; al confirmar,
+ * inicio y fin esperado salvo curso crónico— lo valida el servicio y responde
+ * 422, que es lo que el diálogo del front espeja.
+ */
+export class VerifyConditionDto {
+  /** Confirmar o refutar. */
+  @ApiProperty({ enum: DIAGNOSIS_OUTCOMES })
+  @IsIn(DIAGNOSIS_OUTCOMES)
+  outcome!: DiagnosisOutcome;
+
+  /** Motivo de la decisión; se exige motivo o evidencia. */
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reasonText?: string;
+
+  /** Evidencia que respalda la decisión; se exige motivo o evidencia. */
+  @ApiPropertyOptional({ type: DiagnosisEvidenceDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DiagnosisEvidenceDto)
+  basedOn?: DiagnosisEvidenceDto;
+
+  /** Inicio; obligatorio al confirmar si la condición todavía no lo declara. */
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  onsetAt?: string;
+
+  /** Fin esperado; obligatorio al confirmar salvo curso crónico. */
+  @ApiPropertyOptional({ format: 'date-time' })
+  @IsOptional()
+  @IsDateString()
+  expectedResolutionAt?: string;
+
+  /** Curso clínico; un curso crónico se confirma sin fin esperado. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  clinicalCourseConceptId?: string;
 }

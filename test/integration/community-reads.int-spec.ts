@@ -1,6 +1,13 @@
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
-import { SEED } from '../../src/common';
+import {
+  bootstrapTestApp,
+  bearer,
+  ensureTestSession,
+  type TestContext,
+} from './harness';
+import { SEED, TokenService } from '../../src/common';
+import { Encounters } from '../../src/modules/clinical/entities';
+import { CLIN } from '../../src/modules/clinical/clinical.concepts';
 
 /**
  * Las lecturas del módulo Community (19), ejercidas de punta a punta contra la
@@ -36,13 +43,17 @@ describe('Lecturas de Community (integración)', () => {
   const auth = () => bearer(ctx.adminToken);
 
   /** Crea un perfil público y devuelve su id. */
-  async function createProfile(suffix: string): Promise<string> {
+  async function createProfile(
+    suffix: string,
+    overrides: { targetId?: string; targetType?: string } = {},
+  ): Promise<string> {
     const res = await http()
       .post('/community/public-profiles')
       .set(auth())
       .send({
         tenantId: SEED.tenantId,
-        targetId: ctx.adminUserId,
+        targetId: overrides.targetId ?? ctx.adminUserId,
+        ...(overrides.targetType ? { targetType: overrides.targetType } : {}),
         slug: `int-${suffix}-${u}`,
         displayName: `Perfil ${suffix}`,
       })
@@ -303,13 +314,50 @@ describe('Lecturas de Community (integración)', () => {
 
   describe('reviews', () => {
     it('la review publicada NUNCA arrastra el encuentro clínico ni el paciente', async () => {
-      const profesional = await createProfile('rev-target');
+      // Desde 4293c63f `verifiedEncounterId` es obligatorio y el servidor exige
+      // una atención real, terminada, de este paciente y con este profesional
+      // (`CommunityReviewsService.assertAtencionElegible`): ya no basta con
+      // mandar un uuid — hay que dejar la fila y firmar como ese paciente.
+      const profesional = await createProfile('rev-target', {
+        targetId: ctx.practitionerSubtypeId,
+        targetType: 'PRACTITIONER',
+      });
+
+      const encounterId = await (async () => {
+        const em = ctx.orm.em.fork();
+        const encuentro = em.create(
+          Encounters,
+          {
+            patientProfileId: ctx.patientSubtypeId,
+            tenantId: SEED.tenantId,
+            primaryPractitionerId: ctx.practitionerSubtypeId,
+            statusConceptId: CLIN.ENCOUNTER_FINISHED,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          { partial: true },
+        );
+        await em.flush();
+        return encuentro.id;
+      })();
+
+      const sid = `community-reads-review-${u}`;
+      await ensureTestSession(ctx.orm, ctx.adminUserId, sid);
+      const reviewerToken = ctx.app
+        .get(TokenService)
+        .signAccessToken(
+          ctx.adminUserId,
+          sid,
+          ['SUPERADMIN', 'SECURITY_ADMIN'],
+          [SEED.tenantId],
+          { patientProfileId: ctx.patientSubtypeId },
+        );
 
       await http()
         .post(`/community/profiles/${profesional}/reviews`)
-        .set(auth())
+        .set(bearer(reviewerToken))
         .send({
-          reviewerPatientProfileId: ctx.patientSubtypeId,
+          verifiedEncounterId: encounterId,
           overallRating: 5,
           reviewText: 'excelente atención',
         })

@@ -22,16 +22,15 @@ declara como servicio. Sin él, sólo esa suite falla; el resto de la integraci�
 ## Advertencia conocida
 
 `yarn test` reporta *"A worker process has failed to exit gracefully"* — un handle no liberado
-(temporizador o conexión) en algún test o código bajo prueba. No afecta el resultado (exit 0).
-Registrado como `TEST-002` en `docs/governance/traceability-matrix.md`; investigar con
-`--detectOpenHandles` si se prioriza.
+(temporizador o conexión) en algún test o código bajo prueba. No afecta el resultado (exit 0);
+`--detectOpenHandles` lo localiza.
 
 ## Analizadores propios del proyecto
 
 Además de Jest, el repositorio tiene analizadores estáticos propios:
 
 ```bash
-yarn redesa:guardrails   # gobierno de dominios: aislamiento, huérfanos, políticas de acceso
-yarn redesa:coverage     # inventario cuantitativo: entidades, endpoints, controllers
+yarn alovida:guardrails   # gobierno de dominios: aislamiento, huérfanos, políticas de acceso
+yarn alovida:coverage     # inventario cuantitativo: entidades, endpoints, controllers
 yarn orm:audit           # fidelidad del catálogo ORM contra graphify-out/fidelity-audit.json
 ```

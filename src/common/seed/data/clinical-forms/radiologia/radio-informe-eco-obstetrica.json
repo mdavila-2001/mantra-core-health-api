@@ -1,0 +1,119 @@
+{
+  "code": "RADIO_INFORME_ECO_OBSTETRICA",
+  "name": "Informe de ecografía obstétrica",
+  "specialty": { "code": "RADIOLOGIA", "display": "Radiología e Imagenología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones de la OMS sobre atención prenatal para una experiencia positiva del embarazo (2016)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241549912",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Biometría, edad gestacional, líquido, placenta y vitalidad (recomendada antes de las 24 semanas por la OMS)."
+  },
+  "fields": [
+    {
+      "section": "Solicitud",
+      "code": "indicacion_del_estudio",
+      "name": "Indicación del estudio",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Solicitud",
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Solicitud",
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "numero_fetos",
+      "name": "Número de fetos",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "actividad_cardiaca",
+      "name": "Actividad cardíaca presente",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "biometria",
+      "name": "Biometría (DBP, CC, CA, LF)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "edad_gestacional_eco",
+      "name": "Edad gestacional por ecografía",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "presentacion",
+      "name": "Presentación",
+      "dataType": "string",
+      "required": false,
+      "options": ["Cefálica", "Podálica", "Transversa"]
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "placenta",
+      "name": "Placenta",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normoinserta", "Previa", "Baja"]
+    },
+    {
+      "section": "Resultado: ecografía obstétrica",
+      "code": "liquido",
+      "name": "Líquido amniótico",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Oligoamnios", "Polihidramnios"]
+    },
+    {
+      "section": "Conclusión",
+      "code": "conclusion",
+      "name": "Conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "recomendacion",
+      "name": "Recomendación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    }
+  ],
+  "kind": "SPECIFIC"
+}

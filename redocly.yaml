@@ -3,7 +3,7 @@
 # decoradores @nestjs/swagger reales del código — este archivo evita que se
 # degrade con cambios futuros sin gobierno.
 apis:
-  redesa-health@v1:
+  alovida-health@v1:
     root: openapi/openapi.yaml
 
 extends:
@@ -36,7 +36,7 @@ rules:
   # fabricar un servidor que no existe.
   no-server-example.com: off
   no-server-trailing-slash: error
-  info-contact: off # sin propietario técnico único definido aún (ver GOV-002)
+  info-contact: off # sin propietario técnico único definido
   info-license: off # API interna, sin licencia pública
   no-unused-components: warn
   spec-strict-refs: off

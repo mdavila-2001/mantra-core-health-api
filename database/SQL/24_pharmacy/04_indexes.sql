@@ -74,6 +74,12 @@ CREATE INDEX IF NOT EXISTS "ix_pharmacy_products_manufacturer_tenant_id" ON "pha
 
 CREATE INDEX IF NOT EXISTS "ix_pharmacy_products_dosage_form_concept_id" ON "pharmacy"."pharmacy_products" ("dosage_form_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_pharmacy_products_catalog_product_concept_id" ON "pharmacy"."pharmacy_products" ("catalog_product_concept_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_pharmacy_products_catalog_presentation" ON "pharmacy"."pharmacy_products" ("pharmacy_id", "catalog_product_concept_id", "catalog_presentation_code") WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_pharmacy_products_catalog_no_presentation" ON "pharmacy"."pharmacy_products" ("pharmacy_id", "catalog_product_concept_id") WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NULL;
+
 CREATE INDEX IF NOT EXISTS "ix_pharmacy_products_status_concept_id" ON "pharmacy"."pharmacy_products" ("status_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_pharmacy_products_created_by_user_id" ON "pharmacy"."pharmacy_products" ("created_by_user_id");
@@ -118,7 +124,7 @@ CREATE INDEX IF NOT EXISTS "ix_pharmacy_product_prices_status_concept_id" ON "ph
 
 CREATE INDEX IF NOT EXISTS "ix_pharmacy_product_prices_recorded_by_user_id" ON "pharmacy"."pharmacy_product_prices" ("recorded_by_user_id");
 
-CREATE UNIQUE INDEX IF NOT EXISTS "uq_pharmacy_product_prices_pharmacy_price_list_id_vers_7ebb36be" ON "pharmacy"."pharmacy_product_prices" ("pharmacy_price_list_id", "version_number");
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_pharmacy_product_prices_pharmacy_price_list_id_vers_7ebb36be" ON "pharmacy"."pharmacy_product_prices" ("pharmacy_price_list_id", "pharmacy_product_id", "version_number");
 
 CREATE INDEX IF NOT EXISTS "ix_pharmacy_integration_connections_pharmacy_id" ON "pharmacy"."pharmacy_integration_connections" ("pharmacy_id");
 

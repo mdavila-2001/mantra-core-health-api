@@ -229,7 +229,7 @@ hoy no existan, para que la incorporación futura de `@nestjs/terminus` no reint
 
 | Fase | Adaptación concreta a este repo |
 | --- | --- |
-| 1 · Diseño | Nombres `redesa-api` / `redesa-worker-<dominio>`; namespace `redesa` |
+| 1 · Diseño | Nombres `alovida-api` / `alovida-worker-<dominio>`; namespace `alovida` |
 | 2 · Dependencias | Instrumentaciones **individuales**, no el meta-paquete `auto-instrumentations-node`: evita arrastrar ~40 instrumentaciones (Kafka, gRPC, MySQL…) que este backend no usa |
 | 3 · Bootstrap | `src/observability/telemetry.bootstrap.ts`, importado en la línea 1 de `src/main.ts` y de `src/worker/bootstrap.ts` |
 | 4 · Automática | 6 instrumentaciones activas; `fs`/`dns`/`net` fuera |

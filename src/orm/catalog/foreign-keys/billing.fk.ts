@@ -2,12 +2,13 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `billing`.
- * 140 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 156 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   // [tablaOrigen, columnaOrigen, schemaDestino, tablaDestino, columnaDestino]
   ['billing_document_links', 'bill_id', 'billing', 'bills', 'id'],
+  ['billing_document_links', 'claim_id', 'insurance', 'insurance_claims', 'id'],
   ['billing_document_links', 'contract_id', 'erp', 'contracts', 'id'],
   ['billing_document_links', 'created_by_user_id', 'iam', 'users', 'id'],
   ['billing_document_links', 'encounter_id', 'clinical', 'encounters', 'id'],
@@ -78,6 +79,7 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['invoice_lines', 'cost_center_id', 'accounting', 'cost_centers', 'id'],
   ['invoice_lines', 'created_by_user_id', 'iam', 'users', 'id'],
   ['invoice_lines', 'income_account_id', 'accounting', 'accounts', 'id'],
+  ['invoice_lines', 'insurance_claim_line_id', 'insurance', 'insurance_claim_lines', 'id'],
   ['invoice_lines', 'invoice_id', 'billing', 'invoices', 'id'],
   ['invoice_lines', 'sales_order_item_id', 'erp', 'sales_order_items', 'id'],
   ['invoice_lines', 'tax_code_id', 'billing', 'tax_codes', 'id'],
@@ -114,23 +116,37 @@ export const billingForeignKeys: readonly ForeignKeyTuple[] = [
   ['payments_received', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['payments_received', 'transaction_id', 'payments', 'payment_transactions', 'id'],
   ['payments_received', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['quotations', 'created_by_practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['quotations', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['quotations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['quotations', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['quotations', 'practice_id', 'practice', 'practices', 'id'],
+  ['quotations', 'service_catalog_id', 'billing', 'service_catalog', 'id'],
+  ['quotations', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['quotations', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['quotation_installments', 'quotation_id', 'billing', 'quotations', 'id'],
   ['receivable_payment_allocations', 'clearing_item_id', 'accounting', 'clearing_items', 'id'],
   ['receivable_payment_allocations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['receivable_payment_allocations', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['receivable_payment_allocations', 'invoice_id', 'billing', 'invoices', 'id'],
   ['receivable_payment_allocations', 'open_item_id', 'accounting', 'open_items', 'id'],
   ['receivable_payment_allocations', 'payment_received_id', 'billing', 'payments_received', 'id'],
+  ['reimbursements', 'claim_id', 'insurance', 'insurance_claims', 'id'],
   ['reimbursements', 'created_by_user_id', 'iam', 'users', 'id'],
   ['reimbursements', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['reimbursements', 'transaction_id', 'accounting', 'journal_transactions', 'id'],
   ['reimbursements', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['service_catalog', 'created_by_user_id', 'iam', 'users', 'id'],
   ['service_catalog', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_catalog', 'image_file_id', 'common', 'files', 'id'],
   ['service_catalog', 'income_account_id', 'accounting', 'accounts', 'id'],
   ['service_catalog', 'practice_id', 'practice', 'practices', 'id'],
   ['service_catalog', 'service_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_catalog', 'tax_code_id', 'billing', 'tax_codes', 'id'],
   ['service_catalog', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['siat_simulated_invoices', 'invoice_id', 'billing', 'invoices', 'id'],
+  ['siat_simulated_invoices', 'practice_id', 'practice', 'practices', 'id'],
+  ['siat_simulated_outbox', 'siat_invoice_id', 'billing', 'siat_simulated_invoices', 'id'],
   ['tax_codes', 'account_id', 'accounting', 'accounts', 'id'],
   ['tax_codes', 'created_by_user_id', 'iam', 'users', 'id'],
   ['tax_codes', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],

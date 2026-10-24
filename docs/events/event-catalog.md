@@ -21,8 +21,7 @@ contrato, fuera del alcance de este ejercicio documental).
 AsyncAPI (`asyncapi/asyncapi.yaml`) declara el sobre (envelope) real y verificable
 (`eventType`, `aggregateType`, `aggregateId`, `payloadJson`, metadatos), y modela `payloadJson`
 como `object` genérico — documentar el schema exacto de cada uno de los 79 eventos requeriría
-inspeccionar cada call site individualmente, fuera de alcance de esta fase. Ver `GAP-017` en
-[análisis de brechas](../reports/documentation-gap-analysis.md).
+inspeccionar cada call site individualmente.
 
 ## Catálogo por módulo productor
 
@@ -50,6 +49,16 @@ inspeccionar cada call site individualmente, fuera de alcance de esta fase. Ver 
 | `WorkflowDefined` | `automation-definition.service.ts` |
 | `WorkflowRunCompleted` | `automation-execution.service.ts` |
 | `WorkflowRunStarted` | `automation-execution.service.ts` |
+
+### `clinical` (1 evento)
+
+| Evento | Servicio productor |
+|---|---|
+| `ServiceRequestPlaced` | `service-requests.service.ts` |
+
+Payload: sólo `serviceRequestId` y `statusConceptId` — ni paciente ni estudio viajan en el outbox
+(MCH-027). El aviso al paciente no sale de este evento: se escribe en la misma transacción, bajo un
+savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
 
 ### `cross_store_consistency` (8 eventos)
 

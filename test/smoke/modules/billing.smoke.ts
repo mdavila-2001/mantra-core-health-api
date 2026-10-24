@@ -252,7 +252,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
   {
     module: 'Billing',
     endpoint: 'POST /billing/reimbursements:link',
-    name: 'happy: vincula reembolso a la factura',
+    name: 'inválido: reclamo inexistente -> 422 (FK a insurance.insurance_claims)',
     method: 'post',
     path: () => '/billing/reimbursements:link',
     body: (c) => ({
@@ -261,7 +261,7 @@ export const BILLING_SMOKE: SmokeCase[] = [
       amount: '20.00',
       tenantId: c.tenantId,
     }),
-    expectedStatus: 201,
+    expectedStatus: 422,
   },
   {
     module: 'Billing',

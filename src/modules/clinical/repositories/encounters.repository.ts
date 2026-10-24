@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
+  Appointments,
   Encounters,
   EncounterParticipants,
   EncounterLocations,
@@ -245,6 +247,112 @@ export class EncountersRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * Bloquea la cita clínica para serializar los check-in concurrentes que la
+   * referencian (D-3 de la subtarea 4.2). Molde:
+   * `scheduling-bookings.repository.ts:195-204`.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentId - Identificador de la cita a bloquear.
+   * @returns La cita bloqueada, o `null` si no existe.
+   */
+  findAppointmentForUpdate(
+    em: EntityManager,
+    appointmentId: string,
+  ): Promise<Appointments | null> {
+    return em.findOne(
+      Appointments,
+      { id: appointmentId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Encuentros asociados a una cita clínica, del más reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentId - Identificador de la cita.
+   * @returns Filas de la cita, ordenadas de la más reciente a la más antigua.
+   */
+  findByAppointmentId(
+    em: EntityManager,
+    appointmentId: string,
+  ): Promise<Encounters[]> {
+    return em.find(
+      Encounters,
+      { appointmentId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * El encuentro más reciente de cada cita, indexado por `appointmentId`.
+   *
+   * En lote y no uno por uno: la agenda proyecta hasta cien reservas por
+   * página, y pedir el encuentro de cada una convertiría un listado en cien
+   * consultas más. Es el mismo criterio que `AppointmentsRepository.findTypesByIds`.
+   *
+   * Si una cita tiene más de un encuentro, gana el más reciente por
+   * `createdAt` — la misma regla que ya usa el check-in para resolver «el
+   * encuentro de esta cita» (ver `findByAppointmentId`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentIds - Citas cuyo encuentro más reciente se necesita.
+   * @returns Mapa `appointmentId` → `encounters.id`.
+   */
+  async findLatestIdsByAppointmentIds(
+    em: EntityManager,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    if (appointmentIds.length === 0) return map;
+    const encounters = await em.find(
+      Encounters,
+      { appointmentId: { $in: [...appointmentIds] } },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      if (!map.has(encounter.appointmentId)) {
+        map.set(encounter.appointmentId, encounter.id);
+      }
+    }
+    return map;
+  }
+
+  /**
+   * **Todos** los encuentros de cada cita, indexados por `appointmentId`.
+   *
+   * Hermano de {@link findLatestIdsByAppointmentIds}, pero sin quedarse con el
+   * último: la solicitud de seguro cuelga del encuentro, y si una cita tuvo dos
+   * (un check-in repetido, una atención partida), la solicitud puede estar en
+   * cualquiera. Mirar sólo el último la escondería. En lote, por lo mismo que
+   * el hermano.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param appointmentIds - Citas cuyos encuentros se necesitan.
+   * @returns Mapa `appointmentId` → ids de `encounters`, del más nuevo al más viejo.
+   */
+  async findIdsByAppointmentIds(
+    em: EntityManager,
+    appointmentIds: readonly string[],
+  ): Promise<Map<string, string[]>> {
+    const map = new Map<string, string[]>();
+    if (appointmentIds.length === 0) return map;
+    const encounters = await em.find(
+      Encounters,
+      { appointmentId: { $in: [...appointmentIds] } },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      const ids = map.get(encounter.appointmentId) ?? [];
+      ids.push(encounter.id);
+      map.set(encounter.appointmentId, ids);
+    }
+    return map;
   }
 
   /**

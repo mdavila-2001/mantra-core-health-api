@@ -1,0 +1,206 @@
+{
+  "code": "NNAC25_TRA_03_FRACTURAS",
+  "name": "Fracturas (NNAC 2025)",
+  "specialty": {
+    "code": "TRAUMATOLOGIA",
+    "display": "Traumatología y ortopedia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Traumatología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/965-norma-nacional-de-atencion-clinica-de-traumatologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 3, pág. 28; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dolor local",
+        "Dolor irradiado",
+        "Deformidad regional",
+        "Acortamiento del miembro",
+        "Aumento de volumen por tumefacción",
+        "Equimosis",
+        "Movilidad dolorosa",
+        "Movilidad anormal",
+        "Limitación o impotencia funcional",
+        "Dolor local, dolor irradiado",
+        "Exposición ósea, (puntiforme o exposición extensa)",
+        "Hemorragia, puede ser importante",
+        "Movilidad anormal y dolorosa",
+        "Evaluación vascular y neurológica distal a la lesión",
+        "Inspección en busca de heridas abiertas, deformidad, inflamación, equimosis y alteración o disminución de la amplitud de movimiento",
+        "Palpación en busca de hipersensibilidad, crepitación y defectos macroscópicos en el hueso o el tendón",
+        "Examen de las articulaciones por encima y por debajo de la zona lesionada (p. ej., para la articulación del hombro, la columna cervical y el codo)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 28. Las fracturas se definen como la interrupción en la continuidad ósea. La mayoría de las fracturas se debe a la aplicación de una fuerza significativa sobre un hueso normal (1)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fracturas cerradas",
+        "Diafisaria",
+        "Metafisaria",
+        "Epifisaria",
+        "Transversal",
+        "Oblicua",
+        "Simple",
+        "Con tercer fragmento",
+        "Estables e Inestables"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["T02: Fracturas que afectan múltiples regiones del cuerpo"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hematomas",
+        "Lesiones nerviosas",
+        "Lesiones vasculares",
+        "Pseudoartrosis",
+        "Consolidación en posiciones defectuosas",
+        "Tromboembolia pulmonar Fracturas expuestas",
+        "Consolidación viciosa",
+        "Osteomielitis",
+        "Sepsis",
+        "Asepsia y antisepsia",
+        "Limpieza quirúrgica (lavar con abundante solución estéril) a demanda, se puede agregar otro antiséptico según protocolo hospitalario",
+        "Desbridamiento de los cuerpos extraños y tejido avascular o necrótico o desvascularizado",
+        "Nuevas limpiezas quirúrgicas y desbridamientos",
+        "Injertos libres o pediculados. rotación de colgajos según la necesidad (manejo en conjunto con cirugía plástica u ortoplástica)",
+        "Osteosíntesis definitiva",
+        "Se debe aplicar vacuna de toxoide tetánico según el lugar donde ocurre la contaminación (granjas, lugares de agricultura)",
+        "Todo tratamiento debe tener en cuenta una posterior rehabilitación temprana de la extremidad",
+        "Por la severidad de la lesión la amputación primaria puede ser el tratamiento de elección"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 3, pág. 28); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Consolidación ósea",
+        "Alineación (reducción adecuada)",
+        "Perfusión y sensibilidad distal conservadas después del tratamiento",
+        "Heridas cicatrizadas",
+        "Retorno a la función con posibles secuelas, de acuerdo a la gravedad de la lesión"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

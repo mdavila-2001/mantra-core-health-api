@@ -1,23 +1,41 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { ChartNotesService } from '../services';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  AccessLogged,
+  type AuthenticatedUser,
+} from '../../../common';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
+import { ChartNotesService, ChartNotesReadService } from '../services';
 import {
   AddVersionDto,
   AmendNoteDto,
+  ChartNotesListResponseDto,
   CosignVersionDto,
   CreateNoteDto,
   ExamFindingsDto,
   ExamFindingsResultDto,
+  ListChartNotesQueryDto,
   NoteVersionResponseDto,
   ReleaseResultDto,
   ReleaseVersionDto,
@@ -28,7 +46,19 @@ import {
 /**
  * Endpoints de notas clínicas versionadas (`/charts/notes`). Capa fina: valida
  * parámetros y delega en `ChartNotesService`. La autenticación la impone el guard
- * global; el acceso por paciente (grants) se valida aguas arriba.
+ * global.
+ *
+ * SEC-01 (AC-SEC-02): el acceso por paciente **ya no** «se valida aguas arriba»
+ * —no había nada aguas arriba—. La creación de la nota lleva
+ * `ClinicalRecordAccessGuard`, que resuelve su `patientProfileId` del cuerpo
+ * contra la política del expediente. Es la ruta real que la fuente de SEC-01
+ * citaba como `POST /clinical/encounters/:id/notes`, que nunca existió.
+ *
+ * Las otras siete rutas mutantes (versiones, firma, cofirma, enmienda,
+ * liberación, retención, hallazgos) **no** lo llevan: su paciente sólo se
+ * conoce cargando la nota o la versión, y el guard no carga recursos. Las
+ * autoriza `ChartNotesService` con la política de escritura (MCH-007, cierre
+ * del GAP-3 de SEC-01).
  */
 @ApiTags('chart-notes')
 @ApiBearerAuth()
@@ -40,10 +70,39 @@ export class ChartNotesController {
    *
    * @param notesService - Valor de notes service requerido por la operación.
    */
-  constructor(private readonly notesService: ChartNotesService) {}
+  constructor(
+    private readonly notesService: ChartNotesService,
+    private readonly notesReadService: ChartNotesReadService,
+  ) {}
+
+  /** P18: colección de notas de evolución de un profesional. */
+  @Get()
+  @AccessLogged({ resourceType: 'CLINICAL_NOTES' })
+  @ApiOperation({
+    summary:
+      'Listar las notas de evolución de un profesional por ventana de fechas',
+  })
+  @ApiOkResponse({ type: ChartNotesListResponseDto })
+  @ApiForbiddenResponse({
+    description:
+      'La sesión no tiene perfil profesional, o pide las notas de otro ' +
+      'profesional sin ser SUPERADMIN.',
+  })
+  listNotes(
+    @Query() query: ListChartNotesQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChartNotesListResponseDto> {
+    return this.notesReadService.listNotes(query, actor);
+  }
 
   /** UC-15-01. */
+  @Audited({
+    action: 'CLINICAL_NOTE_CREATED',
+    entity: 'clinical_note_header',
+    entityId: 'result.id',
+  })
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear una nota clínica versionada (borrador SOAP)',
@@ -56,6 +115,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-02. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_ADDED',
+    entity: 'clinical_note_header',
+    entityId: 'param:noteId',
+  })
   @Put(':noteId/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -70,6 +134,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-03. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_SIGNED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post(':noteId/versions/:versionId/sign')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Firmar una versión y sellar su contenido' })
@@ -83,6 +152,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-04. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_COSIGNED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post(':noteId/versions/:versionId/cosign')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cofirmar una versión firmada (cadena de firmas)' })
@@ -96,6 +170,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-05. */
+  @Audited({
+    action: 'CLINICAL_NOTE_AMENDED',
+    entity: 'clinical_note_header',
+    entityId: 'param:noteId',
+  })
   @Post(':noteId/amendments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enmendar una nota firmada (addendum versionado)' })
@@ -108,6 +187,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-06. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_RELEASED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/release')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Liberar una versión al paciente' })
@@ -120,6 +204,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-07. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_WITHHELD',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/withhold')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Retener una versión del paciente (motivo legal)' })
@@ -132,6 +221,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-08. */
+  @Audited({
+    action: 'CLINICAL_NOTE_EXAM_FINDINGS_RECORDED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/exam-findings')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar hallazgos de examen físico' })

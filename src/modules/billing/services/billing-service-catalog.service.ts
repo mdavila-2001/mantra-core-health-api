@@ -2,20 +2,52 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
+  CONCEPT_DEFS,
   ConflictException,
+  ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
+  getCurrentTenantId,
+  requireTenantId,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
+import { PracticeTenantLookupService } from '../../practice/services';
+import { PractitionerRoleAssignments } from '../../practice/entities';
+import { PRAC } from '../../practice/practice.concepts';
+import {
+  AssignmentsRepository,
+  TemplatesRepository,
+} from '../../surveys/repositories';
+import { SURVEYS } from '../../surveys/surveys.concepts';
+import type { ServiceCatalog } from '../entities';
 import { ServiceCatalogRepository } from '../repositories';
 import {
   CreateServiceCatalogItemDto,
   SearchServiceCatalogResponseDto,
   ServiceCatalogItemDto,
+  UpdateServiceCatalogItemDto,
 } from '../dto';
+
+/** Plazo por defecto para responder la encuesta de satisfacción que se auto-crea (FT-31). */
+const DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS = 30;
 
 /** Tope de servicios por página cuando el cliente no pide uno. */
 const DEFAULT_PAGE_SIZE = 50;
+
+/**
+ * Sigla de las monedas globales, por concepto.
+ *
+ * Sólo las dos del juego global: el proyecto arrastra cuatro juegos de conceptos
+ * de moneda sin unificar y adivinar la sigla de los otros sería inventar.
+ */
+const CURRENCY_CODE_BY_CONCEPT: Readonly<Record<string, string>> =
+  Object.freeze({
+    [CONCEPTS.CURRENCY_BOB]: CONCEPT_DEFS.CURRENCY_BOB.code,
+    [CONCEPTS.CURRENCY_USD]: CONCEPT_DEFS.CURRENCY_USD.code,
+  });
 
 /**
  * Catálogo maestro de servicios (`billing.service_catalog`): lista fija sobre la
@@ -35,6 +67,9 @@ export class BillingServiceCatalogService {
   constructor(
     private readonly em: EntityManager,
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
+    private readonly templatesRepo: TemplatesRepository,
+    private readonly assignmentsRepo: AssignmentsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BillingServiceCatalogService.name);
@@ -114,6 +149,7 @@ export class BillingServiceCatalogService {
       },
       'Creating service catalog item',
     );
+    await this.assertRegistrationCanRegister(actor, dto.practiceId);
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -124,6 +160,7 @@ export class BillingServiceCatalogService {
         throw new ConflictException(
           'Ya existe un servicio con ese código en el catálogo',
           { code: dto.code },
+          BillingErrorReason.SERVICE_CATALOG_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -131,6 +168,8 @@ export class BillingServiceCatalogService {
         practiceId: dto.practiceId,
         code: dto.code,
         name: dto.name,
+        descriptionText: dto.descriptionText,
+        imageFileId: dto.imageFileId,
         serviceConceptId: dto.serviceConceptId,
         defaultPrice: dto.defaultPrice,
         currencyConceptId: dto.currencyConceptId,
@@ -141,6 +180,8 @@ export class BillingServiceCatalogService {
       });
       await tx.flush();
 
+      await this.attachDefaultSatisfactionSurvey(tx, item, actor);
+
       this.logger.info(
         {
           operation: 'billing.service-catalog.create',
@@ -150,6 +191,261 @@ export class BillingServiceCatalogService {
       );
       return toItemDto(item);
     });
+  }
+
+  /**
+   * Quién puede dar de alta un servicio en una práctica.
+   *
+   * La administración de la organización, en cualquiera de las suyas; un profesional,
+   * **sólo en su consultorio propio**. En una organización ajena el catálogo es de la
+   * organización y el profesional sólo corrige precio y duraciones (ver `update`).
+   *
+   * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
+   * práctica ajena responde igual que uno inventado.
+   */
+  private async assertRegistrationCanRegister(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    const administra =
+      actor.roles.includes('SECURITY_ADMIN') ||
+      actor.roles.includes('SUPERADMIN');
+    if (administra) return;
+    if (await this.practiceTenantLookup.isOwnOffice(practiceId, actor.id)) {
+      return;
+    }
+    throw new ResourceNotFoundException('Práctica no encontrada', {
+      practiceId,
+    });
+  }
+
+  /**
+   * FT-31: todo servicio médico nuevo sale con su encuesta de satisfacción ya
+   * activa, para que ningún servicio quede sin forma de medir la atención.
+   *
+   * Se crea, publica y asocia dentro de la misma transacción que el alta del
+   * servicio: si algo de esto falla, el servicio tampoco se crea — es una
+   * garantía del alta, no un agregado best-effort.
+   *
+   * **Dueño de la plantilla.** `survey_templates.owner_practitioner_id` no
+   * admite nulo, pero quien da de alta un servicio es siempre `SECURITY_ADMIN`
+   * (ver el guard del controlador) y casi nunca tiene perfil profesional. Se
+   * atribuye entonces al profesional activo más antiguo de la práctica —el
+   * primero en el tiempo, o el marcado principal si hay varios— porque en la
+   * enorme mayoría de las prácticas (una o pocas personas atendiendo) es
+   * exactamente la persona a la que le importa esta encuesta. El resto de la
+   * práctica igual la ve entre las respuestas del servicio; sólo la edición
+   * del cuestionario queda del lado de quien figura como dueño.
+   *
+   * Si la práctica todavía no tiene ningún profesional vinculado y activo
+   * (una organización recién creada, antes de que se una el primer doctor), el
+   * servicio se crea igual y queda sin encuesta — no hay a quién atribuírsela.
+   * No hay retro-alta cuando se una el primero: es la misma limitación que ya
+   * acepta el resto del catálogo con datos que faltan.
+   */
+  private async attachDefaultSatisfactionSurvey(
+    tx: EntityManager,
+    item: ServiceCatalog,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const ownerPractitionerId =
+      actor.practitionerProfileId ??
+      (await this.findDefaultSurveyOwner(tx, item.practiceId));
+    if (!ownerPractitionerId) {
+      this.logger.warn(
+        {
+          operation: 'billing.service-catalog.create',
+          serviceCatalogId: item.id,
+          practiceId: item.practiceId,
+        },
+        'Sin profesional activo en la práctica: el servicio queda sin encuesta de satisfacción automática',
+      );
+      return;
+    }
+
+    const tenantId = requireTenantId();
+    const template = this.templatesRepo.createTemplate(tx, {
+      tenantId,
+      ownerPractitionerId,
+      title: `Satisfacción — ${item.name}`,
+      statusConceptId: SURVEYS.TEMPLATE_DRAFT,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    const version = this.templatesRepo.createVersion(tx, {
+      surveyTemplateId: template.id,
+      versionNumber: 1,
+      publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+      responseWindowDays: DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    this.templatesRepo.createQuestion(tx, {
+      surveyVersionId: version.id,
+      position: 1,
+      questionText: '¿Qué tan satisfecho quedó con la atención?',
+      answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
+      required: true,
+      scaleMin: 1,
+      scaleMax: 5,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+
+    // Publicar acá mismo, no dejarla en borrador: un servicio nuevo sin
+    // encuesta *utilizable* deja el requisito a medias — nadie la publicaría
+    // por su cuenta si ni siquiera sabe que se creó sola.
+    version.publicationStatusConceptId = SURVEYS.VERSION_PUBLISHED;
+    version.effectiveFrom = new Date();
+    version.publishedAt = new Date();
+    touch(version, actor.id);
+    template.statusConceptId = SURVEYS.TEMPLATE_ACTIVE;
+    touch(template, actor.id);
+
+    this.assignmentsRepo.create(tx, {
+      surveyVersionId: version.id,
+      tenantId,
+      targetTypeConceptId: SURVEYS.TARGET_SERVICE,
+      targetId: item.id,
+      active: true,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+  }
+
+  /**
+   * El profesional activo más antiguo de la práctica, o el marcado principal
+   * si hay varios — ver la nota de {@link attachDefaultSatisfactionSurvey}.
+   */
+  private async findDefaultSurveyOwner(
+    tx: EntityManager,
+    practiceId: string,
+  ): Promise<string | null> {
+    const candidates = await tx.find(PractitionerRoleAssignments, {
+      practiceId,
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      validTo: null,
+    });
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => {
+      if (Boolean(a.isPrimary) !== Boolean(b.isPrimary)) {
+        return Number(b.isPrimary ?? false) - Number(a.isPrimary ?? false);
+      }
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+    return candidates[0].practitionerProfileId;
+  }
+
+  /**
+   * Corrige un servicio del catálogo de una práctica propia (FT-22-R05).
+   *
+   * Existe porque «el precio es editable» no tenía endpoint: el alta la hace una
+   * cuenta administradora y hasta acá el catálogo era inmutable. Lo que se edita
+   * es el precio con su moneda, el nombre y si sigue ofreciéndose; el código y
+   * la práctica identifican al servicio y no se mueven.
+   *
+   * @param id - Servicio a corregir (`billing.service_catalog.id`).
+   * @param dto - Campos a corregir; los ausentes se conservan.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns El servicio ya corregido.
+   * @throws ResourceNotFoundException si el servicio no existe o no es alcanzable por el actor.
+   */
+  async update(
+    id: string,
+    dto: UpdateServiceCatalogItemDto,
+    actor: AuthenticatedUser,
+  ): Promise<ServiceCatalogItemDto> {
+    this.logger.info(
+      { operation: 'billing.service-catalog.update', id, actorId: actor.id },
+      'Updating service catalog item',
+    );
+    return this.em.transactional(async (tx) => {
+      const item = await this.serviceCatalogRepo.findById(tx, id);
+      if (item === null) {
+        throw new ResourceNotFoundException(
+          'Servicio no encontrado',
+          { id },
+          BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_FOUND,
+        );
+      }
+      await this.assertCanEdit(actor, item.practiceId, id);
+
+      if (dto.name !== undefined) item.name = dto.name;
+      if (dto.isActive !== undefined) item.isActive = dto.isActive;
+      if (dto.defaultPrice !== undefined) {
+        item.defaultPrice = dto.defaultPrice;
+        // Un importe sin moneda no es un precio. La fila puede venir de un alta
+        // que no la declaró: la primera edición la fija, y el boliviano es la
+        // moneda del producto (lo mismo que hace el resto del código nuevo).
+        item.currencyConceptId =
+          dto.currencyConceptId ??
+          item.currencyConceptId ??
+          CONCEPTS.CURRENCY_BOB;
+      }
+      touch(item, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'billing.service-catalog.update',
+          serviceCatalogId: item.id,
+        },
+        'Service catalog item updated',
+      );
+      return toItemDto(item);
+    });
+  }
+
+  /**
+   * Exige que el actor alcance esa práctica, por vinculación o por organización.
+   *
+   * Dos caminos, porque son dos figuras legítimas sobre el mismo catálogo: el
+   * profesional que atiende en la práctica —y por eso pone el precio de lo que
+   * ofrece— y la cuenta administradora de la organización, que es la que dio de
+   * alta el servicio y tiene que poder corregirlo.
+   *
+   * **Falla siempre con 404, nunca 403**: un id de otra práctica responde lo
+   * mismo que un id inventado, así que probar uuids no confirma la existencia de
+   * nada (AC-22-3). Es la diferencia deliberada con
+   * `LedgerReadService.verificarPracticaDelTenant`, donde quien pregunta ya tenía
+   * el id de la práctica; acá el id es el del servicio.
+   */
+  private async assertCanEdit(
+    actor: AuthenticatedUser,
+    practiceId: string,
+    serviceId: string,
+  ): Promise<void> {
+    if (actor.practitionerProfileId !== undefined) {
+      const own =
+        await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+          actor.practitionerProfileId,
+        );
+      if (own.includes(practiceId)) return;
+    }
+
+    if (actor.roles.includes('SECURITY_ADMIN')) {
+      const tenantId = getCurrentTenantId();
+      const tenantPractice =
+        await this.practiceTenantLookup.findTenantOfPractice(practiceId);
+      // Sin tenant en contexto son los carriles internos, que no pasan por la
+      // cabecera: lo único que se exige es que la práctica exista.
+      if (
+        tenantPractice !== null &&
+        (tenantId === undefined || tenantPractice === tenantId)
+      ) {
+        return;
+      }
+    }
+
+    throw new ResourceNotFoundException(
+      'Servicio no encontrado',
+      {
+        id: serviceId,
+      },
+      BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_VISIBLE,
+    );
   }
 }
 
@@ -164,6 +460,8 @@ function toItemDto(row: {
   practiceId: string;
   code: string;
   name: string;
+  descriptionText?: string;
+  imageFileId?: string;
   serviceConceptId?: string;
   defaultPrice: string;
   currencyConceptId?: string;
@@ -176,9 +474,15 @@ function toItemDto(row: {
     practiceId: row.practiceId,
     code: row.code,
     name: row.name,
+    descriptionText: row.descriptionText,
+    imageFileId: row.imageFileId,
     serviceConceptId: row.serviceConceptId,
     defaultPrice: row.defaultPrice,
     currencyConceptId: row.currencyConceptId,
+    currencyCode:
+      row.currencyConceptId === undefined
+        ? undefined
+        : CURRENCY_CODE_BY_CONCEPT[row.currencyConceptId],
     taxCodeId: row.taxCodeId,
     incomeAccountId: row.incomeAccountId,
     isActive: row.isActive,

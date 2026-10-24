@@ -1,7 +1,7 @@
 # ADR-0006: Multi-tenancy — esquema compartido con Row-Level Security
 
 ## Estado
-Aceptado, con verificación operativa pendiente por entorno (ver riesgos).
+Aceptado.
 
 ## Contexto
 La plataforma sirve a múltiples organizaciones de salud sobre la misma base de datos. El modelo
@@ -35,14 +35,12 @@ RLS de PostgreSQL usan para filtrar filas.
   propietario usado para DDL/migraciones.
 
 ## Riesgos
-**Crítico, no cerrado por esta documentación.** `RLS_ENFORCE` es configurable por entorno y su
-valor real en cada despliegue no fue verificado en esta auditoría — ver `SEC-001` en la
-[matriz de trazabilidad](../governance/traceability-matrix.md). No se declara este ADR "seguro en
-producción" sin esa verificación operativa explícita.
+**Crítico.** `RLS_ENFORCE` es configurable por entorno y su valor real en cada despliegue no
+está verificado por este repositorio. Este ADR no afirma que el aislamiento esté activo en un
+despliegue concreto; [`docs/security/tenant-isolation.md`](../security/tenant-isolation.md)
+describe cómo comprobarlo.
 
 ## Evidencia
 `src/common/tenant/tenant-context.interceptor.ts`, `docker-compose.yml` (`RLS_ENFORCE`),
-`ESTADO-Y-PENDIENTES.md` §"Validar aislamiento por tenant en cada entorno".
+[`docs/security/tenant-isolation.md`](../security/tenant-isolation.md).
 
-## Plan de revisión
-Obligatorio antes de cualquier declaración de "apto para producción" — ver Fase 18.

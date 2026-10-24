@@ -42,14 +42,32 @@ function booleanValue(value: unknown): boolean {
 }
 
 /**
+ * Lo que `buildValueColumns` necesita saber del campo para un `code`: si
+ * resuelve contra un conjunto de valores (concepto real, `value_concept_id`)
+ * o contra opciones propias tecleadas a mano (texto libre, `value_code`). Sin
+ * esto, un `code` sin `valueSetId` intentaría escribir una opción como «Ex
+ * fumador» en una columna `uuid` con FK a `terminology.catalog_concepts`, y
+ * la base lo rechazaría — no es casualidad, es la columna equivocada.
+ */
+export interface CodeFieldKind {
+  readonly valueSetId?: string;
+}
+
+/**
  * Traduce un `dataType` técnico + valor a la única columna `value_*` que
  * corresponde (REC 3.4: value[x] exclusivo). Centraliza la exclusividad para que
  * captura (UC-09-08), corrección (UC-09-09), importación (UC-09-10) y migración
  * (UC-09-13) construyan valores de forma consistente.
+ *
+ * @param field - Sólo hace falta para `dataType: 'code'`: decide entre
+ *   `value_concept_id` (campo con `valueSetId`) y `value_code` (campo con
+ *   opciones propias). Ausente, se asume options — es el caso más nuevo y el
+ *   único para el que el llamador podría no tener el campo a mano todavía.
  */
 export function buildValueColumns(
   dataType: string,
   value: unknown,
+  field?: CodeFieldKind,
 ): ValueColumns {
   if (value === undefined || value === null) {
     throw new PreconditionFailedException('El valor no puede ser nulo', {
@@ -74,7 +92,9 @@ export function buildValueColumns(
     case 'time':
       return { valueTime: scalarString(dataType, value) };
     case 'code':
-      return { valueConceptId: scalarString(dataType, value) };
+      return field?.valueSetId !== undefined
+        ? { valueConceptId: scalarString(dataType, value) }
+        : { valueCode: scalarString(dataType, value) };
     case 'reference':
       return { valueReferenceId: scalarString(dataType, value) };
     case 'uuid':

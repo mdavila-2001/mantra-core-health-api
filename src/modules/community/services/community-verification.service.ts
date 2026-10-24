@@ -140,7 +140,7 @@ export class CommunityVerificationService {
       return { action: 'no-profile' };
     }
 
-    const existente = await this.repo.findActive(
+    const existing = await this.repo.findActive(
       tx,
       profile.id,
       badgeTypeConceptId,
@@ -156,7 +156,7 @@ export class CommunityVerificationService {
         evidenceRef: outcome.evidenceRef,
         validTo: outcome.validTo,
       },
-      existente,
+      existing,
     );
     // El historial apunta al sello por uuid y no por relación, así que el ORM
     // no puede deducir el orden: sin este flush intenta insertar la fila de
@@ -199,19 +199,19 @@ export class CommunityVerificationService {
    * @param tx - Transacción activa.
    * @param targetId - Sujeto de dominio afectado.
    * @param actorUserId - Quién lo registró.
-   * @param motivo - Si la autoridad lo retiró o si simplemente venció.
+   * @param reason - Si la autoridad lo retiró o si simplemente venció.
    * @returns Cuántos sellos cayeron.
    */
   async applyRevoked(
     tx: EntityManager,
     targetId: string,
     actorUserId: string,
-    motivo: 'REVOKED' | 'EXPIRED' = 'REVOKED',
+    reason: 'REVOKED' | 'EXPIRED' = 'REVOKED',
   ): Promise<{ revoked: number }> {
     const profile = await this.repo.findProfileByTarget(tx, targetId);
     if (!profile) return { revoked: 0 };
 
-    return this.revokeProfileBadges(tx, profile, actorUserId, motivo);
+    return this.revokeProfileBadges(tx, profile, actorUserId, reason);
   }
 
   /**
@@ -223,22 +223,22 @@ export class CommunityVerificationService {
    * @param tx - Transacción activa.
    * @param profile - Perfil afectado.
    * @param actorUserId - Quién lo registró.
-   * @param motivo - Revocado por la autoridad, o vencido por fecha.
+   * @param reason - Revocado por la autoridad, o vencido por fecha.
    * @returns Cuántos sellos cayeron.
    */
   async revokeProfileBadges(
     tx: EntityManager,
     profile: PublicProfiles,
     actorUserId: string,
-    motivo: 'REVOKED' | 'EXPIRED',
+    reason: 'REVOKED' | 'EXPIRED',
   ): Promise<{ revoked: number }> {
     const badges = await this.repo.findAllBySubject(tx, profile.id);
-    const vigentes = badges.filter(
+    const current = badges.filter(
       (badge) => badge.statusConceptId === CONCEPTS.STATE_ACTIVE,
     );
 
-    for (const badge of vigentes) {
-      this.repo.revoke(badge, actorUserId, motivo);
+    for (const badge of current) {
+      this.repo.revoke(badge, actorUserId, reason);
       this.repo.recordHistory(tx, badge, COMM.BADGE_HISTORY_OP_REVOKED);
     }
 
@@ -254,13 +254,13 @@ export class CommunityVerificationService {
       {
         operation: 'community.verification.revoke',
         profileId: profile.id,
-        revoked: vigentes.length,
-        motivo,
+        revoked: current.length,
+        motivo: reason,
       },
       'Verified badges revoked',
     );
 
-    return { revoked: vigentes.length };
+    return { revoked: current.length };
   }
 
   /**
@@ -278,23 +278,23 @@ export class CommunityVerificationService {
     limit = 200,
   ): Promise<{ expired: number; profiles: number }> {
     return this.em.transactional(async (tx) => {
-      const vencidos = await this.repo.findExpired(tx, new Date(), limit);
-      const perfiles = new Set<string>();
+      const overdue = await this.repo.findExpired(tx, new Date(), limit);
+      const profiles = new Set<string>();
 
-      for (const badge of vencidos) {
+      for (const badge of overdue) {
         this.repo.revoke(badge, actorUserId, 'EXPIRED');
         this.repo.recordHistory(tx, badge, COMM.BADGE_HISTORY_OP_REVOKED);
-        perfiles.add(badge.subjectRefId);
+        profiles.add(badge.subjectRefId);
       }
 
       // El resumen del perfil se baja sólo si NO le queda ningún otro sello
       // vigente: un profesional con dos sellos que pierde uno sigue verificado.
-      for (const profileId of perfiles) {
-        const restantes = await this.repo.findAllBySubject(tx, profileId);
-        const sigueVigente = restantes.some(
+      for (const profileId of profiles) {
+        const remaining = await this.repo.findAllBySubject(tx, profileId);
+        const followsCurrent = remaining.some(
           (badge) => badge.statusConceptId === CONCEPTS.STATE_ACTIVE,
         );
-        if (sigueVigente) continue;
+        if (followsCurrent) continue;
 
         const profile = await tx.findOne(PublicProfiles, { id: profileId });
         if (profile?.verificationStatusConceptId === CONCEPTS.STATE_ACTIVE) {
@@ -303,18 +303,18 @@ export class CommunityVerificationService {
         }
       }
 
-      if (vencidos.length > 0) {
+      if (overdue.length > 0) {
         this.logger.info(
           {
             operation: 'community.verification.expire-sweep',
-            expired: vencidos.length,
-            profiles: perfiles.size,
+            expired: overdue.length,
+            profiles: profiles.size,
           },
           'Expired verified badges swept',
         );
       }
 
-      return { expired: vencidos.length, profiles: perfiles.size };
+      return { expired: overdue.length, profiles: profiles.size };
     });
   }
 
@@ -359,39 +359,39 @@ export class CommunityVerificationService {
     badges: readonly VerifiedBadges[],
   ): VerifiedBadgeDto {
     const now = Date.now();
-    const vigente = badges.find(
+    const current = badges.find(
       (badge) =>
         badge.statusConceptId === CONCEPTS.STATE_ACTIVE &&
         (!badge.validFrom || badge.validFrom.getTime() <= now) &&
         (!badge.validTo || badge.validTo.getTime() >= now),
     );
 
-    if (vigente) {
+    if (current) {
       return {
         status: 'VERIFIED',
-        badgeTypeConceptId: vigente.badgeTypeConceptId,
-        verificationMethodConceptId: vigente.verificationMethodConceptId,
-        verifiedAt: vigente.validFrom?.toISOString() ?? null,
-        validUntil: vigente.validTo?.toISOString() ?? null,
+        badgeTypeConceptId: current.badgeTypeConceptId,
+        verificationMethodConceptId: current.verificationMethodConceptId,
+        verifiedAt: current.validFrom?.toISOString() ?? null,
+        validUntil: current.validTo?.toISOString() ?? null,
       };
     }
 
     // El más reciente de los caídos: es el que sostiene «Verificación vencida»
     // con una fecha, en vez de un rótulo sin respaldo.
-    const caido = [...badges].sort(
+    const down = [...badges].sort(
       (a, b) => (b.validTo?.getTime() ?? 0) - (a.validTo?.getTime() ?? 0),
     )[0];
 
-    const vencio =
-      caido !== undefined ||
+    const expired =
+      down !== undefined ||
       profile.verificationStatusConceptId === CONCEPTS.STATE_EXPIRED;
 
     return {
-      status: vencio ? 'EXPIRED' : 'NONE',
-      badgeTypeConceptId: caido?.badgeTypeConceptId ?? null,
-      verificationMethodConceptId: caido?.verificationMethodConceptId ?? null,
-      verifiedAt: caido?.validFrom?.toISOString() ?? null,
-      validUntil: caido?.validTo?.toISOString() ?? null,
+      status: expired ? 'EXPIRED' : 'NONE',
+      badgeTypeConceptId: down?.badgeTypeConceptId ?? null,
+      verificationMethodConceptId: down?.verificationMethodConceptId ?? null,
+      verifiedAt: down?.validFrom?.toISOString() ?? null,
+      validUntil: down?.validTo?.toISOString() ?? null,
     };
   }
 }

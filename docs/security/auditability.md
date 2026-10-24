@@ -7,7 +7,7 @@
 
 | Tabla | Naturaleza | Qué registra |
 |---|---|---|
-| `audit.audit_log` | **WORM** (Write Once Read Many) | Cambios relevantes — mencionado explícitamente en `ESTADO-Y-PENDIENTES.md` como control transversal ya incorporado |
+| `audit.audit_log` | **WORM** (Write Once Read Many) | Cambios relevantes — control transversal ya incorporado |
 | `audit.data_access_log` | Append-only | **Lecturas** de datos sensibles — distinto de `audit_log`, que registra cambios |
 
 Regla del estándar de diseño del proyecto: *"toda lectura de datos sensibles deja traza en
@@ -39,8 +39,7 @@ los 5 almacenes de datos — no es una operación local a un solo almacén.
 Recomendación textual del propio estándar de diseño del proyecto: *"Cobertura de
 `data_access_log` sobre toda lectura de PHI (verificar por `entity_registry.contains_phi`)"* —
 es decir, el propio equipo de diseño ya identificó que la cobertura real necesita auditarse contra
-`entity_registry`, no asumirse. Esta documentación no puede cerrar esa verificación (requiere una
-base real poblada) — ver `GOV-005` en [matriz de trazabilidad](../governance/traceability-matrix.md).
+`entity_registry`, no asumirse. Esa verificación requiere una base real poblada.
 
 ## Ver también
 

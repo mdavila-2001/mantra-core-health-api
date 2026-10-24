@@ -151,6 +151,28 @@ export class MedicationRequests {
   indicationConditionId?: string;
 
   /**
+   * Motivo de la receta escrito a mano cuando no hay diagnóstico codificado
+   * (P24 / CL-03). Excluyente con `indication_condition_id`: gana el concepto.
+   *
+   * Declarada en el modelo (`diagram_08_clinical.puml`,
+   * `indication_text : varchar(200)` nullable). Parche para bases ya pobladas:
+   * `2026-10-11_v4238_medication_requests_indication_text.sql`.
+   */
+  @Property({
+    fieldName: 'indication_text',
+    columnType: 'varchar(200)',
+    nullable: true,
+  })
+  indicationText?: string;
+
+  /**
+   * P43: instancia (cerrada) del formulario médico de la que sale el registro.
+   * Nula cuando se emite desde la historia del paciente, sin formulario.
+   */
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  formInstanceId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

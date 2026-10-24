@@ -113,3 +113,20 @@ export class PatientStatementResponseDto {
   @ApiProperty()
   closingBalance!: string;
 }
+
+/** Página de estados de cuenta de la práctica (CV-12). */
+export class ListPatientStatementsResponseDto {
+  /** Estados de cuenta de esta página, ordenados por `id`. */
+  @ApiProperty({ type: [PatientStatementResponseDto] })
+  items!: PatientStatementResponseDto[];
+
+  /** Cantidad devuelta en esta página. */
+  @ApiProperty() count!: number;
+
+  /** Tope aplicado a la consulta. */
+  @ApiProperty() limit!: number;
+
+  /** Cursor opaco de continuación, o `null` si ésta es la última página. */
+  @ApiProperty({ nullable: true, type: String })
+  nextCursor!: string | null;
+}

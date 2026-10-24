@@ -5,10 +5,13 @@ import { PinoLogger } from 'nestjs-pino';
 import { AuthenticationCredentials } from '../../modules/iam/entities';
 import { Roles, UserRoleAssignments } from '../../modules/authz/entities';
 import { TenantMemberships } from '../../modules/directory/entities';
-import { DIR } from '../../modules/directory/directory.concepts';
-import { IamUsersService } from '../../modules/iam/services';
+import {
+  DIR,
+  TENANT_ROLE_CONCEPT_BY_CODE,
+} from '../../modules/directory/directory.concepts';
+import { IamUsersService } from '../../modules/iam/application/services';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
-import { createdBy } from '../persistence/audit-fields';
+import { createdBy, touch } from '../persistence/audit-fields';
 import {
   PROVIDER_ACCOUNTS,
   type ProviderAccountSeed,
@@ -113,8 +116,8 @@ export class ProviderAccountsSeedService {
 
     const em = this.orm.em.fork();
     let created = 0;
-    for (const cuenta of PROVIDER_ACCOUNTS) {
-      if (await this.ensureAccount(em, cuenta, password)) created += 1;
+    for (const account of PROVIDER_ACCOUNTS) {
+      if (await this.ensureAccount(em, account, password)) created += 1;
     }
     await em.flush();
 
@@ -131,27 +134,27 @@ export class ProviderAccountsSeedService {
    * Crea una cuenta si todavía no existe, y la hace miembro del tenant semilla.
    *
    * @param em - Contexto de persistencia.
-   * @param cuenta - La cuenta declarada en el catálogo.
+   * @param account - La cuenta declarada en el catálogo.
    * @param password - Contraseña compartida.
    * @returns `true` si esta pasada la creó.
    */
   private async ensureAccount(
     em: EntityManager,
-    cuenta: ProviderAccountSeed,
+    account: ProviderAccountSeed,
     password: string,
   ): Promise<boolean> {
-    const existente = await em.findOne(AuthenticationCredentials, {
-      externalSubject: cuenta.email,
+    const existing = await em.findOne(AuthenticationCredentials, {
+      externalSubject: account.email,
     });
-    if (existente) {
-      await this.ensureMembership(em, existente.userId);
+    if (existing) {
+      await this.ensureMembership(em, existing.userId, account.tenantRole);
       return false;
     }
 
-    const creado = await this.users.createUser(
+    const created = await this.users.createUser(
       {
-        displayName: cuenta.displayName,
-        email: cuenta.email,
+        displayName: account.displayName,
+        email: account.email,
         password,
         // `initialRole` solo admite USER o SECURITY_ADMIN: es el rol GLOBAL de
         // la plataforma. El de dominio —farmacia, laboratorio…— vive en
@@ -164,37 +167,52 @@ export class ProviderAccountsSeedService {
     // Sin membresía en un tenant, la sesión entra pero no tiene organización
     // activa: toda pantalla que dependa de `tenantId` queda bloqueada pidiendo
     // que se elija una que la cuenta no tiene.
-    await this.ensureMembership(em, creado.id);
-    await this.ensureRole(em, creado.id, cuenta.initialRole);
+    await this.ensureMembership(em, created.id, account.tenantRole);
+    await this.ensureRole(em, created.id, account.initialRole);
 
     this.logger.info(
       {
         operation: 'seed.provider-accounts',
-        organizacion: cuenta.organizacion,
-        role: cuenta.initialRole,
+        organizacion: account.organizacion,
+        role: account.initialRole,
       },
       'Cuenta de demostración creada',
     );
     return true;
   }
 
-  /** Hace a la cuenta miembro del tenant semilla, si no lo era ya. */
+  /**
+   * Hace a la cuenta miembro del tenant semilla con el rol que declara el
+   * catálogo.
+   *
+   * Si la membresía ya existe con otro rol, la lleva al declarado: las bases
+   * ya sembradas tienen a la aseguradora como `STAFF`, y sin converger seguiría
+   * sin poder administrar su catálogo.
+   */
   private async ensureMembership(
     em: EntityManager,
     userId: string,
+    tenantRole: ProviderAccountSeed['tenantRole'],
   ): Promise<void> {
-    const existente = await em.findOne(TenantMemberships, {
+    const tenantRoleConceptId = TENANT_ROLE_CONCEPT_BY_CODE[tenantRole];
+    const existing = await em.findOne(TenantMemberships, {
       userId,
       tenantId: SEED.tenantId,
     });
-    if (existente) return;
+    if (existing) {
+      if (existing.tenantRoleConceptId === tenantRoleConceptId) return;
+      existing.tenantRoleConceptId = tenantRoleConceptId;
+      touch(existing, SEED_ACTOR_ID);
+      await em.flush();
+      return;
+    }
 
     em.create(
       TenantMemberships,
       {
         userId,
         tenantId: SEED.tenantId,
-        tenantRoleConceptId: DIR.ROLE_STAFF,
+        tenantRoleConceptId,
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
@@ -218,8 +236,8 @@ export class ProviderAccountsSeedService {
     userId: string,
     code: string,
   ): Promise<void> {
-    const rol = await em.findOne(Roles, { code });
-    if (!rol) {
+    const role = await em.findOne(Roles, { code });
+    if (!role) {
       this.logger.warn(
         { operation: 'seed.provider-accounts', role: code },
         'Rol no declarado en authz.roles: la cuenta queda sin él',
@@ -227,18 +245,18 @@ export class ProviderAccountsSeedService {
       return;
     }
 
-    const existente = await em.findOne(UserRoleAssignments, {
+    const existing = await em.findOne(UserRoleAssignments, {
       userId,
-      roleId: rol.id,
+      roleId: role.id,
       tenantId: SEED.tenantId,
     });
-    if (existente) return;
+    if (existing) return;
 
     em.create(
       UserRoleAssignments,
       {
         userId,
-        roleId: rol.id,
+        roleId: role.id,
         tenantId: SEED.tenantId,
         assignedByUserId: SEED_ACTOR_ID,
         statusConceptId: CONCEPTS.STATE_ACTIVE,

@@ -12,6 +12,7 @@ import { GroupsRepository } from '../repositories';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityGroupAccessService } from './community-group-access.service';
 import { COMM } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import type {
   GroupPageDto,
   GroupMemberPageDto,
@@ -146,14 +147,22 @@ export class CommunityGroupsReadService {
     );
     const group = await this.groupsRepo.findById(em, groupId);
     if (!group)
-      throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+      throw new ResourceNotFoundException(
+        'Grupo no encontrado',
+        { groupId },
+        CommunityErrorReason.GROUP_NOT_FOUND,
+      );
 
     if (group.visibilityConceptId === COMM.GROUP_VISIBILITY_SECRET) {
       const member = actorProfileId
         ? await this.groupsRepo.findMember(em, groupId, actorProfileId)
         : null;
       if (!member || member.joinStatusConceptId !== COMM.GROUP_JOIN_ACTIVE)
-        throw new ResourceNotFoundException('Grupo no encontrado', { groupId });
+        throw new ResourceNotFoundException(
+          'Grupo no encontrado',
+          { groupId },
+          CommunityErrorReason.GROUP_SECRET_NOT_VISIBLE,
+        );
     }
 
     const afterKey = this.decodeCreatedAtCursor(options.cursor);

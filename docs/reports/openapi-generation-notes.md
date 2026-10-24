@@ -30,13 +30,12 @@ active limitación de tasa.
 | Errores de `redocly lint` | **0** |
 | Warnings de `redocly lint` | 1542 (ver §6) |
 
-**Nota sobre el conteo de 841 vs. las 850 operaciones que reporta `tools/redesa/coverage-report.mjs`:**
+**Nota sobre el conteo de 841 vs. las 850 operaciones que reporta `tools/alovida/coverage-report.mjs`:**
 ambos analizadores miden cosas ligeramente distintas (parseo de decoradores por regex vs.
 introspección real del `Reflector` de Nest en runtime); la diferencia de 9 no se investigó a fondo
 en esta fase — se registra como nota, no como blocker, porque ninguna de las dos cifras es
 "incorrecta": son dos métodos de conteo válidos con un margen de discrepancia esperable en un
-sistema de 850 endpoints. Ver `GOV-003` en `docs/governance/traceability-matrix.md` si se decide
-investigar la causa exacta en una fase futura.
+sistema de 850 endpoints.
 
 ## 3. Problema encontrado y corregido — DTOs con nombre duplicado (23 clases)
 
@@ -51,10 +50,8 @@ documentaba el shape equivocado para uno de los dos endpoints reales.
 una ausencia): se añadió el decorador `@ApiSchema({ name: '<Módulo><Clase>' })` a las 46
 ocurrencias (23 pares) para que cada una tenga un nombre de esquema único y estable en el
 documento OpenAPI, sin renombrar ninguna clase TypeScript ni tocar ningún import/uso existente.
-Detalle completo, lista de las 23 clases y justificación en
-`docs/reports/inconsistency-remediation.md` §2 (nota: ese documento cubre `ARCH-001`; la lista de
-DTOs vive en el propio commit — `git show` sobre `tools/openapi/generate-openapi.mjs` no aplica
-aquí, el codemod fue una utilidad de sesión, no persistida en `tools/`).
+La lista de DTOs vive en el propio commit (el codemod fue una utilidad de sesión, no persistida
+en `tools/`).
 
 **Verificación:** `yarn test` completo (369→370 suites, 3724→3732 tests, 100% verde) tras el
 cambio — el decorador es puramente de metadata Swagger, no afecta validación ni lógica de negocio.
@@ -111,12 +108,12 @@ salta el guard JWT global — verificado archivo por línea, no asumido), y 1
 
 | Regla Redocly | Ocurrencias | Por qué queda como `warn` |
 |---|---:|---|
-| `operation-4xx-response` | 841 | Documentar la respuesta 4xx real de cada una de las 841 operaciones requiere `@ApiResponse` por endpoint en 191 controllers — volumen que excede el alcance de esta fase; el modelo de error compartido ya existe en código (`docs/api/error-model.md`) y describe la forma real, aunque no está enlazado operación por operación todavía. |
+| `operation-4xx-response` | 841 | Documentar la respuesta 4xx real de cada una de las 841 operaciones requiere `@ApiResponse` por endpoint en 191 controllers — volumen que excede el alcance de esta fase; el modelo de error compartido ya existe en código (`docs/api/error-model.md`) y describe la forma real, sin enlazarse operación por operación. |
 | `operation-description` | 530 | Las operaciones tienen `summary` (vía `@ApiOperation`) pero no siempre `description` extendida. Mejora de contenido, no de exactitud. |
-| `tag-description` | 169 | Los 169 tags se derivan automáticamente de `@ApiTags`; no tienen descripción propia todavía (ver `docs/modules/*/overview.md`, Fase 9, como fuente futura). |
+| `tag-description` | 169 | Los 169 tags se derivan automáticamente de `@ApiTags` y no tienen descripción propia. |
 
-Ninguna de estas advertencias afecta la corrección del contrato — describen contenido narrativo
-pendiente, no datos incorrectos.
+Ninguna de estas advertencias afecta la corrección del contrato: describen contenido narrativo
+ausente, no datos incorrectos.
 
 ## 7. Ambigüedad de rutas aceptada (2 pares, ver `ARCH-004`)
 
@@ -132,9 +129,39 @@ por orden de registro sin colisión en producción. Rediseñar las rutas es un c
 API que no se hace sin que el usuario lo pida; se documenta y acepta en `ARCH-004`
 (`docs/governance/traceability-matrix.md`).
 
-## 8. No incluido en esta fase
+## 8. Límites del contrato
 
-- `@ApiResponse` de error por operación (841 operaciones) — ver §6.
-- Servidor de producción/staging en `openapi/openapi.yaml` — no existe una URL real conocida que
-  documentar sin inventarla; solo se declara `http://localhost:3000`. Añadir cuando exista un
-  dominio real (Fase 14, `docs/operations/environments.md`).
+- Sin `@ApiResponse` de error por operación (841 operaciones) — ver §6.
+- Sin servidor de producción/staging en `openapi/openapi.yaml`: solo se declara
+  `http://localhost:3000`, porque no hay una URL real que documentar sin inventarla.
+
+## Cuerpos de request: homónimos y `additionalProperties: false` (2026-10-09)
+
+`@nestjs/swagger` nombra cada esquema por el nombre de la clase. Con dos DTO
+homónimos en módulos distintos queda **un solo** esquema y una de las rutas se
+documenta con el cuerpo ajeno: `POST /surveys/assignments` figuraba con el
+`CreateAssignmentDto` de `forms` (`fieldId`, `targetResourceConceptId`) en vez
+del suyo (`surveyVersionId`, `targetType`, `targetId`). En `src/**/dto/` hay 85
+nombres de clase repetidos (contados con `grep`, no todos son cuerpos de
+request); Swagger sólo avisa «Duplicate DTO detected» por consola.
+
+Tampoco emitía `additionalProperties: false`, aunque el `ValidationPipe` global
+rechaza con 400 toda clave que el DTO no declara (`forbidNonWhitelisted`).
+
+`tools/openapi/request-body-contract.mjs` lo corrige en el generador, desde los
+metadatos reales y antes de `createDocument`:
+
+- lee el DTO de cada `@Body()` y su módulo Nest (`ModulesContainer`);
+- a los homónimos les pone `@ApiSchema({ name: '<Módulo><Clase>' })`
+  (`SurveysCreateAssignmentDto`); los que ya tienen nombre propio se respetan;
+- cierra con `additionalProperties: false` el cuerpo y los DTO anidados que
+  `@ValidateNested` recorre — sin `@ValidateNested`, el whitelist no entra y el
+  objeto anidado sigue abierto.
+
+`required` no se toca: lo sigue calculando Swagger.
+
+Pruebas: `yarn docs:openapi:request-bodies:test` (app Nest mínima, sin base; la
+primera prueba reproduce el defecto con Swagger real). El `openapi.json`
+versionado **no se regeneró** con este cambio: generar exige `yarn build` y los
+almacenes del stack arriba. Hasta regenerarlo, el paso `git diff --exit-code` de
+CI marca la diferencia, que es exactamente el efecto de este arreglo.

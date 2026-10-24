@@ -424,6 +424,18 @@ export class ObjectStorageRepository {
   }
 
   /**
+   * Checksum de la versión, sin bloqueo: lo consulta la emisión de acceso para
+   * no servir una versión cuya integridad nadie verificó (MCH-021).
+   */
+  findChecksum(
+    em: EntityManager,
+    objectVersionId: string,
+    algorithm: string,
+  ): Promise<ObjectChecksums | null> {
+    return em.findOne(ObjectChecksums, { objectVersionId, algorithm });
+  }
+
+  /**
    * Crea create encryption envelope.
    *
    * @param em - Contexto de persistencia o transacción activa.

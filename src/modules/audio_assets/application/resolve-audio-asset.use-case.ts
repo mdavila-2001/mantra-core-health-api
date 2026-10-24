@@ -210,7 +210,12 @@ export class ResolveAudioAssetUseCase {
         existing.generationStatus,
       )
     ) {
-      const jobId = await this.queue.enqueue(existing.id, assetKey, actor);
+      const jobId = await this.queue.enqueue(
+        existing.id,
+        assetKey,
+        actor,
+        existing.tenantId,
+      );
       return {
         status: 'QUEUED',
         asset: toAudioAssetView(existing),
@@ -251,7 +256,12 @@ export class ResolveAudioAssetUseCase {
     );
     if (asset.generationStatus === 'READY')
       return { status: 'READY', asset: toAudioAssetView(asset) };
-    const jobId = await this.queue.enqueue(asset.id, asset.assetKey, actor);
+    const jobId = await this.queue.enqueue(
+      asset.id,
+      asset.assetKey,
+      actor,
+      asset.tenantId,
+    );
     await recordAudioResolutionEvent(
       this.repository,
       asset,

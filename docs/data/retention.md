@@ -30,8 +30,8 @@ que escala 10 años y uno que colapsa."*
 
 No todo dato es purgable por política de retención estándar:
 
-- `audit.audit_log` — protección WORM (Write Once Read Many), mencionada explícitamente en
-  `ESTADO-Y-PENDIENTES.md` como control transversal ya incorporado.
+- `audit.audit_log` — protección WORM (Write Once Read Many), control transversal ya
+  incorporado.
 - `consent.consent_evidence` — append-only e inmutable por diseño (ver
   [reglas de negocio](../business/business-rules.md) §7): un consentimiento no se borra, se
   revoca hacia adelante.
@@ -59,4 +59,4 @@ tiempo de ejecución, no de código. Se documenta el mecanismo, no se asume su c
 ## Ver también
 
 - [Clasificación de sensibilidad](classification.md)
-- Auditabilidad (Fase 13, en construcción)
+- [Auditabilidad](../security/auditability.md)

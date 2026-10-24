@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Promotions, DiscountRules, Coupons, Redemptions } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
+import { CatalogConcepts } from '../../terminology/entities';
 
 /**
  * Describe el contrato estructural de create promotion data.
@@ -356,6 +357,102 @@ export class PromotionsDiscountsRepository {
     promotionId: string,
   ): Promise<DiscountRules[]> {
     return em.find(DiscountRules, { promotionId });
+  }
+
+  // --- Lectura del paciente (GET /promotions/me) ---
+
+  /**
+   * Promociones **vigentes** del tenant: activas y con `now` dentro de su
+   * ventana (un extremo ausente no acota). Las que vencen antes, primero; a
+   * igual vencimiento, la de mayor prioridad.
+   *
+   * @param em - Contexto de persistencia.
+   * @param tenantId - Tenant del contexto.
+   * @param now - Instante de referencia.
+   */
+  findCurrentPromotions(
+    em: EntityManager,
+    tenantId: string,
+    now: Date,
+  ): Promise<Promotions[]> {
+    return em.find(
+      Promotions,
+      {
+        tenantId,
+        statusConceptId: CONCEPTS.PROMOTION_ACTIVE,
+        $and: [
+          { $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },
+          { $or: [{ validTo: null }, { validTo: { $gte: now } }] },
+        ],
+      },
+      { orderBy: { validTo: 'ASC NULLS LAST', priority: 'DESC', code: 'ASC' } },
+    );
+  }
+
+  /**
+   * Reglas de descuento de varias promociones, en un solo lote.
+   *
+   * @param em - Contexto de persistencia.
+   * @param promotionIds - Promociones cuyas reglas se leen.
+   */
+  findRulesByPromotions(
+    em: EntityManager,
+    promotionIds: readonly string[],
+  ): Promise<DiscountRules[]> {
+    if (promotionIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      DiscountRules,
+      { promotionId: { $in: [...promotionIds] } },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+  }
+
+  /**
+   * Los cupones **personales** de un miembro, activos y vigentes, entre las
+   * promociones dadas. Nunca los de otro: el titular va en el WHERE.
+   *
+   * @param em - Contexto de persistencia.
+   * @param promotionIds - Promociones candidatas.
+   * @param memberTypeConceptId - Tipo de miembro (paciente).
+   * @param memberRefId - El titular.
+   * @param now - Instante de referencia.
+   */
+  findPersonalCoupons(
+    em: EntityManager,
+    promotionIds: readonly string[],
+    memberTypeConceptId: string,
+    memberRefId: string,
+    now: Date,
+  ): Promise<Coupons[]> {
+    if (promotionIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      Coupons,
+      {
+        promotionId: { $in: [...promotionIds] },
+        assignedMemberTypeConceptId: memberTypeConceptId,
+        assignedMemberRefId: memberRefId,
+        statusConceptId: CONCEPTS.COUPON_ACTIVE,
+        $and: [
+          { $or: [{ validFrom: null }, { validFrom: { $lte: now } }] },
+          { $or: [{ validTo: null }, { validTo: { $gte: now } }] },
+        ],
+      },
+      { orderBy: { validTo: 'ASC NULLS LAST', code: 'ASC' } },
+    );
+  }
+
+  /**
+   * Conceptos por id, para servir `{code, display}` en vez de uuids.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ids - Conceptos a resolver.
+   */
+  findConcepts(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<CatalogConcepts[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(CatalogConcepts, { id: { $in: [...ids] } });
   }
 
   // --- Cupones (UC-51-08, UC-51-09) ---

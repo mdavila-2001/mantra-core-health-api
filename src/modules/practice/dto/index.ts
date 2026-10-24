@@ -1,5 +1,6 @@
 export * from './create-practice.dto';
 export * from './create-site.dto';
+export * from './create-own-site.dto';
 export * from './create-accreditation.dto';
 export * from './verify-accreditation.dto';
 export * from './create-clinical-unit.dto';
@@ -13,3 +14,4 @@ export * from './create-inventory-item.dto';
 export * from './create-movement.dto';
 export * from './responses.dto';
 export * from './organization-console.dto';
+export * from './update-own-site.dto';

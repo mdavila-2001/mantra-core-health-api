@@ -20,6 +20,59 @@ const QUEUE = '11111111-1111-1111-1111-111111111111';
 const JOB = '22222222-2222-2222-2222-222222222222';
 const DEAD = '33333333-3333-3333-3333-333333333333';
 
+describe('storage intent boundary (7.2)', () => {
+  it.each(['storage.publish', 'storage.purge'])(
+    'generic enqueue cannot forge %s',
+    async (jobType) => {
+      const { service, queuesRepo } = build();
+      await expect(
+        service.enqueueJob(
+          'default',
+          {
+            jobType,
+            dedupeKey: 'synthetic',
+            payloadJson: {},
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(queuesRepo.createJob).not.toHaveBeenCalled();
+    },
+  );
+  it('generic completion/failure cannot release a storage reservation', async () => {
+    const { service, queuesRepo } = build();
+    const row = {
+      id: JOB,
+      jobType: 'storage.publish',
+      statusConceptId: CONCEPTS.JOB_RUNNING,
+      lockedBy: 'worker',
+    };
+    queuesRepo.findJobForUpdate.mockResolvedValue(row);
+    await expect(
+      service.completeJob(JOB, { workerId: 'worker' }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    await expect(
+      service.failJob(JOB, { workerId: 'worker', errorText: 'synthetic' }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(row.statusConceptId).toBe(CONCEPTS.JOB_RUNNING);
+  });
+  it('generic redrive cannot create a fresh attempt for a quarantined storage intent', async () => {
+    const { service, queuesRepo } = build();
+    queuesRepo.findDeadLetterJobById.mockResolvedValue({
+      id: DEAD,
+      originalJobId: JOB,
+    });
+    queuesRepo.findJobById.mockResolvedValue({
+      id: JOB,
+      jobType: 'storage.purge',
+    });
+    await expect(
+      service.redriveDeadLetter(DEAD, { reason: 'synthetic' }, actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(queuesRepo.createJob).not.toHaveBeenCalled();
+  });
+});
+
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
@@ -28,6 +81,7 @@ function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const queuesRepo = {
+    findStorageIntents: mockFn(() => Promise.resolve([])),
     findQueueByCode: mockFn(),
     findQueueById: mockFn(),
     createJob: mockFn(() => ({ id: JOB })),

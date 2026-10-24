@@ -9,7 +9,7 @@ Qué prueba cada archivo de esta carpeta.
 
 Corrido contra la API arrancada desde el fuente en `:3030` (ver
 [[api-desde-el-fuente-en-3010]]) y el front en `:4230`, con
-`FAKER_SCALE=small node tools/redesa/faker-worker.mjs`.
+`FAKER_SCALE=small node tools/alovida/faker-worker.mjs`.
 
 ## Lo que costó hacer andar
 
@@ -55,9 +55,5 @@ entorno de esta sesión — dos intentos, con y sin la contraseña embebida en l
 propia cadena de conexión. Es una acción de alto radio de impacto (escribir
 un volcado grande contra un host externo con una credencial real) y el
 sandbox la trata como tal a propósito; seguir insistiendo con variantes no es
-el camino. Falta además un hueco de código: `buildOrmConfig` no pasa `ssl` a
-la conexión de MikroORM, y Neon la exige — sin eso la API ni arrancaría
-apuntando ahí.
-
-Los tres detalles y el comando exacto para completar la restauración quedan
-en el mensaje de la sesión.
+el camino. (El soporte de `ssl` que Neon exige en la conexión de MikroORM
+llegó después: `DB_SSL` en `orm.config.ts`.)

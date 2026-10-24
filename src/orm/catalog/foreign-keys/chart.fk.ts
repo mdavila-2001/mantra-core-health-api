@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `chart`.
- * 70 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 71 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const chartForeignKeys: readonly ForeignKeyTuple[] = [
@@ -11,6 +11,7 @@ export const chartForeignKeys: readonly ForeignKeyTuple[] = [
   ['care_plans', 'condition_id', 'clinical', 'conditions', 'id'],
   ['care_plans', 'created_by_user_id', 'iam', 'users', 'id'],
   ['care_plans', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['care_plans', 'form_instance_id', 'forms', 'form_instances', 'id'],
   ['care_plans', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['care_plans', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['care_plans', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],

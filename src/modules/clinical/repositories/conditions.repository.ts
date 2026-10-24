@@ -107,6 +107,25 @@ export class ConditionsRepository {
     return em.findOne(Conditions, { id });
   }
 
+  /**
+   * Diagnósticos de un encuentro (para el sello y el PDF oficial del cierre:
+   * el hash tiene que ser determinista).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param encounterId - Encuentro cuyos diagnósticos se leen.
+   * @returns Filas ordenadas por `createdAt, id`.
+   */
+  findByEncounter(
+    em: EntityManager,
+    encounterId: string,
+  ): Promise<Conditions[]> {
+    return em.find(
+      Conditions,
+      { encounterId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
   /** Condición activa del paciente con el mismo código (evita duplicados). */
   findActiveByCode(
     em: EntityManager,

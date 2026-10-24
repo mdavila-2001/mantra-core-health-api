@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `billing`.
- * 156 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 174 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingIndexes: readonly IndexTuple[] = [
@@ -86,6 +86,8 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['invoices', 'ix_invoices_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
   ['invoice_lines', 'ix_invoice_lines_invoice_id', ['invoice_id'], false, 'btree'],
   ['invoice_lines', 'ix_invoice_lines_service_id', ['service_id'], false, 'btree'],
+  ['invoice_lines', 'ix_invoice_lines_insurance_claim_line_id', ['insurance_claim_line_id'], false, 'btree'],
+  ['invoice_lines', 'uq_invoice_lines_insurance_claim_line_id', ['insurance_claim_line_id'], true, 'btree', 'insurance_claim_line_id IS NOT NULL'],
   ['invoice_lines', 'ix_invoice_lines_tax_code_id', ['tax_code_id'], false, 'btree'],
   ['invoice_lines', 'ix_invoice_lines_income_account_id', ['income_account_id'], false, 'btree'],
   ['invoice_lines', 'ix_invoice_lines_cost_center_id', ['cost_center_id'], false, 'btree'],
@@ -128,6 +130,16 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['payments_received', 'ix_payments_received_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['payments_received', 'ix_payments_received_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['payments_received', 'ix_payments_received_patient_profile_id_updated_at', ['patient_profile_id', 'updated_at desc'], false, 'btree'],
+  ['quotations', 'ix_quotations_practice_id', ['practice_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_created_by_practitioner_profile_id', ['created_by_practitioner_profile_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_appointment_id', ['appointment_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_service_catalog_id', ['service_catalog_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_currency_concept_id', ['currency_concept_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['quotations', 'ix_quotations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['quotation_installments', 'ix_quotation_installments_quotation_id', ['quotation_id'], false, 'btree'],
   ['receivable_payment_allocations', 'uq_receivable_payment_allocations_payment_received_id__c1caeee3', ['payment_received_id', 'invoice_id', 'open_item_id'], true, 'btree'],
   ['receivable_payment_allocations', 'ix_receivable_payment_allocations_payment_received_id', ['payment_received_id'], false, 'btree'],
   ['receivable_payment_allocations', 'ix_receivable_payment_allocations_invoice_id', ['invoice_id'], false, 'btree'],
@@ -141,12 +153,18 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['reimbursements', 'ix_reimbursements_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['reimbursements', 'ix_reimbursements_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_practice_id', ['practice_id'], false, 'btree'],
+  ['service_catalog', 'ix_service_catalog_image_file_id', ['image_file_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_service_concept_id', ['service_concept_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_currency_concept_id', ['currency_concept_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_tax_code_id', ['tax_code_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_income_account_id', ['income_account_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'ix_siat_simulated_invoices_invoice_id', ['invoice_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'ix_siat_simulated_invoices_encounter_id', ['encounter_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'ix_siat_simulated_invoices_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'uk_siat_simulated_invoices_practice_number', ['practice_id', 'invoice_number'], true, 'btree', '"status" <> \'REJECTED\''],
+  ['siat_simulated_outbox', 'ix_siat_simulated_outbox_siat_invoice_id', ['siat_invoice_id'], false, 'btree'],
   ['tax_codes', 'ix_tax_codes_practice_id', ['practice_id'], false, 'btree'],
   ['tax_codes', 'ix_tax_codes_tax_type_concept_id', ['tax_type_concept_id'], false, 'btree'],
   ['tax_codes', 'ix_tax_codes_jurisdiction_concept_id', ['jurisdiction_concept_id'], false, 'btree'],

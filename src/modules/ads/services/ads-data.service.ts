@@ -10,6 +10,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { AdsErrorReason } from '../ads.error-reasons';
 import { AdsAccountsRepository, AdsDataRepository } from '../repositories';
 import { AdEventFieldRules } from '../entities';
 import {
@@ -124,10 +125,14 @@ export class AdsDataService {
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe una política con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe una política con ese código',
+        {
+          tenantId: dto.tenantId,
+          code: dto.code,
+        },
+        AdsErrorReason.EVENT_POLICY_CODE_DUPLICATE,
+      );
     }
     for (const rule of dto.fieldRules) {
       if (rule.action === 'HASH' && !rule.transformation) {
@@ -136,6 +141,7 @@ export class AdsDataService {
           {
             fieldPath: rule.fieldPath,
           },
+          AdsErrorReason.FIELD_RULE_TRANSFORMATION_MISSING,
         );
       }
     }
@@ -211,6 +217,7 @@ export class AdsDataService {
           {
             platformConnectionId: dto.platformConnectionId,
           },
+          AdsErrorReason.PLATFORM_CONNECTION_NOT_FOUND,
         );
       }
       if (connection.statusConceptId !== CONCEPTS.CONNECTION_CONNECTED) {
@@ -219,6 +226,7 @@ export class AdsDataService {
           {
             platformConnectionId: dto.platformConnectionId,
           },
+          AdsErrorReason.PLATFORM_CONNECTION_NOT_ACTIVE,
         );
       }
 
@@ -232,6 +240,7 @@ export class AdsDataService {
           {
             adAccountId: dto.adAccountId,
           },
+          AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
         );
       }
 
@@ -389,6 +398,7 @@ export class AdsDataService {
         throw new ResourceNotFoundException(
           'Dataset de conversión no encontrado',
           { datasetId },
+          AdsErrorReason.CONVERSION_DATASET_NOT_FOUND,
         );
       }
       if (dataset.statusConceptId !== CONCEPTS.DATASET_ACTIVE) {
@@ -397,6 +407,7 @@ export class AdsDataService {
           {
             datasetId,
           },
+          AdsErrorReason.CONVERSION_DATASET_NOT_ACTIVE,
         );
       }
 
@@ -431,6 +442,7 @@ export class AdsDataService {
         throw new PreconditionFailedException(
           'La política exige consentimiento y el evento no lo aporta',
           { datasetId, eventName: dto.eventName },
+          AdsErrorReason.CONVERSION_CONSENT_REQUIRED,
         );
       }
 
@@ -588,6 +600,7 @@ export class AdsDataService {
           {
             adAccountId: dto.adAccountId,
           },
+          AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
         );
       }
 
@@ -673,14 +686,22 @@ export class AdsDataService {
     return this.em.transactional(async (tx) => {
       const catalog = await this.dataRepo.findCatalogForUpdate(tx, catalogId);
       if (!catalog) {
-        throw new ResourceNotFoundException('Catálogo no encontrado', {
-          catalogId,
-        });
+        throw new ResourceNotFoundException(
+          'Catálogo no encontrado',
+          {
+            catalogId,
+          },
+          AdsErrorReason.CATALOG_NOT_FOUND,
+        );
       }
 
       const feed = await this.dataRepo.findFeedForUpdate(tx, feedId);
       if (!feed) {
-        throw new ResourceNotFoundException('Feed no encontrado', { feedId });
+        throw new ResourceNotFoundException(
+          'Feed no encontrado',
+          { feedId },
+          AdsErrorReason.CATALOG_FEED_NOT_FOUND,
+        );
       }
       if (feed.productCatalogId !== catalogId) {
         throw new PreconditionFailedException(
@@ -689,12 +710,17 @@ export class AdsDataService {
             catalogId,
             feedId,
           },
+          AdsErrorReason.CATALOG_FEED_CATALOG_MISMATCH,
         );
       }
       if (feed.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El feed no está activo', {
-          feedId,
-        });
+        throw new PreconditionFailedException(
+          'El feed no está activo',
+          {
+            feedId,
+          },
+          AdsErrorReason.CATALOG_FEED_NOT_ACTIVE,
+        );
       }
 
       const dynamicSets = await this.dataRepo.findDynamicSets(tx, catalogId);

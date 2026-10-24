@@ -9,3 +9,4 @@ export * from './pharmacy-integration-connections.repository';
 export * from './pharmacy-external-product-mappings.repository';
 export * from './pharmacy-read.repository';
 export * from './pharmacy-marketplace.repository';
+export * from './medicine-catalog.repository';

@@ -1,0 +1,186 @@
+import { jest } from '@jest/globals';
+
+// Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
+const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { IamUsersController } from './iam-users.controller';
+
+const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+/**
+ * Construye el sistema bajo prueba con dependencias controladas.
+ * @returns Resultado de build.
+ */
+function build() {
+  const usersService = {
+    createUser: mockFn(),
+    lock: mockFn(),
+    changeGlobalRole: mockFn(),
+    anonymize: mockFn(),
+  };
+  const usersReadService = {
+    searchUsers: mockFn(),
+    getUserById: mockFn(),
+    listCredentials: mockFn(),
+    listDevices: mockFn(),
+    listMfaFactors: mockFn(),
+    listSessions: mockFn(),
+    listGlobalRoles: mockFn(),
+  };
+  const credentialsService = {
+    linkFederated: mockFn(),
+    revokeCredential: mockFn(),
+  };
+  const mfaService = { enrollOrVerify: mockFn() };
+  const devicesService = { register: mockFn() };
+  const assistedRegistrationService = { assistedRegistration: mockFn() };
+  // P6: el alta administrativa de un profesional cuelga del mismo servicio que
+  // el autorregistro, porque comparten el registro CTI atómico.
+  const practitionerRegistrationService = {
+    assistedRegisterPractitioner: mockFn(),
+  };
+
+  const controller = new IamUsersController(
+    usersService as any,
+    usersReadService as any,
+    credentialsService as any,
+    mfaService as any,
+    devicesService as any,
+    assistedRegistrationService as any,
+    practitionerRegistrationService as any,
+  );
+  return {
+    controller,
+    usersService,
+    usersReadService,
+    credentialsService,
+    mfaService,
+    devicesService,
+    assistedRegistrationService,
+  };
+}
+
+describe('IamUsersController', () => {
+  it('delegates createUser (UC-01-01)', async () => {
+    const d = build();
+    const dto = { displayName: 'A', email: 'a@x.io', password: 'password123' };
+    d.usersService.createUser.mockResolvedValue({ id: 'u1' });
+    await expect(d.controller.createUser(dto as any, actor)).resolves.toEqual({
+      id: 'u1',
+    });
+    expect(d.usersService.createUser).toHaveBeenCalledWith(dto, actor);
+  });
+
+  it('delegates linkFederated (UC-01-02)', async () => {
+    const d = build();
+    const dto = { identityProvider: 'g', externalSubject: 's' };
+    await d.controller.linkFederated('u1', dto, actor);
+    expect(d.credentialsService.linkFederated).toHaveBeenCalledWith(
+      'u1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates revokeCredential (UC-01-09)', async () => {
+    const d = build();
+    await d.controller.revokeCredential('u1', 'c1', actor);
+    expect(d.credentialsService.revokeCredential).toHaveBeenCalledWith(
+      'u1',
+      'c1',
+      actor,
+    );
+  });
+
+  it('delegates mfaFactor (UC-01-03)', async () => {
+    const d = build();
+    const dto = { factorType: 'TOTP' };
+    await d.controller.mfaFactor('u1', dto as any, actor);
+    expect(d.mfaService.enrollOrVerify).toHaveBeenCalledWith('u1', dto, actor);
+  });
+
+  it('delegates registerDevice (UC-01-05)', async () => {
+    const d = build();
+    const dto = { deviceFingerprint: 'fp' };
+    await d.controller.registerDevice('u1', dto, actor);
+    expect(d.devicesService.register).toHaveBeenCalledWith('u1', dto, actor);
+  });
+
+  it('delegates lock (UC-01-07)', async () => {
+    const d = build();
+    await d.controller.lock('u1', { reason: 'x' }, actor);
+    expect(d.usersService.lock).toHaveBeenCalledWith(
+      'u1',
+      { reason: 'x' },
+      actor,
+    );
+  });
+
+  it('delegates changeGlobalRole (UC-01-10)', async () => {
+    const d = build();
+    const dto = { role: 'USER', action: 'GRANT' };
+    await d.controller.changeGlobalRole('u1', dto as any, actor);
+    expect(d.usersService.changeGlobalRole).toHaveBeenCalledWith(
+      'u1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates anonymize (UC-01-12)', async () => {
+    const d = build();
+    await d.controller.anonymize('u1', actor);
+    expect(d.usersService.anonymize).toHaveBeenCalledWith('u1', actor);
+  });
+});
+
+describe('IamUsersController — lecturas', () => {
+  it('searchUsers aplica el tope por defecto cuando el cliente no pide uno', async () => {
+    const d = build();
+    d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+    await d.controller.searchUsers();
+
+    expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+      query: undefined,
+      statusConceptId: undefined,
+      cursor: undefined,
+      limit: 50,
+    });
+  });
+
+  it('searchUsers propaga texto, estado, cursor y tope tal como llegan', async () => {
+    const d = build();
+    d.usersReadService.searchUsers.mockResolvedValue({ items: [] });
+
+    await d.controller.searchUsers('ana', 'status-1', 'cursor-opaco', 10);
+
+    expect(d.usersReadService.searchUsers).toHaveBeenCalledWith({
+      query: 'ana',
+      statusConceptId: 'status-1',
+      cursor: 'cursor-opaco',
+      limit: 10,
+    });
+  });
+
+  it.each([
+    ['getUser', 'getUserById'],
+    ['listCredentials', 'listCredentials'],
+    ['listDevices', 'listDevices'],
+    ['listMfaFactors', 'listMfaFactors'],
+    ['listSessions', 'listSessions'],
+    ['listGlobalRoles', 'listGlobalRoles'],
+  ])('%s delega en el servicio de lectura', async (method, delegate) => {
+    const d = build();
+    (d.usersReadService as any)[delegate].mockResolvedValue({ items: [] });
+
+    await (d.controller as any)[method]('u1');
+
+    expect((d.usersReadService as any)[delegate]).toHaveBeenCalledWith('u1');
+  });
+});

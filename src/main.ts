@@ -4,7 +4,6 @@
 // tarde y no se emite ni un span. Ver `src/observability/telemetry.bootstrap.ts`.
 import './observability/telemetry.bootstrap';
 
-import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
@@ -13,13 +12,41 @@ import { apiReference } from '@scalar/nestjs-api-reference';
 import { Logger, PinoLogger } from 'nestjs-pino';
 import helmet from 'helmet';
 import { json, urlencoded } from 'express';
+import type { Server, ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
+import { loadHttpSliEnv } from './observability/http-sli/http-sli.env';
+import { createHttpSliMiddleware } from './observability/http-sli/http-sli.middleware';
+import { httpSliAggregator } from './observability/http-sli/http-sli.tokens';
 import {
+  buildCorsOptions,
+  createGlobalValidationPipe,
   describeBuild,
   installProcessGuards,
   installShutdownWatchdog,
   loadBuildInfo,
+  loadCorsAllowedOrigins,
 } from './common';
+
+/**
+ * Adaptador de socket.io que impone la MISMA política de CORS que la API
+ * HTTP a todos los gateways, en lugar de que cada `@WebSocketGateway` declare
+ * la suya y se desincronicen.
+ */
+class CorsIoAdapter extends IoAdapter {
+  constructor(
+    app: NestExpressApplication,
+    private readonly cors: ServerOptions['cors'],
+  ) {
+    super(app);
+  }
+
+  override createIOServer(port: number, options?: ServerOptions): Server {
+    return super.createIOServer(port, {
+      ...options,
+      cors: this.cors,
+    }) as Server;
+  }
+}
 
 /**
  * Splash de arranque. Se escribe directo a stdout, no por el logger: es un
@@ -33,7 +60,7 @@ const BANNER = `
  | |  | | (_| | | | | |_| | | (_| | |__| (_) | | |  __/    | |  __/ (__| | | |
  |_|  |_|\\__,_|_| |_|\\__|_|  \\__,_|\\____\\___/|_|  \\___|    |_|\\___|\\___|_| |_|
  =============================================================================
-  MANTRA CORE TECHNOLOGIES - REDSAT HEALTH API
+  MANTRA CORE TECHNOLOGIES - ALOVIDA HEALTH API
  =============================================================================
 `;
 
@@ -134,46 +161,53 @@ async function bootstrap() {
   // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
   app.use(helmet());
 
+  // Medición de peticiones HTTP para el portal de superadministración. Va acá, antes
+  // de las rutas y de cualquier parseo de cuerpo, y no como interceptor: un
+  // interceptor no ve lo que se rechaza antes del handler (cuerpo inválido, ruta
+  // inexistente) y esos 4xx son justo lo que se quiere contar. Sólo lee verbo,
+  // plantilla de ruta, estado y duración; nunca la URL, el cuerpo ni al usuario.
+  if (loadHttpSliEnv().enabled) {
+    app.use(createHttpSliMiddleware(httpSliAggregator));
+  }
+
   // Límite explícito de tamaño de payload. El default de Express (100 kb) queda
   // documentado aquí de forma intencional; las cargas grandes (imágenes, DICOM)
   // van por el flujo de almacenamiento de objetos, no por el body JSON.
   app.use(json({ limit: '1mb' }));
   app.use(urlencoded({ extended: true, limit: '1mb' }));
 
-  // CORS deshabilitado por defecto de forma explícita (deny-by-default). Cuando
-  // haya un frontend con origen conocido, declarar aquí la allowlist de orígenes.
-  app.enableCors({ origin: false });
+  // CORS deny-by-default. Con front y API bajo el mismo origen (nginx del
+  // frontend delante) no hace falta. Si el front vive en otro dominio, sus
+  // orígenes exactos van en `CORS_ALLOWED_ORIGINS` (ver `common/http/cors-origins`).
+  const corsOrigins = loadCorsAllowedOrigins();
+  const corsOptions = buildCorsOptions(corsOrigins);
+  app.enableCors(corsOptions);
+  logger.info(
+    { event: 'app.cors', origins: corsOrigins },
+    corsOrigins.length > 0
+      ? `CORS abierto a ${corsOrigins.join(', ')}`
+      : 'CORS denegado (mismo origen)',
+  );
 
   // Mensajería en tiempo real (`CommunityMessagingGateway`). Sin este adaptador
   // el `@WebSocketGateway` del módulo `community` queda declarado pero nunca
-  // escucha: Nest no monta socket.io sobre el servidor HTTP por defecto. Mismo
-  // criterio deny-by-default que el CORS de arriba — el gateway declara su
-  // propio `cors: { origin: false }`.
-  app.useWebSocketAdapter(new IoAdapter(app));
+  // escucha: Nest no monta socket.io sobre el servidor HTTP por defecto. Los
+  // gateways heredan la misma allowlist que el CORS de arriba.
+  app.useWebSocketAdapter(new CorsIoAdapter(app, corsOptions));
 
-  // Validación global de DTO. `whitelist` + `forbidNonWhitelisted` cierran el
-  // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en
-  // lugar de filtrarse a la capa de dominio. `transform` habilita la coerción de
-  // tipos declarada con class-transformer (p. ej. query params numéricos).
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  // Validación global de DTO: ver `createGlobalValidationPipe`. Es la misma
+  // fábrica que usa el harness de integración, para que las pruebas validen el
+  // contrato que corre de verdad.
+  app.useGlobalPipes(createGlobalValidationPipe());
 
   // OpenAPI/Swagger en /docs y referencia interactiva Scalar en /reference.
   // Solo fuera de producción: en producción publicarían el mapa completo de
-  // endpoints y esquemas (divulgación de superficie de ataque). La estrategia
-  // de exposición en producción (Scalar protegido, entorno separado, etc.) es
-  // una decisión pendiente — ver `SEC-002` en
-  // `docs/governance/traceability-matrix.md` y `docs/api/conventions.md`.
+  // endpoints y esquemas (divulgación de superficie de ataque). En producción
+  // no se expone ninguna de las dos.
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('REDSAT Health API')
-      .setDescription('Mantra Core Technologies - REDSAT Health Ecosystem')
+      .setTitle('ALOVIDA Health API')
+      .setDescription('Mantra Core Technologies - ALOVIDA Health Ecosystem')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
@@ -188,10 +222,10 @@ async function bootstrap() {
         ) => (req: unknown, res: unknown) => void
       )({
         content: document,
-        pageTitle: 'REDSAT Health API — Referencia',
+        pageTitle: 'ALOVIDA Health API — Referencia',
         theme: 'default',
         metaData: {
-          title: 'REDSAT Health API',
+          title: 'ALOVIDA Health API',
           description:
             'Referencia interactiva del contrato OpenAPI real, generado desde los decoradores del backend.',
         },

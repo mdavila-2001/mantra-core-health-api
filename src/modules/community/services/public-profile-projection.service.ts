@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CONCEPTS, ResourceNotFoundException, touch } from '../../../common';
 import { COMM } from '../community.concepts';
 import { PublicProfilesRepository } from '../repositories';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 /** Datos mínimos para proyectar una organización en el directorio público. */
 export interface OrganizationPublicProfileProjection {
@@ -36,7 +37,7 @@ export interface OrganizationPublicProfileProjection {
  * sólo cambia la portada no borre la biografía sin quererlo. `null` explícito
  * sí quita el valor.
  */
-export interface OrganizationVitrinaUpdate {
+export interface OrganizationShowcaseUpdate {
   /** Sujeto del perfil. Para una organización es su propio `tenantId`. */
   targetId: string;
   /** Nombre visible; omitido conserva el que proyectó la verificación. */
@@ -66,6 +67,47 @@ export class PublicProfileProjectionService {
    */
   constructor(private readonly profilesRepo: PublicProfilesRepository) {}
 
+  /** Referencia del logo; no publica ni crea una vitrina al leer. */
+  async getOrganizationLogo(
+    em: EntityManager,
+    targetId: string,
+  ): Promise<string | null> {
+    const profile = await this.profilesRepo.findByTarget(em, targetId);
+    return profile?.avatarFileId ?? null;
+  }
+
+  /** Guarda el logo antes de la verificación sin publicar la organización. */
+  async setOrganizationLogo(
+    em: EntityManager,
+    data: {
+      tenantId: string;
+      displayName: string;
+      fileId: string | null;
+      actorUserId: string;
+    },
+  ): Promise<void> {
+    let profile = await this.profilesRepo.findByTarget(em, data.tenantId);
+    if (!profile) {
+      if (data.fileId === null) return;
+      profile = this.profilesRepo.create(em, {
+        tenantId: data.tenantId,
+        targetId: data.tenantId,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+        slug: `organization-${data.tenantId}`,
+        displayName: data.displayName,
+        statusConceptId: CONCEPTS.STATE_PENDING,
+        // Sin visibilidad pública: esta fila sólo permite guardar el logo interno.
+        actorUserId: data.actorUserId,
+        avatarFileId: data.fileId,
+      });
+    } else {
+      // null explícito persiste la eliminación, sin tocar presentación ni portada.
+      em.assign(profile, { avatarFileId: data.fileId });
+      touch(profile, data.actorUserId);
+    }
+    await em.flush();
+  }
+
   /**
    * Proyecta una organización dentro de la transacción del caso de uso llamador.
    *
@@ -81,8 +123,23 @@ export class PublicProfileProjectionService {
     // vuelva a verificarlo. Sin esto, reverificar dejaba dos filas para el
     // mismo sujeto —dos enlaces públicos a lo mismo— y el slug, que es único,
     // hacía caer la segunda con un error de base que no nombraba el problema.
-    const existente = await this.profilesRepo.findByTarget(em, data.targetId);
-    if (existente) return existente.id;
+    const existing = await this.profilesRepo.findByTarget(em, data.targetId);
+    if (existing) {
+      // Completa exclusivamente el ancla pendiente creada para un logo interno.
+      // Una vitrina con visibilidad privada explícita conserva su decisión.
+      if (
+        existing.visibilityConceptId == null &&
+        existing.statusConceptId === CONCEPTS.STATE_PENDING
+      ) {
+        existing.visibilityConceptId = COMM.PROFILE_VISIBILITY_PUBLIC;
+        existing.statusConceptId = CONCEPTS.STATE_ACTIVE;
+        existing.targetTypeConceptId =
+          data.targetTypeConceptId ?? COMM.PROFILE_TARGET_ORGANIZATION;
+        touch(existing, data.actorUserId);
+        await em.flush();
+      }
+      return existing.id;
+    }
 
     const profile = this.profilesRepo.create(em, {
       tenantId: data.tenantId,
@@ -128,9 +185,9 @@ export class PublicProfileProjectionService {
    * @returns Identificador del perfil actualizado.
    * @throws ResourceNotFoundException si el sujeto no tiene vitrina proyectada.
    */
-  async updateOrganizationVitrina(
+  async updateOrganizationShowcase(
     em: EntityManager,
-    data: OrganizationVitrinaUpdate,
+    data: OrganizationShowcaseUpdate,
   ): Promise<string> {
     const profile = await this.profilesRepo.findByTarget(em, data.targetId);
     // Sin vitrina no hay nada que editar, y crearla acá saltearía la
@@ -139,6 +196,7 @@ export class PublicProfileProjectionService {
       throw new ResourceNotFoundException(
         'Esta organización todavía no tiene vitrina pública: se proyecta al verificarla',
         { targetId: data.targetId },
+        CommunityErrorReason.ORGANIZATION_VITRINA_NOT_PROJECTED,
       );
 
     if (data.displayName !== undefined) profile.displayName = data.displayName;

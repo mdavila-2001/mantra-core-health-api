@@ -1097,7 +1097,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "display": "valor-ejemplo"
       },
       "sampleCollectionAvailable": {},
-      "imagingAvailable": {}
+      "imagingAvailable": {},
+      "latitude": {},
+      "longitude": {}
     }
   ],
   "equipment": [
@@ -1182,7 +1184,7 @@ Campos de la respuesta:
 | `acceptsExternalOrders` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `walkInAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
-| `sites` | Sí | `array<DiagnosticUnitSiteDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","role":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"sampleCollectionAvailable":{},"imagingAvailable":{}}]` |
+| `sites` | Sí | `array<DiagnosticUnitSiteDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","role":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"sampleCollectionAvailable":{},"imagingAvailable":{},"latitude":{},"longitude":{}}]` |
 | `sites[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sites[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -1191,6 +1193,8 @@ Campos de la respuesta:
 | `sites[].role.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `sites[].sampleCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `sites[].imagingAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sites[].latitude` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sites[].longitude` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `equipment` | Sí | `array<DiagnosticEquipmentDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"manufacturer":{},"model":{},"modality":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"operationalStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"lastCalibrationAt":{},"nextCalibrationDueAt":{}}]` |
 | `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `equipment[].siteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -3018,7 +3022,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "tenantId": "00000000-0000-4000-8000-000000000001",
       "rating": {},
       "ratingCount": 1,
-      "minAmount": {}
+      "minAmount": {},
+      "minAmountCurrency": {},
+      "cities": [
+        "valor-ejemplo"
+      ]
     }
   ],
   "total": 1,
@@ -3031,7 +3039,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<DiagnosticUnitSearchItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{},"tenantId":"00000000-0000-4000-8000-000000000001","rating":{},"ratingCount":1,"minAmount":{}}]` |
+| `items` | Sí | `array<DiagnosticUnitSearchItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{},"tenantId":"00000000-0000-4000-8000-000000000001","rating":{},"ratingCount":1,"minAmount":{},"minAmountCurrency":{},"cities":["valor-ejemplo"]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -3048,6 +3056,8 @@ Campos de la respuesta:
 | `items[].rating` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `items[].minAmount` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].minAmountCurrency` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].cities` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `offset` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |

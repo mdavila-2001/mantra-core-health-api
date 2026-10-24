@@ -1,0 +1,470 @@
+{
+  "generatedAt": "2026-10-24T01:07:09.237Z",
+  "artifacts": {
+    "fhir-r5-core": {
+      "spec": "hl7.fhir.r5.core@5.0.0",
+      "version": "5.0.0",
+      "url": "https://registry.npmjs.org/hl7.fhir.r5.core/-/hl7.fhir.r5.core-5.0.0.tgz",
+      "sha256": "09f22107bef64313545a50d2c127d20f81173c499a395672fae089bc23e72fab",
+      "retrievedAt": "2026-10-24T00:40:38.736Z",
+      "license": "CC0-1.0"
+    },
+    "hl7-terminology": {
+      "spec": "hl7.terminology.r4@7.0.1",
+      "version": "7.0.1",
+      "url": "https://registry.npmjs.org/hl7.terminology.r4/-/hl7.terminology.r4-7.0.1.tgz",
+      "sha256": "170c546f761fb51b3355788ca500206f6b772b21c57348c29205de85a6612baa",
+      "retrievedAt": "2026-10-24T00:40:40.142Z",
+      "license": "CC0-1.0"
+    },
+    "vsac": {
+      "spec": "us.nlm.vsac@0.24.0",
+      "version": "0.24.0",
+      "url": "https://registry.npmjs.org/us.nlm.vsac/-/us.nlm.vsac-0.24.0.tgz",
+      "sha256": "979a22871245fc91dda62356b58d281e2b46ccd58b2da12d99323234eccec653",
+      "retrievedAt": "2026-10-24T00:40:40.950Z",
+      "license": "US Govt"
+    },
+    "phinvads": {
+      "spec": "us.cdc.phinvads@0.12.0",
+      "version": "0.12.0",
+      "url": "https://registry.npmjs.org/us.cdc.phinvads/-/us.cdc.phinvads-0.12.0.tgz",
+      "sha256": "383410ef815333025855949e0d3231f9e32ac1d70cd79bc3d3dc7c5fe1a1d239",
+      "retrievedAt": "2026-10-24T00:40:46.142Z",
+      "license": "HHS/Open"
+    },
+    "hpo": {
+      "spec": "obophenotype/human-phenotype-ontology/hp.obo",
+      "version": "920d4eb3608b50a2c19ddb10290224ab35a759c5",
+      "url": "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/920d4eb3608b50a2c19ddb10290224ab35a759c5/hp.obo",
+      "sha256": "93dace952fcb3ec4728818857f6ba76bc2d5312f4d83266519b8694b8e798f22",
+      "retrievedAt": "2026-10-24T00:40:47.725Z",
+      "license": "HPO license (uso libre con cita y sin modificar el contenido)"
+    },
+    "hpo-es": {
+      "spec": "obophenotype/hpo-translations/babelon/hp-es.babelon.tsv",
+      "version": "f35b9e90ecb78f88893e4a24ca3c4dfbc5b7e2db",
+      "url": "https://raw.githubusercontent.com/obophenotype/hpo-translations/f35b9e90ecb78f88893e4a24ca3c4dfbc5b7e2db/babelon/hp-es.babelon.tsv",
+      "sha256": "00972e33775a0340ad7b45620f0ff1d2794766c45beb937a165ee86e6f16ed9a",
+      "retrievedAt": "2026-10-24T00:40:48.830Z",
+      "license": "HPO license (uso libre con cita y sin modificar el contenido)"
+    },
+    "doid": {
+      "spec": "DiseaseOntology/HumanDiseaseOntology/src/ontology/doid.obo",
+      "version": "776da8dabab5dccff7fe39a81887a37204245103",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/776da8dabab5dccff7fe39a81887a37204245103/src/ontology/doid.obo",
+      "sha256": "51e717b6b9f5d391f2793f9e16faf9c8629a661ab8f21c3a024458129f182ad2",
+      "retrievedAt": "2026-10-24T00:40:49.783Z",
+      "license": "CC0-1.0"
+    },
+    "mondo": {
+      "spec": "monarch-initiative/mondo/src/ontology/mondo-edit.obo",
+      "version": "a645ab571f5b0881a184c28b84d0f9050432dc53",
+      "url": "https://raw.githubusercontent.com/monarch-initiative/mondo/a645ab571f5b0881a184c28b84d0f9050432dc53/src/ontology/mondo-edit.obo",
+      "sha256": "83983900026e5533ac84719050e2c493b8483171a2949deaea0e4adcabc9d0ca",
+      "retrievedAt": "2026-10-24T00:40:50.488Z",
+      "license": "CC-BY-4.0"
+    },
+    "off-allergens": {
+      "spec": "openfoodfacts/openfoodfacts-server/taxonomies/allergens.txt",
+      "version": "c8bb42e08aefdb8b5b8577ab787120b1bde9cf34",
+      "url": "https://raw.githubusercontent.com/openfoodfacts/openfoodfacts-server/c8bb42e08aefdb8b5b8577ab787120b1bde9cf34/taxonomies/allergens.txt",
+      "sha256": "0d3992c301b8cbda92e03fe0d98da3bd17794c51970222d9bea4d6b6549c658d",
+      "retrievedAt": "2026-10-24T00:40:53.230Z",
+      "license": "ODbL-1.0"
+    },
+    "off-additives": {
+      "spec": "openfoodfacts/openfoodfacts-server/taxonomies/additives.txt",
+      "version": "c8bb42e08aefdb8b5b8577ab787120b1bde9cf34",
+      "url": "https://raw.githubusercontent.com/openfoodfacts/openfoodfacts-server/c8bb42e08aefdb8b5b8577ab787120b1bde9cf34/taxonomies/additives.txt",
+      "sha256": "3c8b3c6d62e50bd3a308336c6402dcb3b248f55e2f7dfd0a3b9ce39de2d8c538",
+      "retrievedAt": "2026-10-24T00:40:53.761Z",
+      "license": "ODbL-1.0"
+    },
+    "ecto": {
+      "spec": "EnvironmentOntology/environmental-exposure-ontology/ecto.owl",
+      "version": "dfb9e555f6e723aa0d675361db0e96b29d18aa0f",
+      "url": "https://raw.githubusercontent.com/EnvironmentOntology/environmental-exposure-ontology/dfb9e555f6e723aa0d675361db0e96b29d18aa0f/ecto.owl",
+      "sha256": "c637876e3c15494ee260e05b73cea38f0b152eee5aff1c10ad6e2574d74bc5c3",
+      "retrievedAt": "2026-10-24T01:02:40.205Z",
+      "license": "CC0-1.0 (ECTO) · CC-BY-4.0 (contenido de ChEBI)"
+    },
+    "oae": {
+      "spec": "OAE-ontology/OAE/oae.owl",
+      "version": "5bd979475976915542aa27cfcdeca8b9b0b9ece7",
+      "url": "https://raw.githubusercontent.com/OAE-ontology/OAE/5bd979475976915542aa27cfcdeca8b9b0b9ece7/oae.owl",
+      "sha256": "3ff0f811db391c5c9425296a0978a122c7e6e97b7b81df1e1dfcb9ef6fee71b5",
+      "retrievedAt": "2026-10-24T01:02:42.542Z",
+      "license": "CC-BY-4.0"
+    },
+    "foodon": {
+      "spec": "FoodOntology/foodon/foodon.owl",
+      "version": "cd73540243a84bcd511a500d9a497d12d7dc02f6",
+      "url": "https://raw.githubusercontent.com/FoodOntology/foodon/cd73540243a84bcd511a500d9a497d12d7dc02f6/foodon.owl",
+      "sha256": "b897bf64c1b265c422db9ee01e1235c10c0b809e7f02326ef810a52068347edf",
+      "retrievedAt": "2026-10-24T01:02:43.681Z",
+      "license": "CC-BY-4.0"
+    },
+    "symp": {
+      "spec": "DiseaseOntology/SymptomOntology/src/ontology/symp.obo",
+      "version": "6e16da69d4182c25d8882b58d3575aa84e343717",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/SymptomOntology/6e16da69d4182c25d8882b58d3575aa84e343717/src/ontology/symp.obo",
+      "sha256": "09ac08ff1595e671826c6a4b8a5141f4609bea7f71e8393a1fea997bceabcc2b",
+      "retrievedAt": "2026-10-24T01:02:46.242Z",
+      "license": "CC0-1.0"
+    },
+    "fhir-cl-core": {
+      "spec": "hl7.fhir.cl.clcore@1.9.4",
+      "version": "1.9.4",
+      "url": "https://registry.npmjs.org/hl7.fhir.cl.clcore/-/hl7.fhir.cl.clcore-1.9.4.tgz",
+      "sha256": "78fddf93d2dd76f889c9bf9c4e5a8de8a81f5dcaffaed399981422fc51439013",
+      "retrievedAt": "2026-10-24T01:02:46.801Z",
+      "license": "CC0-1.0"
+    },
+    "fhir-eu-base": {
+      "spec": "hl7.fhir.eu.base@2.0.0-ballot",
+      "version": "2.0.0-ballot",
+      "url": "https://registry.npmjs.org/hl7.fhir.eu.base/-/hl7.fhir.eu.base-2.0.0-ballot.tgz",
+      "sha256": "27e7b9f11c0c2375819cb2b0818d1e2c288bb67271bb2ec55f637986bbb55c2f",
+      "retrievedAt": "2026-10-24T01:02:47.334Z",
+      "license": "CC0-1.0"
+    }
+  },
+  "passes": [
+    {
+      "n": 1,
+      "key": "hl7-enums",
+      "title": "HL7 FHIR R5 + HL7 Terminology: enumeraciones de AllergyIntolerance y tablas v2",
+      "read": 50,
+      "added": 50,
+      "duplicates": 0
+    },
+    {
+      "n": 2,
+      "key": "rxnorm-ingredients",
+      "title": "VSAC «Clinical Drug Ingredient» (RxNorm IN/PIN/MIN/BN, sin BN)",
+      "read": 21923,
+      "added": 21923,
+      "duplicates": 0
+    },
+    {
+      "n": 3,
+      "key": "ndfrt-classes",
+      "title": "VSAC «Medication Drug Class» (NDF-RT)",
+      "read": 12994,
+      "added": 12994,
+      "duplicates": 0
+    },
+    {
+      "n": 4,
+      "key": "cvx-vsac",
+      "title": "VSAC «CVX Vaccines Administered Vaccine Set»",
+      "read": 235,
+      "added": 235,
+      "duplicates": 0
+    },
+    {
+      "n": 5,
+      "key": "cvx-others",
+      "title": "Resto de value sets con CVX (VSAC + PHIN VADS)",
+      "read": 846,
+      "added": 40,
+      "duplicates": 806
+    },
+    {
+      "n": 6,
+      "key": "rxnorm-medicinal-ingredients",
+      "title": "VSAC «Medicinal Ingredients RXNORM» (otra versión de RxNorm)",
+      "read": 21923,
+      "added": 0,
+      "duplicates": 21923
+    },
+    {
+      "n": 7,
+      "key": "vsac-allergy-groupings",
+      "title": "Value sets de VSAC sobre alergia con RxNorm (agrupamientos por clase)",
+      "read": 0,
+      "added": 0,
+      "duplicates": 0
+    },
+    {
+      "n": 8,
+      "key": "hpo",
+      "title": "HPO (fenotipos y alergias) + traducción oficial al castellano",
+      "read": 19178,
+      "added": 19178,
+      "duplicates": 0
+    },
+    {
+      "n": 9,
+      "key": "doid",
+      "title": "Disease Ontology — DOID:1205 allergic disease",
+      "read": 176,
+      "added": 176,
+      "duplicates": 0
+    },
+    {
+      "n": 10,
+      "key": "mondo",
+      "title": "Mondo — MONDO:0005271 allergic disease (dedup. por equivalentTo)",
+      "read": 15,
+      "added": 15,
+      "duplicates": 0
+    },
+    {
+      "n": 11,
+      "key": "off-allergens",
+      "title": "Open Food Facts — alérgenos",
+      "read": 26,
+      "added": 26,
+      "duplicates": 0
+    },
+    {
+      "n": 12,
+      "key": "off-additives",
+      "title": "Open Food Facts — aditivos (número E)",
+      "read": 725,
+      "added": 725,
+      "duplicates": 0
+    },
+    {
+      "n": 13,
+      "key": "lexical-sweep",
+      "title": "Barrido léxico «allerg…» en DOID/Mondo/HPO fuera de los subárboles",
+      "read": 0,
+      "added": 0,
+      "duplicates": 0
+    },
+    {
+      "n": 14,
+      "key": "phinvads-allergy-types",
+      "title": "PHIN VADS — value sets HL7 v2 de alergia (0127/0128/0436/0438)",
+      "read": 12,
+      "added": 0,
+      "duplicates": 12
+    },
+    {
+      "n": 15,
+      "key": "chebi-allergens",
+      "title": "ChEBI (vía ECTO) — químicos con rol «allergen» y clases de alérgeno",
+      "read": 86,
+      "added": 86,
+      "duplicates": 0
+    },
+    {
+      "n": 16,
+      "key": "oae-allergy",
+      "title": "OAE — «allergy AE» y descendientes",
+      "read": 35,
+      "added": 35,
+      "duplicates": 0
+    },
+    {
+      "n": 17,
+      "key": "foodon-labelling",
+      "title": "FoodOn — «food allergen labelling»",
+      "read": 20,
+      "added": 20,
+      "duplicates": 0
+    },
+    {
+      "n": 18,
+      "key": "national-fhir-igs",
+      "title": "Guías FHIR nacionales: HL7 Chile CL Core 1.9.4, HL7 Europe EU Base 2.0.0-ballot",
+      "read": 0,
+      "added": 0,
+      "duplicates": 0
+    },
+    {
+      "n": 19,
+      "key": "symptom-ontology",
+      "title": "Symptom Ontology (DOID) — reacciones alérgicas",
+      "read": 0,
+      "added": 0,
+      "duplicates": 0
+    },
+    {
+      "n": 20,
+      "key": "ecto-exposures",
+      "title": "ECTO — exposiciones a alérgenos",
+      "read": 0,
+      "added": 0,
+      "duplicates": 0
+    }
+  ],
+  "discarded": [
+    {
+      "pass": "rxnorm-ingredients",
+      "reason": "marca comercial (TTY=BN según el value set VSAC 1237.18): la alergia se registra al ingrediente",
+      "count": 5096
+    },
+    {
+      "pass": "cvx-others",
+      "reason": "código CVX administrativo («no vaccine administered», «unknown», «RESERVED»)",
+      "count": 3
+    },
+    {
+      "pass": "cvx-others",
+      "reason": "código CVX sólo presente en value sets de PHIN VADS que no son de vacunas administradas (códigos nunca activos)",
+      "count": 1
+    },
+    {
+      "pass": "vsac-allergy-groupings",
+      "reason": "código RxNorm de producto (no ingrediente): no es una sustancia",
+      "count": 10240
+    },
+    {
+      "pass": "mondo",
+      "reason": "Mondo lo declara equivalentTo un DOID ya cargado (se anota como external_id)",
+      "count": 21
+    },
+    {
+      "pass": "off-additives",
+      "reason": "entrada de la taxonomía sin número E (clase o agrupador, no aditivo)",
+      "count": 17
+    },
+    {
+      "pass": "lexical-sweep",
+      "reason": "nombre con «allerg…» pero fuera del subárbol de alergia de su ontología: no se carga (ver lista en meta)",
+      "count": 13
+    },
+    {
+      "pass": "national-fhir-igs",
+      "reason": "recursos de alergia de CL Core / EU Base sin códigos propios fuera de SNOMED CT",
+      "count": 0
+    },
+    {
+      "pass": "symptom-ontology",
+      "reason": "manifestación ya cubierta por la HPO (con castellano oficial); SYMP no declara equivalencia",
+      "count": 3
+    },
+    {
+      "pass": "ecto-exposures",
+      "reason": "clase de exposición (ECTO), no sustancia: la sustancia ya está en la pasada 15",
+      "count": 3
+    }
+  ],
+  "notes": {
+    "hpoStaleTranslations": 2131,
+    "lexicalSweep": [
+      {
+        "id": "MONDO:0014218",
+        "name": "severe dermatitis-multiple allergies-metabolic wasting syndrome"
+      },
+      {
+        "id": "MONDO:0021202",
+        "name": "allergic otitis media"
+      },
+      {
+        "id": "MONDO:0100177",
+        "name": "allergic rhinitis, susceptibility to"
+      },
+      {
+        "id": "MONDO:1010284",
+        "name": "allergic rhinitis, non-human animal"
+      },
+      {
+        "id": "MONDO:1011130",
+        "name": "allergic rhinitis, cattle"
+      },
+      {
+        "id": "MONDO:1011735",
+        "name": "dermal allergy, non-human animal"
+      },
+      {
+        "id": "MONDO:1012060",
+        "name": "dermal allergy, horse"
+      },
+      {
+        "id": "MONDO:1013076",
+        "name": "food allergy, non-human animal"
+      },
+      {
+        "id": "MONDO:1013078",
+        "name": "allergic urticaria, non-human animal"
+      },
+      {
+        "id": "MONDO:1017105",
+        "name": "allergic bronchitis, non-human animal"
+      },
+      {
+        "id": "MONDO:1017329",
+        "name": "allergic angioedema, non-human animal"
+      },
+      {
+        "id": "MONDO:1017334",
+        "name": "mast cell-rich papular allergic dermatitis, non-human animal"
+      },
+      {
+        "id": "MONDO:1017579",
+        "name": "allergic skin disease, non-human animal"
+      }
+    ],
+    "nationalFhirIgs": [],
+    "symptomOntology": [
+      {
+        "id": "SYMP:0000434",
+        "name": "urticaria"
+      },
+      {
+        "id": "SYMP:0000895",
+        "name": "anaphylactic shock"
+      },
+      {
+        "id": "SYMP:0000900",
+        "name": "allergic reaction"
+      }
+    ],
+    "ectoExposures": [
+      {
+        "id": "ECTO:0000726",
+        "name": "exposure to allergen"
+      },
+      {
+        "id": "ECTO:0900047",
+        "name": "exposure to allergen via inhalation"
+      },
+      {
+        "id": "ECTO:9002082",
+        "name": "exposure to drug allergen"
+      }
+    ]
+  },
+  "totals": {
+    "concepts": 55503,
+    "withSpanishDisplay": 17510,
+    "byCodeSystem": {
+      "allergy-hl7-fhir": 50,
+      "allergy-rxnorm-ingredients": 21923,
+      "allergy-ndfrt-drug-classes": 12994,
+      "allergy-cvx-vaccines": 275,
+      "allergy-hpo": 19178,
+      "allergy-doid": 176,
+      "allergy-mondo": 15,
+      "allergy-off-allergens": 26,
+      "allergy-off-additives": 725,
+      "allergy-chebi": 86,
+      "allergy-oae": 35,
+      "allergy-foodon": 20
+    },
+    "byValueSet": {
+      "allergy-substances": 36029,
+      "allergy-substances-medication-ingredient": 21923,
+      "allergy-substances-rxnorm-allergenic-extract": 702,
+      "allergy-substances-rxnorm-pollen": 323,
+      "allergy-substances-rxnorm-animal-epithelia": 53,
+      "allergy-substances-rxnorm-house-dust-mite": 5,
+      "allergy-substances-rxnorm-venom": 36,
+      "allergy-substances-drug-class": 12994,
+      "allergy-substances-vaccine": 275,
+      "allergy-manifestations": 19178,
+      "allergy-conditions": 221,
+      "allergy-substances-food-allergen": 26,
+      "allergy-substances-food-additive": 725,
+      "allergy-substances-chemical-allergen": 86,
+      "allergy-adverse-event-types": 35,
+      "allergy-food-allergen-labelling": 20
+    }
+  },
+  "seconds": 18
+}

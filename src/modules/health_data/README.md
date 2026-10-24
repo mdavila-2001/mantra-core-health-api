@@ -5,6 +5,42 @@ procedencia y su linaje, identificadores y relaciones, enlace al dominio clínic
 perfiles FHIR R5, reglas de calidad, identidad longitudinal del paciente (MPI), línea de tiempo,
 de-identificación, exportación de Bundles y retiro gobernado.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/health_data -name '*.controller.ts' | wc -l
+  find src/modules/health_data -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/health_data -name '*.entity.ts' | wc -l
+  find src/modules/health_data -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 16 rutas HTTP, 34 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 34 de 34 archivos `*.entity.ts`): `canonical_health_resource_versions`, `canonical_health_resources`, `canonical_resource_bindings`, `canonical_resource_identifiers`, `canonical_resource_relationships`, `fhir_profile_definitions`, `fhir_profile_versions`, `fhir_validation_issues`, `fhir_validation_runs`, `health_data_quality_issues`, `health_data_quality_rule_sets`, `health_data_quality_rules`, `health_data_quality_runs`, `health_deidentification_profiles`, `health_deidentification_runs`, `health_export_jobs`, `health_export_manifests`, `health_ingestion_batches`, `health_ingestion_records`, `health_lineage_edges`, `health_provenance_records`, `health_provenance_targets`, `health_source_connections`, `health_source_systems`, `health_terminology_mapping_rules`, `health_terminology_mapping_sets`, `omop_mapping_rules`, `omop_mapping_sets`, `omop_transformation_runs`, `patient_identity_clusters`, `patient_identity_members`, `patient_match_candidates`, `patient_match_decisions`, `patient_timeline_entries`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /fhir/r5/$export` | PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `fhir-r5` |
+| `GET /fhir/r5/Patient/:id/$everything` | INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `fhir-r5` |
+| `POST /health-data/source-connections` | HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN | `health-data` |
+| `POST /health-data/ingestion-batches` | INGESTION_WORKER, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/ingestion-batches/:id/records` | INGESTION_WORKER, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/ingestion-batches/:id/close` | INGESTION_WORKER, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/canonical-resources/project` | INGESTION_WORKER, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/canonical-resources/:id/identifiers` | INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/canonical-resources/:id/relationships` | DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/canonical-resources/:id/bindings` | CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/versions/:id/validate` | INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN | `health-data` |
+| `POST /health-data/quality-runs` | DATA_STEWARD, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/identity/candidates/:id/decision` | MPI_STEWARD, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/timeline-entries` | SYSTEM, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/deidentification-runs` | PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `health-data` |
+| `POST /health-data/canonical-resources/:id/retire` | CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `health-data` |
+
 ## Casos de uso cubiertos (14)
 
 | UC | Endpoint | Descripción |
@@ -172,7 +208,7 @@ registrados. No se loguean payloads, valores observados ni resúmenes clínicos.
 `yarn test --testPathPatterns=health_data` — 98 pruebas (82 de servicio + 16 de delegación de los dos
 controladores).
 
-## Pendiente
+## Fuera de este módulo
 
 - **Normalización del payload**: el módulo versiona lo que le entregan normalizado; el mapeo
   terminológico y la normalización viven en el worker de ingesta.
@@ -188,10 +224,12 @@ controladores).
   manifiesto; transformar los datos y escribir el fichero es del worker y del almacenamiento de
   objetos.
 - **OMOP** (`omop_*`): las tablas existen en el esquema pero ningún caso de uso del módulo las opera.
-- **Outbox** (módulo 35): `IngestionBatchOpened/Closed`, `CanonicalResourceVersioned`,
-  `ResourceIdentifiersRegistered`, `CanonicalResourceLinked`, `ResourceBoundToDomain`,
-  `FhirValidationCompleted`, `QualityRunCompleted`, `IdentityResolved`, `TimelineEntryProjected`,
-  `DeidentificationCompleted`, `HealthDataExported`, `EverythingBundleServed`,
-  `CanonicalResourceRetired`.
 - **Proyecciones**: `read_models.*`, índices de `search_platform`, embeddings de `vector_rag`,
-  aristas de `graph_intelligence` y las series de `time_series` los alimenta el outbox.
+  aristas de `graph_intelligence` y las series de `time_series` se alimentan desde el outbox.
+
+## Revisión backend 2026-10-05
+
+`$everything`, la ingesta y la liberación de datos no acotan el alcance del
+actor, y los arrays de entrada no tienen límite. La corrida dirigida ejecutó 7 suites y 98 tests
+verdes; no reemplaza pruebas con dos tenants, autorización por paciente ni
+consentimiento real.

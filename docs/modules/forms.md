@@ -3,13 +3,13 @@
   Fuente real: src/modules/forms/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `forms`
 
-**Fuente:** [`src/modules/forms/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/forms/README.md)
-· 6 controllers · 6 services · 6 repositories · 16 entidades · 14 DTO
+**Fuente:** [`src/modules/forms/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/forms/README.md)
+· 6 controllers · 6 services · 6 repositories · 16 entidades · 17 DTO
 
 ---
 
@@ -20,17 +20,62 @@ inmutables, campos con reglas y dependencias, localizaciones i18n, asignaciones
 gobernadas por política, instancias de formulario, captura/curación de valores
 (value[x] exclusivo, supersede, procedencia) y migración de esquema.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/forms -name '*.controller.ts' | wc -l
+  find src/modules/forms -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/forms -name '*.entity.ts' | wc -l
+  find src/modules/forms -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **6 controllers, 25 rutas HTTP, 16 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `dynamic_field_definitions`, `dynamic_field_sections`, `extension_target_policies`, `field_assignments`, `field_definition_localizations`, `field_definition_set_versions`, `field_definition_sets`, `field_dependencies`, `field_schema_migrations`, `field_set_members`, `field_validation_rules`, `field_value_access_rules`, `field_value_audit`, `field_value_provenance`, `field_values`, `form_instances`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /forms/assignments` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `GET /forms/assignments/budget` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `POST /forms/assignments` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `PUT /forms/assignments/order` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `PATCH /forms/assignments/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `DELETE /forms/assignments/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-assignments` |
+| `GET /forms/definition-sets` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-definition-sets` |
+| `GET /forms/definition-sets/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/definition-sets` | SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/definition-sets/:id/versions/:ver/publish` | SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/definition-sets/:id/migrations/:migrationId/run` | SECURITY_ADMIN | `forms-definition-sets` |
+| `POST /forms/field-definitions` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `PATCH /forms/field-definitions/:id` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `POST /forms/fields/:id/dependencies` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `PUT /forms/fields/:id/localizations/:lang` | CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `forms-fields` |
+| `POST /forms/fields/:id/access-rules` | SECURITY_ADMIN | `forms-fields` |
+| `GET /forms/instances` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `GET /forms/instances/:id` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `POST /forms/instances` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `POST /forms/instances/:id/values` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `POST /forms/instances/:id/close` | CLINICIAN, PRACTITIONER | `forms-instances` |
+| `GET /forms/me/instances` | sesión | `forms-me` |
+| `GET /forms/me/instances/:id` | sesión | `forms-me` |
+| `POST /forms/values/import` | CLINICIAN, PRACTITIONER | `forms-values` |
+| `PATCH /forms/values/:id` | CLINICIAN, PRACTITIONER | `forms-values` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Permiso | Descripción |
 |----|---------------|---------|-------------|
 | UC-09-01 | `POST /forms/definition-sets` | `SECURITY_ADMIN` | Crea set + versión inicial (draft, inmutable) |
-| UC-09-02 | `POST /forms/field-definitions` | autenticado | Declara campo con reglas de validación |
+| UC-09-02 | `POST /forms/field-definitions` | clínico, practitioner o `SECURITY_ADMIN` | Declara campo con reglas de validación |
 | UC-09-03 | `POST /forms/definition-sets/:id/versions/:ver/publish` | `SECURITY_ADMIN` | Compone miembros y publica la versión |
 | UC-09-04 | `POST /forms/fields/:id/dependencies` | autenticado | Define dependencia condicional entre campos |
 | UC-09-05 | `PUT /forms/fields/:id/localizations/:lang` | autenticado | Upsert de localización i18n (`es`/`en`) |
 | UC-09-06 | `POST /forms/assignments` | `SECURITY_ADMIN` | Asigna campo a target con enforcement de política |
-| UC-09-07 | `POST /forms/instances` | autenticado | Abre instancia de formulario para un recurso |
+| UC-09-07 | `POST /forms/instances` | `CLINICIAN`/`PRACTITIONER` | Abre instancia de formulario para un recurso |
 | UC-09-08 | `POST /forms/instances/:id/values` | autenticado | Captura valores (value[x] exclusivo) |
 | UC-09-09 | `PATCH /forms/values/:id` | autenticado | Corrige valor con supersede y snapshot inmutable |
 | UC-09-10 | `POST /forms/values/import` | autenticado | Importa valores externos (batch ETL) con procedencia |
@@ -87,15 +132,15 @@ Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exig
 `FormsReadService` sigue el patrón de `ChartReadService`: sólo lectura sobre un
 `fork` del `EntityManager`, lotes `$in` sin N+1, `limit+1` con recorte declarado.
 Aislamiento de instancias: la propiedad se ancla en el `clinical.encounter` que
-la instancia referencia (`resourceId`), exigiendo el tenant del contexto; lo
-ajeno o lo no anclable responde 404. Enmascarado deny-by-default: un campo con
+la instancia referencia (`resourceId`) y exige tenant del contexto. Las lecturas
+profesionales no aplican la política clínica del paciente.
+Enmascarado deny-by-default: un campo con
 `field_value_access_rules` activa responde `masked: true` sin valor, porque la
-semántica de roles de la regla no es evaluable todavía (no existe puente
+semántica de roles de la regla no es evaluable (no existe puente
 rol→value-set en el sistema).
 
 ## Tests
 
-- Unit: `services/*.service.spec.ts` (mockean repos/em) y
-  `controllers/forms-controllers.spec.ts` (mockean servicios). 45 casos.
+- `corepack yarn test src/modules/forms --runInBand --silent`: 9 suites y 129
+  pruebas aprobadas durante la revisión.
 - Smoke: `test/smoke/modules/forms.smoke.ts` (`FORMS_SMOKE`), 29 casos encadenados.
-

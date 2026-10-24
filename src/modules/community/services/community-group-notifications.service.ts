@@ -93,9 +93,9 @@ export class CommunityGroupNotificationsService {
         recipientUserId,
         actor,
         categoryConceptId: CONCEPTS.NOTIF_CAT_GROUP_JOIN_APPROVED,
-        subject: `Ya sos parte de ${group.name}`,
+        subject: `Ya es parte de ${group.name}`,
         bodyText:
-          'Aceptaron tu solicitud de ingreso. Entrá para ver lo que se está publicando.',
+          'Aceptaron su solicitud de ingreso. Entre para ver lo que se está publicando.',
       });
     });
   }
@@ -141,7 +141,7 @@ export class CommunityGroupNotificationsService {
           // El cuerpo de la publicación no viaja en el asunto: una bandeja se
           // mira en pantallas que pueden estar a la vista de cualquiera, y en
           // un grupo de apoyo el título ya diría demasiado.
-          bodyText: 'Se publicó algo nuevo en el grupo. Entrá para leerlo.',
+          bodyText: 'Se publicó algo nuevo en el grupo. Entre para leerlo.',
         });
       }
     });

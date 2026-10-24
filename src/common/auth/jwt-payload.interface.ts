@@ -17,6 +17,13 @@ export interface JwtPayload {
    */
   roles: string[];
   /**
+   * Códigos de rol de negocio con ámbito de tenant, indexados por el tenant en
+   * el que fueron concedidos (MCH-001). Ver `AuthenticatedUser.scopedRoles`
+   * para la semántica completa: un código ausente de este mapa es una
+   * excepción global.
+   */
+  scopedRoles?: Record<string, string[]>;
+  /**
    * Tenants (organizaciones) de los que el usuario es miembro activo. El request
    * elige uno vía cabecera `X-Tenant-Id`, que debe pertenecer a esta lista; así
    * el scoping por tenant (RLS) no requiere un lookup por request.
@@ -40,6 +47,20 @@ export interface JwtPayload {
    * y elegir mal significa mirar los datos de otra institución.
    */
   tenantNames?: Record<string, string>;
+  /**
+   * Código de tipo de cada tenant de `tenants`, indexado por id
+   * (`TenantTypeCode` de `directory.concepts.ts`: `'PAYER'`, `'PROVIDER'`,
+   * `'PHARMACY'`…).
+   *
+   * Igual que `tenantNames`, es sólo dato de presentación —**no participa de
+   * ninguna decisión de autorización**: quién puede hacer qué lo siguen
+   * decidiendo `roles` y el tenant del request—. Existe porque el frontend
+   * necesita saber si la organización activa es una aseguradora para recortar
+   * su propio menú a lo que le corresponde, y el token es el único lugar de
+   * donde puede sacarlo sin una ruta `/me`. Se omite por tenant cuyo
+   * `tenant_type_concept_id` no esté en el catálogo.
+   */
+  tenantTypes?: Record<string, string>;
   /**
    * Perfil de paciente del titular de la cuenta, si tiene uno.
    *

@@ -16,6 +16,7 @@ import {
   Roles,
   requireTenantId,
   type AuthenticatedUser,
+  AccessLogged,
 } from '../../../common';
 import {
   PeriopCasesService,
@@ -101,6 +102,7 @@ export class PeriopController {
    * programación del día ni los casos de un paciente.
    */
   @Get('procedure-cases')
+  @AccessLogged({ resourceType: 'PROCEDURE_CASES' })
   @Roles(
     'SURGEON',
     'ANESTHESIOLOGIST',
@@ -119,6 +121,7 @@ export class PeriopController {
 
   /** Detalle agregado del caso: equipo, diagnósticos, órdenes, plan e informes. */
   @Get('procedure-cases/:id')
+  @AccessLogged({ resourceType: 'PROCEDURE_CASE', resourceId: 'param:id' })
   @Roles(
     'SURGEON',
     'ANESTHESIOLOGIST',
@@ -261,6 +264,7 @@ export class PeriopController {
    * aceptar nunca y el caso no podía confirmarse.
    */
   @Get('procedure-cases/:id/team-members')
+  @AccessLogged({ resourceType: 'PROCEDURE_CASE_TEAM', resourceId: 'param:id' })
   @Roles(
     'SURGEON',
     'ANESTHESIOLOGIST',

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 75 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 98 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`
+- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -18,74 +18,97 @@ Referencia exhaustiva de 75 operación(es) del módulo `community`, derivada del
 5. [GET /community/bookmarks](#5-get-community-bookmarks) — Marcadores guardados por un perfil
 6. [POST /community/bookmarks](#6-post-community-bookmarks) — Guardar un bookmark en una colección
 7. [POST /community/comments](#7-post-community-comments) — Comentar (hilo anidado) con contadores
-8. [GET /community/conversations](#8-get-community-conversations) — Conversaciones activas de un perfil
-9. [POST /community/conversations](#9-post-community-conversations) — Crear una conversación con participantes
-10. [GET /community/conversations/{conversationId}/messages](#10-get-community-conversations-conversationid-messages) — Mensajes de una conversación
-11. [POST /community/conversations/{conversationId}/messages](#11-post-community-conversations-conversationid-messages) — Enviar un mensaje directo en la conversación
-12. [POST /community/conversations/{conversationId}/read](#12-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
-13. [GET /community/feed](#13-get-community-feed) — Timeline de un perfil
-14. [DELETE /community/follows](#14-delete-community-follows) — Dejar de seguir un objeto social
-15. [GET /community/follows](#15-get-community-follows) — Seguimientos activos de un perfil
-16. [POST /community/follows](#16-post-community-follows) — Seguir un objeto social
-17. [GET /community/groups](#17-get-community-groups) — Grupos de una organización
-18. [POST /community/groups](#18-post-community-groups) — Crear un grupo/comunidad
-19. [GET /community/groups/{groupId}](#19-get-community-groups-groupid) — Ficha de un grupo
-20. [GET /community/groups/{groupId}/members](#20-get-community-groups-groupid-members) — Integrantes de un grupo
-21. [POST /community/groups/{groupId}/members](#21-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
-22. [PATCH /community/groups/{groupId}/members/{memberId}](#22-patch-community-groups-groupid-members-memberid) — Aprobar/rechazar un alta o cambiar el rol
-23. [DELETE /community/groups/{groupId}/members/{memberProfileId}](#23-delete-community-groups-groupid-members-memberprofileid) — Salir del grupo o dar de baja a un integrante
-24. [GET /community/groups/{groupId}/posts](#24-get-community-groups-groupid-posts) — Muro de un grupo
-25. [POST /community/groups/{groupId}/posts](#25-post-community-groups-groupid-posts) — Publicar en el muro del grupo
-26. [GET /community/moderation/appeals](#26-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
-27. [POST /community/moderation/appeals/{appealId}/resolve](#27-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
-28. [GET /community/moderation/decisions](#28-get-community-moderation-decisions) — Decisiones de moderación tomadas
-29. [POST /community/moderation/decisions/{decisionId}/appeal](#29-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
-30. [GET /community/moderation/queue](#30-get-community-moderation-queue) — Cola de moderación con filtros y cursor
-31. [POST /community/moderation/queue/{queueId}/decision](#31-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
-32. [GET /community/notifications](#32-get-community-notifications) — Notificaciones sociales de un perfil
-33. [GET /community/polls/{pollId}](#33-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
-34. [POST /community/polls/{pollId}/votes](#34-post-community-polls-pollid-votes) — Votar en una encuesta
-35. [GET /community/posts/{postId}](#35-get-community-posts-postid) — Publicación con media, hashtags y menciones
-36. [GET /community/posts/{postId}/comments](#36-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
-37. [POST /community/posts/{postId}/polls](#37-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
-38. [GET /community/posts/{postId}/reactions](#38-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
-39. [GET /community/profiles/{profileId}](#39-get-community-profiles-profileid) — Ficha de un perfil público
-40. [GET /community/profiles/{profileId}/posts](#40-get-community-profiles-profileid-posts) — Publicaciones de un perfil
-41. [POST /community/profiles/{profileId}/posts](#41-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
-42. [GET /community/profiles/{profileId}/reviews](#42-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
-43. [POST /community/profiles/{profileId}/reviews](#43-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
-44. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#44-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
-45. [GET /community/profiles/by-slug/{slug}](#45-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
-46. [GET /community/profiles/me](#46-get-community-profiles-me) — Consultar la vitrina pública propia
-47. [PUT /community/profiles/me](#47-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
-48. [GET /community/profiles/me/stats](#48-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
-49. [POST /community/public-profiles](#49-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-50. [PUT /community/reactions](#50-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-51. [POST /community/reports](#51-post-community-reports) — Reportar contenido y encolar moderación
-52. [GET /community/topics](#52-get-community-topics) — Temas de la comunidad
-53. [GET /f/{slug}](#53-get-f-slug) — Ficha pública de una farmacia
-54. [GET /internal/community/feed/pending](#54-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-55. [POST /internal/community/feed/rebuild](#55-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-56. [GET /internal/community/search/health](#56-get-internal-community-search-health) — Estado del índice del directorio público
-57. [POST /internal/community/search/reindex](#57-post-internal-community-search-reindex) — Reindexar el directorio público
-58. [POST /internal/community/verification/badges](#58-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-59. [POST /internal/community/verification/badges/{targetId}/revoke](#59-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-60. [POST /internal/community/verification/badges/expire-sweep](#60-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-61. [GET /l/{slug}](#61-get-l-slug) — Ficha pública de un laboratorio
-62. [GET /o/{slug}](#62-get-o-slug) — Ficha pública de una organización
-63. [GET /p/{slug}](#63-get-p-slug) — Ficha pública de un profesional
-64. [GET /public/media/{id}](#64-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-65. [GET /public/nearby](#65-get-public-nearby) — Prestadores cercanos, en línea recta
-66. [GET /public/posts](#66-get-public-posts) — Últimas publicaciones de todos los profesionales
-67. [GET /public/profiles/{prefijo}/{slug}](#67-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-68. [GET /public/search](#68-get-public-search) — Buscador público unificado
-69. [GET /public/search/diagnostic-units](#69-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-70. [GET /public/search/insurers](#70-get-public-search-insurers) — Aseguradoras en el directorio público
-71. [GET /public/search/medications](#71-get-public-search-medications) — Medicamentos ofertados públicamente
-72. [GET /public/search/organizations](#72-get-public-search-organizations) — Organizaciones en el directorio público
-73. [GET /public/search/pharmacies](#73-get-public-search-pharmacies) — Farmacias en el directorio público
-74. [GET /public/search/practitioners](#74-get-public-search-practitioners) — Profesionales en el directorio público
-75. [GET /s/{slug}](#75-get-s-slug) — Ficha pública de una aseguradora
+8. [GET /community/comments/media/{fileId}/content](#8-get-community-comments-media-fileid-content) — Descargar el adjunto de un comentario (imagen, sticker o GIF)
+9. [GET /community/conversations](#9-get-community-conversations) — Conversaciones activas de un perfil
+10. [POST /community/conversations](#10-post-community-conversations) — Crear una conversación con participantes
+11. [GET /community/conversations/{conversationId}/attachments/{fileId}/content](#11-get-community-conversations-conversationid-attachments-fileid-content) — Descargar el adjunto de una conversación (participante activo)
+12. [GET /community/conversations/{conversationId}/messages](#12-get-community-conversations-conversationid-messages) — Mensajes de una conversación
+13. [POST /community/conversations/{conversationId}/messages](#13-post-community-conversations-conversationid-messages) — Enviar un mensaje directo en la conversación
+14. [DELETE /community/conversations/{conversationId}/messages/{messageId}](#14-delete-community-conversations-conversationid-messages-messageid) — Eliminar un mensaje propio
+15. [PATCH /community/conversations/{conversationId}/messages/{messageId}](#15-patch-community-conversations-conversationid-messages-messageid) — Editar el texto de un mensaje propio
+16. [PATCH /community/conversations/{conversationId}/participant](#16-patch-community-conversations-conversationid-participant) — Marcar la conversación como favorita, fijada o archivada
+17. [DELETE /community/conversations/{conversationId}/pin](#17-delete-community-conversations-conversationid-pin) — Soltar el mensaje fijado de la conversación
+18. [POST /community/conversations/{conversationId}/pin](#18-post-community-conversations-conversationid-pin) — Fijar un mensaje de la conversación
+19. [GET /community/conversations/{conversationId}/presence](#19-get-community-conversations-conversationid-presence) — Presencia de los demás participantes
+20. [POST /community/conversations/{conversationId}/read](#20-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
+21. [POST /community/conversations/contacts/search](#21-post-community-conversations-contacts-search) — Buscar personas para iniciar una conversación
+22. [GET /community/feed](#22-get-community-feed) — Timeline de un perfil
+23. [DELETE /community/follows](#23-delete-community-follows) — Dejar de seguir un objeto social
+24. [GET /community/follows](#24-get-community-follows) — Seguimientos activos de un perfil
+25. [POST /community/follows](#25-post-community-follows) — Seguir un objeto social
+26. [GET /community/groups](#26-get-community-groups) — Grupos de una organización
+27. [POST /community/groups](#27-post-community-groups) — Crear un grupo/comunidad
+28. [GET /community/groups/{groupId}](#28-get-community-groups-groupid) — Ficha de un grupo
+29. [GET /community/groups/{groupId}/members](#29-get-community-groups-groupid-members) — Integrantes de un grupo
+30. [POST /community/groups/{groupId}/members](#30-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
+31. [DELETE /community/groups/{groupId}/members/{member}](#31-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
+32. [PATCH /community/groups/{groupId}/members/{member}](#32-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
+33. [GET /community/groups/{groupId}/posts](#33-get-community-groups-groupid-posts) — Muro de un grupo
+34. [POST /community/groups/{groupId}/posts](#34-post-community-groups-groupid-posts) — Publicar en el muro del grupo
+35. [GET /community/moderation/appeals](#35-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
+36. [POST /community/moderation/appeals/{appealId}/resolve](#36-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
+37. [GET /community/moderation/decisions](#37-get-community-moderation-decisions) — Decisiones de moderación tomadas
+38. [POST /community/moderation/decisions/{decisionId}/appeal](#38-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
+39. [GET /community/moderation/decisions/mine](#39-get-community-moderation-decisions-mine) — Mis propias decisiones de moderación
+40. [GET /community/moderation/queue](#40-get-community-moderation-queue) — Cola de moderación con filtros y cursor
+41. [POST /community/moderation/queue/{queueId}/decision](#41-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
+42. [GET /community/notifications](#42-get-community-notifications) — Notificaciones sociales de un perfil
+43. [GET /community/polls/{pollId}](#43-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
+44. [POST /community/polls/{pollId}/votes](#44-post-community-polls-pollid-votes) — Votar en una encuesta
+45. [GET /community/posts/{postId}](#45-get-community-posts-postid) — Publicación con media, hashtags y menciones
+46. [GET /community/posts/{postId}/comments](#46-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
+47. [POST /community/posts/{postId}/polls](#47-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
+48. [GET /community/posts/{postId}/reactions](#48-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
+49. [GET /community/profiles/{profileId}](#49-get-community-profiles-profileid) — Ficha de un perfil público
+50. [GET /community/profiles/{profileId}/auto-reply](#50-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
+51. [PUT /community/profiles/{profileId}/auto-reply](#51-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
+52. [GET /community/profiles/{profileId}/posts](#52-get-community-profiles-profileid-posts) — Publicaciones de un perfil
+53. [POST /community/profiles/{profileId}/posts](#53-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
+54. [GET /community/profiles/{profileId}/reviews](#54-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
+55. [POST /community/profiles/{profileId}/reviews](#55-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
+56. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#56-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
+57. [GET /community/profiles/by-slug/{slug}](#57-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
+58. [GET /community/profiles/me](#58-get-community-profiles-me) — Consultar la vitrina pública propia
+59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
+60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
+61. [POST /community/public-profiles](#61-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+62. [GET /community/ratings](#62-get-community-ratings) — Calificaciones de un médico, paciente u organización
+63. [PUT /community/ratings](#63-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
+64. [GET /community/ratings/mine](#64-get-community-ratings-mine) — Mis calificaciones
+65. [GET /community/ratings/summary](#65-get-community-ratings-summary) — Nota media de un médico, paciente u organización
+66. [PUT /community/reactions](#66-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+67. [POST /community/reports](#67-post-community-reports) — Reportar contenido y encolar moderación
+68. [GET /community/topics](#68-get-community-topics) — Temas de la comunidad
+69. [GET /f/{slug}](#69-get-f-slug) — Ficha pública de una farmacia
+70. [GET /internal/community/feed/pending](#70-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+71. [POST /internal/community/feed/ranking/apply](#71-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
+72. [GET /internal/community/feed/ranking/pending](#72-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
+73. [POST /internal/community/feed/rebuild](#73-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+74. [GET /internal/community/search/health](#74-get-internal-community-search-health) — Estado del índice del directorio público
+75. [POST /internal/community/search/reindex](#75-post-internal-community-search-reindex) — Reindexar el directorio público
+76. [POST /internal/community/verification/badges](#76-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+77. [POST /internal/community/verification/badges/{targetId}/revoke](#77-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+78. [POST /internal/community/verification/badges/expire-sweep](#78-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+79. [GET /l/{slug}](#79-get-l-slug) — Ficha pública de un laboratorio
+80. [GET /o/{slug}](#80-get-o-slug) — Ficha pública de una organización
+81. [GET /p/{slug}](#81-get-p-slug) — Ficha pública de un profesional
+82. [POST /patients/me/reviews](#82-post-patients-me-reviews) — Calificar una atención recibida
+83. [GET /public/comments/{commentId}/replies](#83-get-public-comments-commentid-replies) — Respuestas de un comentario público
+84. [GET /public/media/{id}](#84-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+85. [GET /public/nearby](#85-get-public-nearby) — Prestadores cercanos, en línea recta
+86. [GET /public/posts](#86-get-public-posts) — Últimas publicaciones de todos los profesionales
+87. [GET /public/posts/{postId}/comments](#87-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+88. [GET /public/posts/{postId}/reactions](#88-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+89. [GET /public/profiles/{prefijo}/{slug}](#89-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+90. [GET /public/profiles/{prefijo}/{slug}/reviews](#90-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+91. [GET /public/search](#91-get-public-search) — Buscador público unificado
+92. [GET /public/search/diagnostic-units](#92-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+93. [GET /public/search/insurers](#93-get-public-search-insurers) — Aseguradoras en el directorio público
+94. [GET /public/search/medications](#94-get-public-search-medications) — Medicamentos ofertados públicamente
+95. [GET /public/search/organizations](#95-get-public-search-organizations) — Organizaciones en el directorio público
+96. [GET /public/search/pharmacies](#96-get-public-search-pharmacies) — Farmacias en el directorio público
+97. [GET /public/search/practitioners](#97-get-public-search-practitioners) — Profesionales en el directorio público
+98. [GET /s/{slug}](#98-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -870,6 +893,11 @@ Content-Type: application/json
 | `mentions[].mentionedProfileId` | No | `string` | formato `uuid` | Perfil mencionado | `00000000-0000-4000-8000-000000000001` |
 | `mentions[].offsetStart` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `mentions[].offsetEnd` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `media` | No | `array<CommentMediaInputDto>` | máximo 4 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"fileId":"00000000-0000-4000-8000-000000000001","mediaRole":"IMAGE","altText":"valor-ejemplo","ordinal":1}]` |
+| `media[].fileId` | No | `string` | formato `uuid` | Id del archivo (common.files) | `00000000-0000-4000-8000-000000000001` |
+| `media[].mediaRole` | No | `string` | valores: `IMAGE`, `STICKER`, `GIF` | Rol del medio | `IMAGE` |
+| `media[].altText` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `media[].ordinal` | No | `number` | mínimo 0 | Orden de despliegue | `1` |
 
 ### Payload completo de ejemplo
 
@@ -892,6 +920,14 @@ Content-Type: application/json
       "mentionedProfileId": "00000000-0000-4000-8000-000000000001",
       "offsetStart": 1,
       "offsetEnd": 1
+    }
+  ],
+  "media": [
+    {
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "mediaRole": "IMAGE",
+      "altText": "valor-ejemplo",
+      "ordinal": 1
     }
   ]
 }
@@ -938,10 +974,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Perfil autor no encontrado | Excepción explícita en src/modules/community/services/community-social.service.ts |
 | 404 | `NOT_FOUND` | Comentario padre no encontrado | Excepción explícita en src/modules/community/services/community-social.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -959,7 +1001,109 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /community/conversations
+## 8. GET /community/comments/media/{fileId}/content
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Descargar el adjunto de un comentario (imagen, sticker o GIF)
+- **Operation ID:** `CommunitySocialController_getCommentMediaContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.getCommentMediaContent](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Descargar el adjunto de un comentario (imagen, sticker o GIF). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: FND-01: el contenido de un adjunto de comentario, para quien tiene sesión y puede ver el post del que cuelga — no sólo para quien lo subió. Declarada con un segmento fijo (`media`) antes que nada bajo `comments/` capture `:id`: hoy no hay otra ruta `comments/:algo` en este controlador, pero es la misma cautela que ya deja escrita `listLinks` en `CommonFilesController` para `links` contra `:id/content`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/comments/media/{fileId}/content` en `CommunitySocialController_getCommentMediaContent`. El controlador delega en `CommunitySocialReadService.getCommentMedia`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `fileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actorProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/comments/media/00000000-0000-4000-8000-000000000001/content?actorProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `fileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/comments/media/00000000-0000-4000-8000-000000000001/content?actorProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-social-read.service.ts |
+| 404 | `NOT_FOUND` | Versión vigente no encontrada | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo está borrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo no tiene una versión vigente | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión vigente todavía no está lista para servirse públicamente | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/comments/media/{fileId}/content"
+}
+```
+
+---
+
+## 9. GET /community/conversations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -972,7 +1116,7 @@ Ejemplo de error normalizado:
 
 Conversaciones activas de un perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Bandeja del propio perfil, con vista previa y no leídos.
+Contexto declarado en el controlador: Bandeja del propio perfil, con vista previa y no leídos. F4.3: acepta `cursor` (el `nextCursor` de la página anterior) y `q` (nombre del otro lado o texto del último mensaje).
 
 ### Descripción del sistema
 
@@ -984,13 +1128,15 @@ NestJS resuelve `GET /community/conversations` en `CommunityMessagingController_
 |---|---|:---:|---|---|---|---|
 | `profileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /community/conversations?profileId=00000000-0000-4000-8000-000000000001&limit=1 HTTP/1.1
+GET /community/conversations?profileId=00000000-0000-4000-8000-000000000001&limit=1&cursor=valor-ejemplo&q=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1008,7 +1154,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /community/conversations?profileId=00000000-0000-4000-8000-000000000001&limit=1 HTTP/1.1
+GET /community/conversations?profileId=00000000-0000-4000-8000-000000000001&limit=1&cursor=valor-ejemplo&q=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1039,9 +1185,17 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "id": "00000000-0000-4000-8000-000000000001",
         "senderProfileId": "00000000-0000-4000-8000-000000000001",
         "bodyText": "valor-ejemplo",
+        "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+        "attachmentFileId": "00000000-0000-4000-8000-000000000001",
+        "deletedAt": "2026-07-31T12:00:00.000Z",
         "sentAt": "2026-07-31T12:00:00.000Z"
       },
       "unreadCount": 1,
+      "lastMessageReadByPeer": true,
+      "isFavorite": true,
+      "isPinned": true,
+      "archivedAt": "2026-07-31T12:00:00.000Z",
+      "pinnedMessageId": "00000000-0000-4000-8000-000000000001",
       "peers": [
         {
           "profileId": "00000000-0000-4000-8000-000000000001",
@@ -1061,25 +1215,33 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
+| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la conversación. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de conversación (directa, grupal). | `00000000-0000-4000-8000-000000000001` |
 | `items[].groupId` | No | `string` | formato `uuid`; admite null | Grupo al que pertenece, si es de grupo. | `00000000-0000-4000-8000-000000000001` |
 | `items[].lastMessageAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió el último mensaje. | `2026-07-31T12:00:00.000Z` |
 | `items[].messageCount` | No | `number` | admite null | Cuántos mensajes acumula. | `1` |
-| `items[].lastMessage` | No | `ConversationPreviewMessageDto` | Sin restricción adicional declarada | Vista previa del último mensaje. | `{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","sentAt":"2026-07-31T12:00:00.000Z"}` |
+| `items[].lastMessage` | No | `ConversationPreviewMessageDto` | Sin restricción adicional declarada | Vista previa del último mensaje. | `{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].lastMessage.id` | No | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
 | `items[].lastMessage.senderProfileId` | No | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
-| `items[].lastMessage.bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
+| `items[].lastMessage.bodyText` | No | `string` | admite null | Cuerpo del mensaje; `null` si era sólo un adjunto o si se eliminó. | `valor-ejemplo` |
+| `items[].lastMessage.contentTypeConceptId` | No | `string` | formato `uuid`; admite null | Concept id del tipo de contenido (texto o media). F4.3: con esto la fila de la bandeja dice «Foto» o «Documento» sin adivinarlo por el cuerpo vacío. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lastMessage.attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`, si el último mensaje era uno. | `00000000-0000-4000-8000-000000000001` |
+| `items[].lastMessage.deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó, si el último mensaje está eliminado (F4.5). | `2026-07-31T12:00:00.000Z` |
 | `items[].lastMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
 | `items[].unreadCount` | Sí | `number` | Sin restricción adicional declarada | Cuántos mensajes le quedan sin leer al actor. | `1` |
+| `items[].lastMessageReadByPeer` | No | `boolean` | admite null | Si el otro lado ya leyó el último mensaje, cuando ese mensaje es del actor y la conversación es directa. `null` si no se sabe (grupo, o el último no es propio). Con esto la bandeja pinta el doble tilde sin mentir (F4.3). | `true` |
+| `items[].isFavorite` | Sí | `boolean` | Sin restricción adicional declarada | Favorita para el actor (F4.4). | `true` |
+| `items[].isPinned` | Sí | `boolean` | Sin restricción adicional declarada | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `true` |
+| `items[].archivedAt` | No | `string` | formato `date-time`; admite null | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `2026-07-31T12:00:00.000Z` |
+| `items[].pinnedMessageId` | No | `string` | formato `uuid`; admite null | El mensaje fijado en la barra superior, si hay uno (F4.6). | `00000000-0000-4000-8000-000000000001` |
 | `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]` |
 | `items[].peers[].profileId` | Sí | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
 | `items[].peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
 | `items[].peers[].avatarUrl` | No | `string` | admite null | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `valor-ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
-| `nextCursor` | No | `string` | admite null | Siempre `null`: la bandeja devuelve las conversaciones activas del actor de una vez, acotadas por el tope. Se mantiene el campo para que la forma de la respuesta sea la misma que la de los demás listados. | `valor-ejemplo` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1108,7 +1270,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /community/conversations
+## 10. POST /community/conversations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1159,8 +1321,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `participantProfileIds` | Sí | `array<string>` | formato `uuid`; mínimo 2 elemento(s) | Perfiles participantes | `["valor-ejemplo","valor-ejemplo"]` |
-| `conversationType` | No | `string` | valores: `DIRECT`, `GROUP` | Tipo de conversación | `DIRECT` |
-| `groupId` | No | `string` | formato `uuid` | Grupo asociado (conversaciones de grupo) | `00000000-0000-4000-8000-000000000001` |
+| `conversationType` | No | `string` | valores: `DIRECT` | Tipo de conversación (los grupos usan su flujo de membresía) | `DIRECT` |
 
 ### Payload completo de ejemplo
 
@@ -1177,8 +1338,7 @@ Content-Type: application/json
     "valor-ejemplo",
     "valor-ejemplo"
   ],
-  "conversationType": "DIRECT",
-  "groupId": "00000000-0000-4000-8000-000000000001"
+  "conversationType": "DIRECT"
 }
 ```
 
@@ -1219,7 +1379,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Las conversaciones grupales se crean desde el flujo de grupos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los participantes de una conversación deben ser distintos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una conversación directa requiere exactamente dos participantes | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | La persona no está disponible para iniciar una conversación | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede iniciar una conversación entre perfiles bloqueados | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1237,7 +1403,111 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /community/conversations/{conversationId}/messages
+## 11. GET /community/conversations/{conversationId}/attachments/{fileId}/content
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Descargar el adjunto de una conversación (participante activo)
+- **Operation ID:** `CommunityMessagingController_getAttachmentContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.getAttachmentContent](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Descargar el adjunto de una conversación (participante activo). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: 5.1 · FT-32-R02: el contenido de un adjunto de la conversación, para quien participa en ella — no sólo para quien lo subió. La conversación forma parte de la ruta: ni conocer el archivo ni conocer una conversación por separado permite mezclar ambos contextos. `no-store` como en toda descarga autenticada: la caché del navegador no debe conservar un adjunto clínico después de cerrar sesión.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/conversations/{conversationId}/attachments/{fileId}/content` en `CommunityMessagingController_getAttachmentContent`. El controlador delega en `CommunityMessagingReadService.getAttachmentContent`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `profileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/conversations/00000000-0000-4000-8000-000000000001/attachments/00000000-0000-4000-8000-000000000001/content?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`, `fileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/conversations/00000000-0000-4000-8000-000000000001/attachments/00000000-0000-4000-8000-000000000001/content?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging-read.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/attachments/{fileId}/content"
+}
+```
+
+---
+
+## 12. GET /community/conversations/{conversationId}/messages
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1320,13 +1590,26 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "bodyText": "valor-ejemplo",
       "attachmentFileId": "00000000-0000-4000-8000-000000000001",
       "isEdited": true,
+      "deletedAt": "2026-07-31T12:00:00.000Z",
       "sentAt": "2026-07-31T12:00:00.000Z"
     }
   ],
   "count": 1,
   "limit": 1,
   "nextCursor": "valor-ejemplo",
-  "peerReadUpTo": "2026-07-31T12:00:00.000Z"
+  "peerReadUpTo": "2026-07-31T12:00:00.000Z",
+  "pinnedMessage": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "conversationId": "00000000-0000-4000-8000-000000000001",
+    "senderProfileId": "00000000-0000-4000-8000-000000000001",
+    "replyToMessageId": "00000000-0000-4000-8000-000000000001",
+    "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+    "bodyText": "valor-ejemplo",
+    "attachmentFileId": "00000000-0000-4000-8000-000000000001",
+    "isEdited": true,
+    "deletedAt": "2026-07-31T12:00:00.000Z",
+    "sentAt": "2026-07-31T12:00:00.000Z"
+  }
 }
 ```
 
@@ -1334,7 +1617,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<DirectMessageDto>` | Sin restricción adicional declarada | Mensajes de la página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"sentAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<DirectMessageDto>` | Sin restricción adicional declarada | Mensajes de la página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationId` | Sí | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `items[].senderProfileId` | Sí | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
@@ -1342,12 +1625,24 @@ Campos de la respuesta:
 | `items[].contentTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
 | `items[].bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
 | `items[].attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
-| `items[].isEdited` | No | `boolean` | admite null | Si fue editado. | `true` |
+| `items[].isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
+| `items[].deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `items[].sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
 | `peerReadUpTo` | No | `string` | formato `date-time`; admite null | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `2026-07-31T12:00:00.000Z` |
+| `pinnedMessage` | No | `DirectMessageDto` | Sin restricción adicional declarada | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}` |
+| `pinnedMessage.id` | No | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.conversationId` | No | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.senderProfileId` | No | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.replyToMessageId` | No | `string` | formato `uuid`; admite null | Mensaje al que responde, si responde a alguno. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.contentTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
+| `pinnedMessage.attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessage.isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
+| `pinnedMessage.deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
+| `pinnedMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1377,7 +1672,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /community/conversations/{conversationId}/messages
+## 13. POST /community/conversations/{conversationId}/messages
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1493,11 +1788,20 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 404 | `NOT_FOUND` | Archivo adjunto no encontrado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El remitente no es participante activo | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | Existe un bloqueo entre los participantes | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede adjuntar un archivo sin un actor que lo autorice | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1517,7 +1821,779 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /community/conversations/{conversationId}/read
+## 14. DELETE /community/conversations/{conversationId}/messages/{messageId}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Eliminar un mensaje propio
+- **Operation ID:** `CommunityMessagingController_deleteMessage`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.deleteMessage](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Eliminar un mensaje propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.5 · Eliminar un mensaje propio (lógico: queda «Se eliminó este mensaje»).
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /community/conversations/{conversationId}/messages/{messageId}` en `CommunityMessagingController_deleteMessage`. El controlador delega en `CommunityMessagingService.deleteMessage`. No recibe body. El tipo de retorno estático es `Promise<DeletedMessageResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `messageId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `profileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /community/conversations/00000000-0000-4000-8000-000000000001/messages/00000000-0000-4000-8000-000000000001?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`, `messageId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /community/conversations/00000000-0000-4000-8000-000000000001/messages/00000000-0000-4000-8000-000000000001?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DeletedMessageResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeletedMessageResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "messageId": "00000000-0000-4000-8000-000000000001",
+  "deletedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `messageId` | Sí | `string` | formato `uuid` | El mensaje eliminado. | `00000000-0000-4000-8000-000000000001` |
+| `deletedAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo el autor puede editar o eliminar su mensaje | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mensaje ya fue eliminado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/messages/{messageId}"
+}
+```
+
+---
+
+## 15. PATCH /community/conversations/{conversationId}/messages/{messageId}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Editar el texto de un mensaje propio
+- **Operation ID:** `CommunityMessagingController_editMessage`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.editMessage](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Editar el texto de un mensaje propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.5 · Editar el texto de un mensaje propio.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /community/conversations/{conversationId}/messages/{messageId}` en `CommunityMessagingController_editMessage`. El controlador delega en `CommunityMessagingService.editMessage`. Valida el body como `EditMessageDto` y consume `application/json`. El tipo de retorno estático es `Promise<DirectMessageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `messageId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `EditMessageDto`; los campos opcionales se omiten.
+
+```http
+PATCH /community/conversations/00000000-0000-4000-8000-000000000001/messages/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "senderProfileId": "00000000-0000-4000-8000-000000000001",
+  "bodyText": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`, `messageId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `senderProfileId` | Sí | `string` | formato `uuid` | Perfil autor del mensaje | `00000000-0000-4000-8000-000000000001` |
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 4000 | Texto nuevo del mensaje | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /community/conversations/00000000-0000-4000-8000-000000000001/messages/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "senderProfileId": "00000000-0000-4000-8000-000000000001",
+  "bodyText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DirectMessageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DirectMessageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "senderProfileId": "00000000-0000-4000-8000-000000000001",
+  "replyToMessageId": "00000000-0000-4000-8000-000000000001",
+  "contentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "bodyText": "valor-ejemplo",
+  "attachmentFileId": "00000000-0000-4000-8000-000000000001",
+  "isEdited": true,
+  "deletedAt": "2026-07-31T12:00:00.000Z",
+  "sentAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `senderProfileId` | Sí | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
+| `replyToMessageId` | No | `string` | formato `uuid`; admite null | Mensaje al que responde, si responde a alguno. | `00000000-0000-4000-8000-000000000001` |
+| `contentTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de contenido. | `00000000-0000-4000-8000-000000000001` |
+| `bodyText` | No | `string` | admite null | Cuerpo del mensaje. | `valor-ejemplo` |
+| `attachmentFileId` | No | `string` | formato `uuid`; admite null | Adjunto en `common.files`. | `00000000-0000-4000-8000-000000000001` |
+| `isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
+| `deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
+| `sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Sólo el autor puede editar o eliminar su mensaje | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mensaje ya fue eliminado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mensaje no tiene marca de envío: no se puede editar | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Pasaron más de 5 minutos: el mensaje ya no se puede editar | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/messages/{messageId}"
+}
+```
+
+---
+
+## 16. PATCH /community/conversations/{conversationId}/participant
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Marcar la conversación como favorita, fijada o archivada
+- **Operation ID:** `CommunityMessagingController_updateParticipant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.updateParticipant](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Marcar la conversación como favorita, fijada o archivada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.4 · Favorita, fijada o archivada, de mi lado.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /community/conversations/{conversationId}/participant` en `CommunityMessagingController_updateParticipant`. El controlador delega en `CommunityMessagingService.updateParticipant`. Valida el body como `UpdateParticipantDto` y consume `application/json`. El tipo de retorno estático es `Promise<ParticipantPreferencesDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateParticipantDto`; los campos opcionales se omiten.
+
+```http
+PATCH /community/conversations/00000000-0000-4000-8000-000000000001/participant HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Perfil que marca | `00000000-0000-4000-8000-000000000001` |
+| `isFavorite` | No | `boolean` | Sin restricción adicional declarada | Favorita | `true` |
+| `isPinned` | No | `boolean` | Sin restricción adicional declarada | Fijada arriba de la bandeja | `true` |
+| `archived` | No | `boolean` | Sin restricción adicional declarada | Archivada | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /community/conversations/00000000-0000-4000-8000-000000000001/participant HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "isFavorite": true,
+  "isPinned": true,
+  "archived": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ParticipantPreferencesDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ParticipantPreferencesDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "isFavorite": true,
+  "isPinned": true,
+  "archivedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `isFavorite` | Sí | `boolean` | Sin restricción adicional declarada | Favorita para este participante. | `true` |
+| `isPinned` | Sí | `boolean` | Sin restricción adicional declarada | Fijada arriba de la bandeja de este participante. | `true` |
+| `archivedAt` | No | `string` | formato `date-time`; admite null | Desde cuándo está archivada; `null` si no lo está. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/participant"
+}
+```
+
+---
+
+## 17. DELETE /community/conversations/{conversationId}/pin
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Soltar el mensaje fijado de la conversación
+- **Operation ID:** `CommunityMessagingController_unpinMessage`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.unpinMessage](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Soltar el mensaje fijado de la conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.6 · Soltar el mensaje fijado.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /community/conversations/{conversationId}/pin` en `CommunityMessagingController_unpinMessage`. El controlador delega en `CommunityMessagingService.unpinMessage`. No recibe body. El tipo de retorno estático es `Promise<PinnedMessageResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `profileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /community/conversations/00000000-0000-4000-8000-000000000001/pin?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /community/conversations/00000000-0000-4000-8000-000000000001/pin?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PinnedMessageResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "pinnedMessageId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessageId` | No | `string` | formato `uuid`; admite null | El mensaje fijado, o `null` si se soltó. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/pin"
+}
+```
+
+---
+
+## 18. POST /community/conversations/{conversationId}/pin
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Fijar un mensaje de la conversación
+- **Operation ID:** `CommunityMessagingController_pinMessage`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.pinMessage](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Fijar un mensaje de la conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.6 · Fijar un mensaje en la barra superior del hilo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/conversations/{conversationId}/pin` en `CommunityMessagingController_pinMessage`. El controlador delega en `CommunityMessagingService.pinMessage`. Valida el body como `PinMessageDto` y consume `application/json`. El tipo de retorno estático es `Promise<PinnedMessageResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PinMessageDto`; los campos opcionales se omiten.
+
+```http
+POST /community/conversations/00000000-0000-4000-8000-000000000001/pin HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "messageId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Perfil que fija | `00000000-0000-4000-8000-000000000001` |
+| `messageId` | Sí | `string` | formato `uuid` | Mensaje a fijar | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/conversations/00000000-0000-4000-8000-000000000001/pin HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "messageId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PinnedMessageResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PinnedMessageResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "pinnedMessageId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `pinnedMessageId` | No | `string` | formato `uuid`; admite null | El mensaje fijado, o `null` si se soltó. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/pin"
+}
+```
+
+---
+
+## 19. GET /community/conversations/{conversationId}/presence
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Presencia de los demás participantes
+- **Operation ID:** `CommunityMessagingController_conversationPresence`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.conversationPresence](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Presencia de los demás participantes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.2 · Quién de los otros está en línea, y si no, cuándo se lo vio.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/conversations/{conversationId}/presence` en `CommunityMessagingController_conversationPresence`. El controlador delega en `CommunityMessagingReadService.conversationPresence`. No recibe body. El tipo de retorno estático es `Promise<ConversationPresenceDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `profileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/conversations/00000000-0000-4000-8000-000000000001/presence?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/conversations/00000000-0000-4000-8000-000000000001/presence?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ConversationPresenceDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConversationPresenceDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "peers": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "online": true,
+      "lastSeenAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación consultada. | `00000000-0000-4000-8000-000000000001` |
+| `peers` | Sí | `array<ProfilePresenceDto>` | Sin restricción adicional declarada | Los otros participantes, sin el propio. | `[{"profileId":"00000000-0000-4000-8000-000000000001","online":true,"lastSeenAt":"2026-07-31T12:00:00.000Z"}]` |
+| `peers[].profileId` | Sí | `string` | formato `uuid` | Perfil público. | `00000000-0000-4000-8000-000000000001` |
+| `peers[].online` | Sí | `boolean` | Sin restricción adicional declarada | `true` si tiene la mensajería abierta ahora mismo. | `true` |
+| `peers[].lastSeenAt` | No | `string` | formato `date-time`; admite null | Última vez que se lo vio conectado; `null` si nunca, o si la presencia no está disponible (Redis caído: se responde «no se sabe», no un 500). | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/presence"
+}
+```
+
+---
+
+## 20. POST /community/conversations/{conversationId}/read
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1625,6 +2701,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El perfil no es participante activo | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
@@ -1645,7 +2722,143 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /community/feed
+## 21. POST /community/conversations/contacts/search
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-messaging`
+- **Nombre:** Buscar personas para iniciar una conversación
+- **Operation ID:** `CommunityMessagingController_searchContacts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityMessagingController.searchContacts](../../src/modules/community/controllers/community-messaging.controller.ts)
+
+### Descripción de negocio
+
+Buscar personas para iniciar una conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Personas activas —pacientes y profesionales— con quienes iniciar un chat.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/conversations/contacts/search` en `CommunityMessagingController_searchContacts`. El controlador delega en `CommunityMessagingReadService.searchContacts`. Valida el body como `SearchChatContactsRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<ChatContactPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SearchChatContactsRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /community/conversations/contacts/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "q": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `q` | Sí | `string` | longitud mínima 2; longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `limit` | No | `object` | mínimo 1; máximo 20 | Sin descripción específica en el contrato OpenAPI. | `10` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/conversations/contacts/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "q": "valor-ejemplo",
+  "limit": 10
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ChatContactPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatContactPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "headline": "valor-ejemplo",
+      "avatarUrl": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ChatContactDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","headline":"valor-ejemplo","avatarUrl":"valor-ejemplo"}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Perfil interno necesario para crear la conversación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible en el resultado. | `Nombre de ejemplo` |
+| `items[].headline` | No | `string` | admite null | Descripción breve, si la persona la configuró. | `valor-ejemplo` |
+| `items[].avatarUrl` | No | `string` | admite null | Avatar servido por la ruta pública de archivos, o `null`. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/contacts/search"
+}
+```
+
+---
+
+## 22. GET /community/feed
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -1818,7 +3031,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. DELETE /community/follows
+## 23. DELETE /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -1927,7 +3140,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /community/follows
+## 24. GET /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -2055,7 +3268,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /community/follows
+## 25. POST /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -2184,7 +3397,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /community/groups
+## 26. GET /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2323,7 +3536,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /community/groups
+## 27. POST /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2441,9 +3654,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Tema no encontrado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 409 | `CONFLICT` | Ya hay un grupo con ese slug | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Para crear un grupo necesitás tu perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 422 | `PRECONDITION_FAILED` | Para crear un grupo público necesitás tu perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 422 | `PRECONDITION_FAILED` | Para crear un grupo público, tu perfil público tiene que estar completo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo necesita su perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo público necesita su perfil público configurado | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para crear un grupo público, su perfil público tiene que estar completo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2461,7 +3674,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /community/groups/{groupId}
+## 28. GET /community/groups/{groupId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2611,7 +3824,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /community/groups/{groupId}/members
+## 29. GET /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2744,7 +3957,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /community/groups/{groupId}/members
+## 30. POST /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2872,7 +4085,125 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. PATCH /community/groups/{groupId}/members/{memberId}
+## 31. DELETE /community/groups/{groupId}/members/{member}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-groups`
+- **Nombre:** Salir del grupo o dar de baja a un integrante
+- **Operation ID:** `CommunityGroupsController_leaveGroup`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityGroupsController.leaveGroup](../../src/modules/community/controllers/community-groups.controller.ts)
+
+### Descripción de negocio
+
+Salir del grupo o dar de baja a un integrante. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P7: baja de un integrante. Lleva el **perfil** y no el id de membresía porque quien se da de baja a sí mismo conoce su perfil, no el uuid de su fila en `group_members`. El segmento se llama `:member` en las dos rutas —aunque el `PATCH` espera la membresía y este el perfil— porque el contrato OpenAPI no admite dos rutas que sólo difieran en el nombre del parámetro (`no-identical-paths`). El nombre no viaja en la URL: la diferencia queda dicha en `@ApiParam`.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /community/groups/{groupId}/members/{member}` en `CommunityGroupsController_leaveGroup`. El controlador delega en `CommunityGroupsService.leaveGroup`. No recibe body. El tipo de retorno estático es `Promise<GroupMemberUpdatedDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `member` | path | Sí | `string` | formato `uuid` | Id del perfil del integrante que sale del grupo. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `groupId`, `member`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberUpdatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "memberRoleConceptId": "00000000-0000-4000-8000-000000000001",
+  "joinStatusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Membresía afectada. | `00000000-0000-4000-8000-000000000001` |
+| `memberRoleConceptId` | Sí | `string` | formato `uuid` | Concept id del rol resultante. | `00000000-0000-4000-8000-000000000001` |
+| `joinStatusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado resultante. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra el grupo puede resolver sus membresías | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
+| 404 | `NOT_FOUND` | El perfil no es del grupo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 409 | `CONFLICT` | Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes | Excepción explícita en src/modules/community/services/community-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/groups/{groupId}/members/{member}"
+}
+```
+
+---
+
+## 32. PATCH /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -2889,14 +4220,14 @@ Contexto declarado en el controlador: P7: resuelve un alta pendiente y/o cambia 
 
 ### Descripción del sistema
 
-NestJS resuelve `PATCH /community/groups/{groupId}/members/{memberId}` en `CommunityGroupsController_updateMember`. El controlador delega en `CommunityGroupsService.updateMember`. Valida el body como `UpdateGroupMemberDto` y consume `application/json`. El tipo de retorno estático es `Promise<GroupMemberUpdatedDto>`.
+NestJS resuelve `PATCH /community/groups/{groupId}/members/{member}` en `CommunityGroupsController_updateMember`. El controlador delega en `CommunityGroupsService.updateMember`. Valida el body como `UpdateGroupMemberDto` y consume `application/json`. El tipo de retorno estático es `Promise<GroupMemberUpdatedDto>`.
 
 ### Parámetros
 
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `memberId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `member` | path | Sí | `string` | formato `uuid` | Id de la membresía (`group_members.id`). | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload mínimo aceptable
 
@@ -2914,7 +4245,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Deben ser UUID válidos: `groupId`, `memberId`.
+- Deben ser UUID válidos: `groupId`, `member`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3008,131 +4339,13 @@ Ejemplo de error normalizado:
   "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
-  "path": "/community/groups/{groupId}/members/{memberId}"
+  "path": "/community/groups/{groupId}/members/{member}"
 }
 ```
 
 ---
 
-## 23. DELETE /community/groups/{groupId}/members/{memberProfileId}
-
-- **Módulo:** `community`
-- **Etiqueta OpenAPI:** `community-groups`
-- **Nombre:** Salir del grupo o dar de baja a un integrante
-- **Operation ID:** `CommunityGroupsController_leaveGroup`
-- **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [CommunityGroupsController.leaveGroup](../../src/modules/community/controllers/community-groups.controller.ts)
-
-### Descripción de negocio
-
-Salir del grupo o dar de baja a un integrante. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-
-Contexto declarado en el controlador: P7: baja de un integrante. Lleva el **perfil** y no el id de membresía porque quien se da de baja a sí mismo conoce su perfil, no el uuid de su fila en `group_members`.
-
-### Descripción del sistema
-
-NestJS resuelve `DELETE /community/groups/{groupId}/members/{memberProfileId}` en `CommunityGroupsController_leaveGroup`. El controlador delega en `CommunityGroupsService.leaveGroup`. No recibe body. El tipo de retorno estático es `Promise<GroupMemberUpdatedDto>`.
-
-### Parámetros
-
-| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|---|:---:|---|---|---|---|
-| `groupId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `memberProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-
-### Payload mínimo aceptable
-
-La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
-
-```http
-DELETE /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
-Host: localhost:3000
-Authorization: Bearer <access_token_jwt>
-```
-
-### Restricciones a considerar
-
-- Requiere `Authorization: Bearer <JWT>`.
-- Deben ser UUID válidos: `groupId`, `memberProfileId`.
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
-- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
-
-
-
-### Payload completo de ejemplo
-
-No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
-
-```http
-DELETE /community/groups/00000000-0000-4000-8000-000000000001/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
-Host: localhost:3000
-Authorization: Bearer <access_token_jwt>
-```
-
-### Respuestas generales esperadas
-
-| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
-|---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 400 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 404 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 409 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 422 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 429 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-| 500 | Operación completada correctamente. | `Promise<GroupMemberUpdatedDto>` | No |
-
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GroupMemberUpdatedDto`. Ejemplo completo derivado de ese DTO:
-
-```json
-{
-  "id": "00000000-0000-4000-8000-000000000001",
-  "memberRoleConceptId": "00000000-0000-4000-8000-000000000001",
-  "joinStatusConceptId": "00000000-0000-4000-8000-000000000001"
-}
-```
-
-Campos de la respuesta:
-
-| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Membresía afectada. | `00000000-0000-4000-8000-000000000001` |
-| `memberRoleConceptId` | Sí | `string` | formato `uuid` | Concept id del rol resultante. | `00000000-0000-4000-8000-000000000001` |
-| `joinStatusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado resultante. | `00000000-0000-4000-8000-000000000001` |
-
-En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
-
-### Respuestas de error posibles
-
-| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
-|---:|---|---|---|
-| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
-| 403 | `FORBIDDEN` | Sólo quien administra el grupo puede resolver sus membresías | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
-| 404 | `NOT_FOUND` | Grupo no encontrado | Excepción explícita en src/modules/community/services/community-group-access.service.ts |
-| 404 | `NOT_FOUND` | El perfil no es del grupo | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 409 | `CONFLICT` | Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes | Excepción explícita en src/modules/community/services/community-groups.service.ts |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
-| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
-
-Ejemplo de error normalizado:
-
-```json
-{
-  "code": "VALIDATION_FAILED",
-  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
-  "correlationId": "req-01J00000000000000000000000",
-  "timestamp": "2026-07-31T12:00:00.000Z",
-  "path": "/community/groups/{groupId}/members/{memberProfileId}"
-}
-```
-
----
-
-## 24. GET /community/groups/{groupId}/posts
+## 33. GET /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3271,7 +4484,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /community/groups/{groupId}/posts
+## 34. POST /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3426,7 +4639,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /community/moderation/appeals
+## 35. GET /community/moderation/appeals
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -3580,7 +4793,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /community/moderation/appeals/{appealId}/resolve
+## 36. POST /community/moderation/appeals/{appealId}/resolve
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -3706,7 +4919,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /community/moderation/decisions
+## 37. GET /community/moderation/decisions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -3839,7 +5052,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /community/moderation/decisions/{decisionId}/appeal
+## 38. POST /community/moderation/decisions/{decisionId}/appeal
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -3946,6 +5159,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el sancionado por esta decisión puede apelarla | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
 | 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
 | 404 | `NOT_FOUND` | Decisión no encontrada | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
 | 409 | `CONFLICT` | Ya existe una apelación abierta para esta decisión | Excepción explícita en src/modules/community/services/community-moderation.service.ts |
@@ -3967,7 +5181,135 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /community/moderation/queue
+## 39. GET /community/moderation/decisions/mine
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-moderation`
+- **Nombre:** Mis propias decisiones de moderación
+- **Operation ID:** `CommunityModerationController_listMyDecisions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityModerationController.listMyDecisions](../../src/modules/community/controllers/community-moderation.controller.ts)
+
+### Descripción de negocio
+
+Mis propias decisiones de moderación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: UC-19-10 (AG-18) · «Mis sanciones»: el autor lee sus propias decisiones. Sin `@Roles`, a propósito: es la lectura que le falta a cualquier cuenta para poder apelar — sin ella, el autor sancionado nunca conoce el `decisionId` que `POST .../appeal` le exige. Declarada **antes** que `moderation/decisions` (la de `SECURITY_ADMIN`) para que un futuro `GET moderation/decisions/:id` no la capture primero.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/moderation/decisions/mine` en `CommunityModerationController_listMyDecisions`. El controlador delega en `CommunityModerationReadService.listMyDecisions`. No recibe body. El tipo de retorno estático es `Promise<MyModerationDecisionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | query | Sí | `string` | formato `uuid` | Perfil propio | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor de la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1 | Tope de filas | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/moderation/decisions/mine?profileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/moderation/decisions/mine?profileId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyModerationDecisionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyModerationDecisionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "decisionId": "00000000-0000-4000-8000-000000000001",
+      "policyConceptId": "00000000-0000-4000-8000-000000000001",
+      "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+      "rationaleText": "valor-ejemplo",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "appealable": true
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MyModerationDecisionItemDto>` | Sin restricción adicional declarada | Decisiones de la página. | `[{"decisionId":"00000000-0000-4000-8000-000000000001","policyConceptId":"00000000-0000-4000-8000-000000000001","decisionConceptId":"00000000-0000-4000-8000-000000000001","rationaleText":"valor-ejemplo","decidedAt":"2026-07-31T12:00:00.000Z","appealable":true}]` |
+| `items[].decisionId` | Sí | `string` | formato `uuid` | Identificador de la decisión, el que viaja en `POST .../appeal`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].policyConceptId` | Sí | `string` | formato `uuid` | Concept id de la política aplicada. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decisionConceptId` | Sí | `string` | formato `uuid` | Concept id de la decisión tomada (removido, restringido, advertido). | `00000000-0000-4000-8000-000000000001` |
+| `items[].rationaleText` | No | `string` | admite null | Motivo escrito por quien decidió. | `valor-ejemplo` |
+| `items[].decidedAt` | No | `string` | formato `date-time`; admite null | Cuándo se decidió. | `2026-07-31T12:00:00.000Z` |
+| `items[].appealable` | Sí | `boolean` | Sin restricción adicional declarada | `false` si ya hay una apelación abierta para esta decisión. | `true` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas trae esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil puede leer su contenido privado | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/moderation/decisions/mine"
+}
+```
+
+---
+
+## 40. GET /community/moderation/queue
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4115,7 +5457,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /community/moderation/queue/{queueId}/decision
+## 41. POST /community/moderation/queue/{queueId}/decision
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4252,7 +5594,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /community/notifications
+## 42. GET /community/notifications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -4388,7 +5730,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /community/polls/{pollId}
+## 43. GET /community/polls/{pollId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -4526,7 +5868,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /community/polls/{pollId}/votes
+## 44. POST /community/polls/{pollId}/votes
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -4656,7 +5998,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /community/posts/{postId}
+## 45. GET /community/posts/{postId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4800,7 +6142,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /community/posts/{postId}/comments
+## 46. GET /community/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -4884,6 +6226,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "createdAt": "2026-07-31T12:00:00.000Z",
       "replies": [
         "<CommentThreadItemDto>"
+      ],
+      "media": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "fileId": "00000000-0000-4000-8000-000000000001",
+          "mediaRoleConceptId": "00000000-0000-4000-8000-000000000001",
+          "altText": "valor-ejemplo",
+          "ordinal": 1
+        }
       ]
     }
   ],
@@ -4897,7 +6248,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<CommentThreadItemDto>` | Sin restricción adicional declarada | Comentarios raíz de la página, cada uno con sus respuestas. | `[{"id":"00000000-0000-4000-8000-000000000001","authorProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","parentCommentId":"00000000-0000-4000-8000-000000000001","threadDepth":1,"replyCount":1,"createdAt":"2026-07-31T12:00:00.000Z","replies":["<CommentThreadItemDto>"]}]` |
+| `items` | Sí | `array<CommentThreadItemDto>` | Sin restricción adicional declarada | Comentarios raíz de la página, cada uno con sus respuestas. | `[{"id":"00000000-0000-4000-8000-000000000001","authorProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","parentCommentId":"00000000-0000-4000-8000-000000000001","threadDepth":1,"replyCount":1,"createdAt":"2026-07-31T12:00:00.000Z","replies":["<CommentThreadItemDto>"],"media":[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","mediaRoleConceptId":"00000000-0000-4000-8000-000000000001","altText":"valor-ejemplo","ordinal":1}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador del comentario. | `00000000-0000-4000-8000-000000000001` |
 | `items[].authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor. | `00000000-0000-4000-8000-000000000001` |
 | `items[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Cuerpo del comentario. | `valor-ejemplo` |
@@ -4906,6 +6257,12 @@ Campos de la respuesta:
 | `items[].replyCount` | No | `number` | admite null | Cuántas respuestas tiene registradas. | `1` |
 | `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se creó. | `2026-07-31T12:00:00.000Z` |
 | `items[].replies` | Sí | `array<CommentThreadItemDto>` | Sin restricción adicional declarada | Respuestas anidadas de este comentario. | `["<CommentThreadItemDto>"]` |
+| `items[].media` | Sí | `array<CommentMediaDto>` | Sin restricción adicional declarada | Adjuntos del comentario (REQ-01-011), en orden de despliegue. | `[{"id":"00000000-0000-4000-8000-000000000001","fileId":"00000000-0000-4000-8000-000000000001","mediaRoleConceptId":"00000000-0000-4000-8000-000000000001","altText":"valor-ejemplo","ordinal":1}]` |
+| `items[].media[].id` | Sí | `string` | formato `uuid` | Identificador del adjunto. | `00000000-0000-4000-8000-000000000001` |
+| `items[].media[].fileId` | Sí | `string` | formato `uuid` | Archivo en `common.files`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].media[].mediaRoleConceptId` | Sí | `string` | formato `uuid` | Concept id del rol del medio (imagen, sticker, GIF). | `00000000-0000-4000-8000-000000000001` |
+| `items[].media[].altText` | No | `string` | admite null | Texto alternativo para lectores de pantalla. | `valor-ejemplo` |
+| `items[].media[].ordinal` | No | `number` | admite null | Orden de despliegue. | `1` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas raíces trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
@@ -4938,7 +6295,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /community/posts/{postId}/polls
+## 47. POST /community/posts/{postId}/polls
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -5079,7 +6436,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. GET /community/posts/{postId}/reactions
+## 48. GET /community/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5203,7 +6560,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /community/profiles/{profileId}
+## 49. GET /community/profiles/{profileId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5276,6 +6633,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "tenantId": "00000000-0000-4000-8000-000000000001",
   "targetTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -5310,6 +6668,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador del perfil. | `00000000-0000-4000-8000-000000000001` |
 | `tenantId` | Sí | `string` | formato `uuid` | Organización a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `targetTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de sujeto (usuario, profesional, organización). | `00000000-0000-4000-8000-000000000001` |
+| `kind` | No | `object` | valores: `PRACTITIONER`, `ORGANIZATION`, `PHARMACY`, `DIAGNOSTIC_UNIT`, `INSURER` | La vertical en claro, o `null` si este perfil no tiene ficha pública. `targetTypeConceptId` es un uuid de terminología y el cliente **no tiene su tabla**: sin esto tendría que adivinar a qué URL pública lleva un perfil —`/p`, `/o`, `/f`, `/l`, `/s`— o no ofrecer el enlace nunca. Es el mismo valor que publica el buscador anónimo, del mismo mapa. `null` en el perfil de un paciente: no se publica, y decirlo es parte de la respuesta. | `{}` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Ruta pública del perfil. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
 | `headline` | No | `string` | admite null | Titular o especialidad declarada. | `valor-ejemplo` |
@@ -5359,7 +6718,290 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /community/profiles/{profileId}/posts
+## 50. GET /community/profiles/{profileId}/auto-reply
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Respuesta automática por inactividad del perfil
+- **Operation ID:** `CommunitySocialController_getAutoReply`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.getAutoReply](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Respuesta automática por inactividad del perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.7 · La respuesta automática por inactividad de un perfil. **Va declarada antes que `profiles/:profileId`**, por el mismo motivo que `by-slug`: el router prueba en orden. `null` cuando nunca se configuró — que no es lo mismo que estar apagada, y la pantalla los dibuja distinto.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/profiles/{profileId}/auto-reply` en `CommunitySocialController_getAutoReply`. El controlador delega en `CommunityChatAutoReplyService.get`. No recibe body. El tipo de retorno estático es `Promise<ChatAutoReplyDto | null>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/profiles/00000000-0000-4000-8000-000000000001/auto-reply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `profileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/profiles/00000000-0000-4000-8000-000000000001/auto-reply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChatAutoReplyDto | null>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatAutoReplyDto | null`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "publicProfileId": "00000000-0000-4000-8000-000000000001",
+  "isActive": true,
+  "inactivityMinutes": 1,
+  "bodyText": "valor-ejemplo",
+  "cooldownHours": 1,
+  "onlyOutsideBusinessHours": true,
+  "businessHoursFrom": "08:00",
+  "businessHoursTo": "18:00",
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la configuración. | `00000000-0000-4000-8000-000000000001` |
+| `publicProfileId` | Sí | `string` | formato `uuid` | De quién es. | `00000000-0000-4000-8000-000000000001` |
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `inactivityMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `cooldownHours` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `onlyOutsideBusinessHours` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `businessHoursFrom` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `businessHoursTo` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `18:00` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/{profileId}/auto-reply"
+}
+```
+
+---
+
+## 51. PUT /community/profiles/{profileId}/auto-reply
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-social`
+- **Nombre:** Configurar la respuesta automática del perfil
+- **Operation ID:** `CommunitySocialController_upsertAutoReply`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySocialController.upsertAutoReply](../../src/modules/community/controllers/community-social.controller.ts)
+
+### Descripción de negocio
+
+Configurar la respuesta automática del perfil. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: F4.7 · Configura la respuesta automática del perfil. `PUT` y no `PATCH`: hay **una sola fila por perfil** y se manda entera, así que quien configura no tiene que saber si ya existía. Sólo el titular del perfil — lo comprueba el servicio, que es donde hay base para comprobarlo.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /community/profiles/{profileId}/auto-reply` en `CommunitySocialController_upsertAutoReply`. El controlador delega en `CommunityChatAutoReplyService.upsert`. Valida el body como `UpsertChatAutoReplyDto` y consume `application/json`. El tipo de retorno estático es `Promise<ChatAutoReplyDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpsertChatAutoReplyDto`; los campos opcionales se omiten.
+
+```http
+PUT /community/profiles/00000000-0000-4000-8000-000000000001/auto-reply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "isActive": true,
+  "inactivityMinutes": 1,
+  "bodyText": "valor-ejemplo",
+  "cooldownHours": 1,
+  "onlyOutsideBusinessHours": true
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `profileId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Si la respuesta automática está encendida | `true` |
+| `inactivityMinutes` | Sí | `number` | mínimo 1; máximo 1440 | Minutos de inactividad antes de contestar solo | `1` |
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 4000 | Texto de la respuesta | `valor-ejemplo` |
+| `cooldownHours` | Sí | `number` | mínimo 1; máximo 168 | Horas de descanso antes de repetirle a la misma conversación | `1` |
+| `onlyOutsideBusinessHours` | Sí | `boolean` | Sin restricción adicional declarada | Contestar sólo fuera del horario de atención | `true` |
+| `businessHoursFrom` | No | `string` | patrón runtime `HOUR` | Inicio del horario de atención | `08:00` |
+| `businessHoursTo` | No | `string` | patrón runtime `HOUR` | Fin del horario de atención | `18:00` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /community/profiles/00000000-0000-4000-8000-000000000001/auto-reply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "isActive": true,
+  "inactivityMinutes": 1,
+  "bodyText": "valor-ejemplo",
+  "cooldownHours": 1,
+  "onlyOutsideBusinessHours": true,
+  "businessHoursFrom": "08:00",
+  "businessHoursTo": "18:00"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ChatAutoReplyDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChatAutoReplyDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "publicProfileId": "00000000-0000-4000-8000-000000000001",
+  "isActive": true,
+  "inactivityMinutes": 1,
+  "bodyText": "valor-ejemplo",
+  "cooldownHours": 1,
+  "onlyOutsideBusinessHours": true,
+  "businessHoursFrom": "08:00",
+  "businessHoursTo": "18:00",
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la configuración. | `00000000-0000-4000-8000-000000000001` |
+| `publicProfileId` | Sí | `string` | formato `uuid` | De quién es. | `00000000-0000-4000-8000-000000000001` |
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `inactivityMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `bodyText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `cooldownHours` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `onlyOutsideBusinessHours` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `businessHoursFrom` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `08:00` |
+| `businessHoursTo` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `18:00` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/profiles/{profileId}/auto-reply"
+}
+```
+
+---
+
+## 52. GET /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5516,7 +7158,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /community/profiles/{profileId}/posts
+## 53. POST /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -5565,7 +7207,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 5000 | Texto del post (sin PHI identificable) | `valor-ejemplo` |
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 20000 | Texto del post (sin PHI identificable) | `valor-ejemplo` |
 | `postType` | No | `string` | valores: `TEXT`, `POLL` | Tipo de post | `TEXT` |
 | `visibility` | No | `string` | valores: `PUBLIC`, `FOLLOWERS`, `PRIVATE` | Quién puede leer el post. Omitirlo equivale a PUBLIC, que es como se leen las publicaciones anteriores a este campo. | `PUBLIC` |
 | `commentsEnabled` | No | `boolean` | Sin restricción adicional declarada | Comentarios habilitados | `true` |
@@ -5690,7 +7332,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /community/profiles/{profileId}/reviews
+## 54. GET /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -5769,6 +7411,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "overallRating": 1,
       "reviewText": "valor-ejemplo",
       "reviewerDisplayModeConceptId": "00000000-0000-4000-8000-000000000001",
+      "reviewerDisplayName": "Nombre de ejemplo",
       "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
       "publishedAt": "2026-07-31T12:00:00.000Z",
       "editedAt": "2026-07-31T12:00:00.000Z",
@@ -5798,12 +7441,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ServiceReviewDto>` | Sin restricción adicional declarada | Reviews de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","targetPublicProfileId":"00000000-0000-4000-8000-000000000001","overallRating":1,"reviewText":"valor-ejemplo","reviewerDisplayModeConceptId":"00000000-0000-4000-8000-000000000001","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","publishedAt":"2026-07-31T12:00:00.000Z","editedAt":"2026-07-31T12:00:00.000Z","dimensionScores":[{"dimensionConceptId":"00000000-0000-4000-8000-000000000001","score":1}],"responses":[{"id":"00000000-0000-4000-8000-000000000001","responderPublicProfileId":"00000000-0000-4000-8000-000000000001","responseText":"valor-ejemplo","publishedAt":"2026-07-31T12:00:00.000Z"}]}]` |
+| `items` | Sí | `array<ServiceReviewDto>` | Sin restricción adicional declarada | Reviews de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","targetPublicProfileId":"00000000-0000-4000-8000-000000000001","overallRating":1,"reviewText":"valor-ejemplo","reviewerDisplayModeConceptId":"00000000-0000-4000-8000-000000000001","reviewerDisplayName":"Nombre de ejemplo","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","publishedAt":"2026-07-31T12:00:00.000Z","editedAt":"2026-07-31T12:00:00.000Z","dimensionScores":[{"dimensionConceptId":"00000000-0000-4000-8000-000000000001","score":1}],"responses":[{"id":"00000000-0000-4000-8000-000000000001","responderPublicProfileId":"00000000-0000-4000-8000-000000000001","responseText":"valor-ejemplo","publishedAt":"2026-07-31T12:00:00.000Z"}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la review. | `00000000-0000-4000-8000-000000000001` |
 | `items[].targetPublicProfileId` | Sí | `string` | formato `uuid` | Perfil calificado. | `00000000-0000-4000-8000-000000000001` |
 | `items[].overallRating` | Sí | `number` | Sin restricción adicional declarada | Puntuación general. | `1` |
 | `items[].reviewText` | No | `string` | admite null | Texto de la reseña. | `valor-ejemplo` |
 | `items[].reviewerDisplayModeConceptId` | No | `string` | formato `uuid`; admite null | Concept id del modo de presentación del autor (con nombre, anónimo). | `00000000-0000-4000-8000-000000000001` |
+| `items[].reviewerDisplayName` | No | `string` | admite null | Cómo firma quien escribió, o `null` si la publicó como anónima. Sale del modo que el propio autor eligió al publicarla (`reviewer_display_mode_concept_id`): con nombre real viaja su nombre, y con modo anónimo viaja `null` — nunca el nombre «por si acaso». Es el único dato del autor que sale de acá, y sale porque él decidió que saliera; `reviewer_patient_profile_id` sigue sin publicarse, así que una reseña anónima no se puede reconstruir desde esta respuesta. La pantalla que lo reciba en `null` dice «Paciente verificado», no el nombre vacío. | `Nombre de ejemplo` |
 | `items[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de verificación de la reseña. | `00000000-0000-4000-8000-000000000001` |
 | `items[].publishedAt` | No | `string` | formato `date-time`; admite null | Cuándo se publicó. | `2026-07-31T12:00:00.000Z` |
 | `items[].editedAt` | No | `string` | formato `date-time`; admite null | Si fue editada, cuándo. | `2026-07-31T12:00:00.000Z` |
@@ -5846,7 +7490,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /community/profiles/{profileId}/reviews
+## 55. POST /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -5997,7 +7641,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+## 56. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -6125,7 +7769,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /community/profiles/by-slug/{slug}
+## 57. GET /community/profiles/by-slug/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6197,6 +7841,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "tenantId": "00000000-0000-4000-8000-000000000001",
   "targetTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
   "slug": "valor-ejemplo",
   "displayName": "Nombre de ejemplo",
   "headline": "valor-ejemplo",
@@ -6231,6 +7876,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador del perfil. | `00000000-0000-4000-8000-000000000001` |
 | `tenantId` | Sí | `string` | formato `uuid` | Organización a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `targetTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de sujeto (usuario, profesional, organización). | `00000000-0000-4000-8000-000000000001` |
+| `kind` | No | `object` | valores: `PRACTITIONER`, `ORGANIZATION`, `PHARMACY`, `DIAGNOSTIC_UNIT`, `INSURER` | La vertical en claro, o `null` si este perfil no tiene ficha pública. `targetTypeConceptId` es un uuid de terminología y el cliente **no tiene su tabla**: sin esto tendría que adivinar a qué URL pública lleva un perfil —`/p`, `/o`, `/f`, `/l`, `/s`— o no ofrecer el enlace nunca. Es el mismo valor que publica el buscador anónimo, del mismo mapa. `null` en el perfil de un paciente: no se publica, y decirlo es parte de la respuesta. | `{}` |
 | `slug` | Sí | `string` | Sin restricción adicional declarada | Ruta pública del perfil. | `valor-ejemplo` |
 | `displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
 | `headline` | No | `string` | admite null | Titular o especialidad declarada. | `valor-ejemplo` |
@@ -6281,7 +7927,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /community/profiles/me
+## 58. GET /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6406,7 +8052,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. PUT /community/profiles/me
+## 59. PUT /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6575,7 +8221,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /community/profiles/me/stats
+## 60. GET /community/profiles/me/stats
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6693,7 +8339,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /community/public-profiles
+## 61. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6838,7 +8484,500 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. PUT /community/reactions
+## 62. GET /community/ratings
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Calificaciones de un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.list](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Calificaciones de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Nota media y calificaciones individuales de una parte.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings` en `PartyRatingsController_list`. El controlador delega en `PartyRatingsReadService.list`. No recibe body. El tipo de retorno estático es `Promise<RatingListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `targetId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RatingListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RatingListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "reviewerType": {},
+      "overallRating": 1,
+      "commentText": "valor-ejemplo",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<RatingItemDto>` | Sin restricción adicional declarada | Calificaciones individuales (hasta 50, las más recientes). | `[{"id":"00000000-0000-4000-8000-000000000001","reviewerType":{},"overallRating":1,"commentText":"valor-ejemplo","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la calificación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reviewerType` | Sí | `object` | Sin restricción adicional declarada | Qué tipo de parte calificó. | `{}` |
+| `items[].overallRating` | Sí | `number` | Sin restricción adicional declarada | Estrellas. | `1` |
+| `items[].commentText` | No | `string` | Sin restricción adicional declarada | Comentario, si lo dejó. | `valor-ejemplo` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Cuándo se calificó por última vez. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La calificación de un paciente sólo la ven los profesionales que lo atienden | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings"
+}
+```
+
+---
+
+## 63. PUT /community/ratings
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Calificar con estrellas a un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_rate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.rate](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Exige una atención terminada cuando hay un paciente de por medio, y el vínculo de trabajo entre médico y organización. Volver a calificar el mismo respaldo actualiza la calificación.
+
+Contexto declarado en el controlador: Califico (o recalifico) a una parte. Idempotente por respaldo.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /community/ratings` en `PartyRatingsController_rate`. El controlador delega en `PartyRatingsService.rate`. Valida el body como `CommunityRatePartyDto` y consume `application/json`. El tipo de retorno estático es `Promise<PartyRatingResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CommunityRatePartyDto`; los campos opcionales se omiten.
+
+```http
+PUT /community/ratings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reviewerType": "PATIENT",
+  "targetType": "PATIENT",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reviewerType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `reviewerOrganizationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `targetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `roleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `commentText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /community/ratings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reviewerType": "PATIENT",
+  "reviewerOrganizationId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "PATIENT",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "commentText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartyRatingResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "created": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la calificación. | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | Sin restricción adicional declarada | Estrellas guardadas. | `1` |
+| `created` | Sí | `boolean` | Sin restricción adicional declarada | `true` si se creó; `false` si se actualizó una calificación previa. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique la atención terminada que respalda la calificación | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 400 | `VALIDATION_FAILED` | Indique el vínculo de trabajo que respalda la calificación | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 400 | `VALIDATION_FAILED` | Indique en nombre de qué organización califica | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No puede calificar a una organización que usted administra | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil de paciente con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil profesional con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra la organización puede calificar en su nombre | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 409 | `CONFLICT` | Esta calificación se está guardando en otro pedido; vuelva a intentarlo | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | BASIS_REJECTED | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención todavía no terminó | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings"
+}
+```
+
+---
+
+## 64. GET /community/ratings/mine
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Mis calificaciones
+- **Operation ID:** `PartyRatingsController_mine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.mine](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Mis calificaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las calificaciones que hice, para precargar el formulario.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings/mine` en `PartyRatingsController_mine`. El controlador delega en `PartyRatingsReadService.mine`. No recibe body. El tipo de retorno estático es `Promise<MyRatingDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `reviewerType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `reviewerOrganizationId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings/mine?reviewerType=PATIENT HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings/mine?reviewerType=PATIENT&reviewerOrganizationId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyRatingDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "reviewerType": {},
+    "targetType": {},
+    "targetId": "00000000-0000-4000-8000-000000000001",
+    "encounterId": "00000000-0000-4000-8000-000000000001",
+    "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+    "overallRating": 1,
+    "commentText": "valor-ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique en nombre de qué organización califica | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil de paciente con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil profesional con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra la organización puede calificar en su nombre | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings/mine"
+}
+```
+
+---
+
+## 65. GET /community/ratings/summary
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Nota media de un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_summary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.summary](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Nota media de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Nota media de una parte.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings/summary` en `PartyRatingsController_summary`. El controlador delega en `PartyRatingsReadService.summary`. No recibe body. El tipo de retorno estático es `Promise<RatingSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `targetId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings/summary?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings/summary?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RatingSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "average": 1,
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `average` | Sí | `number` | admite null | Media de estrellas, con un decimal; `null` si nadie la calificó. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas calificaciones la componen. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La calificación de un paciente sólo la ven los profesionales que lo atienden | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings/summary"
+}
+```
+
+---
+
+## 66. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6970,7 +9109,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /community/reports
+## 67. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -7099,7 +9238,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /community/topics
+## 68. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -7217,7 +9356,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /f/{slug}
+## 69. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -7308,6 +9447,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -7360,6 +9511,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -7407,7 +9566,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /internal/community/feed/pending
+## 70. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -7523,7 +9682,263 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /internal/community/feed/rebuild
+## 71. POST /internal/community/feed/ranking/apply
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-feed`
+- **Nombre:** Aplicar rank_score recalculado
+- **Operation ID:** `CommunityFeedController_rankingApply`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityFeedController.rankingApply](../../src/modules/community/controllers/community-feed.controller.ts)
+
+### Descripción de negocio
+
+Aplicar rank_score recalculado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Aplica los rank_score recalculados por el worker (UC-19-16).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/community/feed/ranking/apply` en `CommunityFeedController_rankingApply`. El controlador delega en `CommunityFeedService.applyRanking`. Valida el body como `ApplyFeedRankingDto` y consume `application/json`. El tipo de retorno estático es `Promise<FeedRankingApplyResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ApplyFeedRankingDto`; los campos opcionales se omiten.
+
+```http
+POST /internal/community/feed/ranking/apply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "rankScore": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `updates` | Sí | `array<FeedRankingUpdateDto>` | máximo 500 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"feedItemId":"00000000-0000-4000-8000-000000000001","rankScore":"valor-ejemplo"}]` |
+| `updates[].feedItemId` | Sí | `string` | formato `uuid` | Ítem de feed | `00000000-0000-4000-8000-000000000001` |
+| `updates[].rankScore` | Sí | `string` | Sin restricción adicional declarada | Nuevo rank_score, como texto decimal | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /internal/community/feed/ranking/apply HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "rankScore": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FeedRankingApplyResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRankingApplyResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "updated": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `updated` | Sí | `number` | Sin restricción adicional declarada | Ítems actualizados | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/feed/ranking/apply"
+}
+```
+
+---
+
+## 72. GET /internal/community/feed/ranking/pending
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-feed`
+- **Nombre:** Items de feed pendientes de puntuar
+- **Operation ID:** `CommunityFeedController_rankingPending`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityFeedController.rankingPending](../../src/modules/community/controllers/community-feed.controller.ts)
+
+### Descripción de negocio
+
+Items de feed pendientes de puntuar. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lote de ítems de feed pendientes de recalcular su rank_score (UC-19-16). Descubre-y-actúa como `pending`/`rebuild`: este endpoint junta las señales crudas (recencia, interacción) y `ranking/apply` persiste el puntaje que el worker calculó con ellas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /internal/community/feed/ranking/pending` en `CommunityFeedController_rankingPending`. El controlador delega en `CommunityFeedService.pendingRanking`. No recibe body. El tipo de retorno estático es `Promise<FeedRankingPendingResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /internal/community/feed/ranking/pending?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /internal/community/feed/ranking/pending?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FeedRankingPendingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeedRankingPendingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "feedItemId": "00000000-0000-4000-8000-000000000001",
+      "postId": "00000000-0000-4000-8000-000000000001",
+      "ownerProfileId": "00000000-0000-4000-8000-000000000001",
+      "authorProfileId": "00000000-0000-4000-8000-000000000001",
+      "itemCreatedAt": "valor-ejemplo",
+      "postPublishedAt": "valor-ejemplo",
+      "reactionCount": 1,
+      "commentCount": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<FeedRankingPendingItemDto>` | Sin restricción adicional declarada | Lote de ítems a puntuar. | `[{"feedItemId":"00000000-0000-4000-8000-000000000001","postId":"00000000-0000-4000-8000-000000000001","ownerProfileId":"00000000-0000-4000-8000-000000000001","authorProfileId":"00000000-0000-4000-8000-000000000001","itemCreatedAt":"valor-ejemplo","postPublishedAt":"valor-ejemplo","reactionCount":1,"commentCount":1}]` |
+| `items[].feedItemId` | Sí | `string` | formato `uuid` | Ítem de feed | `00000000-0000-4000-8000-000000000001` |
+| `items[].postId` | Sí | `string` | formato `uuid` | Post fuente | `00000000-0000-4000-8000-000000000001` |
+| `items[].ownerProfileId` | Sí | `string` | formato `uuid` | Perfil dueño del feed | `00000000-0000-4000-8000-000000000001` |
+| `items[].authorProfileId` | Sí | `string` | formato `uuid` | Perfil autor | `00000000-0000-4000-8000-000000000001` |
+| `items[].itemCreatedAt` | Sí | `string` | Sin restricción adicional declarada | Alta del ítem | `valor-ejemplo` |
+| `items[].postPublishedAt` | Sí | `string` | admite null | Publicación del post fuente | `valor-ejemplo` |
+| `items[].reactionCount` | Sí | `number` | Sin restricción adicional declarada | Reacciones del post | `1` |
+| `items[].commentCount` | Sí | `number` | Sin restricción adicional declarada | Comentarios del post | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/community/feed/ranking/pending"
+}
+```
+
+---
+
+## 73. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -7651,7 +10066,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. GET /internal/community/search/health
+## 74. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -7761,7 +10176,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. POST /internal/community/search/reindex
+## 75. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -7890,7 +10305,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. POST /internal/community/verification/badges
+## 76. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -8014,7 +10429,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. POST /internal/community/verification/badges/{targetId}/revoke
+## 77. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -8135,7 +10550,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 60. POST /internal/community/verification/badges/expire-sweep
+## 78. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -8241,7 +10656,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. GET /l/{slug}
+## 79. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8332,6 +10747,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -8384,6 +10811,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -8431,7 +10866,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. GET /o/{slug}
+## 80. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8522,6 +10957,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -8574,6 +11021,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -8621,7 +11076,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. GET /p/{slug}
+## 81. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8712,6 +11167,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -8764,6 +11231,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -8811,7 +11286,248 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /public/media/{id}
+## 82. POST /patients/me/reviews
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-reviews`
+- **Nombre:** Calificar una atención recibida
+- **Operation ID:** `PatientReviewsController_publishOwnReview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientReviewsController.publishOwnReview](../../src/modules/community/controllers/patient-reviews.controller.ts)
+
+### Descripción de negocio
+
+El destinatario sale del encuentro declarado: no hace falta conocer el identificador de la vitrina del profesional.
+
+Contexto declarado en el controlador: Califico una atención que ya terminó. El servidor comprueba que el encuentro sea mío, que haya terminado y que lo haya atendido el profesional que queda calificado; y que no lo haya calificado ya. Quién califica sale del token, nunca del cuerpo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /patients/me/reviews` en `PatientReviewsController_publishOwnReview`. El controlador delega en `CommunityReviewsService.publishOwnReview`. Valida el body como `CommunityCreateReviewDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReviewResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CommunityCreateReviewDto`; los campos opcionales se omiten.
+
+```http
+POST /patients/me/reviews HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `verifiedEncounterId` | Sí | `string` | formato `uuid` | Atención que respalda la reseña (nunca se expone) | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Calificación global 1..5 | `1` |
+| `reviewText` | No | `string` | longitud máxima 4000 | Texto de la review | `valor-ejemplo` |
+| `displayMode` | No | `string` | valores: `REAL_NAME`, `ANONYMOUS` | Modo de visualización del reviewer | `REAL_NAME` |
+| `dimensions` | No | `array<ReviewDimensionInputDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"dimension":"COMMUNICATION","score":1}]` |
+| `dimensions[].dimension` | No | `string` | valores: `COMMUNICATION`, `PUNCTUALITY`, `CLEANLINESS`, `OUTCOME` | Dimensión | `COMMUNICATION` |
+| `dimensions[].score` | No | `number` | mínimo 1; máximo 5 | Puntuación 1..5 | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /patients/me/reviews HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "verifiedEncounterId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "reviewText": "valor-ejemplo",
+  "displayMode": "REAL_NAME",
+  "dimensions": [
+    {
+      "dimension": "COMMUNICATION",
+      "score": 1
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "courseId": "00000000-0000-4000-8000-000000000001",
+  "rating": 1,
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `courseId` | Sí | `string` | formato `uuid` | Identificador asociado a course. | `00000000-0000-4000-8000-000000000001` |
+| `rating` | Sí | `number` | Sin restricción adicional declarada | Valor de rating mantenido por la instancia. | `1` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo un paciente con atención registrada puede calificar | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 404 | `NOT_FOUND` | Perfil objetivo no encontrado | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 409 | `CONFLICT` | Ya existe una review verificada para este encuentro | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La atención declarada no habilita una reseña | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 422 | `PRECONDITION_FAILED` | El perfil no acepta reviews | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención todavía no terminó | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención declarada no fue con este profesional | Excepción explícita en src/modules/community/services/community-reviews.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/patients/me/reviews"
+}
+```
+
+---
+
+## 83. GET /public/comments/{commentId}/replies
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Respuestas de un comentario público
+- **Operation ID:** `CommunityPublicController_commentReplies`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.commentReplies](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Respuestas de un comentario público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las respuestas de un comentario (AC-01-12, «Ver N respuestas»). Ruta propia y no un parámetro de la anterior: son dos recursos paginados distintos y el desplegable abre varios hilos a la vez. La justificación larga está en `CommunityPublicService.commentReplies`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/comments/{commentId}/replies` en `CommunityPublicController_commentReplies`. El controlador delega en `CommunityPublicService.commentReplies`. No recibe body. El tipo de retorno estático es `Promise<PublicCommentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `commentId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/comments/00000000-0000-4000-8000-000000000001/replies?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Deben ser UUID válidos: `commentId`.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/comments/00000000-0000-4000-8000-000000000001/replies?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+
+El controlador declara `PublicCommentPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Comentario no encontrado | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/comments/{commentId}/replies"
+}
+```
+
+---
+
+## 84. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8822,7 +11538,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Servir una imagen pública (avatar, portada o post). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Servir una imagen pública (avatar, portada o post). Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: Imagen de la superficie pública: el avatar o la portada de una vitrina, o una foto de una de sus publicaciones. La ficha y el buscador devuelven la URL `/public/media/:id` en vez del id de archivo pelado —un uuid interno regalado a un anónimo no se vuelve a esconder—, así que esta ruta es la contraparte que sirve esos bytes. Lo que autoriza es qué es el archivo, no quién lo pide: sin esto, cada foto del directorio es un enlace roto. `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la base; el resto de los «no» son un 404 indistinguible del «no existe».
 
@@ -8869,8 +11585,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<void>` | No |
 | 400 | Consulta completada correctamente. | `Promise<void>` | No |
-| 401 | Consulta completada correctamente. | `Promise<void>` | No |
-| 403 | Consulta completada correctamente. | `Promise<void>` | No |
 | 404 | Consulta completada correctamente. | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
@@ -8906,7 +11620,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /public/nearby
+## 85. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -8919,7 +11633,7 @@ Ejemplo de error normalizado:
 
 Prestadores cercanos, en línea recta. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Lo más cercano a un punto.
+Contexto declarado en el controlador: Lo más cercano a un punto. `kind` acotaba en el servicio y en el cliente del front desde el 18/08, pero el controlador nunca lo declaraba: la frontera se lo comía en silencio y `/nearby-places` recibía los cuatro verticales mezclados en vez de sólo imagenología o sólo centros médicos. Mismo defecto que `specialty` tenía en `searchPractitioners` — ver su spec para el patrón.
 
 ### Descripción del sistema
 
@@ -8932,6 +11646,7 @@ NestJS resuelve `GET /public/nearby` en `CommunityPublicController_nearby`. El c
 | `lat` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `lng` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `radiusKm` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `kind` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
@@ -8939,7 +11654,7 @@ NestJS resuelve `GET /public/nearby` en `CommunityPublicController_nearby`. El c
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&kind=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -8956,7 +11671,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/nearby?lat=valor-ejemplo&lng=valor-ejemplo&radiusKm=valor-ejemplo&kind=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -8999,7 +11714,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. GET /public/posts
+## 86. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9010,13 +11725,13 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Últimas publicaciones de todos los profesionales. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Últimas publicaciones de todos los profesionales. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: El feed de la portada: lo último de todas las vitrinas, mezclado. Va declarado **antes** que `public/search` por la misma razón que todo este controlador va antes que `read_models`: Nest resuelve por orden, y una ruta hermana con parámetro capturaría este segmento.
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublico`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
+NestJS resuelve `GET /public/posts` en `CommunityPublicController_feedPublico`. El controlador delega en `CommunityPublicService.feedPublic`. No recibe body. El tipo de retorno estático es `Promise<PublicFeedPageDto>`.
 
 ### Parámetros
 
@@ -9057,8 +11772,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 | 400 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicFeedPageDto>` | No |
 
@@ -9088,7 +11801,189 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. GET /public/profiles/{prefijo}/{slug}
+## 87. GET /public/posts/{postId}/comments
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Comentarios raíz de una publicación pública
+- **Operation ID:** `CommunityPublicController_postComments`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.postComments](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Comentarios raíz de una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El hilo de comentarios raíz de una publicación (AC-01-11, AC-01-12).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/posts/{postId}/comments` en `CommunityPublicController_postComments`. El controlador delega en `CommunityPublicService.postComments`. No recibe body. El tipo de retorno estático es `Promise<PublicCommentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `postId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/posts/00000000-0000-4000-8000-000000000001/comments?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Deben ser UUID válidos: `postId`.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/posts/00000000-0000-4000-8000-000000000001/comments?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicCommentPageDto>` | No |
+
+El controlador declara `PublicCommentPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/posts/{postId}/comments"
+}
+```
+
+---
+
+## 88. GET /public/posts/{postId}/reactions
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Quiénes reaccionaron a una publicación pública
+- **Operation ID:** `CommunityPublicController_postReactions`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.postReactions](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Quiénes reaccionaron a una publicación pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quién reaccionó a una publicación (AC-01-9). Va inmediatamente detrás de `public/posts` y comparte todo lo suyo: es `@Public()`, cae bajo el mismo límite de 60 por minuto por IP que declara la clase, se envuelve en `items`/`nextCursor`/`totalHint`/`generatedAt` y gana su `ETag` y su `Cache-Control` de `PublicCacheInterceptor`, que actúa sobre todo `GET` marcado `@Public()`. `ParseUUIDPipe` rechaza con 400 lo que no es un uuid antes de tocar la base —igual que en `public/media/:id`—; el resto de los «no» son un 404 indistinguible del «no existe».
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/posts/{postId}/reactions` en `CommunityPublicController_postReactions`. El controlador delega en `CommunityPublicService.postReactions`. No recibe body. El tipo de retorno estático es `Promise<PublicPostReactionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `postId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/posts/00000000-0000-4000-8000-000000000001/reactions?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Deben ser UUID válidos: `postId`.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/posts/00000000-0000-4000-8000-000000000001/reactions?cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicPostReactionPageDto>` | No |
+
+El controlador declara `PublicPostReactionPageDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | Publicación no encontrada | Excepción explícita en src/modules/community/services/community-public.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/posts/{postId}/reactions"
+}
+```
+
+---
+
+## 89. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9099,7 +11994,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Ficha pública por prefijo de vertical. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Ficha pública por prefijo de vertical. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: Ficha pública por vertical, bajo el prefijo `/public`. ## Por qué existe además de las cinco rutas cortas Porque `/p/:slug` es a la vez **la URL de la página** y la de su dato. En el navegador eso choca: el servidor de desarrollo enruta por prefijo de texto, así que mandar `/p` a la API se come la ruta del router y abrir la ficha devuelve JSON en vez de la pantalla; no mandarla deja al cliente pidiendo `/p/:slug` al servidor de Angular, que responde el `index.html` con **200** y el cliente recibe HTML donde espera JSON. Las dos salidas rompen algo, y `check-client-prefixes.mjs` lo denuncia desde el 2026-08-17. Las cinco rutas cortas **se quedan**: son las que alguien pega en un mensaje y las que un rastreador sigue, y su contrato no cambia. Esta es la que llama el cliente, y no es ambigua porque cuelga de `/public`, que ya está enrutado. El comportamiento es idéntico, incluido el 404 del tipo equivocado: es el mismo servicio con el mismo concepto de sujeto, no una segunda implementación que pueda separarse de la primera.
 
@@ -9146,8 +12041,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 400 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 404 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicDirectoryProfileDto>` | No |
@@ -9180,6 +12073,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "departmentText": "valor-ejemplo",
       "startDate": "2026-07-31",
       "endDate": "2026-07-31"
+    }
+  ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
     }
   ],
   "ratingAverage": 1,
@@ -9234,6 +12139,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
@@ -9281,7 +12194,112 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. GET /public/search
+## 90. GET /public/profiles/{prefijo}/{slug}/reviews
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-public`
+- **Nombre:** Opiniones publicadas de una ficha pública
+- **Operation ID:** `CommunityPublicController_listPublicProfileReviews`
+- **Autenticación:** Pública
+- **Implementación:** [CommunityPublicController.listPublicProfileReviews](../../src/modules/community/controllers/community-public.controller.ts)
+
+### Descripción de negocio
+
+Opiniones publicadas de una ficha pública. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P31 — las opiniones de una ficha pública, con su promedio. Cuelga del mismo `/public/profiles/:prefijo/:slug` que la ficha y no de `/community/profiles/:profileId/reviews` por lo mismo que aquella ruta existe: la abre un anónimo y lo único que lleva la URL es el slug. La lectura con sesión sigue donde estaba y devuelve exactamente las mismas reseñas — es el mismo servicio, no una segunda implementación. El promedio viaja acá y no sólo en la ficha porque la cabecera de las opiniones y la lista se dibujan juntas: pedirlos por separado deja la pantalla con «4,6 de 5» arriba y un hueco abajo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /public/profiles/{prefijo}/{slug}/reviews` en `CommunityPublicController_listPublicProfileReviews`. El controlador delega en `CommunityReviewsReadService.listPublicReviewsBySlug`. No recibe body. El tipo de retorno estático es `Promise<PublicProfileReviewsDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `prefijo` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `slug` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /public/profiles/valor-ejemplo/valor-ejemplo/reviews?cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle(PUBLIC_RATE_LIMIT)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /public/profiles/valor-ejemplo/valor-ejemplo/reviews?cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicProfileReviewsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfileReviewsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ratingAverage": 1,
+  "ratingCount": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ratingAverage` | No | `number` | admite null | Promedio de estrellas del perfil, con una decimal, o `null` si no tiene ninguna reseña publicada. `null` y no `0`: cero estrellas es una calificación pésima y «todavía nadie calificó» no lo es. Quien lo reciba tiene que decir «sin calificaciones». | `1` |
+| `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Cuántas reseñas publicadas tiene el perfil en total. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 404 | `NOT_FOUND` | No encontrado | Excepción explícita en src/modules/community/services/community-reviews-read.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/public/profiles/{prefijo}/{slug}/reviews"
+}
+```
+
+---
+
+## 91. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9355,6 +12373,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9374,7 +12398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. GET /public/search/diagnostic-units
+## 92. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9448,6 +12472,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9467,7 +12497,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. GET /public/search/insurers
+## 93. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9541,6 +12571,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9560,7 +12596,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. GET /public/search/medications
+## 94. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9634,6 +12670,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9653,7 +12695,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /public/search/organizations
+## 95. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9666,7 +12708,7 @@ Ejemplo de error normalizado:
 
 Organizaciones en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Organizaciones de salud: hospitales, clínicas, centros.
+Contexto declarado en el controlador: Organizaciones de salud: hospitales, clínicas, centros. `city` acota por la ciudad de la dirección vigente, sin distinguir tildes ni mayúsculas. Es el filtro que un directorio de **lugares** necesita antes que ningún otro —a nadie le sirve una clínica excelente en otra ciudad—, y está implementado en los dos caminos, el del índice y el de SQL: uno que sólo funcionara con OpenSearch arriba dejaría de acotar sin avisar el día que se cayera.
 
 ### Descripción del sistema
 
@@ -9677,8 +12719,11 @@ NestJS resuelve `GET /public/search/organizations` en `CommunityPublicController
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `city` | query | No | `string` | Sin restricción adicional declarada | Ciudad a la que acotar; sin tildes ni mayúsculas que valgan | `valor-ejemplo` |
 | `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `department` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422 | `valor-ejemplo` |
+| `municipality` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422 | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -9702,7 +12747,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/search/organizations?q=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/search/organizations?q=valor-ejemplo&city=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo&department=valor-ejemplo&municipality=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -9727,6 +12772,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9746,7 +12797,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /public/search/pharmacies
+## 96. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9820,6 +12871,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9839,7 +12896,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. GET /public/search/practitioners
+## 97. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9852,7 +12909,7 @@ Ejemplo de error normalizado:
 
 Profesionales en el directorio público. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Profesionales de la salud.
+Contexto declarado en el controlador: Profesionales de la salud. `specialty` es el `concept_id` de una especialidad de `VS_MEDICAL_SPECIALTY` —las 36 del patch v4.0.11—, **no** el nombre de la especialidad: el directorio agrupa por catálogo, no por texto libre. El cliente ya lo mandaba (`public-directory.client.ts`, `searchPractitioners`) y el controlador no lo declaraba, así que hasta hoy se perdía entre los dos: la pantalla dibujaba un filtro que no filtraba, que es peor que no dibujarlo. Un uuid que no pertenece al conjunto se rechaza con **422** —el mismo `PreconditionFailedException` y el mismo `MedicalSpecialtyCatalogService` que usa el alta de profesional—, nunca se ignora en silencio (AC-02-8).
 
 ### Descripción del sistema
 
@@ -9864,8 +12921,11 @@ NestJS resuelve `GET /public/search/practitioners` en `CommunityPublicController
 |---|---|:---:|---|---|---|---|
 | `q` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `verified` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `specialty` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_MEDICAL_SPECIALTY al que acotar; uno ajeno al conjunto da 422 | `valor-ejemplo` |
 | `cursor` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `limit` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `department` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422 | `valor-ejemplo` |
+| `municipality` | query | No | `string` | Sin restricción adicional declarada | concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o de otro departamento que `department`, da 422 | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -9889,7 +12949,7 @@ Host: localhost:3000
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /public/search/practitioners?q=valor-ejemplo&verified=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo HTTP/1.1
+GET /public/search/practitioners?q=valor-ejemplo&verified=valor-ejemplo&specialty=valor-ejemplo&cursor=valor-ejemplo&limit=valor-ejemplo&department=valor-ejemplo&municipality=valor-ejemplo HTTP/1.1
 Host: localhost:3000
 ```
 
@@ -9914,6 +12974,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
+| 422 | `PRECONDITION_FAILED` | options.mensaje | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | Operación de runtime sin tenant en contexto | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 422 | `PRECONDITION_FAILED` | Clave de runtime vacía | Excepción explícita en src/modules/redis_runtime/services/redis-runtime.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
@@ -9933,7 +12999,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. GET /s/{slug}
+## 98. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10024,6 +13090,18 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "endDate": "2026-07-31"
     }
   ],
+  "practiceSites": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "addressText": "valor-ejemplo",
+      "location": {
+        "lat": 1,
+        "lng": 1
+      },
+      "isOwn": true
+    }
+  ],
   "ratingAverage": 1,
   "ratingCount": 1,
   "acceptsReviews": true,
@@ -10076,6 +13154,14 @@ Campos de la respuesta:
 | `trajectory[].departmentText` | Sí | `string` | admite null | Servicio o departamento, si lo declaró | `valor-ejemplo` |
 | `trajectory[].startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
 | `trajectory[].endDate` | Sí | `string` | formato `date`; admite null | Fin del vínculo, o null si sigue vigente | `2026-07-31` |
+| `practiceSites` | Sí | `array<PublicPracticeSiteDto>` | Sin restricción adicional declarada | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","addressText":"valor-ejemplo","location":{"lat":1,"lng":1},"isOwn":true}]` |
+| `practiceSites[].id` | Sí | `string` | formato `uuid` | Identificador de la sede | `00000000-0000-4000-8000-000000000001` |
+| `practiceSites[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sede | `Nombre de ejemplo` |
+| `practiceSites[].addressText` | Sí | `string` | admite null | Dirección en una línea, o null si la sede no cargó ninguna | `valor-ejemplo` |
+| `practiceSites[].location` | Sí | `PublicLocationDto` | Sin restricción adicional declarada | Punto de la sede; null si su dirección no tiene coordenadas | `{"lat":1,"lng":1}` |
+| `practiceSites[].location.lat` | Sí | `number` | Sin restricción adicional declarada | Latitud en grados decimales | `1` |
+| `practiceSites[].location.lng` | Sí | `number` | Sin restricción adicional declarada | Longitud en grados decimales | `1` |
+| `practiceSites[].isOwn` | Sí | `boolean` | Sin restricción adicional declarada | Si es un consultorio propio del profesional y no la sede de una organización | `true` |
 | `ratingAverage` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ratingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `acceptsReviews` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |

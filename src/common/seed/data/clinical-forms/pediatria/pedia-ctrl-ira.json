@@ -1,0 +1,136 @@
+{
+  "code": "PEDIA_CTRL_IRA",
+  "name": "Niño con tos o dificultad para respirar (AIEPI)",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Atención Integrada a las Enfermedades Prevalentes de la Infancia (AIEPI)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/teams/maternal-newborn-child-adolescent-health-and-ageing/child-health/integrated-management-of-childhood-illness",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Signos generales de peligro, respiración rápida para la edad y tiraje, con la clasificación AIEPI."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "edad_en_meses",
+      "name": "Edad (meses)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "signos_de_peligro",
+      "name": "Signos generales de peligro",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "No puede beber ni tomar el pecho",
+        "Vomita todo",
+        "Convulsiones",
+        "Letárgico o inconsciente",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": true,
+      "description": "Rápida: ≥ 50 de 2 a 11 meses; ≥ 40 de 1 a 4 años."
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "tiraje",
+      "name": "Tiraje subcostal",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "estridor",
+      "name": "Estridor en reposo",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "sibilancias",
+      "name": "Sibilancias",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tos o dificultad respiratoria",
+      "code": "clasificacion_aiepi",
+      "name": "Clasificación",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Neumonía grave o enfermedad muy grave",
+        "Neumonía",
+        "Tos o resfriado"
+      ]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Signos para volver de inmediato",
+        "Alimentación y líquidos",
+        "Antibiótico completo si corresponde"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

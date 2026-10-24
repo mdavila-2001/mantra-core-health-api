@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,6 +16,9 @@ import {
   VirtualEncounterResponseDto,
 } from '../dto';
 import { CEXT } from '../clinical_ext.concepts';
+import { EncountersRepository } from '../../clinical/repositories';
+import type { Encounters } from '../../clinical/entities';
+import { CLIN } from '../../clinical/clinical.concepts';
 
 /**
  * Telesalud (UC-18-12): alta de la sesión virtual (scheduled), unión (in-progress)
@@ -33,6 +37,7 @@ export class VirtualEncountersService {
   constructor(
     private readonly em: EntityManager,
     private readonly encountersRepo: VirtualEncountersRepository,
+    private readonly clinicalEncountersRepo: EncountersRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(VirtualEncountersService.name);
@@ -51,6 +56,8 @@ export class VirtualEncountersService {
       'Creating virtual encounter',
     );
     return this.em.transactional(async (tx) => {
+      await this.requireEncounterParticipant(tx, dto.encounterId, actor, false);
+
       const existing = await this.encountersRepo.findByEncounter(
         tx,
         dto.encounterId,
@@ -64,7 +71,7 @@ export class VirtualEncountersService {
         );
       }
 
-      const venc = this.encountersRepo.create(tx, {
+      const due = this.encountersRepo.create(tx, {
         encounterId: dto.encounterId,
         platformConceptId: dto.platformConceptId,
         meetingUrl: dto.meetingUrl,
@@ -75,9 +82,9 @@ export class VirtualEncountersService {
       await tx.flush();
 
       return {
-        id: venc.id,
-        encounterId: venc.encounterId,
-        statusConceptId: venc.statusConceptId,
+        id: due.id,
+        encounterId: due.encounterId,
+        statusConceptId: due.statusConceptId,
       };
     });
   }
@@ -92,25 +99,26 @@ export class VirtualEncountersService {
       'Joining virtual encounter',
     );
     return this.em.transactional(async (tx) => {
-      const venc = await this.encountersRepo.findById(tx, id);
-      if (!venc)
+      const due = await this.encountersRepo.findById(tx, id);
+      if (!due)
         throw new ResourceNotFoundException('Sesión virtual no encontrada', {
           id,
         });
-      if (venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED) {
+      await this.requireEncounterParticipant(tx, due.encounterId, actor, true);
+      if (due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED) {
         throw new PreconditionFailedException('La sesión no está agendada', {
           id,
         });
       }
 
-      venc.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS;
-      venc.joinedAt = new Date();
-      touch(venc, actor.id);
+      due.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS;
+      due.joinedAt = new Date();
+      touch(due, actor.id);
 
       return {
-        id: venc.id,
-        encounterId: venc.encounterId,
-        statusConceptId: venc.statusConceptId,
+        id: due.id,
+        encounterId: due.encounterId,
+        statusConceptId: due.statusConceptId,
       };
     });
   }
@@ -126,27 +134,92 @@ export class VirtualEncountersService {
       'Ending virtual encounter',
     );
     return this.em.transactional(async (tx) => {
-      const venc = await this.encountersRepo.findById(tx, id);
-      if (!venc)
+      const due = await this.encountersRepo.findById(tx, id);
+      if (!due)
         throw new ResourceNotFoundException('Sesión virtual no encontrada', {
           id,
         });
-      if (venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
+      await this.requireEncounterParticipant(tx, due.encounterId, actor, false);
+      if (due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('La sesión no está en progreso', {
           id,
         });
       }
 
-      venc.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_COMPLETED;
-      venc.endedAt = new Date();
-      venc.recordingFileId = dto.recordingFileId;
-      touch(venc, actor.id);
+      due.statusConceptId = CEXT.VIRTUAL_ENCOUNTER_COMPLETED;
+      due.endedAt = new Date();
+      due.recordingFileId = dto.recordingFileId;
+      touch(due, actor.id);
 
       return {
-        id: venc.id,
-        encounterId: venc.encounterId,
-        statusConceptId: venc.statusConceptId,
+        id: due.id,
+        encounterId: due.encounterId,
+        statusConceptId: due.statusConceptId,
       };
     });
+  }
+
+  /**
+   * Autoriza una transición contra el encuentro clínico que es su fuente de
+   * verdad. El rol abre la ruta; la relación concreta decide sobre esta sesión.
+   */
+  private async requireEncounterParticipant(
+    tx: EntityManager,
+    encounterId: string,
+    actor: AuthenticatedUser,
+    allowPatient: boolean,
+  ): Promise<Encounters> {
+    const encounter = await this.clinicalEncountersRepo.findById(
+      tx,
+      encounterId,
+    );
+    if (!encounter) {
+      throw new ResourceNotFoundException('Encuentro clínico no encontrado', {
+        encounterId,
+      });
+    }
+
+    const activeTenantId = getCurrentTenantId();
+    const belongsToTenant = activeTenantId
+      ? activeTenantId === encounter.tenantId
+      : actor.tenantIds?.includes(encounter.tenantId) === true;
+    if (!belongsToTenant) {
+      throw new ForbiddenException(
+        'La sesión virtual pertenece a otra organización.',
+      );
+    }
+
+    if (
+      allowPatient &&
+      actor.patientProfileId !== undefined &&
+      actor.patientProfileId === encounter.patientProfileId
+    ) {
+      return encounter;
+    }
+
+    const practitionerProfileId = actor.practitionerProfileId;
+    if (!practitionerProfileId) {
+      throw new ForbiddenException('No participa de este encuentro clínico.');
+    }
+    if (encounter.primaryPractitionerId === practitionerProfileId) {
+      return encounter;
+    }
+
+    const participants =
+      await this.clinicalEncountersRepo.findActiveParticipants(
+        tx,
+        encounter.id,
+        CLIN.PARTICIPANT_ACTIVE,
+      );
+    if (
+      participants.some(
+        (participant) =>
+          participant.practitionerProfileId === practitionerProfileId,
+      )
+    ) {
+      return encounter;
+    }
+
+    throw new ForbiddenException('No participa de este encuentro clínico.');
   }
 }

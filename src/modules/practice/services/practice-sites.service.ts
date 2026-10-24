@@ -9,6 +9,9 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import { PracticeAccessService } from './practice-access.service';
+import { DEFAULT_APPOINTMENT_SERVICE } from '../../billing/default-services';
+import { ServiceCatalogRepository } from '../../billing/repositories';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -58,7 +61,9 @@ export class PracticeSitesService {
     private readonly spacesRepo: CareSpacesRepository,
     private readonly servicesRepo: HealthcareServicesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
+    private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
+    private readonly access: PracticeAccessService,
   ) {
     this.logger.setContext(PracticeSitesService.name);
   }
@@ -85,6 +90,22 @@ export class PracticeSitesService {
         actorUserId: actor.id,
       });
       await tx.flush();
+
+      // Toda práctica nace ofreciendo una consulta (FT-22-R01). En la misma
+      // transacción: una organización a la que le falló el catálogo no tiene
+      // nada que mostrarle a quien atiende, y arreglarlo después exige saber
+      // que hacía falta.
+      this.serviceCatalogRepo.create(tx, {
+        practiceId: practice.id,
+        code: DEFAULT_APPOINTMENT_SERVICE.code,
+        name: DEFAULT_APPOINTMENT_SERVICE.name,
+        defaultPrice: DEFAULT_APPOINTMENT_SERVICE.defaultPrice,
+        currencyConceptId: DEFAULT_APPOINTMENT_SERVICE.currencyConceptId,
+        isActive: true,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
       this.logger.info(
         { operation: 'practice.create', practiceId: practice.id },
         'Practice created',
@@ -107,21 +128,31 @@ export class PracticeSitesService {
    * de modo que el `operatingRoomId` que exige programar una intervención había
    * que averiguarlo fuera del sistema.
    *
+   * El tenant no basta para aislar a un `PRACTITIONER`: los médicos
+   * auto-registrados comparten el tenant `DEFAULT`, así que a él sólo se le
+   * listan las prácticas donde tiene una vinculación ACTIVE
+   * (`PracticeAccessService`).
+   *
    * @param tenantId - Tenant del contexto.
-   * @returns Las prácticas activas.
+   * @param actor - Actor autenticado, para acotar lo que ve un profesional.
+   * @returns Las prácticas activas que el actor puede ver.
    */
-  async listPractices(tenantId: string): Promise<PracticeSummaryDto[]> {
-    const practices = await this.practicesRepo.findByTenant(
-      this.em,
-      tenantId,
-      PRAC.PRACTICE_ACTIVE,
-    );
-    return practices.map((p) => ({
-      id: p.id,
-      code: p.code,
-      name: p.name,
-      status: p.statusConceptId,
-    }));
+  async listPractices(
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PracticeSummaryDto[]> {
+    const [practices, allowed] = await Promise.all([
+      this.practicesRepo.findByTenant(this.em, tenantId, PRAC.PRACTICE_ACTIVE),
+      this.access.allowedPracticeIds(actor),
+    ]);
+    return practices
+      .filter((p) => allowed === null || allowed.has(p.id))
+      .map((p) => ({
+        id: p.id,
+        code: p.code,
+        name: p.name,
+        status: p.statusConceptId,
+      }));
   }
 
   /**

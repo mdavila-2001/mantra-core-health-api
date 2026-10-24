@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash } from 'node:crypto';
@@ -9,6 +9,9 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+
+/** Rol comodín que puede firmar en nombre de cualquier perfil profesional. */
+const SUPERADMIN_ROLE = 'SUPERADMIN';
 import { ClinicalNotesRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
 import {
@@ -25,6 +28,7 @@ import {
   WithholdVersionDto,
 } from '../dto';
 import type { ClinicalNoteVersions } from '../entities';
+import { ClinicalReadService } from '../../clinical/services';
 
 /**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
@@ -43,11 +47,13 @@ export class ChartNotesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param notesRepo - Valor de notes repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly notesRepo: ClinicalNotesRepository,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
   ) {
     this.logger.setContext(ChartNotesService.name);
   }
@@ -73,6 +79,9 @@ export class ChartNotesService {
       { operation: 'chart.note.create', actorId: actor.id },
       'Creating clinical note',
     );
+    // CL-20 (BR-13): el autor sale de la sesión; se resuelve antes de tocar
+    // nada para que un 403 no deje cabecera.
+    const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
       const header = this.notesRepo.createHeader(tx, {
         patientProfileId: dto.patientProfileId,
@@ -89,7 +98,7 @@ export class ChartNotesService {
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: header.id,
         versionNumber: 1,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         statusConceptId: CHART.VERSION_DRAFT,
         chiefComplaintText: dto.chiefComplaintText,
         subjectiveText: dto.subjectiveText,
@@ -135,6 +144,11 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Nota clínica no encontrada', {
           noteId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertCanWriteHistory(
+        header.patientProfileId,
+        actor,
+      );
       if (header.lifecycleStatusConceptId !== CHART.NOTE_LIFECYCLE_DRAFT) {
         throw new PreconditionFailedException(
           'La nota ya no está en borrador; use una enmienda (UC-15-05)',
@@ -142,11 +156,13 @@ export class ChartNotesService {
         );
       }
 
+      // CL-20 (BR-13): el autor de la versión sale de la sesión.
+      const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
       const n = await this.notesRepo.maxVersionNumber(tx, noteId);
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: noteId,
         versionNumber: n + 1,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         statusConceptId: CHART.VERSION_DRAFT,
         chiefComplaintText: dto.chiefComplaintText,
         subjectiveText: dto.subjectiveText,
@@ -180,10 +196,16 @@ export class ChartNotesService {
       'Signing note version',
     );
     return this.em.transactional(async (tx) => {
+      const signerProfileId = this.resolveSigner(dto.signerProfileId, actor);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
         versionId,
+      );
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertCanWriteHistory(
+        header.patientProfileId,
+        actor,
       );
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
         throw new PreconditionFailedException(
@@ -195,7 +217,7 @@ export class ChartNotesService {
       const hash = this.contentHash(version);
       this.notesRepo.createSignature(tx, {
         clinicalNoteVersionId: versionId,
-        signerProfileId: dto.signerProfileId,
+        signerProfileId,
         signatureTypeConceptId: CHART.SIGNATURE_AUTHOR,
         signedContentHash: hash,
         certificateThumbprint: dto.certificateThumbprint,
@@ -203,7 +225,7 @@ export class ChartNotesService {
       });
 
       version.statusConceptId = CHART.VERSION_SIGNED;
-      version.signedByProfileId = dto.signerProfileId;
+      version.signedByProfileId = signerProfileId;
       version.signedAt = new Date();
       version.contentHash = hash;
       version.releaseEligibilityConceptId = CHART.ELIGIBILITY_ELIGIBLE;
@@ -230,10 +252,16 @@ export class ChartNotesService {
       'Cosigning note version',
     );
     return this.em.transactional(async (tx) => {
+      const signerProfileId = this.resolveSigner(dto.signerProfileId, actor);
       const { header, version } = await this.loadNoteAndVersion(
         tx,
         noteId,
         versionId,
+      );
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertCanWriteHistory(
+        header.patientProfileId,
+        actor,
       );
       if (version.statusConceptId !== CHART.VERSION_SIGNED) {
         throw new PreconditionFailedException(
@@ -255,18 +283,18 @@ export class ChartNotesService {
       const alreadyCosigned = signatures.some(
         (s) =>
           s.signatureTypeConceptId === CHART.SIGNATURE_COSIGN &&
-          s.signerProfileId === dto.signerProfileId,
+          s.signerProfileId === signerProfileId,
       );
       if (alreadyCosigned) {
         throw new ConflictException('El cofirmante ya firmó esta versión', {
           versionId,
-          signerProfileId: dto.signerProfileId,
+          signerProfileId,
         });
       }
 
       this.notesRepo.createSignature(tx, {
         clinicalNoteVersionId: versionId,
-        signerProfileId: dto.signerProfileId,
+        signerProfileId,
         signatureTypeConceptId: CHART.SIGNATURE_COSIGN,
         signedContentHash: version.contentHash,
         certificateThumbprint: dto.certificateThumbprint,
@@ -300,6 +328,11 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Nota clínica no encontrada', {
           noteId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertCanWriteHistory(
+        header.patientProfileId,
+        actor,
+      );
       if (header.lifecycleStatusConceptId === CHART.NOTE_LIFECYCLE_DRAFT) {
         throw new PreconditionFailedException(
           'La nota no está firmada; edítela como borrador (UC-15-02)',
@@ -307,11 +340,13 @@ export class ChartNotesService {
         );
       }
 
+      // CL-20 (BR-13): quien enmienda es el profesional de la sesión.
+      const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
       const n = await this.notesRepo.maxVersionNumber(tx, noteId);
       const version = this.notesRepo.createVersion(tx, {
         clinicalNoteId: noteId,
         versionNumber: n + 1,
-        authorProfileId: dto.authorProfileId,
+        authorProfileId,
         statusConceptId: CHART.VERSION_DRAFT,
         subjectiveText: dto.subjectiveText,
         objectiveText: dto.objectiveText,
@@ -352,6 +387,9 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Versión de nota no encontrada', {
           versionId,
         });
+      // MCH-007: la ruta sólo trae el id de la versión; el paciente sale de
+      // la cabecera de su nota.
+      await this.assertCanWriteNote(tx, version.clinicalNoteId, actor);
       const signed =
         version.statusConceptId === CHART.VERSION_SIGNED ||
         version.statusConceptId === CHART.VERSION_COSIGNED;
@@ -423,6 +461,11 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Nota clínica no encontrada', {
           versionId,
         });
+      // MCH-007: la ruta sólo trae ids; el paciente sale de la cabecera.
+      await this.clinicalRead.assertCanWriteHistory(
+        header.patientProfileId,
+        actor,
+      );
 
       const event = this.notesRepo.createReleaseEvent(tx, {
         clinicalNoteVersionId: versionId,
@@ -468,6 +511,9 @@ export class ChartNotesService {
         throw new ResourceNotFoundException('Versión de nota no encontrada', {
           versionId,
         });
+      // MCH-007: la ruta sólo trae el id de la versión; el paciente sale de
+      // la cabecera de su nota.
+      await this.assertCanWriteNote(tx, version.clinicalNoteId, actor);
       if (version.statusConceptId !== CHART.VERSION_DRAFT) {
         throw new PreconditionFailedException(
           'La versión ya está firmada; los hallazgos quedan sellados',
@@ -492,6 +538,105 @@ export class ChartNotesService {
       }
       return { versionId, recordedFindings: dto.findings.length };
     });
+  }
+
+  /**
+   * D-7: una nota la firma su propio profesional; nadie firma en nombre de
+   * otro perfil. Como el firmante sólo puede ser el perfil de la sesión, el
+   * servidor lo deriva y el cliente no tiene que mandarlo (informe B, C5: el
+   * cuerpo `{}` de la pantalla daba 400). Si el cuerpo lo trae, se confirma.
+   * `SUPERADMIN` tiene paso franco, igual que en el resto del sistema de
+   * roles, y firma con el perfil que declare (o el suyo, si tiene).
+   *
+   * @param declared - Perfil que trajo el cuerpo, si trajo alguno.
+   * @param actor - Sesión que pide firmar o cofirmar.
+   * @returns El perfil profesional que queda como firmante.
+   * @throws ForbiddenException si la sesión no tiene perfil profesional (ni
+   *   uno declarado, en el caso de `SUPERADMIN`), o si el perfil declarado no
+   *   es el suyo.
+   */
+  private resolveSigner(
+    declared: string | undefined,
+    actor: AuthenticatedUser,
+  ): string {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) {
+      const chosen = declared ?? actor.practitionerProfileId;
+      if (!chosen) {
+        throw new ForbiddenException(
+          'Una firma clínica necesita un perfil profesional firmante.',
+        );
+      }
+      return chosen;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que firmar.',
+      );
+    }
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'Una nota la firma su profesional: no se puede firmar en nombre de otro perfil.',
+      );
+    }
+    return actor.practitionerProfileId;
+  }
+
+  /**
+   * CL-20 (BR-13): el autor de una nota, de una versión o de una enmienda es
+   * el profesional de la sesión, nunca el que diga el cuerpo. La misma regla
+   * que {@link resolveSigner}, aplicada a escribir en vez de a
+   * firmar: el DTO conserva `authorProfileId` por compatibilidad —si viene, se
+   * confirma; si difiere, 403— y si no viene, el autor es el perfil de la
+   * sesión. `SUPERADMIN` pasa con lo que declare.
+   *
+   * @param declared - Lo que trajo el cuerpo, si trajo algo.
+   * @param actor - La sesión que escribe.
+   * @returns El perfil profesional que queda como autor.
+   */
+  private resolveAuthor(
+    declared: string | undefined,
+    actor: AuthenticatedUser,
+  ): string {
+    if (actor.roles.includes(SUPERADMIN_ROLE)) {
+      const chosen = declared ?? actor.practitionerProfileId;
+      if (!chosen) {
+        throw new ForbiddenException(
+          'Una nota clínica necesita un profesional autor.',
+        );
+      }
+      return chosen;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'La sesión no tiene un perfil profesional con el que escribir la nota.',
+      );
+    }
+    if (declared !== undefined && declared !== actor.practitionerProfileId) {
+      throw new ForbiddenException(
+        'El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil.',
+      );
+    }
+    return actor.practitionerProfileId;
+  }
+
+  /**
+   * MCH-007: exige poder escribir en la historia del paciente de la nota. Lo
+   * usan las mutaciones que llegan sólo con el id de una versión.
+   */
+  private async assertCanWriteNote(
+    tx: EntityManager,
+    noteId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const header = await this.notesRepo.findHeaderById(tx, noteId);
+    if (!header)
+      throw new ResourceNotFoundException('Nota clínica no encontrada', {
+        noteId,
+      });
+    await this.clinicalRead.assertCanWriteHistory(
+      header.patientProfileId,
+      actor,
+    );
   }
 
   /** Carga versión y cabecera comprobando que la versión pertenece a la nota. */

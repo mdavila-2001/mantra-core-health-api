@@ -103,6 +103,27 @@ CREATE TABLE IF NOT EXISTS "community"."review_responses" (
     CONSTRAINT "pk_review_responses" PRIMARY KEY ("id")
 );
 
+CREATE TABLE IF NOT EXISTS "community"."party_ratings" (
+    "id" uuid NOT NULL,
+    "reviewer_patient_profile_id" uuid,
+    "reviewer_practitioner_profile_id" uuid,
+    "reviewer_practice_id" uuid,
+    "target_patient_profile_id" uuid,
+    "target_practitioner_profile_id" uuid,
+    "target_practice_id" uuid,
+    "verified_encounter_id" uuid,
+    "verified_role_assignment_id" uuid,
+    "overall_rating" smallint NOT NULL,
+    "comment_text" text,
+    "moderation_status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_party_ratings" PRIMARY KEY ("id")
+);
+
 CREATE TABLE IF NOT EXISTS "community"."content_reports" (
     "id" uuid NOT NULL,
     "reporter_user_id" uuid NOT NULL,
@@ -352,6 +373,7 @@ CREATE TABLE IF NOT EXISTS "community"."conversations" (
     "group_id" uuid,
     "last_message_at" timestamptz,
     "message_count" integer,
+    "pinned_message_id" uuid,
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
@@ -369,6 +391,10 @@ CREATE TABLE IF NOT EXISTS "community"."conversation_participants" (
     "joined_at" timestamptz,
     "last_read_message_id" uuid,
     "muted_until" timestamptz,
+    "last_auto_reply_at" timestamptz,
+    "is_favorite" boolean NOT NULL DEFAULT false,
+    "is_pinned" boolean NOT NULL DEFAULT false,
+    "archived_at" timestamptz,
     "status_concept_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
@@ -376,6 +402,25 @@ CREATE TABLE IF NOT EXISTS "community"."conversation_participants" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_conversation_participants" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."chat_auto_replies" (
+    "id" uuid NOT NULL,
+    "public_profile_id" uuid NOT NULL,
+    "is_active" boolean NOT NULL,
+    "inactivity_minutes" integer NOT NULL,
+    "body_text" text NOT NULL,
+    "cooldown_hours" integer NOT NULL,
+    "only_outside_business_hours" boolean NOT NULL,
+    "business_hours_from" time,
+    "business_hours_to" time,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_chat_auto_replies" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "community"."direct_messages" (
@@ -641,4 +686,16 @@ CREATE TABLE IF NOT EXISTS "community"."feedback_ticket_events" (
     "changed_by_user_id" uuid,
     "recorded_at" timestamptz NOT NULL,
     CONSTRAINT "pk_feedback_ticket_events" PRIMARY KEY ("history_id")
+);
+
+CREATE TABLE IF NOT EXISTS "community"."comment_media" (
+    "id" uuid NOT NULL,
+    "comment_id" uuid NOT NULL,
+    "file_id" uuid NOT NULL,
+    "media_role_concept_id" uuid NOT NULL,
+    "alt_text" varchar,
+    "ordinal" integer,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_comment_media" PRIMARY KEY ("id")
 );

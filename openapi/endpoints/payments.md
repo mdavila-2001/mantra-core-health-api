@@ -122,7 +122,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "transactionId": "00000000-0000-4000-8000-000000000001",
   "duplicate": true,
-  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "applied": true,
+  "decision": "aplicar",
+  "reconciliationRequired": true
 }
 ```
 
@@ -133,6 +136,9 @@ Campos de la respuesta:
 | `transactionId` | Sí | `string` | formato `uuid` | Transacción correlacionada | `00000000-0000-4000-8000-000000000001` |
 | `duplicate` | Sí | `boolean` | Sin restricción adicional declarada | true si el callback ya se había aplicado antes | `true` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `applied` | Sí | `boolean` | Sin restricción adicional declarada | true si el evento cambió el estado local de la transacción | `true` |
+| `decision` | Sí | `string` | valores: `aplicar`, `duplicado`, `obsoleto`, `contradiccion` | Cómo se interpretó el evento frente al estado ya conocido | `aplicar` |
+| `reconciliationRequired` | Sí | `boolean` | Sin restricción adicional declarada | true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1170,10 +1176,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 409 | `CONFLICT` | La intención ya fue cobrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención tiene una operación abierta en el gateway | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | El importe excede el saldo pendiente de la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La captura excede el importe autorizado | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La intención está cancelada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La intención requiere evaluación de riesgo antes de cobrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | El motor de riesgo rechazó la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El importe a procesar debe ser mayor que cero | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1937,6 +1947,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El reembolso excede el importe capturado | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se puede reembolsar una transacción capturada o liquidada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El importe del reembolso debe ser mayor que cero | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

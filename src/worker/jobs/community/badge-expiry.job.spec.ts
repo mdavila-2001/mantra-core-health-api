@@ -34,8 +34,8 @@ describe('BadgeExpiryJob', () => {
 
     await d.job.tick();
 
-    const [[ruta]] = d.api.post.mock.calls;
-    expect(ruta).toBe('/internal/community/verification/badges/expire-sweep');
+    const [[route]] = d.api.post.mock.calls;
+    expect(route).toBe('/internal/community/verification/badges/expire-sweep');
   });
 
   it('informa cuando cayeron sellos', async () => {

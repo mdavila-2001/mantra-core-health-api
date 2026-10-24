@@ -45,6 +45,13 @@ import evaluacionKinesiologica from './fisioterapia/evaluacion-kinesiologica.jso
 import valoracionDeEnfermeria from './enfermeria/valoracion-de-enfermeria.json';
 import controlObstetrico from './obstetricia/control-obstetrico.json';
 import anamnesisOdontologica from './odontologia/anamnesis-odontologica.json';
+// v2 (2026-10-02) — las fichas específicas por condición, generadas.
+import { SPECIFIC_FORMS } from './specific-forms.generated';
+// v4.2.0 — los dos tamizajes de salud mental que el README dejaba como
+// «reemplazo libre propuesto» (PHQ-9/GAD-7/Beck/AUDIT ilustrado tienen
+// copyright comercial): SRQ-20 y AUDIT, ambos publicados por la OMS.
+import srq20TamizajeSaludMental from './psiquiatria/srq-20-tamizaje-salud-mental.json';
+import auditTamizajeConsumoAlcohol from './psiquiatria/audit-tamizaje-consumo-alcohol.json';
 
 /**
  * Los tipos de dato que un formulario del catálogo puede declarar.
@@ -57,7 +64,7 @@ import anamnesisOdontologica from './odontologia/anamnesis-odontologica.json';
  * un tipo de más rompe el arranque del seed con el nombre del archivo, no una
  * plantilla a medio crear.
  */
-const TIPOS_ADMITIDOS = [
+const ACCEPTED_TYPES = [
   'string',
   'text',
   'integer',
@@ -77,7 +84,7 @@ const TIPOS_ADMITIDOS = [
  * lista blanca y no una puerta abierta: agregar un código acá obliga a que
  * exista el control que lo dibuja.
  */
-const CODIGOS_JSON_CON_CONTROL = ['odontograma_fdi'] as const;
+const JSON_CODES_WITH_CONTROL = ['odontograma_fdi'] as const;
 
 /**
  * La ficha de catálogo de un formulario: de dónde salió.
@@ -121,10 +128,27 @@ export interface StandardFormSpecialty {
  * Tipo de dato admitido en un formulario del catálogo.
  *
  * Los generales, más `json` para los campos de
- * {@link CODIGOS_JSON_CON_CONTROL} — los que tienen un control dedicado que
+ * {@link JSON_CODES_WITH_CONTROL} — los que tienen un control dedicado que
  * sabe dibujar su forma.
  */
-export type StandardFormDataType = (typeof TIPOS_ADMITIDOS)[number] | 'json';
+export type StandardFormDataType = (typeof ACCEPTED_TYPES)[number] | 'json';
+
+/**
+ * Cuándo se muestra un campo: la semántica de `enableWhen` de HL7 FHIR
+ * Questionnaire con operador `=` y comportamiento `SHOW` —la misma que declara
+ * `CreateFieldDependencyDto` con `EQ`/`SHOW`—.
+ *
+ * Se cumple si el campo `field` vale `equals`. Si `field` es de varias
+ * respuestas, se cumple cuando la respuesta **incluye** el valor; si `equals`
+ * es una lista, basta con que coincida uno. Un campo cuyo padre está oculto
+ * también se oculta.
+ */
+export interface StandardFormShowWhen {
+  /** Código del campo del que depende, dentro de la misma ficha. */
+  field: string;
+  /** El valor (o los valores) que lo muestran. */
+  equals: string | boolean | readonly (string | boolean)[];
+}
 
 /** Un campo del esquema, tal como lo acepta `POST /charts/templates`. */
 export interface StandardFormField {
@@ -134,14 +158,40 @@ export interface StandardFormField {
   name: string;
   /** Tipo de dato técnico. */
   dataType: StandardFormDataType;
-  /** Si es obligatorio al completar. */
+  /** Si es obligatorio al completar (sólo cuando está a la vista). */
   required?: boolean;
+  /** La sección de la ficha en la que va: motivo, antecedentes, examen… */
+  section?: string;
+  /**
+   * Las respuestas ofrecidas, para un campo de lista cerrada. Con una sola
+   * respuesta el tipo es `string` (se guarda la opción); con varias es `json`
+   * (se guarda la lista).
+   */
+  options?: readonly string[];
+  /** Si se pueden elegir varias opciones. */
+  multiple?: boolean;
+  /** Si además de las opciones se ofrece «Otro» con texto libre. */
+  allowOther?: boolean;
+  /** La ayuda que se muestra bajo el campo. */
+  description?: string;
+  /** Cuándo se muestra; ausente = siempre. */
+  showWhen?: StandardFormShowWhen;
 }
+
+/**
+ * Qué clase de ficha es:
+ * - `BASE`: la consulta inicial de la especialidad (una por especialidad);
+ * - `SPECIFIC`: el control o la evaluación estándar de una condición;
+ * - `GENERAL`: las transversales, de toda consulta.
+ */
+export type StandardFormKind = 'BASE' | 'SPECIFIC' | 'GENERAL';
 
 /** Un formulario estándar del catálogo, con su ficha y su esquema. */
 export interface StandardFormDefinition {
   /** Código único de la plantilla que se va a crear. */
   code: string;
+  /** Clase de ficha. */
+  kind: StandardFormKind;
   /** Nombre legible del formulario. */
   name: string;
   /** Especialidad a la que pertenece. */
@@ -159,9 +209,11 @@ export interface StandardFormDefinition {
  * ensanchan a `string`, así que `dataType` llega sin estrechar. `validar` es lo
  * que cierra esa brecha.
  */
-type RawForm = Omit<StandardFormDefinition, 'fields'> & {
-  fields: readonly (Omit<StandardFormField, 'dataType'> & {
+export type RawForm = Omit<StandardFormDefinition, 'fields' | 'kind'> & {
+  kind?: string;
+  fields: readonly (Omit<StandardFormField, 'dataType' | 'showWhen'> & {
     dataType: string;
+    showWhen?: { field: string; equals: unknown };
   })[];
 };
 
@@ -173,24 +225,114 @@ type RawForm = Omit<StandardFormDefinition, 'fields'> & {
  * `.json` mal tipeado tiene que decir cuál es, no dejar una plantilla a medio
  * crear en la base.
  */
-function validar(form: RawForm): StandardFormDefinition {
+export function validate(form: RawForm): StandardFormDefinition {
+  const previous = new Map<string, RawForm['fields'][number]>();
   const fields = form.fields.map((field) => {
-    const conControl =
-      field.dataType === 'json' &&
-      (CODIGOS_JSON_CON_CONTROL as readonly string[]).includes(field.code);
-    if (
-      !conControl &&
-      !(TIPOS_ADMITIDOS as readonly string[]).includes(field.dataType)
-    ) {
+    const failure = (reason: string): never => {
       throw new Error(
-        `Formulario ${form.code}: el campo "${field.code}" declara el tipo ` +
-          `"${field.dataType}", que no está entre los admitidos ` +
-          `(${TIPOS_ADMITIDOS.join(', ')}).`,
+        `Formulario ${form.code}: el campo "${field.code}" ${reason}.`,
       );
+    };
+    validateType(field, failure);
+    validateOptions(field, failure);
+    if (field.showWhen !== undefined) {
+      validateCondition(field.showWhen, previous, failure);
     }
-    return { ...field, dataType: field.dataType as StandardFormDataType };
+    previous.set(field.code, field);
+    return field as StandardFormField;
   });
-  return { ...form, fields };
+  const kind = form.kind ?? 'BASE';
+  if (!['BASE', 'SPECIFIC', 'GENERAL'].includes(kind)) {
+    throw new Error(`Formulario ${form.code}: clase desconocida "${kind}".`);
+  }
+  return { ...form, kind: kind as StandardFormKind, fields };
+}
+
+/** El tipo tiene que ser uno que el motor sepa dibujar. */
+function validateType(
+  field: RawForm['fields'][number],
+  failure: (reason: string) => never,
+): void {
+  const withControl =
+    field.dataType === 'json' &&
+    (JSON_CODES_WITH_CONTROL as readonly string[]).includes(field.code);
+  const isListMultiple =
+    field.dataType === 'json' &&
+    field.multiple === true &&
+    (field.options?.length ?? 0) > 0;
+  if (
+    !withControl &&
+    !isListMultiple &&
+    !(ACCEPTED_TYPES as readonly string[]).includes(field.dataType)
+  ) {
+    failure(
+      `declara el tipo "${field.dataType}", que no está entre los admitidos ` +
+        `(${ACCEPTED_TYPES.join(', ')}; json sólo para listas de varias respuestas)`,
+    );
+  }
+}
+
+/**
+ * Una lista cerrada no puede venir vacía ni repetir opciones, y su tipo dice
+ * dónde se guarda la respuesta: `string` para una, `json` para varias.
+ */
+function validateOptions(
+  field: RawForm['fields'][number],
+  failure: (reason: string) => never,
+): void {
+  if (field.options === undefined) {
+    if (field.multiple === true)
+      failure('declara varias respuestas sin opciones');
+    return;
+  }
+  if (field.options.length === 0)
+    failure('declara una lista de opciones vacía');
+  if (new Set(field.options).size !== field.options.length) {
+    failure('repite una opción');
+  }
+  const expectedType = field.multiple === true ? 'json' : 'string';
+  if (field.dataType !== expectedType) {
+    failure(
+      `es de ${field.multiple === true ? 'varias respuestas' : 'una respuesta'} y debe ser ${expectedType}`,
+    );
+  }
+}
+
+/**
+ * La condición apunta a un campo **anterior** de la misma ficha, y a un valor
+ * que ese campo puede tomar: `true`/`false` si es sí/no, una de sus opciones si
+ * es de lista. Cualquier otra cosa dejaría un campo que nunca se muestra.
+ */
+function validateCondition(
+  showWhen: { field: string; equals: unknown },
+  previous: ReadonlyMap<string, RawForm['fields'][number]>,
+  failure: (reason: string) => never,
+): void {
+  const parent = previous.get(showWhen.field);
+  if (parent === undefined) {
+    failure(`depende de "${showWhen.field}", que no está antes en la ficha`);
+  }
+  const values = Array.isArray(showWhen.equals)
+    ? (showWhen.equals as unknown[])
+    : [showWhen.equals];
+  if (values.length === 0) failure('tiene una condición sin valores');
+  for (const value of values) {
+    if (parent.dataType === 'boolean') {
+      if (typeof value !== 'boolean') {
+        failure(
+          `depende del sí/no "${parent.code}" con un valor que no es sí/no`,
+        );
+      }
+    } else if (parent.options !== undefined) {
+      if (typeof value !== 'string' || !parent.options.includes(value)) {
+        failure(
+          `depende de "${parent.code}" con «${String(value)}», que no es una de sus opciones`,
+        );
+      }
+    } else {
+      failure(`depende de "${parent.code}", que no es sí/no ni de lista`);
+    }
+  }
 }
 
 /**
@@ -254,4 +396,8 @@ export const STANDARD_FORMS: readonly StandardFormDefinition[] = [
   valoracionDeEnfermeria,
   controlObstetrico,
   anamnesisOdontologica,
-].map(validar);
+  ...(SPECIFIC_FORMS as readonly RawForm[]),
+  // v4.2.0 — tamizajes de salud mental de dominio público (OMS)
+  srq20TamizajeSaludMental,
+  auditTamizajeConsumoAlcohol,
+].map(validate);

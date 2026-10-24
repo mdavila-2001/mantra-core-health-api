@@ -76,17 +76,16 @@ producirlo.
 | Contenedor sin límite de recursos | Un leak consume la RAM del host | 4 | 2 | 3 | **8** | `deploy.resources.limits` (API 1536M, workers 512M) | ✅ (previo) |
 | Deriva de reloj entre nodos | Expiraciones prematuras o tardías | 3 | 2 | **5** | **30** | Ninguno en este repositorio: requiere NTP garantizado | 🔵 [R-18](01-matriz-de-riesgos.md#r-18) |
 
-## Los tres RPN más altos que quedan
+## Los tres RPN más altos
 
-Todo lo demás está por debajo de 20. Estos tres son la lista de trabajo de la
-siguiente iteración, y los tres tienen **D = 4 o 5**: el problema no es que sean
-graves, es que pueden pasar inadvertidos.
+Todo lo demás está por debajo de 20. Los tres tienen **D = 4 o 5**: el problema no
+es que sean graves, es que pueden pasar inadvertidos.
 
 1. **RPN 48 — fallo persistente de un tick sin alerta.** El dato existe
-   (`consecutiveFailures`); falta quien lo mire. Bloqueado por la ausencia de
-   métricas ([A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-)).
-2. **RPN 36 — descarte sostenido sin alerta.** Mismo diagnóstico, mismo bloqueo.
-3. **RPN 30 — deriva de reloj.** No medida. Requiere insumo de infraestructura.
+   (`consecutiveFailures`), pero sin métricas
+   ([A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-)) nadie lo vigila.
+2. **RPN 36 — descarte sostenido sin alerta.** Mismo diagnóstico.
+3. **RPN 30 — deriva de reloj.** No medida: depende de la infraestructura.
 
 ---
 
@@ -94,7 +93,7 @@ graves, es que pueden pasar inadvertidos.
 
 Tres eventos cabecera. `∧` = **y** (todas las causas deben darse) · `∨` = **o**
 (basta una). Las hojas marcadas ✅ tienen un control que las corta; las 🟡/🔵 son
-las que hoy siguen abiertas.
+las que no tienen un control completo.
 
 ## Evento cabecera 1 · Pérdida o duplicación de trabajo asíncrono
 
@@ -176,10 +175,9 @@ INCIDENTE SIN DIAGNÓSTICO
 
 ## Lectura conjunta
 
-Las tres ramas que siguen abiertas convergen en el mismo sitio: **no hay métricas
+Las tres ramas sin control convergen en el mismo sitio: **no hay métricas
 sobre las que definir umbrales**. Los datos existen y están expuestos en
-`GET :9100/status` y en los logs estructurados; lo que falta es la serie temporal
-y la alerta.
+`GET :9100/status` y en los logs estructurados, sin serie temporal ni alerta.
 
 Eso hace que el sistema, hoy, detecte de forma **automática** los fallos duros
 —proceso muerto, tick atascado, dependencia caída— y dependa de que alguien mire

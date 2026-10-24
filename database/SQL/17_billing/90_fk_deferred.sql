@@ -4,8 +4,6 @@
 
 -- FK sin destino canónico (no forzadas, temperatura-0):
 --   invoice_lines.service_id
---   reimbursements.claim_id
---   billing_document_links.claim_id
 
 
 -- destino: practice.practices (requiere schema practice)
@@ -13,6 +11,13 @@ DO $$ BEGIN
     ALTER TABLE "billing"."service_catalog"
         ADD CONSTRAINT "fk_service_catalog_practice_id" FOREIGN KEY ("practice_id")
         REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: common.files (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "billing"."service_catalog"
+        ADD CONSTRAINT "fk_service_catalog_image_file_id" FOREIGN KEY ("image_file_id")
+        REFERENCES "common"."files" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
@@ -132,6 +137,13 @@ DO $$ BEGIN
     ALTER TABLE "billing"."invoices"
         ADD CONSTRAINT "fk_invoices_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.insurance_claim_lines (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "billing"."invoice_lines"
+        ADD CONSTRAINT "fk_invoice_lines_insurance_claim_line_id" FOREIGN KEY ("insurance_claim_line_id")
+        REFERENCES "insurance"."insurance_claim_lines" ("id") ON DELETE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: accounting.accounts (requiere schema accounting)
@@ -505,6 +517,20 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_invoices"
+        ADD CONSTRAINT "fk_siat_simulated_invoices_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: insurance.insurance_claims (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "billing"."reimbursements"
+        ADD CONSTRAINT "fk_reimbursements_claim_id" FOREIGN KEY ("claim_id")
+        REFERENCES "insurance"."insurance_claims" ("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: accounting.journal_transactions (requiere schema accounting)
 DO $$ BEGIN
     ALTER TABLE "billing"."reimbursements"
@@ -778,6 +804,13 @@ DO $$ BEGIN
         REFERENCES "erp"."purchase_orders" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: insurance.insurance_claims (requiere schema insurance)
+DO $$ BEGIN
+    ALTER TABLE "billing"."billing_document_links"
+        ADD CONSTRAINT "fk_billing_document_links_claim_id" FOREIGN KEY ("claim_id")
+        REFERENCES "insurance"."insurance_claims" ("id") ON DELETE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: clinical.encounters (requiere schema clinical)
 DO $$ BEGIN
     ALTER TABLE "billing"."billing_document_links"
@@ -867,4 +900,53 @@ DO $$ BEGIN
     ALTER TABLE "billing"."dunning_items"
         ADD CONSTRAINT "fk_dunning_items_status_concept_id" FOREIGN KEY ("status_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.practices (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.patient_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_patient_profile_id" FOREIGN KEY ("patient_profile_id")
+        REFERENCES "profiles"."patient_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: profiles.health_practitioner_profiles (requiere schema profiles)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_created_by_practitioner_profile_id" FOREIGN KEY ("created_by_practitioner_profile_id")
+        REFERENCES "profiles"."health_practitioner_profiles" ("profile_id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_currency_concept_id" FOREIGN KEY ("currency_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

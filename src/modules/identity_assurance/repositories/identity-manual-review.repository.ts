@@ -91,4 +91,26 @@ export class IdentityManualReviewCasesRepository {
       { partial: true },
     );
   }
+
+  /**
+   * La revisión manual ya decidida más reciente del caso.
+   *
+   * Es de donde sale el motivo de aceptación/rechazo que ve el titular
+   * (FT-32-R05): un caso resuelto sin escalar a revisión manual no tiene fila
+   * acá, y por tanto no tiene motivo de texto — sólo el trace de sus checks.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Caso a consultar.
+   * @returns La revisión decidida más reciente, o `null` si no hubo ninguna.
+   */
+  findLatestDecidedByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityManualReviewCases | null> {
+    return em.findOne(
+      IdentityManualReviewCases,
+      { identityVerificationCaseId: caseId, decidedAt: { $ne: null } },
+      { orderBy: { decidedAt: 'DESC' } },
+    );
+  }
 }

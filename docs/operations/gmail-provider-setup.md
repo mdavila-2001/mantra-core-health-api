@@ -1,9 +1,8 @@
 # Configurar Gmail como proveedor real de email (`messaging`)
 
-> Proveedor de **desarrollo** para el canal EMAIL de `messaging`. El proveedor definitivo de
-> producción sigue siendo una decisión de negocio pendiente (SendGrid mencionado como candidato) —
-> ver `ESTADO-Y-PENDIENTES.md`. Esta guía cubre cómo dejarlo funcionando localmente o en un
-> entorno de desarrollo/staging.
+> Proveedor de **desarrollo** para el canal EMAIL de `messaging`; no es el proveedor de
+> producción. Esta guía cubre cómo dejarlo funcionando localmente o en un entorno de
+> desarrollo/staging.
 
 ## Qué hace esto
 

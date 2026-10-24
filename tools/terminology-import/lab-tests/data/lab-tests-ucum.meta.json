@@ -1,0 +1,35 @@
+{
+  "layer": "ucum",
+  "builtAt": "2026-10-24T01:16:07.914Z",
+  "records": 888,
+  "source": {
+    "name": "@lhncbc/ucum-lhc",
+    "version": "8.0.1"
+  },
+  "codeSystems": [
+    {
+      "internalCode": "ucum",
+      "name": "UCUM — Unified Code for Units of Measure",
+      "canonicalUrl": "http://unitsofmeasure.org",
+      "version": "ucum-lhc-8.0.1",
+      "sourceKey": "ucum",
+      "records": 888
+    }
+  ],
+  "files": {
+    "ucumDefs.min.json": {
+      "file": "lab-tests-sources/ucum-lhc/package/data/ucumDefs.min.json",
+      "sha256": "6086bc2a074ddb921434d3e636896ba1707f8211463470c39081600c3a5bf074"
+    },
+    "ValueSet-ucum-common.json": {
+      "file": "lab-tests-sources/hl7-terminology-r4/package/ValueSet-ucum-common.json",
+      "sha256": "fb520e4e11934f9b8c5803b966f9dd6922f4453b1e74127f3a45a5fd08fb1252"
+    }
+  },
+  "stats": {
+    "lhcUnits": 772,
+    "lhcDuplicateCodes": [],
+    "thoCommon": 848,
+    "merged": 888
+  }
+}

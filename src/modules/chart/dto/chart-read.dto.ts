@@ -111,6 +111,16 @@ export class CarePlanActivityItemDto {
   id!: string;
 
   /**
+   * Clase de la actividad (concept id) — columna existente
+   * (`chart.care_plan_activities.activity_concept_id`, NOT NULL, siempre
+   * `CPACT_GENERAL` por defecto). BR-16/CL-26: el alta ya la manda y la
+   * guarda; esta lectura no la exponía, así que el expediente mostraba un
+   * plan sin la clase de actividad que se eligió.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  activityConceptId?: string;
+
+  /**
    * Identificador asociado a status concept.
    */
   @ApiPropertyOptional({ format: 'uuid' })
@@ -180,6 +190,27 @@ export class ChartCarePlanItemDto {
   createdAt!: Date;
 }
 
+/** Un archivo gobernado colgado de un documento del expediente. */
+export class ChartDocumentFileItemDto {
+  /**
+   * Identificador asociado a file.
+   */
+  @ApiProperty({ format: 'uuid' })
+  fileId!: string;
+
+  /**
+   * Rol del contenido: la pieza principal del documento o un adjunto suyo.
+   */
+  @ApiProperty({ enum: ['PRIMARY', 'ATTACHMENT'] })
+  contentRole!: 'PRIMARY' | 'ATTACHMENT';
+
+  /**
+   * Posición del archivo dentro del documento.
+   */
+  @ApiPropertyOptional()
+  ordinal?: number;
+}
+
 /** Un documento del expediente. */
 export class ChartDocumentItemDto {
   /**
@@ -229,6 +260,12 @@ export class ChartDocumentItemDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Archivos gobernados vinculados al documento, ordenados por `ordinal`.
+   */
+  @ApiProperty({ type: [ChartDocumentFileItemDto] })
+  files!: ChartDocumentFileItemDto[];
 }
 
 /**

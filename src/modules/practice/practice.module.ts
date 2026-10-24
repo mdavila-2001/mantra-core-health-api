@@ -18,7 +18,9 @@ import {
   PracticeInventoryService,
   PracticeTenantLookupService,
   PractitionerSitesService,
+  OwnSiteProvisioningService,
   PracticeOrganizationReadService,
+  PracticeAccessService,
 } from './services';
 import {
   PracticesRepository,
@@ -34,6 +36,20 @@ import {
   InventoryMovementsRepository,
   PracticeOrganizationReadRepository,
 } from './repositories';
+import { ServiceCatalogRepository } from '../billing/repositories';
+import { AddressesRepository } from '../common/repositories';
+// ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
+// quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
+// necesita crear la dirección de la sede (`AddressesRepository`). Mismo
+// criterio que `ServiceCatalogRepository` arriba: se registran las clases
+// puntuales, no `ProfilesModule`/`CommonModule` enteros — evita el ciclo
+// (`profiles` ya lee lo que `practice` expone) y no duplica fuente de verdad.
+import { ProfileOwnershipService } from '../profiles/application/services/profile-ownership.service';
+import {
+  PersonAccountLinksRepository,
+  HealthPractitionerProfilesRepository,
+  PatientProfilesRepository,
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo Practice (14): organizaciones de atención, sitios, unidades clínicas,
@@ -64,6 +80,17 @@ import {
     InventoryItemsRepository,
     InventoryMovementsRepository,
     PracticeOrganizationReadRepository,
+    // El catálogo de servicios es de `billing`, pero acá se registra la clase y
+    // no se importa `BillingModule`: la dependencia entre los dos módulos ya va
+    // en el otro sentido (billing → practice, por `PracticeTenantLookupService`)
+    // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
+    // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
+    ServiceCatalogRepository,
+    AddressesRepository,
+    PersonAccountLinksRepository,
+    HealthPractitionerProfilesRepository,
+    PatientProfilesRepository,
+    ProfileOwnershipService,
     // Servicios
     PracticeSitesService,
     PracticeAccreditationsService,
@@ -73,11 +100,31 @@ import {
     PracticeInventoryService,
     PracticeTenantLookupService,
     PractitionerSitesService,
+    OwnSiteProvisioningService,
     PracticeOrganizationReadService,
+    PracticeAccessService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
   // la dependencia va en un solo sentido y no cierra ciclo.
-  exports: [PracticeTenantLookupService, PractitionerSitesService],
+  //
+  // `OwnSiteProvisioningService` se exporta además para `iam`: el
+  // auto-registro de profesional (`POST /iam/auth/register-practitioner`, P20)
+  // lo usa DENTRO de su propia transacción para dar de alta el consultorio
+  // propio declarado en el alta. `practice` no importa `iam`, así que la
+  // dependencia va en un solo sentido y no cierra ciclo.
+  //
+  // `PracticesRepository`/`PracticeSitesRepository` se exportan además para
+  // `diagnostic_units`: `DiagnosticUnitProvisioningService` (subtarea 1.5)
+  // los necesita para dar de alta la práctica y la sede propias de una
+  // unidad diagnóstica al registrar un centro de imagenología. `practice` no
+  // importa `diagnostic_units`, así que tampoco acá cierra ciclo.
+  exports: [
+    PracticeTenantLookupService,
+    PractitionerSitesService,
+    OwnSiteProvisioningService,
+    PracticesRepository,
+    PracticeSitesRepository,
+  ],
 })
 export class PracticeModule {}

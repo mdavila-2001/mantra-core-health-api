@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ProcessingLegalBasesService } from '../services';
 import {
   CreateProcessingLegalBasisDto,
@@ -22,6 +27,11 @@ export class ProcessingLegalBasesController {
   ) {}
 
   /** UC-07-06. */
+  @Audited({
+    action: 'PROCESSING_LEGAL_BASIS_VERSIONED',
+    entity: 'processing_legal_basis',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

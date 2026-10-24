@@ -20,6 +20,7 @@ import {
   DisclosureAcceptanceResponseDto,
   CreateTrackingConsentDto,
   TrackingConsentResponseDto,
+  MyTrackingConsentStatusDto,
   ProvisionAnalyticsSubjectDto,
   AnalyticsSubjectResponseDto,
 } from '../dto';
@@ -54,6 +55,34 @@ export class TelemetryConsentService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(TelemetryConsentService.name);
+  }
+
+  /**
+   * Estado vigente del consentimiento **de quien consulta**.
+   *
+   * No recibe un usuario: el estado sale siempre del actor autenticado, así que
+   * nadie puede averiguar si otra persona consintió.
+   *
+   * @param purposeDefinitionId - Propósito de tracking consultado.
+   * @param actor - Usuario autenticado.
+   * @returns `GRANTED`, `WITHDRAWN` o `NONE`, con el id a retirar si está vigente.
+   */
+  async getMyStatus(
+    purposeDefinitionId: string,
+    actor: AuthenticatedUser,
+  ): Promise<MyTrackingConsentStatusDto> {
+    const latest = await this.consentsRepo.findLatest(
+      this.em.fork(),
+      actor.id,
+      purposeDefinitionId,
+    );
+    if (!latest) {
+      return { status: 'NONE', purposeDefinitionId };
+    }
+    if (latest.decisionConceptId === TELE.DECISION_GRANTED) {
+      return { status: 'GRANTED', consentId: latest.id, purposeDefinitionId };
+    }
+    return { status: 'WITHDRAWN', purposeDefinitionId };
   }
 
   /** UC-28-04: registra la aceptación de una disclosure vigente por usuario/sesión. */

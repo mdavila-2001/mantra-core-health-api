@@ -1,11 +1,8 @@
 {
   "code": "MEDINT_EVALUACION_BASE",
-  "name": "Evaluación de medicina interna — versión general base",
-  "specialty": {
-    "code": "MEDICINA_INTERNA",
-    "display": "Medicina interna"
-  },
-  "version": 1,
+  "name": "Medicina interna — consulta inicial (ficha base)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, historia clínica de consulta externa",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,98 +10,367 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de la evaluación integral del adulto: comorbilidades, polifarmacia y revisión por sistemas."
+    "note": "Estructura de la evaluación integral del adulto: comorbilidades, polifarmacia y revisión por sistemas. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: AUDIT-C (OMS)."
   },
   "fields": [
     {
+      "section": "Motivo de consulta",
       "code": "motivo_consulta",
       "name": "Motivo de consulta",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Motivo de consulta",
       "code": "enfermedad_actual",
-      "name": "Enfermedad actual",
+      "name": "Relato de la enfermedad actual",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
+      "code": "antecedentes_cronicos",
+      "name": "Comorbilidades",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión arterial",
+        "Diabetes mellitus",
+        "Cardiopatía",
+        "EPOC o asma",
+        "Enfermedad renal crónica",
+        "Hepatopatía",
+        "Cáncer",
+        "Enfermedad de Chagas",
+        "VIH",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Antecedentes",
       "code": "comorbilidades",
-      "name": "Comorbilidades activas",
+      "name": "Comorbilidades — detalle y grado de control",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
       "code": "medicacion_actual",
-      "name": "Medicación actual",
+      "name": "Medicación actual (nombre, dosis, frecuencia)",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Antecedentes",
       "code": "cantidad_de_farmacos",
-      "name": "Cantidad de fármacos habituales",
+      "name": "Cantidad de fármacos en uso",
       "dataType": "integer",
+      "required": false,
+      "description": "5 o más: polifarmacia."
+    },
+    {
+      "section": "Antecedentes",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
       "code": "alergias",
-      "name": "Alergias",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
     },
     {
-      "code": "habitos_toxicos",
-      "name": "Hábitos tóxicos",
-      "dataType": "text",
-      "required": false
-    },
-    {
-      "code": "estado_funcional",
-      "name": "Estado funcional / autonomía",
+      "section": "Antecedentes",
+      "code": "tabaco",
+      "name": "Consumo de tabaco",
       "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "cigarrillos_por_dia",
+      "name": "Cigarrillos por día",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_fumando",
+      "name": "Años fumando",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Fumador actual" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "anios_sin_fumar",
+      "name": "Años desde que dejó de fumar",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "tabaco", "equals": "Exfumador" }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_frecuencia",
+      "name": "¿Con qué frecuencia consume alguna bebida alcohólica? (AUDIT-C 1)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Una o menos veces al mes",
+        "De 2 a 4 veces al mes",
+        "De 2 a 3 veces a la semana",
+        "4 o más veces a la semana"
+      ]
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_cantidad",
+      "name": "¿Cuántas consumiciones toma en un día de consumo normal? (AUDIT-C 2)",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 o 2", "3 o 4", "5 o 6", "7 a 9", "10 o más"],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "audit_c_seis_o_mas",
+      "name": "¿Con qué frecuencia toma 6 o más bebidas en una sola ocasión? (AUDIT-C 3)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Nunca",
+        "Menos de una vez al mes",
+        "Mensualmente",
+        "Semanalmente",
+        "A diario o casi a diario"
+      ],
+      "showWhen": {
+        "field": "audit_c_frecuencia",
+        "equals": [
+          "Una o menos veces al mes",
+          "De 2 a 4 veces al mes",
+          "De 2 a 3 veces a la semana",
+          "4 o más veces a la semana"
+        ]
+      }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "otras_sustancias",
+      "name": "¿Consume otras sustancias?",
+      "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Antecedentes",
+      "code": "otras_sustancias_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Hoja de coca (acullicu)",
+        "Marihuana",
+        "Cocaína o pasta base",
+        "Sedantes sin receta"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "otras_sustancias", "equals": true }
+    },
+    {
+      "section": "Antecedentes",
+      "code": "habitos_toxicos",
+      "name": "Hábitos tóxicos — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Antecedentes",
+      "code": "estado_funcional",
+      "name": "Estado funcional",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Independiente",
+        "Requiere ayuda para actividades instrumentales",
+        "Requiere ayuda para actividades básicas",
+        "Postrado"
+      ]
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "perdida_de_peso_reciente",
       "name": "Pérdida de peso reciente",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Revisión por sistemas",
+      "code": "perdida_de_peso_kg",
+      "name": "¿Cuántos kg y en cuánto tiempo?",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": { "field": "perdida_de_peso_reciente", "equals": true }
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "fiebre",
       "name": "Fiebre",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Revisión por sistemas",
+      "code": "fiebre_dias",
+      "name": "Días de fiebre",
+      "dataType": "integer",
+      "required": true,
+      "showWhen": { "field": "fiebre", "equals": true }
+    },
+    {
+      "section": "Revisión por sistemas",
       "code": "revision_por_sistemas",
-      "name": "Revisión por sistemas",
+      "name": "Revisión por sistemas — hallazgos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen físico",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "temperatura",
+      "name": "Temperatura axilar (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
       "code": "examen_fisico_dirigido",
       "name": "Examen físico dirigido",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Examen físico",
       "code": "laboratorio_relevante",
       "name": "Laboratorio relevante",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Insuficiencia cardíaca",
+        "Diabetes mellitus descompensada",
+        "Hipertensión arterial",
+        "Neumonía",
+        "Anemia",
+        "Síndrome febril prolongado",
+        "Enfermedad renal crónica"
+      ],
+      "allowOther": true,
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
+    },
+    {
+      "section": "Problemas y plan",
       "code": "problemas_activos",
       "name": "Lista de problemas activos",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Problemas y plan",
       "code": "plan_por_problema",
       "name": "Plan por problema",
       "dataType": "text",
       "required": true
     }
-  ]
+  ],
+  "kind": "BASE"
 }

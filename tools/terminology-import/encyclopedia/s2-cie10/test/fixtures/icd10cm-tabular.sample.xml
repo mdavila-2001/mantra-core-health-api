@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ICD10CM.tabular>
+  <version>2025</version>
+  <introduction>
+    <introSection type="title">
+      <title>ICD-10-CM TABULAR LIST of DISEASES and INJURIES</title>
+    </introSection>
+    <introSection type="subtitle">
+      <title>Instructional Notations</title>
+    </introSection>
+    <introSection type="instruction">
+      <title>Includes:</title>
+      <instruction>
+        <note>The word 'Includes' appears immediately under certain categories to further define, or give examples of, the content of the category.</note>
+      </instruction>
+    </introSection>
+    <introSection type="instruction">
+      <title>Excludes Notes</title>
+      <instruction>
+        <note>The ICD-10-CM has two types of excludes notes.  Each note has a different definition for use but they are both similar in that they indicate that codes excluded from each other are independent of each other.</note>
+      </instruction>
+    </introSection>
+    <introSection type="instruction">
+      <title>Excludes1</title>
+      <instruction>
+        <note>A type 1 Excludes note is a pure excludes.  It means 'NOT CODED HERE!'  An Excludes1 note indicates that the code excluded should never be used at the same time as the code above the Excludes1 note.  An Excludes1 is used when two conditions cannot occur together, such as a congenital form versus an acquired form of the same condition.</note>
+      </instruction>
+    </introSection>
+    <introSection type="instruction">
+      <title>Excludes2</title>
+      <instruction>
+        <note>A type 2 excludes note represents 'Not included here'.  An excludes2 note indicates that the condition excluded is not part of the condition it is excluded from but a patient may have both conditions at the same time.  When an Excludes2 note appears under a code it is acceptable to use both the code and the excluded code together.</note>
+      </instruction>
+    </introSection>
+    <introSection type="instruction">
+      <title>Code First/Use Additional Code notes (etiology/manifestation paired codes)</title>
+      <instruction>
+        <note>Certain conditions have both an underlying etiology and multiple body system manifestations due to the underlying etiology.  For such conditions the ICD-10-CM has a coding convention that requires the underlying condition be sequenced first followed by the manifestation.  Wherever such a combination exists there is a 'use additional code' note at the etiology code, and a 'code first' note at the manifestation code.  These instructional notes indicate the proper sequencing order of the codes, etiology followed by manifestation.</note>
+        <note>In most cases the manifestation codes will have in the code title, 'in diseases classified elsewhere.'  Codes with this title are a component of the etiology/ manifestation convention. The code title indicates that it is a manifestation code.  'In diseases classified elsewhere' codes are never permitted to be used as first listed or principal diagnosis codes. They must be used in conjunction with an underlying condition code and they must be listed following the underlying condition.</note>
+      </instruction>
+    </introSection>
+    <introSection type="instruction">
+      <title>Code Also</title>
+      <instruction>
+        <note>A code also note instructs that 2 codes may be required to fully describe a condition but the sequencing of the two codes is discretionary, depending on the severity of the conditions and the reason for the encounter.</note>
+      </instruction>
+    </introSection>
+    <introSection type="instruction">
+      <title>7th characters and placeholder X</title>
+      <instruction>
+        <note>For codes less than 6 characters that require a 7th character a placeholder X should be assigned for all characters less than 6.  The 7th character must always be the 7th character of a code</note>
+      </instruction>
+    </introSection>
+  </introduction>
+  <chapter><sectionIndex/><section id="x"><diag>
+        <name>E84</name>
+        <desc>Cystic fibrosis</desc>
+        <includes>
+          <note>mucoviscidosis</note>
+        </includes>
+        <codeAlso>
+          <note>exocrine pancreatic insufficiency (K86.81)</note>
+        </codeAlso>
+        <diag>
+          <name>E84.0</name>
+          <desc>Cystic fibrosis with pulmonary manifestations</desc>
+          <useAdditionalCode>
+            <note>code to identify any infectious organism present, such as:</note>
+            <note>Pseudomonas (B96.5)</note>
+          </useAdditionalCode>
+        </diag>
+        <diag>
+          <name>E84.1</name>
+          <desc>Cystic fibrosis with intestinal manifestations</desc>
+          <diag>
+            <name>E84.11</name>
+            <desc>Meconium ileus in cystic fibrosis</desc>
+            <excludes1>
+              <note>meconium ileus not due to cystic fibrosis (P76.0)</note>
+            </excludes1>
+          </diag>
+          <diag>
+            <name>E84.19</name>
+            <desc>Cystic fibrosis with other intestinal manifestations</desc>
+            <inclusionTerm>
+              <note>Distal intestinal obstruction syndrome</note>
+            </inclusionTerm>
+          </diag>
+        </diag>
+        <diag>
+          <name>E84.8</name>
+          <desc>Cystic fibrosis with other manifestations</desc>
+        </diag>
+        <diag>
+          <name>E84.9</name>
+          <desc>Cystic fibrosis, unspecified</desc>
+        </diag>
+      </diag><diag>
+        <name>J18</name>
+        <desc>Pneumonia, unspecified organism</desc>
+        <codeFirst>
+          <note>, if applicable, associated influenza (J09.X1, J10.0-, J11.0-)</note>
+        </codeFirst>
+        <codeAlso>
+          <note>, if applicable, any associated condition such as:</note>
+          <note>aspiration pneumonia (J69.-)</note>
+        </codeAlso>
+        <excludes1>
+          <note>congenital pneumonia (P23.0)</note>
+          <note>drug-induced interstitial lung disorder (J70.2-J70.4)</note>
+          <note>interstitial pneumonia NOS (J84.9)</note>
+          <note>neonatal aspiration pneumonia (P24.-)</note>
+          <note>pneumonitis due to fumes and vapors (J68.0)</note>
+          <note>usual interstitial pneumonia (J84.178)</note>
+        </excludes1>
+        <excludes2>
+          <note>abscess of lung with pneumonia (J85.1)</note>
+          <note>aspiration pneumonia due to anesthesia during labor and delivery (O74.0)</note>
+          <note>aspiration pneumonia due to anesthesia during pregnancy (O29)</note>
+          <note>aspiration pneumonia due to anesthesia during puerperium (O89.0)</note>
+          <note>aspiration pneumonia due to solids and liquids (J69.-)</note>
+          <note>aspiration pneumonia NOS (J69.0)</note>
+          <note>lipid pneumonia (J69.1)</note>
+          <note>pneumonitis due to external agents (J67-J70)</note>
+        </excludes2>
+        <diag>
+          <name>J18.0</name>
+          <desc>Bronchopneumonia, unspecified organism</desc>
+          <excludes1>
+            <note>hypostatic bronchopneumonia (J18.2)</note>
+            <note>lipid pneumonia (J69.1)</note>
+          </excludes1>
+          <excludes2>
+            <note>acute bronchiolitis (J21.-)</note>
+            <note>chronic bronchiolitis (J44.89)</note>
+            <note>other specified chronic obstructive pulmonary disease (J44.89)</note>
+          </excludes2>
+        </diag>
+        <diag>
+          <name>J18.1</name>
+          <desc>Lobar pneumonia, unspecified organism</desc>
+        </diag>
+        <diag>
+          <name>J18.2</name>
+          <desc>Hypostatic pneumonia, unspecified organism</desc>
+          <inclusionTerm>
+            <note>Hypostatic bronchopneumonia</note>
+            <note>Passive pneumonia</note>
+          </inclusionTerm>
+        </diag>
+        <diag>
+          <name>J18.8</name>
+          <desc>Other pneumonia, unspecified organism</desc>
+        </diag>
+        <diag>
+          <name>J18.9</name>
+          <desc>Pneumonia, unspecified organism</desc>
+        </diag>
+      </diag></section></chapter></ICD10CM.tabular>

@@ -9,6 +9,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import {
   AgentsRepository,
   AutomationGovernanceRepository,
@@ -74,15 +75,20 @@ export class AutomationDefinitionService {
           {
             code: dto.code,
           },
+          AutomationErrorReason.WORKFLOW_CODE_ALREADY_EXISTS,
         );
       }
 
       const stepCodes = new Set<string>();
       for (const step of dto.steps) {
         if (stepCodes.has(step.stepCode)) {
-          throw new ConflictException('Dos pasos comparten el mismo código.', {
-            stepCode: step.stepCode,
-          });
+          throw new ConflictException(
+            'Dos pasos comparten el mismo código.',
+            {
+              stepCode: step.stepCode,
+            },
+            AutomationErrorReason.DUPLICATE_STEP_CODE_IN_BATCH,
+          );
         }
         stepCodes.add(step.stepCode);
       }
@@ -93,6 +99,7 @@ export class AutomationDefinitionService {
             throw new PreconditionFailedException(
               'Un paso salta a otro que no está declarado en el workflow.',
               { stepCode: step.stepCode, target },
+              AutomationErrorReason.STEP_TARGET_NOT_DECLARED,
             );
           }
         }
@@ -103,6 +110,7 @@ export class AutomationDefinitionService {
           throw new PreconditionFailedException(
             'Un paso de llamada a agente tiene que declarar qué agente llama.',
             { stepCode: step.stepCode },
+            AutomationErrorReason.AGENT_CALL_STEP_MISSING_AGENT,
           );
         }
         if (
@@ -112,6 +120,7 @@ export class AutomationDefinitionService {
           throw new PreconditionFailedException(
             'Un paso de llamada a herramienta tiene que declarar qué herramienta usa.',
             { stepCode: step.stepCode },
+            AutomationErrorReason.TOOL_CALL_STEP_MISSING_TOOL,
           );
         }
         if (step.agentId) {
@@ -123,6 +132,7 @@ export class AutomationDefinitionService {
                 stepCode: step.stepCode,
                 agentId: step.agentId,
               },
+              AutomationErrorReason.STEP_AGENT_NOT_FOUND,
             );
           }
         }
@@ -132,6 +142,7 @@ export class AutomationDefinitionService {
             throw new ResourceNotFoundException(
               'Herramienta referenciada por un paso no encontrada.',
               { stepCode: step.stepCode, agentToolId: step.agentToolId },
+              AutomationErrorReason.STEP_TOOL_NOT_FOUND,
             );
           }
         }
@@ -232,9 +243,13 @@ export class AutomationDefinitionService {
         dto.code,
       );
       if (existing) {
-        throw new ConflictException('Ya existe un disparador con ese código.', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un disparador con ese código.',
+          {
+            code: dto.code,
+          },
+          AutomationErrorReason.TRIGGER_CODE_ALREADY_EXISTS,
+        );
       }
 
       const workflow = await this.governanceRepo.findWorkflowById(
@@ -242,14 +257,19 @@ export class AutomationDefinitionService {
         dto.workflowId,
       );
       if (!workflow) {
-        throw new ResourceNotFoundException('Workflow no encontrado.', {
-          workflowId: dto.workflowId,
-        });
+        throw new ResourceNotFoundException(
+          'Workflow no encontrado.',
+          {
+            workflowId: dto.workflowId,
+          },
+          AutomationErrorReason.WORKFLOW_NOT_FOUND,
+        );
       }
       if (workflow.stateConceptId === CONCEPTS.AUTO_WORKFLOW_ARCHIVED) {
         throw new PreconditionFailedException(
           'No se puede disparar un workflow archivado.',
           { workflowId: workflow.id },
+          AutomationErrorReason.WORKFLOW_ARCHIVED,
         );
       }
 
@@ -260,6 +280,7 @@ export class AutomationDefinitionService {
         throw new PreconditionFailedException(
           'Un disparador por evento tiene que declarar qué evento suscribe.',
           { code: dto.code },
+          AutomationErrorReason.EVENT_TRIGGER_MISSING_EVENT_TYPE,
         );
       }
       if (dto.triggerTypeConceptId === CONCEPTS.AUTO_TRIGGER_TYPE_SCHEDULE) {
@@ -267,6 +288,7 @@ export class AutomationDefinitionService {
           throw new PreconditionFailedException(
             'Un disparador por calendario tiene que declarar su cron.',
             { code: dto.code },
+            AutomationErrorReason.SCHEDULE_TRIGGER_MISSING_CRON,
           );
         }
         this.assertCron(dto.scheduleCron);
@@ -331,6 +353,7 @@ export class AutomationDefinitionService {
       throw new PreconditionFailedException(
         'La expresión cron tiene que tener cinco campos.',
         { fieldCount: fields.length },
+        AutomationErrorReason.CRON_INVALID_FIELD_COUNT,
       );
     }
   }

@@ -109,9 +109,9 @@ export class PharmacyPublicController {
     return this.service.listMedications({
       q,
       group,
-      origin: origenDe(lat, lng),
-      radiusKm: aDecimal(radiusKm),
-      limit: aEntero(limit),
+      origin: originOf(lat, lng),
+      radiusKm: toDecimal(radiusKm),
+      limit: toInteger(limit),
     });
   }
 
@@ -140,8 +140,8 @@ export class PharmacyPublicController {
     @Query('radiusKm') radiusKm?: string,
   ): Promise<PublicMedicationAvailabilityDto> {
     return this.service.getAvailability(conceptId, {
-      origin: origenDe(lat, lng),
-      radiusKm: aDecimal(radiusKm),
+      origin: originOf(lat, lng),
+      radiusKm: toDecimal(radiusKm),
     });
   }
 }
@@ -153,26 +153,26 @@ export class PharmacyPublicController {
  * la superficie pública recorta lo que no entiende en vez de fallar, y media
  * coordenada no dice desde dónde medir nada.
  */
-function origenDe(
+function originOf(
   lat?: string,
   lng?: string,
 ): { lat: number; lng: number } | undefined {
-  const latitud = aDecimal(lat);
-  const longitud = aDecimal(lng);
-  if (latitud === undefined || longitud === undefined) return undefined;
-  return { lat: latitud, lng: longitud };
+  const latitude = toDecimal(lat);
+  const longitude = toDecimal(lng);
+  if (latitude === undefined || longitude === undefined) return undefined;
+  return { lat: latitude, lng: longitude };
 }
 
 /** Decimal de un parámetro de consulta, o `undefined`. */
-function aDecimal(valor?: string): number | undefined {
-  if (valor === undefined) return undefined;
-  const numero = Number.parseFloat(valor);
-  return Number.isFinite(numero) ? numero : undefined;
+function toDecimal(value?: string): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 /** Entero de un parámetro de consulta, o `undefined`. */
-function aEntero(valor?: string): number | undefined {
-  if (valor === undefined) return undefined;
-  const numero = Number.parseInt(valor, 10);
-  return Number.isFinite(numero) ? numero : undefined;
+function toInteger(value?: string): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }

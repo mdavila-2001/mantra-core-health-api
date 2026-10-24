@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  camposObligatoriosDePaciente,
+  identidadProfesional,
+} from './harness';
 
 /**
  * FX-4 · retirar un horario publicado avisa antes de romper nada.
@@ -34,6 +40,10 @@ import { bootstrapTestApp, bearer, type TestContext } from './harness';
  */
 describe('FX-4 · retirar un horario publicado', () => {
   let ctx: TestContext;
+  /** Los campos que el alta de paciente exige; salen del arnés. */
+  let camposDePaciente: Awaited<
+    ReturnType<typeof camposObligatoriosDePaciente>
+  >;
   const http = () => request(ctx.app.getHttpServer());
 
   const sufijo = randomUUID().slice(0, 8);
@@ -66,10 +76,12 @@ describe('FX-4 · retirar un horario publicado', () => {
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
+    camposDePaciente = await camposObligatoriosDePaciente(ctx);
 
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password: PASSWORD,
         name: 'Rocío',
@@ -90,6 +102,7 @@ describe('FX-4 · retirar un horario publicado', () => {
     const altaPaciente = await http()
       .post('/iam/auth/register-patient')
       .send({
+        ...camposDePaciente,
         nationalId: paciente.nationalId,
         password: PASSWORD,
         email: `fx4-pac-${sufijo}@example.test`,
@@ -199,33 +212,40 @@ describe('FX-4 · retirar un horario publicado', () => {
       .expect(200);
   });
 
-  it('con una cita comprometida NO retira: responde 409 y la nombra', async () => {
-    const rechazo = await http()
+  // M4 · H1.S2.M2 (2026-09-26): las citas vivas ya no frenan el retiro. El 409
+  // le impedía a un médico en ejercicio cambiar su horario nunca; ahora retira,
+  // conserva el cupo de cada cita viva y las nombra en la respuesta.
+  let retiroConCita: {
+    releasedSlots: number;
+    keptSlots: number;
+    liveBookings: number;
+    liveBookingIds: string[];
+    truncated: boolean;
+  };
+
+  it('con una cita comprometida retira igual: responde 200 y nombra la cita viva', async () => {
+    const res = await http()
       .delete(`/scheduling/templates/${templateId}`)
       .set(bearer(medico.token))
-      .expect(409);
+      .expect(200);
+    retiroConCita = res.body;
 
-    expect(rechazo.body.details.liveBookings).toBe(1);
-    expect(rechazo.body.details.totalBookings).toBe(1);
-    expect(rechazo.body.details.bookingIds).toContain(bookingId);
-    expect(rechazo.body.details.truncated).toBe(false);
+    expect(retiroConCita.liveBookings).toBe(1);
+    expect(retiroConCita.liveBookingIds).toContain(bookingId);
+    expect(retiroConCita.truncated).toBe(false);
+    // El cupo de la cita viva se conserva; el resto se suelta.
+    expect(retiroConCita.keptSlots).toBe(1);
+    expect(retiroConCita.releasedSlots).toBeGreaterThan(0);
 
-    // Lo que importa no es el 409: es que el horario siga en pie. Un aviso que
-    // llega después del borrado no sirve de nada.
+    // Retirar no es borrar: la plantilla y el cupo de la cita siguen ahí.
     expect(await restosDeLaPlantilla()).toBeGreaterThan(0);
   });
 
   it('el aviso no filtra al paciente: ids, nunca nombres', async () => {
-    const rechazo = await http()
-      .delete(`/scheduling/templates/${templateId}`)
-      .set(bearer(medico.token))
-      .expect(409);
-
     // Quien recibe esto es la pantalla, que ya sabe pedir cada cita con su
     // permiso. Mandar nombres acá los expondría a cualquiera que administre
     // agendas, incluida gente que no atiende a ese paciente.
-    const cuerpo = JSON.stringify(rechazo.body.details);
-    expect(cuerpo).not.toMatch(/Carla|Ríos/);
+    expect(JSON.stringify(retiroConCita)).not.toMatch(/Carla|Ríos/);
   });
 
   it('retirar una agenda ajena es 403, no un 409', async () => {
@@ -234,6 +254,7 @@ describe('FX-4 · retirar un horario publicado', () => {
     const otro = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(`fx4-otro-${sufijo}@example.test`),
         email: `fx4-otro-${sufijo}@example.test`,
         password: PASSWORD,
         name: 'Iván',
@@ -255,7 +276,7 @@ describe('FX-4 · retirar un horario publicado', () => {
       .expect(403);
   });
 
-  it('resuelta la cita, el horario se retira y conserva su historia', async () => {
+  it('resuelta la cita, el horario retirado conserva su historia', async () => {
     await http()
       .post(`/scheduling/bookings/${bookingId}/cancel`)
       .set(bearer(medico.token))
@@ -265,18 +286,9 @@ describe('FX-4 · retirar un horario publicado', () => {
       })
       .expect(200);
 
-    const retiro = await http()
-      .delete(`/scheduling/templates/${templateId}`)
-      .set(bearer(medico.token))
-      .expect(200);
-
-    expect(retiro.body.id).toBe(templateId);
     // Un cupo se conserva: es el de la cita cancelada. Su `bookable_slot_id`
     // es NOT NULL, así que borrarlo sería borrar el registro de que esa persona
     // tuvo un turno.
-    expect(retiro.body.keptSlots).toBe(1);
-    expect(retiro.body.releasedSlots).toBeGreaterThan(0);
-
     const estado = await ctx.orm.em
       .getConnection()
       .execute<{ status_concept_id: string }[]>(

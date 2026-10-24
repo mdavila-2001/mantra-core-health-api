@@ -50,13 +50,13 @@ ningún archivo supera las 190 líneas y el conjunto sigue siendo diffable líne
 cuando el modelo cambie. El orden de los campos está documentado en `catalog.types.ts` y
 repetido como comentario en la cabecera de cada archivo generado.
 
-## Deuda conocida heredada del modelo
+## Límites heredados del modelo
 
-Estas no son omisiones de la implementación: son cosas que el modelo oficial todavía no
-fija, y el código las señala en vez de inventarlas.
+Estas no son omisiones de la implementación: son cosas que el modelo oficial no fija, y el
+código las señala en vez de inventarlas.
 
 - **`terminology.technical_data_type` con valores provisionales.** El modelo declara el
-  enum y lista "definir sus valores" como pendiente. Sin al menos un valor, PostgreSQL no
+  enum sin dominio de valores. Sin al menos un valor, PostgreSQL no
   crea el tipo y no se pueden crear las seis tablas que lo usan. Se materializa un conjunto
   marcado `provisional: true` y el arranque lo reporta como incidencia en cada ejecución.
 - **`vector_rag.vector_embeddings.embedding` sin dimensión.** El modelo la declara como
@@ -81,3 +81,9 @@ yarn orm:catalog     # borra y reescribe indexes/ y foreign-keys/ y schemas.cata
 
 Los archivos escritos a mano (`catalog.types.ts`, `extensions.catalog.ts`,
 `types.catalog.ts`, `physical.catalog.ts`) **no** se tocan al regenerar.
+
+## Verificación y límite conocido
+
+Ejecutar `corepack yarn test --runInBand --silent src/orm`. El catálogo no aplica
+DDL por sí solo; la materialización requiere PostgreSQL descartable. El enum
+`technical_data_type` es provisional (ver arriba).

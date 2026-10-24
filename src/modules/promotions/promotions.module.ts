@@ -5,6 +5,7 @@ import { LoyaltyController, PromotionsController } from './controllers';
 import {
   PromotionsLoyaltyService,
   PromotionsDiscountsService,
+  PromotionsReadService,
 } from './services';
 import {
   PromotionsLoyaltyRepository,
@@ -25,6 +26,7 @@ import { PaymentsModule } from '../payments/payments.module';
     PromotionsDiscountsRepository,
     PromotionsLoyaltyService,
     PromotionsDiscountsService,
+    PromotionsReadService,
   ],
 })
 export class PromotionsModule {}

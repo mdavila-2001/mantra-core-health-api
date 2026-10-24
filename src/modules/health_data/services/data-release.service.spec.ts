@@ -42,6 +42,11 @@ function build() {
     findExportJobForUpdate: mockFn(),
     createExportManifest: mockFn(() => ({ id: 'manifest-1' })),
     findManifest: mockFn(() => Promise.resolve(null)),
+    // Las dos últimas las usa la portabilidad de seguros (subtarea 3.3), no
+    // este servicio; van igual porque el doble se tipa contra el repositorio
+    // entero.
+    findManifestByContentHash: mockFn(() => Promise.resolve(null)),
+    findExportJobById: mockFn(() => Promise.resolve(null)),
   };
   const resourcesRepo = {
     findResourcesByPatient: mockFn(() => Promise.resolve([])),

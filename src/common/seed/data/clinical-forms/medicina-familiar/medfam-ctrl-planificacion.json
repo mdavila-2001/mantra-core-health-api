@@ -1,0 +1,246 @@
+{
+  "code": "MEDFAM_CTRL_PLANIFICACION",
+  "name": "Consejería en planificación familiar",
+  "specialty": { "code": "MEDICINA_FAMILIAR", "display": "Medicina Familiar" },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "Criterios médicos de elegibilidad para el uso de anticonceptivos, 5.ª ed.",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241549158",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Elegibilidad de cada método según los criterios médicos de la OMS (categorías 1 a 4). Ampliación internacional (2026-10-24): motivo de la visita, intención de embarazo, motivo para dejar el método y problemas con el método desde la WHO Digital Adaptation Kit for family planning and STIs: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-fp, commit b69bbec); instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Consulta",
+      "code": "fp_motivo_visita",
+      "name": "Motivo de la visita",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dejar la anticoncepción",
+        "Consejería en anticoncepción",
+        "Iniciar anticoncepción",
+        "Continuar con el método actual",
+        "Anticoncepción de emergencia",
+        "Problemas o dudas con el método",
+        "Retiro del implante",
+        "Retiro del DIU",
+        "Cambio de método"
+      ],
+      "multiple": true,
+      "description": "Fuente: elemento FP.DE.0059 «Reason for visit» de la WHO Digital Adaptation Kit for family planning and STIs: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-fp, commit b69bbec). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Consulta",
+      "code": "fp_intencion_embarazo",
+      "name": "¿Desea un embarazo en el próximo año?",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Sí, quiero quedar embarazada",
+        "Me da lo mismo",
+        "No, no quiero quedar embarazada",
+        "No está segura"
+      ],
+      "description": "Fuente: elemento FP.DE.0074 «Pregnancy intention» de la WHO Digital Adaptation Kit for family planning and STIs: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-fp, commit b69bbec). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Consulta",
+      "code": "fp_motivo_dejar_metodo",
+      "name": "Motivo para dejar el método",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Efectos adversos",
+        "Desea un embarazo",
+        "Falla del método (embarazo no buscado)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento FP.DE.0069 «Reason for stopping contraception or method» de la WHO Digital Adaptation Kit for family planning and STIs: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-fp, commit b69bbec). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": {
+        "field": "fp_motivo_visita",
+        "equals": "Dejar la anticoncepción"
+      }
+    },
+    {
+      "section": "Consulta",
+      "code": "fp_problemas_metodo",
+      "name": "Problemas con el método",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sangrado abundante o prolongado",
+        "Sangrado irregular",
+        "Amenorrea",
+        "Sangrado vaginal inexplicado",
+        "Cólicos y dolor",
+        "Posible anemia",
+        "La pareja siente los hilos del DIU",
+        "Dolor intenso en el bajo vientre",
+        "Sospecha de perforación",
+        "Expulsión parcial del DIU",
+        "Expulsión completa del DIU",
+        "No se encuentran los hilos del DIU",
+        "Acné",
+        "Cefaleas comunes",
+        "Sensibilidad mamaria",
+        "Cambio de peso",
+        "Náuseas o mareos",
+        "Cardiopatía isquémica",
+        "Migraña",
+        "Olvido de píldoras",
+        "Inyección atrasada",
+        "Cambios de ánimo o del deseo sexual",
+        "Sospecha de embarazo",
+        "Problemas con el parche",
+        "Problemas con el anillo vaginal",
+        "Cambio en el momento de la menstruación",
+        "Sangrado o coágulos",
+        "Dolor que dura meses",
+        "Infección en el sitio de inserción o incisión",
+        "Absceso",
+        "Dificultad para usar el preservativo",
+        "Irritación genital",
+        "Preservativo mal usado, roto o deslizado",
+        "Dificultad para convencer a la pareja",
+        "El preservativo hace ruido",
+        "Trombosis venosa profunda",
+        "Embarazo ectópico",
+        "Infarto de miocardio",
+        "Enfermedad hepática",
+        "Enfermedad inflamatoria pélvica",
+        "Embolia pulmonar",
+        "Embarazo ectópico roto",
+        "Alergia grave al látex",
+        "Accidente cerebrovascular",
+        "Síndrome de shock tóxico"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento FP.DE.0216 «Issues and concerns» de la WHO Digital Adaptation Kit for family planning and STIs: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-fp, commit b69bbec). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": {
+        "field": "fp_motivo_visita",
+        "equals": "Problemas o dudas con el método"
+      }
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "metodo_actual",
+      "name": "Método actual",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Ninguno",
+        "Preservativo",
+        "Píldora combinada",
+        "Inyectable",
+        "Implante",
+        "DIU de cobre",
+        "DIU hormonal",
+        "Ligadura o vasectomía"
+      ]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "condiciones_mec",
+      "name": "Condiciones que cambian la elegibilidad",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fuma y tiene 35 años o más",
+        "Hipertensión",
+        "Migraña con aura",
+        "Antecedente de trombosis",
+        "Lactancia < 6 semanas",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "metodo_elegido",
+      "name": "Método elegido",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Preservativo",
+        "Píldora combinada",
+        "Píldora de progestágeno",
+        "Inyectable",
+        "Implante",
+        "DIU de cobre",
+        "DIU hormonal",
+        "Ligadura o vasectomía",
+        "Ninguno"
+      ]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "categoria_mec",
+      "name": "Categoría OMS del método elegido",
+      "dataType": "string",
+      "required": false,
+      "options": ["1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: anticoncepción",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Uso correcto",
+        "Doble protección con preservativo",
+        "Anticoncepción de emergencia"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

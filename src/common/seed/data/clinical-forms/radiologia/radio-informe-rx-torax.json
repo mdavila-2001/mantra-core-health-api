@@ -1,0 +1,113 @@
+{
+  "code": "RADIO_INFORME_RX_TORAX",
+  "name": "Informe de radiografía de tórax",
+  "specialty": { "code": "RADIOLOGIA", "display": "Radiología e Imagenología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Lectura sistemática: técnica, partes blandas, huesos, mediastino, corazón, pulmones y pleura."
+  },
+  "fields": [
+    {
+      "section": "Solicitud",
+      "code": "indicacion_del_estudio",
+      "name": "Indicación del estudio",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Solicitud",
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Solicitud",
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Resultado: radiografía de tórax",
+      "code": "proyeccion",
+      "name": "Proyección",
+      "dataType": "string",
+      "required": true,
+      "options": ["PA", "AP", "Lateral"]
+    },
+    {
+      "section": "Resultado: radiografía de tórax",
+      "code": "tecnica_adecuada",
+      "name": "Técnica",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Adecuada",
+        "Rotada",
+        "Subpenetrada",
+        "Inspiración insuficiente"
+      ]
+    },
+    {
+      "section": "Resultado: radiografía de tórax",
+      "code": "hallazgos_torax",
+      "name": "Hallazgos",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Consolidación",
+        "Infiltrado intersticial",
+        "Derrame pleural",
+        "Neumotórax",
+        "Cardiomegalia",
+        "Nódulo o masa",
+        "Cavitación",
+        "Sin hallazgos"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Resultado: radiografía de tórax",
+      "code": "indice_cardiotoracico",
+      "name": "Índice cardiotorácico",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "conclusion",
+      "name": "Conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "recomendacion",
+      "name": "Recomendación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    }
+  ],
+  "kind": "SPECIFIC"
+}

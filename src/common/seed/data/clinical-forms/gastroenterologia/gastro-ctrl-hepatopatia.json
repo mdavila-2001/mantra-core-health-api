@@ -1,0 +1,251 @@
+{
+  "code": "GASTRO_CTRL_HEPATOPATIA",
+  "name": "Control de hepatopatía crónica y cirrosis",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Gravedad por Child-Pugh (puntaje publicado de uso libre), descompensaciones y tamizaje de hepatocarcinoma. Ampliación internacional (2026-10-24): los cinco ítems de la clasificación de Child-Pugh desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de hepatopatía crónica",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "hepatopatia_causa",
+      "name": "Causa",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Alcohol",
+        "Hígado graso",
+        "Hepatitis B",
+        "Hepatitis C",
+        "Autoinmune",
+        "Otra o no establecida"
+      ]
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_bilirrubina",
+      "name": "Child-Pugh — bilirrubina total (µmol/L)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — menor de 34 µmol/L",
+        "2 — de 34 a 50 µmol/L",
+        "3 — mayor de 50 µmol/L"
+      ],
+      "description": "Conversión de unidades: 1 mg/dL de bilirrubina = 17,1 µmol/L (34 µmol/L ≈ 2 mg/dL; 50 µmol/L ≈ 3 mg/dL). Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_albumina",
+      "name": "Child-Pugh — albúmina sérica (g/L)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — mayor de 35 g/L",
+        "2 — de 28 a 35 g/L",
+        "3 — menor de 28 g/L"
+      ],
+      "description": "Conversión de unidades: 35 g/L = 3,5 g/dL; 28 g/L = 2,8 g/dL. Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_inr",
+      "name": "Child-Pugh — INR",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 — menor de 1,7", "2 — de 1,7 a 2,3", "3 — mayor de 2,3"],
+      "description": "Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_ascitis",
+      "name": "Child-Pugh — ascitis",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 — Ausente", "2 — Leve", "3 — Moderada a grave"],
+      "description": "Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_encefalopatia",
+      "name": "Child-Pugh — encefalopatía hepática",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — Ausente",
+        "2 — Grado I a II o controlada con medicación",
+        "3 — Grado III a IV o refractaria"
+      ],
+      "description": "La suma de los cinco ítems (5 a 15) da la clase: A 5–6, B 7–9, C 10–15. Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh",
+      "name": "Child-Pugh",
+      "dataType": "string",
+      "required": true,
+      "options": ["A (5–6)", "B (7–9)", "C (10–15)"]
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "descompensaciones",
+      "name": "Descompensaciones desde el último control",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ascitis",
+        "Encefalopatía",
+        "Hemorragia variceal",
+        "Ictericia",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "bilirrubina",
+      "name": "Bilirrubina total (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "albumina",
+      "name": "Albúmina (g/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "inr",
+      "name": "INR",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "ecografia_6_meses",
+      "name": "Ecografía de tamizaje en los últimos 6 meses",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí, sin nódulos", "Sí, con nódulo", "No"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Abstinencia de alcohol",
+        "Tamizaje al día",
+        "Vacunas de hepatitis A y B",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Abstinencia de alcohol",
+        "Restricción de sal si hay ascitis",
+        "Signos de alarma"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

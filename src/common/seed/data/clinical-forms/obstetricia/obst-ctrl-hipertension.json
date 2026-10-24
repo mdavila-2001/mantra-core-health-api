@@ -1,0 +1,170 @@
+{
+  "code": "OBST_CTRL_HIPERTENSION",
+  "name": "Trastorno hipertensivo del embarazo",
+  "specialty": { "code": "OBSTETRICIA", "display": "Obstetricia" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones de la OMS sobre atención prenatal para una experiencia positiva del embarazo (2016)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241549912",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Presión, proteinuria y criterios de gravedad de preeclampsia; sulfato de magnesio y momento del parto."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de hipertensión en el embarazo",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "edad_gestacional_semanas",
+      "name": "Edad gestacional (semanas)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "proteinuria",
+      "name": "Proteinuria",
+      "dataType": "string",
+      "required": true,
+      "options": ["Negativa", "+", "++", "+++"]
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "criterios_gravedad",
+      "name": "Criterios de gravedad",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "PA ≥ 160/110",
+        "Cefalea o alteración visual",
+        "Dolor en epigastrio",
+        "Plaquetas < 100 000",
+        "Transaminasas elevadas",
+        "Oliguria",
+        "Edema pulmonar",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "sulfato_magnesio",
+      "name": "Recibe sulfato de magnesio",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hipertensión en el embarazo",
+      "code": "frecuencia_cardiaca_fetal",
+      "name": "Frecuencia cardíaca fetal (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Signos de alarma", "Aspirina en dosis baja si corresponde"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

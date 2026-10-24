@@ -42,13 +42,13 @@ function build() {
 }
 
 /** Una cuenta con su naturaleza: es lo que da signo al saldo. */
-function cuenta(id: string, code: string, deudora = true) {
+function account(id: string, code: string, debtor = true) {
   return {
     id,
     code,
     name: `Cuenta ${code}`,
     accountTypeConceptId: 'tipo',
-    normalBalanceConceptId: deudora
+    normalBalanceConceptId: debtor
       ? ACCT.DIRECTION_DEBIT
       : ACCT.DIRECTION_CREDIT,
   };
@@ -60,21 +60,21 @@ function cuenta(id: string, code: string, deudora = true) {
  * corriente. El doble lo refleja a propósito: mientras llenaba `amountBase`,
  * escondía el defecto que los datos reales destaparon.
  */
-function linea(accountId: string, debe: boolean, amount: string) {
+function line(accountId: string, must: boolean, amount: string) {
   return {
     id: `l-${accountId}-${amount}`,
     transactionId: 't-1',
     accountId,
-    directionConceptId: debe ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
+    directionConceptId: must ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
     amount,
     amountBase: null,
   };
 }
 
 /** Una línea convertida: `amount` en su moneda y `amount_base` ya convertido. */
-function lineaConvertida(
+function convertedLine(
   accountId: string,
-  debe: boolean,
+  must: boolean,
   amount: string,
   amountBase: string,
 ) {
@@ -82,7 +82,7 @@ function lineaConvertida(
     id: `l-${accountId}-${amountBase}`,
     transactionId: 't-1',
     accountId,
-    directionConceptId: debe ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
+    directionConceptId: must ? ACCT.DIRECTION_DEBIT : ACCT.DIRECTION_CREDIT,
     amount,
     amountBase,
   };
@@ -138,12 +138,12 @@ describe('LedgerReadService', () => {
       const d = build();
       d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
       d.accountsRepo.findByPractice.mockResolvedValue([
-        cuenta('gasto', '5.1.01', true),
-        cuenta('pagar', '2.1.01', false),
+        account('gasto', '5.1.01', true),
+        account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('gasto', true, '100.00'),
-        linea('pagar', false, '100.00'),
+        line('gasto', true, '100.00'),
+        line('pagar', false, '100.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -161,12 +161,12 @@ describe('LedgerReadService', () => {
       const d = build();
       d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
       d.accountsRepo.findByPractice.mockResolvedValue([
-        cuenta('gasto', '5.1.01', true),
-        cuenta('pagar', '2.1.01', false),
+        account('gasto', '5.1.01', true),
+        account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('gasto', true, '100.00'),
-        linea('pagar', false, '90.00'),
+        line('gasto', true, '100.00'),
+        line('pagar', false, '90.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -181,22 +181,22 @@ describe('LedgerReadService', () => {
       const d = build();
       d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
       d.accountsRepo.findByPractice.mockResolvedValue([
-        cuenta('banco', '1.1.01', true),
-        cuenta('pagar', '2.1.01', false),
+        account('banco', '1.1.01', true),
+        account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('banco', true, '250.00'),
-        linea('pagar', false, '250.00'),
+        line('banco', true, '250.00'),
+        line('pagar', false, '250.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
-      const banco = res.items.find((i) => i.accountId === 'banco');
-      const pagar = res.items.find((i) => i.accountId === 'pagar');
+      const bank = res.items.find((i) => i.accountId === 'banco');
+      const pay = res.items.find((i) => i.accountId === 'pagar');
 
-      expect(banco?.balance).toBe('250.00');
+      expect(bank?.balance).toBe('250.00');
       // Acreedora: haber − debe. Si se calculara siempre debe − haber, saldría
       // «-250.00» y un pasivo correcto parecería un error.
-      expect(pagar?.balance).toBe('250.00');
+      expect(pay?.balance).toBe('250.00');
     });
 
     /**
@@ -207,13 +207,13 @@ describe('LedgerReadService', () => {
       const d = build();
       d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
       d.accountsRepo.findByPractice.mockResolvedValue([
-        cuenta('a', '1.1.01', true),
-        cuenta('b', '2.1.01', false),
+        account('a', '1.1.01', true),
+        account('b', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('a', true, '0.10'),
-        linea('a', true, '0.20'),
-        linea('b', false, '0.30'),
+        line('a', true, '0.10'),
+        line('a', true, '0.20'),
+        line('b', false, '0.30'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -260,12 +260,12 @@ describe('LedgerReadService', () => {
       const d = build();
       d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
       d.accountsRepo.findByPractice.mockResolvedValue([
-        cuenta('gasto', '5.1.01', true),
-        cuenta('pagar', '2.1.01', false),
+        account('gasto', '5.1.01', true),
+        account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('gasto', true, '12000.00'),
-        linea('pagar', false, '12000.00'),
+        line('gasto', true, '12000.00'),
+        line('pagar', false, '12000.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -281,11 +281,11 @@ describe('LedgerReadService', () => {
       const d = build();
       d.journalRepo.findTransactions.mockResolvedValue([{ id: 't-1' }]);
       d.accountsRepo.findByPractice.mockResolvedValue([
-        cuenta('gasto', '5.1.01', true),
+        account('gasto', '5.1.01', true),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
         // 100 dólares a 6.96 → 696 bolivianos.
-        lineaConvertida('gasto', true, '100.00', '696.00'),
+        convertedLine('gasto', true, '100.00', '696.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -316,9 +316,9 @@ describe('LedgerReadService', () => {
         to: '2026-01-31',
       });
 
-      const filtros = d.journalRepo.findTransactions.mock.calls[0][1];
-      expect(filtros.from).toBeInstanceOf(Date);
-      expect(filtros.to).toBeInstanceOf(Date);
+      const filters = d.journalRepo.findTransactions.mock.calls[0][1];
+      expect(filters.from).toBeInstanceOf(Date);
+      expect(filters.to).toBeInstanceOf(Date);
     });
   });
 
@@ -338,8 +338,8 @@ describe('LedgerReadService', () => {
         statusConceptId: ACCT.TXN_POSTED,
       });
       d.journalRepo.findEntriesByTransaction.mockResolvedValue([
-        linea('gasto', true, '100.00'),
-        linea('pagar', false, '100.00'),
+        line('gasto', true, '100.00'),
+        line('pagar', false, '100.00'),
       ]);
 
       const res = await d.service.getJournalTransaction('t-1');

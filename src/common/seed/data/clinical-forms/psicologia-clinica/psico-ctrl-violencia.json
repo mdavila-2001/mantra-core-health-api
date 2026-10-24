@@ -1,0 +1,146 @@
+{
+  "code": "PSICO_CTRL_VIOLENCIA",
+  "name": "Atención a personas en situación de violencia",
+  "specialty": {
+    "code": "PSICOLOGIA_CLINICA",
+    "display": "Psicología Clínica"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Respuesta a la violencia de pareja y a la violencia sexual contra las mujeres: directrices clínicas (2013)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241548595",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Primera ayuda (escuchar, preguntar, validar, mejorar la seguridad, apoyo) de las directrices clínicas de la OMS."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "violencia_tipo",
+      "name": "Tipo de violencia",
+      "dataType": "json",
+      "required": true,
+      "options": ["Física", "Psicológica", "Sexual", "Económica"],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "riesgo_inminente",
+      "name": "Riesgo inminente para su vida",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "plan_de_seguridad",
+      "name": "Plan de seguridad acordado",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "riesgo_inminente", "equals": true }
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "violencia_sexual_72h",
+      "name": "Violencia sexual en las últimas 72 horas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "atencion_urgente",
+      "name": "Atención urgente",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Profilaxis VIH",
+        "Anticoncepción de emergencia",
+        "Profilaxis de ITS"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "violencia_sexual_72h", "equals": true }
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "orientacion_denuncia",
+      "name": "Orientada sobre la denuncia (Ley 348)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "srq20_respuestas_si",
+      "name": "SRQ-20 (OMS): marque las preguntas que respondió «sí» en el último mes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "¿Tiene frecuentes dolores de cabeza?",
+        "¿Tiene mal apetito?",
+        "¿Duerme mal?",
+        "¿Se asusta con facilidad?",
+        "¿Sufre de temblor de manos?",
+        "¿Se siente nervioso, tenso o aburrido?",
+        "¿Sufre de mala digestión?",
+        "¿No puede pensar con claridad?",
+        "¿Se siente triste?",
+        "¿Llora usted con mucha frecuencia?",
+        "¿Tiene dificultad en disfrutar sus actividades diarias?",
+        "¿Tiene dificultad para tomar decisiones?",
+        "¿Tiene dificultad en hacer su trabajo?",
+        "¿Es incapaz de desempeñar un papel útil en su vida?",
+        "¿Ha perdido interés en las cosas?",
+        "¿Siente que usted es una persona inútil?",
+        "¿Ha tenido la idea de acabar con su vida?",
+        "¿Se siente cansado todo el tiempo?",
+        "¿Tiene sensaciones desagradables en su estómago?",
+        "¿Se cansa con facilidad?"
+      ],
+      "multiple": true,
+      "description": "8 o más respuestas positivas: probable trastorno mental común. La pregunta 17 positiva exige evaluar riesgo suicida."
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "srq20_puntaje",
+      "name": "SRQ-20 — total de respuestas «sí» (0–20)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: violencia",
+      "code": "ideacion_suicida",
+      "name": "Ideación suicida actual",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

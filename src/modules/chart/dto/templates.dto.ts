@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsIn,
@@ -146,6 +147,64 @@ export class TemplateFieldInputDto {
   valueSetId?: string;
 
   /**
+   * Opciones propias de un campo de elección sin `valueSetId`: texto libre,
+   * en el orden en que se ofrecen. Mutuamente excluyente con `valueSetId` —
+   * un campo "code" declara una de las dos, nunca las dos.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'Opciones propias de un campo de elección (dataType "code" sin valueSetId)',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(2, {
+    message: 'Un campo de elección necesita al menos dos opciones',
+  })
+  @IsString({ each: true })
+  options?: string[];
+
+  /** Si el campo admite marcar varias opciones («casillas de verificación»). */
+  @ApiPropertyOptional({
+    description: 'Admite varias respuestas en vez de una sola',
+  })
+  @IsOptional()
+  @IsBoolean()
+  multiple?: boolean;
+
+  /** Si el campo ofrece además «Otro», con un texto libre que no está entre `options`. */
+  @ApiPropertyOptional({ description: 'Ofrece «Otro», con texto libre' })
+  @IsOptional()
+  @IsBoolean()
+  allowOther?: boolean;
+
+  /** La ayuda que se lee bajo la pregunta cuando el nombre no alcanza. */
+  @ApiPropertyOptional({
+    description: 'Ayuda que se lee bajo la pregunta (se sirve como "hint")',
+    maxLength: 1000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  /** Casillas: marcar al menos N. Sólo tiene sentido con `multiple: true`. */
+  @ApiPropertyOptional({
+    description: 'Cardinalidad mínima (sólo con multiple)',
+  })
+  @IsOptional()
+  @IsInt()
+  cardinalityMin?: number;
+
+  /** Casillas: marcar como máximo N. Sólo tiene sentido con `multiple: true`. */
+  @ApiPropertyOptional({
+    description: 'Cardinalidad máxima (sólo con multiple)',
+  })
+  @IsOptional()
+  @IsInt()
+  cardinalityMax?: number;
+
+  /**
    * Si el campo es obligatorio al completar la plantilla.
    */
   @ApiPropertyOptional({ default: false })
@@ -219,6 +278,31 @@ export class CreateChartTemplateDto {
   fields!: TemplateFieldInputDto[];
 }
 
+/**
+ * Cuándo se muestra un campo: `enableWhen` de HL7 FHIR con operador `=` y
+ * comportamiento `SHOW`. Se cumple si el campo `fieldId` vale `equals`; si ese
+ * campo es de varias respuestas, si las incluye; si `equals` es una lista,
+ * basta con que coincida uno. Un campo cuyo padre está oculto, también.
+ */
+export class ChartTemplateShowWhenDto {
+  /** El campo del que depende (`fieldId` de la misma plantilla). */
+  @ApiProperty({ format: 'uuid' })
+  fieldId!: string;
+
+  /** El valor, o los valores, que lo muestran. */
+  @ApiProperty({
+    oneOf: [
+      { type: 'string' },
+      { type: 'boolean' },
+      {
+        type: 'array',
+        items: { oneOf: [{ type: 'string' }, { type: 'boolean' }] },
+      },
+    ],
+  })
+  equals!: string | boolean | (string | boolean)[];
+}
+
 /** Un campo ya persistido de una plantilla, tal como lo lee el frontend. */
 export class ChartTemplateFieldDto {
   /**
@@ -257,6 +341,14 @@ export class ChartTemplateFieldDto {
   @ApiPropertyOptional({ format: 'uuid' })
   valueSetId?: string;
 
+  /** Casillas: marcar al menos N. Sólo con `multiple`. */
+  @ApiPropertyOptional()
+  cardinalityMin?: number;
+
+  /** Casillas: marcar como máximo N. Sólo con `multiple`. */
+  @ApiPropertyOptional()
+  cardinalityMax?: number;
+
   /**
    * Si el campo es obligatorio al completar la plantilla.
    */
@@ -280,6 +372,33 @@ export class ChartTemplateFieldDto {
     description: '¿Es un campo propio del tenant, o del formulario estándar?',
   })
   own!: boolean;
+
+  /** La sección de la ficha en la que va (motivo, antecedentes, examen…). */
+  @ApiPropertyOptional()
+  section?: string;
+
+  /**
+   * Las respuestas ofrecidas de una lista cerrada. Con `multiple`, el valor es
+   * la lista elegida (`json`); sin él, la opción elegida (`string`).
+   */
+  @ApiPropertyOptional({ type: [String] })
+  options?: string[];
+
+  /** Si se pueden elegir varias opciones. */
+  @ApiPropertyOptional()
+  multiple?: boolean;
+
+  /** Si además se ofrece «Otro» con texto libre. */
+  @ApiPropertyOptional()
+  allowOther?: boolean;
+
+  /** La ayuda bajo el campo. */
+  @ApiPropertyOptional()
+  description?: string;
+
+  /** Cuándo se muestra el campo; ausente = siempre. */
+  @ApiPropertyOptional({ type: () => ChartTemplateShowWhenDto })
+  showWhen?: ChartTemplateShowWhenDto;
 }
 
 /**
@@ -397,4 +516,12 @@ export class ChartTemplateResponseDto {
    */
   @ApiPropertyOptional({ type: ChartTemplateProvenanceDto })
   provenance?: ChartTemplateProvenanceDto;
+
+  /**
+   * Qué clase de ficha es, en el catálogo estándar: la consulta inicial de la
+   * especialidad (`BASE`), el control estándar de una condición (`SPECIFIC`) o
+   * una de toda consulta (`GENERAL`). Ausente en las plantillas armadas a mano.
+   */
+  @ApiPropertyOptional({ enum: ['BASE', 'SPECIFIC', 'GENERAL'] })
+  kind?: 'BASE' | 'SPECIFIC' | 'GENERAL';
 }

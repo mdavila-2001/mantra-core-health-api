@@ -1,11 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
-import {
-  ThrottlerGuard,
-  ThrottlerModule,
-  ThrottlerStorage,
-} from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerStorage } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppReadinessService } from './app-readiness.service';
@@ -18,6 +14,7 @@ import {
   TraceResponseInterceptor,
   telemetryEnvSchema,
 } from './observability';
+import { HttpSliModule } from './observability/http-sli/http-sli.module';
 import {
   AllExceptionsFilter,
   AuthModule,
@@ -41,6 +38,7 @@ import { ConsentModule } from './modules/consent/consent.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { AdsModule } from './modules/ads/ads.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { AuditTrailInterceptor } from './modules/audit/interceptors/audit-trail.interceptor';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
@@ -56,6 +54,7 @@ import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/c
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
+import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { EducationModule } from './modules/education/education.module';
 import { ErpModule } from './modules/erp/erp.module';
@@ -70,6 +69,7 @@ import { IntegrationContractsModule } from './modules/integration_contracts/inte
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { LakehouseModule } from './modules/lakehouse/lakehouse.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
+import { MedicalGroupsModule } from './modules/medical_groups/medical_groups.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
 import { ObjectStorageModule } from './modules/object_storage/object_storage.module';
 import { OrganizationExtensionsModule } from './modules/organization_extensions/organization_extensions.module';
@@ -82,12 +82,16 @@ import { PolyglotStorageModule } from './modules/polyglot_storage/polyglot_stora
 import { PracticeModule } from './modules/practice/practice.module';
 import { ProceduresPerioperativeModule } from './modules/procedures_perioperative/procedures_perioperative.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { PublicCatalogModule } from './modules/public/public.module';
 import { QaLabModule } from './modules/qa_lab/qa_lab.module';
+import { QuotationsModule } from './modules/quotations/quotations.module';
 import { ReadModelsModule } from './modules/read_models/read_models.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
+import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
+import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
@@ -97,8 +101,10 @@ import { VectorRagModule } from './modules/vector_rag/vector_rag.module';
 // Módulos 55/56/57: almacenamiento poliglota sobre motores no-PostgreSQL.
 import { DocumentStoreModule } from './modules/document_store/document_store.module';
 import { RedisRuntimeModule } from './modules/redis_runtime/redis_runtime.module';
+import { AuthThrottlerGuard } from './common/security/auth-throttler.guard';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
+import { PublicCacheStore } from './common/http/public-cache.store';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
 
 /**
@@ -111,6 +117,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // en la primera consulta ni en la primera línea de log. Se concatenan los dos
     // esquemas Joi (persistencia + logging) en la única validación global.
     ConfigModule.forRoot({
+      // Explicit dotenv path permits isolated QA without loading a developer remote .env.
+      envFilePath: process.env.DOTENV_CONFIG_PATH ?? '.env',
       isGlobal: true,
       validationSchema: ormEnvSchema
         .concat(dataSourcesEnvSchema)
@@ -147,6 +155,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // `TracingService` sin reimportar nada. No arranca el SDK -eso ocurre en la
     // primera línea de `main.ts`-, solo expone la API que lo consume.
     ObservabilityModule,
+    // Medición de peticiones HTTP (portal de superadministración): vuelca cada
+    // minuto lo que el middleware de `main.ts` agregó. Apagado por defecto
+    // (`OBSERVABILITY_HTTP_SLI_ENABLED`).
+    HttpSliModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,
@@ -205,6 +217,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     IntegrationsModule,
     LakehouseModule,
     MarketingModule,
+    // MCH-012: existía entero y sin importar, así que sus rutas daban 404.
+    // `app.module.wiring.spec.ts` impide que otro módulo quede así.
+    MedicalGroupsModule,
     MessagingModule,
     ObjectStorageModule,
     OrganizationExtensionsModule,
@@ -217,13 +232,18 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     PracticeModule,
     ProceduresPerioperativeModule,
     PromotionsModule,
+    PublicCatalogModule,
     QaLabModule,
+    QuotationsModule,
     ReadModelsModule,
     ReportingModule,
     SchedulingModule,
     SurveysModule,
+    DataCatalogModule,
     SystemContextModule,
     SystemOpsModule,
+    QaExecutionModule,
+    OpsConsoleModule,
     TelemetryModule,
     TrackingModule,
     WorkflowModule,
@@ -241,14 +261,23 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // qué se registra y qué se oculta al cliente. Ver AllExceptionsFilter.
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     // Guard de rate limiting aplicado a todas las rutas HTTP.
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: AuthThrottlerGuard },
     { provide: ThrottlerStorage, useClass: RedisThrottlerStorage },
     // Sólo actúa sobre manejadores `@Public()`: una respuesta con sesión no
-    // puede llevar `Cache-Control: public` ni de casualidad.
+    // puede llevar `Cache-Control: public` ni de casualidad. `PublicCacheStore`
+    // es su caché de representaciones (MCH-028): se declara acá porque nada
+    // más en la app la necesita.
+    PublicCacheStore,
     { provide: APP_INTERCEPTOR, useClass: PublicCacheInterceptor },
     // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
     // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
+    // Bitácora transversal (informe C §8.4): sella en `audit.audit_log` toda
+    // ruta autenticada que muta y registra en `audit.data_access_log` las
+    // lecturas `@AccessLogged()`. Va DESPUÉS del de tenant a propósito: así
+    // corre dentro de su contexto y, con RLS_ENFORCE=true, dentro de su
+    // transacción, de modo que el sello de éxito se confirma con la mutación.
+    { provide: APP_INTERCEPTOR, useClass: AuditTrailInterceptor },
     // Cabecera `x-trace-id` en la respuesta: el identificador que un usuario
     // puede entregar a soporte para que localice la traza exacta en Jaeger.
     { provide: APP_INTERCEPTOR, useClass: TraceResponseInterceptor },

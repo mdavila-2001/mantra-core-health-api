@@ -1,0 +1,261 @@
+import { afterEach, describe, it, expect, jest } from '@jest/globals';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+
+import {
+  MAX_ADDITIONAL_PHONES,
+  RegisterPatientDto,
+} from './register-patient.dto';
+import { PROF } from '../../../profiles/profiles.concepts';
+
+/**
+ * El parentesco del contacto de emergencia, comprobado en el borde.
+ *
+ * El servicio da por buenos los datos que recibe —es el pipe de validación
+ * quien los filtra—, así que «el campo acepta cualquier cosa» no se ve en las
+ * pruebas del servicio: se ve acá o en producción. Un `relationship_concept_id`
+ * que no sea un uuid rompe la clave foránea al escribir, y el error que llega a
+ * la persona es un 500 en vez del 400 que le diría qué corregir.
+ */
+
+/**
+ * El alta mínima que el DTO exige, para no repetirla en cada caso.
+ *
+ * Son los obligatorios de AC-03-3 más los tres del contrato del servidor
+ * (nombre, apellido paterno y contraseña). Se declaran completos a propósito:
+ * un caso que llegara inválido por otro campo dejaría de decir nada sobre el
+ * parentesco, que es lo único que estas pruebas afirman.
+ */
+const MINIMAL_REGISTRATION = {
+  nationalId: '1234567',
+  residenceMunicipalityConceptId: '11111111-1111-4111-8111-111111111111',
+  issuerAdministrativeAreaConceptId: '22222222-2222-4222-8222-222222222222',
+  password: 'secreto12',
+  name: 'Ana',
+  lastName: 'Paz',
+  email: 'ana@ejemplo.test',
+  birthDate: '1990-05-17',
+  phone: '+591 70012345',
+  sexAtBirth: 'FEMALE',
+};
+
+/**
+ * Valida un alta y devuelve las propiedades que quedaron mal.
+ *
+ * @param registration - El cuerpo del alta, tal como llegaría del cliente.
+ * @returns Los nombres de las propiedades con error, sin el detalle.
+ */
+async function propertiesWithError(
+  registration: Record<string, unknown>,
+): Promise<string[]> {
+  const dto = plainToInstance(RegisterPatientDto, registration);
+  const errors = await validate(dto);
+  return errors.map((error) => error.property);
+}
+
+describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
+  it('acepta el alta sin parentesco declarado: el campo es opcional', async () => {
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
+  });
+
+  it('acepta un concepto del catálogo', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        guardianName: 'Rosa Quispe',
+        guardianRelationshipConceptId: PROF.RELATIONSHIP_MOTHER,
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza lo que no es un uuid', async () => {
+    // El caso real es un cliente que manda el código del concepto —«MOTHER»— en
+    // vez del identificador que la lectura del catálogo le dio.
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        guardianName: 'Rosa Quispe',
+        guardianRelationshipConceptId: 'RELATIONSHIP_MOTHER',
+      }),
+    ).toEqual(['guardianRelationshipConceptId']);
+  });
+
+  it('rechaza la cadena vacía: ausente y vacío no son lo mismo', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        guardianRelationshipConceptId: '',
+      }),
+    ).toEqual(['guardianRelationshipConceptId']);
+  });
+});
+
+/**
+ * El departamento emisor del documento (1.4): obligatorio desde el PR #390
+ * del front — es lo que separa cédulas homónimas de departamentos distintos
+ * (backlog T-01). El DTO sólo comprueba la forma (uuid); que el uuid
+ * pertenezca de verdad a `VS_BO_DEPARTMENT` lo decide el servicio con
+ * `AdministrativeAreaCatalogService`.
+ */
+describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => {
+  it('rechaza el alta sin el campo: es obligatorio', async () => {
+    const {
+      issuerAdministrativeAreaConceptId: _skipped,
+      ...withoutDepartment
+    } = MINIMAL_REGISTRATION;
+    expect(await propertiesWithError(withoutDepartment)).toEqual([
+      'issuerAdministrativeAreaConceptId',
+    ]);
+  });
+
+  it('rechaza null', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        issuerAdministrativeAreaConceptId: null,
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('rechaza la cadena vacía: ausente y vacío no son lo mismo', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        issuerAdministrativeAreaConceptId: '',
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('rechaza lo que no es un uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        issuerAdministrativeAreaConceptId: 'geo:bo:department:SC',
+      }),
+    ).toEqual(['issuerAdministrativeAreaConceptId']);
+  });
+
+  it('acepta un uuid', async () => {
+    expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
+  });
+});
+
+describe('RegisterPatientDto · rango de la fecha de nacimiento', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  /**
+   * El tope es «hoy» calculado al validar, no un año escrito a mano: el día
+   * que el calendario pase a 2027, una fecha de 2027 ya tiene que entrar.
+   */
+  it('el tope se mueve con el calendario: en 2027 acepta fechas de 2027', async () => {
+    jest.useFakeTimers({ now: new Date('2027-03-01T12:00:00Z') });
+
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '2027-02-01',
+      }),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '2027-03-02',
+      }),
+    ).toEqual(['birthDate']);
+  });
+
+  /** La fecha de hoy como la escribe el cliente, `YYYY-MM-DD`. */
+  const today = (): string => new Date().toISOString().slice(0, 10);
+
+  it('rechaza una fecha futura: la edad quedaría negativa', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '2999-01-01',
+      }),
+    ).toEqual(['birthDate']);
+  });
+
+  it('rechaza una fecha anterior a 1910', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '1909-12-31',
+      }),
+    ).toEqual(['birthDate']);
+  });
+
+  it('acepta los dos extremos: 1910-01-01 y hoy', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '1910-01-01',
+      }),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: today(),
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe('RegisterPatientDto · teléfonos y contactos de emergencia adicionales', () => {
+  it('acepta teléfonos adicionales con el mismo formato que el principal', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalPhones: ['+591 71111111', '72222222'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un teléfono adicional con texto libre', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalPhones: ['+591 71111111', 'llamar de noche'],
+      }),
+    ).toEqual(['additionalPhones']);
+  });
+
+  it('rechaza más teléfonos adicionales que el tope', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalPhones: Array.from(
+          { length: MAX_ADDITIONAL_PHONES + 1 },
+          (_, i) => `7000000${i}`,
+        ),
+      }),
+    ).toEqual(['additionalPhones']);
+  });
+
+  it('acepta contactos de emergencia adicionales con nombre', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalEmergencyContacts: [
+          {
+            name: 'Luis Paz',
+            phone: '+591 72222222',
+            relationshipConceptId: PROF.RELATIONSHIP_FATHER,
+          },
+          { name: 'Marta Rojas' },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un contacto adicional sin nombre', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalEmergencyContacts: [{ phone: '+591 72222222' }],
+      }),
+    ).toEqual(['additionalEmergencyContacts']);
+  });
+});

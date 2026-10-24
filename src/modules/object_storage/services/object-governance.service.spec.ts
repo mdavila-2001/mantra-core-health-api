@@ -362,6 +362,9 @@ describe('ObjectGovernanceService', () => {
       expect(res.status).toBe(INTEGRITY_CHECK.PASSED);
       expect(checksum.verificationStatus).toBe(CHECKSUM_VERIFICATION.VERIFIED);
       expect(location.replicationState).toBe(REPLICATION_STATE.VERIFIED);
+      // MCH-021: el verificador de integridad es un origen de confianza; el
+      // checksum deja de ser «lo que declaró el cliente».
+      expect(checksum.source).toBe('scan');
       expect(manifest.lifecycleState).toBe(OBJECT_LIFECYCLE.ACTIVE);
     });
 

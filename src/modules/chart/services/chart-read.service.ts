@@ -6,7 +6,9 @@ import {
   ClinicalNotesRepository,
   DocumentsRepository,
 } from '../repositories';
-import type { PatientChartResponseDto } from '../dto';
+import type { ChartDocumentFileItemDto, PatientChartResponseDto } from '../dto';
+import { toChartNoteItem } from './chart-note-item.mapper';
+import { CHART } from '../chart.concepts';
 
 /**
  * Cara de lectura del expediente clínico (UC-40-14).
@@ -95,32 +97,34 @@ export class ChartReadService {
       activitiesByPlan.set(activity.carePlanId, bucket);
     }
 
+    const documentFiles = await this.documentsRepo.findFilesForRecords(
+      em,
+      documentsPage.map((document) => document.id),
+    );
+    const filesByDocument = new Map<string, ChartDocumentFileItemDto[]>();
+    for (const file of documentFiles) {
+      const bucket = filesByDocument.get(file.documentRecordId) ?? [];
+      bucket.push({
+        fileId: file.fileId,
+        contentRole:
+          file.contentRoleConceptId === CHART.CONTENT_ROLE_PRIMARY
+            ? 'PRIMARY'
+            : 'ATTACHMENT',
+        ordinal: file.ordinal,
+      });
+      filesByDocument.set(file.documentRecordId, bucket);
+    }
+
     return {
       patientProfileId,
-      notes: notesPage.map((header) => {
-        const version = header.currentVersionId
-          ? versions.get(header.currentVersionId)
-          : undefined;
-        return {
-          noteId: header.id,
-          encounterId: header.encounterId,
-          noteTypeConceptId: header.noteTypeConceptId,
-          lifecycleStatusConceptId: header.lifecycleStatusConceptId,
-          currentVersionId: header.currentVersionId,
-          versionNumber: version?.versionNumber,
-          authorProfileId: version?.authorProfileId,
-          chiefComplaintText: version?.chiefComplaintText,
-          subjectiveText: version?.subjectiveText,
-          objectiveText: version?.objectiveText,
-          assessmentText: version?.assessmentText,
-          planText: version?.planText,
-          signedAt: version?.signedAt,
-          // Liberada al portal es tener una versión liberada, no un estado del
-          // encabezado: una nota puede estar firmada y aún así retenida.
-          releasedToPatient: Boolean(header.currentReleasedVersionId),
-          createdAt: header.createdAt,
-        };
-      }),
+      notes: notesPage.map((header) =>
+        toChartNoteItem(
+          header,
+          header.currentVersionId
+            ? versions.get(header.currentVersionId)
+            : undefined,
+        ),
+      ),
       carePlans: plansPage.map((plan) => ({
         id: plan.id,
         statusConceptId: plan.statusConceptId,
@@ -130,6 +134,8 @@ export class ChartReadService {
         endDate: plan.endDate,
         activities: (activitiesByPlan.get(plan.id) ?? []).map((activity) => ({
           id: activity.id,
+          // BR-16 (CL-26): columna existente que la lectura no exponía.
+          activityConceptId: activity.activityConceptId,
           statusConceptId: activity.statusConceptId,
           detailText: activity.detailText,
           scheduledAt: activity.scheduledAt,
@@ -145,6 +151,7 @@ export class ChartReadService {
         isExternal: document.isExternal,
         documentDate: document.documentDate,
         createdAt: document.createdAt,
+        files: filesByDocument.get(document.id) ?? [],
       })),
       limit,
       truncated,

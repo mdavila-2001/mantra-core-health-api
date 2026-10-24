@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { PracticeModule } from '../practice/practice.module';
+import { SurveysModule } from '../surveys/surveys.module';
 import {
   BillingReceivablesController,
   BillingPayablesController,
   BillingOperationsController,
   BillingServiceCatalogController,
+  BillingSimulatedController,
 } from './controllers';
 import {
   InvoicesService,
@@ -20,6 +22,8 @@ import {
   DunningService,
   KpiSnapshotsService,
   BillingServiceCatalogService,
+  ProcedureNomenclatureService,
+  BillingSimulatedService,
 } from './services';
 import {
   InvoicesRepository,
@@ -46,12 +50,17 @@ import {
     // Puerto de lectura público para agrupar facturas por tenant sin importar
     // la entidad ORM de Practice dentro del dominio Billing.
     PracticeModule,
+    // FT-31 — reutiliza sus repositorios para auto-crear la encuesta de
+    // satisfacción por defecto de un servicio médico nuevo, en la misma
+    // transacción que lo da de alta.
+    SurveysModule,
   ],
   controllers: [
     BillingReceivablesController,
     BillingPayablesController,
     BillingOperationsController,
     BillingServiceCatalogController,
+    BillingSimulatedController,
   ],
   providers: [
     // Repositorios
@@ -77,6 +86,8 @@ import {
     DunningService,
     KpiSnapshotsService,
     BillingServiceCatalogService,
+    ProcedureNomenclatureService,
+    BillingSimulatedService,
   ],
   // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar
   // `transaction_id` en el documento de origen, idempotente por documento)

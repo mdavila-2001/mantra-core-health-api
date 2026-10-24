@@ -1,0 +1,153 @@
+{
+  "code": "GERIA_CTRL_DEMENCIA",
+  "name": "Control de demencia",
+  "specialty": { "code": "GERIATRIA", "display": "Geriatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Guía de intervención mhGAP para los trastornos mentales, neurológicos y por consumo de sustancias, versión 2.0",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789241549790",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Módulo de demencia de mhGAP: función, síntomas conductuales y apoyo al cuidador."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de demencia",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: demencia",
+      "code": "prueba_cognitiva",
+      "name": "Prueba cognitiva y puntaje",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: demencia",
+      "code": "demencia_funcion",
+      "name": "Repercusión funcional",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Leve: actividades instrumentales",
+        "Moderada: actividades básicas",
+        "Grave: dependencia total"
+      ]
+    },
+    {
+      "section": "Evaluación: demencia",
+      "code": "sintomas_conductuales",
+      "name": "Síntomas conductuales",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Agitación",
+        "Agresividad",
+        "Deambulación",
+        "Alucinaciones",
+        "Insomnio",
+        "Depresión",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: demencia",
+      "code": "sobrecarga_cuidador",
+      "name": "Sobrecarga del cuidador",
+      "dataType": "string",
+      "required": false,
+      "options": ["Baja", "Moderada", "Alta"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Apoyo al cuidador", "Seguridad en el hogar", "Rutinas"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

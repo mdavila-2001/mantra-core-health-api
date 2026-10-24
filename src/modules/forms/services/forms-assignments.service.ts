@@ -3,23 +3,32 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   requireTenantId,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
 import {
   AssignmentsRepository,
   FieldDefinitionsRepository,
 } from '../repositories';
-import { CreateAssignmentDto, IdResponseDto } from '../dto';
+import {
+  CreateAssignmentDto,
+  IdResponseDto,
+  OkResultDto,
+  ReorderAssignmentsDto,
+  UpdateAssignmentDto,
+} from '../dto';
 import { FORMS } from '../forms.concepts';
+import type { FieldAssignments } from '../entities';
 
 /**
  * Los roles que administran la extensibilidad **sin techo de tenant**: pueden
  * asignar en cualquier organización y crear asignaciones globales.
  */
-const ROLES_DE_GOBIERNO: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
+const ROLES_GOVERNMENT: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
 
 /**
  * Asignación de campos a un target con enforcement de la política de
@@ -74,10 +83,10 @@ export class FormsAssignmentsService {
     dto: CreateAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    const gobierna = actor.roles.some((rol) => ROLES_DE_GOBIERNO.includes(rol));
+    const governs = actor.roles.some((role) => ROLES_GOVERNMENT.includes(role));
     // El tenant de un doctor lo fija el contexto del request, nunca el cuerpo.
-    const tenantId = gobierna ? dto.tenantId : requireTenantId();
-    if (!gobierna && dto.tenantId !== undefined && dto.tenantId !== tenantId) {
+    const tenantId = governs ? dto.tenantId : requireTenantId();
+    if (!governs && dto.tenantId !== undefined && dto.tenantId !== tenantId) {
       throw new ForbiddenException(
         'Sólo se pueden asignar campos dentro de la propia organización',
       );
@@ -88,7 +97,7 @@ export class FormsAssignmentsService {
         operation: 'forms.assignment.create',
         fieldId: dto.fieldId,
         tenantId,
-        gobierna,
+        gobierna: governs,
       },
       'Assigning field to target',
     );
@@ -110,12 +119,12 @@ export class FormsAssignmentsService {
       // Para quien no gobierna, la política no es un techo opcional: es el
       // permiso. Un target sin política activa no declaró presupuesto alguno, y
       // uno con `allow_tenant_fields` en falso lo declaró cerrado.
-      if (!gobierna && !policy) {
+      if (!governs && !policy) {
         throw new ForbiddenException(
           'Este formulario no admite campos propios: no tiene política de extensión activa',
         );
       }
-      if (!gobierna && policy?.allowTenantFields !== true) {
+      if (!governs && policy?.allowTenantFields !== true) {
         throw new ForbiddenException(
           'La política de este formulario no permite campos del tenant',
         );
@@ -175,5 +184,152 @@ export class FormsAssignmentsService {
       );
       return { id: assignment.id };
     });
+  }
+
+  /**
+   * CL-61: cambia lo obligatorio, lo visible o lo editable de una asignación
+   * **propia**. Las del estándar (globales, `tenant_id` nulo) y las de otro
+   * tenant responden 403; quien gobierna no tiene techo.
+   */
+  async updateAssignment(
+    assignmentId: string,
+    dto: UpdateAssignmentDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const assignment = await this.loadOwnedAssignment(
+        tx,
+        assignmentId,
+        actor,
+      );
+      if (dto.required !== undefined) assignment.required = dto.required;
+      if (dto.visible !== undefined) assignment.visible = dto.visible;
+      if (dto.editable !== undefined) assignment.editable = dto.editable;
+      touch(assignment, actor.id);
+
+      this.logger.info(
+        { operation: 'forms.assignment.update', assignmentId },
+        'Field assignment updated',
+      );
+      return { ok: true };
+    });
+  }
+
+  /**
+   * CL-61: descuelga un campo propio del formulario, **por baja lógica**: se
+   * cierra `valid_to` y el estado pasa a retirado. La fila y los valores
+   * capturados contra ella siguen existiendo y legibles; la definición sigue
+   * en el catálogo y puede estar colgada de otro formulario.
+   */
+  async retireAssignment(
+    assignmentId: string,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const assignment = await this.loadOwnedAssignment(
+        tx,
+        assignmentId,
+        actor,
+      );
+      if (assignment.stateConceptId === FORMS.ASSIGNMENT_RETIRED) {
+        throw new ConflictException('La asignación ya fue retirada', {
+          assignmentId,
+        });
+      }
+      assignment.stateConceptId = FORMS.ASSIGNMENT_RETIRED;
+      assignment.validTo = new Date();
+      touch(assignment, actor.id);
+
+      this.logger.info(
+        { operation: 'forms.assignment.retire', assignmentId },
+        'Field assignment retired',
+      );
+      return { ok: true };
+    });
+  }
+
+  /**
+   * CL-61: reordena las asignaciones **propias** de un target. La lista viaja
+   * entera; una incompleta manda las no nombradas al final en su orden previo.
+   * Un id que no es una asignación propia y activa de ese target → 422 — eso
+   * incluye las del estándar, que desde un consultorio no se reordenan.
+   */
+  async reorderAssignments(
+    dto: ReorderAssignmentsDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const current =
+        await this.assignmentsRepo.findActiveOwnAssignmentsForTarget(
+          tx,
+          dto.targetResourceConceptId,
+          tenantId,
+        );
+      const byId = new Map(current.map((a) => [a.id, a]));
+      const unknown = dto.assignmentIds.filter((id) => !byId.has(id));
+      if (unknown.length > 0) {
+        throw new PreconditionFailedException(
+          'Hay asignaciones que no son campos propios y activos de este formulario',
+          { targetResourceConceptId: dto.targetResourceConceptId, unknown },
+        );
+      }
+
+      const named = new Set(dto.assignmentIds);
+      const ordered = [
+        ...dto.assignmentIds.map((id) => byId.get(id)!),
+        ...current.filter((a) => !named.has(a.id)),
+      ];
+      ordered.forEach((assignment, index) => {
+        if (assignment.ordinal !== index) {
+          assignment.ordinal = index;
+          touch(assignment, actor.id);
+        }
+      });
+
+      this.logger.info(
+        {
+          operation: 'forms.assignment.reorder',
+          targetResourceConceptId: dto.targetResourceConceptId,
+          count: ordered.length,
+        },
+        'Field assignments reordered',
+      );
+      return { ok: true };
+    });
+  }
+
+  /**
+   * Carga una asignación y exige que sea del tenant del actor. Quien gobierna
+   * (`SECURITY_ADMIN`, `SUPERADMIN`) no tiene techo. Una asignación global
+   * (`tenant_id` nulo) es del estándar: desde un consultorio, 403.
+   */
+  private async loadOwnedAssignment(
+    em: EntityManager,
+    assignmentId: string,
+    actor: AuthenticatedUser,
+  ): Promise<FieldAssignments> {
+    const assignment = await this.assignmentsRepo.findAssignmentById(
+      em,
+      assignmentId,
+    );
+    if (!assignment) {
+      throw new ResourceNotFoundException('Asignación no encontrada', {
+        assignmentId,
+      });
+    }
+    const governs = actor.roles.some((role) => ROLES_GOVERNMENT.includes(role));
+    if (governs) return assignment;
+    if (!assignment.tenantId) {
+      throw new ForbiddenException(
+        'Los campos del formulario estándar no se editan desde una organización',
+      );
+    }
+    if (assignment.tenantId !== requireTenantId()) {
+      throw new ForbiddenException(
+        'Sólo se pueden editar los campos propios de la organización',
+      );
+    }
+    return assignment;
   }
 }

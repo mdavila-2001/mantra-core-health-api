@@ -74,6 +74,25 @@ export class PriorAuthorizationDeterminations {
   denialReasonConceptId?: string;
 
   /**
+   * Cita de la cláusula contractual que fundamenta el NO APROBADO del ítem
+   * (patch v4.2.31). Nula en aprobaciones y en determinaciones anteriores.
+   */
+  @Property({
+    fieldName: 'policy_clause_reference',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  policyClauseReference?: string;
+
+  /** Justificación circunstanciada del rechazo (patch v4.2.31). */
+  @Property({
+    fieldName: 'denial_rationale',
+    columnType: 'text',
+    nullable: true,
+  })
+  denialRationale?: string;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

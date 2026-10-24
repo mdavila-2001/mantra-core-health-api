@@ -1,7 +1,7 @@
 import type { SchemaSpec } from './catalog.types';
 
 /**
- * Registro de los 60 esquemas PostgreSQL que compone el modelo canónico.
+ * Registro de los 63 esquemas PostgreSQL que compone el modelo canónico.
  * La capa 02 del arranque crea cada uno con CREATE SCHEMA IF NOT EXISTS antes de
  * que MikroORM sincronice tablas: sin el schema, el DDL de tablas fallaría.
  * Generado desde la bóveda SALUD; regenerar con `yarn orm:catalog`.
@@ -15,15 +15,16 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['auth_providers', 40, 'auth_providers', 9],
   ['authz', 6, 'authz', 15],
   ['automation', 48, 'automation', 16],
-  ['billing', 17, 'billing', 20],
+  ['billing', 17, 'billing', 22],
   ['chart', 15, 'chart', 11],
   ['clinical', 8, 'clinical', 22],
   ['clinical_ext', 18, 'clinical_ext', 13],
   ['common', 2, 'common', 7],
-  ['community', 19, 'community', 38],
+  ['community', 19, 'community', 40],
   ['consent', 7, 'consent', 10],
   ['crm', 49, 'crm', 32],
   ['cross_store_consistency', 62, 'cross_store_consistency', 20],
+  ['data_catalog', 67, 'data_catalog', 8],
   ['delegated_access', 29, 'delegated_access', 7],
   ['diagnostic_units', 23, 'diagnostic_units', 10],
   ['diagnostics', 20, 'diagnostics', 36],
@@ -37,11 +38,12 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['health_data', 52, 'health_data', 34],
   ['iam', 1, 'iam', 14],
   ['identity_assurance', 27, 'identity_assurance', 11],
-  ['insurance', 26, 'insurance', 29],
+  ['insurance', 26, 'insurance', 31],
   ['integration_contracts', 31, 'integration_contracts', 9],
   ['integrations', 12, 'integrations', 10],
   ['lakehouse', 63, 'lakehouse', 18],
   ['marketing', 50, 'marketing', 14],
+  ['medical_groups', 66, 'medical_groups', 2],
   ['messaging', 35, 'messaging', 22],
   ['object_storage', 60, 'object_storage', 17],
   ['organization_extensions', 22, 'organization_extensions', 6],
@@ -55,10 +57,11 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['procedures_perioperative', 53, 'procedures_perioperative', 37],
   ['profiles', 5, 'profiles', 19],
   ['promotions', 51, 'promotions', 11],
+  ['qa_execution', 68, 'qa_execution', 4],
   ['qa_lab', 36, 'qa_lab', 13],
   ['read_models', 30, 'read_models', 13],
   ['reporting', 39, 'reporting', 12],
-  ['scheduling', 41, 'scheduling', 16],
+  ['scheduling', 41, 'scheduling', 18],
   ['surveys', 65, 'surveys', 7],
   ['system_context', 45, 'system_context', 9],
   ['system_ops', 11, 'system_ops', 30],

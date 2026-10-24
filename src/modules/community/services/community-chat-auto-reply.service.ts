@@ -1,0 +1,264 @@
+import { Injectable } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+
+import { CONCEPTS, touch, type AuthenticatedUser } from '../../../common';
+// Directo y no por el barrel: mismo ciclo barrel↔barrel que documenta
+// `community-messaging.service.ts`.
+import { CommunityVisibilityService } from './community-visibility.service';
+import { ChatAutoReplies, ConversationParticipants } from '../entities';
+import type { ChatAutoReplyDto, UpsertChatAutoReplyDto } from '../dto';
+
+/**
+ * La respuesta automática por inactividad (F4.7).
+ *
+ * ## Qué resuelve
+ *
+ * «Si alguien me escribe y hace N minutos que no aparezco, contestale esto —y
+ * no más de una vez cada M horas por conversación.» Es lo que pidió el
+ * propietario, y hasta ahora sólo existía en el navegador
+ * (`ChatAutoReply` del frontend, sobre `localStorage`), con un límite que no se
+ * podía disimular: **no salía con la aplicación cerrada**.
+ *
+ * ## Por qué la decisión vive acá y no en el cliente
+ *
+ * Porque el mensaje entrante llega al servidor aunque el titular no tenga
+ * ninguna pestaña abierta. Un contestador que exige tener el navegador abierto
+ * no es un contestador; es un recordatorio.
+ *
+ * ## Qué NO hace
+ *
+ * No manda el mensaje: devuelve **el texto a mandar, o `null`**. Quien lo manda
+ * es `CommunityMessagingService`, por el mismo camino que cualquier otro
+ * mensaje del perfil — la respuesta automática es un mensaje normal, no una
+ * clase aparte, y la otra persona tiene que poder contestarla.
+ */
+@Injectable()
+export class CommunityChatAutoReplyService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia.
+   * @param visibility - Que el perfil que se configura sea del actor.
+   */
+  constructor(
+    private readonly em: EntityManager,
+    private readonly visibility: CommunityVisibilityService,
+  ) {}
+
+  /**
+   * La configuración de un perfil, o `null` si nunca la tocó.
+   *
+   * @param profileId - El perfil público.
+   * @param actor - Quién pregunta; tiene que ser suyo.
+   */
+  async get(
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ChatAutoReplyDto | null> {
+    const em = this.em.fork();
+    await this.visibility.assertActsAsProfile(em, profileId, actor);
+    const row = await em.findOne(ChatAutoReplies, {
+      publicProfileId: profileId,
+    });
+    return row ? toDto(row) : null;
+  }
+
+  /**
+   * Crea o reemplaza la configuración de un perfil.
+   *
+   * Idempotente: hay **una sola fila por perfil**, así que quien configura no
+   * tiene que saber si ya existía.
+   *
+   * @param profileId - El perfil público que se configura.
+   * @param dto - La configuración completa.
+   * @param actor - Quién configura; tiene que ser suyo.
+   */
+  async upsert(
+    profileId: string,
+    dto: UpsertChatAutoReplyDto,
+    actor: AuthenticatedUser,
+  ): Promise<ChatAutoReplyDto> {
+    return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(tx, profileId, actor);
+
+      const existing = await tx.findOne(ChatAutoReplies, {
+        publicProfileId: profileId,
+      });
+      const row = existing ?? new ChatAutoReplies();
+      if (!existing) {
+        row.publicProfileId = profileId;
+        row.createdAt = new Date();
+        row.statusConceptId = CONCEPTS.STATE_ACTIVE;
+      }
+
+      row.isActive = dto.isActive;
+      row.inactivityMinutes = dto.inactivityMinutes;
+      row.bodyText = dto.bodyText.trim();
+      row.cooldownHours = dto.cooldownHours;
+      row.onlyOutsideBusinessHours = dto.onlyOutsideBusinessHours;
+      // La franja sólo se guarda si se va a usar: dejar un horario colgado de
+      // una opción apagada es un dato que miente la próxima vez que se
+      // encienda.
+      row.businessHoursFrom = dto.onlyOutsideBusinessHours
+        ? normalizeTime(dto.businessHoursFrom)
+        : undefined;
+      row.businessHoursTo = dto.onlyOutsideBusinessHours
+        ? normalizeTime(dto.businessHoursTo)
+        : undefined;
+
+      touch(row, actor.id);
+      if (!existing) {
+        tx.persist(row);
+      }
+      await tx.flush();
+      return toDto(row);
+    });
+  }
+
+  /**
+   * Qué contestar automáticamente a un mensaje entrante, o `null`.
+   *
+   * ## La regla, entera
+   *
+   * Contesta si la configuración está encendida **y** el destinatario lleva al
+   * menos `inactivity_minutes` sin actividad **y** a esa conversación no se le
+   * avisó en las últimas `cooldown_hours` **y**, si pidió franja horaria,
+   * estamos fuera de ella.
+   *
+   * ## Qué cuenta como «actividad» del destinatario
+   *
+   * Cuándo leyó por última vez **cualquiera** de sus conversaciones. No hay una
+   * columna «última vez conectado» en el modelo, y no hacía falta inventarla:
+   * marcar leído es exactamente lo que hace alguien que está mirando el chat, y
+   * es lo que el propio hilo ya escribe al abrirse.
+   *
+   * Sin ninguna lectura registrada **no se supone ausencia**: una cuenta nueva
+   * no tiene historial, y contestarle sola a su primer mensaje sería contestar
+   * por alguien que quizá está mirando la pantalla.
+   *
+   * @param em - La transacción del mensaje entrante.
+   * @param conversationId - Dónde llegó.
+   * @param recipientProfileId - A quién le llegó.
+   * @param now - En qué instante se evalúa. Se pide para que una prueba
+   *   pueda pararlo y para que las cuatro condiciones midan el mismo momento.
+   * @returns El texto a mandar, o `null` si no corresponde.
+   */
+  async textForResponder(
+    em: EntityManager,
+    conversationId: string,
+    recipientProfileId: string,
+    now: Date = new Date(),
+  ): Promise<string | null> {
+    const config = await em.findOne(ChatAutoReplies, {
+      publicProfileId: recipientProfileId,
+    });
+    if (!config?.isActive) {
+      return null;
+    }
+
+    const participation = await em.findOne(ConversationParticipants, {
+      conversationId,
+      participantProfileId: recipientProfileId,
+    });
+    if (!participation) {
+      return null;
+    }
+
+    const absent = await this.wasAbsent(em, config, recipientProfileId, now);
+    if (!absent) {
+      return null;
+    }
+
+    const lastNotice = participation.lastAutoReplyAt;
+    if (
+      lastNotice &&
+      now.getTime() - lastNotice.getTime() < config.cooldownHours * 3_600_000
+    ) {
+      return null;
+    }
+
+    if (config.onlyOutsideBusinessHours && bandInside(config, now)) {
+      return null;
+    }
+
+    // La marca se pone acá, dentro de la misma transacción del mensaje
+    // entrante: si el envío falla, tampoco queda anotado el aviso.
+    participation.lastAutoReplyAt = now;
+
+    return config.bodyText;
+  }
+
+  /**
+   * `true` si el destinatario lleva sin aparecer al menos lo configurado.
+   *
+   * Se mide contra la última conversación que marcó leída, sea cual sea.
+   */
+  private async wasAbsent(
+    em: EntityManager,
+    config: ChatAutoReplies,
+    recipientProfileId: string,
+    now: Date,
+  ): Promise<boolean> {
+    const last = await em.findOne(
+      ConversationParticipants,
+      { participantProfileId: recipientProfileId },
+      { orderBy: { updatedAt: 'DESC' } },
+    );
+    if (!last?.updatedAt) {
+      return false;
+    }
+    const inactivity = now.getTime() - last.updatedAt.getTime();
+    return inactivity >= config.inactivityMinutes * 60_000;
+  }
+}
+
+/** `HH:MM:SS` → `HH:MM`; `undefined` se queda como está. */
+function normalizeTime(value: string | undefined): string | undefined {
+  return value === undefined ? undefined : value.slice(0, 5);
+}
+
+/**
+ * `true` si el instante cae dentro de la franja de atención.
+ *
+ * Una franja que termina antes de empezar —`22:00` a `06:00`— es la de quien
+ * atiende de noche y cruza la medianoche: se resuelve como la unión de los dos
+ * tramos, no como un rango vacío.
+ */
+function bandInside(config: ChatAutoReplies, now: Date): boolean {
+  const from = inMinutes(config.businessHoursFrom);
+  const until = inMinutes(config.businessHoursTo);
+  if (from === null || until === null) {
+    // Pidió franja y no la declaró: no hay horario que respetar, así que la
+    // condición no bloquea nada.
+    return false;
+  }
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return from <= until
+    ? minutes >= from && minutes < until
+    : minutes >= from || minutes < until;
+}
+
+function inMinutes(hhmm: string | undefined): number | null {
+  if (!hhmm) {
+    return null;
+  }
+  const [hours, min] = hhmm.split(':').map(Number);
+  return Number.isFinite(hours) && Number.isFinite(min)
+    ? hours * 60 + min
+    : null;
+}
+
+function toDto(row: ChatAutoReplies): ChatAutoReplyDto {
+  return {
+    id: row.id,
+    publicProfileId: row.publicProfileId,
+    isActive: row.isActive,
+    inactivityMinutes: row.inactivityMinutes,
+    bodyText: row.bodyText,
+    cooldownHours: row.cooldownHours,
+    onlyOutsideBusinessHours: row.onlyOutsideBusinessHours,
+    businessHoursFrom: row.businessHoursFrom ?? null,
+    businessHoursTo: row.businessHoursTo ?? null,
+    updatedAt: row.updatedAt,
+  };
+}

@@ -1,0 +1,327 @@
+import { defineModuleConcepts } from '../../../common/seed/concept-seed';
+
+/**
+ * Conceptos del módulo Insurance (26). El prefijo `insurance` aísla las claves
+ * para que el UUID determinista no colisione con conceptos homónimos de otros
+ * módulos. Se declaran solo los estados/tipos/resultados que los endpoints usan
+ * para poblar cada columna `*_concept_id NOT NULL` de los inserts.
+ *
+ * El agregador central (`src/common/seed/module-concepts.ts`) reúne el array
+ * exportado `INSURANCE_CONCEPT_SEEDS`; los servicios consumen el mapa `INS`.
+ */
+export const { seeds: INSURANCE_CONCEPT_SEEDS, ids: INS } =
+  defineModuleConcepts('insurance', {
+    // Aseguradoras / productos / planes / beneficios
+    CARRIER_ACTIVE: { code: 'CARRIER_ACTIVE', display: 'Aseguradora activa' },
+    VERIFY_PENDING: {
+      code: 'VERIFICATION_PENDING',
+      display: 'Verificación pendiente',
+    },
+    VERIFY_VERIFIED: { code: 'VERIFICATION_VERIFIED', display: 'Verificado' },
+    PRODUCT_ACTIVE: { code: 'PRODUCT_ACTIVE', display: 'Producto activo' },
+    PRODUCT_TYPE_HEALTH: {
+      code: 'PRODUCT_TYPE_HEALTH',
+      display: 'Producto de salud',
+    },
+    PLAN_ACTIVE: { code: 'PLAN_ACTIVE', display: 'Plan activo' },
+    BENEFIT_ACTIVE: { code: 'BENEFIT_ACTIVE', display: 'Beneficio activo' },
+    BENEFIT_CATEGORY_GENERAL: {
+      code: 'BENEFIT_CATEGORY_GENERAL',
+      display: 'Beneficio general',
+    },
+    BENEFIT_CATEGORY_OUTPATIENT: {
+      code: 'BENEFIT_CATEGORY_OUTPATIENT',
+      display: 'Consulta externa',
+    },
+    BENEFIT_CATEGORY_EMERGENCY: {
+      code: 'BENEFIT_CATEGORY_EMERGENCY',
+      display: 'Emergencias',
+    },
+    BENEFIT_CATEGORY_HOSPITALIZATION: {
+      code: 'BENEFIT_CATEGORY_HOSPITALIZATION',
+      display: 'Hospitalización',
+    },
+    BENEFIT_CATEGORY_LAB_IMAGING: {
+      code: 'BENEFIT_CATEGORY_LAB_IMAGING',
+      display: 'Laboratorio e imagen',
+    },
+    BENEFIT_CATEGORY_PHARMACY: {
+      code: 'BENEFIT_CATEGORY_PHARMACY',
+      display: 'Farmacia',
+    },
+
+    // Redes y membresías
+    NETWORK_ACTIVE: { code: 'NETWORK_ACTIVE', display: 'Red activa' },
+    NETWORK_TYPE_PPO: { code: 'NETWORK_TYPE_PPO', display: 'Red PPO' },
+    MEMBERSHIP_ACTIVE: {
+      code: 'MEMBERSHIP_ACTIVE',
+      display: 'Membresía activa',
+    },
+    PROVIDER_TYPE_PRACTICE: {
+      code: 'PROVIDER_TYPE_PRACTICE',
+      display: 'Prestador: práctica',
+    },
+    PARTICIPATION_IN_NETWORK: {
+      code: 'PARTICIPATION_IN_NETWORK',
+      display: 'En red',
+    },
+
+    // Coberturas y dependientes
+    COVERAGE_ACTIVE: { code: 'COVERAGE_ACTIVE', display: 'Cobertura activa' },
+    DEPENDENT_ACTIVE: {
+      code: 'DEPENDENT_ACTIVE',
+      display: 'Dependiente activo',
+    },
+    RELATIONSHIP_SELF: { code: 'RELATIONSHIP_SELF', display: 'Titular' },
+    RELATIONSHIP_SPOUSE: { code: 'RELATIONSHIP_SPOUSE', display: 'Cónyuge' },
+    RELATIONSHIP_CHILD: { code: 'RELATIONSHIP_CHILD', display: 'Hijo/a' },
+    CLIENT_TYPE_INDIVIDUAL: {
+      code: 'CLIENT_TYPE_INDIVIDUAL',
+      display: 'Cliente individual',
+    },
+
+    // Elegibilidad
+    ELIG_REQUESTED: {
+      code: 'ELIGIBILITY_REQUESTED',
+      display: 'Elegibilidad solicitada',
+    },
+    ELIG_RESOLVED: {
+      code: 'ELIGIBILITY_RESOLVED',
+      display: 'Elegibilidad resuelta',
+    },
+    ELIG_OUTCOME_ACTIVE: {
+      code: 'ELIGIBILITY_ACTIVE',
+      display: 'Cobertura vigente',
+    },
+    ELIG_PROVIDER_TYPE_PRACTICE: {
+      code: 'ELIG_PROVIDER_TYPE_PRACTICE',
+      display: 'Solicitante: práctica',
+    },
+
+    ELIG_PROVIDER_TYPE_PHARMACY: {
+      code: 'ELIG_PROVIDER_TYPE_PHARMACY',
+      display: 'Solicitante: farmacia',
+    },
+    ELIG_PROVIDER_TYPE_DIAGNOSTIC_UNIT: {
+      code: 'ELIG_PROVIDER_TYPE_DIAGNOSTIC_UNIT',
+      display: 'Solicitante: unidad diagnóstica',
+    },
+
+    // Autorización previa
+    PRIOR_AUTH_SUBMITTED: {
+      code: 'PRIOR_AUTH_SUBMITTED',
+      display: 'Autorización enviada',
+    },
+    PRIOR_AUTH_IN_REVIEW: {
+      code: 'PRIOR_AUTH_IN_REVIEW',
+      display: 'Autorización en revisión',
+    },
+    PRIOR_AUTH_DETERMINED: {
+      code: 'PRIOR_AUTH_DETERMINED',
+      display: 'Autorización determinada',
+    },
+    DECISION_APPROVED: { code: 'DECISION_APPROVED', display: 'Aprobado' },
+    DECISION_DENIED: { code: 'DECISION_DENIED', display: 'Denegado' },
+    DECISION_PARTIAL: { code: 'DECISION_PARTIAL', display: 'Parcial' },
+
+    // Reclamos y adjudicación
+    CLAIM_SUBMITTED: { code: 'CLAIM_SUBMITTED', display: 'Reclamo enviado' },
+    CLAIM_ADJUDICATED: {
+      code: 'CLAIM_ADJUDICATED',
+      display: 'Reclamo adjudicado',
+    },
+    CLAIM_REVERSED: { code: 'CLAIM_REVERSED', display: 'Reclamo revertido' },
+    CLAIM_PAID: { code: 'CLAIM_PAID', display: 'Reclamo pagado' },
+    BILLING_PROVIDER_TYPE_PRACTICE: {
+      code: 'BILLING_PROVIDER_TYPE_PRACTICE',
+      display: 'Facturador: práctica',
+    },
+    BILLING_PROVIDER_TYPE_PHARMACY: {
+      code: 'BILLING_PROVIDER_TYPE_PHARMACY',
+      display: 'Facturador: farmacia',
+    },
+    BILLING_PROVIDER_TYPE_DIAGNOSTIC_UNIT: {
+      code: 'BILLING_PROVIDER_TYPE_DIAGNOSTIC_UNIT',
+      display: 'Facturador: unidad diagnóstica',
+    },
+    ADJ_OUTCOME_APPROVED: {
+      code: 'ADJUDICATION_APPROVED',
+      display: 'Adjudicación aprobada',
+    },
+    ADJ_OUTCOME_DENIED: {
+      code: 'ADJUDICATION_DENIED',
+      display: 'Adjudicación denegada',
+    },
+    // La aseguradora aprobó una parte del monto solicitado (Hito 4 §A,
+    // `POST /insurance/received-claims/:id/decision`). Antes sólo existían los
+    // dos extremos y «parcial» se leía como una aprobación con líneas denegadas;
+    // la pantalla de la aseguradora necesita nombrarlo.
+    ADJ_OUTCOME_PARTIAL: {
+      code: 'ADJUDICATION_PARTIAL',
+      display: 'Adjudicación aprobada parcialmente',
+    },
+    LINE_DECISION_APPROVED: {
+      code: 'LINE_DECISION_APPROVED',
+      display: 'Línea aprobada',
+    },
+    LINE_DECISION_DENIED: {
+      code: 'LINE_DECISION_DENIED',
+      display: 'Línea denegada',
+    },
+
+    // EOB
+    EOB_PUBLISHED: { code: 'EOB_PUBLISHED', display: 'EOB publicada' },
+
+    // Coordinación de beneficios
+    COB_RULE_STANDARD: {
+      code: 'COB_RULE_STANDARD',
+      display: 'Regla COB estándar',
+    },
+    COB_ACTIVE: { code: 'COB_ACTIVE', display: 'COB vigente' },
+
+    // Reversión
+    REVERSAL_REASON_CORRECTION: {
+      code: 'REVERSAL_REASON_CORRECTION',
+      display: 'Corrección',
+    },
+
+    // Disputas y apelaciones
+    DISPUTE_OPEN: { code: 'DISPUTE_OPEN', display: 'Disputa abierta' },
+    DISPUTE_IN_REVIEW: {
+      code: 'DISPUTE_IN_REVIEW',
+      display: 'Disputa en revisión',
+    },
+    DISPUTE_RESOLVED: { code: 'DISPUTE_RESOLVED', display: 'Disputa resuelta' },
+    DISPUTE_TYPE_APPEAL: {
+      code: 'DISPUTE_TYPE_APPEAL',
+      display: 'Tipo: apelación',
+    },
+    DISPUTE_REASON_UNDERPAID: {
+      code: 'DISPUTE_REASON_UNDERPAID',
+      display: 'Motivo: pago insuficiente',
+    },
+    PARTY_PROVIDER: { code: 'PARTY_PROVIDER', display: 'Parte: prestador' },
+    PARTY_PATIENT: { code: 'PARTY_PATIENT', display: 'Parte: paciente' },
+    APPEAL_LEVEL_FIRST: {
+      code: 'APPEAL_LEVEL_FIRST',
+      display: 'Apelación primer nivel',
+    },
+    APPEAL_DECISION_UPHELD: {
+      code: 'APPEAL_DECISION_UPHELD',
+      display: 'Ratificado',
+    },
+    APPEAL_DECISION_OVERTURNED: {
+      code: 'APPEAL_DECISION_OVERTURNED',
+      display: 'Revertido',
+    },
+
+    // Conciliación
+    RECON_BATCH_OPEN: { code: 'RECON_BATCH_OPEN', display: 'Lote abierto' },
+    RECON_BATCH_RECONCILED: {
+      code: 'RECON_BATCH_RECONCILED',
+      display: 'Lote conciliado',
+    },
+    RECON_ITEM_MATCHED: {
+      code: 'RECON_ITEM_MATCHED',
+      display: 'Ítem conciliado',
+    },
+    RECON_PROVIDER_TYPE_PRACTICE: {
+      code: 'RECON_PROVIDER_TYPE_PRACTICE',
+      display: 'Conciliación: práctica',
+    },
+    VARIANCE_NONE: { code: 'VARIANCE_NONE', display: 'Sin variación' },
+
+    // Lotes periódicos de liquidación al profesional (Tarea 3 · H8,
+    // contrato docs/contracts/insurer-practitioner-settlement-batches.md §9).
+    // Reutilizan las tablas de conciliación UC-26-13 con estados propios,
+    // distintos de RECON_BATCH_*/RECON_ITEM_MATCHED de arriba.
+    SETTLEMENT_BATCH_ISSUED: {
+      code: 'SETTLEMENT_BATCH_ISSUED',
+      display: 'Lote de liquidación emitido',
+    },
+    SETTLEMENT_ITEM_INCLUDED: {
+      code: 'SETTLEMENT_ITEM_INCLUDED',
+      display: 'Reclamo incluido en lote',
+    },
+    /**
+     * Ajuste por reversión (contrato §10, v1.1): cuando un reclamo ya incluido
+     * en un lote se revierte después del corte, el lote SIGUIENTE del mismo
+     * par aseguradora/prestador registra este ítem con `expected_amount`
+     * negativo — nunca se edita el lote original.
+     */
+    SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT: {
+      code: 'SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT',
+      display: 'Ajuste por reversión',
+    },
+
+    // Campañas preventivas de la aseguradora (Tarea 4 · M-06, contrato
+    // docs/contracts/insurer-preventive-campaigns.md). Son valores internos de
+    // columnas `*_concept_id`; el front los rotula con su propio mapa cerrado.
+    CAMPAIGN_DRAFT: { code: 'CAMPAIGN_DRAFT', display: 'Campaña en borrador' },
+    CAMPAIGN_ACTIVE: { code: 'CAMPAIGN_ACTIVE', display: 'Campaña activa' },
+    CAMPAIGN_PAUSED: { code: 'CAMPAIGN_PAUSED', display: 'Campaña pausada' },
+    CAMPAIGN_EXPIRED: {
+      code: 'CAMPAIGN_EXPIRED',
+      display: 'Campaña finalizada',
+    },
+    CAMPAIGN_TYPE_LABORATORY: {
+      code: 'CAMPAIGN_TYPE_LABORATORY',
+      display: 'Campaña de laboratorio',
+    },
+    CAMPAIGN_TYPE_PHARMACY: {
+      code: 'CAMPAIGN_TYPE_PHARMACY',
+      display: 'Campaña de farmacia',
+    },
+    CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING: {
+      code: 'CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING',
+      display: 'Campaña de diagnóstico por imagen',
+    },
+    CAMPAIGN_TYPE_VACCINATION: {
+      code: 'CAMPAIGN_TYPE_VACCINATION',
+      display: 'Campaña de vacunación',
+    },
+    CAMPAIGN_PARTNER_ROLE_SPONSOR: {
+      code: 'CAMPAIGN_PARTNER_ROLE_SPONSOR',
+      display: 'Aliado auspiciante',
+    },
+    CAMPAIGN_PARTNER_ROLE_PROVIDER: {
+      code: 'CAMPAIGN_PARTNER_ROLE_PROVIDER',
+      display: 'Aliado prestador',
+    },
+    CAMPAIGN_PARTNER_TYPE_IMPORTER: {
+      code: 'CAMPAIGN_PARTNER_TYPE_IMPORTER',
+      display: 'Importadora de medicamentos',
+    },
+    CAMPAIGN_PARTNER_TYPE_MANUFACTURER: {
+      code: 'CAMPAIGN_PARTNER_TYPE_MANUFACTURER',
+      display: 'Fabricante de medicamentos',
+    },
+    CAMPAIGN_PARTNER_TYPE_LABORATORY: {
+      code: 'CAMPAIGN_PARTNER_TYPE_LABORATORY',
+      display: 'Laboratorio clínico',
+    },
+    CAMPAIGN_PARTNER_TYPE_PHARMACY: {
+      code: 'CAMPAIGN_PARTNER_TYPE_PHARMACY',
+      display: 'Farmacia aliada',
+    },
+    CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER: {
+      code: 'CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER',
+      display: 'Centro de diagnóstico',
+    },
+
+    // Brokers
+    BROKER_ACTIVE: { code: 'BROKER_ACTIVE', display: 'Broker activo' },
+    EMPLOYER_GROUP_ACTIVE: {
+      code: 'EMPLOYER_GROUP_ACTIVE',
+      display: 'Grupo empleador activo',
+    },
+    AGREEMENT_ACTIVE: { code: 'AGREEMENT_ACTIVE', display: 'Acuerdo activo' },
+    COMMISSION_MODEL_FLAT: {
+      code: 'COMMISSION_MODEL_FLAT',
+      display: 'Comisión fija',
+    },
+    COMMISSION_DRAFT: {
+      code: 'COMMISSION_DRAFT',
+      display: 'Liquidación borrador',
+    },
+  });

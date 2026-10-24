@@ -1,0 +1,66 @@
+# Visor de `docker logs` en tiempo real (Dozzle), sólo lectura y con login.
+# Ruta pública: https://logs.62.169.18.132.sslip.io
+# (router en traefik/alovida-logs.yaml → /data/coolify/proxy/dynamic/ del VPS).
+#
+# Dozzle NO toca el socket de Docker: habla con un docker-socket-proxy que sólo
+# permite GET sobre contenedores, eventos, info e imágenes (POST=0). Aunque
+# alguien entrara al visor, no puede crear, parar ni ejecutar nada.
+# Acciones y shell de Dozzle quedan apagados (son su default; se fija explícito).
+#
+# Usuarios: data/users.yml (bcrypt), fuera del repo. Ver README.md.
+name: alovida-logs
+
+services:
+  docker-read-proxy:
+    image: tecnativa/docker-socket-proxy:0.3.0
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      EVENTS: 1
+      INFO: 1
+      IMAGES: 1
+      PING: 1
+      VERSION: 1
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - logs-internal
+
+  dozzle:
+    image: amir20/dozzle:v11.1.0
+    restart: unless-stopped
+    depends_on:
+      - docker-read-proxy
+    environment:
+      DOCKER_HOST: tcp://docker-read-proxy:2375
+      DOZZLE_AUTH_PROVIDER: simple
+      DOZZLE_AUTH_TTL: 12h
+      DOZZLE_ENABLE_ACTIONS: "false"
+      DOZZLE_ENABLE_SHELL: "false"
+      DOZZLE_NO_ANALYTICS: "true"
+      DOZZLE_HOSTNAME: alovida-vps-62
+    volumes:
+      - ./data:/data
+    # El autoheal del monitoreo (infra/monitoring) reinicia lo `unhealthy` que
+    # lleve esta etiqueta; `restart` sólo cubre que el proceso termine.
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    labels:
+      autoheal: "true"
+    networks:
+      logs-internal: {}
+      coolify:
+        aliases:
+          - alovida-dozzle
+    mem_limit: 256m
+
+networks:
+  logs-internal:
+    internal: true
+  coolify:
+    external: true

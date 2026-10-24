@@ -3,6 +3,36 @@ import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CatalogConcepts } from '../entities';
 import { createdBy } from '../../../common';
+import {
+  containsPattern,
+  normalizeSearchText,
+  sqlSearchKey,
+  sqlSortKey,
+} from './glossary-search.sql';
+
+/** Filtros de la lectura paginada del glosario. */
+export interface GlossaryPageFilters {
+  /** Versión vigente del conjunto que acota (paraguas, categoría o etiqueta). */
+  readonly valueSetVersionId: string;
+  /** Versión vigente de una segunda etiqueta que también tiene que cumplirse. */
+  readonly tagValueSetVersionId?: string;
+  /** Texto buscado, tal como lo escribió la persona. */
+  readonly query?: string;
+  /** Estado publicado que tiene que tener el concepto (el glosario: `TERM_ACTIVE`). */
+  readonly stateConceptId: string;
+  /** Idioma cuyo nombre preferido ordena la lista (y se busca). */
+  readonly languageConceptId: string;
+  /** Acota además a estos ids (intersección), si vienen. */
+  readonly ids?: readonly string[];
+  /** Acota además a una versión de sistema de códigos, si viene. */
+  readonly codeSystemVersionId?: string;
+}
+
+/** Una página del glosario: los ids en orden y cuántos coinciden en total. */
+export interface GlossaryPage {
+  readonly ids: string[];
+  readonly total: number;
+}
 
 /** Datos mínimos para materializar un concepto de catálogo. */
 export interface CreateCatalogConceptData {
@@ -228,5 +258,131 @@ export class CatalogConceptsRepository {
       orderBy: { code: 'ASC' },
       limit,
     });
+  }
+
+  /**
+   * Una página del glosario, resuelta **entera en la base**: pertenencia,
+   * estado, texto, orden alfabético, total y recorte.
+   *
+   * ## Por qué no alcanzaba {@link search}
+   *
+   * `search` recibe los miembros del conjunto como lista de ids y ordena por
+   * código; el servicio reordenaba por nombre **después** del `LIMIT`. Con 69
+   * términos daba igual. Con cientos de miles es un `IN` de cientos de miles
+   * de uuid y una página que no es la página: el `LIMIT` cortaba por código y
+   * el orden alfabético se aplicaba sólo a lo que quedaba. Acá el orden y el
+   * corte salen de la misma consulta, así que la página 7 es de verdad lo que
+   * sigue a la 6.
+   *
+   * ## Castellano primero
+   *
+   * Los términos con nombre en el idioma pedido van antes que los que sólo
+   * tienen su nombre original (`es.value IS NULL`): «Enfermedades» suma las
+   * categorías ICD-10-CM en inglés, y su primera página no puede ser de ellas.
+   * Es el mismo criterio que el simulador (`justin/glosario-correcciones`).
+   *
+   * ## Qué usa de los índices que ya existen
+   *
+   * - `uq_value_set_members_version_concept` para acotar al conjunto (y a la
+   *   etiqueta, con el `EXISTS`);
+   * - la PK de `catalog_concepts` para el `JOIN`;
+   * - `ix_concept_designations_concept_id` para el nombre en el idioma pedido
+   *   y para los sinónimos.
+   *
+   * El filtro de texto es un «contiene» y ningún `btree` lo resuelve: recorre
+   * los miembros del conjunto ya acotado. Un índice de trigramas lo haría
+   * sublineal, pero exige la extensión `pg_trgm`, que el modelo no declara —
+   * ver `glossary-search.sql.ts`—.
+   *
+   * @param em - Contexto de persistencia.
+   * @param filters - Conjunto, etiqueta, texto, estado e idioma.
+   * @param limit - Términos por página.
+   * @param offset - Cuántos saltear desde el principio.
+   * @returns Los ids de la página, en orden, y el total que coincide.
+   */
+  async searchGlossaryPage(
+    em: EntityManager,
+    filters: GlossaryPageFilters,
+    limit: number,
+    offset: number,
+  ): Promise<GlossaryPage> {
+    const conditions: string[] = [
+      'm.value_set_version_id = ?',
+      'm.included = true',
+      'c.state_concept_id = ?',
+    ];
+    const params: unknown[] = [
+      filters.languageConceptId,
+      filters.valueSetVersionId,
+      filters.stateConceptId,
+    ];
+
+    if (filters.tagValueSetVersionId !== undefined) {
+      conditions.push(
+        `EXISTS (SELECT 1 FROM terminology.value_set_members t
+                  WHERE t.value_set_version_id = ? AND t.included = true
+                    AND t.concept_id = c.id)`,
+      );
+      params.push(filters.tagValueSetVersionId);
+    }
+    if (filters.ids !== undefined) {
+      if (filters.ids.length === 0) return { ids: [], total: 0 };
+      conditions.push('c.id IN (?)');
+      params.push([...filters.ids]);
+    }
+    if (filters.codeSystemVersionId !== undefined) {
+      conditions.push('c.code_system_version_id = ?');
+      params.push(filters.codeSystemVersionId);
+    }
+
+    const normalized =
+      filters.query === undefined ? '' : normalizeSearchText(filters.query);
+    if (normalized !== '') {
+      const pattern = containsPattern(normalized);
+      conditions.push(
+        `(${sqlSearchKey('c.code')} LIKE ?
+          OR ${sqlSearchKey('c.display')} LIKE ?
+          OR EXISTS (SELECT 1 FROM terminology.concept_designations d2
+                      WHERE d2.concept_id = c.id
+                        AND ${sqlSearchKey('d2.value')} LIKE ?))`,
+      );
+      params.push(pattern, pattern, pattern);
+    }
+
+    const rows: { id: string; total: string | number }[] = await em
+      .getConnection()
+      .execute(
+        `SELECT c.id, count(*) OVER () AS total
+           FROM terminology.value_set_members m
+           JOIN terminology.catalog_concepts c ON c.id = m.concept_id
+      LEFT JOIN LATERAL (
+                SELECT d.value
+                  FROM terminology.concept_designations d
+                 WHERE d.concept_id = c.id
+                   AND d.language_concept_id = ?
+                   AND d.preferred = true
+                 ORDER BY d.value
+                 LIMIT 1
+              ) es ON true
+          WHERE ${conditions.join('\n            AND ')}
+          ORDER BY (es.value IS NULL),
+                   ${sqlSortKey('coalesce(es.value, c.display)')},
+                   coalesce(es.value, c.display),
+                   c.id
+          LIMIT ? OFFSET ?`,
+        [...params, limit, offset],
+      );
+
+    // `count(*) OVER ()` viaja en cada fila; una página vacía no lo trae. Si
+    // se pidió más allá del final, el total se vuelve a pedir sin recorte:
+    // decir «0 en total» a quien saltó a la página 900 de 12 sería mentirle.
+    if (rows.length === 0 && offset > 0) {
+      const again = await this.searchGlossaryPage(em, filters, 1, 0);
+      return { ids: [], total: again.total };
+    }
+    return {
+      ids: rows.map((row) => row.id),
+      total: rows.length === 0 ? 0 : Number(rows[0].total),
+    };
   }
 }

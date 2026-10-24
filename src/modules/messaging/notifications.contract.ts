@@ -95,7 +95,41 @@ export type NotificationDestinationType =
    * union es puramente de tipos (se guarda en `related_resource_type`,
    * varchar); el `switch` exhaustivo del front debe sumar su ruta al conectar.
    */
-  | 'PHARMACY_ORDER';
+  | 'PHARMACY_ORDER'
+  /**
+   * Una solicitud de relación asistencial (FT-07-R05): un practicante pide
+   * autorización para ver el expediente de un paciente que encontró por
+   * búsqueda. Aditivo, mismo criterio que `PHARMACY_ORDER`.
+   */
+  | 'CARE_RELATIONSHIP_REQUEST'
+  /**
+   * Una solicitud de representar a quien ya tiene cuenta (dependiente adulto):
+   * el pedido le llega a esa persona y la respuesta vuelve a quien lo hizo. El
+   * `id` es el del apoderamiento pendiente. El front ya la enruta a la pantalla
+   * de dependientes.
+   */
+  | 'DEPENDENT_LINK_REQUEST'
+  /**
+   * Una orden de estudios que el médico dejó al paciente (MCH-027). Aditivo,
+   * mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su ruta
+   * (la lista de órdenes del paciente) al conectar.
+   */
+  | 'SERVICE_REQUEST'
+  /**
+   * Un turno concreto (AG-06/BR-22): lo que en verdad emite
+   * `scheduling/notices/agenda-notices.ts` (`RECURSO_CITA`) para confirmación,
+   * recordatorio, cancelación y cambio de cita. `APPOINTMENT` (arriba) no lo
+   * emite ningún módulo hoy — se declaró antes de que la agenda tuviera
+   * avisos propios y quedó como aspiracional; se deja tal cual (diff mínimo,
+   * decisión D-Notif) y este es el literal real.
+   */
+  | 'scheduling.appointment_bookings'
+  /**
+   * Un cupo que se liberó (AG-06/AG-07): lo que emite
+   * `scheduling-agenda-notices.service.ts` vía `RECURSO_CUPO` cuando
+   * `scheduling-waitlist.service.ts` promueve la lista de espera.
+   */
+  | 'scheduling.bookable_slots';
 
 /**
  * A dónde lleva la notificación al abrirla.
@@ -155,6 +189,17 @@ export interface EmitInAppResult {
 
   /** La fila de la bandeja, sólo si efectivamente se entregó. */
   readonly inAppNotificationId?: string;
+
+  /**
+   * Cuándo empieza a contar para el destinatario (ISO 8601), sólo si se creó
+   * la fila de bandeja.
+   *
+   * Normalmente es «ahora», salvo que el silencio nocturno (carril P9) la
+   * haya aplazado a la mañana siguiente: la fila existe igual, pero todavía
+   * no es «nueva» para nadie. Quien empuje el aviso en tiempo real (AG-22) lo
+   * usa para no despertar la campana antes de horario.
+   */
+  readonly availableAt?: string;
 
   /** `true` si la preferencia del destinatario la detuvo. */
   readonly suppressed: boolean;

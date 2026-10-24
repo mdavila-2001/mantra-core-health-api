@@ -25,6 +25,7 @@ import {
   type PaymentPurpose,
   type RiskDecision,
 } from '../dto';
+import { PaymentsErrorReason } from '../payments.error-reasons';
 
 const PURPOSE_CONCEPT: Readonly<Record<PaymentPurpose, string>> = {
   INVOICE: CONCEPTS.PAY_PURPOSE_INVOICE,
@@ -152,20 +153,26 @@ export class PaymentsIntentsService {
         {
           currency: dto.fromCurrency,
         },
+        PaymentsErrorReason.FX_LOCK_SAME_CURRENCY,
       );
     }
 
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) {
-        throw new ResourceNotFoundException('Intención de pago no encontrada', {
-          intentId,
-        });
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          {
+            intentId,
+          },
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
       }
       if (intent.statusConceptId !== CONCEPTS.PI_PENDING) {
         throw new PreconditionFailedException(
           'Solo se puede bloquear el cambio de una intención pendiente',
           { intentId },
+          PaymentsErrorReason.FX_LOCK_INTENT_NOT_PENDING,
         );
       }
 
@@ -181,6 +188,7 @@ export class PaymentsIntentsService {
             intentId,
             fxLockId: active.id,
           },
+          PaymentsErrorReason.FX_LOCK_ALREADY_ACTIVE,
         );
       }
 
@@ -231,9 +239,13 @@ export class PaymentsIntentsService {
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) {
-        throw new ResourceNotFoundException('Intención de pago no encontrada', {
-          intentId,
-        });
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          {
+            intentId,
+          },
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
       }
 
       const riskLevel = this.deriveRiskLevel(dto.riskScore);
@@ -290,6 +302,7 @@ export class PaymentsIntentsService {
       throw new PreconditionFailedException(
         'Un reparto por importe exige `amount`',
         { intentId },
+        PaymentsErrorReason.SPLIT_MISSING_AMOUNT,
       );
     }
     if (dto.splitType === 'PERCENTAGE' && !dto.percentage) {
@@ -298,15 +311,20 @@ export class PaymentsIntentsService {
         {
           intentId,
         },
+        PaymentsErrorReason.SPLIT_MISSING_PERCENTAGE,
       );
     }
 
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) {
-        throw new ResourceNotFoundException('Intención de pago no encontrada', {
-          intentId,
-        });
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          {
+            intentId,
+          },
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
       }
 
       const amount =
@@ -326,6 +344,7 @@ export class PaymentsIntentsService {
             intentId,
             intentAmount: intent.amount,
           },
+          PaymentsErrorReason.SPLIT_EXCEEDS_INTENT_AMOUNT,
         );
       }
 

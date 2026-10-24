@@ -10,7 +10,11 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ChartTemplatesService } from './chart-templates.service';
 import { CHART } from '../chart.concepts';
 import { FORMS } from '../../forms/forms.concepts';
-import { ResourceNotFoundException, runWithTenant } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -153,6 +157,78 @@ describe('ChartTemplatesService', () => {
         code: 'ejercicio_tolerancia',
         required: true,
       });
+    });
+
+    it('creates a choice field with its own options and persists them', async () => {
+      const d = build();
+      d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl1' });
+      d.templatesRepo.createTemplateSection.mockReturnValue({ id: 'sec1' });
+      d.templatesRepo.createTemplateField.mockReturnValue({
+        id: 'field1',
+        code: 'habito_tabaquico',
+        name: '¿Fuma?',
+        options: ['Nunca', 'Ex fumador', 'Fumador'],
+        multiple: false,
+      });
+      d.templatesRepo.createTemplateFieldAssignment.mockReturnValue({
+        id: 'assign1',
+        required: true,
+        ordinal: 0,
+      });
+
+      const res = await d.service.createTemplate(
+        {
+          specialtyConceptId: 'sp1',
+          code: 'TPL',
+          name: 'N',
+          fields: [
+            {
+              code: 'habito_tabaquico',
+              name: '¿Fuma?',
+              dataType: 'code' as const,
+              options: ['Nunca', 'Ex fumador', 'Fumador'],
+              required: true,
+            },
+          ],
+        },
+        actor,
+      );
+
+      expect(d.templatesRepo.createTemplateField).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          options: ['Nunca', 'Ex fumador', 'Fumador'],
+        }),
+      );
+      expect(res.fields[0]).toMatchObject({
+        options: ['Nunca', 'Ex fumador', 'Fumador'],
+      });
+    });
+
+    it('rejects a "code" field with fewer than two options', async () => {
+      const d = build();
+      d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl1' });
+      d.templatesRepo.createTemplateSection.mockReturnValue({ id: 'sec1' });
+
+      await expect(
+        d.service.createTemplate(
+          {
+            specialtyConceptId: 'sp1',
+            code: 'TPL',
+            name: 'N',
+            fields: [
+              {
+                code: 'x',
+                name: 'X',
+                dataType: 'code' as const,
+                options: ['Sólo una'],
+              },
+            ],
+          },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.templatesRepo.createTemplateField).not.toHaveBeenCalled();
     });
   });
 
@@ -301,6 +377,105 @@ describe('ChartTemplatesService', () => {
       expect(
         d.templatesRepo.findFieldAssignmentsBySection,
       ).toHaveBeenCalledWith(d.em, 'sec1', 'tenant-a');
+    });
+
+    /** Una plantilla del catálogo con «¿tiene alergias?» → «¿a qué?». */
+    function withPresentation(d: ReturnType<typeof build>) {
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl1',
+        specialtyConceptId: 'sp1',
+        code: 'MEDGEN',
+        name: 'Consulta',
+        version: 2,
+        statusConceptId: CHART.TEMPLATE_ACTIVE,
+        sectionId: 'sec1',
+      });
+      d.templatesRepo.findFieldAssignmentsBySection.mockResolvedValue([
+        { id: 'a0', fieldId: 'f-cat', required: false, ordinal: -1 },
+        { id: 'a1', fieldId: 'f-si', required: false, ordinal: 0 },
+        { id: 'a2', fieldId: 'f-cual', required: true, ordinal: 1 },
+        {
+          id: 'a3',
+          fieldId: 'f-viejo',
+          required: false,
+          ordinal: 2,
+          visible: false,
+        },
+      ]);
+      d.templatesRepo.findFieldDefinitionsByIds.mockResolvedValue([
+        {
+          id: 'f-cat',
+          code: 'MEDGEN.__catalog__',
+          name: 'Procedencia',
+          dataType: 'json',
+          defaultValueJson: {
+            sourceTitle: 'NT 022',
+            organization: 'MINSA',
+            url: 'https://example.org',
+            license: 'Pública',
+            retrievedAt: '2026-08-14',
+            fieldPresentation: {
+              tiene_alergias: { section: 'Antecedentes' },
+              tipo_de_alergia: {
+                section: 'Antecedentes',
+                options: ['Medicamentos', 'Alimentos'],
+                multiple: true,
+                allowOther: true,
+                showWhen: { field: 'tiene_alergias', equals: true },
+              },
+            },
+          },
+        },
+        {
+          id: 'f-si',
+          code: 'MEDGEN.tiene_alergias',
+          name: '¿Alergias?',
+          dataType: 'boolean',
+        },
+        {
+          id: 'f-cual',
+          code: 'MEDGEN.tipo_de_alergia',
+          name: '¿A qué?',
+          dataType: 'json',
+        },
+        {
+          id: 'f-viejo',
+          code: 'MEDGEN.alergias_v1',
+          name: 'Alergias',
+          dataType: 'text',
+        },
+      ]);
+    }
+
+    it('pega a cada campo del catálogo su lista, su sección y su condición', async () => {
+      const d = build();
+      withPresentation(d);
+
+      const res = await d.service.getTemplate('tpl1');
+
+      const which = res.fields.find((f) => f.fieldId === 'f-cual')!;
+      expect(which).toMatchObject({
+        section: 'Antecedentes',
+        options: ['Medicamentos', 'Alimentos'],
+        multiple: true,
+        allowOther: true,
+        // El código del padre se traduce a su `fieldId`: es lo que el cliente
+        // tiene a mano para leer el valor del que depende.
+        showWhen: { fieldId: 'f-si', equals: true },
+      });
+      expect(
+        res.fields.find((f) => f.fieldId === 'f-si')!.showWhen,
+      ).toBeUndefined();
+      expect(res.provenance?.organization).toBe('MINSA');
+    });
+
+    it('no sirve los campos que una versión nueva del catálogo retiró', async () => {
+      const d = build();
+      withPresentation(d);
+
+      const res = await d.service.getTemplate('tpl1');
+
+      expect(res.fields.map((f) => f.fieldId)).toEqual(['f-si', 'f-cual']);
     });
   });
 });

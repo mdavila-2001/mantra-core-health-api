@@ -5,6 +5,41 @@ versionados con huella de esquema, colecciones físicas, colocaciones que sólo 
 cumplen residencia y clasificación a la vez, políticas de consistencia, acceso, cifrado, replicación
 y retención, salud con failover, consolidación de costes e integridad de las proyecciones.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/polyglot_storage -name '*.controller.ts' | wc -l
+  find src/modules/polyglot_storage -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/polyglot_storage -name '*.entity.ts' | wc -l
+  find src/modules/polyglot_storage -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 15 rutas HTTP, 20 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 20 de 20 archivos `*.entity.ts`): `collection_definitions`, `collection_schema_versions`, `consistency_policies`, `data_access_policies`, `data_classifications`, `dataset_definitions`, `dataset_placements`, `dataset_versions`, `encryption_profiles`, `key_rotation_policies`, `replication_policies`, `residency_policies`, `retention_policies`, `storage_backend_regions`, `storage_backends`, `storage_capabilities`, `storage_cost_snapshots`, `storage_integrity_policies`, `store_health_checks`, `tenant_storage_bindings`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /finops/storage-cost-snapshots` | SYSTEM, FINOPS_ANALYST, PLATFORM_ADMIN | `storage-finops` |
+| `POST /governance/storage-backends` | PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/datasets` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/datasets/:id/versions` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/collections` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/placements/approve` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/consistency-policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/datasets/:id/data-access-policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/tenants/:tenantId/storage-bindings` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/encryption-profiles` | SECURITY_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-governance` |
+| `POST /governance/placements/:id/failover` | PLATFORM_ADMIN | `storage-governance` |
+| `POST /ops/store-health-checks` | SYSTEM, PLATFORM_ADMIN | `storage-operations` |
+| `POST /ops/integrity-policies` | GOVERNANCE_ADMIN, PLATFORM_ADMIN | `storage-operations` |
+| `POST /ops/integrity/:datasetId/verify` | SYSTEM, PLATFORM_ADMIN | `storage-operations` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |
@@ -142,7 +177,7 @@ delegación de los tres controladores).
   ningún `{id}` que referenciar al llamar. Se publica sin el segmento, y la idempotencia la da la
   clave natural `(versión, región, papel)`.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real contra el motor**: crear la colección en Mongo, aplicar el TTL, mover la réplica.
   El módulo gobierna y registra; el adaptador de cada backend ejecuta.
@@ -151,13 +186,15 @@ delegación de los tres controladores).
 - **Cálculo de los hashes de integridad**: se comparan los dos que llegan; recorrer la proyección y
   la fuente canónica para calcularlos es del worker.
 - **Métricas de uso para el coste**: llegan consolidadas; medirlas es del proveedor.
-- **Validación sintáctica de `row_filter_expression`**: el caso de uso la pide; hoy se guarda tal
-  cual. Necesita el parser del lenguaje de filtros, que no está definido en el modelo.
+- **Validación sintáctica de `row_filter_expression`**: se guarda tal cual, porque el modelo no
+  define el lenguaje de filtros.
 - **Bloqueo distribuido e idempotencia en Redis** (`redis_runtime.*`): aquí lo cubren el `FOR UPDATE`
-  y las claves naturales. Ese esquema es del módulo 56, **sin asignar**.
-- **Outbox** (módulo 35, ya disponible): `StorageBackendRegistered`, `DatasetDefined`,
-  `DatasetVersionPublished`, `CollectionSchemaRegistered`, `DataPlacementApproved`,
-  `ConsistencyPolicyDefined`, `DataAccessPolicyDefined`, `TenantStorageBound`,
-  `EncryptionProfileDefined`, `StoragePoliciesDefined`, `StoreHealthDegraded`,
-  `PlacementFailedOver`, `StorageCostSnapshotConsolidated`, `IntegrityMismatchDetected`,
-  `ProjectionQuarantined`. Quedan por cablear a `OutboxService.publishDomainEvent()`.
+  y las claves naturales.
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó las reglas de gobierno estáticas. Aprobar una colocación no aplica la política sobre el motor físico.
+
+```bash
+corepack yarn test src/modules/polyglot_storage --runInBand --silent
+```

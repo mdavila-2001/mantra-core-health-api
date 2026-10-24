@@ -1,0 +1,2030 @@
+{
+  "fuente": {
+    "nombre": "FONASA — Arancel de Prestaciones de Salud 2026, Modalidad Libre Elección",
+    "organismo": "Fondo Nacional de Salud, Ministerio de Salud de Chile",
+    "url": "https://www.fonasa.gob.cl/wp-content/uploads/sites/3/2026/03/1-Libro-Arancel-MLE-2026.pdf",
+    "copiaLeida": "https://redsalud.ssmso.cl/wp-content/uploads/2026/05/1-Libro-Arancel-MLE-2026.pdf",
+    "vigencia": "2026-03-16",
+    "moneda": "CLP",
+    "columna": "NIVEL 1 · TOTAL",
+    "licencia": "Documento público del Estado de Chile (FONASA); se cita la fuente.",
+    "grupo": "04",
+    "sha256": "79b0021be23a702fb750022a6c85bca30a05b4430329bb7933a71c24e797cf6a"
+  },
+  "prestaciones": [
+    {
+      "codigo": "04-01-001",
+      "nombre": "RADIOGRAFÍA DE LAS GLÁNDULAS SALIVALES 'SIALOGRAFÍA'",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 26040,
+      "valoresPublicados": [
+        26040,
+        13020,
+        33850,
+        20830,
+        41660,
+        28640
+      ]
+    },
+    {
+      "codigo": "04-01-002",
+      "nombre": "RADIOGRAFÍA DE PARTES BLANDAS, LARINGE LATERAL, CAVUM RINOFARÍNGEO (RINOFARINX).",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 9730,
+      "valoresPublicados": [
+        9730,
+        4860,
+        12650,
+        7780,
+        15570,
+        10700
+      ]
+    },
+    {
+      "codigo": "04-01-004",
+      "nombre": "RADIOGRAFÍA DE TÓRAX, PROYECCIÓN COMPLEMENTARIA (OBLICUAS, SELECTIVAS U OTRAS)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8960,
+      "valoresPublicados": [
+        8960,
+        4480,
+        11650,
+        7170,
+        14340,
+        9860
+      ]
+    },
+    {
+      "codigo": "04-01-008",
+      "nombre": "RADIOGRAFÍA DE TÓRAX FRONTAL O LATERAL CON EQUIPO MÓVIL FUERA DEL DEPARTAMENTO DE RAYOS.",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 12670,
+      "valoresPublicados": [
+        12670,
+        6330,
+        16470,
+        10130,
+        20270,
+        13930
+      ]
+    },
+    {
+      "codigo": "04-01-009",
+      "nombre": "RADIOGRAFÍA DE TÓRAX SIMPLE FRONTAL O LATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 11050,
+      "valoresPublicados": [
+        11050,
+        5520,
+        14370,
+        8840,
+        17680,
+        12150
+      ]
+    },
+    {
+      "codigo": "04-01-070",
+      "nombre": "RADIOGRAFÍA DE TÓRAX FRONTAL Y LATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 19930,
+      "valoresPublicados": [
+        19930,
+        9960,
+        25910,
+        15940,
+        31890,
+        21920
+      ]
+    },
+    {
+      "codigo": "04-01-010",
+      "nombre": "MAMOGRAFÍA BILATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 23500,
+      "valoresPublicados": [
+        23500,
+        11750,
+        30550,
+        18800,
+        37600,
+        25850
+      ]
+    },
+    {
+      "codigo": "04-01-110",
+      "nombre": "MAMOGRAFÍA UNILATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 13800,
+      "valoresPublicados": [
+        13800,
+        6900,
+        17940,
+        11040,
+        22080,
+        15180
+      ]
+    },
+    {
+      "codigo": "04-01-130",
+      "nombre": "MAMOGRAFÍA PROYECCIÓN COMPLEMENTARIA (AXILAR U OTRAS)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 5040,
+      "valoresPublicados": [
+        5040,
+        2520,
+        6550,
+        4030,
+        8060,
+        5540
+      ]
+    },
+    {
+      "codigo": "04-01-011",
+      "nombre": "MARCACIÓN PREOPERATORIA DE LESIONES DE LA MAMA",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 32260,
+      "valoresPublicados": [
+        32260,
+        16130,
+        41940,
+        25810,
+        51620,
+        35490
+      ]
+    },
+    {
+      "codigo": "04-01-012",
+      "nombre": "RADIOGRAFÍA DE MAMA, PIEZA OPERATORIA",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 9470,
+      "valoresPublicados": [
+        9470,
+        4730,
+        12310,
+        7570,
+        15150,
+        10410
+      ]
+    },
+    {
+      "codigo": "04-01-013",
+      "nombre": "RADIOGRAFÍA DE ABDOMEN SIMPLE",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 10130,
+      "valoresPublicados": [
+        10130,
+        5060,
+        13170,
+        8100,
+        16210,
+        11140
+      ]
+    },
+    {
+      "codigo": "04-01-014",
+      "nombre": "RADIOGRAFÍA DE ABDOMEN SIMPLE, PROYECCIÓN COMPLEMENTARIA (LATERAL Y/O OBLICUA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 7300,
+      "valoresPublicados": [
+        7300,
+        3650,
+        9490,
+        5840,
+        11680,
+        8030
+      ]
+    },
+    {
+      "codigo": "04-01-015",
+      "nombre": "COLANGIOGRAFÍA INTRA O POSTOPERATORIA (POR SONDA T, O SIMILAR)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 23620,
+      "valoresPublicados": [
+        23620,
+        11810,
+        30710,
+        18900,
+        37790,
+        25980
+      ]
+    },
+    {
+      "codigo": "04-01-018",
+      "nombre": "ENEMA BARITADO DEL COLON (INCLUYE LLENE Y CONTROL POST-VACIAMIENTO)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 48390,
+      "valoresPublicados": [
+        48390,
+        24190,
+        62910,
+        38710,
+        77420,
+        53220
+      ]
+    },
+    {
+      "codigo": "04-01-019",
+      "nombre": "ENEMA BARITADO DEL COLON O INTESTINO DELGADO, DOBLE CONTRASTE",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 46710,
+      "valoresPublicados": [
+        46710,
+        23350,
+        60720,
+        37360,
+        74740,
+        51380
+      ]
+    },
+    {
+      "codigo": "04-01-020",
+      "nombre": "ESOFAGOGRAMA (INCLUYE PESQUISA DE CUERPO EXTRAÑO) (PROC.AUT.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 22160,
+      "valoresPublicados": [
+        22160,
+        11080,
+        28810,
+        17730,
+        35460,
+        24380
+      ]
+    },
+    {
+      "codigo": "04-01-021",
+      "nombre": "RADIOGRAFÍA DE ESÓFAGO, ESTÓMAGO Y DUODENO, RELLENO Y/O DOBLE CONTRASTE",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 41090,
+      "valoresPublicados": [
+        41090,
+        20540,
+        53420,
+        32870,
+        65740,
+        45190
+      ]
+    },
+    {
+      "codigo": "04-01-022",
+      "nombre": "ESTUDIO RADIOLÓGICO DE DEGLUCIÓN FARÍNGEA",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 18470,
+      "valoresPublicados": [
+        18470,
+        9230,
+        24010,
+        14770,
+        29550,
+        20310
+      ]
+    },
+    {
+      "codigo": "04-01-023",
+      "nombre": "ESTUDIO RADIOLÓGICO DEL INTESTINO DELGADO",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 34200,
+      "valoresPublicados": [
+        34200,
+        17100,
+        44460,
+        27360,
+        54720,
+        37620
+      ]
+    },
+    {
+      "codigo": "04-01-024",
+      "nombre": "RADIOGRAFÍA DE ESÓFAGO, ESTÓMAGO Y DUODENO, SIMPLE EN NIÑOS",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 34060,
+      "valoresPublicados": [
+        34060,
+        17030,
+        44280,
+        27250,
+        54500,
+        37470
+      ]
+    },
+    {
+      "codigo": "04-01-073",
+      "nombre": "VIDEOFLUOROSCOPIA PARA ESTUDIO DE DEGLUCIÓN",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 121310,
+      "valoresPublicados": [
+        121310,
+        60650
+      ]
+    },
+    {
+      "codigo": "04-01-027",
+      "nombre": "PIELOGRAFÍA DE ELIMINACIÓN O DESCENDENTE: INCLUYE RENAL Y VESICAL SIMPLES PREVIAS, 3 PLACAS POST INYECCIÓN DE MEDIO DE CONTRASTE, CONTROLES DE PIE Y CISTOGRAFÍA PRE Y POST MICCIONAL.",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 43520,
+      "valoresPublicados": [
+        43520,
+        21760,
+        56580,
+        34820,
+        69630,
+        47870
+      ]
+    },
+    {
+      "codigo": "04-01-028",
+      "nombre": "RADIOGRAFÍA RENAL SIMPLE (PROC. AUT.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 9320,
+      "valoresPublicados": [
+        9320,
+        4660,
+        12120,
+        7460,
+        14910,
+        10250
+      ]
+    },
+    {
+      "codigo": "04-01-029",
+      "nombre": "RADIOGRAFÍA VESICAL SIMPLE O PERIVESICAL (PROC. AUT.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8030,
+      "valoresPublicados": [
+        8030,
+        4010,
+        10440,
+        6420,
+        12850,
+        8830
+      ]
+    },
+    {
+      "codigo": "04-01-031",
+      "nombre": "RADIOGRAFÍA DE CAVIDADES PERINASALES, ÓRBITAS, ARTICULACIONES TEMPOROMANDIBULARES, HUESOS PROPIOS DE LA NARIZ, MALAR, MAXILAR, ARCO CIGOMÁTICO Y CARA",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 10970,
+      "valoresPublicados": [
+        10970,
+        5480,
+        14260,
+        8770,
+        17550,
+        12060
+      ]
+    },
+    {
+      "codigo": "04-01-032",
+      "nombre": "RADIOGRAFÍA DE CRÁNEO FRONTAL Y LATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 11470,
+      "valoresPublicados": [
+        11470,
+        5730,
+        14910,
+        9170,
+        18350,
+        12610
+      ]
+    },
+    {
+      "codigo": "04-01-033",
+      "nombre": "RADIOGRAFÍA DE CRÁNEO PROYECCIÓN ESPECIAL DE BASE DE CRÁNEO (TOWNE)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8040,
+      "valoresPublicados": [
+        8040,
+        4020,
+        10450,
+        6430,
+        12860,
+        8840
+      ]
+    },
+    {
+      "codigo": "04-01-035",
+      "nombre": "RADIOGRAFÍA DE OÍDO, UNILATERAL O BILATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 13880,
+      "valoresPublicados": [
+        13880,
+        6940,
+        18040,
+        11100,
+        22210,
+        15270
+      ]
+    },
+    {
+      "codigo": "04-01-040",
+      "nombre": "RADIOGRAFÍA DE SILLA TURCA FRONTAL Y LATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 12820,
+      "valoresPublicados": [
+        12820,
+        6410,
+        16670,
+        10260,
+        20510,
+        14100
+      ]
+    },
+    {
+      "codigo": "04-01-042",
+      "nombre": "RADIOGRAFÍA DE COLUMNA CERVICAL O ATLAS-AXIS (FRONTAL Y LATERAL)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 11050,
+      "valoresPublicados": [
+        11050,
+        5520,
+        14370,
+        8840,
+        17680,
+        12150
+      ]
+    },
+    {
+      "codigo": "04-01-043",
+      "nombre": "RADIOGRAFÍA DE COLUMNA CERVICAL (FRONTAL, LATERAL Y OBLICUAS)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 18600,
+      "valoresPublicados": [
+        18600,
+        9300,
+        24180,
+        14880,
+        29760,
+        20460
+      ]
+    },
+    {
+      "codigo": "04-01-044",
+      "nombre": "RADIOGRAFÍA DE COLUMNA CERVICAL FLEXIÓN Y EXTENSIÓN (DINÁMICAS)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 10430,
+      "valoresPublicados": [
+        10430,
+        5210,
+        13560,
+        8340,
+        16690,
+        11470
+      ]
+    },
+    {
+      "codigo": "04-01-045",
+      "nombre": "RADIOGRAFÍA DE COLUMNA DORSAL O DORSOLUMBAR LOCALIZADA, PARRILLA COSTAL (FRONTAL Y LATERAL)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 12870,
+      "valoresPublicados": [
+        12870,
+        6430,
+        16730,
+        10290,
+        20590,
+        14150
+      ]
+    },
+    {
+      "codigo": "04-01-046",
+      "nombre": "RADIOGRAFÍA COLUMNA LUMBAR O LUMBOSACRA ( FRONTAL, LATERAL Y FOCALIZADA EN EL 5° ESPACIO)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 19050,
+      "valoresPublicados": [
+        19050,
+        9520,
+        24770,
+        15240,
+        30480,
+        20950
+      ]
+    },
+    {
+      "codigo": "04-01-047",
+      "nombre": "RADIOGRAFÍA COLUMNA LUMBAR O LUMBOSACRA FLEXIÓN Y EXTENSIÓN (DINÁMICAS)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 15490,
+      "valoresPublicados": [
+        15490,
+        7740,
+        20140,
+        12390,
+        24780,
+        17030
+      ]
+    },
+    {
+      "codigo": "04-01-048",
+      "nombre": "RADIOGRAFÍA COLUMNA LUMBAR O LUMBOSACRA, OBLICUAS ADICIONALES",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 10430,
+      "valoresPublicados": [
+        10430,
+        5210,
+        13560,
+        8340,
+        16690,
+        11470
+      ]
+    },
+    {
+      "codigo": "04-01-049",
+      "nombre": "RADIOGRAFÍA DE COLUMNA TOTAL, PANORÁMICA CON FOLIO GRADUADO FRONTAL O LATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 14250,
+      "valoresPublicados": [
+        14250,
+        7120,
+        18530,
+        11400,
+        22800,
+        15670
+      ]
+    },
+    {
+      "codigo": "04-01-051",
+      "nombre": "RADIOGRAFÍA DE PELVIS, CADERA O COXOFEMORAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8470,
+      "valoresPublicados": [
+        8470,
+        4230,
+        11010,
+        6770,
+        13550,
+        9310
+      ]
+    },
+    {
+      "codigo": "04-01-151",
+      "nombre": "RADIOGRAFÍA DE PELVIS, CADERA O COXOFEMORAL DE RN, LACTANTE O NIÑO MENOR DE 6 AÑOS.",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8080,
+      "valoresPublicados": [
+        8080,
+        4040,
+        10500,
+        6460,
+        12930,
+        8890
+      ]
+    },
+    {
+      "codigo": "04-01-052",
+      "nombre": "RADIOGRAFÍA DE PELVIS, CADERA O COXOFEMORAL, PROYECCIONES ESPECIALES; (ROTACIÓN INTERNA, ABDUCCIÓN, LATERAL, LAWENSTEIN U OTRAS)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 7720,
+      "valoresPublicados": [
+        7720,
+        3860,
+        10040,
+        6180,
+        12350,
+        8490
+      ]
+    },
+    {
+      "codigo": "04-01-053",
+      "nombre": "RADIOGRAFÍA DE SACROCOXIS O ARTICULACIONES SACROILÍACAS.",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 11620,
+      "valoresPublicados": [
+        11620,
+        5810,
+        15110,
+        9300,
+        18590,
+        12780
+      ]
+    },
+    {
+      "codigo": "04-01-054",
+      "nombre": "RADIOGRAFÍA DE BRAZO, ANTEBRAZO, CODO, MUÑECA, MANO, DEDOS, PIE (FRONTAL Y LATERAL)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 9640,
+      "valoresPublicados": [
+        9640,
+        4820,
+        12530,
+        7710,
+        15420,
+        10600
+      ]
+    },
+    {
+      "codigo": "04-01-055",
+      "nombre": "RADIOGRAFÍA DE CLAVÍCULA.",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 11280,
+      "valoresPublicados": [
+        11280,
+        5640,
+        14660,
+        9020,
+        18050,
+        12410
+      ]
+    },
+    {
+      "codigo": "04-01-056",
+      "nombre": "RADIOGRAFÍA EDAD ÓSEA: CARPO Y MANO",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8040,
+      "valoresPublicados": [
+        8040,
+        4020,
+        10450,
+        6430,
+        12860,
+        8840
+      ]
+    },
+    {
+      "codigo": "04-01-057",
+      "nombre": "RADIOGRAFÍA EDAD ÓSEA : RODILLA FRONTAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8390,
+      "valoresPublicados": [
+        8390,
+        4190,
+        10910,
+        6710,
+        13420,
+        9220
+      ]
+    },
+    {
+      "codigo": "04-01-058",
+      "nombre": "ESTUDIO RADIOLÓGICO DE ESCAFOIDES",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 12610,
+      "valoresPublicados": [
+        12610,
+        6300,
+        16390,
+        10080,
+        20180,
+        13870
+      ]
+    },
+    {
+      "codigo": "04-01-059",
+      "nombre": "ESTUDIO RADIOLÓGICO DE MUÑECA O TOBILLO FRONTAL LATERAL Y OBLICUAS",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 10900,
+      "valoresPublicados": [
+        10900,
+        5450,
+        14170,
+        8720,
+        17440,
+        11990
+      ]
+    },
+    {
+      "codigo": "04-01-060",
+      "nombre": "RADIOGRAFÍA DE HOMBRO, FÉMUR, RODILLA, PIERNA, COSTILLA O ESTERNÓN FRONTAL Y LATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 11400,
+      "valoresPublicados": [
+        11400,
+        5700,
+        14820,
+        9120,
+        18240,
+        12540
+      ]
+    },
+    {
+      "codigo": "04-01-062",
+      "nombre": "RADIOGRAFÍA DE PROYECCIONES ESPECIALES OBLICUAS U OTRAS EN HOMBRO, BRAZO, CODO, RODILLA, RÓTULAS, SESAMOIDEOS, AXIAL DE AMBAS RÓTULAS O SIMILARES",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 7930,
+      "valoresPublicados": [
+        7930,
+        3960,
+        10310,
+        6340,
+        12690,
+        8720
+      ]
+    },
+    {
+      "codigo": "04-01-063",
+      "nombre": "RADIOGRAFÍA DE TÚNEL INTERCONDÍLEO O RADIO-CARPIANO",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 7720,
+      "valoresPublicados": [
+        7720,
+        3860,
+        10040,
+        6180,
+        12350,
+        8490
+      ]
+    },
+    {
+      "codigo": "04-01-064",
+      "nombre": "APOYO FLUOROSCÓPICO A PROCEDIMIENTOS INTRAOPERATORIOS Y/O BIOPSIA (NO INCLUYE EL PROC.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 9370,
+      "valoresPublicados": [
+        9370,
+        4680,
+        12180,
+        7490,
+        14990,
+        10300
+      ]
+    },
+    {
+      "codigo": "04-02-005",
+      "nombre": "GALACTOGRAFÍA, UNILATERAL",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 12020,
+      "valoresPublicados": [
+        12020,
+        6010,
+        15630,
+        9620,
+        19230,
+        13220
+      ]
+    },
+    {
+      "codigo": "04-02-008",
+      "nombre": "COLANGIOPANCREATOGRAFÍA ENDOSCÓPICA (A.C.18-01-018; 5-7 EXP)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 31600,
+      "valoresPublicados": [
+        31600,
+        15800,
+        41080,
+        25280,
+        50560,
+        34760
+      ]
+    },
+    {
+      "codigo": "04-02-009",
+      "nombre": "FISTULOGRAFÍA (A.C. 18-01-020) (3 EXP.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 8610,
+      "valoresPublicados": [
+        8610,
+        4300,
+        11190,
+        6880,
+        13780,
+        9470
+      ]
+    },
+    {
+      "codigo": "04-02-011",
+      "nombre": "HISTEROSALPINGOGRAFÍA (A.C. 20-01-013) (4 EXP.; INCLUYE PRUEBA DE COTTE TARDÍA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 24550,
+      "valoresPublicados": [
+        24550,
+        12270,
+        31920,
+        19640,
+        39280,
+        27000
+      ]
+    },
+    {
+      "codigo": "04-02-012",
+      "nombre": "PIELOGRAFÍA ASCENDENTE (A.C. 19-01-015) (3 EXP.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 28110,
+      "valoresPublicados": [
+        28110,
+        14050,
+        36540,
+        22480,
+        44980,
+        30920
+      ]
+    },
+    {
+      "codigo": "04-02-014",
+      "nombre": "URETRO Y/O CISTOURETROGRAFÍA MICCIONAL RETRÓGRADA (A.C. 19-01-016) ( 5 EXP.)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 26330,
+      "valoresPublicados": [
+        26330,
+        13160,
+        34230,
+        21060,
+        42130,
+        28960
+      ]
+    },
+    {
+      "codigo": "04-02-015",
+      "nombre": "ARTROGRAFÍA FACETARIA",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 38830,
+      "valoresPublicados": [
+        38830,
+        19410,
+        50480,
+        31060,
+        62130,
+        42710
+      ]
+    },
+    {
+      "codigo": "04-02-019",
+      "nombre": "ANGIOGRAFÍA SELECTIVA DE CARÓTIDA EXTERNA O INTERNA (A.C 17-01-061 AL 17-01-069, SEGÚN CORRESPONDA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 43490,
+      "valoresPublicados": [
+        43490,
+        21740,
+        56540,
+        34790,
+        69580,
+        47830
+      ]
+    },
+    {
+      "codigo": "04-02-020",
+      "nombre": "ANGIOGRAFÍA SELECTIVA MEDULAR (A.C 17-01-061 AL 17-01-069, SEGÚN CORRESPONDA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 44870,
+      "valoresPublicados": [
+        44870,
+        22430,
+        58330,
+        35890,
+        71790,
+        49350
+      ]
+    },
+    {
+      "codigo": "04-02-022",
+      "nombre": "ANGIOPLASTIA INTRALUMINAL CORONARIA. PROCEDIMIENTO RADIOLÓGICO. (A.C.17-01-031)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 70520,
+      "valoresPublicados": [
+        70520,
+        35260,
+        91680,
+        56420,
+        112830,
+        77570
+      ]
+    },
+    {
+      "codigo": "04-02-023",
+      "nombre": "ANGIOPLASTIA INTRALUMINAL PERIFÉRICA. PROCEDIMIENTO RADIOLÓGICO. (A.C. 17-01-032)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 49120,
+      "valoresPublicados": [
+        49120,
+        24560,
+        63860,
+        39300,
+        78590,
+        54030
+      ]
+    },
+    {
+      "codigo": "04-02-024",
+      "nombre": "AORTOGRAFÍA CON AOT O CINEANGIOGRAFÍA (A.C. 17-01-022)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 51490,
+      "valoresPublicados": [
+        51490,
+        25740,
+        66940,
+        41190,
+        82380,
+        56630
+      ]
+    },
+    {
+      "codigo": "04-02-025",
+      "nombre": "ARTERIOGRAFÍA DE MIEMBROS SUPERIORES O INFERIORES UNILATERAL (A.C.17-01-023)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 32540,
+      "valoresPublicados": [
+        32540,
+        16270,
+        42300,
+        26030,
+        52060,
+        35790
+      ]
+    },
+    {
+      "codigo": "04-02-027",
+      "nombre": "ARTERIOGRAFÍA SELECTIVA CON AOT O CINEANGIOGRAFÍA (PULMONAR, RENAL, TRONCO CELÍACO O SIMILAR) C/U. (A.C 17-01-061 AL 17-01-069, SEGÚN CORRESPONDA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 60480,
+      "valoresPublicados": [
+        60480,
+        30240,
+        78620,
+        48380,
+        96770,
+        66530
+      ]
+    },
+    {
+      "codigo": "04-02-029",
+      "nombre": "ARTERIOGRAFÍA DE VASOS DEL CUELLO ( CARÓTIDAS Y VERTEBRALES) (A.C. 11-01-013)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 44210,
+      "valoresPublicados": [
+        44210,
+        22100,
+        57470,
+        35360,
+        70740,
+        48630
+      ]
+    },
+    {
+      "codigo": "04-02-030",
+      "nombre": "CINECORONARIOGRAFÍA (A.C. 17-01-019)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 54990,
+      "valoresPublicados": [
+        54990,
+        27490,
+        71490,
+        43990,
+        87980,
+        60480
+      ]
+    },
+    {
+      "codigo": "04-02-031",
+      "nombre": "EMBOLIZACIÓN O BALONIZACIÓN (A.C. DE LA ANGIOGRAFÍA CORRESPONDIENTE) (INCLUYE CONTROL RADIOLÓGICO INMEDIATO)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 34520,
+      "valoresPublicados": [
+        34520,
+        17260,
+        44880,
+        27620,
+        55230,
+        37970
+      ]
+    },
+    {
+      "codigo": "04-02-032",
+      "nombre": "INSTALACIÓN DE CATÉTER O SONDA INTRACARDÍACA, CONTROL POR RADIÓLOGO DE (A.C. 17-01-020, 17-01-021, 17-01-011 O 17-01-014, SEGÚN CORRESPONDA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 24120,
+      "valoresPublicados": [
+        24120,
+        12060,
+        31360,
+        19300,
+        38590,
+        26530
+      ]
+    },
+    {
+      "codigo": "04-02-033",
+      "nombre": "VENTRICULOGRAFÍA DERECHA Y/O IZQUIERDA (A.C. 17-01-011, 17-01-020 Ó 17-01-021 Ó 17-01-041 Ó 17-01-42 Ó 17-01-43, SEGÚN CORRESPONDA)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 54990,
+      "valoresPublicados": [
+        54990,
+        27490,
+        71490,
+        43990,
+        87980,
+        60480
+      ]
+    },
+    {
+      "codigo": "04-02-035",
+      "nombre": "CAVOGRAFÍA (A.C. 17-01-025)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 31100,
+      "valoresPublicados": [
+        31100,
+        15550,
+        40430,
+        24880,
+        49760,
+        34210
+      ]
+    },
+    {
+      "codigo": "04-02-038",
+      "nombre": "FLEBOGRAFÍA EXTREMIDAD INFERIOR O SUPERIOR, UNILATERAL (A.C. 17-01-026) CADA EXTREMIDAD.",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 27510,
+      "valoresPublicados": [
+        27510,
+        13750,
+        35760,
+        22000,
+        44020,
+        30260
+      ]
+    },
+    {
+      "codigo": "04-02-041",
+      "nombre": "FLEBOGRAFÍA SELECTIVA DE VENAS HEPÁTICAS, RENALES, GONADALES, PÉLVICAS. (A.C. 17-01-027)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 31100,
+      "valoresPublicados": [
+        31100,
+        15550,
+        40430,
+        24880,
+        49760,
+        34210
+      ]
+    },
+    {
+      "codigo": "04-02-050",
+      "nombre": "MIELOGRAFÍA POR PUNCIÓN LUMBAR CON CONTRASTE HIDROSOLUBLE (A.C. 11-01-025)",
+      "seccion": "EXAMENES RADIOLOGICOS",
+      "valorClp": 37760,
+      "valoresPublicados": [
+        37760,
+        18880,
+        49090,
+        30210,
+        60420,
+        41540
+      ]
+    },
+    {
+      "codigo": "04-03-001",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE CRÁNEO ENCEFÁLICA",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 69710,
+      "valoresPublicados": [
+        69710,
+        34850,
+        90620,
+        55760,
+        111540,
+        76680
+      ]
+    },
+    {
+      "codigo": "04-03-002",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE HIPOTÁLAMO-HIPÓFISIS",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 73360,
+      "valoresPublicados": [
+        73360,
+        36680,
+        95370,
+        58690,
+        117380,
+        80700
+      ]
+    },
+    {
+      "codigo": "04-03-003",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE FOSA POSTERIOR",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 63010,
+      "valoresPublicados": [
+        63010,
+        31500,
+        81910,
+        50400,
+        100820,
+        69310
+      ]
+    },
+    {
+      "codigo": "04-03-006",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE TEMPORAL-OÍDO",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 60500,
+      "valoresPublicados": [
+        60500,
+        30250,
+        78650,
+        48400,
+        96800,
+        66550
+      ]
+    },
+    {
+      "codigo": "04-03-007",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE ÓRBITAS MAXILOFACIAL",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 80900,
+      "valoresPublicados": [
+        80900,
+        40450,
+        105170,
+        64720,
+        129440,
+        88990
+      ]
+    },
+    {
+      "codigo": "04-03-008",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE COLUMNA CERVICAL",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 88620,
+      "valoresPublicados": [
+        88620,
+        44310,
+        115210,
+        70900,
+        141790,
+        97480
+      ]
+    },
+    {
+      "codigo": "04-03-018",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE COLUMNA DORSAL. INCLUYE MÍNIMO 6 ESPACIOS",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 77650,
+      "valoresPublicados": [
+        77650,
+        38820,
+        100950,
+        62120,
+        124240,
+        85410
+      ]
+    },
+    {
+      "codigo": "04-03-019",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE COLUMNA LUMBAR",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 77650,
+      "valoresPublicados": [
+        77650,
+        38820,
+        100950,
+        62120,
+        124240,
+        85410
+      ]
+    },
+    {
+      "codigo": "04-03-012",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE CUELLO, PARTES BLANDAS",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 65490,
+      "valoresPublicados": [
+        65490,
+        32740,
+        85140,
+        52390,
+        104780,
+        72030
+      ]
+    },
+    {
+      "codigo": "04-03-013",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE TÓRAX. INCLUYE ADEMÁS: ESTERNÓN, CLAVÍCULAS, ARTICULACIÓN ACROMIOCLAVICULAR, ESCÁPULA, COSTILLAS, ARTICULACIÓN ESTERNOCLAVICULAR. INCLUYE TODO EL TÓRAX O CADA SEGMENTO O ARTICULACIÓN. INCLUYE BILATERALIDAD",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 103440,
+      "valoresPublicados": [
+        103440,
+        51720,
+        134470,
+        82750,
+        165500,
+        113780
+      ]
+    },
+    {
+      "codigo": "04-03-014",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE ABDOMEN (HÍGADO, VÍAS Y VESÍCULA BILIAR, PÁNCREAS, BAZO, SUPRARRENALES Y RIÑONES)",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 62280,
+      "valoresPublicados": [
+        62280,
+        31140,
+        80960,
+        49820,
+        99650,
+        68510
+      ]
+    },
+    {
+      "codigo": "04-03-016",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE PELVIS (ADEMÁS INCLUYE SACRO, COXIS, CADERAS, HUESOS PÉLVICOS, ARTICULACIONES SACRO ILÍACAS). BILATERAL",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 63870,
+      "valoresPublicados": [
+        63870,
+        31930,
+        83030,
+        51090,
+        102190,
+        70250
+      ]
+    },
+    {
+      "codigo": "04-03-020",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE ABDOMEN Y PELVIS",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 101650,
+      "valoresPublicados": [
+        101650,
+        50820,
+        132150,
+        81320,
+        162640,
+        111810
+      ]
+    },
+    {
+      "codigo": "04-03-021",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA PIELOGRAFÍA",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 26770,
+      "valoresPublicados": [
+        26770,
+        13380,
+        34800,
+        21410,
+        42830,
+        29440
+      ]
+    },
+    {
+      "codigo": "04-03-022",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA UROGRAFÍA",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 59800,
+      "valoresPublicados": [
+        59800,
+        29900,
+        77740,
+        47840,
+        95680,
+        65780
+      ]
+    },
+    {
+      "codigo": "04-03-023",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE COLONOSCOPÍA VIRTUAL. NO INCLUYE INSTALACIÓN DE SONDA",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 51050,
+      "valoresPublicados": [
+        51050,
+        25520,
+        66370,
+        40840,
+        81680,
+        56150
+      ]
+    },
+    {
+      "codigo": "04-03-024",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA PLANIFICACIÓN RADIOTERAPIA",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 69270,
+      "valoresPublicados": [
+        69270,
+        34630,
+        90050,
+        55410,
+        110830,
+        76190
+      ]
+    },
+    {
+      "codigo": "04-03-025",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE CALCIO CORONARIO",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 34140,
+      "valoresPublicados": [
+        34140,
+        17070,
+        44380,
+        27310,
+        54620,
+        37550
+      ]
+    },
+    {
+      "codigo": "04-03-104",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE CUELLO",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 69430,
+      "valoresPublicados": [
+        69430,
+        34710,
+        90260,
+        55540,
+        111090,
+        76370
+      ]
+    },
+    {
+      "codigo": "04-03-105",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE PELVIS",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 50630,
+      "valoresPublicados": [
+        50630,
+        25310,
+        65820,
+        40500,
+        81010,
+        55690
+      ]
+    },
+    {
+      "codigo": "04-03-106",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA DE ANGIO CARDÍACO. MÍNIMO 64 CORTES",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 66370,
+      "valoresPublicados": [
+        66370,
+        33180,
+        86280,
+        53090,
+        106190,
+        73000
+      ]
+    },
+    {
+      "codigo": "04-03-017",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA MUSCULOESQUELÉTICA POR ZONA ANATÓMICA. POR CADA SEGMENTO O ARTICULACIÓN: MUSLO, PIERNA, RODILLAS, ANTEBRAZO, CODO, MUÑECA, MANO, HOMBRO, PIE, TOBILLO U OTROS. BILATERAL SÓLO PARA RODILLAS",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 55760,
+      "valoresPublicados": [
+        55760,
+        27880,
+        72490,
+        44610,
+        89220,
+        61340
+      ]
+    },
+    {
+      "codigo": "04-03-101",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE ENCÉFALO",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 84490,
+      "valoresPublicados": [
+        84490,
+        42240,
+        109840,
+        67590,
+        135180,
+        92930
+      ]
+    },
+    {
+      "codigo": "04-03-102",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE TÓRAX",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 127200,
+      "valoresPublicados": [
+        127200,
+        63600,
+        165360,
+        101760,
+        203520,
+        139920
+      ]
+    },
+    {
+      "codigo": "04-03-103",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE ABDOMEN",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 117770,
+      "valoresPublicados": [
+        117770,
+        58880,
+        153100,
+        94210,
+        188430,
+        129540
+      ]
+    },
+    {
+      "codigo": "04-03-107",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE EXTREMIDADES INFERIORES (BILATERAL)",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 96100,
+      "valoresPublicados": [
+        96100,
+        48050,
+        124930,
+        76880,
+        153760,
+        105710
+      ]
+    },
+    {
+      "codigo": "04-03-108",
+      "nombre": "TOMOGRAFÍA COMPUTARIZADA ANGIO DE EXTREMIDAD SUPERIOR (UNILATERAL)",
+      "seccion": "TOMOGRAFIA COMPUTARIZADA",
+      "valorClp": 98450,
+      "valoresPublicados": [
+        98450,
+        49220,
+        127990,
+        78760,
+        157520,
+        108290
+      ]
+    },
+    {
+      "codigo": "04-04-002",
+      "nombre": "ECOGRAFÍA OBSTÉTRICA",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 8730,
+      "valoresPublicados": [
+        8730,
+        4360,
+        11350,
+        6980,
+        13970,
+        9600
+      ]
+    },
+    {
+      "codigo": "04-04-003",
+      "nombre": "ECOGRAFÍA ABDOMINAL (INCLUYE HÍGADO, VÍA BILIAR, VESÍCULA, PÁNCREAS, RIÑONES, BAZO, RETROPERITONEO Y GRANDES VASOS)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 27570,
+      "valoresPublicados": [
+        27570,
+        13780,
+        35840,
+        22050,
+        44110,
+        30320
+      ]
+    },
+    {
+      "codigo": "04-04-004",
+      "nombre": "ECOGRAFÍA COMO APOYO A CIRUGÍA, O A PROCEDIMIENTO (DE TÓRAX, MUSCULAR, PARTES BLANDAS, ETC.)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 17040,
+      "valoresPublicados": [
+        17040,
+        8520,
+        22150,
+        13630,
+        27260,
+        18740
+      ]
+    },
+    {
+      "codigo": "04-04-005",
+      "nombre": "ECOGRAFÍA TRANSVAGINAL O TRANSRECTAL",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 15400,
+      "valoresPublicados": [
+        15400,
+        7700,
+        20020,
+        12320,
+        24640,
+        16940
+      ]
+    },
+    {
+      "codigo": "04-04-006",
+      "nombre": "ECOGRAFÍA GINECOLÓGICA, PELVIANA FEMENINA U OBSTÉTRICA CON ESTUDIO FETAL",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 14670,
+      "valoresPublicados": [
+        14670,
+        7330,
+        19070,
+        11730,
+        23470,
+        16130
+      ]
+    },
+    {
+      "codigo": "04-04-007",
+      "nombre": "ECOGRAFÍA TRANSVAGINAL PARA SEGUIMIENTO DE OVULACIÓN, PROCEDIMIENTO COMPLETO (6-8 SESIONES )",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 21410,
+      "valoresPublicados": [
+        21410,
+        10700,
+        27830,
+        17120,
+        34260,
+        23550
+      ]
+    },
+    {
+      "codigo": "04-04-008",
+      "nombre": "ECOGRAFÍA PARA SEGUIMIENTO DE OVULACIÓN, PROCEDIMIENTO COMPLETO (6 A 8 SESIONES)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 23980,
+      "valoresPublicados": [
+        23980,
+        11990,
+        31170,
+        19180,
+        38370,
+        26380
+      ]
+    },
+    {
+      "codigo": "04-04-009",
+      "nombre": "ECOGRAFÍA PÉLVICA MASCULINA (INCLUYE VEJIGA Y PRÓSTATA)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 15330,
+      "valoresPublicados": [
+        15330,
+        7660,
+        19930,
+        12260,
+        24530,
+        16860
+      ]
+    },
+    {
+      "codigo": "04-04-010",
+      "nombre": "ECOGRAFÍA RENAL (BILATERAL), O DE BAZO",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 19110,
+      "valoresPublicados": [
+        19110,
+        9550,
+        24840,
+        15280,
+        30580,
+        21020
+      ]
+    },
+    {
+      "codigo": "04-04-011",
+      "nombre": "ECOGRAFÍA ENCEFÁLICA (RN O LACTANTE)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 20630,
+      "valoresPublicados": [
+        20630,
+        10310,
+        26820,
+        16500,
+        33010,
+        22690
+      ]
+    },
+    {
+      "codigo": "04-04-012",
+      "nombre": "ECOGRAFÍA MAMARIA BILATERAL (INCLUYE DOPPLER)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 19210,
+      "valoresPublicados": [
+        19210,
+        9600,
+        24970,
+        15360,
+        30740,
+        21130
+      ]
+    },
+    {
+      "codigo": "04-04-013",
+      "nombre": "ECOGRAFÍA OCULAR, UNILATERAL O BILATERAL.",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 22290,
+      "valoresPublicados": [
+        22290,
+        11140,
+        28980,
+        17830,
+        35660,
+        24510
+      ]
+    },
+    {
+      "codigo": "04-04-014",
+      "nombre": "ECOGRAFÍA TESTICULAR (UNILATERAL O BILATERAL) (INCLUYE DOPPLER)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 18960,
+      "valoresPublicados": [
+        18960,
+        9480,
+        24650,
+        15170,
+        30340,
+        20860
+      ]
+    },
+    {
+      "codigo": "04-04-015",
+      "nombre": "ECOGRAFÍA TIROIDEA (INCLUYE DOPPLER)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 19210,
+      "valoresPublicados": [
+        19210,
+        9600,
+        24970,
+        15360,
+        30740,
+        21130
+      ]
+    },
+    {
+      "codigo": "04-04-016",
+      "nombre": "ECOGRAFÍA PARTES BLANDAS O MUSCULOESQUELÉTICA (CADA ZONA ANATÓMICA)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 19210,
+      "valoresPublicados": [
+        19210,
+        9600,
+        24970,
+        15360,
+        30740,
+        21130
+      ]
+    },
+    {
+      "codigo": "04-04-118",
+      "nombre": "ECOGRAFÍA VASCULAR (ARTERIAL Y VENOSA) PERIFÉRICA (BILATERAL)",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 63040,
+      "valoresPublicados": [
+        63040,
+        31520,
+        81950,
+        50430,
+        100860,
+        69340
+      ]
+    },
+    {
+      "codigo": "04-04-119",
+      "nombre": "ECOGRAFÍA DOPPLER DE VASOS DEL CUELLO",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 59530,
+      "valoresPublicados": [
+        59530,
+        29760,
+        77390,
+        47620,
+        95250,
+        65480
+      ]
+    },
+    {
+      "codigo": "04-04-120",
+      "nombre": "ECOGRAFÍA TRANSCRANEANA",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 63040,
+      "valoresPublicados": [
+        63040,
+        31520,
+        81950,
+        50430,
+        100860,
+        69340
+      ]
+    },
+    {
+      "codigo": "04-04-121",
+      "nombre": "ECOGRAFÍA ABDOMINAL O DE VASOS TESTICULARES",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 64960,
+      "valoresPublicados": [
+        64960,
+        32480,
+        84450,
+        51970,
+        103940,
+        71460
+      ]
+    },
+    {
+      "codigo": "04-04-122",
+      "nombre": "ECOGRAFÍA DOPPLER DE VASOS PLACENTARIOS",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 63040,
+      "valoresPublicados": [
+        63040,
+        31520,
+        81950,
+        50430,
+        100860,
+        69340
+      ]
+    },
+    {
+      "codigo": "04-04-218",
+      "nombre": "ELASTOGRAFÍA HEPÁTICA",
+      "seccion": "ULTRASONOGRAFIA",
+      "valorClp": 199030,
+      "valoresPublicados": [
+        199030,
+        99510
+      ]
+    },
+    {
+      "codigo": "04-05-001",
+      "nombre": "RESONANCIA MAGNÉTICA CRÁNEO ENCEFÁLICA U OÍDOS, BILATERAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 215350,
+      "valoresPublicados": [
+        215350,
+        107670
+      ]
+    },
+    {
+      "codigo": "04-05-002",
+      "nombre": "RESONANCIA MAGNÉTICA DE HIPOTÁLAMO - HIPÓFISIS",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 224230,
+      "valoresPublicados": [
+        224230,
+        112110
+      ]
+    },
+    {
+      "codigo": "04-05-003",
+      "nombre": "RESONANCIA MAGNÉTICA DE ÓRBITAS",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 201000,
+      "valoresPublicados": [
+        201000,
+        100500
+      ]
+    },
+    {
+      "codigo": "04-05-004",
+      "nombre": "RESONANCIA MAGNÉTICA DE ARTICULACIONES TEMPOROMANDIBULARES",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 216130,
+      "valoresPublicados": [
+        216130,
+        108060
+      ]
+    },
+    {
+      "codigo": "04-05-005",
+      "nombre": "RESONANCIA MAGNÉTICA DE COLUMNA CERVICAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 215350,
+      "valoresPublicados": [
+        215350,
+        107670
+      ]
+    },
+    {
+      "codigo": "04-05-006",
+      "nombre": "RESONANCIA MAGNÉTICA DE COLUMNA DORSAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 223960,
+      "valoresPublicados": [
+        223960,
+        111980
+      ]
+    },
+    {
+      "codigo": "04-05-007",
+      "nombre": "RESONANCIA MAGNÉTICA DE COLUMNA LUMBAR",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 215350,
+      "valoresPublicados": [
+        215350,
+        107670
+      ]
+    },
+    {
+      "codigo": "04-05-017",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE ENCÉFALO",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 230760,
+      "valoresPublicados": [
+        230760,
+        115380
+      ]
+    },
+    {
+      "codigo": "04-05-018",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE CUELLO",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 237300,
+      "valoresPublicados": [
+        237300,
+        118650
+      ]
+    },
+    {
+      "codigo": "04-05-019",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE TÓRAX",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 233510,
+      "valoresPublicados": [
+        233510,
+        116750
+      ]
+    },
+    {
+      "codigo": "04-05-020",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE ABDOMEN",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 218070,
+      "valoresPublicados": [
+        218070,
+        109030
+      ]
+    },
+    {
+      "codigo": "04-05-021",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE PELVIS",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 224230,
+      "valoresPublicados": [
+        224230,
+        112110
+      ]
+    },
+    {
+      "codigo": "04-05-022",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE EXTREMIDAD SUPERIOR UNILATERAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 221610,
+      "valoresPublicados": [
+        221610,
+        110800
+      ]
+    },
+    {
+      "codigo": "04-05-023",
+      "nombre": "RESONANCIA MAGNÉTICA ANGIOGRAFÍA DE EXTREMIDAD INFERIOR BILATERAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 215350,
+      "valoresPublicados": [
+        215350,
+        107670
+      ]
+    },
+    {
+      "codigo": "04-05-009",
+      "nombre": "RESONANCIA MAGNÉTICA DE TÓRAX ( CORAZÓN, ESTERNÓN, CLAVÍCULAS, ARTICULACIÓN ACROMIOCLAVICULAR, ESCÁPULA, COSTILLAS O ARTICULACIÓN ESTERNOCLAVICULAR). TODA LA PARED TORÁCICA O CADA SEGMENTO O ARTICULACIÓN. BILATERAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 230760,
+      "valoresPublicados": [
+        230760,
+        115380
+      ]
+    },
+    {
+      "codigo": "04-05-010",
+      "nombre": "RESONANCIA MAGNÉTICA DE ABDOMEN",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 215350,
+      "valoresPublicados": [
+        215350,
+        107670
+      ]
+    },
+    {
+      "codigo": "04-05-011",
+      "nombre": "RESONANCIA MAGNÉTICA DE PELVIS. INCLUYE: OSTEOARTICULAR DE SACROILIACAS U OSTEOARTICULAR DE SACROCOXIS U OSTEOARTICULAR DE HUESOS PÉLVICOS U ÓRGANOS PELVIANOS (INCLUYE GENITALES INTERNOS Y GASTROINTESTINAL)",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 215350,
+      "valoresPublicados": [
+        215350,
+        107670
+      ]
+    },
+    {
+      "codigo": "04-05-012",
+      "nombre": "RESONANCIA MAGNÉTICA DE ABDOMEN Y PELVIS",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 322990,
+      "valoresPublicados": [
+        322990,
+        161490
+      ]
+    },
+    {
+      "codigo": "04-05-098",
+      "nombre": "COLANGIORESONANCIA",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 144250,
+      "valoresPublicados": [
+        144250,
+        72120
+      ]
+    },
+    {
+      "codigo": "04-05-013",
+      "nombre": "RESONANCIA MAGNÉTICA DE RODILLA",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 176560,
+      "valoresPublicados": [
+        176560,
+        88280
+      ]
+    },
+    {
+      "codigo": "04-05-024",
+      "nombre": "RESONANCIA MAGNÉTICA DE MANO O MUÑECA",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 189210,
+      "valoresPublicados": [
+        189210,
+        94600
+      ]
+    },
+    {
+      "codigo": "04-05-025",
+      "nombre": "RESONANCIA MAGNÉTICA DE ANTEBRAZO O BRAZO",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 180930,
+      "valoresPublicados": [
+        180930,
+        90460
+      ]
+    },
+    {
+      "codigo": "04-05-026",
+      "nombre": "RESONANCIA MAGNÉTICA DE CODO",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 183850,
+      "valoresPublicados": [
+        183850,
+        91920
+      ]
+    },
+    {
+      "codigo": "04-05-027",
+      "nombre": "RESONANCIA MAGNÉTICA DE HOMBRO",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 176560,
+      "valoresPublicados": [
+        176560,
+        88280
+      ]
+    },
+    {
+      "codigo": "04-05-028",
+      "nombre": "RESONANCIA MAGNÉTICA DE PIE, ANTEPIE O TOBILLO",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 176560,
+      "valoresPublicados": [
+        176560,
+        88280
+      ]
+    },
+    {
+      "codigo": "04-05-029",
+      "nombre": "RESONANCIA MAGNÉTICA DE PIERNA",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 181710,
+      "valoresPublicados": [
+        181710,
+        90850
+      ]
+    },
+    {
+      "codigo": "04-05-030",
+      "nombre": "RESONANCIA MAGNÉTICA DE MUSLO O CADERA. UNILATERAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 183850,
+      "valoresPublicados": [
+        183850,
+        91920
+      ]
+    },
+    {
+      "codigo": "04-05-031",
+      "nombre": "RESONANCIA MAGNÉTICA DE MAMA (BILATERAL)",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 176560,
+      "valoresPublicados": [
+        176560,
+        88280
+      ]
+    },
+    {
+      "codigo": "04-05-032",
+      "nombre": "RESONANCIA MAGNÉTICA FETAL",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 211900,
+      "valoresPublicados": [
+        211900,
+        105950
+      ]
+    },
+    {
+      "codigo": "04-05-016",
+      "nombre": "RESONANCIA COLUMNA TOTAL (CERVICAL, DORSAL, LUMBAR)",
+      "seccion": "RESONANCIA MAGNÉTICA",
+      "valorClp": 381050,
+      "valoresPublicados": [
+        381050,
+        190520
+      ]
+    }
+  ]
+}

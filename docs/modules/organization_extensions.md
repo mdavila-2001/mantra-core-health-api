@@ -3,12 +3,12 @@
   Fuente real: src/modules/organization_extensions/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `organization_extensions`
 
-**Fuente:** [`src/modules/organization_extensions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/organization_extensions/README.md)
+**Fuente:** [`src/modules/organization_extensions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/README.md)
 · 4 controllers · 4 services · 5 repositories · 6 entidades · 8 DTO
 
 ---
@@ -18,6 +18,35 @@
 Especializa organizaciones del directorio como hospitales y gestiona sus líneas
 de servicio, licencias de instalación, afiliaciones entre organizaciones y
 fronteras de datos (residencia/RLS).
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/organization_extensions -name '*.controller.ts' | wc -l
+  find src/modules/organization_extensions -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/organization_extensions -name '*.entity.ts' | wc -l
+  find src/modules/organization_extensions -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **4 controllers, 9 rutas HTTP, 6 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 6 de 6 archivos `*.entity.ts`): `data_use_agreements`, `facility_licenses`, `hospital_service_lines`, `hospitals`, `organization_affiliations`, `organization_data_boundaries`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /orgext/affiliations` | SECURITY_ADMIN | `orgext-affiliations` |
+| `POST /orgext/affiliations/:id/terminate` | SECURITY_ADMIN | `orgext-affiliations` |
+| `POST /orgext/data-boundaries` | SECURITY_ADMIN | `orgext-data-boundaries` |
+| `POST /orgext/facility-licenses` | SECURITY_ADMIN | `orgext-facility-licenses` |
+| `POST /orgext/facility-licenses/:id/verify` | SECURITY_ADMIN | `orgext-facility-licenses` |
+| `POST /orgext/hospitals` | SECURITY_ADMIN | `orgext-hospitals` |
+| `POST /orgext/hospitals/:id/activate` | SECURITY_ADMIN | `orgext-hospitals` |
+| `POST /orgext/hospitals/:id/service-lines` | SECURITY_ADMIN | `orgext-hospitals` |
+| `DELETE /orgext/hospitals/:id/service-lines/:lineId` | SECURITY_ADMIN | `orgext-hospitals` |
 
 ## Endpoints
 
@@ -81,3 +110,11 @@ Pino estructurado por operación (`orgext.hospital.specialize`,
 - Smoke: `test/smoke/modules/organization_extensions.smoke.ts`
   (`ORGANIZATION_EXTENSIONS_SMOKE`).
 
+## Auditoría vigente
+
+Las mutaciones por UUID de hospital, licencia y afiliación no comprueban el
+tenant propietario antes de cambiar estado.
+
+```bash
+corepack yarn test src/modules/organization_extensions --runInBand --silent
+```

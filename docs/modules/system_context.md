@@ -3,12 +3,12 @@
   Fuente real: src/modules/system_context/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `system_context`
 
-**Fuente:** [`src/modules/system_context/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/system_context/README.md)
+**Fuente:** [`src/modules/system_context/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/system_context/README.md)
 · 1 controllers · 2 services · 1 repositories · 9 entidades · 1 DTO
 
 ---
@@ -19,6 +19,39 @@ Enumeraciones gobernadas por filas versionadas —sin tipos `ENUM` nativos de Po
 snapshot inmutable de opciones, publicación que invalida caché, binding a campos y validación en
 escritura; y contextos de sistema versionados con refresco idempotente, procedencia, promoción,
 binding a consumidores y vuelta atrás.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/system_context -name '*.controller.ts' | wc -l
+  find src/modules/system_context -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/system_context -name '*.entity.ts' | wc -l
+  find src/modules/system_context -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 13 rutas HTTP, 9 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `dynamic_enum_bindings`, `dynamic_enum_definitions`, `dynamic_enum_options`, `dynamic_enum_versions`, `system_context_bindings`, `system_context_inputs`, `system_context_refresh_runs`, `system_context_versions`, `system_contexts`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /system-context/dynamic-enums/bindings` | sesión | `system-context` |
+| `GET /system-context/dynamic-enums` | pública | `system-context` |
+| `POST /system-context/dynamic-enums/definitions` | TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/versions` | TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/versions/:version/publish` | TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/bindings` | MODULE_OWNER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/resolve` | WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/dynamic-enums/definitions/:defId/retire` | PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts` | PLATFORM_ADMIN, GOVERNANCE | `system-context` |
+| `POST /system-context/contexts/:id/refresh` | SYSTEM, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts/:id/versions/:version/activate` | PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts/:id/bindings` | MODULE_OWNER, PLATFORM_ADMIN | `system-context` |
+| `POST /system-context/contexts/:id/rollback` | PLATFORM_ADMIN | `system-context` |
 
 ## Casos de uso cubiertos (12)
 
@@ -125,16 +158,16 @@ sets cerrados", y esa validación vive en `terminology`, no aquí.
 
 `PLATFORM_ADMIN` cubre el módulo. `TERMINOLOGY_ENGINEER` define enumeraciones, redacta y publica
 versiones. `MODULE_OWNER` crea bindings de enum y de contexto. `WRITE_SERVICE` resuelve valores en
-escritura. `GOVERNANCE` define contextos. `SYSTEM` ejecuta el refresco.
-
-Ninguna ruta es pública.
+escritura. `GOVERNANCE` define contextos. `SYSTEM` ejecuta el refresco. `GET /dynamic-enums` es
+`@Public()` para poblar altas anónimas; `GET /dynamic-enums/bindings` queda autenticado sin rol
+específico.
 
 ## Concurrencia
 
-`FOR UPDATE` sobre la definición al redactar —el número de versión sale de un máximo, y dos
-redacciones simultáneas darían el mismo número—, sobre la versión y la publicada al publicar, sobre
-los bindings al retirar, sobre el contexto en todo lo que mueva `current_version_id`, y sobre la
-versión activa al promover o volver atrás. `row_version` aporta bloqueo optimista.
+`FOR UPDATE` protege la definición al redactar, la versión publicada al publicar, los bindings al
+retirar, y el contexto/versiones que cambian `current_version_id`. `row_version` aporta bloqueo
+optimista. La creación concurrente de bindings y sus ventanas requiere el endurecimiento detallado
+en el informe de revisión.
 
 ## Logs
 
@@ -144,24 +177,27 @@ contexto. No se loguea el contenido del contexto.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=system_context` — 76 pruebas (65 de servicio + 11 de delegación del
-controlador).
+`corepack yarn test src/modules/system_context --runInBand --silent` — **3 suites y 99 pruebas**
+aprobadas en la revisión de 2026-10-04. Son pruebas unitarias con repositorios simulados; no
+comprueban constraints PostgreSQL, dos transacciones en paralelo ni la respuesta HTTP del filtro
+global.
 
-## Pendiente
+## Revisión de seguridad e integridad
+
+La resolución de tenant está centralizada en `TenantContextInterceptor`, que rechaza propietarios
+contradictorios y puede fijar RLS. Riesgos conocidos: la clave de idempotencia global del refresh,
+la carrera al crear bindings, el DTO de procedencia que admite campos `NOT NULL` ausentes y reasons
+no versionados.
+
+## Fuera de este módulo
 
 - **Caché en Redis** (`redis_runtime.dynamic_enum_cache_entries`,
   `system_context_cache_entries`): el módulo emite y devuelve el `cacheToken`, que es lo que
   identifica la entrada; poblar e invalidar la caché es del módulo de almacenamiento políglota.
 - **Validación contra `system_ops.entity_registry`**: el caso de uso pide validar
-  `target_schema/entity/field` y `source_schema/entity` contra el registro de entidades. Escribir o
-  leer ahí cruzaría la frontera del esquema; queda para cuando exista el cliente gobernado de
-  `system_ops`.
+  `target_schema/entity/field` y `source_schema/entity` contra el registro de entidades; el módulo no
+  lo hace, porque escribir o leer ahí cruzaría la frontera del esquema.
 - **Resolución de `value_set_version_id` vigente**: el caso de uso la resuelve contra
   `terminology.value_set_versions`. Aquí se acepta la que entrega el llamante.
-- **Outbox** (módulo 35): `DynamicEnumDefinitionCreated`, `DynamicEnumVersionDrafted`,
-  `DynamicEnumVersionPublished`, `DynamicEnumBindingCreated`, `DynamicEnumValidationRejected`,
-  `DynamicEnumDefinitionRetired`, `SystemContextCreated`, `SystemContextRefreshCompleted`,
-  `SystemContextVersionActivated`, `SystemContextBound`, `SystemContextRolledBack`.
-- **Proyecciones y series**: `read_models.*` y `time_series.context_refresh_series` los alimenta el
-  outbox.
-
+- **Proyecciones y series**: `read_models.*` y `time_series.context_refresh_series` se alimentan
+  desde el outbox.

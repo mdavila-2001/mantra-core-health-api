@@ -1392,7 +1392,7 @@ def main():
 
     collection = {
         'info': {
-            'name': f"{spec['info'].get('title', 'REDESA Health API')} · {total} endpoints",
+            'name': f"{spec['info'].get('title', 'ALOVIDA Health API')} · {total} endpoints",
             'description': (
                 f"Colección generada desde `openapi/openapi.json` con "
                 f"`yarn postman:generate` — **no editar a mano**.\n\n"

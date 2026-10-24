@@ -1,0 +1,208 @@
+{
+  "code": "NEUMO_CTRL_EPOC",
+  "name": "Control de EPOC",
+  "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Global Strategy for the Diagnosis, Management and Prevention of COPD",
+    "organization": "Global Initiative for Chronic Obstructive Lung Disease (GOLD)",
+    "url": "https://goldcopd.org/",
+    "license": "Guía de acceso público; se usan sus categorías clínicas, no su texto",
+    "retrievedAt": "2026-10-02",
+    "note": "Disnea (mMRC), exacerbaciones y grupo de manejo según las categorías GOLD; exposición a biomasa."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de EPOC",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "epoc_mmrc",
+      "name": "Disnea (escala mMRC)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Grado 0 — disnea sólo con ejercicio intenso",
+        "Grado 1 — al caminar rápido o subir una pendiente",
+        "Grado 2 — camina más despacio que sus pares o se detiene en llano",
+        "Grado 3 — se detiene a los 100 metros o a los pocos minutos",
+        "Grado 4 — no sale de casa o se ahoga al vestirse"
+      ]
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "epoc_exacerbaciones_anio",
+      "name": "Exacerbaciones en el último año",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "epoc_internaciones_anio",
+      "name": "Internaciones por exacerbación en el último año",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "vef1",
+      "name": "VEF₁ posbroncodilatador (% del predicho)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "gold_grupo",
+      "name": "Grupo GOLD",
+      "dataType": "string",
+      "required": false,
+      "options": ["A", "B", "E"]
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "tabaco",
+      "name": "Tabaco",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nunca fumó", "Exfumador", "Fumador actual"]
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "epoc_biomasa",
+      "name": "Exposición a humo de leña o biomasa",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "oxigeno_domiciliario",
+      "name": "Usa oxígeno en domicilio",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: EPOC",
+      "code": "tecnica_inhalatoria",
+      "name": "Técnica inhalatoria",
+      "dataType": "string",
+      "required": false,
+      "options": ["Correcta", "Con errores", "No evaluada"]
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin exacerbaciones",
+        "No fuma",
+        "Vacunas al día (influenza y neumococo)",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Dejar de fumar",
+        "Técnica inhalatoria",
+        "Rehabilitación respiratoria",
+        "Signos de exacerbación"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

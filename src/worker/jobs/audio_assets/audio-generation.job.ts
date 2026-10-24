@@ -11,6 +11,7 @@ import {
 import { AudioMetricsService } from '../../../modules/audio_assets/infrastructure/audio-metrics.service';
 import { SystemApiClient } from '../../system-api-client.service';
 import { registerQueueJobHandler } from '../messaging/queue.job';
+import { publishAudioBytes } from '../files/remote-storage-publication';
 
 interface ClaimedAudioJob {
   id: string;
@@ -109,25 +110,34 @@ export class AudioGenerationJob implements OnModuleInit {
       );
       this.tracing.addEvent('audio.provider.done');
       const storageStartedAt = Date.now();
-      const stored = await this.storage.store({
-        buffer: result.audio,
-        originalName: `${assetId}.audio`,
-        mimeType: result.mimeType,
-      });
+      const stored = await publishAudioBytes(
+        this.api,
+        this.storage,
+        assetId,
+        job.id,
+        {
+          buffer: result.audio,
+          originalName: `${assetId}.audio`,
+          mimeType: result.mimeType,
+        },
+        async (publicationStored, publication) => {
+          await this.api.post(
+            `/internal/audio-assets/${assetId}/generated`,
+            {
+              storageUri: publicationStored.storageUri,
+              checksumSha256: publicationStored.contentHash,
+              bytes: publicationStored.sizeBytes,
+              durationMs: result.durationMs,
+              credits: result.usage?.credits ?? result.usage?.characters,
+              ...(publication ? { publication } : {}),
+            },
+            { idempotent: true },
+          );
+        },
+      );
       this.metrics.observeStorage(
         stored.storageUri.startsWith('s3://') ? 's3' : 'local',
         Date.now() - storageStartedAt,
-      );
-      await this.api.post(
-        `/internal/audio-assets/${assetId}/generated`,
-        {
-          storageUri: stored.storageUri,
-          checksumSha256: stored.contentHash,
-          bytes: stored.sizeBytes,
-          durationMs: result.durationMs,
-          credits: result.usage?.credits ?? result.usage?.characters,
-        },
-        { idempotent: true },
       );
       this.metrics.generated(this.tts.providerName, Date.now() - startedAt);
       this.logger.info(

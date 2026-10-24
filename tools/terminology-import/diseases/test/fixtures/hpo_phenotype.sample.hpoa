@@ -1,0 +1,10 @@
+#description: "HPO annotations for rare diseases [8478: OMIM; 47: DECIPHER; 4357 ORPHANET]"
+#version: 2026-09-02
+#tracker: https://github.com/obophenotype/human-phenotype-ontology/issues
+#hpo-version: http://purl.obolibrary.org/obo/hp/releases/2026-09-01/hp.json
+database_id	disease_name	qualifier	hpo_id	reference	evidence	onset	frequency	sex	modifier	aspect	biocuration
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0011097	PMID:31675180	PCS		1/2			P	HPO:probinson[2021-06-21]
+OMIM:619340	Developmental and epileptic encephalopathy 96		HP:0002187	PMID:31675180	PCS		1/1			P	HPO:probinson[2021-06-21]
+OMIM:300425	Autism susceptibility, X-linked 1		HP:0000750	OMIM:300425	IEA		HP:0040282			P	HPO:skoehler[2010-06-20]
+ORPHA:558	Marfan syndrome		HP:0000768	ORPHA:558	TAS		HP:0040281			P	ORPHA:orphadata[2026-09-02]
+DECIPHER:16	22q11 deletion syndrome (Velocardiofacial / DiGeorge syndrome)		HP:0005403	DECIPHER:16	IEA					P	HPO:skoehler[2013-05-29]

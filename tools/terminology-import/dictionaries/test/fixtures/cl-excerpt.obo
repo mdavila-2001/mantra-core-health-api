@@ -1,0 +1,113 @@
+format-version: 1.2
+data-version: releases/2026-06-08
+subsetdef: abnormal_slim ""
+
+[Typedef]
+id: BFO:0000050
+name: part of
+def: "a core relation that holds between a part and its whole" []
+subset: http://purl.obolibrary.org/obo/valid_for_go_annotation_extension
+subset: http://purl.obolibrary.org/obo/valid_for_go_gp2term
+subset: http://purl.obolibrary.org/obo/valid_for_go_ontology
+subset: http://purl.obolibrary.org/obo/valid_for_gocam
+property_value: IAO:0000116 "Everything is part of itself. Any part of any part of a thing is itself part of that thing. Two distinct things cannot be part of each other." xsd:string
+property_value: IAO:0000116 "Occurrents are not subject to change and so parthood between occurrents holds for all the times that the part exists. Many continuants are subject to change, so parthood between continuants will only hold at certain times, but this is difficult to specify in OWL. See http://purl.obolibrary.org/obo/ro/docs/temporal-semantics/" xsd:string
+property_value: IAO:0000116 "Parthood requires the part and the whole to have compatible classes: only an occurrent can be part of an occurrent; only a process can be part of a process; only a continuant can be part of a continuant; only an independent continuant can be part of an independent continuant; only an immaterial entity can be part of an immaterial entity; only a specifically dependent continuant can be part of a specifically dependent continuant; only a generically dependent continuant can be part of a generically dependent continuant. (This list is not exhaustive.)\n\nA continuant cannot be part of an occurrent: use 'participates in'. An occurrent cannot be part of a continuant: use 'has participant'. A material entity cannot be part of an immaterial entity: use 'has location'. A specifically dependent continuant cannot be part of an independent continuant: use 'inheres in'. An independent continuant cannot be part of a specifically dependent continuant: use 'bearer of'." xsd:string
+property_value: seeAlso http://ontologydesignpatterns.org/wiki/Community:Parts_and_Collections
+property_value: seeAlso http://ontologydesignpatterns.org/wiki/Submissions:PartOf
+property_value: seeAlso "http://www.obofoundry.org/ro/#OBO_REL:part_of" xsd:string
+property_value: seeAlso "https://wiki.geneontology.org/Part_of" xsd:anyURI
+is_transitive: true
+is_a: RO:0002131 ! overlaps
+inverse_of: BFO:0000051 ! has part
+
+[Typedef]
+id: RO:0002202
+name: develops from
+def: "x develops from y if and only if either (a) x directly develops from y or (b) there exists some z such that x directly develops from z and z develops from y" []
+comment: This is the transitive form of the develops from relation
+domain: BFO:0000004
+range: BFO:0000004
+is_transitive: true
+is_a: RO:0002254 ! has developmental contribution from
+is_a: RO:0002258 ! developmentally preceded by
+inverse_of: RO:0002203 ! develops into
+
+[Typedef]
+id: RO:0002162
+name: in taxon
+def: "x is in taxon y if an only if y is an organism, and the relationship between x and y is one of: part of (reflexive), developmentally preceded by, derives from, secreted by, expressed." []
+comment: Connects a biological entity to its taxon of origin.
+subset: ro-eco
+synonym: "life cycle stage of" NARROW []
+property_value: seeAlso https://github.com/obophenotype/uberon/wiki/Taxon-constraints
+range: COB:0000022
+holds_over_chain: RO:0002005 RO:0002162
+holds_over_chain: RO:0002131 RO:0002162
+holds_over_chain: RO:0002134 RO:0002162
+holds_over_chain: RO:0002150 RO:0002162
+holds_over_chain: RO:0002170 RO:0002162
+holds_over_chain: RO:0002176 RO:0002162
+holds_over_chain: RO:0002206 RO:0002162
+holds_over_chain: RO:0002211 RO:0002162
+holds_over_chain: RO:0002215 RO:0002162
+holds_over_chain: RO:0002254 RO:0002162
+holds_over_chain: RO:0002256 RO:0002162
+holds_over_chain: RO:0002295 RO:0002162
+holds_over_chain: RO:0002387 RO:0002162
+holds_over_chain: RO:0002490 RO:0002162
+holds_over_chain: RO:0003000 RO:0002162
+holds_over_chain: RO:0003001 RO:0002162
+is_a: RO:0002320 ! evolutionarily related to
+
+[Term]
+id: CL:0000084
+name: T cell
+alt_id: CL:0000804
+alt_id: CL:0000812
+def: "A type of lymphocyte whose defining characteristic is the expression of a T cell receptor complex." [GOC:add, GOC:tfm, ISBN:0781735149]
+subset: cellxgene_subset
+subset: human_reference_atlas
+subset: human_subset
+subset: mouse_subset
+synonym: "immature T cell" RELATED []
+synonym: "mature T cell" RELATED []
+synonym: "T lymphocyte" EXACT []
+synonym: "T-cell" EXACT []
+synonym: "T-lymphocyte" EXACT []
+xref: BTO:0000782
+xref: CALOHA:TS-1001
+xref: FMA:62870
+xref: MESH:D013601
+xref: VHOG:0001479
+xref: ZFA:0009046 {sssom:mapping_justification="https://w3id.org/semapv/vocab/UnspecifiedMatching"}
+is_a: CL:0000542 {is_inferred="true"} ! lymphocyte
+intersection_of: CL:0000542 ! lymphocyte
+intersection_of: RO:0002215 GO:0002456 ! capable of T cell mediated immunity
+disjoint_from: CL:0000945 ! lymphocyte of B lineage
+relationship: RO:0002202 CL:0000827 ! develops from pro-T cell
+relationship: RO:0002215 GO:0002456 ! capable of T cell mediated immunity
+
+[Term]
+id: CL:0000236
+name: B cell
+def: "A lymphocyte of B lineage that is capable of B cell mediated immunity." [GO_REF:0000031, GOC:add, GOC:tfm, ISBN:0781735149]
+subset: blood_and_immune_upper_slim
+subset: cellxgene_subset
+subset: human_reference_atlas
+subset: human_subset
+subset: mouse_subset
+synonym: "B lymphocyte" EXACT []
+synonym: "B-cell" EXACT []
+synonym: "B-lymphocyte" EXACT []
+xref: BTO:0000776
+xref: CALOHA:TS-0068
+xref: FMA:62869
+xref: MESH:D001402
+xref: VHOG:0001480
+xref: ZFA:0009142 {sssom:mapping_justification="https://w3id.org/semapv/vocab/UnspecifiedMatching"}
+is_a: CL:0000945 {is_inferred="true"} ! lymphocyte of B lineage
+intersection_of: CL:0000945 ! lymphocyte of B lineage
+intersection_of: RO:0002215 GO:0019724 ! capable of B cell mediated immunity
+relationship: RO:0002215 GO:0019724 ! capable of B cell mediated immunity
+

@@ -1,13 +1,16 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import type { AuthenticatedUser } from '../../../common';
+import { getCurrentTenantId, type AuthenticatedUser } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
-import { SCHED } from '../../scheduling/scheduling.concepts';
-import { SchedulingBookingsRepository } from '../../scheduling/repositories';
-import { diaLocalDe } from '../../scheduling/scheduling-time';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
+import { SchedulingBookingsRepository } from '../../scheduling/infrastructure/repositories';
+import { localDayOf } from '../../scheduling/domain/time/scheduling-time';
 import {
   AllergyIntolerancesRepository,
+  // BR-14 (CL-11): lectura de reacciones de alergia, independiente del
+  // repositorio de M3.
+  AllergyReactionsReadRepository,
   CareEpisodesRepository,
   ConditionsRepository,
   EncountersRepository,
@@ -23,19 +26,40 @@ import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
+// FT-07-R05/R08: el PDP resuelve si hay grant/relación/representación vigente
+// más allá del turno de hoy. `AuthzModule` lo exporta justamente para esto.
+import { AuthzPdpService } from '../../authz/services';
+// El permiso de lectura no puede depender sólo del turno del día: el PDP
+// (`AuthzPdpService`) ya define y evalúa esta base de acceso ("relación
+// asistencial vigente") para el resto del sistema. Se provee acá directo —y no
+// se importa `AuthzModule` entero— por el mismo criterio que el resto de este
+// archivo: es una clase sin estado que recibe el `EntityManager` por
+// parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
+import { CareRelationshipsRepository } from '../../authz/repositories';
+import { PatientRepresentationService } from '../../profiles/application/services/patient-representation.service';
+// N-04 (BR-13 / M3): toda lectura del resumen clínico deja su fila en
+// `audit.data_access_log`, como ya hace el break-the-glass. Repositorio sin
+// estado por `EntityManager`, provisto en `ClinicalModule` sin importar más de
+// `AuditModule` (que sólo exporta la cadena WORM de mutaciones).
+import { DataAccessLogRepository } from '../../audit/repositories';
+// BR-14 (CL-10): el motivo del último cambio de estado de una condición vive
+// en `audit.conditions_history.data_snapshot` (decisión D-BR14-04, sin
+// columna nueva). `HistoryRepository.latestBySource` ya resuelve "última
+// revisión por agregado en lote" para cualquier dominio registrado — se
+// reutiliza en vez de escribir la misma consulta de nuevo.
+import { HistoryRepository } from '../../audit/repositories';
+import { AUD } from '../../audit/audit.concepts';
 import type { PatientClinicalSummaryResponseDto } from '../dto';
-import { PatientPortalProxies } from '../../profiles/entities/patient_portal_proxies.entity';
-import { PROF } from '../../profiles/profiles.concepts';
-import { ValueSets } from '../../terminology/entities/value_sets.entity';
+import {
+  hasVerification,
+  verificationFromSnapshot,
+} from './condition-verification';
 
-/** Códigos internos de value set requeridos para lectura delegada. */
-export const CLINICAL_PROXY_SCOPE = {
-  SUMMARY_READ: 'patient-portal-clinical-summary-read',
-  PRESCRIPTIONS_READ: 'patient-portal-prescriptions-read',
-} as const;
-type ClinicalProxyScope =
-  (typeof CLINICAL_PROXY_SCOPE)[keyof typeof CLINICAL_PROXY_SCOPE];
+/** Recurso que se asienta en `audit.data_access_log` al leer el resumen. */
+const SUMMARY_RESOURCE_TYPE = 'PATIENT_CLINICAL_SUMMARY';
+/** Propósito de uso que respalda la lectura del resumen: la atención. */
+const SUMMARY_PURPOSE = 'TREATMENT';
 
 /**
  * Cara de lectura del registro clínico (UC-39-20).
@@ -61,7 +85,7 @@ type ClinicalProxyScope =
  * producto a propósito: equivocarse por cuatro horas en un límite de día le cierra la
  * historia a quien está atendiendo al paciente.
  */
-const ZONA_POR_DEFECTO = 'America/La_Paz';
+const DEFAULT_ZONE = 'America/La_Paz';
 
 /**
  * Roles que leen la historia de OTRA persona: los que atienden.
@@ -70,7 +94,7 @@ const ZONA_POR_DEFECTO = 'America/La_Paz';
  * ya no ramifica. `SUPERADMIN` no está en la lista — tiene su propio camino, explícito,
  * al principio del gate.
  */
-const ROLES_QUE_ATIENDEN: readonly string[] = ['CLINICIAN', 'PRACTITIONER'];
+const ROLES_THAT_ATTEND: readonly string[] = ['CLINICIAN', 'PRACTITIONER'];
 
 /**
  * Estados de reserva que cuentan como «turno de hoy» para abrir la historia.
@@ -80,15 +104,22 @@ const ROLES_QUE_ATIENDEN: readonly string[] = ['CLINICIAN', 'PRACTITIONER'];
  * evolución. Quedan afuera los que no comprometen —`REQUESTED`, `PENDING_CONFIRM`—
  * y los que dejaron de existir: `CANCELLED` y `NO_SHOW`.
  */
-const ESTADOS_QUE_HABILITAN: readonly string[] = [
+const STATES_THAT_ENABLE: readonly string[] = [
   CONCEPTS.BOOKING_CONFIRMED,
   CONCEPTS.BOOKING_CHECKED_IN,
   SCHED.BOOKING_IN_PROGRESS,
   SCHED.BOOKING_COMPLETED,
 ];
 
+/**
+ * El 403 de la historia clínica, idéntico para lectura y escritura: no debe
+ * distinguir un paciente ajeno de un uuid inventado.
+ */
+const WITHOUT_ACCESS_TO_HISTORY =
+  'Sólo puede consultar su propia historia clínica.';
+
 /** Ventana que se mira alrededor de ahora; el día exacto lo decide la zona de la sede. */
-const VENTANA_MS = 48 * 60 * 60 * 1000;
+const WINDOW_MS = 48 * 60 * 60 * 1000;
 
 @Injectable()
 export class ClinicalReadService {
@@ -102,12 +133,14 @@ export class ClinicalReadService {
    * @param observationsRepo - Acceso a observaciones.
    * @param encountersRepo - Acceso a encuentros.
    * @param episodesRepo - Acceso a episodios de cuidado (internaciones).
+   * @param careRelationshipsRepo - Acceso a relaciones asistenciales vigentes.
    * @param logger - Registro estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly conditionsRepo: ConditionsRepository,
     private readonly allergiesRepo: AllergyIntolerancesRepository,
+    private readonly allergyReactionsRepo: AllergyReactionsReadRepository,
     private readonly medicationRequestsRepo: MedicationRequestsRepository,
     private readonly observationsRepo: ObservationsRepository,
     private readonly encountersRepo: EncountersRepository,
@@ -116,7 +149,16 @@ export class ClinicalReadService {
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
     private readonly bookingsRepo: SchedulingBookingsRepository,
+    private readonly pdp: AuthzPdpService,
+    private readonly careRelationshipsRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
+    // B.1 — la historia de un menor la lee también quien lo representa. Quién
+    // representa a quién lo sabe `profiles`; acá sólo se pregunta.
+    private readonly representation: PatientRepresentationService,
+    // N-04 — la lectura del resumen se asienta en `audit.data_access_log`.
+    private readonly dataAccessLogRepo: DataAccessLogRepository,
+    // BR-14 (CL-10) — el motivo del último cambio de estado de una condición.
+    private readonly historyRepo: HistoryRepository,
   ) {
     this.logger.setContext(ClinicalReadService.name);
   }
@@ -134,14 +176,17 @@ export class ClinicalReadService {
    * si el soporte no debe leer PHI sin turno, se saca de acá y se decide qué lo
    * reemplaza — hoy hay pruebas de integración que dependen de este acceso.
    *
-   * ## 2 · Quien atiende: sólo con turno de HOY con ESE paciente
+   * ## 2 · Quien atiende: turno de HOY con ESE paciente, o relación asistencial vigente
    *
    * Antes pasaba cualquiera con el rol. El comentario que lo justificaba decía que a
    * quién puede atender lo decide la asignación de roles «y no este endpoint» — pero esa
    * asignación no existía: la tabla de permisos por paciente está vacía y nadie la
    * consulta. En los hechos, cualquier médico con sesión leía la historia de cualquier
    * persona. Esta es la regla mínima defendible mientras el grupo define el modelo de
-   * consentimiento: **nace del turno confirmado y dura el día del turno**.
+   * consentimiento: **nace del turno confirmado, o de una relación asistencial que
+   * `authz` ya declara vigente** (ALV-029: sin esta segunda vía, un profesional con
+   * paciente asignado pero sin cupo agendado para hoy caía en {@link assertOwnRecord}
+   * como un desconocido).
    *
    * «Hoy» es el día de la SEDE, no el del servidor. Un turno de las 23:30 en La Paz ya
    * cayó en «mañana» para UTC, y con la fecha del servidor el profesional se quedaría
@@ -167,55 +212,195 @@ export class ClinicalReadService {
    * @param actor - Quién la pide.
    * @throws ForbiddenException si no la atiende hoy ni es su titular.
    */
-  async assertPuedeLeerHistoria(
+  async assertCanReadHistory(
     patientProfileId: string,
     actor: AuthenticatedUser,
-    proxyScope: ClinicalProxyScope = CLINICAL_PROXY_SCOPE.SUMMARY_READ,
   ): Promise<void> {
     if (actor.roles.includes('SUPERADMIN')) return;
 
-    if (!actor.roles.some((rol) => ROLES_QUE_ATIENDEN.includes(rol))) {
-      await this.assertOwnRecord(
-        patientProfileId,
-        actor,
-        undefined,
-        proxyScope,
-      );
+    if (!actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
+      await this.assertOwnRecord(patientProfileId, actor);
       return;
     }
 
     const em = this.em.fork();
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    const perfilProfesional = link
+    const professionalProfile = link
       ? await this.practitionerProfilesRepo.findById(em, link.personId)
       : null;
 
     if (
-      perfilProfesional &&
-      (await this.estaAtendiendo(
+      professionalProfile &&
+      (await this.isAttending(
         em,
-        perfilProfesional.profileId,
+        professionalProfile.profileId,
         patientProfileId,
       ))
     ) {
       return;
     }
 
-    // Sin turno hoy no alcanza el rol; queda la titularidad, que además cubre al
-    // profesional que lee su propia historia.
-    await this.assertOwnRecord(patientProfileId, actor, link, proxyScope);
+    // FT-07-R05/R06/R07/R08: sin turno hoy, todavía puede haber una relación
+    // asistencial o un acceso clínico que el paciente autorizó explícitamente
+    // —el flujo de `POST /authz/care-relationships/request` +
+    // `.../respond`— o una representación legal vigente. El PDP de `authz` ya
+    // resuelve exactamente esa pregunta; se consulta acá para no reimplementar
+    // la evaluación (deny-overrides, vigencia, propósito) en dos lugares.
+    if (
+      actor.practitionerProfileId &&
+      (await this.hasAuthorizedAccess(patientProfileId, actor))
+    ) {
+      return;
+    }
+
+    // BR-20 / CV-19: el acceso de emergencia (`break-the-glass`) es un grant con
+    // propósito EMERGENCY y nivel ELEVATED que emite el propio módulo `authz`,
+    // auditado y con ventana corta. El PDP compara propósito con propósito, así
+    // que la pregunta por TREATMENT de arriba lo deja afuera: la médica que
+    // acababa de obtener el 201 de la emergencia seguía recibiendo 403 al abrir
+    // la historia (verificado contra la API viva el 2026-09-26 con una cuenta
+    // CLINICAL_APPROVER real; SUPERADMIN no lo mostraba porque pasa antes). Se
+    // pregunta también por EMERGENCY. No exige `practitionerProfileId`: el grant
+    // se otorga al usuario, no al perfil profesional.
+    if (
+      await this.hasAuthorizedAccess(
+        patientProfileId,
+        actor,
+        'READ',
+        'EMERGENCY',
+      )
+    ) {
+      return;
+    }
+
+    // Sin turno hoy ni autorización vigente no alcanza el rol; queda la
+    // titularidad, que además cubre al profesional que lee su propia historia.
+    await this.assertOwnRecord(patientProfileId, actor, link);
+  }
+
+  /**
+   * MCH-007: ¿puede este actor **escribir** en la historia de este paciente?
+   *
+   * Hasta ahora las escrituras del expediente pasaban por
+   * {@link assertCanReadHistory}, que le pregunta al PDP por `READ`: un
+   * grant de sólo lectura —el que crea el paciente al aprobar una solicitud de
+   * acceso (`practitioner-access-requests`)— alcanzaba para escribir. Y su
+   * último recurso, la titularidad, dejaba al profesional escribir en su propia
+   * historia.
+   *
+   * La escritura pide lo mismo que la lectura salvo en esas dos cosas:
+   *
+   * 1. `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
+   * 2. Sólo un rol que atiende escribe. Un paciente no escribe su expediente.
+   * 3. Estar atendiendo —consulta en curso, turno vivo de hoy o relación
+   *    asistencial vigente— habilita, con el mismo criterio que la lectura.
+   * 4. Sin eso, el PDP con la acción **`WRITE`**: un grant `READ` no alcanza el
+   *    rango (`CLINICAL_ACTION_RANK`), uno `WRITE`/`FULL` sí.
+   * 5. No hay red de titularidad: nadie escribe su propia historia por serlo.
+   *
+   * El 403 lleva el mismo texto que el de la lectura para que no distinga
+   * «no es tuya» de «no existe».
+   *
+   * Firmar es otra pregunta —quién firma—, y cada servicio la resuelve contra
+   * su propio recurso: poder escribir no es poder firmar por otro profesional.
+   *
+   * @param patientProfileId - La historia en la que se quiere escribir.
+   * @param actor - Quién escribe.
+   * @throws ForbiddenException si no hay base de escritura sobre ese paciente.
+   */
+  async assertCanWriteHistory(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (actor.roles.includes('SUPERADMIN')) return;
+
+    if (actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))) {
+      const em = this.em.fork();
+      const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+      const professionalProfile = link
+        ? await this.practitionerProfilesRepo.findById(em, link.personId)
+        : null;
+      if (
+        professionalProfile &&
+        (await this.isAttending(
+          em,
+          professionalProfile.profileId,
+          patientProfileId,
+        ))
+      ) {
+        return;
+      }
+      if (
+        actor.practitionerProfileId &&
+        (await this.hasAuthorizedAccess(patientProfileId, actor, 'WRITE'))
+      ) {
+        return;
+      }
+      // Mismo caso que en la lectura: el grant de emergencia (EMERGENCY,
+      // ELEVATED) sólo aparece si se pregunta por su propósito. El nivel lo
+      // sigue decidiendo el PDP (`CLINICAL_LEVEL_RANK`), no este servicio.
+      if (
+        await this.hasAuthorizedAccess(
+          patientProfileId,
+          actor,
+          'WRITE',
+          'EMERGENCY',
+        )
+      ) {
+        return;
+      }
+    }
+
+    throw new ForbiddenException(WITHOUT_ACCESS_TO_HISTORY);
+  }
+
+  /**
+   * ¿Hay una base legítima de acceso más allá del turno de hoy?
+   *
+   * Consulta el PDP de `authz` (`clinical_access_grants` / `care_relationships`
+   * / representación legal) para el propósito `TREATMENT`. Nunca lanza: un
+   * `DENY` del PDP simplemente deja que {@link assertCanReadHistory} siga a
+   * `assertOwnRecord`, que es quien decide el mensaje final.
+   */
+  private async hasAuthorizedAccess(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+    action: 'READ' | 'WRITE' = 'READ',
+    purposeOfUse: 'TREATMENT' | 'EMERGENCY' = 'TREATMENT',
+  ): Promise<boolean> {
+    const tenantId = actor.tenantIds?.[0];
+    if (!tenantId) return false;
+    const decision = await this.pdp.evaluate(
+      {
+        userId: actor.id,
+        tenantId,
+        resource: 'clinical.patient_record',
+        action,
+        patientProfileId,
+        practitionerProfileId: actor.practitionerProfileId,
+        purposeOfUse,
+      },
+      actor,
+    );
+    return decision.decision === 'PERMIT';
   }
 
   /**
    * ¿Está este profesional atendiendo a esta persona?
    *
-   * Dos caminos, y el orden importa porque el barato va primero:
+   * Tres caminos, y el orden importa porque el barato va primero:
    *
    * 1. **Hay una consulta en curso.** Sin mirar el calendario. Que el
    *    profesional haya apretado «Iniciar consulta» es la afirmación más fuerte
    *    que el sistema tiene de que está atendiendo a esa persona **ahora**; la
    *    fecha del cupo sólo dice cuándo se pensaba que iba a atenderla.
    * 2. **Hay una reserva viva que cae hoy**, que es la regla de siempre.
+   * 3. **Hay una relación asistencial vigente** (`authz.care_relationships`,
+   *    ACTIVA y dentro de su ventana `valid_from`/`valid_to`) — el paciente
+   *    asignado al profesional aunque hoy no tenga cupo agendado con él
+   *    (ALV-029). Es la misma base de acceso que ya evalúa el PDP
+   *    (`AuthzPdpService`) para el resto del sistema; acá se reusa el mismo
+   *    criterio, no uno nuevo.
    *
    * ## Por qué se agregó el primero
    *
@@ -240,13 +425,13 @@ export class ClinicalReadService {
    * La alternativa era la contraria —prohibir iniciar una cita que no sea de
    * hoy—, y se descartó porque deshacía la corrección #15.
    */
-  private async estaAtendiendo(
+  private async isAttending(
     em: EntityManager,
     practitionerProfileId: string,
     patientProfileId: string,
   ): Promise<boolean> {
     if (
-      await this.bookingsRepo.tieneConsultaEnCurso(
+      await this.bookingsRepo.hasConsultationInProgress(
         em,
         practitionerProfileId,
         patientProfileId,
@@ -255,7 +440,60 @@ export class ClinicalReadService {
     ) {
       return true;
     }
-    return this.atiendeHoy(em, practitionerProfileId, patientProfileId);
+    if (await this.attendsToday(em, practitionerProfileId, patientProfileId)) {
+      return true;
+    }
+    return this.hasCareCurrentRelation(
+      em,
+      practitionerProfileId,
+      patientProfileId,
+    );
+  }
+
+  /**
+   * ¿Hay una relación asistencial ACTIVA, vigente y SIN acotar a un propósito
+   * distinto, entre ambos? (ALV-029)
+   *
+   * `findActiveForPractitionerPatient` sólo filtra por `status_concept_id`: la
+   * ventana temporal (`valid_from`/`valid_to`) se comprueba acá, con el mismo
+   * criterio que ya usa `AuthzPdpService.isWithinWindow` — reusar la tabla sin
+   * reusar la ventana habilitaría una relación ya vencida.
+   *
+   * ## Por qué se descarta una relación con `purposeConceptId`
+   *
+   * El PDP (`AuthzPdpService`, caso 6c) exige que una relación acotada a un
+   * propósito sólo habilite acciones que declaren ESE mismo propósito. Este
+   * endpoint no recibe ningún propósito de uso —es el resumen clínico
+   * completo, no una acción puntual—, así que no hay con qué comparar. Tratar
+   * una relación acotada como si abriera el resumen entero sería darle más
+   * alcance del que su propio propósito le fija: fail-closed, igual que el PDP.
+   *
+   * @param em - Contexto de persistencia.
+   * @param practitionerProfileId - El profesional que pide.
+   * @param patientProfileId - El paciente cuya historia se pide.
+   * @returns `true` si hay una relación activa, sin propósito acotado, cuya
+   *          ventana cubre este instante.
+   */
+  private async hasCareCurrentRelation(
+    em: EntityManager,
+    practitionerProfileId: string,
+    patientProfileId: string,
+  ): Promise<boolean> {
+    const now = Date.now();
+    const relations =
+      await this.careRelationshipsRepo.findActiveForPractitionerPatient(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+      );
+    return relations.some((relation) => {
+      if (relation.purposeConceptId) return false;
+      if (relation.validFrom.getTime() > now) return false;
+      if (relation.validTo && relation.validTo.getTime() <= now) {
+        return false;
+      }
+      return true;
+    });
   }
 
   /**
@@ -270,27 +508,30 @@ export class ClinicalReadService {
    * @param patientProfileId - El paciente cuya historia se pide.
    * @returns `true` si alguna reserva viva cae hoy en la zona de su sede.
    */
-  private async atiendeHoy(
+  private async attendsToday(
     em: EntityManager,
     practitionerProfileId: string,
     patientProfileId: string,
   ): Promise<boolean> {
-    const ahora = new Date();
-    const reservas = await this.bookingsRepo.findConfirmadasConPacienteEntre(
-      em,
-      practitionerProfileId,
-      patientProfileId,
-      new Date(ahora.getTime() - VENTANA_MS),
-      new Date(ahora.getTime() + VENTANA_MS),
-      ESTADOS_QUE_HABILITAN,
-    );
+    const now = new Date();
+    const reservations =
+      await this.bookingsRepo.findConfirmedWithPatientBetween(
+        em,
+        practitionerProfileId,
+        patientProfileId,
+        new Date(now.getTime() - WINDOW_MS),
+        new Date(now.getTime() + WINDOW_MS),
+        STATES_THAT_ENABLE,
+      );
 
-    return reservas.some((reserva) => {
-      const zona = reserva.timeZone ?? ZONA_POR_DEFECTO;
-      const hoy = diaLocalDe(ahora, zona);
-      const dia = diaLocalDe(reserva.startAt, zona);
+    return reservations.some((reservation) => {
+      const zone = reservation.timeZone ?? DEFAULT_ZONE;
+      const today = localDayOf(now, zone);
+      const day = localDayOf(reservation.startAt, zone);
       return (
-        dia.year === hoy.year && dia.month === hoy.month && dia.day === hoy.day
+        day.year === today.year &&
+        day.month === today.month &&
+        day.day === today.day
       );
     });
   }
@@ -335,47 +576,34 @@ export class ClinicalReadService {
   async assertOwnRecord(
     patientProfileId: string,
     actor: AuthenticatedUser,
-    linkResuelto?: Awaited<
+    linkResolved?: Awaited<
       ReturnType<PersonAccountLinksRepository['findActiveByUser']>
     >,
-    proxyScope: ClinicalProxyScope = CLINICAL_PROXY_SCOPE.SUMMARY_READ,
   ): Promise<void> {
     const em = this.em.fork();
     // El vínculo puede venir ya resuelto del gate: la base no garantiza que sea
     // único (su índice vive comentado), así que resolverlo dos veces en la misma
     // petición podría devolver personas distintas.
     const link =
-      linkResuelto !== undefined
-        ? linkResuelto
+      linkResolved !== undefined
+        ? linkResolved
         : await this.accountLinksRepo.findActiveByUser(em, actor.id);
-    const perfil = await this.patientProfilesRepo.findById(
+    const profile = await this.patientProfilesRepo.findById(
       em,
       patientProfileId,
     );
 
-    if (perfil && link && perfil.profileId === link.personId) return;
+    if (!link || !profile || profile.profileId !== link.personId) {
+      // No es la suya, pero puede ser la de alguien a quien representa (B.1):
+      // la madre que pidió el turno de su hijo tiene que poder leer lo que el
+      // pediatra escribió. Se pregunta recién acá —y no antes— para que el caso
+      // normal, el titular leyendo lo suyo, no pague una consulta de más.
+      if (
+        await this.representation.representsPatient(patientProfileId, actor)
+      ) {
+        return;
+      }
 
-    // Un representante puede leer mientras el poder siga activo y vigente.
-    // La autorización se vuelve a comprobar en cada descarga.
-    const ahora = new Date();
-    const proxy = perfil
-      ? await em.findOne(PatientPortalProxies, {
-          patientProfileId,
-          proxyUserId: actor.id,
-          statusConceptId: PROF.PROXY_ACTIVE,
-          $and: [
-            { $or: [{ validFrom: null }, { validFrom: { $lte: ahora } }] },
-            { $or: [{ validTo: null }, { validTo: { $gt: ahora } }] },
-          ],
-        })
-      : null;
-    const scope = proxy
-      ? await em.findOne(ValueSets, {
-          id: proxy.scopeValueSetId,
-          internalCode: proxyScope,
-        })
-      : null;
-    if (!proxy || !scope) {
       this.logger.warn(
         {
           operation: 'clinical.patient.read.denied',
@@ -384,23 +612,32 @@ export class ClinicalReadService {
         },
         'Intento de leer una historia clínica ajena',
       );
-      throw new ForbiddenException(
-        'Sólo podés consultar tu propia historia clínica.',
-      );
+      // El mensaje no cambia: quien no puede leerla no tiene por qué distinguir
+      // «no sos el titular» de «no lo representás» ni de «ese paciente no
+      // existe». Las tres cosas se dicen igual.
+      throw new ForbiddenException(WITHOUT_ACCESS_TO_HISTORY);
     }
   }
 
   /**
    * UC-39-20: historial clínico del paciente.
    *
+   * N-04 (BR-13): la lectura **deja rastro** en `audit.data_access_log` —quién,
+   * qué paciente, con qué propósito—, en el mismo `EntityManager` de la
+   * lectura y **antes** de devolver nada: si el asiento no se puede escribir,
+   * el resumen no se sirve (fail-closed, mismo criterio que el break-the-glass
+   * de `authz`). El asiento lleva identificadores, nunca contenido clínico.
+   *
    * @param patientProfileId - Paciente cuyo historial se lee.
    * @param limit - Tope por bloque.
+   * @param actor - Quién lee; ya autorizado por `ClinicalRecordAccessGuard`.
    * @returns Condiciones, alergias, medicación, observaciones, encuentros y
    *          episodios de cuidado.
    */
   async getPatientSummary(
     patientProfileId: string,
     limit: number,
+    actor: AuthenticatedUser,
   ): Promise<PatientClinicalSummaryResponseDto> {
     this.logger.info(
       { operation: 'clinical.patient.read', patientProfileId, limit },
@@ -409,6 +646,18 @@ export class ClinicalReadService {
 
     const em = this.em.fork();
     const over = limit + 1;
+
+    this.dataAccessLogRepo.record(em, {
+      userId: actor.id,
+      actionConceptId: AUD.ACTION_READ,
+      patientProfileId,
+      tenantId: getCurrentTenantId(),
+      purpose: SUMMARY_PURPOSE,
+      resourceType: SUMMARY_RESOURCE_TYPE,
+      resourceId: patientProfileId,
+      recordedByUserId: actor.id,
+    });
+    await em.flush();
 
     const [
       conditions,
@@ -427,11 +676,60 @@ export class ClinicalReadService {
     ]);
 
     const truncated: string[] = [];
+    const cutConditions = this.cut(conditions, limit, 'conditions', truncated);
+    const cutAllergies = this.cut(allergies, limit, 'allergies', truncated);
+
+    // BR-14 (CL-10): última revisión de cada condición, en lote, para leer el
+    // motivo del último cambio de estado desde `data_snapshot` (decisión
+    // D-BR14-04, sin columna nueva).
+    const conditionHistory = await this.historyRepo.latestBySource(
+      em,
+      'conditions',
+      cutConditions.map((c) => c.id),
+    );
+    // C3 / P41: la decisión de verificación, de la última revisión que la
+    // trae — un cambio de estado posterior no la borra.
+    const verificationHistory = await this.historyRepo.latestBySource(
+      em,
+      'conditions',
+      cutConditions.map((c) => c.id),
+      (revision) => hasVerification(revision.dataSnapshot),
+    );
+    // BR-14 (CL-11): reacciones de cada alergia, en lote.
+    const reactionsByAllergy = new Map<
+      string,
+      {
+        id: string;
+        manifestationConceptId: string;
+        severityConceptId?: string;
+        description?: string;
+      }[]
+    >();
+    const reactions = await this.allergyReactionsRepo.findByAllergyIds(
+      em,
+      cutAllergies.map((a) => a.id),
+    );
+    for (const reaction of reactions) {
+      const list = reactionsByAllergy.get(reaction.allergyId) ?? [];
+      list.push({
+        id: reaction.id,
+        manifestationConceptId: reaction.manifestationConceptId,
+        severityConceptId: reaction.severityConceptId,
+        description: reaction.description,
+      });
+      reactionsByAllergy.set(reaction.allergyId, list);
+    }
 
     return {
       patientProfileId,
-      conditions: this.cut(conditions, limit, 'conditions', truncated).map(
-        (row) => ({
+      conditions: cutConditions.map((row) => {
+        const snapshot = conditionHistory.get(row.id)?.dataSnapshot as
+          Record<string, unknown> | undefined;
+        const lastStatusChangeReasonText =
+          typeof snapshot?.statusChangeReasonText === 'string'
+            ? snapshot.statusChangeReasonText
+            : undefined;
+        return {
           id: row.id,
           codeConceptId: row.codeConceptId,
           categoryConceptId: row.categoryConceptId,
@@ -440,24 +738,29 @@ export class ClinicalReadService {
           severityConceptId: row.severityConceptId,
           encounterId: row.encounterId,
           clinicalCourseConceptId: row.clinicalCourseConceptId,
+          lateralityConceptId: row.lateralityConceptId,
           onsetAt: row.onsetAt,
           expectedResolutionAt: row.expectedResolutionAt,
           resolvedAt: row.resolvedAt,
           noteText: row.noteText,
+          lastStatusChangeReasonText,
+          verification: verificationFromSnapshot(
+            verificationHistory.get(row.id)?.dataSnapshot,
+          ),
           createdAt: row.createdAt,
-        }),
-      ),
-      allergies: this.cut(allergies, limit, 'allergies', truncated).map(
-        (row) => ({
-          id: row.id,
-          substanceConceptId: row.substanceConceptId,
-          typeConceptId: row.typeConceptId,
-          categoryConceptId: row.categoryConceptId,
-          criticalityConceptId: row.criticalityConceptId,
-          clinicalStatusConceptId: row.clinicalStatusConceptId,
-          createdAt: row.createdAt,
-        }),
-      ),
+        };
+      }),
+      allergies: cutAllergies.map((row) => ({
+        id: row.id,
+        substanceConceptId: row.substanceConceptId,
+        encounterId: row.encounterId,
+        typeConceptId: row.typeConceptId,
+        categoryConceptId: row.categoryConceptId,
+        criticalityConceptId: row.criticalityConceptId,
+        clinicalStatusConceptId: row.clinicalStatusConceptId,
+        reactions: reactionsByAllergy.get(row.id) ?? [],
+        createdAt: row.createdAt,
+      })),
       medicationRequests: this.cut(
         medicationRequests,
         limit,
@@ -468,12 +771,15 @@ export class ClinicalReadService {
         medicationConceptId: row.medicationConceptId,
         statusConceptId: row.statusConceptId,
         prescriberProfileId: row.prescriberProfileId,
+        encounterId: row.encounterId,
+        formInstanceId: row.formInstanceId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
         validFrom: row.validFrom,
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
         indicationConditionId: row.indicationConditionId,
+        indicationText: row.indicationText,
         signedAt: row.signedAt,
         issuedAt: row.issuedAt,
         createdAt: row.createdAt,
@@ -507,6 +813,7 @@ export class ClinicalReadService {
           reasonText: row.reasonText,
           startAt: row.startAt,
           endAt: row.endAt,
+          rowVersion: row.rowVersion,
         }),
       ),
       careEpisodes: this.cut(

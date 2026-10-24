@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -16,6 +16,7 @@ import {
   MODERATION_DECISION_BY_CODE,
   STRIKE_SEVERITY_BY_CODE,
 } from '../community.concepts';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CreateReportDto,
   ModerationDecisionDto,
@@ -119,13 +120,21 @@ export class CommunityModerationService {
     return this.em.transactional(async (tx) => {
       const queue = await this.moderationRepo.findQueueById(tx, queueId);
       if (!queue)
-        throw new ResourceNotFoundException('Entrada de cola no encontrada', {
-          queueId,
-        });
+        throw new ResourceNotFoundException(
+          'Entrada de cola no encontrada',
+          {
+            queueId,
+          },
+          CommunityErrorReason.MODERATION_QUEUE_ENTRY_NOT_FOUND,
+        );
       if (queue.statusConceptId === COMM.QUEUE_RESOLVED) {
-        throw new ConflictException('La entrada de cola ya está resuelta', {
-          queueId,
-        });
+        throw new ConflictException(
+          'La entrada de cola ya está resuelta',
+          {
+            queueId,
+          },
+          CommunityErrorReason.MODERATION_QUEUE_ALREADY_RESOLVED,
+        );
       }
 
       const map = MODERATION_DECISION_BY_CODE[dto.decision];
@@ -200,9 +209,30 @@ export class CommunityModerationService {
         decisionId,
       );
       if (!decision)
-        throw new ResourceNotFoundException('Decisión no encontrada', {
-          decisionId,
-        });
+        throw new ResourceNotFoundException(
+          'Decisión no encontrada',
+          {
+            decisionId,
+          },
+          CommunityErrorReason.MODERATION_DECISION_NOT_FOUND,
+        );
+
+      // AG-18: el apelante tiene que ser el sancionado, no sólo el dueño del
+      // perfil que declaró. `assertActsAsProfile` de arriba ya probó que el
+      // actor es `dto.appellantProfileId`; esto prueba que esa decisión lo
+      // sancionó A ÉL. Sin este paso, cualquiera podía abrir una apelación
+      // ajena con su propio perfil, y la única apelación abierta por decisión
+      // le quemaba la del sancionado real.
+      const strike = await this.moderationRepo.findStrikeByDecisionAndSubject(
+        tx,
+        decisionId,
+        dto.appellantProfileId,
+      );
+      if (!strike) {
+        throw new ForbiddenException(
+          'Sólo el sancionado por esta decisión puede apelarla',
+        );
+      }
 
       const open = await this.moderationRepo.findOpenAppealForDecision(
         tx,
@@ -213,6 +243,7 @@ export class CommunityModerationService {
         throw new ConflictException(
           'Ya existe una apelación abierta para esta decisión',
           { decisionId },
+          CommunityErrorReason.APPEAL_ALREADY_OPEN,
         );
 
       const appeal = this.moderationRepo.createAppeal(tx, {
@@ -261,8 +292,7 @@ export class CommunityModerationService {
    * revierte la decisión original**: `OVERTURNED` deja constancia de que la
    * apelación prosperó, pero deshacer la sanción —restituir el contenido, anular
    * el strike— es una política de producto que nadie definió, y ejecutarla acá
-   * sería inventarla. Queda registrada como decisión de producto pendiente en el
-   * reporte del carril.
+   * sería inventarla.
    *
    * @param appealId - Apelación a resolver.
    * @param dto - Resolución.
@@ -287,18 +317,26 @@ export class CommunityModerationService {
     return this.em.transactional(async (tx) => {
       const appeal = await this.moderationRepo.findAppealById(tx, appealId);
       if (!appeal)
-        throw new ResourceNotFoundException('Apelación no encontrada', {
-          appealId,
-        });
+        throw new ResourceNotFoundException(
+          'Apelación no encontrada',
+          {
+            appealId,
+          },
+          CommunityErrorReason.APPEAL_NOT_FOUND,
+        );
       if (appeal.statusConceptId !== COMM.APPEAL_OPEN) {
-        throw new ConflictException('La apelación ya está resuelta', {
-          appealId,
-        });
+        throw new ConflictException(
+          'La apelación ya está resuelta',
+          {
+            appealId,
+          },
+          CommunityErrorReason.APPEAL_ALREADY_RESOLVED,
+        );
       }
 
-      const resolucion = APPEAL_RESOLUTION_BY_CODE[dto.resolution];
-      appeal.statusConceptId = resolucion;
-      appeal.resolutionConceptId = resolucion;
+      const resolution = APPEAL_RESOLUTION_BY_CODE[dto.resolution];
+      appeal.statusConceptId = resolution;
+      appeal.resolutionConceptId = resolution;
       appeal.reviewedByUserId = actor.id;
       appeal.resolvedAt = new Date();
       touch(appeal, actor.id);
@@ -317,14 +355,14 @@ export class CommunityModerationService {
           )
         : null;
       if (original) {
-        const reencolada = await this.moderationRepo.findOpenQueueForContent(
+        const requeued = await this.moderationRepo.findOpenQueueForContent(
           tx,
           original.contentRefId,
           COMM.QUEUE_RESOLVED,
         );
-        if (reencolada) {
-          reencolada.statusConceptId = COMM.QUEUE_RESOLVED;
-          touch(reencolada, actor.id);
+        if (requeued) {
+          requeued.statusConceptId = COMM.QUEUE_RESOLVED;
+          touch(requeued, actor.id);
         }
       }
 

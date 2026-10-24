@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `delegated_access`
 
-Referencia exhaustiva de 11 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 12 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`
 - **Controladores:** `AccessRequestsController`, `DelegatedAccessAuthzController`, `DelegatedPermissionSetsController`, `OrgUserAssignmentsController`, `PractitionerDelegatesController`
@@ -14,14 +14,15 @@ Referencia exhaustiva de 11 operación(es) del módulo `delegated_access`, deriv
 1. [POST /access-requests/{id}/decision](#1-post-access-requests-id-decision) — Aprobar/Denegar solicitud y emitir grant scoped
 2. [POST /authz/effective-actor/evaluate](#2-post-authz-effective-actor-evaluate) — Evaluar actor efectivo por propósito (step-up)
 3. [POST /delegated-access/expiry-sweep](#3-post-delegated-access-expiry-sweep) — Expirar delegaciones y grants vencidos (barrido)
-4. [POST /delegated-permission-sets](#4-post-delegated-permission-sets) — Publicar set de permisos delegados (scoped)
-5. [POST /delegated-permission-sets/{id}/versions](#5-post-delegated-permission-sets-id-versions) — Versionar set de permisos delegados
-6. [POST /org/{tenantMembershipId}/user-assignments](#6-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
-7. [PATCH /org/user-assignments/{id}](#7-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
-8. [POST /practitioner-delegates](#8-post-practitioner-delegates) — Crear asignación de delegado de practitioner
-9. [POST /practitioner-delegates/{id}/access-requests](#9-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
-10. [POST /practitioner-delegates/{id}/grants](#10-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
-11. [POST /practitioner-delegates/{id}/revoke](#11-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
+4. [GET /delegated-permission-sets](#4-get-delegated-permission-sets) — Listar los sets de permisos delegados del tenant
+5. [POST /delegated-permission-sets](#5-post-delegated-permission-sets) — Publicar set de permisos delegados (scoped)
+6. [POST /delegated-permission-sets/{id}/versions](#6-post-delegated-permission-sets-id-versions) — Versionar set de permisos delegados
+7. [POST /org/{tenantMembershipId}/user-assignments](#7-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
+8. [PATCH /org/user-assignments/{id}](#8-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
+9. [POST /practitioner-delegates](#9-post-practitioner-delegates) — Crear asignación de delegado de practitioner
+10. [POST /practitioner-delegates/{id}/access-requests](#10-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
+11. [POST /practitioner-delegates/{id}/grants](#11-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
+12. [POST /practitioner-delegates/{id}/revoke](#12-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
 
 ---
 
@@ -406,7 +407,138 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /delegated-permission-sets
+## 4. GET /delegated-permission-sets
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-permission-sets`
+- **Nombre:** Listar los sets de permisos delegados del tenant
+- **Operation ID:** `DelegatedPermissionSetsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DelegatedPermissionSetsController.list](../../src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts)
+
+### Descripción de negocio
+
+Listar los sets de permisos delegados del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CV-13: listado del hub, acotado al tenant del actor.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /delegated-permission-sets` en `DelegatedPermissionSetsController_list`. El controlador delega en `PermissionSetsService.listByTenant`. No recibe body. El tipo de retorno estático es `Promise<ListPermissionSetsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Sets por página | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /delegated-permission-sets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /delegated-permission-sets?cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPermissionSetsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "delegateTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "versionNumber": 1,
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PermissionSetSummaryDto>` | Sin restricción adicional declarada | Sets de esta página, ordenados por `id`. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","delegateTypeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","versionNumber":1,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código del set, único dentro del tenant. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre visible del set. | `Nombre de ejemplo` |
+| `items[].delegateTypeConceptId` | Sí | `string` | formato `uuid` | Concepto del tipo de delegado al que aplica. | `00000000-0000-4000-8000-000000000001` |
+| `items[].description` | No | `string` | Sin restricción adicional declarada | Descripción libre, si se publicó una. | `Texto descriptivo de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Concepto de estado del set. | `00000000-0000-4000-8000-000000000001` |
+| `items[].versionNumber` | Sí | `number` | Sin restricción adicional declarada | Versión publicada más reciente. | `1` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha de creación del set. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/delegated-permission-sets"
+}
+```
+
+---
+
+## 5. POST /delegated-permission-sets
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -557,7 +689,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /delegated-permission-sets/{id}/versions
+## 6. POST /delegated-permission-sets/{id}/versions
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -699,7 +831,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /org/{tenantMembershipId}/user-assignments
+## 7. POST /org/{tenantMembershipId}/user-assignments
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -843,7 +975,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. PATCH /org/user-assignments/{id}
+## 8. PATCH /org/user-assignments/{id}
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -976,7 +1108,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /practitioner-delegates
+## 9. POST /practitioner-delegates
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1121,7 +1253,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /practitioner-delegates/{id}/access-requests
+## 10. POST /practitioner-delegates/{id}/access-requests
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1255,7 +1387,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /practitioner-delegates/{id}/grants
+## 11. POST /practitioner-delegates/{id}/grants
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1393,7 +1525,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /practitioner-delegates/{id}/revoke
+## 12. POST /practitioner-delegates/{id}/revoke
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`

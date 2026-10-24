@@ -13,6 +13,29 @@ import {
 import { QaCatalogRepository, QaRunsRepository } from '../repositories';
 import { TestAssertions } from '../entities';
 import {
+  evaluateAssertion,
+  type AssertionDefinition,
+  type AssertionType,
+  type ObservedResponse,
+  type Operator,
+} from '../domain/assertion-evaluator';
+
+const ASSERTION_TYPE_BY_CONCEPT: Readonly<Record<string, AssertionType>> = {
+  [CONCEPTS.ASSERTION_STATUS_CODE]: 'STATUS',
+  [CONCEPTS.ASSERTION_JSON_PATH]: 'JSON_PATH',
+  [CONCEPTS.ASSERTION_HEADER]: 'HEADER',
+  [CONCEPTS.ASSERTION_LATENCY]: 'LATENCY',
+};
+
+const OPERATOR_BY_CONCEPT: Readonly<Record<string, Operator>> = {
+  [CONCEPTS.OPERATOR_EQUALS]: 'EQ',
+  [CONCEPTS.OPERATOR_NOT_EQUALS]: 'NEQ',
+  [CONCEPTS.OPERATOR_CONTAINS]: 'CONTAINS',
+  [CONCEPTS.OPERATOR_EXISTS]: 'EXISTS',
+  [CONCEPTS.OPERATOR_LESS_THAN]: 'LT',
+  [CONCEPTS.OPERATOR_GREATER_THAN]: 'GT',
+};
+import {
   CreateRunDto,
   RunResponseDto,
   ExecuteCaseDto,
@@ -346,6 +369,7 @@ export class QaRunsService {
   async evaluateResult(
     resultId: string,
     actor: AuthenticatedUser,
+    observed?: ObservedResponse,
   ): Promise<EvaluateResultResponseDto> {
     this.logger.info(
       { operation: 'qa.result.evaluate', resultId },
@@ -388,16 +412,27 @@ export class QaRunsService {
         });
       }
 
-      // La evaluación real la hace el runner y llega en `assertion_results`;
-      // aquí se consolidan y se decide el estado del caso.
+      // Con respuesta observada por el runner del servidor (módulo 68) la
+      // aserción se evalúa de verdad contra ella. Sin ella —ejecuciones
+      // reportadas por el cliente— se conserva el comportamiento anterior,
+      // pero la evidencia dice que no hubo evaluación contra una respuesta.
       let passed = 0;
       const failedOrdinals: number[] = [];
       for (const assertion of assertions) {
-        const verdict = this.verdictFor(assertion);
+        const evaluated = observed
+          ? evaluateAssertion(this.definitionOf(assertion), observed)
+          : null;
+        const verdict = evaluated
+          ? evaluated.passed
+          : this.verdictFor(assertion);
         this.runsRepo.createAssertionResult(tx, {
           testCaseResultId: resultId,
           testAssertionId: assertion.id,
           passed: verdict,
+          actualValue: evaluated?.actualValue ?? undefined,
+          message:
+            evaluated?.message ??
+            'DECLARATIVE_ONLY: sin respuesta observada por el servidor; no es un oráculo',
           recordedByUserId: actor.id,
         });
         if (verdict) passed += 1;
@@ -482,8 +517,12 @@ export class QaRunsService {
       run.totalSkipped = totalSkipped;
       run.finishedAt = finishedAt;
       run.durationMs = durationMs;
+      // Sin ningún caso aprobado la corrida no pasa: cero ejecutados (todo
+      // omitido) no es evidencia de que el sistema funcione.
       run.statusConceptId =
-        totalFailed === 0 ? CONCEPTS.RUN_PASSED : CONCEPTS.RUN_FAILED_STATUS;
+        totalFailed === 0 && totalPassed > 0
+          ? CONCEPTS.RUN_PASSED
+          : CONCEPTS.RUN_FAILED_STATUS;
       touch(run, actor.id);
 
       if (totalFailed > 0) {
@@ -777,6 +816,18 @@ export class QaRunsService {
    * aserción cuyo valor esperado esté declarado, que es lo que el modelo
    * permite decidir sin ejecutar la petición.
    */
+  /** Traduce la aserción persistida (conceptos) al lenguaje del evaluador. */
+  private definitionOf(assertion: TestAssertions): AssertionDefinition {
+    return {
+      type:
+        ASSERTION_TYPE_BY_CONCEPT[assertion.assertionTypeConceptId] ?? 'STATUS',
+      operator: OPERATOR_BY_CONCEPT[assertion.operatorConceptId ?? ''] ?? 'EQ',
+      path: assertion.jsonPath ?? null,
+      expected: assertion.expectedValue ?? null,
+      tolerance: assertion.tolerance ?? null,
+    };
+  }
+
   private verdictFor(assertion: TestAssertions): boolean {
     if (assertion.operatorConceptId === CONCEPTS.OPERATOR_EXISTS) return true;
     return (

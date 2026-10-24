@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 /**
  * Mapea la entidad persistente asociada a `survey_assignments`.
  *
- * Conecta una versión publicada con la cosa evaluada. REDESA lo pide como
+ * Conecta una versión publicada con la cosa evaluada. ALOVIDA lo pide como
  * «asociar encuestas a una consulta, servicio o tipo de atención», y por eso el
  * destino es un par `(tipo, id)` en vez de tres columnas nullable: los tres
  * casos son el mismo hecho —a qué se le pregunta— y separarlos obligaría a

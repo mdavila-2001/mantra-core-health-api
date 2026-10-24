@@ -1,0 +1,114 @@
+{
+  "code": "INFECTO_CTRL_MALARIA",
+  "name": "Malaria: evaluación y seguimiento",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Directrices de la OMS sobre la malaria",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/teams/global-malaria-programme",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Especie, signos de gravedad de la OMS y control parasitológico."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: malaria",
+      "code": "malaria_especie",
+      "name": "Gota gruesa",
+      "dataType": "string",
+      "required": true,
+      "options": ["P. vivax", "P. falciparum", "Mixta", "Negativa"]
+    },
+    {
+      "section": "Evaluación: malaria",
+      "code": "parasitemia",
+      "name": "Parasitemia",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: malaria",
+      "code": "malaria_gravedad",
+      "name": "Signos de gravedad",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Alteración de la conciencia",
+        "Convulsiones",
+        "Dificultad respiratoria",
+        "Ictericia",
+        "Anemia grave",
+        "Sangrado",
+        "Hipoglucemia",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: malaria",
+      "code": "zona_exposicion",
+      "name": "Zona donde se expuso",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Gota gruesa negativa al control", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Completar el tratamiento (primaquina en vivax)",
+        "Mosquitero"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

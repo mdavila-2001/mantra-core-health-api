@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -6,17 +13,33 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { ParseOptionalLimitPipe } from '../../../common';
-import { PharmacyReadService } from '../services';
 import {
+  CurrentUser,
+  ParseOptionalLimitPipe,
+  type AuthenticatedUser,
+} from '../../../common';
+import {
+  MedicineCatalogSearchService,
+  PharmacyReadService,
+  PharmacyStaffReadService,
+  type GeoPoint,
+} from '../services';
+import {
+  CatalogProductPageDto,
+  CatalogProductQueryDto,
+  PharmacyContactsResponseDto,
   PharmacyDetailDto,
+  PharmacyLicenseListResponseDto,
   PharmacyDirectoryResponseDto,
   PharmacyProductSearchResponseDto,
+  PharmacySiteListResponseDto,
+  PharmacySummaryDto,
   PharmacySitePricesResponseDto,
 } from '../dto';
 
 /**
- * Lecturas del directorio de farmacias sobre `/pharmacy` (carril E2).
+ * Lecturas del directorio de farmacias sobre `/pharmacy` (carril E2 + carril
+ * A, sedes sueltas y filtro por farmacia).
  *
  * **Sin `@Roles` a propósito**, igual que el directorio de unidades
  * diagnósticas: son lecturas publicadas del tenant activo, y el filtro real es
@@ -31,8 +54,14 @@ export class PharmacyReadController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param readService - Lecturas del directorio de farmacias.
+   * @param staffReadService - Lecturas reservadas al personal de la farmacia.
+   * @param catalogSearch - Búsqueda en el catálogo universal de medicamentos.
    */
-  constructor(private readonly readService: PharmacyReadService) {}
+  constructor(
+    private readonly readService: PharmacyReadService,
+    private readonly staffReadService: PharmacyStaffReadService,
+    private readonly catalogSearch: MedicineCatalogSearchService,
+  ) {}
 
   /** E2: el directorio de farmacias publicadas. */
   @Get('pharmacies')
@@ -52,10 +81,121 @@ export class PharmacyReadController {
     return this.readService.getPharmacy(id);
   }
 
-  /** E2: búsqueda de productos por texto o por medicamento del vademécum. */
+  /**
+   * La carpeta de licencias de la farmacia (`pharmacy_licenses`), con los días
+   * hasta el vencimiento contados por el servidor.
+   *
+   * Sin `@Roles`: el alcance no es un rol global sino **pertenecer a la
+   * organización dueña** (o ser de la plataforma), y eso lo decide el
+   * servicio. Quien no pertenece recibe el mismo 404 que un id inexistente.
+   */
+  @Get('pharmacies/:id/licenses')
+  @ApiOperation({
+    summary: 'Licencias de la farmacia (sólo su personal)',
+  })
+  @ApiOkResponse({ type: PharmacyLicenseListResponseDto })
+  listLicenses(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyLicenseListResponseDto> {
+    return this.staffReadService.listLicenses(id, actor);
+  }
+
+  /** P47: los números del resumen del portal de la farmacia (sólo su personal). */
+  @Get('pharmacies/:id/summary')
+  @ApiOperation({
+    summary: 'Resumen del catálogo de la farmacia (sólo su personal)',
+  })
+  @ApiOkResponse({ type: PharmacySummaryDto })
+  getSummary(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacySummaryDto> {
+    return this.staffReadService.getSummary(id, actor);
+  }
+
+  /**
+   * El representante legal y las gerencias de la organización dueña de la
+   * farmacia. Mismo alcance que las licencias.
+   */
+  @Get('pharmacies/:id/contacts')
+  @ApiOperation({
+    summary:
+      'Representante legal y gerencias de la farmacia (sólo su personal)',
+  })
+  @ApiOkResponse({ type: PharmacyContactsResponseDto })
+  getContacts(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyContactsResponseDto> {
+    return this.staffReadService.getContacts(id, actor);
+  }
+
+  /**
+   * Carril A (H4): las sedes publicadas, sueltas — lo que «elegir farmacia»
+   * necesita antes de que la persona haya buscado nada.
+   *
+   * Declarada **antes** de `sites/:siteId/prices` a propósito: aunque los
+   * segmentos no colisionan (uno es `/pharmacy/sites`, el otro
+   * `/pharmacy/sites/:siteId/prices`), el orden documenta la intención y
+   * evita que una futura ruta `sites/:algo` la tape sin que se note.
+   */
+  @Get('sites')
+  @ApiOperation({ summary: 'Listar sedes publicadas, sueltas' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Texto a buscar en el nombre de la farmacia o la sede',
+  })
+  @ApiQuery({
+    name: 'lat',
+    required: false,
+    description: 'Latitud WGS84 desde donde medir distancia (va con lng)',
+  })
+  @ApiQuery({
+    name: 'lng',
+    required: false,
+    description: 'Longitud WGS84 desde donde medir distancia (va con lat)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Tope del listado (por defecto 50)',
+  })
+  @ApiOkResponse({ type: PharmacySiteListResponseDto })
+  listSites(
+    @Query('search') search?: string,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PharmacySiteListResponseDto> {
+    return this.readService.listSites({
+      search,
+      origin: parseOrigin(lat, lng),
+      limit: limit ?? 50,
+    });
+  }
+
+  /**
+   * El catálogo universal de medicamentos: lo que una farmacia busca para dar
+   * de alta un producto en vez de tipearlo. Registros sanitarios oficiales, uno
+   * por fuente; los que ya no están vigentes se listan con `selectable: false`.
+   */
+  @Get('catalog-products')
+  @ApiOperation({
+    summary: 'Buscar en el catálogo universal de medicamentos',
+  })
+  @ApiOkResponse({ type: CatalogProductPageDto })
+  searchCatalogProducts(
+    @Query() query: CatalogProductQueryDto,
+  ): Promise<CatalogProductPageDto> {
+    return this.catalogSearch.search(query);
+  }
+
+  /** E2: búsqueda de productos por texto, por medicamento o por farmacia. */
   @Get('products')
   @ApiOperation({
-    summary: 'Buscar productos publicados por texto o por medicamento',
+    summary: 'Buscar productos publicados por texto, medicamento o farmacia',
   })
   @ApiQuery({
     name: 'search',
@@ -69,6 +209,12 @@ export class PharmacyReadController {
     description: 'Medicamento del vademécum (medication_concept_id)',
   })
   @ApiQuery({
+    name: 'pharmacyId',
+    required: false,
+    format: 'uuid',
+    description: 'Sólo lo publicado por esta farmacia (carril A, H5)',
+  })
+  @ApiQuery({
     name: 'limit',
     required: false,
     description: 'Tope del listado (por defecto 50)',
@@ -78,9 +224,14 @@ export class PharmacyReadController {
     @Query('search') search?: string,
     @Query('conceptId', new ParseUUIDPipe({ optional: true }))
     conceptId?: string,
+    @Query('pharmacyId', new ParseUUIDPipe({ optional: true }))
+    pharmacyId?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PharmacyProductSearchResponseDto> {
-    return this.readService.searchProducts({ search, conceptId }, limit ?? 50);
+    return this.readService.searchProducts(
+      { search, conceptId, pharmacyId },
+      limit ?? 50,
+    );
   }
 
   /** E2: precios públicos vigentes de una sede. */
@@ -102,4 +253,38 @@ export class PharmacyReadController {
   ): Promise<PharmacySitePricesResponseDto> {
     return this.readService.getSitePrices(siteId, productId);
   }
+}
+
+/**
+ * Valida el punto de origen: `lat` y `lng` van juntos o no van, y tienen que
+ * ser coordenadas WGS84 reales.
+ *
+ * Copiado a propósito de
+ * `pharmacy_inventory/controllers/pharmacy-inventory-read.controller.ts:parseOrigin`
+ * en vez de importarlo: ese módulo es de sólo lectura para este carril
+ * (reservado de otro dueño).
+ */
+function parseOrigin(
+  lat: string | undefined,
+  lng: string | undefined,
+): GeoPoint | undefined {
+  if (lat === undefined && lng === undefined) return undefined;
+  if (lat === undefined || lng === undefined) {
+    throw new BadRequestException(
+      'lat y lng van juntos: mande ambos para ordenar por distancia, o ninguno',
+    );
+  }
+  const parsedLat = Number(lat);
+  const parsedLng = Number(lng);
+  if (
+    !Number.isFinite(parsedLat) ||
+    !Number.isFinite(parsedLng) ||
+    Math.abs(parsedLat) > 90 ||
+    Math.abs(parsedLng) > 180
+  ) {
+    throw new BadRequestException(
+      'lat/lng deben ser coordenadas WGS84 válidas (lat en [-90, 90], lng en [-180, 180])',
+    );
+  }
+  return { lat: parsedLat, lng: parsedLng };
 }

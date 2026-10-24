@@ -79,6 +79,17 @@ export class AllergyIntolerances {
   recordedByUserId?: string;
 
   /**
+   * Encuentro en el que se detectó la alergia (P26 / CL-01). Nullable: hay
+   * alergias declaradas fuera de una atención, igual que en `conditions`.
+   *
+   * Declarada en el modelo (`diagram_08_clinical.puml`) junto con
+   * `ix_allergy_intolerances_encounter_id`. Parche para bases ya pobladas:
+   * `2026-10-23_allergy_intolerances_encounter_id.sql`.
+   */
+  @Property({ fieldName: 'encounter_id', type: 'uuid', nullable: true }) // FK → clinical.encounters
+  encounterId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

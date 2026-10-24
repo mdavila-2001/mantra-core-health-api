@@ -34,6 +34,13 @@ export class PriorAuthorizationRequests {
   }) // FK → clinical.medication_requests
   medicationRequestId?: string;
 
+  @Property({
+    fieldName: 'inventory_reservation_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → pharmacy_inventory.inventory_reservations
+  inventoryReservationId?: string;
+
   /**
    * Identificador asociado a requesting provider type concept.
    */

@@ -10,10 +10,15 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PracticeSitesService } from './practice-sites.service';
 import { PRAC } from '../practice.concepts';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import {
+  buildPracticeAccess,
+  type AssignmentRow,
+} from '../../../../test/doubles/practice-access.double';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -21,13 +26,14 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(assignments: AssignmentRow[] = []) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const practicesRepo = {
     findByTenant: mockFn().mockResolvedValue([]),
     findActive: mockFn(),
     findById: mockFn(),
+    findOwnOffice: mockFn().mockResolvedValue(null),
     create: mockFn(),
   };
   const sitesRepo = {
@@ -40,6 +46,7 @@ function build() {
   const spacesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const servicesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const rolesRepo = { findBySite: mockFn().mockResolvedValue([]) };
+  const serviceCatalogRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new PracticeSitesService(
@@ -50,13 +57,16 @@ function build() {
     spacesRepo as any,
     servicesRepo as any,
     rolesRepo as any,
+    serviceCatalogRepo as any,
     logger as any,
+    buildPracticeAccess(assignments),
   );
   return {
     service,
     tx,
     practicesRepo,
     sitesRepo,
+    serviceCatalogRepo,
     unitsRepo,
     spacesRepo,
     servicesRepo,
@@ -88,6 +98,39 @@ describe('PracticeSitesService', () => {
         createdAt: created.createdAt,
       });
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    /**
+     * FT-22-R01. Una práctica que nace con el catálogo vacío le abre a quien
+     * atiende una pantalla sin nada, y la consulta es lo único que ofrecen
+     * todas. Va en la misma transacción que el alta a propósito.
+     */
+    it('la práctica nace ofreciendo una cita médica en 0.00 Bs', async () => {
+      const d = build();
+      d.practicesRepo.create.mockReturnValue({
+        id: 'p1',
+        code: 'P-1',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await d.service.createPractice(
+        { tenantId: 't1', code: 'P-1', name: 'Acme' },
+        actor,
+      );
+
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceId: 'p1',
+          code: 'CITA_MEDICA',
+          name: 'Cita médica',
+          defaultPrice: '0.00',
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+          isActive: true,
+          actorUserId: actor.id,
+        }),
+      );
     });
   });
 
@@ -202,5 +245,80 @@ describe('PracticeSitesService', () => {
       expect(role.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ENDED);
       expect(role.validTo).toBeInstanceOf(Date);
     });
+  });
+});
+
+describe('PracticeSitesService.listPractices — acceso por vinculación', () => {
+  const OWN = { id: 'prac-own', code: 'MIO', name: 'Mi consultorio' };
+  const OTHER = { id: 'prac-other', code: 'AJENO', name: 'Consultorio ajeno' };
+  const PENDING = { id: 'prac-pending', code: 'PEND', name: 'Pendiente' };
+  const rows: AssignmentRow[] = [
+    {
+      practitionerProfileId: 'hp-doc',
+      practiceId: OWN.id,
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      validTo: null,
+    },
+    {
+      practitionerProfileId: 'hp-doc',
+      practiceId: PENDING.id,
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+      validTo: null,
+    },
+  ];
+  const doctor = {
+    id: 'user-doc',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-doc',
+  } as any;
+
+  /**
+   * Servicio con las tres prácticas activas en el tenant compartido.
+   * @returns El servicio y sus dobles.
+   */
+  function withPractices() {
+    const d = build(rows);
+    d.practicesRepo.findByTenant.mockResolvedValue(
+      [OWN, OTHER, PENDING].map((p) => ({
+        ...p,
+        tenantId: 'DEFAULT',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+      })),
+    );
+    return d;
+  }
+
+  it('el médico con vinculación ACTIVE ve sólo esa práctica', async () => {
+    const d = withPractices();
+
+    const list = await d.service.listPractices('DEFAULT', doctor);
+
+    expect(list.map((p) => p.id)).toEqual([OWN.id]);
+    expect(list[0]).toEqual({
+      id: OWN.id,
+      code: OWN.code,
+      name: OWN.name,
+      status: PRAC.PRACTICE_ACTIVE,
+    });
+  });
+
+  it('el médico con vinculación pendiente o sin vinculación no ve ninguna', async () => {
+    const d = withPractices();
+    const newcomer = { ...doctor, practitionerProfileId: 'hp-new' };
+
+    expect(
+      (await d.service.listPractices('DEFAULT', doctor)).map((p) => p.id),
+    ).not.toContain(PENDING.id);
+    await expect(d.service.listPractices('DEFAULT', newcomer)).resolves.toEqual(
+      [],
+    );
+  });
+
+  it('el administrador ve todas las prácticas del tenant', async () => {
+    const d = withPractices();
+
+    const list = await d.service.listPractices('DEFAULT', actor);
+
+    expect(list.map((p) => p.id)).toEqual([OWN.id, OTHER.id, PENDING.id]);
   });
 });

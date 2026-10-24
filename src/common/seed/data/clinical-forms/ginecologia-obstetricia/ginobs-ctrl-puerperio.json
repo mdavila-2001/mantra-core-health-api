@@ -1,0 +1,345 @@
+{
+  "code": "GINOBS_CTRL_PUERPERIO",
+  "name": "Control de puerperio",
+  "specialty": {
+    "code": "GINECOLOGIA_OBSTETRICIA",
+    "display": "Ginecología y obstetricia"
+  },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "Recomendaciones de la OMS sobre la atención materna y neonatal para una experiencia posnatal positiva (2022)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789240045989",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Contactos posnatales de la OMS: sangrado, infección, presión, lactancia, ánimo y anticoncepción. Ampliación internacional (2026-10-24): signos de peligro, molestias, examen uterino y perineal o de la herida de cesárea, problemas de lactancia, indagación de depresión posnatal y método anticonceptivo posparto desde la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4); instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "tipo_parto",
+      "name": "Tipo de parto",
+      "dataType": "string",
+      "required": true,
+      "options": ["Vaginal", "Cesárea"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "dias_posparto",
+      "name": "Días posparto",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_signos_de_peligro",
+      "name": "Signos de peligro de la mujer",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin signos de peligro",
+        "Sangrado vaginal anormal",
+        "Cianosis central",
+        "Convulsiones",
+        "Fiebre (37,5 °C o más)",
+        "Cefalea intensa",
+        "Dolor intenso (no abdominal)",
+        "Vómitos intensos",
+        "Dolor abdominal intenso",
+        "Inconsciente",
+        "Alteraciones visuales"
+      ],
+      "multiple": true,
+      "description": "Fuente: elemento PNC.B4a.DE.1 «Woman's danger signs» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_molestias",
+      "name": "Molestias referidas en las últimas 24 horas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ninguna",
+        "Entuertos (cólicos uterinos)",
+        "Cefalea",
+        "Cansancio",
+        "Dolor de espalda",
+        "Dolor perineal",
+        "Incontinencia urinaria",
+        "Incontinencia fecal",
+        "Náuseas",
+        "Vómitos",
+        "Sangrado vaginal excesivo",
+        "Secreciones fétidas",
+        "Edema de piernas",
+        "Dolor a la palpación en las piernas",
+        "Enrojecimiento de las piernas",
+        "Diarrea",
+        "Estreñimiento",
+        "Síntomas gripales",
+        "Fiebre",
+        "Mareos",
+        "Tos",
+        "Falta de aire",
+        "Dolor torácico"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B3a.DE.35 «Specific complaint for the last 24 hours» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_preeclampsia_grave",
+      "name": "Síntomas de preeclampsia grave",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin síntomas de preeclampsia grave",
+        "Cefalea intensa",
+        "Alteraciones visuales",
+        "Dolor epigástrico",
+        "Mareos",
+        "Vómitos"
+      ],
+      "multiple": true,
+      "description": "Fuente: elemento PNC.B4a.DE.27 «Symptoms of severe pre-eclampsia» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "temperatura",
+      "name": "Temperatura (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "loquios",
+      "name": "Loquios",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normales", "Abundantes", "Fétidos"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "involucion_uterina",
+      "name": "Involución uterina",
+      "dataType": "string",
+      "required": false,
+      "options": ["Adecuada", "Subinvolución"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_tono_uterino",
+      "name": "Tono del fondo uterino",
+      "dataType": "string",
+      "required": false,
+      "options": ["Contraído", "Flácido", "No evaluable"],
+      "description": "Fuente: elemento PNC.B4a.DE.90 «Fundal tone» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_altura_uterina",
+      "name": "Altura del fondo uterino",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 a 2 cm por encima del ombligo",
+        "1 a 2 cm por debajo del ombligo",
+        "A mitad de camino entre el ombligo y la sínfisis",
+        "Intrapélvico"
+      ],
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4a.DE.94 «Fundal height» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_examen_perineal",
+      "name": "Examen perineal",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin heridas",
+        "Heridas limpias y secas",
+        "Cerradas con puntos",
+        "Cerradas sin puntos",
+        "Dehiscencia",
+        "Hematoma",
+        "Enrojecimiento",
+        "Tumefacción",
+        "Calor local",
+        "Secreción fétida o purulenta",
+        "Secreción serosa"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4a.DE.113 «Perineal examination» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "tipo_parto", "equals": "Vaginal" }
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_herida_cesarea",
+      "name": "Examen de la herida de la cesárea",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Examen de la herida no realizado",
+        "Limpia y seca",
+        "Cerrada con puntos",
+        "Cerrada sin puntos",
+        "Dehiscente",
+        "Hematoma",
+        "Enrojecimiento",
+        "Tumefacción",
+        "Calor local",
+        "Secreción fétida o purulenta",
+        "Secreción serosa"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B4a.DE.144 «Caesarean section wound examination» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "tipo_parto", "equals": "Cesárea" }
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "lactancia",
+      "name": "Lactancia",
+      "dataType": "string",
+      "required": false,
+      "options": ["Exclusiva", "Mixta", "Sin lactancia"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_problemas_mamas",
+      "name": "Problemas de lactancia o de las mamas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Ninguno",
+        "Dolor mamario",
+        "Congestión mamaria",
+        "Pezones doloridos",
+        "Infección del pezón",
+        "Mastitis o absceso",
+        "Poca producción de leche",
+        "Problemas de posición",
+        "Problemas de agarre",
+        "Reflujo o regurgitación"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento PNC.B3a.DE.23 «Breastfeeding/breast issues» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "animo_puerperio",
+      "name": "Ánimo",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Tristeza persistente",
+        "Ansiedad",
+        "Ideas de hacerse daño",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_tamizaje_depresion_ansiedad",
+      "name": "Indagación clínica de depresión y ansiedad posnatal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "No realizada",
+        "Positiva (hay signos)",
+        "Negativa (no hay signos)",
+        "No se pudo determinar"
+      ],
+      "description": "Fuente: elemento PNC.B3a.DE.1 «Screening for postnatal depression and anxiety» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "anticoncepcion_posparto",
+      "name": "Anticoncepción",
+      "dataType": "string",
+      "required": false,
+      "options": ["Elegida e iniciada", "Elegida, pendiente", "No desea"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "puerperio_metodo_anticonceptivo",
+      "name": "Método anticonceptivo posparto elegido",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "DIU de cobre",
+        "DIU de levonorgestrel",
+        "Implante de etonogestrel (una varilla)",
+        "Implante de levonorgestrel (dos varillas)",
+        "DMPA intramuscular",
+        "DMPA subcutáneo",
+        "Enantato de noretisterona (NET-EN)",
+        "Píldora de progestágeno solo",
+        "Anticonceptivo oral combinado",
+        "Parche anticonceptivo combinado",
+        "Anillo vaginal combinado",
+        "Anillo vaginal de progesterona",
+        "Método de la amenorrea de la lactancia (MELA)",
+        "Preservativo masculino",
+        "Preservativo femenino",
+        "Vasectomía",
+        "Ligadura tubaria",
+        "No se entregó método"
+      ],
+      "description": "Fuente: elemento PNC.B3a.DE.147 «Method of postpartum contraception selected» de la Digital adaptation kit for postnatal care: operational requirements for implementing WHO recommendations in digital systems (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-dak-pnc, commit 1c490e4). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": {
+        "field": "anticoncepcion_posparto",
+        "equals": ["Elegida e iniciada", "Elegida, pendiente"]
+      }
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

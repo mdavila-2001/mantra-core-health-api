@@ -1,3 +1,4 @@
+export * from './chat-auto-reply.dto';
 export * from './responses.dto';
 export * from './public-profile.dto';
 export * from './own-public-profile.dto';
@@ -29,3 +30,4 @@ export * from './search-index.dto';
 export * from './verification.dto';
 export * from './profile-stats.dto';
 export * from './group-wall.dto';
+export * from './party-rating.dto';

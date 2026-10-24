@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { RemotePublicationProof } from '../../../common/storage/storage-worker-publication.service';
 import {
   IsArray,
   IsBoolean,
@@ -44,6 +45,10 @@ export class PregenerateAudioAssetsDto {
   templateKeys?: string[];
 }
 export class GeneratedAudioAssetDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsObject()
+  publication?: RemotePublicationProof;
   @ApiProperty() @IsString() @MaxLength(1024) storageUri!: string;
   @ApiProperty() @IsString() @MaxLength(64) checksumSha256!: string;
   @ApiProperty() @IsInt() @Min(1) bytes!: number;

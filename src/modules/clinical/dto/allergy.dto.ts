@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -31,9 +32,10 @@ export class AllergyReactionInput {
   /**
    * Valor de description mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Descripción libre' })
+  @ApiPropertyOptional({ description: 'Descripción libre', maxLength: 1000 })
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   description?: string;
 }
 
@@ -58,6 +60,21 @@ export class CreateAllergyIntoleranceDto {
   })
   @IsUUID()
   patientProfileId!: string;
+
+  /**
+   * Encuentro en el que se detectó la alergia (P26 / CL-01).
+   *
+   * Opcional a propósito: hay alergias declaradas fuera de una atención. Cuando
+   * viaja, el servicio exige que el encuentro sea del mismo paciente (422 si no),
+   * con el mismo criterio que `indicationConditionId` en las recetas.
+   */
+  @ApiPropertyOptional({
+    description: 'Encuentro en el que se detectó (clinical.encounters)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  encounterId?: string;
 
   /**
    * Identificador asociado a substance concept.
@@ -125,6 +142,12 @@ export class AllergyIntoleranceResponseDto {
   patientProfileId!: string;
 
   /**
+   * Encuentro en el que se detectó, si se registró dentro de una atención.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true })
+  encounterId!: string | null;
+
+  /**
    * Valor de clinical status mantenido por la instancia.
    */
   @ApiProperty({
@@ -145,4 +168,11 @@ export class AllergyIntoleranceResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+}
+
+/** Cuerpo de `POST /clinical/allergy-intolerances/:id/attachments` (P25). */
+export class AttachFileToAllergyIntoleranceDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
 }

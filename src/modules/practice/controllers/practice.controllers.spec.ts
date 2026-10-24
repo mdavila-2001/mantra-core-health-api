@@ -28,11 +28,15 @@ describe('PracticesController', () => {
       createPractice: mockFn(),
       createSite: mockFn(),
       decommissionSite: mockFn(),
+      listPractices: mockFn(),
     };
     const accreditationsService = { create: mockFn() };
     const structureService = { publishHealthcareService: mockFn() };
     const settingsService = { upsert: mockFn() };
-    const workforceService = { assignRole: mockFn() };
+    const workforceService = {
+      assignRole: mockFn(),
+      listPracticeAssignments: mockFn(),
+    };
     const inventoryService = { createItem: mockFn() };
     const organizationReadService = { getConsole: mockFn() };
     const controller = new PracticesController(
@@ -125,14 +129,36 @@ describe('PracticesController', () => {
     );
   });
 
-  it('pasa el tenant del contexto a la consola de organización (C13)', async () => {
+  it('pasa el tenant del contexto y el actor a la consola de organización (C13)', async () => {
     const d = build();
     await runWithTenant('tenant-1', () =>
-      d.controller.getOrganizationConsole('p1'),
+      d.controller.getOrganizationConsole('p1', actor),
     );
     expect(d.organizationReadService.getConsole).toHaveBeenCalledWith(
       'p1',
       'tenant-1',
+      actor,
+    );
+  });
+
+  it('pasa el tenant del contexto y el actor al listar prácticas', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () => d.controller.listPractices(actor));
+    expect(d.sitesService.listPractices).toHaveBeenCalledWith(
+      'tenant-1',
+      actor,
+    );
+  });
+
+  it('pasa el tenant del contexto al listar vinculaciones (CV-14)', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () =>
+      d.controller.listRoleAssignments('p1', 'PENDING', 'cur1', 10),
+    );
+    expect(d.workforceService.listPracticeAssignments).toHaveBeenCalledWith(
+      'p1',
+      'tenant-1',
+      { statusConceptId: 'PENDING', cursor: 'cur1', limit: 10 },
     );
   });
 

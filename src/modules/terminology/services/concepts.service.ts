@@ -34,11 +34,19 @@ import {
   type ConceptTaxonomyRefDto,
   type ConceptTextDto,
   type ConceptRelationDto,
+  type ConceptImageDto,
+  type ConceptSearchItemDto,
   type GlossaryGraphDto,
   type GlossaryGraphNodeDto,
   type GlossaryGraphEdgeDto,
+  type GlossaryNeighborDto,
+  type GlossaryNeighborGroupDto,
+  type GlossaryNeighborhoodDto,
+  type GlossaryNeighborhoodRequest,
   SearchConceptsResponseDto,
+  DEFAULT_NEIGHBORS_PER_GROUP,
 } from '../dto';
+import type { CatalogConcepts } from '../entities';
 import {
   LANGUAGE_CONCEPT_BY_CODE,
   definitionPropertyCode,
@@ -46,19 +54,41 @@ import {
 import {
   GLOSSARY_CATEGORY_PREFIX,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
+  GLOSSARY_IMAGE_PROPERTY_CODE,
+  GLOSSARY_ARTICLE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
   GLOSSARY_RELATION_TYPE_CONCEPT_IDS,
   GLOSSARY_SLUG_PROPERTY_CODE,
   GLOSSARY_TAG_PREFIX,
   GLOSSARY_ALL_TERMS_CODE,
+  GLOSSARY_RELATION_DIRECTIONS,
+  GLOSSARY_RELATION_TYPES,
+  glossaryRelationTypeConceptId,
   glossaryRelationTypeFromConceptId,
   glossaryStatusOf,
   isGlossaryValueSetCode,
   type GlossaryBilingualText,
+  type GlossaryRelationDirection,
+  type GlossaryRelationType,
 } from '../glossary.constants';
 
 /** Tipo de dato por defecto para propiedades de concepto sin `dataType` explícito. */
 const DEFAULT_PROPERTY_DATA_TYPE = 'string';
+
+/** Un vecino ya resuelto, antes de ponerle categoría. */
+interface SortedNeighbor {
+  readonly conceptId: string;
+  readonly slug: string;
+  readonly display: string;
+}
+
+/** Clave de un grupo del vecindario: tipo y sentido. */
+function neighborGroupKey(
+  type: GlossaryRelationType,
+  direction: GlossaryRelationDirection,
+): string {
+  return `${type}|${direction}`;
+}
 
 /** Idioma por defecto de los textos del glosario cuando no se pide uno explícito. */
 const DEFAULT_GLOSSARY_LANGUAGE: DesignationLanguage = 'ES';
@@ -85,7 +115,33 @@ export interface ConceptReadOptions {
    * que se verían distinto.
    */
   readonly valueSetId?: string;
+  /**
+   * Sólo glosario: una etiqueta que el término **también** tiene que llevar.
+   *
+   * Es «Enfermedades» + «Cardiovascular»: la categoría acota por
+   * `valueSetId` y esto la intersecta. Antes la pantalla lo resolvía en el
+   * navegador sobre lo que ya había traído; con la lista paginada por el
+   * servidor, filtrar la página 3 en el cliente dejaría páginas medio vacías.
+   */
+  readonly tagValueSetId?: string;
+  /**
+   * Sólo glosario: cuántos términos saltear. Ausente es cero.
+   *
+   * El glosario se lee por páginas numeradas y en orden alfabético; el resto
+   * de las búsquedas de conceptos no pagina (es un autocompletar con tope).
+   */
+  readonly offset?: number;
 }
+
+/** Un término de la página ya leído, antes de armar su forma pública. */
+type GlossaryTexts = Map<
+  string,
+  {
+    slug?: string;
+    clinicalDefinition?: ConceptTextDto;
+    plainSummary?: ConceptTextDto;
+  }
+>;
 
 /**
  * Reglas de negocio sobre conceptos ya existentes: alta de designaciones (y
@@ -117,6 +173,24 @@ export class ConceptsService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConceptsService.name);
+  }
+
+  /** Lee el artículo enciclopédico publicado del término, si existe. */
+  async readGlossaryArticle(conceptId: string): Promise<unknown> {
+    const property = await this.designationsRepo.findProperty(
+      this.em,
+      conceptId,
+      GLOSSARY_ARTICLE_PROPERTY_CODE,
+    );
+    if (!property) {
+      throw new ResourceNotFoundException(
+        'Artículo del glosario no encontrado',
+        {
+          conceptId,
+        },
+      );
+    }
+    return property.valueJson;
   }
 
   /** UC-03-05: añade una designación (y opcionalmente propiedades) a un concepto. */
@@ -625,20 +699,6 @@ export class ConceptsService {
       return { items: [], count: 0, limit };
     }
 
-    // Filtrar por categoría se resuelve acotando la lista de ids, no con un
-    // `join` en la búsqueda: así el filtro se combina con el texto y con la
-    // versión sin tocar la consulta que ya existía. Un conjunto vacío —o sin
-    // versión vigente— corta acá: pedir «los términos de esta categoría» y
-    // recibir el catálogo entero sería lo peor que podría pasar.
-    let effectiveIds = ids;
-    // Si el conjunto de valores pedido es de la familia del glosario
-    // (paraguas, categoría o etiqueta), el resultado es «lectura pública del
-    // glosario»: sólo entonces se filtra por estado activo y se resuelven los
-    // campos adicionales (slug, categoría, etiquetas, resumen corto,
-    // relaciones). Fuera de esta familia, ni lo uno ni lo otro cambia —sigue
-    // siendo exactamente la búsqueda histórica de siempre.
-    let glossaryScoped = false;
-
     // `searchGlossary` (único emisor de `includeValueSets`, ver
     // `terminology.client.ts`) manda `valueSetId` sólo cuando el usuario ya
     // eligió una categoría — la landing filtrada por texto, sin categoría,
@@ -653,26 +713,44 @@ export class ConceptsService {
     const requestedValueSetId = options.valueSetId;
     let scopingValueSetId = requestedValueSetId;
     if (scopingValueSetId === undefined && options.includeValueSets === true) {
-      const paraguas = await this.valueSetsRepo.findByInternalCode(
+      const umbrella = await this.valueSetsRepo.findByInternalCode(
         this.em,
         GLOSSARY_ALL_TERMS_CODE,
       );
-      scopingValueSetId = paraguas?.id;
+      scopingValueSetId = umbrella?.id;
     }
 
+    // Una lectura del glosario (paraguas, categoría o etiqueta) se resuelve
+    // entera en la base: pertenencia, estado, texto, orden y página. Ver
+    // `CatalogConceptsRepository.searchGlossaryPage` para por qué el camino
+    // de abajo —lista de ids + reordenar después del `LIMIT`— no escala a un
+    // glosario de cientos de miles de términos.
     if (scopingValueSetId !== undefined) {
-      const [miembros, valueSetRow] = await Promise.all([
-        this.valueSetsRepo.findIncludedConceptIdsByValueSet(
-          this.em,
-          scopingValueSetId,
-        ),
-        this.valueSetsRepo.findById(this.em, scopingValueSetId),
-      ]);
-      if (miembros === null) {
+      const glossaryPage = await this.searchGlossaryPage(
+        scopingValueSetId,
+        requestedValueSetId !== undefined,
+        { query, codeSystemVersionId, ids, limit },
+        options,
+      );
+      if (glossaryPage !== null) return glossaryPage;
+    }
+
+    // Filtrar por un conjunto que no es del glosario se resuelve acotando la
+    // lista de ids: así el filtro se combina con el texto y con la versión
+    // sin tocar la consulta que ya existía. Un conjunto vacío —o sin versión
+    // vigente— corta acá: pedir «los términos de esta categoría» y recibir el
+    // catálogo entero sería lo peor que podría pasar.
+    let effectiveIds = ids;
+    if (scopingValueSetId !== undefined) {
+      const members = await this.valueSetsRepo.findIncludedConceptIdsByValueSet(
+        this.em,
+        scopingValueSetId,
+      );
+      if (members === null) {
         // Un `valueSetId` explícito que no resuelve es un pedido inválido de
         // quien llama: sigue siendo 404. El paraguas resuelto acá —sin que
-        // nadie lo haya pedido— no lo es: si `glossary-all-terms` no está
-        // sembrado, no hay nada que acotar y la búsqueda sigue de largo sin
+        // nadie lo haya pedido— no lo es: si `glossary-all-terms` no tiene
+        // versión, no hay nada que acotar y la búsqueda sigue de largo sin
         // forma de glosario, en vez de romper una pantalla por un catálogo
         // que a esta búsqueda no le corresponde exigir.
         if (requestedValueSetId !== undefined) {
@@ -682,15 +760,12 @@ export class ConceptsService {
           );
         }
       } else {
-        glossaryScoped =
-          valueSetRow !== null &&
-          isGlossaryValueSetCode(valueSetRow.internalCode);
         effectiveIds =
           ids === undefined
-            ? miembros
+            ? members
             : // Con las dos listas presentes vale la intersección: cada filtro
               // acota, ninguno amplía.
-              miembros.filter((conceptId) => ids.includes(conceptId));
+              members.filter((conceptId) => ids.includes(conceptId));
         if (effectiveIds.length === 0) {
           return { items: [], count: 0, limit };
         }
@@ -699,21 +774,143 @@ export class ConceptsService {
 
     const concepts = await this.conceptsRepo.search(
       this.em,
-      {
-        query,
-        codeSystemVersionId,
-        ids: effectiveIds,
-        // El glosario público nunca muestra un borrador: es el «campo de
-        // estado que mantiene fuera el contenido sin revisar» que exige el
-        // carril. Fuera del glosario el catálogo se ve completo, como siempre
-        // —muchas otras pantallas leen conceptos en borrador a propósito.
-        ...(glossaryScoped ? { stateConceptId: CONCEPTS.TERM_ACTIVE } : {}),
-      },
+      { query, codeSystemVersionId, ids: effectiveIds },
       limit,
     );
 
+    const items = await this.buildSearchItems(concepts, options, false);
+
+    // Un glosario se lee en orden alfabético por el nombre; el catálogo viene
+    // ordenado por código, que es el orden que necesita quien configura. Sólo se
+    // reordena cuando se pidió idioma —o sea, cuando el llamador es una pantalla
+    // de lectura—: sin `lang` el orden es el de siempre, porque el catálogo de
+    // administración y los selectores lo esperan así.
+    if (options.language !== undefined) {
+      items.sort((a, b) => a.display.localeCompare(b.display, 'es'));
+    }
+
+    return { items, count: items.length, limit };
+  }
+
+  /**
+   * La lectura paginada del glosario, o `null` si el conjunto pedido no es
+   * del glosario (o el paraguas no tiene versión vigente) y la búsqueda tiene
+   * que seguir por el camino de siempre.
+   *
+   * Orden alfabético por el nombre en el idioma pedido (castellano por
+   * omisión), total de coincidencias y página por desplazamiento, todo desde
+   * la misma consulta. Sólo términos publicados: el glosario público nunca
+   * muestra un borrador — es el «campo de estado que mantiene fuera el
+   * contenido sin revisar» que exige el carril.
+   *
+   * @param valueSetId - Conjunto que acota (paraguas, categoría o etiqueta).
+   * @param requested - Si quien llama lo pidió (404 si no existe) o se
+   *   resolvió solo (paraguas: se sigue de largo).
+   * @param filters - Texto, versión, ids y tope de la búsqueda.
+   * @param options - Idioma, etiqueta y desplazamiento.
+   * @returns La página, o `null` para seguir por la búsqueda general.
+   */
+  private async searchGlossaryPage(
+    valueSetId: string,
+    requested: boolean,
+    filters: {
+      query?: string;
+      codeSystemVersionId?: string;
+      ids?: string[];
+      limit: number;
+    },
+    options: ConceptReadOptions,
+  ): Promise<SearchConceptsResponseDto | null> {
+    const valueSetRow = await this.valueSetsRepo.findById(this.em, valueSetId);
+    if (
+      valueSetRow === null ||
+      !isGlossaryValueSetCode(valueSetRow.internalCode)
+    )
+      return null;
+
+    const version = await this.valueSetsRepo.findDefaultVersion(
+      this.em,
+      valueSetId,
+    );
+    if (version === null) {
+      if (!requested) return null;
+      throw new ResourceNotFoundException(
+        'El conjunto de valores no existe o no tiene versión vigente',
+        { valueSetId },
+      );
+    }
+
+    let tagVersionId: string | undefined;
+    if (options.tagValueSetId !== undefined) {
+      const tagVersion = await this.valueSetsRepo.findDefaultVersion(
+        this.em,
+        options.tagValueSetId,
+      );
+      if (tagVersion === null) {
+        throw new ResourceNotFoundException(
+          'La etiqueta no existe o no tiene versión vigente',
+          { tagValueSetId: options.tagValueSetId },
+        );
+      }
+      tagVersionId = tagVersion.id;
+    }
+
+    const offset = options.offset ?? 0;
+    const language = options.language ?? DEFAULT_GLOSSARY_LANGUAGE;
+    const page = await this.conceptsRepo.searchGlossaryPage(
+      this.em,
+      {
+        valueSetVersionId: version.id,
+        ...(tagVersionId === undefined
+          ? {}
+          : { tagValueSetVersionId: tagVersionId }),
+        ...(filters.query === undefined ? {} : { query: filters.query }),
+        ...(filters.ids === undefined ? {} : { ids: filters.ids }),
+        ...(filters.codeSystemVersionId === undefined
+          ? {}
+          : { codeSystemVersionId: filters.codeSystemVersionId }),
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+        languageConceptId: LANGUAGE_CONCEPT_BY_CODE[language],
+      },
+      filters.limit,
+      offset,
+    );
+
+    const byId = await this.conceptsRepo.findByIds(this.em, page.ids);
+    // El orden es el de la consulta: `findByIds` devuelve un mapa, no una
+    // lista, y reordenar acá por `localeCompare` podría no coincidir con el
+    // corte de la base y repetir o saltear un término entre páginas.
+    const concepts = page.ids
+      .map((id) => byId.get(id))
+      .filter((concept): concept is CatalogConcepts => concept !== undefined);
+
+    const items = await this.buildSearchItems(concepts, options, true);
+    return {
+      items,
+      count: items.length,
+      limit: filters.limit,
+      offset,
+      total: page.total,
+    };
+  }
+
+  /**
+   * La forma pública de una página de conceptos: textos en el idioma pedido,
+   * sus conjuntos de valores y —si es una lectura del glosario— slug,
+   * categoría, etiquetas, resumen, relaciones, estado y miniatura.
+   *
+   * @param concepts - Conceptos de la página, en el orden en que se muestran.
+   * @param options - Idioma y si se pidieron los conjuntos de valores.
+   * @param glossaryScoped - Si la lectura es del glosario.
+   * @returns Los ítems de la respuesta.
+   */
+  private async buildSearchItems(
+    concepts: CatalogConcepts[],
+    options: ConceptReadOptions,
+    glossaryScoped: boolean,
+  ): Promise<ConceptSearchItemDto[]> {
     const conceptIds = concepts.map((concept) => concept.id);
-    const [textos, etiquetas, glossaryTexts, relationsBySource] =
+    const [texts, labels, glossaryTexts, relationsBySource, images] =
       await Promise.all([
         this.resolveTexts(conceptIds, options.language),
         options.includeValueSets || glossaryScoped
@@ -721,43 +918,49 @@ export class ConceptsService {
           : Promise.resolve(undefined),
         glossaryScoped
           ? this.resolveGlossaryTexts(conceptIds, options.language)
-          : Promise.resolve(
-              new Map<
-                string,
-                {
-                  slug?: string;
-                  clinicalDefinition?: ConceptTextDto;
-                  plainSummary?: ConceptTextDto;
-                }
-              >(),
-            ),
+          : Promise.resolve<GlossaryTexts>(new Map()),
         glossaryScoped
           ? this.resolveGlossaryRelations(conceptIds)
           : Promise.resolve(new Map<string, ConceptRelationDto[]>()),
+        glossaryScoped
+          ? this.designationsRepo.findPropertyForConcepts(
+              this.em,
+              conceptIds,
+              GLOSSARY_IMAGE_PROPERTY_CODE,
+            )
+          : Promise.resolve([]),
       ]);
 
-    const items = concepts.map((concept) => {
-      const texto = textos.get(concept.id);
-      const etiquetasDelConcepto = etiquetas?.get(concept.id);
-      const { category, tags } = splitCategoryAndTags(etiquetasDelConcepto);
+    const thumbnailByConcept = new Map<string, string>();
+    for (const property of images) {
+      const image = imageFromProperty(property.valueJson);
+      const url = image?.thumbnailSource ?? image?.source;
+      if (url !== undefined) thumbnailByConcept.set(property.conceptId, url);
+    }
+
+    return concepts.map((concept) => {
+      const text = texts.get(concept.id);
+      const conceptLabels = labels?.get(concept.id);
+      const { category, tags } = splitCategoryAndTags(conceptLabels);
+      const thumbnail = thumbnailByConcept.get(concept.id);
       return {
         conceptId: concept.id,
         code: concept.code,
         // Sin idioma pedido, `texto` es `undefined` y esto es literalmente lo
         // que devolvía antes. Con idioma, cae al original cuando falta la
         // designación: un término sin traducir se muestra igual, marcado.
-        display: texto?.display ?? concept.display,
-        definition: texto?.definition ?? concept.definition,
+        display: text?.display ?? concept.display,
+        definition: text?.definition ?? concept.definition,
         selectable: concept.selectable,
         codeSystemVersionId: concept.codeSystemVersionId,
         // Las claves ausentes no viajan en el JSON, así que sin `language` ni
         // `includeValueSets` el cuerpo es idéntico al de siempre.
         ...(options.language === undefined
           ? {}
-          : { translated: texto?.translated ?? false }),
-        ...(etiquetas === undefined
+          : { translated: text?.translated ?? false }),
+        ...(labels === undefined
           ? {}
-          : { valueSets: toValueSetRefs(etiquetasDelConcepto) }),
+          : { valueSets: toValueSetRefs(conceptLabels) }),
         ...(glossaryScoped
           ? {
               slug: glossaryTexts.get(concept.id)?.slug,
@@ -772,21 +975,13 @@ export class ConceptsService {
               tags: tags.map((tag) => tag.name),
               relationsCount: (relationsBySource.get(concept.id) ?? []).length,
               status: glossaryStatusOf(concept.stateConceptId),
+              ...(thumbnail === undefined
+                ? {}
+                : { imageThumbnailUrl: thumbnail }),
             }
           : {}),
       };
     });
-
-    // Un glosario se lee en orden alfabético por el nombre; el catálogo viene
-    // ordenado por código, que es el orden que necesita quien configura. Sólo se
-    // reordena cuando se pidió idioma —o sea, cuando el llamador es una pantalla
-    // de lectura—: sin `lang` el orden es el de siempre, porque el catálogo de
-    // administración y los selectores lo esperan así.
-    if (options.language !== undefined) {
-      items.sort((a, b) => a.display.localeCompare(b.display, 'es'));
-    }
-
-    return { items, count: items.length, limit };
   }
 
   /** Lee todos los nodos publicados y sus aristas tipadas en una sola llamada. */
@@ -794,10 +989,16 @@ export class ConceptsService {
     language: DesignationLanguage = DEFAULT_GLOSSARY_LANGUAGE,
     limit = 500,
   ): Promise<GlossaryGraphDto> {
-    const page = await this.searchConcepts(undefined, undefined, limit, undefined, {
-      language,
-      includeValueSets: true,
-    });
+    const page = await this.searchConcepts(
+      undefined,
+      undefined,
+      limit,
+      undefined,
+      {
+        language,
+        includeValueSets: true,
+      },
+    );
     const nodes: GlossaryGraphNodeDto[] = page.items
       .filter(
         (item): item is typeof item & { slug: string } =>
@@ -834,8 +1035,317 @@ export class ConceptsService {
       edges,
       count: nodes.length,
       limit,
-      possiblyTruncated: nodes.length === limit,
+      // `searchConcepts` devuelve el total al leer el paraguas del glosario.
+      // Compararlo con el total evita marcar como truncado un catálogo que
+      // tenga exactamente `limit` nodos, y detecta la truncación real aunque
+      // algún registro de la página no tenga slug y no pueda dibujarse.
+      possiblyTruncated: (page.total ?? page.items.length) > page.items.length,
     };
+  }
+
+  /**
+   * El vecindario de un término del glosario: sus relaciones **salientes y
+   * entrantes** agrupadas por tipo y sentido, para el mapa.
+   *
+   * ## Por qué no alcanzaba `readGlossaryGraph`
+   *
+   * El grafo global lee los primeros N términos y sólo conserva las aristas con
+   * ambos extremos dentro del lote: a casi cualquier término le faltaban
+   * vecinos, y un síntoma nunca mostraba las enfermedades que lo presentan,
+   * porque esa relación se guarda en la enfermedad (sentido saliente). Acá se
+   * parte del término y se leen los dos caminos de `concept_relationships`.
+   *
+   * ## Qué devuelve
+   *
+   * - **Muestra** (`{ perGroup }`): por cada tipo y sentido con vecinos, el
+   *   `total` real y los primeros `perGroup` en orden alfabético.
+   * - **Un grupo** (`{ type, direction, offset, limit }`): sólo ese grupo,
+   *   paginado. Es el «Ver los N».
+   *
+   * Los grupos vacíos no viajan. Un vecino sin `glossary-slug`, sin publicar o
+   * que es el propio término se omite (y tampoco cuenta en el `total`), con el
+   * mismo criterio que `resolveGlossaryRelations`: es preferible un vecino de
+   * menos que uno que el cliente no puede abrir.
+   *
+   * Las aristas del término se traen y se ordenan en memoria por nombre: el
+   * orden no usa `strength_score` ni se resuelve en la base.
+   *
+   * @param conceptId - Término central.
+   * @param language - Idioma de los nombres (castellano por omisión).
+   * @param request - Muestra por grupo, o la página de un grupo.
+   * @returns El término central y sus grupos de vecinos.
+   */
+  async readGlossaryNeighborhood(
+    conceptId: string,
+    language: DesignationLanguage = DEFAULT_GLOSSARY_LANGUAGE,
+    request: GlossaryNeighborhoodRequest = {
+      perGroup: DEFAULT_NEIGHBORS_PER_GROUP,
+    },
+  ): Promise<GlossaryNeighborhoodDto> {
+    this.logger.info(
+      {
+        operation: 'terminology.concept.glossary-neighborhood',
+        conceptId,
+        language,
+        mode: 'type' in request ? 'group' : 'sample',
+      },
+      'Leyendo el vecindario de un término',
+    );
+
+    const focus = await this.readGlossaryFocus(conceptId, language);
+    const wantedGroup = 'type' in request ? request : undefined;
+    const typeConceptIds =
+      wantedGroup === undefined
+        ? [...GLOSSARY_RELATION_TYPE_CONCEPT_IDS]
+        : [glossaryRelationTypeConceptId(wantedGroup.type)];
+
+    const counts = await this.relationshipsRepo.countNeighborsByType(
+      this.em,
+      conceptId,
+      typeConceptIds,
+      {
+        neighborStateConceptId: CONCEPTS.TERM_ACTIVE,
+        slugPropertyCode: GLOSSARY_SLUG_PROPERTY_CODE,
+      },
+    );
+    const totals = new Map<string, number>();
+    for (const count of counts) {
+      const type = glossaryRelationTypeFromConceptId(
+        count.relationshipTypeConceptId,
+      );
+      if (!type) continue;
+      if (
+        wantedGroup !== undefined &&
+        wantedGroup.direction !== count.direction
+      ) {
+        continue;
+      }
+      totals.set(neighborGroupKey(type, count.direction), count.total);
+    }
+    if (totals.size === 0) return { focus, groups: [] };
+
+    const sortedByGroup = await this.collectSortedNeighbors(
+      conceptId,
+      typeConceptIds,
+      wantedGroup?.direction,
+      totals,
+      language,
+    );
+
+    const perGroup =
+      'perGroup' in request ? request.perGroup : DEFAULT_NEIGHBORS_PER_GROUP;
+    const pageOf = (
+      neighbors: readonly SortedNeighbor[],
+    ): readonly SortedNeighbor[] =>
+      wantedGroup === undefined
+        ? neighbors.slice(0, perGroup)
+        : neighbors.slice(
+            wantedGroup.offset,
+            wantedGroup.offset + wantedGroup.limit,
+          );
+
+    const pages = new Map<string, readonly SortedNeighbor[]>();
+    for (const [key, neighbors] of sortedByGroup) {
+      pages.set(key, pageOf(neighbors));
+    }
+    const categoryByConcept = await this.resolveNeighborCategories(
+      [...pages.values()].flatMap((page) =>
+        page.map((neighbor) => neighbor.conceptId),
+      ),
+    );
+
+    const groups: GlossaryNeighborGroupDto[] = [];
+    for (const type of GLOSSARY_RELATION_TYPES) {
+      for (const direction of GLOSSARY_RELATION_DIRECTIONS) {
+        const key = neighborGroupKey(type, direction);
+        const total = totals.get(key);
+        if (total === undefined) continue;
+        groups.push({
+          type,
+          direction,
+          total,
+          items: (pages.get(key) ?? []).map(
+            (neighbor): GlossaryNeighborDto => ({
+              conceptId: neighbor.conceptId,
+              slug: neighbor.slug,
+              display: neighbor.display,
+              category: categoryByConcept.get(neighbor.conceptId) ?? null,
+            }),
+          ),
+        });
+      }
+    }
+    return { focus, groups };
+  }
+
+  /**
+   * El término central del mapa como nodo, o 404 si no es un término publicado
+   * del glosario con slug (un concepto de otro catálogo, un borrador o un
+   * término a medio sembrar no se puede dibujar ni abrir).
+   */
+  private async readGlossaryFocus(
+    conceptId: string,
+    language: DesignationLanguage,
+  ): Promise<GlossaryGraphNodeDto> {
+    const concept = await this.conceptsRepo.findById(this.em, conceptId);
+    const notFound = (): ResourceNotFoundException =>
+      new ResourceNotFoundException('Término del glosario no encontrado', {
+        conceptId,
+      });
+    if (!concept) throw notFound();
+
+    const [texts, labels, glossaryTexts] = await Promise.all([
+      this.resolveTexts([conceptId], language),
+      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+      this.resolveGlossaryTexts([conceptId], language),
+    ]);
+    const conceptLabels = labels.get(conceptId);
+    const isGlossaryTerm = (conceptLabels ?? []).some(
+      (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
+    );
+    const glossaryText = glossaryTexts.get(conceptId);
+    if (
+      !isGlossaryTerm ||
+      concept.stateConceptId !== CONCEPTS.TERM_ACTIVE ||
+      glossaryText?.slug === undefined
+    ) {
+      throw notFound();
+    }
+
+    const { category } = splitCategoryAndTags(conceptLabels);
+    return {
+      conceptId: concept.id,
+      slug: glossaryText.slug,
+      display: texts.get(conceptId)?.display ?? concept.display,
+      category: category
+        ? { internalCode: category.internalCode, name: category.name }
+        : null,
+      shortDefinition: glossaryText.plainSummary?.text ?? '',
+    };
+  }
+
+  /**
+   * Los vecinos de cada grupo pedido, ya resueltos y en orden alfabético.
+   *
+   * Lee las aristas de un solo camino por vez que haga falta (`findByTypesForSources`
+   * para las salientes, `findByTypesForTargets` para las entrantes), saca los
+   * repetidos y la autorreferencia, resuelve slug y nombre de los vecinos con
+   * el mismo helper que las relaciones de la ficha y descarta los que no están
+   * publicados.
+   *
+   * @param conceptId - Término central.
+   * @param typeConceptIds - Tipos de relación a leer.
+   * @param onlyDirection - Si se pidió un solo sentido, cuál; si no, ambos.
+   * @param wantedGroups - Claves `tipo|sentido` que importan (las que tienen total).
+   * @param language - Idioma del nombre y del orden.
+   * @returns Mapa `clave de grupo -> vecinos ordenados`.
+   */
+  private async collectSortedNeighbors(
+    conceptId: string,
+    typeConceptIds: string[],
+    onlyDirection: GlossaryRelationDirection | undefined,
+    wantedGroups: ReadonlyMap<string, number>,
+    language: DesignationLanguage,
+  ): Promise<Map<string, SortedNeighbor[]>> {
+    const wantsDirection = (direction: GlossaryRelationDirection): boolean =>
+      onlyDirection === undefined || onlyDirection === direction;
+    const [outgoing, incoming] = await Promise.all([
+      wantsDirection('outgoing')
+        ? this.relationshipsRepo.findByTypesForSources(
+            this.em,
+            typeConceptIds,
+            [conceptId],
+          )
+        : Promise.resolve([]),
+      wantsDirection('incoming')
+        ? this.relationshipsRepo.findByTypesForTargets(
+            this.em,
+            typeConceptIds,
+            [conceptId],
+          )
+        : Promise.resolve([]),
+    ]);
+
+    const links: {
+      key: string;
+      neighborId: string;
+    }[] = [];
+    const addLinks = (
+      edges: typeof outgoing,
+      direction: GlossaryRelationDirection,
+    ): void => {
+      for (const edge of edges) {
+        const type = glossaryRelationTypeFromConceptId(
+          edge.relationshipTypeConceptId,
+        );
+        const neighborId =
+          direction === 'outgoing'
+            ? edge.targetConceptId
+            : edge.sourceConceptId;
+        if (!type || neighborId === conceptId) continue;
+        const key = neighborGroupKey(type, direction);
+        if (wantedGroups.has(key)) links.push({ key, neighborId });
+      }
+    };
+    addLinks(outgoing, 'outgoing');
+    addLinks(incoming, 'incoming');
+
+    const neighborIds = links.map((link) => link.neighborId);
+    const [terms, texts] = await Promise.all([
+      this.resolveGlossaryTerms(neighborIds),
+      this.resolveTexts([...new Set(neighborIds)], language),
+    ]);
+
+    const byGroup = new Map<string, Map<string, SortedNeighbor>>();
+    for (const { key, neighborId } of links) {
+      const term = terms.get(neighborId);
+      if (!term || term.concept.stateConceptId !== CONCEPTS.TERM_ACTIVE) {
+        continue;
+      }
+      const group = byGroup.get(key) ?? new Map<string, SortedNeighbor>();
+      group.set(neighborId, {
+        conceptId: neighborId,
+        slug: term.slug,
+        display: texts.get(neighborId)?.display ?? term.concept.display,
+      });
+      byGroup.set(key, group);
+    }
+
+    const sorted = new Map<string, SortedNeighbor[]>();
+    for (const [key, group] of byGroup) {
+      sorted.set(
+        key,
+        [...group.values()].sort(
+          (a, b) =>
+            a.display.localeCompare(b.display, 'es') ||
+            a.conceptId.localeCompare(b.conceptId),
+        ),
+      );
+    }
+    return sorted;
+  }
+
+  /** La categoría del glosario de cada vecino, resuelta igual que en la búsqueda. */
+  private async resolveNeighborCategories(
+    conceptIds: string[],
+  ): Promise<Map<string, ConceptTaxonomyRefDto>> {
+    const result = new Map<string, ConceptTaxonomyRefDto>();
+    const uniqueIds = [...new Set(conceptIds)];
+    if (uniqueIds.length === 0) return result;
+    const valueSets = await this.valueSetsRepo.findValueSetsByConceptIds(
+      this.em,
+      uniqueIds,
+    );
+    for (const conceptId of uniqueIds) {
+      const { category } = splitCategoryAndTags(valueSets.get(conceptId));
+      if (category) {
+        result.set(conceptId, {
+          internalCode: category.internalCode,
+          name: category.name,
+        });
+      }
+    }
+    return result;
   }
 
   /**
@@ -870,55 +1380,53 @@ export class ConceptsService {
       });
     }
 
-    const [
-      textos,
-      etiquetas,
-      designations,
-      glossaryTexts,
-      relations,
-      properties,
-    ] = await Promise.all([
-      this.resolveTexts([conceptId], language),
-      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
-      this.designationsRepo.findByConcept(this.em, conceptId),
-      this.resolveGlossaryTexts([conceptId], language),
-      this.resolveGlossaryRelations([conceptId]),
-      this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
-    ]);
+    const [texts, labels, designations, glossaryTexts, relations, properties] =
+      await Promise.all([
+        this.resolveTexts([conceptId], language),
+        this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+        this.designationsRepo.findByConcept(this.em, conceptId),
+        this.resolveGlossaryTexts([conceptId], language),
+        this.resolveGlossaryRelations([conceptId]),
+        this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
+      ]);
 
-    const etiquetasDelConcepto = etiquetas.get(conceptId);
-    const esTerminoDelGlosario = (etiquetasDelConcepto ?? []).some(
+    const conceptLabels = labels.get(conceptId);
+    const isGlossaryTerm = (conceptLabels ?? []).some(
       (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
     );
     // El glosario público nunca deja pasar un borrador: es el «campo de
     // estado que mantiene fuera el contenido sin revisar» que exige el
     // carril. Se responde 404 —no una ficha a medias— para que un borrador
     // sea indistinguible de un concepto inexistente desde este endpoint.
-    if (
-      esTerminoDelGlosario &&
-      concept.stateConceptId !== CONCEPTS.TERM_ACTIVE
-    ) {
+    if (isGlossaryTerm && concept.stateConceptId !== CONCEPTS.TERM_ACTIVE) {
       throw new ResourceNotFoundException('Concepto no encontrado', {
         conceptId,
       });
     }
 
-    const texto = textos.get(conceptId);
-    const display = texto?.display ?? concept.display;
-    const { category, tags } = splitCategoryAndTags(etiquetasDelConcepto);
-    const glossaryTexto = glossaryTexts.get(conceptId);
+    const text = texts.get(conceptId);
+    const display = text?.display ?? concept.display;
+    const { category, tags } = splitCategoryAndTags(conceptLabels);
+    const glossaryText = glossaryTexts.get(conceptId);
+    const propertyList: Record<string, unknown> = Object.fromEntries(
+      properties.map((property) => [property.propertyCode, property.valueJson]),
+    );
+    const image = imageFromProperty(
+      propertyList[GLOSSARY_IMAGE_PROPERTY_CODE],
+      display,
+    );
 
     return {
       conceptId: concept.id,
       code: concept.code,
       display,
-      definition: texto?.definition ?? concept.definition,
+      definition: text?.definition ?? concept.definition,
       selectable: concept.selectable,
       codeSystemVersionId: concept.codeSystemVersionId,
       ...(language === undefined
         ? {}
-        : { translated: texto?.translated ?? false }),
-      valueSets: toValueSetRefs(etiquetasDelConcepto),
+        : { translated: text?.translated ?? false }),
+      valueSets: toValueSetRefs(conceptLabels),
       synonyms: designations
         // La que ya se está mostrando arriba no es un sinónimo de sí misma:
         // repetirla bajo «también se le dice» no informa de nada.
@@ -932,15 +1440,13 @@ export class ConceptsService {
             ? {}
             : { preferred: designation.preferred }),
         })),
-      ...(glossaryTexto?.slug === undefined
+      ...(glossaryText?.slug === undefined ? {} : { slug: glossaryText.slug }),
+      ...(glossaryText?.clinicalDefinition === undefined
         ? {}
-        : { slug: glossaryTexto.slug }),
-      ...(glossaryTexto?.clinicalDefinition === undefined
+        : { clinicalDefinition: glossaryText.clinicalDefinition }),
+      ...(glossaryText?.plainSummary === undefined
         ? {}
-        : { clinicalDefinition: glossaryTexto.clinicalDefinition }),
-      ...(glossaryTexto?.plainSummary === undefined
-        ? {}
-        : { plainSummary: glossaryTexto.plainSummary }),
+        : { plainSummary: glossaryText.plainSummary }),
       category,
       tags,
       relations: relations.get(conceptId) ?? [],
@@ -948,12 +1454,11 @@ export class ConceptsService {
       // nunca recorriéndolo. Si un code system repitiera el mismo código en dos
       // filas —que el UPSERT de `upsertProperties` impide— gana la última, que
       // es la misma regla que aplica esa escritura.
-      properties: Object.fromEntries(
-        properties.map((property) => [
-          property.propertyCode,
-          property.valueJson,
-        ]),
-      ),
+      properties: propertyList,
+      // La imagen viaja además como campo propio, ya validada: sin URL, sin
+      // atribución o sin licencia no se publica — una foto sin crédito no se
+      // muestra, por linda que sea.
+      ...(image === undefined ? {} : { image: image }),
     };
   }
 
@@ -1009,31 +1514,31 @@ export class ConceptsService {
       ),
     ]);
 
-    const definicionPorConcepto = new Map<string, string>();
+    const definitionByConcept = new Map<string, string>();
     for (const property of definitions) {
       // `value_json` es jsonb: la definición se guarda como cadena JSON, pero un
       // valor cargado a mano podría ser cualquier cosa. Sólo se acepta texto —
       // pintar `[object Object]` en un glosario sería peor que no traducir.
       if (typeof property.valueJson === 'string') {
-        definicionPorConcepto.set(property.conceptId, property.valueJson);
+        definitionByConcept.set(property.conceptId, property.valueJson);
       }
     }
 
-    const textos = new Map<
+    const texts = new Map<
       string,
       { display?: string; definition?: string; translated: boolean }
     >();
     for (const conceptId of conceptIds) {
       const designation = designations.get(conceptId);
-      const definition = definicionPorConcepto.get(conceptId);
+      const definition = definitionByConcept.get(conceptId);
       if (designation === undefined && definition === undefined) continue;
-      textos.set(conceptId, {
+      texts.set(conceptId, {
         ...(designation === undefined ? {} : { display: designation.value }),
         ...(definition === undefined ? {} : { definition }),
         translated: designation !== undefined,
       });
     }
-    return textos;
+    return texts;
   }
 
   /**
@@ -1151,21 +1656,8 @@ export class ConceptsService {
     );
     if (edges.length === 0) return result;
 
-    const targetConceptIds = [
-      ...new Set(edges.map((edge) => edge.targetConceptId)),
-    ];
-    const [targets, targetSlugProperties] = await Promise.all([
-      this.conceptsRepo.findByIds(this.em, targetConceptIds),
-      this.designationsRepo.findPropertyForConcepts(
-        this.em,
-        targetConceptIds,
-        GLOSSARY_SLUG_PROPERTY_CODE,
-      ),
-    ]);
-    const slugByTarget = new Map(
-      targetSlugProperties
-        .filter((property) => typeof property.valueJson === 'string')
-        .map((property) => [property.conceptId, property.valueJson as string]),
+    const targets = await this.resolveGlossaryTerms(
+      edges.map((edge) => edge.targetConceptId),
     );
 
     for (const edge of edges) {
@@ -1177,15 +1669,123 @@ export class ConceptsService {
       // publicarse.
       if (!type) continue;
       const target = targets.get(edge.targetConceptId);
-      const slug = slugByTarget.get(edge.targetConceptId);
-      if (!target || slug === undefined) continue;
+      if (!target) continue;
 
       const list = result.get(edge.sourceConceptId) ?? [];
-      list.push({ type, conceptId: target.id, slug, display: target.display });
+      list.push({
+        type,
+        conceptId: target.concept.id,
+        slug: target.slug,
+        display: target.concept.display,
+      });
       result.set(edge.sourceConceptId, list);
     }
     return result;
   }
+
+  /**
+   * Los conceptos que además tienen `glossary-slug`: el mínimo para poder
+   * mostrarlos y navegar a ellos desde una relación.
+   *
+   * Un id sin concepto, o un concepto sin slug cargado —indicio de una FK rota
+   * o de un término a medio sembrar— no aparece en el mapa: quien lo usa lo
+   * omite en vez de publicar una fila que el cliente no puede abrir. Es el
+   * bloque que comparten las relaciones de la ficha y el vecindario del mapa.
+   *
+   * @param conceptIds - Conceptos a resolver (se admiten repetidos).
+   * @returns Mapa `conceptId -> { concept, slug }`.
+   */
+  private async resolveGlossaryTerms(
+    conceptIds: string[],
+  ): Promise<Map<string, { concept: CatalogConcepts; slug: string }>> {
+    const result = new Map<
+      string,
+      { concept: CatalogConcepts; slug: string }
+    >();
+    const uniqueIds = [...new Set(conceptIds)];
+    if (uniqueIds.length === 0) return result;
+
+    const [concepts, slugProperties] = await Promise.all([
+      this.conceptsRepo.findByIds(this.em, uniqueIds),
+      this.designationsRepo.findPropertyForConcepts(
+        this.em,
+        uniqueIds,
+        GLOSSARY_SLUG_PROPERTY_CODE,
+      ),
+    ]);
+    for (const property of slugProperties) {
+      if (typeof property.valueJson !== 'string') continue;
+      const concept = concepts.get(property.conceptId);
+      if (concept) {
+        result.set(property.conceptId, { concept, slug: property.valueJson });
+      }
+    }
+    return result;
+  }
+}
+
+/** Lee un campo de texto no vacío de un objeto libre, o `undefined`. */
+function textField(
+  source: Record<string, unknown>,
+  ...keys: string[]
+): string | undefined {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === 'string' && value.trim() !== '') return value.trim();
+  }
+  return undefined;
+}
+
+/**
+ * La imagen de un término a partir de su propiedad `glossary-image`, o
+ * `undefined` si no tiene la forma mínima publicable.
+ *
+ * La propiedad es `value_json` libre y la escribe el importador. Se aceptan
+ * las dos grafías que circulan (`url`/`source`, `thumbUrl`/`thumbnailUrl`)
+ * para no acoplar la lectura a un solo nombre de campo, pero **URL, atribución
+ * y licencia son obligatorias**: sin cualquiera de las tres la imagen no se
+ * publica.
+ *
+ * @param value - El `value_json` de la propiedad.
+ * @param display - Nombre del término, para el texto alternativo si falta.
+ * @returns La imagen lista para el contrato, o `undefined`.
+ */
+export function imageFromProperty(
+  value: unknown,
+  display = '',
+): ConceptImageDto | undefined {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    return undefined;
+  const source = value as Record<string, unknown>;
+  const url = textField(source, 'url', 'source', 'imageUrl');
+  const attribution = textField(source, 'attribution', 'imageAttribution');
+  const license = textField(source, 'license', 'imageLicense');
+  if (url === undefined || attribution === undefined || license === undefined)
+    return undefined;
+
+  const thumbnail = textField(
+    source,
+    'thumbUrl',
+    'thumbnailUrl',
+    'imageThumbUrl',
+  );
+  const sourcePage = textField(source, 'sourcePage', 'imageSourcePage');
+  const status = textField(source, 'status');
+  // Una imagen rechazada en revisión no se publica, aunque la fila exista.
+  if (status === 'rejected') return undefined;
+  return {
+    source: url,
+    attribution,
+    license,
+    alt:
+      textField(source, 'alt') ??
+      (display === ''
+        ? 'Imagen ilustrativa'
+        : `Imagen ilustrativa: ${display}`),
+    status: status === 'pending' ? 'pending' : 'approved',
+    ...(thumbnail === undefined ? {} : { thumbnailSource: thumbnail }),
+    ...(sourcePage === undefined ? {} : { sourcePage }),
+  };
 }
 
 /** Los conjuntos de valores de un concepto, reducidos a lo que pinta una etiqueta. */

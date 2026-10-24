@@ -10,17 +10,25 @@ import {
 import type { Response } from 'express';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { Public, ResourceNotFoundException } from '../../../common';
+import {
+  ParseOptionalLimitPipe,
+  Public,
+  ResourceNotFoundException,
+} from '../../../common';
+import { CommunityErrorReason } from '../community.error-reasons';
 import {
   CommunityPublicService,
+  CommunityReviewsReadService,
   TARGET_CONCEPT_BY_SLUG_PREFIX,
 } from '../services';
 import type {
   PublicCommentPageDto,
+  PublicProfileReviewsDto,
   PublicDirectoryProfileDto,
   PublicFeedPageDto,
   PublicNearbyPageDto,
   PublicPostReactionPageDto,
+  PublicResultKind,
   PublicSearchPageDto,
 } from '../dto';
 
@@ -55,6 +63,34 @@ import type {
  */
 const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
 
+/**
+ * Los cuatro verticales que `GET /public/nearby` sabe acotar
+ * (`openapi/CONTRATO-PUBLICO.md`, sección 9): no los siete de `PublicResultKind`
+ * — `MEDICATION` no tiene concepto de sujeto geolocalizable y `INSURER` no se
+ * publica por proximidad. Es una lista propia y no `PUBLIC_RESULT_KINDS` (que
+ * no existe en tiempo de ejecución en este paquete) porque un valor fuera de
+ * estos cuatro tiene que descartarse, no colarse al índice.
+ */
+const NEARBY_KINDS: readonly PublicResultKind[] = [
+  'PRACTITIONER',
+  'ORGANIZATION',
+  'PHARMACY',
+  'DIAGNOSTIC_UNIT',
+];
+
+/** Tope por defecto de opiniones por página, igual que el resto de la API. */
+const DEFAULT_REVIEW_PAGE_LIMIT = 50;
+
+/**
+ * Filtro territorial en dos pasos (subtarea 2.3), compartido por los
+ * directorios de profesionales y de organizaciones.
+ */
+const DEPARTMENT_QUERY_DESCRIPTION =
+  'concept_id de VS_BO_DEPARTMENT al que acotar; uno ajeno al conjunto da 422';
+const MUNICIPALITY_QUERY_DESCRIPTION =
+  'concept_id de VS_BO_MUNICIPALITY al que acotar; uno ajeno al conjunto, o ' +
+  'de otro departamento que `department`, da 422';
+
 @ApiTags('community-public')
 @Throttle(PUBLIC_RATE_LIMIT)
 @Controller()
@@ -63,8 +99,12 @@ export class CommunityPublicController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param service - Buscador público.
+   * @param reviews - Lecturas de reseñas, para las opiniones de la ficha (P31).
    */
-  constructor(private readonly service: CommunityPublicService) {}
+  constructor(
+    private readonly service: CommunityPublicService,
+    private readonly reviews: CommunityReviewsReadService,
+  ) {}
 
   /**
    * El feed de la portada: lo último de todas las vitrinas, mezclado.
@@ -82,7 +122,7 @@ export class CommunityPublicController {
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicFeedPageDto> {
-    return this.service.feedPublico({ cursor, limit: this.toInt(limit) });
+    return this.service.feedPublic({ cursor, limit: this.toInt(limit) });
   }
 
   /**
@@ -184,18 +224,32 @@ export class CommunityPublicController {
       'concept_id de VS_MEDICAL_SPECIALTY al que acotar; uno ajeno al ' +
       'conjunto da 422',
   })
+  @ApiQuery({
+    name: 'department',
+    required: false,
+    description: DEPARTMENT_QUERY_DESCRIPTION,
+  })
+  @ApiQuery({
+    name: 'municipality',
+    required: false,
+    description: MUNICIPALITY_QUERY_DESCRIPTION,
+  })
   searchPractitioners(
     @Query('q') q?: string,
     @Query('verified') verified?: string,
     @Query('specialty') specialty?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
+    @Query('department') department?: string,
+    @Query('municipality') municipality?: string,
   ): Promise<PublicSearchPageDto> {
     return this.service.search({
       q,
       kind: 'PRACTITIONER',
       verified: this.toBool(verified),
       specialtyConceptId: specialty,
+      departmentConceptId: department,
+      municipalityConceptId: municipality,
       cursor,
       limit: this.toInt(limit),
     });
@@ -219,16 +273,30 @@ export class CommunityPublicController {
     required: false,
     description: 'Ciudad a la que acotar; sin tildes ni mayúsculas que valgan',
   })
+  @ApiQuery({
+    name: 'department',
+    required: false,
+    description: DEPARTMENT_QUERY_DESCRIPTION,
+  })
+  @ApiQuery({
+    name: 'municipality',
+    required: false,
+    description: MUNICIPALITY_QUERY_DESCRIPTION,
+  })
   searchOrganizations(
     @Query('q') q?: string,
     @Query('city') city?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
+    @Query('department') department?: string,
+    @Query('municipality') municipality?: string,
   ): Promise<PublicSearchPageDto> {
     return this.service.search({
       q,
       kind: 'ORGANIZATION',
       city,
+      departmentConceptId: department,
+      municipalityConceptId: municipality,
       cursor,
       limit: this.toInt(limit),
     });
@@ -302,7 +370,15 @@ export class CommunityPublicController {
     });
   }
 
-  /** Lo más cercano a un punto. */
+  /**
+   * Lo más cercano a un punto.
+   *
+   * `kind` acotaba en el servicio y en el cliente del front desde el 18/08,
+   * pero el controlador nunca lo declaraba: la frontera se lo comía en
+   * silencio y `/nearby-places` recibía los cuatro verticales mezclados en
+   * vez de sólo imagenología o sólo centros médicos. Mismo defecto que
+   * `specialty` tenía en `searchPractitioners` — ver su spec para el patrón.
+   */
   @Public()
   @Get('public/nearby')
   @ApiOperation({ summary: 'Prestadores cercanos, en línea recta' })
@@ -310,12 +386,14 @@ export class CommunityPublicController {
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('radiusKm') radiusKm?: string,
+    @Query('kind') kind?: string,
     @Query('limit') limit?: string,
   ): Promise<PublicNearbyPageDto> {
     return this.service.nearby({
       lat: this.toFloat(lat),
       lng: this.toFloat(lng),
       radiusKm: this.toFloat(radiusKm),
+      kind: this.toNearbyKind(kind),
       limit: this.toInt(limit),
     });
   }
@@ -342,7 +420,7 @@ export class CommunityPublicController {
    * mismo servicio con el mismo concepto de sujeto, no una segunda
    * implementación que pueda separarse de la primera.
    *
-   * @param prefijo - `p` · `o` · `f` · `l` · `s`, el mismo que la ruta corta.
+   * @param prefix - `p` · `o` · `f` · `l` · `s`, el mismo que la ruta corta.
    * @param slug - Slug estable del perfil.
    * @throws ResourceNotFoundException si el prefijo no es uno de los cinco.
    */
@@ -350,17 +428,61 @@ export class CommunityPublicController {
   @Get('public/profiles/:prefijo/:slug')
   @ApiOperation({ summary: 'Ficha pública por prefijo de vertical' })
   getProfileByPrefix(
-    @Param('prefijo') prefijo: string,
+    @Param('prefijo') prefix: string,
     @Param('slug') slug: string,
   ): Promise<PublicDirectoryProfileDto> {
-    const concepto = TARGET_CONCEPT_BY_SLUG_PREFIX[prefijo];
+    const concept = TARGET_CONCEPT_BY_SLUG_PREFIX[prefix];
     // Un prefijo inventado da el **mismo** 404 que un slug que no existe: en
     // esta superficie nada distingue «no existe» de «no está publicado», y un
     // 400 acá abriría esa distinción por la puerta de al lado.
-    if (concepto === undefined)
+    if (concept === undefined)
+      throw new ResourceNotFoundException(
+        'No encontrado',
+        { slug },
+        CommunityErrorReason.PUBLIC_DIRECTORY_PROFILE_PREFIX_INVALID,
+      );
+
+    return this.service.getBySlug(slug, concept);
+  }
+
+  /**
+   * P31 — las opiniones de una ficha pública, con su promedio.
+   *
+   * Cuelga del mismo `/public/profiles/:prefijo/:slug` que la ficha y no de
+   * `/community/profiles/:profileId/reviews` por lo mismo que aquella ruta
+   * existe: la abre un anónimo y lo único que lleva la URL es el slug. La
+   * lectura con sesión sigue donde estaba y devuelve exactamente las mismas
+   * reseñas — es el mismo servicio, no una segunda implementación.
+   *
+   * El promedio viaja acá y no sólo en la ficha porque la cabecera de las
+   * opiniones y la lista se dibujan juntas: pedirlos por separado deja la
+   * pantalla con «4,6 de 5» arriba y un hueco abajo.
+   *
+   * @param prefix - `p` · `o` · `f` · `l` · `s`, el mismo que la ficha.
+   * @param slug - Slug estable del perfil.
+   * @param cursor - Cursor opaco de la página anterior.
+   * @param limit - Tope de filas.
+   * @throws ResourceNotFoundException si el prefijo no es uno de los cinco.
+   */
+  @Public()
+  @Get('public/profiles/:prefijo/:slug/reviews')
+  @ApiOperation({ summary: 'Opiniones publicadas de una ficha pública' })
+  listPublicProfileReviews(
+    @Param('prefijo') prefix: string,
+    @Param('slug') slug: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<PublicProfileReviewsDto> {
+    const concept = TARGET_CONCEPT_BY_SLUG_PREFIX[prefix];
+    // Mismo 404 que la ficha: un prefijo inventado no se distingue de un slug
+    // que no existe.
+    if (concept === undefined)
       throw new ResourceNotFoundException('No encontrado', { slug });
 
-    return this.service.getBySlug(slug, concepto);
+    return this.reviews.listPublicReviewsBySlug(slug, concept, {
+      cursor,
+      limit: limit ?? DEFAULT_REVIEW_PAGE_LIMIT,
+    });
   }
 
   /**
@@ -399,9 +521,9 @@ export class CommunityPublicController {
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ): Promise<void> {
-    const contenido = await this.service.getPublicMedia(id);
-    res.setHeader('Content-Type', contenido.mimeType);
-    res.send(contenido.buffer);
+    const content = await this.service.getPublicMedia(id);
+    res.setHeader('Content-Type', content.mimeType);
+    res.send(content.buffer);
   }
 
   /** Ficha pública de un profesional. */
@@ -457,22 +579,33 @@ export class CommunityPublicController {
    * `limit` fuera de rango se **recorta**, y «abc» es tan fuera de rango como
    * 9999. La única excepción son las coordenadas de `nearby`, que sí fallan.
    */
-  private toInt(valor?: string): number | undefined {
-    if (valor === undefined) return undefined;
-    const n = Number.parseInt(valor, 10);
+  private toInt(value?: string): number | undefined {
+    if (value === undefined) return undefined;
+    const n = Number.parseInt(value, 10);
     return Number.isFinite(n) ? n : undefined;
   }
 
   /** Decimal de un parámetro de consulta, o `undefined`. */
-  private toFloat(valor?: string): number | undefined {
-    if (valor === undefined) return undefined;
-    const n = Number.parseFloat(valor);
+  private toFloat(value?: string): number | undefined {
+    if (value === undefined) return undefined;
+    const n = Number.parseFloat(value);
     return Number.isFinite(n) ? n : undefined;
   }
 
+  /**
+   * El vertical de `nearby`, o `undefined` si no es uno de los cuatro que
+   * acepta ese endpoint (ver {@link NEARBY_KINDS}).
+   *
+   * Mismo criterio que `toInt`/`toBool`: un vertical inventado se ignora —el
+   * buscador cae a «todos»— en vez de romper la consulta con 400.
+   */
+  private toNearbyKind(value?: string): PublicResultKind | undefined {
+    return NEARBY_KINDS.find((kind) => kind === value);
+  }
+
   /** Booleano de un parámetro; sólo `'true'` afirma. */
-  private toBool(valor?: string): boolean | undefined {
-    if (valor === undefined) return undefined;
-    return valor === 'true';
+  private toBool(value?: string): boolean | undefined {
+    if (value === undefined) return undefined;
+    return value === 'true';
   }
 }

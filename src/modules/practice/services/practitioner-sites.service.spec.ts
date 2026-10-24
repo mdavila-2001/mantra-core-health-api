@@ -10,24 +10,65 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerSitesService } from './practitioner-sites.service';
 import { PRAC } from '../practice.concepts';
-import { ResourceNotFoundException } from '../../../common';
+import { ResourceNotFoundException, runWithTenant } from '../../../common';
 
 const TENANT = 'tenant-1';
-const OTRO_TENANT = 'tenant-2';
+const OTHER_TENANT = 'tenant-2';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
 function build() {
-  const fork = { findOne: mockFn().mockResolvedValue(null) };
-  const em = { fork: mockFn(() => fork) };
+  const fork = {
+    findOne: mockFn().mockResolvedValue(null),
+    flush: mockFn().mockResolvedValue(undefined),
+  };
+  const em = {
+    fork: mockFn(() => fork),
+    transactional: mockFn((cb: any) => cb(fork)),
+  };
   const practicesRepo = {
     findById: mockFn().mockResolvedValue({ id: 'pr-1', tenantId: TENANT }),
+    findOwnOffice: mockFn().mockResolvedValue(null),
   };
-  const sitesRepo = { findById: mockFn().mockResolvedValue(null) };
+  const addressesRepo = {
+    create: mockFn().mockReturnValue({ id: 'addr-nueva' }),
+    closeCurrent: mockFn(),
+  };
+  const accountLinksRepo = {
+    findActiveByPerson: mockFn().mockResolvedValue(null),
+  };
+  const sitesRepo = {
+    findById: mockFn().mockResolvedValue(null),
+  };
   const spacesRepo = { findById: mockFn().mockResolvedValue(null) };
-  const rolesRepo = { findCurrentWithSite: mockFn().mockResolvedValue([]) };
+  const rolesRepo = {
+    findCurrentWithSite: mockFn().mockResolvedValue([]),
+    findCurrentBySite: mockFn().mockResolvedValue(null),
+  };
+  // El alta transaccional del consultorio propio (ALV-005/006) vive en
+  // `OwnSiteProvisioningService`; acá se mockea como colaborador y sus
+  // propios casos (práctica reutilizada, dirección, sufijo de código) están
+  // en `own-site-provisioning.service.spec.ts`.
+  const provisioning = {
+    provision: mockFn().mockResolvedValue({
+      practiceId: 'pr-own-1',
+      siteId: 'site-own-1',
+      addressId: undefined,
+      site: {
+        id: 'site-own-1',
+        practiceId: 'pr-own-1',
+        code: 'MI-CONSULTORIO',
+        name: 'Mi consultorio',
+        timeZone: undefined,
+        statusConceptId: PRAC.SITE_ACTIVE,
+      },
+    }),
+  };
+  const ownership = {
+    requireOwnPractitionerProfileId: mockFn().mockResolvedValue('prac-1'),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new PractitionerSitesService(
@@ -36,21 +77,30 @@ function build() {
     sitesRepo as any,
     spacesRepo as any,
     rolesRepo as any,
+    addressesRepo as any,
+    accountLinksRepo as any,
+    provisioning as any,
+    ownership as any,
     logger as any,
   );
   return {
     service,
     fork,
+    em,
     practicesRepo,
     sitesRepo,
     spacesRepo,
     rolesRepo,
+    addressesRepo,
+    accountLinksRepo,
+    provisioning,
+    ownership,
     logger,
   };
 }
 
 /** Una sede de la práctica del tenant. */
-const sede = (over: Record<string, unknown> = {}): any => ({
+const siteRecord = (over: Record<string, unknown> = {}): any => ({
   id: 'site-1',
   practiceId: 'pr-1',
   code: 'CC',
@@ -67,7 +117,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
 
       const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
 
@@ -93,21 +143,27 @@ describe('PractitionerSitesService', () => {
       ).resolves.toEqual([]);
     });
 
-    it('drops sites that belong to another organization', async () => {
+    it('includes another organization site when the practitioner has an active assignment there', async () => {
       const d = build();
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
-        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+        {
+          practitionerProfileId: 'prac-1',
+          practiceSiteId: 'site-1',
+          contactPhone: '+591 70000001',
+        },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
-        tenantId: OTRO_TENANT,
+        tenantId: OTHER_TENANT,
       });
 
       const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
 
-      expect(res).toEqual([]);
-      expect(d.logger.warn).toHaveBeenCalled();
+      expect(res).toMatchObject([
+        { id: 'site-1', contactPhone: '+591 70000001' },
+      ]);
+      expect(d.logger.warn).not.toHaveBeenCalled();
     });
 
     it('composes the address in one line, skipping the empty pieces', async () => {
@@ -115,7 +171,9 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede({ addressId: 'addr-1' }));
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ addressId: 'addr-1' }),
+      );
       d.fork.findOne.mockResolvedValue({
         lines: 'Av. Brasil 1234',
         city: 'La Paz',
@@ -128,6 +186,62 @@ describe('PractitionerSitesService', () => {
     });
   });
 
+  describe('setSiteContactPhone', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('stores the phone on the active assignment, including a site of another tenant', async () => {
+      const d = build();
+      const assignment = { contactPhone: undefined } as any;
+      d.rolesRepo.findCurrentBySite.mockResolvedValue(assignment);
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: OTHER_TENANT,
+      });
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteContactPhone(actor, 'site-1', '  +591 72123456  '),
+      );
+
+      expect(d.rolesRepo.findCurrentBySite).toHaveBeenCalledWith(
+        d.fork,
+        'prac-1',
+        'site-1',
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      );
+      expect(assignment.contactPhone).toBe('+591 72123456');
+      expect(d.fork.flush).toHaveBeenCalled();
+      expect(res.contactPhone).toBe('+591 72123456');
+    });
+
+    it('clears only this assignment phone when passed null', async () => {
+      const d = build();
+      const assignment = { contactPhone: '+591 72123456' } as any;
+      d.rolesRepo.findCurrentBySite.mockResolvedValue(assignment);
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteContactPhone(actor, 'site-1', null),
+      );
+
+      expect(assignment.contactPhone).toBeUndefined();
+      expect(res.contactPhone).toBeNull();
+    });
+
+    it('rejects a site without an active assignment owned by the actor', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteContactPhone(actor, 'site-1', '+591 72123456'),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.sitesRepo.findById).not.toHaveBeenCalled();
+      expect(d.fork.flush).not.toHaveBeenCalled();
+    });
+  });
+
   describe('resolveSitesForResources', () => {
     it('maps a practitioner resource to the site of its primary assignment', async () => {
       const d = build();
@@ -135,7 +249,7 @@ describe('PractitionerSitesService', () => {
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-9' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
 
       const res = await d.service.resolveSitesForResources(
         [{ refType: 'health_practitioner_profiles', refId: 'prac-1' }],
@@ -152,7 +266,7 @@ describe('PractitionerSitesService', () => {
         id: 'space-9',
         practiceSiteId: 'site-1',
       });
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
 
       const res = await d.service.resolveSitesForResources(
         [{ refType: 'care_spaces', refId: 'space-9' }],
@@ -187,15 +301,281 @@ describe('PractitionerSitesService', () => {
   describe('getSite', () => {
     it('fails with not found when the site belongs to another organization', async () => {
       const d = build();
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
-        tenantId: OTRO_TENANT,
+        tenantId: OTHER_TENANT,
       });
 
       await expect(d.service.getSite('site-1', TENANT)).rejects.toBeInstanceOf(
         ResourceNotFoundException,
       );
+    });
+  });
+
+  describe('createOwnSite (ALV-005/006)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('resolves tenant and profile and delegates provisioning', async () => {
+      const d = build();
+      const dto = {
+        name: 'Mi consultorio',
+        address: {
+          lines: ['Av. Brasil 1234'],
+          city: 'La Paz',
+          latitude: -16.5,
+          longitude: -68.15,
+        },
+      } as any;
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, dto),
+      );
+
+      expect(d.ownership.requireOwnPractitionerProfileId).toHaveBeenCalledWith(
+        d.fork,
+        actor,
+      );
+      expect(d.provisioning.provision).toHaveBeenCalledWith(
+        d.fork,
+        { tenantId: TENANT, userId: actor.id, practitionerProfileId: 'prac-1' },
+        dto,
+        actor.id,
+      );
+      expect(res).toMatchObject({
+        id: 'site-own-1',
+        name: 'Mi consultorio',
+        addressText: 'Av. Brasil 1234, La Paz',
+        latitude: -16.5,
+        longitude: -68.15,
+      });
+    });
+
+    it('responds with null address fields when no address was declared', async () => {
+      const d = build();
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.createOwnSite(actor, { name: 'Segundo consultorio' } as any),
+      );
+
+      expect(res).toMatchObject({
+        addressText: null,
+        latitude: null,
+        longitude: null,
+      });
+    });
+  });
+
+  describe('deleteOwnSite (ALV-005)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('ends the current assignment for that site', async () => {
+      const d = build();
+      const assignment = {
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      } as any;
+      d.rolesRepo.findCurrentBySite.mockResolvedValue(assignment);
+
+      await d.service.deleteOwnSite(actor, 'site-own-1');
+
+      expect(d.rolesRepo.findCurrentBySite).toHaveBeenCalledWith(
+        d.fork,
+        'prac-1',
+        'site-own-1',
+      );
+      expect(assignment.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ENDED);
+      expect(assignment.validTo).toBeInstanceOf(Date);
+    });
+
+    it('fails with not found when there is no current assignment for that site', async () => {
+      const d = build();
+      await expect(
+        d.service.deleteOwnSite(actor, 'site-ajeno'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('isOwnSite y bankQrFileId en el listado (P32-a / P33)', () => {
+    it('marks the personal practice of that practitioner as their own site', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ bankQrFileId: 'file-qr' }),
+      );
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+        adminUserId: 'user-1',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0]).toMatchObject({
+        isOwnSite: true,
+        bankQrFileId: 'file-qr',
+      });
+    });
+
+    it('does not mark a hospital as their own site', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_HOSPITAL,
+        adminUserId: 'otro-usuario',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0]).toMatchObject({ isOwnSite: false, bankQrFileId: null });
+    });
+
+    it('reads a consulting room of ANOTHER practitioner as not own', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+        adminUserId: 'otro-usuario',
+      });
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0].isOwnSite).toBe(false);
+    });
+  });
+
+  describe('updateOwnSite (P32-b)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    function withOwnOffice(d: ReturnType<typeof build>, site: any) {
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: site.practiceId });
+      d.practicesRepo.findById.mockResolvedValue({
+        id: site.practiceId,
+        tenantId: TENANT,
+        typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+        adminUserId: actor.id,
+      });
+    }
+
+    it('changes only the fields present in the body', async () => {
+      const d = build();
+      const site = siteRecord({ id: 'site-own-1', practiceId: 'pr-own-1' });
+      withOwnOffice(d, site);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.updateOwnSite(actor, 'site-own-1', {
+          name: 'Consultorio Sur',
+        } as any),
+      );
+
+      expect(site.name).toBe('Consultorio Sur');
+      expect(site.timeZone).toBe('America/La_Paz');
+      expect(res).toMatchObject({ name: 'Consultorio Sur', isOwnSite: true });
+    });
+
+    it('fails with not found when the site is not their own office', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ practiceId: 'pr-ajena' }),
+      );
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.updateOwnSite(actor, 'site-ajeno', { name: 'x' } as any),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('ends the previous address instead of overwriting it', async () => {
+      const d = build();
+      const site = siteRecord({
+        id: 'site-own-1',
+        practiceId: 'pr-own-1',
+        addressId: 'addr-vieja',
+      });
+      withOwnOffice(d, site);
+      const current = { id: 'addr-vieja' };
+      d.fork.findOne.mockResolvedValue(current);
+      d.addressesRepo.create.mockReturnValue({ id: 'addr-nueva' });
+
+      await runWithTenant(TENANT, () =>
+        d.service.updateOwnSite(actor, 'site-own-1', {
+          address: { lines: ['Calle Nueva 99'], city: 'La Paz' },
+        } as any),
+      );
+
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalledWith(
+        current,
+        expect.any(Date),
+        actor.id,
+      );
+      expect(site.addressId).toBe('addr-nueva');
+    });
+  });
+
+  describe('setSiteBankQr (P33)', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('authorizes by current assignment, so it works on a site that is not their own', async () => {
+      const d = build();
+      const site = siteRecord({ id: 'site-clinica', practiceId: 'pr-clinica' });
+      d.rolesRepo.findCurrentBySite.mockResolvedValue({ id: 'ra-1' });
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteBankQr(actor, 'site-clinica', 'file-qr'),
+      );
+
+      expect(site.bankQrFileId).toBe('file-qr');
+      expect(res).toMatchObject({ bankQrFileId: 'file-qr', isOwnSite: false });
+    });
+
+    it('clears the QR when the body carries an explicit null', async () => {
+      const d = build();
+      const site = siteRecord({ bankQrFileId: 'file-viejo' });
+      d.rolesRepo.findCurrentBySite.mockResolvedValue({ id: 'ra-1' });
+      d.sitesRepo.findById.mockResolvedValue(site);
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteBankQr(actor, 'site-1', null),
+      );
+
+      expect(site.bankQrFileId).toBeUndefined();
+      expect(res.bankQrFileId).toBeNull();
+    });
+
+    it('fails with not found without a current assignment for that site', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteBankQr(actor, 'site-ajeno', 'file-qr'),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

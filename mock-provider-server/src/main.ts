@@ -18,7 +18,7 @@ async function bootstrap(): Promise<void> {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Mantra REDESA — Mock Provider Server')
+    .setTitle('Mantra ALOVIDA — Mock Provider Server')
     .setDescription(
       'Emulador de proveedores externos (mensajería, borrado cross-store, embeddings) ' +
         'para probar los workers de mantra-core-health-redesa-api sin credenciales reales.',

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -6,17 +6,28 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { FieldDefinitionsRepository } from '../repositories';
+import {
+  AssignmentsRepository,
+  FieldDefinitionsRepository,
+  FieldValuesRepository,
+} from '../repositories';
+import { choiceOptionsOf } from '../entities';
 import {
   CreateFieldDefinitionDto,
   CreateFieldDependencyDto,
   UpsertLocalizationDto,
   CreateAccessRuleDto,
   IdResponseDto,
+  OkResultDto,
+  UpdateFieldDefinitionDto,
 } from '../dto';
+
+/** Roles que administran los campos sin techo de tenant (CL-69). */
+const ROLES_GOVERNMENT: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
 import {
   FORMS,
   DEPENDENCY_BEHAVIOR_BY_CODE,
@@ -44,13 +55,193 @@ export class FormsFieldsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param fieldsRepo - Valor de fields repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param assignmentsRepo - De quién es un campo: por dónde está colgado (CL-69).
+   * @param valuesRepo - Si un campo ya tiene valores capturados (CL-69).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly fieldsRepo: FieldDefinitionsRepository,
     private readonly logger: PinoLogger,
+    private readonly assignmentsRepo: AssignmentsRepository,
+    private readonly valuesRepo: FieldValuesRepository,
   ) {
     this.logger.setContext(FormsFieldsService.name);
+  }
+
+  /**
+   * Las reglas de un campo de elección (`dataType: 'code'`), sean las que
+   * trae el alta o las que resultan de mezclar un `PATCH` sobre lo existente.
+   *
+   * `valueSetId` y `options` resuelven lo mismo —de dónde salen las
+   * opciones— y por eso son mutuamente excluyentes: un campo con las dos
+   * sería ambiguo sobre cuál manda. `allowOther` sólo tiene sentido cuando
+   * las opciones las escribió quien armó el formulario: sobre un `valueSetId`
+   * el catálogo lo administra otro flujo y «Otro» no tiene a dónde ir.
+   */
+  private validateChoiceField(input: {
+    dataType: string;
+    valueSetId?: string;
+    options?: string[];
+    allowOther?: boolean;
+  }): void {
+    if (input.dataType !== 'code') {
+      if (input.options !== undefined) {
+        throw new PreconditionFailedException(
+          '`options` sólo aplica a dataType "code"',
+          { dataType: input.dataType },
+        );
+      }
+      if (input.allowOther) {
+        throw new PreconditionFailedException(
+          '`allowOther` sólo aplica a dataType "code"',
+          { dataType: input.dataType },
+        );
+      }
+      return;
+    }
+
+    if (input.valueSetId !== undefined && input.options !== undefined) {
+      throw new PreconditionFailedException(
+        'Un campo "code" declara valueSetId u options, no los dos',
+        {},
+      );
+    }
+
+    if (input.valueSetId !== undefined) {
+      if (input.allowOther) {
+        throw new PreconditionFailedException(
+          '`allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología',
+          {},
+        );
+      }
+      return;
+    }
+
+    // Sin valueSetId: el campo vive de sus propias opciones.
+    const opciones = input.options ?? [];
+    if (opciones.length < 2) {
+      throw new PreconditionFailedException(
+        'Un campo "code" sin valueSetId necesita al menos dos opciones',
+        { count: opciones.length },
+      );
+    }
+    const vistas = new Set<string>();
+    for (const opcionCruda of opciones) {
+      const opcion = opcionCruda.trim();
+      if (opcion === '') {
+        throw new PreconditionFailedException(
+          'Una opción no puede estar vacía',
+          {},
+        );
+      }
+      if (vistas.has(opcion)) {
+        throw new PreconditionFailedException(
+          'Las opciones no pueden repetirse',
+          {
+            opcion,
+          },
+        );
+      }
+      vistas.add(opcion);
+    }
+  }
+
+  /**
+   * CL-61 / CL-69: corrige nombre o tipo de un campo **propio**.
+   *
+   * La definición es global (`dynamic_field_definitions` no tiene `tenant_id`),
+   * así que «propio» se decide por dónde está colgado: todas sus asignaciones
+   * tienen que ser del tenant del actor. Un campo colgado del estándar (alguna
+   * asignación global) o de otro tenant responde 403; quien gobierna no tiene
+   * techo. Cambiar el tipo con valores ya capturados reescribiría la historia
+   * clínica: 409.
+   *
+   * `options` se reemplaza entera (nunca por índice) y no puede quitar una
+   * opción que ya tiene al menos una respuesta capturada: de las salidas que
+   * documenta `docs/pendientes-backend-formularios.md` del frontend, es la
+   * que no exige esquema nuevo.
+   */
+  async updateFieldDefinition(
+    fieldId: string,
+    dto: UpdateFieldDefinitionDto,
+    actor: AuthenticatedUser,
+  ): Promise<OkResultDto> {
+    return this.em.transactional(async (tx) => {
+      const field = await this.fieldsRepo.findFieldById(tx, fieldId);
+      if (!field) {
+        throw new ResourceNotFoundException('Campo no encontrado', {
+          fieldId,
+        });
+      }
+
+      const governs = actor.roles.some((role) =>
+        ROLES_GOVERNMENT.includes(role),
+      );
+      if (!governs) {
+        const tenantId = requireTenantId();
+        const assignments = await this.assignmentsRepo.findAssignmentsByField(
+          tx,
+          fieldId,
+        );
+        const foreign = assignments.some(
+          (a) => !a.tenantId || a.tenantId !== tenantId,
+        );
+        if (foreign) {
+          throw new ForbiddenException(
+            'Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá',
+          );
+        }
+      }
+
+      this.validateChoiceField({
+        dataType: dto.dataType ?? field.dataType,
+        valueSetId: field.valueSetId,
+        options: dto.options ?? choiceOptionsOf(field.options),
+        allowOther: dto.allowOther ?? field.allowOther,
+      });
+
+      if (dto.dataType !== undefined && dto.dataType !== field.dataType) {
+        const captured = await this.valuesRepo.countByField(tx, fieldId);
+        if (captured > 0) {
+          throw new ConflictException(
+            'El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia',
+            { fieldId, captured },
+          );
+        }
+        field.dataType = dto.dataType;
+      }
+      if (dto.options !== undefined) {
+        const retiradas = (choiceOptionsOf(field.options) ?? []).filter(
+          (opcion) => !dto.options!.includes(opcion),
+        );
+        const enUso = await this.valuesRepo.findCodesInUseByField(
+          tx,
+          fieldId,
+          retiradas,
+        );
+        if (enUso.length > 0) {
+          throw new PreconditionFailedException(
+            'No se puede quitar una opción que ya tiene respuestas capturadas',
+            { fieldId, opciones: enUso },
+          );
+        }
+        field.options = dto.options;
+      }
+      if (dto.name !== undefined) field.name = dto.name;
+      if (dto.multiple !== undefined) field.multiple = dto.multiple;
+      if (dto.allowOther !== undefined) field.allowOther = dto.allowOther;
+      // `null` la quita; ausente ("no viene") no la toca.
+      if (dto.description !== undefined) {
+        field.description = dto.description ?? undefined;
+      }
+      touch(field, actor.id);
+
+      this.logger.info(
+        { operation: 'forms.field.update', fieldId },
+        'Field definition updated',
+      );
+      return { ok: true };
+    });
   }
 
   /** UC-09-02: declara una definición de campo con sus reglas de validación. */
@@ -62,6 +253,12 @@ export class FormsFieldsService {
       { operation: 'forms.field.create', code: dto.code },
       'Creating field definition',
     );
+    this.validateChoiceField({
+      dataType: dto.dataType,
+      valueSetId: dto.valueSetId,
+      options: dto.options,
+      allowOther: dto.allowOther,
+    });
     return this.em.transactional(async (tx) => {
       const clash = await this.fieldsRepo.findFieldByCode(tx, dto.code);
       if (clash) {
@@ -82,6 +279,10 @@ export class FormsFieldsService {
         cardinalityMin: dto.cardinalityMin,
         cardinalityMax: dto.cardinalityMax,
         regex: dto.regex,
+        options: dto.options,
+        multiple: dto.multiple,
+        allowOther: dto.allowOther,
+        description: dto.description,
         schemaVersion: 1,
         stateConceptId: FORMS.FIELD_ACTIVE,
         actorUserId: actor.id,

@@ -60,15 +60,126 @@ describe('VademecumSeedService', () => {
 
   it('reejecutado sobre una base ya completa no inserta nada', async () => {
     const { service, em } = build();
-    em.find.mockImplementation((_entity: unknown, where: any) =>
-      Promise.resolve((where?.id?.$in ?? []).map((id: string) => ({ id }))),
-    );
+    // «Base ya completa» tiene que responder a las DOS formas de consulta que
+    // usa el servicio, no sólo a una. Las designaciones, propiedades e
+    // interacciones se buscan por id; los conceptos, en cambio, se buscan por
+    // su clave natural `(code_system_version_id, code)` —que es lo correcto:
+    // el id del dataset no es el que manda si la fila ya llegó por otro
+    // camino—. Un doble que sólo entendía `id.$in` devolvía «no existe» para
+    // los 17 conceptos y el servicio, con razón, los creaba.
+    em.find.mockImplementation((_entity: unknown, where: any) => {
+      if (where?.id?.$in) {
+        return Promise.resolve(where.id.$in.map((id: string) => ({ id })));
+      }
+      if (where?.code?.$in) {
+        const [versionId] = where.codeSystemVersionId?.$in ?? [];
+        return Promise.resolve(
+          where.code.$in.map((code: string, i: number) => ({
+            id: `concepto-existente-${i}`,
+            codeSystemVersionId: versionId,
+            code,
+          })),
+        );
+      }
+      return Promise.resolve([]);
+    });
     em.findOne.mockResolvedValue({ id: 'ya-existe' });
 
     const result = await service.run('development', false);
 
-    expect(result).toEqual({ inserted: 0 });
+    expect(result.inserted).toBe(0);
     expect(em.create).not.toHaveBeenCalled();
+  });
+
+  it('sobre una base que ya dice lo mismo que el dataset no corrige nada', async () => {
+    const { service, em } = build();
+    const conceptById = new Map(
+      vademecumDataset.concepts.map((c) => [c.id, c]),
+    );
+    const designationById = new Map(
+      vademecumDataset.designations.map((d) => [d.id, d]),
+    );
+    const propertyById = new Map(
+      vademecumDataset.properties.map((p) => [p.id, p]),
+    );
+    em.find.mockImplementation((_entity: unknown, where: any) => {
+      const ids: string[] = where?.id?.$in ?? [];
+      if (ids.length > 0 && conceptById.has(ids[0])) {
+        return Promise.resolve(
+          ids.map((id) => ({
+            id,
+            display: conceptById.get(id)!.display,
+            definition: undefined,
+          })),
+        );
+      }
+      if (ids.length > 0 && designationById.has(ids[0])) {
+        return Promise.resolve(
+          ids.map((id) => ({
+            id,
+            preferred: designationById.get(id)!.preferred,
+          })),
+        );
+      }
+      if (ids.length > 0 && propertyById.has(ids[0])) {
+        // Como lo devuelve Postgres: `jsonb` no conserva el orden de las claves.
+        const reordered = (v: unknown): unknown =>
+          Array.isArray(v)
+            ? v.map(reordered)
+            : v !== null && typeof v === 'object'
+              ? Object.fromEntries(
+                  Object.entries(v)
+                    .reverse()
+                    .map(([k, x]) => [k, reordered(x)]),
+                )
+              : v;
+        return Promise.resolve(
+          ids.map((id) => ({
+            id,
+            valueJson: reordered(propertyById.get(id)!.value_json),
+          })),
+        );
+      }
+      if (where?.code?.$in) {
+        const [versionId] = where.codeSystemVersionId?.$in ?? [];
+        return Promise.resolve(
+          vademecumDataset.concepts.map((c) => ({
+            id: c.id,
+            codeSystemVersionId: versionId,
+            code: c.code,
+          })),
+        );
+      }
+      return Promise.resolve([]);
+    });
+    em.findOne.mockResolvedValue({ id: 'ya-existe' });
+
+    const result = await service.run('development', false);
+
+    expect(result).toEqual({ inserted: 0, reconciled: 0 });
+  });
+
+  it('corrige el nombre en inglés de un medicamento ya cargado al oficial de la LINAME', async () => {
+    const { service, em } = build();
+    const salbutamol = vademecumDataset.concepts.find(
+      (c) => c.code === 'R03AC02',
+    )!;
+    const row = {
+      id: salbutamol.id,
+      display: 'Albuterol',
+      definition: 'Short-acting beta-2 agonist.',
+    } as any;
+    em.find.mockImplementation((_entity: unknown, where: any) => {
+      const ids: string[] = where?.id?.$in ?? [];
+      if (ids.includes(salbutamol.id)) return Promise.resolve([row]);
+      if (where?.code?.$in) return Promise.resolve([]);
+      return Promise.resolve([]);
+    });
+
+    await service.run('development', false);
+
+    expect(row.display).toBe('Salbutamol');
+    expect(row.definition).toBeUndefined();
   });
 
   // --- B-13: el dataset nunca vuelve a traer contenido clínico ni las tres
@@ -101,8 +212,12 @@ describe('VademecumSeedService', () => {
     expect(found).toEqual([]);
   });
 
-  it('el dataset declara una única fuente, y no es RxNorm, SNOMED CT ni WHO ATC/DDD', () => {
-    expect(vademecumDataset.sources).toHaveLength(1);
+  it('el dataset declara sólo el vademécum de desarrollo y la LINAME, y ninguna de las tres que no lo respaldan', () => {
+    // La LINAME (Ministerio de Salud y Deportes de Bolivia) sí respalda lo que
+    // aporta: nombre, forma, concentración, código LINAME, ATC y uso restringido.
+    expect(
+      vademecumDataset.sources.map((source) => source.code).sort(),
+    ).toEqual(['LINAME_BO', 'MANTRA_DEV_VADEMECUM']);
 
     const codes = vademecumDataset.sources.map((source) => source.code);
     expect(codes).not.toContain('RXNORM');
@@ -110,7 +225,7 @@ describe('VademecumSeedService', () => {
     expect(codes).not.toContain('WHO_ATC');
   });
 
-  it('el code system del vademécum apunta a la única fuente declarada', () => {
+  it('el code system del vademécum apunta a una fuente declarada', () => {
     const sourceIds = new Set(
       vademecumDataset.sources.map((source) => source.id),
     );
@@ -118,5 +233,47 @@ describe('VademecumSeedService', () => {
     for (const system of vademecumDataset.codeSystem) {
       expect(sourceIds.has(system.source_id)).toBe(true);
     }
+  });
+});
+
+describe('vademécum: la LINAME 2022-2024', () => {
+  it('trae los medicamentos esenciales de Bolivia por ATC nivel 5, en castellano y con sus presentaciones', () => {
+    expect(vademecumDataset.concepts.length).toBeGreaterThan(480);
+    for (const concept of vademecumDataset.concepts) {
+      expect(concept.code).toMatch(/^[A-Z]\d{2}[A-Z]{2}\d{2}$/);
+      expect(concept.definition).toBeNull();
+    }
+    const gentamicina = vademecumDataset.concepts.find(
+      (c) => c.code === 'J01GB03',
+    )!;
+    const presentations = vademecumDataset.properties.find(
+      (p) =>
+        p.concept_id === gentamicina.id &&
+        p.property_code === 'liname_presentations',
+    )!;
+    expect(presentations.value_json).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'J-01-49',
+          form: 'Inyectable',
+          strength: '80 mg',
+        }),
+      ]),
+    );
+  });
+
+  it('ningún nombre de los 17 de desarrollo queda en inglés', () => {
+    const english = [
+      'Omeprazole',
+      'Albuterol',
+      'Amoxicillin',
+      'Atorvastatin',
+      'Azithromycin',
+      'Amlodipine',
+      'Acetaminophen',
+    ];
+    expect(
+      vademecumDataset.concepts.filter((c) => english.includes(c.display)),
+    ).toEqual([]);
   });
 });

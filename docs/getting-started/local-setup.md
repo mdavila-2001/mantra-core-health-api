@@ -5,7 +5,7 @@
 ## 1. Instalar dependencias
 
 ```bash
-yarn install
+corepack yarn install --immutable
 ```
 
 ## 2. Levantar infraestructura de datos
@@ -34,7 +34,7 @@ Con `NODE_ENV` distinto de `production`, quedan disponibles:
 ## 5. (Opcional) Arrancar un worker de dominio
 
 ```bash
-yarn start:worker:messaging:dev   # o cualquiera de los 20, ver docs/architecture/integration-map.md
+yarn start:worker:messaging:dev   # o cualquiera de los 24 (ls src/worker-*.ts), ver docs/architecture/integration-map.md
 ```
 
 ## Compilar y generar el contrato OpenAPI real

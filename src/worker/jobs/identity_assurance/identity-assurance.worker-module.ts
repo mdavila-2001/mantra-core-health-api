@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EvidenceLifecycleJob } from './evidence-lifecycle.job';
 import { ExpireSweepJob } from './expire-sweep.job';
 import { DispatchIdentityChecksJob } from './dispatch-identity-checks.job';
 import { MockProviderWiringService } from './mock-provider-wiring.service';
@@ -22,6 +23,7 @@ export {
  */
 @Module({
   providers: [
+    EvidenceLifecycleJob,
     ExpireSweepJob,
     DispatchIdentityChecksJob,
     MockProviderWiringService,

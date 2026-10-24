@@ -3,12 +3,12 @@
   Fuente real: src/modules/vector_rag/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `vector_rag`
 
-**Fuente:** [`src/modules/vector_rag/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/vector_rag/README.md)
+**Fuente:** [`src/modules/vector_rag/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/vector_rag/README.md)
 · 2 controllers · 4 services · 3 repositories · 14 entidades · 1 DTO
 
 ---
@@ -18,6 +18,42 @@
 Modelos de embedding aprobados uno a uno, colecciones que sólo aceptan lo que su modelo permite,
 políticas de acceso que se publican tras revisión de privacidad, y un retrieval en el que **cada
 candidato recibe una decisión de autorización y todas se guardan** — también las denegadas.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/vector_rag -name '*.controller.ts' | wc -l
+  find src/modules/vector_rag -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/vector_rag -name '*.entity.ts' | wc -l
+  find src/modules/vector_rag -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 16 rutas HTTP, 14 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `embedding_jobs`, `embedding_model_versions`, `rag_access_policies`, `retrieval_candidates`, `retrieval_evidence`, `retrieval_feedback_events`, `retrieval_sessions`, `vector_chunks`, `vector_collections`, `vector_deletion_jobs`, `vector_documents`, `vector_embeddings`, `vector_reconciliation_runs`, `vector_tenant_bindings`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /vector-rag/embedding-model-versions` | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/embedding-model-versions/:id/retire` | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/collections` | RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/rag-access-policies` | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `vector-governance` |
+| `PUT /vector-rag/rag-access-policies/:id/publish` | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/collections/:id/embedding-jobs` | RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `vector-governance` |
+| `POST /vector-rag/collections/:id/re-embed` | AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `vector-governance` |
+| `PUT /vector-rag/collections/:id/lifecycle` | AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `vector-governance` |
+| `GET /vector-rag/embedding-jobs/pending` | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/embedding-jobs/:id/run` | SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions` | CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions/:id/search` | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions/:id/evidence` | SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/retrieval-sessions/:id/feedback` | CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/deletion-jobs` | PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN | `vector-runtime` |
+| `POST /vector-rag/collections/:id/reconciliation` | SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN | `vector-runtime` |
 
 ## Casos de uso cubiertos (13)
 
@@ -37,7 +73,7 @@ candidato recibe una decisión de autorización y todas se guardan** — tambié
 | UC-59-12 | `POST /vector-rag/collections/:id/reconciliation` | Reconciliar canónico vs vectorial |
 | UC-59-13 | `POST .../embedding-model-versions/:id/retire` · `PUT .../collections/:id/lifecycle` | Retirar y sellar |
 
-15 endpoints para 13 casos de uso: UC-59-03 y UC-59-13 tienen dos cada uno.
+15 endpoints para 13 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 16 rutas, ver «Rutas HTTP y alcance (medido)»): UC-59-03 y UC-59-13 tienen dos cada uno.
 
 ## Estados en `varchar`, en minúsculas
 
@@ -145,7 +181,7 @@ MANTENIMIENTO
 worker. Lo que aporta es el gobierno: qué modelo se puede usar, qué puede entrar en la colección,
 quién puede ver cada chunk y qué queda registrado de todo ello.
 
-## El índice HNSW y su deuda (heredada de la capa de esquema)
+## El índice HNSW (límite heredado de la capa de esquema)
 
 `vector_embeddings.embedding` es de tipo `vector` (pgvector). El índice HNSW que hace viable la
 búsqueda por similitud lo crea la capa 07 del arranque, **pero hoy se omite**:
@@ -160,11 +196,9 @@ para indexar, y fijar aquí una dimensión (1536, 3072…) sería inventar una d
 modelo y que además es irreversible sin recrear la tabla.
 
 **Consecuencia operativa:** la búsqueda por similitud funciona, pero recorre el corpus entero.
-Aceptable con volumen de desarrollo, inaceptable en producción. Queda registrado en cada arranque
-para que no se olvide.
-
-Cuando el modelo fije la dimensión: cambiar `columnType: 'vector'` por `'vector(N)'` en
-`vector_embeddings.entity.ts` y la condición previa del catálogo se cumplirá sola.
+Aceptable con volumen de desarrollo, inaceptable en producción; el arranque lo registra en cada
+ejecución. Con una dimensión fijada en el modelo, `columnType: 'vector(N)'` en
+`vector_embeddings.entity.ts` cumple la condición previa del catálogo.
 
 ## Permisos
 
@@ -198,8 +232,8 @@ ni citas.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/vector_rag` — 94 pruebas (21 gobierno + 20 pipeline +
-25 retrieval + 13 mantenimiento + 15 de delegación de los dos controladores).
+`corepack yarn test src/modules/vector_rag --runInBand --silent` — 5 suites y 97 pruebas
+aprobadas durante la revisión (21 gobierno + 20 pipeline + 25 retrieval + 13 mantenimiento + 15 de delegación).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -213,22 +247,26 @@ ni citas.
   caso de uso dice "PUT para publicar"; separar la publicación de la edición deja claro cuál de las
   dos tiene efecto sobre las consultas.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Cálculo de embeddings y búsqueda ANN**: el worker los aporta. Este módulo no habla con ningún
   proveedor de modelos ni ejecuta `<=>` contra el índice.
-- **Índice HNSW**: bloqueado por la dimensión sin fijar (ver arriba).
+- **Índice HNSW**: no existe mientras el modelo no fije la dimensión (ver arriba).
 - **Redacción del texto**: los DTOs reciben `chunkTextRedacted`, `queryTextRedacted`,
   `quotedTextRedacted` y `commentRedacted` — el redactado ocurre antes, en el worker. Aquí se
   garantiza que el campo que llega es el que se persiste, no que esté efectivamente redactado.
-- **`field_redaction_profile`**: se guarda en la política pero no se aplica. Aplicarlo exige el
-  catálogo de perfiles de redacción, que el modelo no declara.
+- **`field_redaction_profile`**: se guarda en la política pero no se aplica, porque el modelo no
+  declara el catálogo de perfiles de redacción.
 - **Comprobación del consentimiento contra `consent.consent_directives`** (UC-59-06, 07): se exige y
-  se propaga el `consentDirectiveId`, pero no se contrasta contra el módulo 07, que es de la parte de
-  Pablo. Hoy `deny_consent` se decide por la ausencia de la directiva, no por su contenido.
+  se propaga el `consentDirectiveId`, pero no se contrasta contra el módulo 07; `deny_consent` se
+  decide por la ausencia de la directiva, no por su contenido.
 - **`redis_runtime.idempotency_entries`** (UC-59-04, 06): aquí lo cubren la clave de idempotencia del
-  outbox y la búsqueda de sesión abierta por hash. Ese esquema es del módulo 56, **sin asignar**.
-- **Detección fina de descuadre** (UC-59-12): hoy se detecta por documento con más de una versión
-  activa. Comparar `content_hash` contra el manifiesto canónico exige que el manifiesto traiga los
-  hashes, que el caso de uso menciona pero no define en la petición.
+  outbox y la búsqueda de sesión abierta por hash.
+- **Detección fina de descuadre** (UC-59-12): se detecta por documento con más de una versión
+  activa; comparar `content_hash` contra el manifiesto canónico exigiría que el manifiesto trajera
+  los hashes, que el caso de uso menciona pero no define en la petición.
 
+## Revisión ALOVIDA
+
+Los recursos resueltos por UUID no se acotan al tenant activo y el borrado no filtra los documentos
+por tenant.

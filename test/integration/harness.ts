@@ -1,11 +1,17 @@
-import { ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import { createHash } from 'node:crypto';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
-import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
+import {
+  CONCEPTS,
+  SEED,
+  TokenService,
+  createGlobalValidationPipe,
+  createdBy,
+} from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
 import {
@@ -20,6 +26,25 @@ import {
 } from '../../src/modules/profiles/entities';
 import { SpecialtyChartTemplates } from '../../src/modules/chart/entities';
 import { SeedBootstrapService } from '../../src/common/seed/seed-bootstrap.service';
+import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
+
+/**
+ * Identidad ficticia obligatoria para altas profesionales en integración.
+ * Derivarla del correo mantiene cada fixture determinista y único sin usar un
+ * documento real; Santa Cruz es un concepto de departamento sembrado.
+ * @param email - Correo único del profesional sintético.
+ * @returns CI ficticio y departamento emisor.
+ */
+export function identidadProfesional(email: string): {
+  nationalId: string;
+  issuerAdministrativeAreaConceptId: string;
+} {
+  const suffix = createHash('sha256').update(email).digest('hex').slice(0, 32);
+  return {
+    nationalId: `MED${suffix}`,
+    issuerAdministrativeAreaConceptId: boDepartmentConceptId('SC'),
+  };
+}
 
 /**
  * Vacía todos los datos de negocio antes de un arranque, dejando la base limpia
@@ -177,14 +202,7 @@ export async function bootstrapTestApp(
   // está registrado como APP_FILTER en AppModule, así que no se vuelve a añadir.
   app.useLogger(app.get(Logger));
   app.flushLogs();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  app.useGlobalPipes(createGlobalValidationPipe());
   // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando
   // Nest conecta cada `@WebSocketGateway` al servidor.
   if (opts.realtime) {
@@ -225,6 +243,11 @@ export async function bootstrapTestApp(
 
   await seedAdmin(orm);
   await seedFixtures(orm);
+
+  // Desde MCH-004 un access token sólo autentica si su `sid` tiene una sesión
+  // activa en `iam.sessions`: los tokens que firma el harness necesitan la suya.
+  await ensureTestSession(orm, TEST_ADMIN_ID, 'test-session');
+  await ensureTestSession(orm, TEST_ADMIN_ID, 'test-session-tenantless');
 
   const tokenService = app.get(TokenService);
   const adminToken = tokenService.signAccessToken(
@@ -323,6 +346,37 @@ async function seedFixtures(orm: MikroORM): Promise<void> {
  * para las columnas `created_by_user_id`/`recorded_by_user_id` que pueblan los
  * servicios, evitando violaciones de clave foránea al ejercer los endpoints.
  */
+/**
+ * Deja activa la sesión `sid` del usuario, para firmar tokens de prueba a mano.
+ *
+ * El `JwtStrategy` exige que el `sid` del token corresponda a una sesión activa
+ * y vigente del mismo usuario (MCH-004). Es idempotente: si la sesión existe se
+ * reactiva y se le extiende la vigencia.
+ *
+ * @param orm - ORM del contexto de pruebas.
+ * @param userId - Dueño de la sesión; debe existir en `iam.users` y estar activo.
+ * @param sid - Valor que irá en el claim `sid` del token.
+ */
+export async function ensureTestSession(
+  orm: MikroORM,
+  userId: string,
+  sid: string,
+): Promise<void> {
+  await orm.em
+    .fork()
+    .getConnection()
+    .execute(
+      `insert into iam.sessions
+       (id, user_id, token_id, state_concept_id, expires_at, created_at, updated_at)
+     values (gen_random_uuid(), ?, ?, ?, now() + interval '1 day', now(), now())
+     on conflict (token_id) do update
+       set state_concept_id = excluded.state_concept_id,
+           expires_at = excluded.expires_at,
+           updated_at = now()`,
+      [userId, sid, CONCEPTS.STATE_ACTIVE],
+    );
+}
+
 async function seedAdmin(orm: MikroORM): Promise<void> {
   const em = orm.em.fork();
   if (await em.findOne(Users, { id: TEST_ADMIN_ID })) {
@@ -356,6 +410,66 @@ async function seedAdmin(orm: MikroORM): Promise<void> {
 }
 
 /** Authorization header helper. */
+/**
+ * Los campos que `POST /iam/auth/register-patient` exige además de la
+ * identidad, con valores válidos y un municipio real del catálogo.
+ *
+ * Existe porque el DTO se endureció —`birthDate`, `phone`, `sexAtBirth` y
+ * `residenceMunicipalityConceptId` pasaron a obligatorios cuando se implementó
+ * el orden de campos que pidió el propietario— y **once suites de integración
+ * quedaron atrás sin que nadie se enterara**: CI sólo corre
+ * `postgres-privileges` de este directorio, así que el 400 no rompía ningún
+ * check. Cada suite volvía a escribir su propio alta, así que el próximo campo
+ * obligatorio habría vuelto a romperlas una por una.
+ *
+ * **Ampliado en la subtarea 1.4** con `issuerAdministrativeAreaConceptId`
+ * (departamento emisor del documento), obligatorio desde el PR #390 del
+ * front: mismo motivo, mismo riesgo de romper suites en silencio.
+ *
+ * El municipio y el departamento se **buscan**, no se clavan: los ids son
+ * deterministas, pero fijarlos haría caducar las suites el día que el
+ * namespace cambie. El departamento se busca con el mismo predicado que
+ * comprueba `AdministrativeAreaCatalogService.assertIsAdministrativeArea`
+ * (versión por defecto de `VS_BO_DEPARTMENT`, miembros incluidos): si algún
+ * día ese predicado cambia, esta consulta debe cambiar con él.
+ *
+ * @param ctx - El contexto de la prueba, del que sale la conexión.
+ * @returns Los cinco campos, listos para desparramar en el cuerpo del alta.
+ */
+export async function camposObligatoriosDePaciente(ctx: TestContext): Promise<{
+  birthDate: string;
+  phone: string;
+  sexAtBirth: string;
+  residenceMunicipalityConceptId: string;
+  issuerAdministrativeAreaConceptId: string;
+}> {
+  const municipios = await ctx.orm.em.getConnection().execute<{ id: string }[]>(
+    `select id from terminology.catalog_concepts
+        where code like 'geo:bo:municipality:%' order by code limit 1`,
+  );
+  const departamentos = await ctx.orm.em
+    .getConnection()
+    .execute<{ id: string }[]>(
+      `select m.concept_id as id
+         from terminology.value_set_members m
+         join terminology.value_set_versions v on v.id = m.value_set_version_id
+         join terminology.value_sets vs on vs.id = v.value_set_id
+        where vs.internal_code = 'VS_BO_DEPARTMENT'
+          and v.is_default
+          and m.included
+        order by m.ordinal
+        limit 1`,
+    );
+
+  return {
+    birthDate: '1990-01-01',
+    phone: '+591 70000000',
+    sexAtBirth: 'FEMALE',
+    residenceMunicipalityConceptId: municipios[0]?.id ?? '',
+    issuerAdministrativeAreaConceptId: departamentos[0]?.id ?? '',
+  };
+}
+
 export function bearer(token: string): {
   /**
    * Valor de authorization mantenido por la instancia.
@@ -365,14 +479,24 @@ export function bearer(token: string): {
   return { Authorization: `Bearer ${token}` };
 }
 
-/** Conexión a la base de pruebas, con los mismos defaults que `resetBusinessData`. */
+/**
+ * Conexión a la base de pruebas, con los mismos defaults que `resetBusinessData`.
+ *
+ * `ssl` sólo se incluye cuando `DB_SSL` está activo, igual que
+ * `orm.config.ts`: contra el compose local (sin certificado) pasar el objeto
+ * rompería la conexión, y contra Neon (P20, `deleteRegisteredPractitioners`)
+ * su ausencia la rompe al revés — `pg` corta con "connection is insecure
+ * (try using sslmode=require)".
+ */
 function testDbClient(): pg.Client {
+  const ssl = process.env.DB_SSL === 'true';
   return new pg.Client({
     host: process.env.DB_HOST ?? 'localhost',
     port: Number(process.env.DB_PORT ?? 5434),
     user: process.env.DB_USER ?? 'mantra',
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME ?? 'mantra_redesa_health',
+    ...(ssl ? { ssl: { rejectUnauthorized: true } } : {}),
   });
 }
 
@@ -656,6 +780,463 @@ export async function deleteFixturesByRunMark(
         `La limpieza dejó ${pendientes} fixture(s) con la marca ${marca} en la base compartida.`,
       );
     }
+  } finally {
+    await client.end();
+  }
+}
+
+/**
+ * Tablas que cuelgan de `iam.users` por una columna semántica (no auditoría)
+ * y que un autorregistro de profesional puede llegar a escribir. Hijas antes
+ * que madres: `practice.practices` primero porque de ahí cuelgan, por FK, sus
+ * sedes y las asignaciones de rol del consultorio propio (P20).
+ *
+ * **Lista corta y deliberada, no la raíz `iam.users`**: hay ~1 850 FKs hacia
+ * `iam.users` en el modelo (casi todas `created_by_user_id`/
+ * `updated_by_user_id` de auditoría), y recorrerlas todas con
+ * {@link deleteWithDependents} contra una base remota (Neon) costaría miles
+ * de viajes de ida y vuelta por corrida. Si el alta empieza a escribir una
+ * tabla nueva por columna semántica, {@link deleteRegisteredPractitioners}
+ * revienta con el detalle de la FK en vez de dejar un huérfano en silencio.
+ */
+const CUENTA_ESCRIBE_EN: readonly { table: string; column: string }[] = [
+  // `HistoryMirrorSubscriber` (`src/orm/subscribers/history-mirror.subscriber.ts`)
+  // sella una revisión en `audit.users_history` en cada alta de cuenta —
+  // sistémico, no algo que este flujo declare—, y esa tabla no tiene otra
+  // columna semántica que `user_id`. Va primero: es la única entrada de esta
+  // lista sin más hijos propios, así que no importa el orden relativo al resto.
+  { table: 'audit.users_history', column: 'user_id' },
+  { table: 'practice.practices', column: 'admin_user_id' },
+  { table: 'iam.sessions', column: 'user_id' },
+  { table: 'iam.authentication_credentials', column: 'user_id' },
+  { table: 'iam.user_global_roles', column: 'user_id' },
+  { table: 'iam.email_verifications', column: 'user_id' },
+  { table: 'iam.account_activations', column: 'user_id' },
+  { table: 'iam.security_events', column: 'user_id' },
+  // Los PDFs reclamados durante el alta profesional son propiedad del usuario
+  // recién creado aunque su tenant siga siendo DEFAULT; limpiarlos por
+  // `tenant_id` borraría archivos de otras cuentas de prueba.
+  { table: 'common.files', column: 'created_by_user_id' },
+  { table: 'directory.tenant_memberships', column: 'user_id' },
+  { table: 'authz.user_role_assignments', column: 'user_id' },
+  { table: 'messaging.notification_requests', column: 'recipient_user_id' },
+  { table: 'messaging.in_app_notifications', column: 'recipient_user_id' },
+  // `iam.refresh_tokens` NO tiene `user_id`: se llega a través de
+  // `session_id → iam.sessions.id`, y como esa FK sí está en el grafo,
+  // borrar `iam.sessions` de la fila de arriba ya arrastra sus tokens.
+  //
+  // Las cuatro siguientes las destapó el int-spec de C-14/C-23: un
+  // profesional que abre un encuentro, registra observaciones, interna a un
+  // paciente o pide una relación asistencial queda como `created_by_user_id`
+  // de esas filas, y ninguna colgaba de acá — la limpieza fallaba con la FK
+  // de `clinical.encounters` en el detalle.
+  { table: 'clinical.encounters', column: 'created_by_user_id' },
+  { table: 'clinical.care_episodes', column: 'created_by_user_id' },
+  { table: 'clinical.observations', column: 'created_by_user_id' },
+  { table: 'authz.care_relationships', column: 'created_by_user_id' },
+];
+
+/**
+ * Tablas transversales que guardan `owner_id` sin FK declarada (el modelo
+ * las deja polimórficas a propósito): el grafo de {@link readSchemaGraph} no
+ * las ve, así que se limpian aparte, después de {@link CUENTA_ESCRIBE_EN}
+ * (`practice_sites.address_id` apunta acá).
+ */
+const OWNER_SIN_FK = [
+  'common.addresses',
+  'common.contact_points',
+  'common.identifiers',
+] as const;
+
+/**
+ * Borra las cuentas dadas y todo lo que {@link CUENTA_ESCRIBE_EN} y
+ * {@link OWNER_SIN_FK} dicen que cuelga de ellas.
+ *
+ * Extraído de la limpieza del autorregistro de profesional (P20) para que el
+ * de organizaciones (subtarea 1.5) la reutilice: los dos flujos crean una
+ * cuenta ACTIVA con la misma forma alrededor (sesión, credencial, rol
+ * global, verificación de correo, evento de seguridad...) - sólo cambia qué
+ * cuelga de la persona o del tenant *antes* de llegar acá, que resuelve cada
+ * llamador por su cuenta.
+ *
+ * Una cuenta que una tabla WORM sigue nombrando —desde `@Audited`
+ * obligatorio (#621), toda ruta que muta deja su fila en `audit.audit_log`—
+ * no se borra: se anonimiza como lo hace el propio producto en UC-01-12
+ * (DSAR, `IamUsersService.anonymize`). Con credencial, sesiones y roles ya
+ * borrados por {@link CUENTA_ESCRIBE_EN}, lo que queda es una lápida sin
+ * datos personales que no puede iniciar sesión ni aparecer en un padrón, y
+ * la bitácora conserva su integridad referencial. Ver
+ * {@link anonymizeWormPinnedAccounts}.
+ *
+ * Ruidoso por diseño: si borrar `iam.users` choca con una FK que
+ * {@link CUENTA_ESCRIBE_EN} no conoce, lanza explicando cuál - nunca
+ * deshabilita un trigger ni la replicación para forzar el borrado.
+ *
+ * @param client - Conexión ya abierta.
+ * @param graph - El grafo de FK, ya leído.
+ * @param visited - Lo ya borrado en esta corrida, compartido con quien
+ *   llama: si el borrado del padre (persona o tenant) ya alcanzó una fila,
+ *   no se reprocesa.
+ * @param userIds - Las cuentas a borrar.
+ * @param personIds - Personas asociadas, si las hay. El autorregistro de
+ *   organización no crea ninguna (`readonly []`); `OWNER_SIN_FK` también las
+ *   limpia por `owner_id`.
+ * @param descripcion - Cómo nombrar el fixture en el mensaje del `throw`
+ *   final ("de profesional", "de organización"...).
+ * @throws Si algo sobrevive al borrado: un huérfano en silencio es
+ *   exactamente el defecto que este helper existe para impedir.
+ */
+async function deleteAccounts(
+  client: pg.Client,
+  graph: SchemaGraph,
+  visited: Set<string>,
+  userIds: readonly string[],
+  personIds: readonly string[],
+  descripcion: string,
+): Promise<void> {
+  for (const { table, column } of CUENTA_ESCRIBE_EN) {
+    const pk = graph.primaryKey.get(table);
+    if (pk === undefined) continue;
+    const { rows } = await client.query<{ id: string }>(
+      `select "${pk}"::text as id from ${table} where "${column}"::text = any($1::text[])`,
+      [userIds],
+    );
+    await deleteWithDependents(
+      client,
+      graph,
+      table,
+      rows.map((r) => r.id),
+      visited,
+    );
+  }
+
+  // Después de CUENTA_ESCRIBE_EN: `practice_sites.address_id` apunta acá.
+  for (const tabla of OWNER_SIN_FK) {
+    await client.query(
+      `delete from ${tabla} where owner_id::text = any($1::text[])`,
+      [[...userIds, ...personIds]],
+    );
+  }
+
+  const anonimizadas = await anonymizeWormPinnedAccounts(
+    client,
+    graph,
+    userIds,
+  );
+  const borrables = userIds.filter((id) => !anonimizadas.has(id));
+
+  try {
+    await client.query(
+      `delete from iam.users where id::text = any($1::text[])`,
+      [borrables],
+    );
+  } catch (err) {
+    const pgErr = err as {
+      code?: string;
+      table?: string;
+      constraint?: string;
+      detail?: string;
+      message: string;
+    };
+    if (pgErr.code === '23503') {
+      const tablaHija = pgErr.table ?? '(desconocida)';
+      if (graph.noBorrables.has(tablaHija)) {
+        throw new Error(
+          `No se pudo limpiar iam.users: "${tablaHija}" es WORM (trigger forbid) ` +
+            `y la suite no debería ejercitar un flujo que escriba ahí contra la ` +
+            `base compartida. Detalle: ${pgErr.detail ?? pgErr.message}`,
+        );
+      }
+      throw new Error(
+        `No se pudo limpiar iam.users: sigue referenciado desde "${tablaHija}" ` +
+          `(constraint "${pgErr.constraint ?? '?'}"). Agréguela a CUENTA_ESCRIBE_EN ` +
+          `en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
+      );
+    }
+    throw err;
+  }
+
+  const { rows: resto } = await client.query<{ total: string }>(
+    `select count(*)::text as total from iam.users
+      where id::text = any($1::text[]) and anonymized_at is null`,
+    [userIds],
+  );
+  const pendientes = Number(resto[0]?.total ?? 0);
+  if (pendientes > 0) {
+    throw new Error(
+      `La limpieza dejó ${pendientes} cuenta(s) ${descripcion} en la base compartida.`,
+    );
+  }
+}
+
+/**
+ * Anonimiza, en vez de borrar, las cuentas que alguna tabla WORM sigue
+ * nombrando, y devuelve cuáles fueron.
+ *
+ * Las tablas WORM y sus FKs hacia `iam.users` salen del grafo que ya se leyó
+ * del catálogo (`pg_trigger` + `pg_constraint`), no de una lista escrita a
+ * mano: hoy es `audit.audit_log` (`user_id` y `recorded_by_user_id`), y si
+ * mañana otra bitácora inmutable empieza a nombrar cuentas, cae acá sola.
+ *
+ * Por qué anonimizar y no las alternativas: el trigger `trg_forbid_mutation`
+ * es justamente lo que el ADR-0021 y la promoción del WORM al modelo (v4.0.10)
+ * protegen, así que no se desactiva ni se esquiva con
+ * `session_replication_role = replica` —eso exige superusuario y sería, en la
+ * base compartida, el mismo agujero que el WORM existe para cerrar—. El
+ * estado final es el que deja UC-01-12 con una cuenta real: misma
+ * `status_concept_id`, mismo `display_name` y `anonymized_at` sellado.
+ *
+ * @param client - Conexión ya abierta.
+ * @param graph - El grafo de FK, ya leído.
+ * @param userIds - Las cuentas del fixture.
+ * @returns Las cuentas anonimizadas; el resto se puede borrar.
+ */
+async function anonymizeWormPinnedAccounts(
+  client: pg.Client,
+  graph: SchemaGraph,
+  userIds: readonly string[],
+): Promise<Set<string>> {
+  const fijadas = new Set<string>();
+  const aristasWorm = graph.edges.filter(
+    (e) => e.parentTable === 'iam.users' && graph.noBorrables.has(e.childTable),
+  );
+  for (const edge of aristasWorm) {
+    const { rows } = await client.query<{ id: string }>(
+      `select distinct "${edge.childColumn}"::text as id from ${edge.childTable}
+        where "${edge.childColumn}"::text = any($1::text[])`,
+      [userIds],
+    );
+    for (const r of rows) fijadas.add(r.id);
+  }
+  if (fijadas.size === 0) return fijadas;
+
+  await client.query(
+    `update iam.users
+        set status_concept_id = $2,
+            anonymized_at     = coalesce(anonymized_at, now()),
+            display_name      = 'ANONYMIZED',
+            updated_at        = now(),
+            row_version       = row_version + 1
+      where id::text = any($1::text[])`,
+    [[...fijadas], CONCEPTS.USER_ANONYMIZED],
+  );
+  return fijadas;
+}
+
+/**
+ * Borra la cuenta, la persona y todo lo que el auto-registro de profesional
+ * escribió a su alrededor —incluido el consultorio propio de P20—, dejando
+ * la base compartida (Neon, la misma que alimenta la demo) tal como estaba.
+ *
+ * `deleteFixturesByRunMark` no sirve acá: busca `practitioner_code LIKE
+ * 'MED-<marca>-%'`, y el autorregistro genera `PRC-<uuid>`. Este helper parte
+ * de `profiles.persons` (mismo camino ya probado) y delega en
+ * {@link deleteAccounts} lo que cuelga de la cuenta y no de la persona.
+ *
+ * @param fixtures - Las cuentas y personas creadas por la suite.
+ * @throws Si algo sobrevive al borrado: un huérfano en silencio es
+ *   exactamente el defecto que este helper existe para impedir.
+ */
+export async function deleteRegisteredPractitioners(
+  fixtures: readonly { userId: string; personId: string }[],
+): Promise<void> {
+  if (fixtures.length === 0) return;
+  const userIds = fixtures.map((f) => f.userId);
+  const personIds = fixtures.map((f) => f.personId);
+  const client = testDbClient();
+  await client.connect();
+  try {
+    const graph = await readSchemaGraph(client);
+    const visited = new Set<string>();
+
+    await deleteWithDependents(
+      client,
+      graph,
+      'profiles.persons',
+      personIds,
+      visited,
+    );
+
+    await deleteAccounts(
+      client,
+      graph,
+      visited,
+      userIds,
+      personIds,
+      'de profesional',
+    );
+  } finally {
+    await client.end();
+  }
+}
+
+/**
+ * Tablas que cuelgan de `directory.tenants` por una columna semántica
+ * (`tenant_id` u otro nombre propio) y que el autorregistro de organización
+ * puede llegar a escribir. Mismo criterio que {@link CUENTA_ESCRIBE_EN}:
+ * lista corta y deliberada, no la raíz `directory.tenants` a secas —tiene
+ * ~300 FKs entrantes en el modelo, muchas de auditoría, y recorrerlas todas
+ * contra una base remota sería lento sin aportar nada que esta lista no dé.
+ *
+ * Sus hijos (sedes de práctica, sedes y ofertas de la unidad diagnóstica, el
+ * historial de auditoría de `practice.practices`...) los alcanza
+ * {@link deleteWithDependents} solo, recorriendo el grafo de FK desde acá.
+ */
+const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
+  { table: 'audit.tenants_history', column: 'tenant_id' },
+  { table: 'directory.tenant_memberships', column: 'tenant_id' },
+  { table: 'practice.practices', column: 'tenant_id' },
+  { table: 'diagnostic_units.diagnostic_units', column: 'tenant_id' },
+  { table: 'messaging.notification_requests', column: 'tenant_id' },
+  { table: 'messaging.in_app_notifications', column: 'tenant_id' },
+  // Un tenant PAYER materializa su aseguradora en la misma transacción del
+  // alta (`TenantTypeProfileService.materializeProfile`); faltaba acá y
+  // cualquier suite que registrara una aseguradora por
+  // `POST /iam/auth/register-organization` no podía limpiarse (subtarea 1.1).
+  { table: 'insurance.insurance_carriers', column: 'tenant_id' },
+  // Documentos legales de afiliación (subtarea 1.2): el alta los vincula al
+  // tenant recién creado en la misma transacción. Y el `fileId` que cada uno
+  // envuelve pasa a ser propiedad de ESE tenant al reclamarse
+  // (`AttachableFileService.claimAnonymousUpload` reasigna `common.files.tenant_id`
+  // desde el tenant DEFAULT), así que sin esta segunda fila el archivo
+  // reclamado sobrevive al borrado del tenant que lo reclamó.
+  { table: 'directory.tenant_affiliation_documents', column: 'tenant_id' },
+  { table: 'common.files', column: 'tenant_id' },
+  // Casa matriz georreferenciada (subtarea 1.3): `materializeProfile` crea una
+  // fila de `common.addresses` con `owner_id = tenant_id` (owner_type TENANT).
+  // No hay FK hacia `directory.tenants`, así que sin esta entrada el borrado
+  // del tenant NO falla: la fila queda huérfana en silencio. `OWNER_SIN_FK`
+  // no la alcanza (sólo cubre `owner_id in (userIds, personIds)`).
+  { table: 'common.addresses', column: 'owner_id' },
+  // Representante legal y gerencias de contacto (subtarea 1.4): los 3
+  // gerentes llevan `power_of_attorney_document_id NULL` y no son
+  // alcanzables desde `tenant_affiliation_documents` — sin esta entrada,
+  // `delete from directory.tenants` revienta con 23503 nombrando esta tabla.
+  // El orden relativo a `tenant_affiliation_documents` es indiferente: la
+  // recursión por FK borra al representante antes del corte de ciclos.
+  { table: 'directory.tenant_legal_representatives', column: 'tenant_id' },
+];
+
+/**
+ * Borra la organización, su unidad diagnóstica (si la hubo), a quienes la
+ * representan (subtarea 1.4) y la cuenta de su owner, dejando la base
+ * compartida tal como estaba.
+ *
+ * Mismo criterio que {@link deleteRegisteredPractitioners}: recorre
+ * {@link TENANT_ESCRIBE_EN} para alcanzar lo que cuelga del tenant, borra el
+ * tenant en sí (nombrando, si algo lo sigue referenciando, qué tabla falta
+ * en la lista), y delega en {@link deleteAccounts} la cuenta del owner. Desde
+ * la subtarea 1.4 esto **ya no** es cierto para toda organización: un alta
+ * que declaró representante legal o gerencias crea hasta cuatro
+ * `profiles.persons`, así que sus ids se capturan ANTES del bucle —el bucle
+ * borra las filas de `tenant_legal_representatives` que los nombran— y se
+ * borran después de los tenants, igual que hace
+ * {@link deleteRegisteredPractitioners}. `OWNER_SIN_FK` limpia sus
+ * `identifiers`/`contact_points` por `owner_id` una vez que `deleteAccounts`
+ * recibe esos ids.
+ *
+ * @param fixtures - Las cuentas y tenants creados por la suite.
+ * @throws Si algo sobrevive al borrado.
+ */
+export async function deleteRegisteredOrganizations(
+  fixtures: readonly { userId: string; tenantId: string }[],
+): Promise<void> {
+  if (fixtures.length === 0) return;
+  const userIds = fixtures.map((f) => f.userId);
+  const tenantIds = fixtures.map((f) => f.tenantId);
+  const client = testDbClient();
+  await client.connect();
+  try {
+    const graph = await readSchemaGraph(client);
+    const visited = new Set<string>();
+
+    // Antes de que el bucle de abajo borre las filas de
+    // `tenant_legal_representatives`: son las únicas que nombran a estas
+    // personas, así que sus ids hay que capturarlos ahora o se pierden.
+    const { rows: filasDeRepresentacion } = await client.query<{
+      person_id: string;
+    }>(
+      `select person_id from directory.tenant_legal_representatives where tenant_id::text = any($1::text[])`,
+      [tenantIds],
+    );
+    const personIds = filasDeRepresentacion.map((f) => f.person_id);
+
+    for (const { table, column } of TENANT_ESCRIBE_EN) {
+      const pk = graph.primaryKey.get(table);
+      if (pk === undefined) continue;
+      const { rows } = await client.query<{ id: string }>(
+        `select "${pk}"::text as id from ${table} where "${column}"::text = any($1::text[])`,
+        [tenantIds],
+      );
+      await deleteWithDependents(
+        client,
+        graph,
+        table,
+        rows.map((r) => r.id),
+        visited,
+      );
+    }
+
+    try {
+      await client.query(
+        `delete from directory.tenants where id::text = any($1::text[])`,
+        [tenantIds],
+      );
+    } catch (err) {
+      const pgErr = err as {
+        code?: string;
+        table?: string;
+        constraint?: string;
+        detail?: string;
+        message: string;
+      };
+      if (pgErr.code === '23503') {
+        const tablaHija = pgErr.table ?? '(desconocida)';
+        if (graph.noBorrables.has(tablaHija)) {
+          throw new Error(
+            `No se pudo limpiar directory.tenants: "${tablaHija}" es WORM ` +
+              `(trigger forbid) y la suite no debería ejercitar un flujo que ` +
+              `escriba ahí contra la base compartida. Detalle: ${pgErr.detail ?? pgErr.message}`,
+          );
+        }
+        throw new Error(
+          `No se pudo limpiar directory.tenants: sigue referenciado desde ` +
+            `"${tablaHija}" (constraint "${pgErr.constraint ?? '?'}"). Agréguela ` +
+            `a TENANT_ESCRIBE_EN en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
+        );
+      }
+      throw err;
+    }
+
+    const { rows: resto } = await client.query<{ total: string }>(
+      `select count(*)::text as total from directory.tenants where id::text = any($1::text[])`,
+      [tenantIds],
+    );
+    const pendientes = Number(resto[0]?.total ?? 0);
+    if (pendientes > 0) {
+      throw new Error(
+        `La limpieza dejó ${pendientes} organización(es) en la base compartida.`,
+      );
+    }
+
+    // El representante legal y las gerencias (subtarea 1.4): sus vínculos ya
+    // se borraron en el bucle de arriba; sus personas, todavía no.
+    await deleteWithDependents(
+      client,
+      graph,
+      'profiles.persons',
+      personIds,
+      visited,
+    );
+
+    await deleteAccounts(
+      client,
+      graph,
+      visited,
+      userIds,
+      personIds,
+      'de organización',
+    );
   } finally {
     await client.end();
   }

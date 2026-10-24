@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import {
   JournalRepository,
   AccountsRepository,
@@ -31,8 +32,12 @@ import {
   NormalBalance,
 } from '../dto';
 import { sumCents, fromCents } from './money';
+import { classify } from './journal-classification';
 import { AuditTrailService } from '../../audit/services';
-import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  PracticeTenantLookupService,
+  practiceAccessScope,
+} from '../../practice/services';
 
 /** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
 const JOURNAL_AUDIT_ENTITY = 'journal_transaction';
@@ -51,13 +56,17 @@ const NORMAL_BALANCE_CONCEPT: Record<NormalBalance, string> = {
 };
 
 /**
- * Máquina de estados canónica del asiento (REDESA C-17). Cada estado declara sus
+ * Máquina de estados canónica del asiento (ALOVIDA C-17). Cada estado declara sus
  * transiciones válidas; cualquier otra combinación la rechaza `assertTransition`
  * con 422 (PreconditionFailed). El efecto en el mayor (sellado de `postedAt`) solo
  * ocurre en la transición APPROVED → POSTED.
  */
 const ALLOWED_TRANSITIONS: Record<string, readonly string[]> = {
-  [ACCT.TXN_DRAFT]: [ACCT.TXN_AUTO_CLASSIFIED],
+  // MCH-018: un borrador que el motor de reglas no puede clasificar va a
+  // revisión humana en vez de marcarse auto-clasificado. Ese camino lo abre
+  // únicamente `classify`: `submitForReview` sigue exigiendo pasar por la
+  // clasificación (ver su guardia explícita).
+  [ACCT.TXN_DRAFT]: [ACCT.TXN_AUTO_CLASSIFIED, ACCT.TXN_PENDING_REVIEW],
   [ACCT.TXN_AUTO_CLASSIFIED]: [ACCT.TXN_PENDING_REVIEW],
   [ACCT.TXN_PENDING_REVIEW]: [ACCT.TXN_APPROVED],
   [ACCT.TXN_APPROVED]: [ACCT.TXN_POSTED],
@@ -124,13 +133,9 @@ export class LedgerService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    if (
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('ACCOUNTING_APPROVER')
-    ) {
-      return;
-    }
-    if (!actor.roles.includes('PRACTITIONER')) {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
+    // sólo se traduce a los errores 422 propios de contabilidad.
+    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
       // Ningún otro rol llega hoy a estas rutas (el `@Roles` del controlador
       // ya lo impide); no-op defensivo, no un permiso implícito.
       return;
@@ -142,6 +147,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'La cuenta no tiene un perfil profesional asociado',
         { actorId: actor.id },
+        AccountingErrorReason.PRACTITIONER_PROFILE_MISSING,
       );
     }
     const practiceIds =
@@ -152,6 +158,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'El profesional no tiene una vinculación activa con esa práctica',
         { practiceId },
+        AccountingErrorReason.PRACTITIONER_PRACTICE_NOT_LINKED,
       );
     }
   }
@@ -160,7 +167,7 @@ export class LedgerService {
    * UC-16-01 / atajo directo (crear+postear). Registra un asiento balanceado y lo
    * deja POSTEADO en un solo paso, saltándose el flujo de revisión/aprobación.
    *
-   * DECISIÓN DE COMPATIBILIDAD (REDESA C-17): el flujo canónico es
+   * DECISIÓN DE COMPATIBILIDAD (ALOVIDA C-17): el flujo canónico es
    * `createDraft → classify → submitForReview → approve → post`. Este atajo se
    * conserva para no romper integraciones/tests existentes y está controlado por:
    *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
@@ -194,9 +201,13 @@ export class LedgerService {
           dto.fiscalPeriodId,
         );
         if (!period) {
-          throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
-            fiscalPeriodId: dto.fiscalPeriodId,
-          });
+          throw new ResourceNotFoundException(
+            'Periodo fiscal no encontrado',
+            {
+              fiscalPeriodId: dto.fiscalPeriodId,
+            },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+          );
         }
         if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
           throw new PreconditionFailedException(
@@ -205,6 +216,7 @@ export class LedgerService {
               fiscalPeriodId: dto.fiscalPeriodId,
               status: period.statusConceptId,
             },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
           );
         }
       }
@@ -221,6 +233,7 @@ export class LedgerService {
           {
             transactionNumber: number,
           },
+          AccountingErrorReason.JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -277,7 +290,7 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — estado inicial DRAFT. Registra el asiento y sus líneas del mayor
+   * ALOVIDA C-17 — estado inicial DRAFT. Registra el asiento y sus líneas del mayor
    * SIN postearlo: queda en DRAFT (`postedAt` nulo). El efecto en el mayor se aplaza
    * al comando `post`. Se valida la partida doble por adelantado para no aceptar un
    * borrador estructuralmente inválido; el periodo ABIERTO se valida en `post`.
@@ -300,6 +313,7 @@ export class LedgerService {
         throw new ConflictException(
           'El número de asiento ya existe en la práctica',
           { transactionNumber: number },
+          AccountingErrorReason.JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS,
         );
       }
 
@@ -342,31 +356,111 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — DRAFT → AUTO_CLASSIFIED. Clasificación automática por reglas.
-   * PLACEHOLDER determinista y documentado: en ausencia de un motor de reglas de
-   * clasificación, se marca el asiento como auto-clasificado conservando su tipo
-   * STANDARD. Punto de extensión: aquí se resolvería `transactionTypeConceptId`
-   * (y/o cuentas por defecto) a partir de reglas de determinación por escenario.
+   * ALOVIDA C-17 — DRAFT → AUTO_CLASSIFIED. Clasificación automática por reglas.
+   *
+   * MCH-018: antes esto era un PLACEHOLDER que sólo cambiaba el estado, así que
+   * el asiento quedaba "auto-clasificado" sin que ninguna regla se hubiera
+   * evaluado. Ahora decide el motor versionado (`journal-classification.ts`):
+   * sólo con una regla aplicable el asiento llega a AUTO_CLASSIFIED y se le
+   * imputa el tipo que la regla determina. Sin regla, o con reglas en conflicto,
+   * va a PENDING_REVIEW sin inventar tipo ni cuenta, y la respuesta dice por qué.
+   *
+   * @param id - Asiento a clasificar.
+   * @param _dto - Cuerpo de la transición; no aporta datos a la decisión.
+   * @param actor - Usuario autenticado que la solicita.
+   * @returns El asiento con la evidencia de la clasificación.
    */
-  classify(
+  async classify(
     id: string,
     _dto: JournalTransitionDto,
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
-    return this.transition(id, ACCT.TXN_AUTO_CLASSIFIED, actor, 'classify');
+    const owner = await this.journalRepo.findTransactionById(this.em, id);
+    if (owner) {
+      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
+    }
+
+    return this.em.transactional(async (tx) => {
+      const txn = await this.journalRepo.findTransactionById(tx, id);
+      if (!txn) {
+        throw new ResourceNotFoundException('Asiento no encontrado', {
+          transactionId: id,
+        });
+      }
+
+      const result = classify({
+        sourceDocumentType: txn.sourceDocumentType,
+      });
+      const destination =
+        result.decision === 'CLASIFICADA'
+          ? ACCT.TXN_AUTO_CLASSIFIED
+          : ACCT.TXN_PENDING_REVIEW;
+      this.assertTransition(txn.statusConceptId, destination);
+
+      if (result.transactionTypeConceptId) {
+        txn.transactionTypeConceptId = result.transactionTypeConceptId;
+      }
+      txn.statusConceptId = destination;
+      touch(txn, actor.id);
+
+      // La cadena WORM distingue las dos autoridades: una clasificación por
+      // reglas no queda sellada igual que un envío a revisión humana.
+      await this.auditTrail.record(tx, actor, {
+        action:
+          result.decision === 'CLASIFICADA'
+            ? 'JOURNAL_AUTO_CLASSIFIED'
+            : 'JOURNAL_CLASSIFICATION_REVIEW',
+        entity: JOURNAL_AUDIT_ENTITY,
+        entityId: id,
+      });
+
+      this.logger.info(
+        {
+          operation: 'accounting.journal.classify',
+          transactionId: id,
+          decision: result.decision,
+          rulesetVersion: result.rulesetVersion,
+          ruleId: result.ruleId,
+          to: destination,
+        },
+        'Journal transaction classified',
+      );
+
+      return { ...this.toResponse(txn), classification: result };
+    });
   }
 
-  /** REDESA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW. */
+  /**
+   * ALOVIDA C-17 — AUTO_CLASSIFIED → PENDING_REVIEW.
+   *
+   * MCH-018: desde DRAFT la máquina admite ahora PENDING_REVIEW, pero ese camino
+   * es sólo el de `classify` cuando ninguna regla aplica. Enviar a revisión un
+   * borrador sin pasar por la clasificación se rechaza acá explícitamente.
+   */
   submitForReview(
     id: string,
     _dto: JournalTransitionDto,
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
-    return this.transition(id, ACCT.TXN_PENDING_REVIEW, actor, 'submit-review');
+    return this.transition(
+      id,
+      ACCT.TXN_PENDING_REVIEW,
+      actor,
+      'submit-review',
+      undefined,
+      (txn) => {
+        if (txn.statusConceptId === ACCT.TXN_DRAFT) {
+          throw new PreconditionFailedException(
+            'El asiento debe clasificarse antes de enviarse a revisión',
+            { transactionId: id },
+          );
+        }
+      },
+    );
   }
 
   /**
-   * REDESA C-17 — PENDING_REVIEW → APPROVED. Exige rol de aprobación y sella
+   * ALOVIDA C-17 — PENDING_REVIEW → APPROVED. Exige rol de aprobación y sella
    * quién/ cuándo aprobó (segregación de funciones respecto al posteo).
    */
   async approve(
@@ -382,7 +476,7 @@ export class LedgerService {
   }
 
   /**
-   * REDESA C-17 — APPROVED → POSTED. ES el posteo efectivo en el mayor: valida la
+   * ALOVIDA C-17 — APPROVED → POSTED. ES el posteo efectivo en el mayor: valida la
    * partida doble (recalculada desde las líneas persistidas) y que el periodo esté
    * ABIERTO, y sella `postedAt`/`postedByUserId`. Solo transita desde APPROVED.
    */
@@ -394,9 +488,13 @@ export class LedgerService {
     return this.em.transactional(async (tx) => {
       const txn = await this.journalRepo.findTransactionById(tx, id);
       if (!txn) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId: id,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId: id,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
       this.assertTransition(txn.statusConceptId, ACCT.TXN_POSTED);
 
@@ -412,9 +510,13 @@ export class LedgerService {
           txn.fiscalPeriodId,
         );
         if (!period) {
-          throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
-            fiscalPeriodId: txn.fiscalPeriodId,
-          });
+          throw new ResourceNotFoundException(
+            'Periodo fiscal no encontrado',
+            {
+              fiscalPeriodId: txn.fiscalPeriodId,
+            },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+          );
         }
         if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
           throw new PreconditionFailedException(
@@ -423,6 +525,7 @@ export class LedgerService {
               fiscalPeriodId: txn.fiscalPeriodId,
               status: period.statusConceptId,
             },
+            AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
           );
         }
       }
@@ -479,11 +582,15 @@ export class LedgerService {
         transactionId,
       );
       if (!original) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
-      // REDESA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
+      // ALOVIDA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
       // `assertTransition` rechaza (422) reversar un asiento en cualquier otro estado.
       this.assertTransition(original.statusConceptId, ACCT.TXN_REVERSED);
       const existingLink = await this.journalRepo.findLink(
@@ -492,9 +599,13 @@ export class LedgerService {
         ACCT.RELATION_REVERSES,
       );
       if (existingLink) {
-        throw new ConflictException('El asiento ya fue reversado', {
-          transactionId,
-        });
+        throw new ConflictException(
+          'El asiento ya fue reversado',
+          {
+            transactionId,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_ALREADY_REVERSED,
+        );
       }
 
       const originalLines = await this.journalRepo.ledgerEntriesForTransaction(
@@ -604,9 +715,13 @@ export class LedgerService {
         transactionId,
       );
       if (!transaction) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
       const file = this.journalRepo.createFile(tx, {
         transactionId,
@@ -646,6 +761,7 @@ export class LedgerService {
           tenantId: dto.tenantId,
           postingScenarioConceptId: dto.postingScenarioConceptId,
         },
+        AccountingErrorReason.POSTING_RULE_NOT_FOUND,
       );
     }
     return {
@@ -672,6 +788,7 @@ export class LedgerService {
           {
             code: dto.code,
           },
+          AccountingErrorReason.ACCOUNT_CODE_ALREADY_EXISTS,
         );
       }
       const account = this.accountsRepo.create(tx, {
@@ -747,16 +864,28 @@ export class LedgerService {
   assertTransition(from: string, to: string): void {
     const allowed = ALLOWED_TRANSITIONS[from] ?? [];
     if (!allowed.includes(to)) {
-      throw new PreconditionFailedException('Transición de estado inválida', {
-        from,
-        to,
-      });
+      throw new PreconditionFailedException(
+        'Transición de estado inválida',
+        {
+          from,
+          to,
+        },
+        AccountingErrorReason.JOURNAL_INVALID_STATE_TRANSITION,
+      );
     }
   }
 
   /**
    * Transición genérica de estado: carga el asiento, valida la transición y aplica
    * el nuevo estado (más una mutación opcional específica del comando).
+   *
+   * @param id - Asiento a transitar.
+   * @param to - Estado destino.
+   * @param actor - Usuario autenticado que la solicita.
+   * @param operation - Nombre del comando, para la traza.
+   * @param mutate - Mutación específica del comando, tras cambiar el estado.
+   * @param guard - Comprobación previa a la transición sobre el estado actual.
+   * @returns El asiento ya transitado.
    */
   private async transition(
     id: string,
@@ -777,6 +906,12 @@ export class LedgerService {
        */
       approvedByUserId?: string;
     }) => void,
+    guard?: (txn: {
+      /**
+       * Identificador asociado a status concept.
+       */
+      statusConceptId: string;
+    }) => void,
   ): Promise<JournalTransactionResponseDto> {
     // Fuera de la transacción: es una lectura contra `practice`, no contra
     // `accounting`, y no necesita compartir el lock de la fila del asiento.
@@ -788,10 +923,15 @@ export class LedgerService {
     return this.em.transactional(async (tx) => {
       const txn = await this.journalRepo.findTransactionById(tx, id);
       if (!txn) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId: id,
-        });
+        throw new ResourceNotFoundException(
+          'Asiento no encontrado',
+          {
+            transactionId: id,
+          },
+          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+        );
       }
+      guard?.(txn);
       this.assertTransition(txn.statusConceptId, to);
       txn.statusConceptId = to;
       mutate?.(txn);
@@ -811,6 +951,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'Se requiere un rol con autoridad de aprobación para aprobar el asiento',
         { requiredAnyOf: APPROVAL_ROLES },
+        AccountingErrorReason.APPROVAL_ROLE_REQUIRED,
       );
     }
   }
@@ -877,6 +1018,7 @@ export class LedgerService {
       throw new PreconditionFailedException(
         'El asiento no balancea (debe != haber)',
         { debit: fromCents(debitCents), credit: fromCents(creditCents) },
+        AccountingErrorReason.JOURNAL_ENTRY_UNBALANCED,
       );
     }
     return debitCents;
@@ -900,7 +1042,11 @@ export class LedgerService {
       lines.filter((l) => l.direction === 'CREDIT').map((l) => l.amount),
     );
     if (debitCents <= 0) {
-      throw new PreconditionFailedException('El asiento no tiene importe', {});
+      throw new PreconditionFailedException(
+        'El asiento no tiene importe',
+        {},
+        AccountingErrorReason.JOURNAL_ENTRY_EMPTY_AMOUNT,
+      );
     }
     if (debitCents !== creditCents) {
       throw new PreconditionFailedException(
@@ -909,6 +1055,7 @@ export class LedgerService {
           debit: fromCents(debitCents),
           credit: fromCents(creditCents),
         },
+        AccountingErrorReason.JOURNAL_ENTRY_UNBALANCED,
       );
     }
     return { debitCents, creditCents };

@@ -1,0 +1,343 @@
+{
+  "code": "INFECTO_CTRL_VIH",
+  "name": "Control de VIH",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "VIH: directrices consolidadas de la OMS",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/health-topics/hiv-aids",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Estadio clínico de la OMS, carga viral, CD4, adherencia a la terapia antirretroviral y profilaxis. Ampliación internacional (2026-10-24): motivos de mala adherencia, toxicidad limitante, motivo de la carga viral, fracaso terapéutico, signos de enfermedad grave, tamizaje de tuberculosis y hepatitis B y C desde la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735); instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de VIH",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "vih_motivos_mala_adherencia",
+      "name": "Motivos del problema de adherencia",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Se olvidó",
+        "Toxicidad o efectos adversos",
+        "Falta de tiempo",
+        "Cambio de rutina",
+        "Costo del traslado",
+        "Distancia al establecimiento",
+        "Perdió o se le acabaron las pastillas",
+        "Desabastecimiento",
+        "Estaba demasiado enfermo",
+        "Cantidad de pastillas",
+        "Se sentía bien",
+        "Depresión",
+        "Consumo de alcohol",
+        "Consumo de otras sustancias",
+        "Estigma o temor a que se sepa el diagnóstico",
+        "Falta de alimentos",
+        "Mal sabor"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento HIV.D.DE197 «Reason(s) for adherence problem» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": {
+        "field": "adherencia",
+        "equals": ["Olvida dosis algunas veces", "Abandonó el tratamiento"]
+      }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "vih_toxicidad_limitante",
+      "name": "Tipo de toxicidad que limita el tratamiento",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Gastrointestinal (náuseas, diarrea, dolor abdominal, vómitos)",
+        "Cutánea (exantema, hipersensibilidad)",
+        "Neuropatía periférica",
+        "Sistema nervioso central (mareo, ansiedad, pesadillas, depresión)",
+        "Aumento de peso",
+        "Disfunción hepática (ictericia)",
+        "Hematológica (anemia, neutropenia)",
+        "Cansancio",
+        "Cefalea",
+        "Ósea (fracturas, osteopenia)",
+        "Metabólica (cambios de la grasa corporal, hiperglucemia, dislipidemia)",
+        "Renal (nefrolitiasis, insuficiencia renal)",
+        "Reacción adversa inesperada"
+      ],
+      "multiple": true,
+      "description": "Fuente: elemento HIV.D.DE466 «Type of treatment-limiting toxicity» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "estadio_oms_vih",
+      "name": "Estadio clínico OMS",
+      "dataType": "string",
+      "required": true,
+      "options": ["1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "carga_viral",
+      "name": "Última carga viral (copias/mL)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_motivo_carga_viral",
+      "name": "Motivo de la carga viral",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Control de rutina",
+        "Control dirigido (sospecha clínica)",
+        "Primera carga viral",
+        "Control después de la consejería reforzada de adherencia"
+      ],
+      "description": "Fuente: elemento HIV.D.DE391 «Reason for HIV viral load test» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_fracaso_tratamiento",
+      "name": "Fracaso del tratamiento antirretroviral",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fracaso clínico",
+        "Fracaso inmunológico",
+        "Fracaso virológico"
+      ],
+      "multiple": true,
+      "description": "Dejar en blanco si no hay fracaso. Fuente: elemento HIV.D.DE225 «Treatment failure» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "cd4",
+      "name": "Último CD4 (células/µL)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_tamizajes",
+      "name": "Tamizajes al día",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Tuberculosis",
+        "Sífilis",
+        "Hepatitis B",
+        "Cáncer de cuello uterino"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "profilaxis_cotrimoxazol",
+      "name": "Recibe cotrimoxazol",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre",
+        "Pérdida de peso",
+        "Diarrea crónica",
+        "Tos",
+        "Lesiones orales",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_signos_enfermedad_grave",
+      "name": "Signos de enfermedad grave",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fiebre de 39 °C o más",
+        "Taquicardia",
+        "Taquipnea",
+        "No puede caminar sin ayuda",
+        "Letargo",
+        "Inconsciencia",
+        "Convulsiones",
+        "No puede beber (niño)",
+        "No puede mamar (lactante o niño)",
+        "Vómitos repetidos",
+        "Cefalea"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Cualquiera de estos signos indica triaje o referencia de urgencia. Fuente: elemento HIV.D.DE17 «Signs of serious illness» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_sintomas_tb",
+      "name": "Síntomas de tuberculosis (tamizaje)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Tos actual",
+        "Tos de 2 semanas o más",
+        "Fiebre de 39 °C o más",
+        "Pérdida de peso (referida)",
+        "Sudoración nocturna",
+        "Poca ganancia de peso (niño)",
+        "Juega menos (niño)",
+        "Dolor torácico",
+        "Hemoptisis",
+        "Letargo",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "La DAK lo marca como respuesta única; se ofrece como varias porque los síntomas pueden coexistir. Fuente: elemento HIV.D.DE973 «Symptoms of TB» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_resultado_tamizaje_tb",
+      "name": "Resultado del tamizaje de tuberculosis",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positivo", "Negativo", "No concluyente"],
+      "description": "Fuente: elemento HIV.D.DE986 «TB screening result» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_hbsag",
+      "name": "HBsAg (hepatitis B)",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positivo", "Negativo", "Indeterminado"],
+      "description": "Fuente: elemento HIV.D.DE162 «HBsAg test result» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: VIH",
+      "code": "vih_vhc",
+      "name": "Prueba de hepatitis C",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positiva", "Negativa", "Indeterminada"],
+      "description": "Fuente: elemento HIV.D.DE170 «HCV test result» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Carga viral indetectable",
+        "Adherencia > 95 %",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Adherencia",
+        "Prevención de la transmisión",
+        "Pareja: prueba"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

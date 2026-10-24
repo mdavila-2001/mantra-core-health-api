@@ -67,6 +67,13 @@ export class CarePlans {
   authorProfileId?: string;
 
   /**
+   * P43: instancia (cerrada) del formulario médico de la que sale el registro.
+   * Nula cuando se emite desde la historia del paciente, sin formulario.
+   */
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  formInstanceId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

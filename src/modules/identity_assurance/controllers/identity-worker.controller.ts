@@ -8,9 +8,19 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  Optional,
 } from '@nestjs/common';
+import { IsOptional, IsUUID } from 'class-validator';
+import { IdentityEvidenceLifecycleService } from '../services/identity-evidence-lifecycle.service';
+import { IdentityEvidenceStoragePurgeService } from '../services/identity-evidence-storage-purge.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+
+export class EvidenceLifecycleScanDto {
+  @IsOptional() @IsUUID() cursor?: string;
+}
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -43,7 +53,45 @@ export class IdentityWorkerController {
    *
    * @param checksService - Valor de checks service requerido por la operación.
    */
-  constructor(private readonly checksService: IdentityChecksService) {}
+  constructor(
+    private readonly checksService: IdentityChecksService,
+    @Optional() private readonly lifecycle?: IdentityEvidenceLifecycleService,
+    @Optional()
+    private readonly storagePurge?: IdentityEvidenceStoragePurgeService,
+  ) {}
+
+  @Audited({
+    action: 'IDENTITY_EVIDENCE_PURGE_REVIEWED',
+    entity: 'identity_evidence_record',
+    entityId: 'result.id',
+  })
+  @Post('evidence/storage-purge-review')
+  @Roles('SYSTEM')
+  @ApiOperation({
+    summary: 'Recheck retired evidence objects; never grants physical delete',
+  })
+  storagePurgeReview() {
+    if (!this.storagePurge)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    return this.storagePurge.review();
+  }
+
+  @Audited({
+    action: 'IDENTITY_EVIDENCE_LIFECYCLE_SCANNED',
+    entity: 'identity_evidence_record',
+    entityId: 'result.id',
+  })
+  @Post('evidence/lifecycle-scan')
+  @Roles('SYSTEM')
+  @ApiOperation({
+    summary:
+      'Evaluate configured evidence lifecycle; destructive runtime remains blocked',
+  })
+  lifecycleScan(@Body() dto: EvidenceLifecycleScanDto) {
+    if (!this.lifecycle)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    return this.lifecycle.scan(dto.cursor);
+  }
 
   /** Descubrimiento: qué checks hay que despachar o seguir esperando. */
   @Get('checks/dispatchable')
@@ -58,6 +106,11 @@ export class IdentityWorkerController {
   }
 
   /** Asienta el intento de despacho contra la autoridad externa. */
+  @Audited({
+    action: 'VERIFICATION_CHECK_ATTEMPT_RECORDED',
+    entity: 'identity_check',
+    entityId: 'param:id',
+  })
   @Post('checks/:id/attempts')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -76,6 +129,11 @@ export class IdentityWorkerController {
    * Asienta el veredicto de la autoridad. Es el punto que puede cerrar el caso
    * (verificarlo y emitir su aserción, o rechazarlo).
    */
+  @Audited({
+    action: 'VERIFICATION_CHECK_RESULT_RECORDED',
+    entity: 'identity_check',
+    entityId: 'param:id',
+  })
   @Post('checks/:id/results')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -8,3 +8,4 @@ export { LiabilityService } from './liability.service';
 export { ExchangeRateService } from './exchange-rate.service';
 export { PostingHelper } from './posting.helper';
 export { PractitionerAccountingService } from './practitioner-accounting.service';
+export { AccountingReadService } from './accounting-read.service';

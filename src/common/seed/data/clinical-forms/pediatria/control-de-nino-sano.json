@@ -1,11 +1,8 @@
 {
   "code": "PEDIA_CONTROL_NINO_SANO",
-  "name": "Control de niño sano",
-  "specialty": {
-    "code": "PEDIATRIA",
-    "display": "Pediatría"
-  },
-  "version": 1,
+  "name": "Pediatría — control de niño sano (ficha base)",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, atención integral del niño",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,98 +10,295 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS)."
+    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS). v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): los estadios de Tanner desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
+      "section": "Datos del control",
       "code": "edad_en_meses",
       "name": "Edad (meses)",
       "dataType": "integer",
       "required": true
     },
     {
+      "section": "Datos del control",
       "code": "peso_kg",
       "name": "Peso (kg)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Datos del control",
       "code": "talla_cm",
-      "name": "Talla / longitud (cm)",
+      "name": "Talla (cm)",
       "dataType": "decimal",
       "required": true
     },
     {
+      "section": "Datos del control",
       "code": "perimetro_cefalico_cm",
       "name": "Perímetro cefálico (cm)",
       "dataType": "decimal",
       "required": false
     },
     {
-      "code": "alimentacion",
-      "name": "Alimentación actual",
-      "dataType": "text",
-      "required": false
+      "section": "Datos del control",
+      "code": "estado_nutricional",
+      "name": "Estado nutricional (curvas OMS)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Normal",
+        "Riesgo de desnutrición",
+        "Desnutrición aguda moderada",
+        "Desnutrición aguda grave",
+        "Talla baja",
+        "Sobrepeso",
+        "Obesidad"
+      ]
     },
     {
+      "section": "Alimentación",
       "code": "lactancia_materna_exclusiva",
-      "name": "Lactancia materna exclusiva",
+      "name": "Lactancia materna exclusiva (menores de 6 meses)",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Alimentación",
+      "code": "alimentacion_tipo",
+      "name": "Alimentación",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Lactancia exclusiva",
+        "Lactancia y fórmula",
+        "Fórmula",
+        "Lactancia y alimentación complementaria",
+        "Dieta familiar"
+      ]
+    },
+    {
+      "section": "Alimentación",
+      "code": "alimentacion",
+      "name": "Alimentación — detalle",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Alimentación",
+      "code": "suplementos",
+      "name": "Recibe suplementos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Alimentación",
+      "code": "suplementos_cuales",
+      "name": "¿Cuáles?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Hierro", "Vitamina A", "Chispitas nutricionales", "Zinc"],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "suplementos", "equals": true }
+    },
+    {
+      "section": "Vacunas y desarrollo",
       "code": "vacunas_al_dia",
-      "name": "Esquema de vacunación al día",
+      "name": "Vacunas al día según el esquema nacional",
       "dataType": "boolean",
       "required": true
     },
     {
+      "section": "Vacunas y desarrollo",
+      "code": "vacunas_faltantes",
+      "name": "¿Cuáles faltan?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "BCG",
+        "Pentavalente",
+        "Antipolio",
+        "Rotavirus",
+        "Neumococo",
+        "SRP",
+        "Fiebre amarilla",
+        "Influenza",
+        "Varicela"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "vacunas_al_dia", "equals": false }
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "desarrollo_global",
+      "name": "Desarrollo psicomotor para la edad",
+      "dataType": "string",
+      "required": false,
+      "options": ["Adecuado", "Con alerta", "Con retraso"]
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "desarrollo_areas",
+      "name": "¿En qué áreas?",
+      "dataType": "json",
+      "required": true,
+      "options": ["Motor grueso", "Motor fino", "Lenguaje", "Social"],
+      "multiple": true,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
+    },
+    {
+      "section": "Vacunas y desarrollo",
       "code": "desarrollo_motor",
-      "name": "Desarrollo motor",
+      "name": "Motor — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "desarrollo_del_lenguaje",
-      "name": "Desarrollo del lenguaje",
+      "name": "Lenguaje — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "desarrollo_social",
-      "name": "Desarrollo social",
+      "name": "Social — detalle",
       "dataType": "text",
-      "required": false
+      "required": false,
+      "showWhen": {
+        "field": "desarrollo_global",
+        "equals": ["Con alerta", "Con retraso"]
+      }
     },
     {
+      "section": "Vacunas y desarrollo",
+      "code": "tanner_mamas",
+      "name": "Tanner — desarrollo mamario",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Estadio 1 — prepuberal",
+        "Estadio 2 — botón mamario: elevación de la mama y la papila, aumento de la areola",
+        "Estadio 3 — mayor crecimiento de mama y areola, sin separación de sus contornos",
+        "Estadio 4 — areola y papila forman un montículo secundario sobre la mama",
+        "Estadio 5 — maduro: sólo se proyecta la papila"
+      ],
+      "description": "Para la evaluación del desarrollo puberal. Fuente: estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23), según el arquetipo openEHR openEHR-EHR-OBSERVATION.tanner.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "tanner_genitales",
+      "name": "Tanner — genitales masculinos",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Estadio 1 — prepuberal",
+        "Estadio 2 — aumento de escroto y testículos; piel escrotal enrojecida y de textura distinta",
+        "Estadio 3 — crecimiento del pene (primero en longitud) y de los testículos",
+        "Estadio 4 — pene más grueso y desarrollo del glande; escroto más oscuro",
+        "Estadio 5 — genitales adultos"
+      ],
+      "description": "Fuente: estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23), según el arquetipo openEHR openEHR-EHR-OBSERVATION.tanner.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "tanner_vello_pubico",
+      "name": "Tanner — vello púbico",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Estadio 1 — prepuberal (puede haber vello fino)",
+        "Estadio 2 — vello escaso, largo, algo pigmentado, en la base del pene o los labios",
+        "Estadio 3 — más oscuro, grueso y rizado, se extiende sobre el pubis",
+        "Estadio 4 — tipo adulto, en un área menor que el adulto; no llega a los muslos",
+        "Estadio 5 — adulto en tipo y cantidad, con límite superior horizontal"
+      ],
+      "description": "Fuente: estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23), según el arquetipo openEHR openEHR-EHR-OBSERVATION.tanner.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Vacunas y desarrollo",
       "code": "agudeza_visual",
       "name": "Tamizaje visual",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Normal", "Alterado", "No realizado"]
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "tamizaje_auditivo",
       "name": "Tamizaje auditivo",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Normal", "Alterado", "No realizado"]
     },
     {
+      "section": "Vacunas y desarrollo",
       "code": "salud_bucal",
       "name": "Salud bucal",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Signos de peligro (AIEPI)",
+      "code": "signos_de_peligro",
+      "name": "Signos generales de peligro",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "No puede beber ni tomar el pecho",
+        "Vomita todo",
+        "Convulsiones",
+        "Letárgico o inconsciente",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "Cualquiera presente: referencia urgente."
+    },
+    {
+      "section": "Signos de peligro (AIEPI)",
       "code": "signos_de_alarma",
-      "name": "Signos de alarma detectados",
+      "name": "Otros signos de alarma — detalle",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Motivo agregado y observaciones",
+      "code": "motivo_agregado",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Niño sano, sin otro motivo",
+        "Infección respiratoria aguda",
+        "Enfermedad diarreica aguda",
+        "Anemia",
+        "Desnutrición"
+      ],
+      "allowOther": true,
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
+    },
+    {
+      "section": "Próximo control",
       "code": "proximo_control",
-      "name": "Fecha del próximo control",
+      "name": "Próximo control",
       "dataType": "date",
       "required": false
     }
-  ]
+  ],
+  "kind": "BASE"
 }

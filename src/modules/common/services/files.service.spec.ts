@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
+import { ForbiddenException } from '@nestjs/common';
 import { FilesService } from './files.service';
 import {
   CONCEPTS,
@@ -34,6 +35,13 @@ function createEmMock() {
 }
 
 const actor: AuthenticatedUser = { id: 'user-1', roles: [] };
+// H4.S1.M1: casos preexistentes de `listLinkedFiles` que no ejercitan la
+// autorización por propiedad usan un actor con rol de revisión, para no
+// enredar lo que ya probaban con el chequeo nuevo (N-01).
+const reviewer: AuthenticatedUser = {
+  id: 'reviewer-1',
+  roles: ['SECURITY_ADMIN'],
+};
 
 describe('FilesService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -47,6 +55,9 @@ describe('FilesService', () => {
     const filesRepo = { findById: fn(), create: fn() };
     const fileVersionsRepo = {
       findById: fn(),
+      // 5.2: la lista resuelve versiones en lote. Por defecto no encuentra
+      // ninguna, que es lo que ven las pruebas escritas antes de la metadata.
+      findByIds: fn(() => Promise.resolve([])),
       findByFileAndId: fn(),
       maxVersionNumber: fn(),
       findPendingScan: fn(() => Promise.resolve([])),
@@ -103,6 +114,27 @@ describe('FilesService', () => {
       expect(tx.flush).toHaveBeenCalledTimes(3);
       expect(file.currentVersionId).toBe('ver-1');
       expect(result).toMatchObject({ id: 'file-1', currentVersionId: 'ver-1' });
+    });
+
+    it('con actor null deja createdByUserId/recordedByUserId sin declarar (pre-carga anónima)', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({
+        id: 'file-anon',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.create.mockReturnValue({ id: 'ver-1' });
+
+      await service.createFile(createFileDto, null);
+
+      expect(filesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ actorUserId: undefined }),
+      );
+      expect(fileVersionsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ recordedByUserId: undefined }),
+      );
     });
   });
 
@@ -272,6 +304,7 @@ describe('FilesService', () => {
       const { service, em, filesRepo, fileVersionsRepo } = build();
       filesRepo.findById.mockResolvedValue({
         id: 'file-1',
+        createdByUserId: actor.id,
         currentVersionId: 'ver-1',
         deletedAt: undefined,
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
@@ -282,10 +315,11 @@ describe('FilesService', () => {
         malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
       });
 
-      const result = await service.generateDownloadUrl('file-1');
+      const result = await service.generateDownloadUrl('file-1', actor);
 
       expect(em.fork).toHaveBeenCalled();
-      expect(result.url).toContain('fileId=file-1');
+      expect(result.url).toContain('/common/files/file-1/content');
+      expect(result.url).not.toContain('s3://bucket');
       expect(result.url).toContain('signature=');
       expect(result.expiresAt).toBeInstanceOf(Date);
     });
@@ -294,6 +328,7 @@ describe('FilesService', () => {
       const { service, filesRepo, fileVersionsRepo } = build();
       filesRepo.findById.mockResolvedValue({
         id: 'file-1',
+        createdByUserId: actor.id,
         currentVersionId: 'ver-1',
         deletedAt: undefined,
         lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
@@ -305,7 +340,7 @@ describe('FilesService', () => {
       });
 
       await expect(
-        service.generateDownloadUrl('file-1'),
+        service.generateDownloadUrl('file-1', actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -313,11 +348,119 @@ describe('FilesService', () => {
       const { service, filesRepo } = build();
       filesRepo.findById.mockResolvedValue(null);
       await expect(
-        service.generateDownloadUrl('missing'),
+        service.generateDownloadUrl('missing', actor),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
+
+    it('no emite URL para un actor que sólo conoce el UUID', async () => {
+      const { service, filesRepo } = build();
+      filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'otro',
+        currentVersionId: 'ver-1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+
+      await expect(
+        service.generateDownloadUrl('file-1', actor),
+      ).rejects.toThrow('No tiene acceso a este archivo');
+    });
+
+    it('preserva la descarga de un revisor de evidencia ajena', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.findById.mockResolvedValue({
+        id: 'file-1',
+        createdByUserId: 'otro',
+        currentVersionId: 'ver-1',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+      });
+      fileVersionsRepo.findById.mockResolvedValue({
+        id: 'ver-1',
+        storageUri: 's3://bucket/identity.pdf',
+        malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+      });
+
+      await expect(
+        service.generateDownloadUrl('file-1', {
+          id: 'reviewer-1',
+          roles: ['SECURITY_ADMIN'],
+        }),
+      ).resolves.toMatchObject({
+        url: expect.stringContaining('/common/files/file-1/content'),
+      });
+    });
+
+    /**
+     * 5.1 · la URL no puede publicar dónde viven los bytes.
+     *
+     * El modelo lo prohíbe explícitamente («`storage_uri` es una URI interna
+     * estable, no una URL pública ni firmada», nota `FILE_SECURITY` de
+     * `diagram_02_common.puml`) y la versión anterior la incrustaba entera. Se
+     * prueban las dos formas que emite el sistema, porque cada adaptador filtra
+     * una cosa distinta: S3 el **bucket y la clave del objeto**, el disco local
+     * el **hash del contenido**.
+     */
+    it.each([
+      ['s3', 's3://bucket-clinico/pacientes/2026/estudio-ana.pdf'],
+      [
+        'disco local',
+        'file://local/9f2c1ab34d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8',
+      ],
+    ])(
+      'la URL no revela la ubicación interna del adaptador %s',
+      async (_adapter, storageUri) => {
+        const { service, filesRepo, fileVersionsRepo } = build();
+        filesRepo.findById.mockResolvedValue({
+          id: 'file-1',
+          createdByUserId: actor.id,
+          currentVersionId: 'ver-1',
+          deletedAt: undefined,
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        });
+        fileVersionsRepo.findById.mockResolvedValue({
+          id: 'ver-1',
+          storageUri,
+          malwareScanStatusConceptId: CONCEPTS.SCAN_CLEAN,
+        });
+
+        const { url } = await service.generateDownloadUrl('file-1', actor);
+
+        expect(url).not.toContain(storageUri);
+        expect(url).not.toContain('s3://');
+        expect(url).not.toContain('file://');
+        expect(url).not.toContain('bucket-clinico');
+        expect(url).not.toContain('estudio-ana.pdf');
+        expect(url).not.toContain('9f2c1ab3');
+        // Lo que sí debe llevar: el recurso de la propia API y la firma.
+        expect(url).toBe(
+          `/common/files/file-1/content?versionId=ver-1&expires=${url.split('expires=')[1]?.split('&')[0]}&signature=${url.split('signature=')[1]}`,
+        );
+      },
+    );
   });
+
   describe('listLinkedFiles', () => {
+    /**
+     * BR-11 §1.C: el listado genérico no recibe al actor, así que no puede
+     * evaluar la política de la historia. Los tres tipos clínicos nuevos (P25)
+     * se rechazan acá antes de leer nada; el front los lista por la ruta del
+     * recurso. Sumarlos a un listado sin control ampliaría el IDOR.
+     */
+    it.each([
+      OwnerType.MEDICATION_REQUEST,
+      OwnerType.ALLERGY_INTOLERANCE,
+      OwnerType.ENCOUNTER,
+    ])(
+      'rechaza (403) listar adjuntos de %s por el genérico sin leer nada',
+      async (ownerType) => {
+        const { service, fileLinksRepo } = build();
+        await expect(
+          service.listLinkedFiles({ ownerType, ownerId: 'x-1' }, reviewer),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(fileLinksRepo.findByOwner).not.toHaveBeenCalled();
+      },
+    );
+
     /**
      * El vínculo sobrevive al archivo: `softDelete` es lógico y no toca
      * `file_links`. Sin este filtro la ficha seguiría ofreciendo adjuntos que
@@ -365,14 +508,17 @@ describe('FilesService', () => {
         return Promise.resolve(null);
       });
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      });
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
-      expect(pagina.count).toBe(1);
-      expect(pagina.items[0]!.file.id).toBe('f-vivo');
-      expect(pagina.items[0]!.linkId).toBe('l-1');
+      expect(page.count).toBe(1);
+      expect(page.items[0]!.file.id).toBe('f-vivo');
+      expect(page.items[0]!.linkId).toBe('l-1');
     });
 
     /**
@@ -393,14 +539,17 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      });
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
-      expect(pagina.items[0]!.file.category).toBe(FileCategory.IMAGE);
-      expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
-      expect(pagina.items[0]!.ownerType).toBe(OwnerType.PATIENT);
+      expect(page.items[0]!.file.category).toBe(FileCategory.IMAGE);
+      expect(page.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
+      expect(page.items[0]!.ownerType).toBe(OwnerType.PATIENT);
     });
 
     /**
@@ -420,28 +569,379 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-1',
-      });
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
 
-      expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
-      expect(pagina.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
+      expect(page.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
+      expect(page.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
     });
 
     it('acota siempre por propietario y con tope', async () => {
       const { service, fileLinksRepo } = build();
       fileLinksRepo.findByOwner.mockResolvedValue([]);
 
-      await service.listLinkedFiles({
-        ownerType: OwnerType.PATIENT,
-        ownerId: 'p-7',
-      });
+      await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-7',
+        },
+        reviewer,
+      );
 
-      const [, tipo, owner, tope] = fileLinksRepo.findByOwner.mock.calls[0];
-      expect(tipo).toBe(CONCEPTS.OWNER_PATIENT);
+      const [, ownerType, owner, tope] =
+        fileLinksRepo.findByOwner.mock.calls[0];
+      expect(ownerType).toBe(CONCEPTS.OWNER_PATIENT);
       expect(owner).toBe('p-7');
       expect(typeof tope).toBe('number');
+    });
+
+    /**
+     * 5.2 · AC-5.2-2 — el tipo y el tamaño viajan con cada adjunto.
+     *
+     * Viven en `common.file_versions`, así que hasta ahora la lista los perdía
+     * y la pantalla tenía que bajar los bytes sólo para saber qué eran. Se
+     * comprueba también lo que **no** debe viajar: ni la ubicación interna ni
+     * el hash, aunque estén en la misma fila de la versión.
+     */
+    it('5.2: propaga tipo y tamaño de la versión vigente, sin internals de storage', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        currentVersionId: 'v-1',
+        originalName: 'análisis.pdf',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.findByIds.mockResolvedValue([
+        {
+          id: 'v-1',
+          fileId: 'f-1',
+          mimeType: 'application/pdf',
+          sizeBytes: '20480',
+          storageUri: 's3://bucket-clinico/pacientes/estudio.pdf',
+          objectKey: 'pacientes/estudio.pdf',
+          bucketOrContainer: 'bucket-clinico',
+          contentHash: '9f2c1ab34d5e6f70',
+        },
+      ]);
+
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
+
+      const file = page.items[0]!.file;
+      expect(file).toMatchObject({
+        originalName: 'análisis.pdf',
+        mimeType: 'application/pdf',
+        sizeBytes: 20480,
+      });
+      // El bigint de la versión llega como número, no como texto.
+      expect(typeof file.sizeBytes).toBe('number');
+      const serialized = JSON.stringify(page);
+      for (const internal of [
+        's3://',
+        'bucket-clinico',
+        'pacientes/estudio.pdf',
+        '9f2c1ab34d5e6f70',
+        'storageUri',
+        'objectKey',
+        'contentHash',
+      ]) {
+        expect(serialized).not.toContain(internal);
+      }
+    });
+
+    /**
+     * Diez adjuntos no pueden costar diez lecturas de versión. Las versiones
+     * vigentes de la página se piden **una sola vez**, todas juntas, y la
+     * lectura por id no se usa en este camino.
+     */
+    it('5.2: resuelve las versiones de toda la página en una sola consulta', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      const ids = ['f-1', 'f-2', 'f-3'];
+      fileLinksRepo.findByOwner.mockResolvedValue(
+        ids.map((fileId, i) => ({
+          id: `l-${i}`,
+          fileId,
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        })),
+      );
+      filesRepo.findById.mockImplementation((_em: unknown, id: string) =>
+        Promise.resolve({
+          id,
+          currentVersionId: `v-${id}`,
+          categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+          createdAt: new Date(),
+        }),
+      );
+      fileVersionsRepo.findByIds.mockImplementation(
+        (_em: unknown, orders: string[]) =>
+          Promise.resolve(
+            orders.map((vid) => ({
+              id: vid,
+              fileId: vid.replace(/^v-/, ''),
+              mimeType: 'image/png',
+              sizeBytes: '10',
+            })),
+          ),
+      );
+
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
+
+      expect(fileVersionsRepo.findByIds).toHaveBeenCalledTimes(1);
+      expect(fileVersionsRepo.findByIds.mock.calls[0][1]).toEqual([
+        'v-f-1',
+        'v-f-2',
+        'v-f-3',
+      ]);
+      expect(fileVersionsRepo.findById).not.toHaveBeenCalled();
+      expect(page.items.map((i) => i.file.mimeType)).toEqual([
+        'image/png',
+        'image/png',
+        'image/png',
+      ]);
+    });
+
+    /**
+     * Metadata opcional: un archivo sin versión vigente, o cuya versión no
+     * aparece, sale **sin** tipo ni tamaño. No se inventa un tipo genérico ni
+     * un tamaño cero, que la pantalla leería como dato real.
+     */
+    it('5.2: sin versión vigente resoluble no inventa tipo ni tamaño', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-sin', ownerId: 'p-1', createdAt: new Date() },
+        {
+          id: 'l-2',
+          fileId: 'f-perdida',
+          ownerId: 'p-1',
+          createdAt: new Date(),
+        },
+      ]);
+      filesRepo.findById.mockImplementation((_em: unknown, id: string) =>
+        Promise.resolve({
+          id,
+          currentVersionId: id === 'f-perdida' ? 'v-que-no-existe' : undefined,
+          categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+          lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+          createdAt: new Date(),
+        }),
+      );
+      fileVersionsRepo.findByIds.mockResolvedValue([]);
+
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
+
+      for (const item of page.items) {
+        expect(item.file).not.toHaveProperty('mimeType');
+        expect(item.file).not.toHaveProperty('sizeBytes');
+      }
+      // Sólo se pidió la versión que existía como puntero.
+      expect(fileVersionsRepo.findByIds.mock.calls[0][1]).toEqual([
+        'v-que-no-existe',
+      ]);
+    });
+
+    /**
+     * Falla cerrado. Si la versión resuelta no es de ese archivo —con datos
+     * sanos no ocurre, pero una FK inconsistente existe—, se responde sin
+     * metadata antes que con la de otro archivo.
+     */
+    it('5.2: no usa una versión que pertenece a otro archivo', async () => {
+      const { service, filesRepo, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        currentVersionId: 'v-ajena',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.findByIds.mockResolvedValue([
+        {
+          id: 'v-ajena',
+          fileId: 'f-OTRO',
+          mimeType: 'text/plain',
+          sizeBytes: '99',
+        },
+      ]);
+
+      const page = await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
+
+      expect(page.items[0]!.file).not.toHaveProperty('mimeType');
+      expect(page.items[0]!.file).not.toHaveProperty('sizeBytes');
+    });
+
+    it('5.2: una página sin archivos vivos no consulta versiones', async () => {
+      const { service, fileVersionsRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([]);
+
+      await service.listLinkedFiles(
+        {
+          ownerType: OwnerType.PATIENT,
+          ownerId: 'p-1',
+        },
+        reviewer,
+      );
+
+      // El repositorio cortocircuita con la lista vacía; el servicio igual la
+      // entrega vacía y no inventa ids.
+      expect(fileVersionsRepo.findByIds.mock.calls[0]?.[1] ?? []).toEqual([]);
+    });
+
+    // H4.S1.M1 (N-01): sin actor ni chequeo de propiedad, cualquier sesión
+    // autenticada podía listar los adjuntos de cualquier condición o
+    // procedimiento cambiando `ownerId`. Estos cuatro casos fijan el contrato
+    // nuevo: dueño ve lo suyo, revisor ve todo, ajeno recibe 403 (no una lista
+    // vacía, que sería indistinguible de «sin adjuntos»), y un recurso sin
+    // adjuntos de verdad sigue devolviendo 200 vacío.
+    it('el dueño del archivo ve su propio adjunto', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-1', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-1',
+        createdByUserId: actor.id,
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const page = await service.listLinkedFiles(
+        { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
+        actor,
+      );
+
+      expect(page.count).toBe(1);
+    });
+
+    it('un actor sin rol de revisión y ajeno a los archivos recibe 403, no una lista vacía', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-ajeno', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-ajeno',
+        createdByUserId: 'otro-usuario',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      await expect(
+        service.listLinkedFiles(
+          { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
+          actor,
+        ),
+      ).rejects.toThrow('No tiene acceso a los adjuntos de este recurso');
+    });
+
+    it('un rol de revisión ve los adjuntos aunque no los haya subido', async () => {
+      const { service, filesRepo, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([
+        { id: 'l-1', fileId: 'f-ajeno', ownerId: 'p-1', createdAt: new Date() },
+      ]);
+      filesRepo.findById.mockResolvedValue({
+        id: 'f-ajeno',
+        createdByUserId: 'otro-usuario',
+        categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI,
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+
+      const page = await service.listLinkedFiles(
+        { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
+        reviewer,
+      );
+
+      expect(page.count).toBe(1);
+    });
+
+    it('un recurso sin adjuntos responde 200 vacío, no 403', async () => {
+      const { service, fileLinksRepo } = build();
+      fileLinksRepo.findByOwner.mockResolvedValue([]);
+
+      const page = await service.listLinkedFiles(
+        { ownerType: OwnerType.PATIENT, ownerId: 'p-sin-adjuntos' },
+        actor,
+      );
+
+      expect(page).toEqual({ items: [], count: 0 });
+    });
+  });
+
+  /**
+   * 5.2 · AC-5.2-2 en el alta: la versión 1 recién creada ya está en mano, así
+   * que su tipo y tamaño viajan en la respuesta sin una lectura más.
+   */
+  describe('createFile · metadata (5.2)', () => {
+    it('devuelve tipo y tamaño de la versión recién creada, sin storageUri', async () => {
+      const { service, filesRepo, fileVersionsRepo } = build();
+      filesRepo.create.mockReturnValue({
+        id: 'file-1',
+        originalName: 'doc.pdf',
+        lifecycleStatusConceptId: CONCEPTS.FILE_ACTIVE,
+        createdAt: new Date(),
+      });
+      fileVersionsRepo.create.mockReturnValue({
+        id: 'ver-1',
+        fileId: 'file-1',
+        mimeType: 'application/pdf',
+        sizeBytes: '1024',
+        storageUri: 's3://bucket/doc.pdf',
+      });
+
+      const result = await service.createFile(createFileDto, actor);
+
+      expect(result).toMatchObject({
+        mimeType: 'application/pdf',
+        sizeBytes: 1024,
+      });
+      expect(JSON.stringify(result)).not.toContain('s3://');
+      expect(fileVersionsRepo.findByIds).not.toHaveBeenCalled();
+      expect(fileVersionsRepo.findById).not.toHaveBeenCalled();
     });
   });
 });

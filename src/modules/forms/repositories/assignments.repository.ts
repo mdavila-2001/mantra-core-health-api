@@ -193,14 +193,14 @@ export class AssignmentsRepository {
    * desactivadas o históricas si algún flujo futuro las produce.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtro - Acotaciones opcionales por target, campo o sección.
+   * @param filter - Acotaciones opcionales por target, campo o sección.
    * @param tenantId - Tenant del actor, si el contexto lo fijó.
    * @param limit - Tope de filas (el llamador pide una de más para declarar el recorte).
    * @returns Asignaciones activas en orden de presentación.
    */
   findAssignments(
     em: EntityManager,
-    filtro: {
+    filter: {
       /** Target al que se asignaron los campos. */
       targetResourceConceptId?: string;
       /** Campo asignado. */
@@ -215,15 +215,71 @@ export class AssignmentsRepository {
       FieldAssignments,
       {
         stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
-        ...(filtro.targetResourceConceptId
-          ? { targetResourceConceptId: filtro.targetResourceConceptId }
+        ...(filter.targetResourceConceptId
+          ? { targetResourceConceptId: filter.targetResourceConceptId }
           : {}),
-        ...(filtro.fieldId ? { fieldId: filtro.fieldId } : {}),
-        ...(filtro.sectionId ? { sectionId: filtro.sectionId } : {}),
+        ...(filter.fieldId ? { fieldId: filter.fieldId } : {}),
+        ...(filter.sectionId ? { sectionId: filter.sectionId } : {}),
         $or: [{ tenantId: null }, ...(tenantId ? [{ tenantId }] : [])],
       },
       { orderBy: { ordinal: 'ASC' }, limit },
     );
+  }
+
+  /**
+   * Una asignación por id. Quién puede tocarla lo decide el servicio por el
+   * tenant de la fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la asignación.
+   * @returns La asignación, o `null`.
+   */
+  findAssignmentById(
+    em: EntityManager,
+    id: string,
+  ): Promise<FieldAssignments | null> {
+    return em.findOne(FieldAssignments, { id });
+  }
+
+  /**
+   * Las asignaciones **activas y propias de un tenant** para un target, en su
+   * orden de presentación: lo que el generador reordena (CL-61). Las globales
+   * quedan fuera a propósito: el estándar no se reordena desde un consultorio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param targetResourceConceptId - Target cuyas asignaciones se piden.
+   * @param tenantId - Tenant dueño de las asignaciones.
+   * @returns Asignaciones activas del tenant, ordenadas por `ordinal`.
+   */
+  findActiveOwnAssignmentsForTarget(
+    em: EntityManager,
+    targetResourceConceptId: string,
+    tenantId: string,
+  ): Promise<FieldAssignments[]> {
+    return em.find(
+      FieldAssignments,
+      {
+        targetResourceConceptId,
+        tenantId,
+        stateConceptId: FORMS.ASSIGNMENT_ACTIVE,
+      },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
+   * Todas las asignaciones (activas o no) de un campo: para saber a quién
+   * pertenece un campo antes de dejar editar su definición (CL-69).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param fieldId - Campo cuyas asignaciones se piden.
+   * @returns Asignaciones del campo.
+   */
+  findAssignmentsByField(
+    em: EntityManager,
+    fieldId: string,
+  ): Promise<FieldAssignments[]> {
+    return em.find(FieldAssignments, { fieldId });
   }
 
   /**

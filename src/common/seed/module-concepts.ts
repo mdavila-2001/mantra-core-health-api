@@ -20,16 +20,17 @@ import { ORGANIZATION_EXTENSIONS_CONCEPT_SEEDS } from '../../modules/organizatio
 import { DIAGNOSTIC_UNITS_CONCEPT_SEEDS } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { PHARMACY_CONCEPT_SEEDS } from '../../modules/pharmacy/pharmacy.concepts';
 import { DIAGNOSTICS_CONCEPT_SEEDS } from '../../modules/diagnostics/diagnostics.concepts';
-import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_inventory/pharmacy_inventory.concepts';
-import { INSURANCE_CONCEPT_SEEDS } from '../../modules/insurance/insurance.concepts';
+import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_inventory/domain/pharmacy_inventory.concepts';
+import { INSURANCE_CONCEPT_SEEDS } from '../../modules/insurance/domain/insurance.concepts';
 import { IDENTITY_ASSURANCE_CONCEPT_SEEDS } from '../../modules/identity_assurance/identity_assurance.concepts';
 import { TELEMETRY_CONCEPT_SEEDS } from '../../modules/telemetry/telemetry.concepts';
 import { DELEGATED_ACCESS_CONCEPT_SEEDS } from '../../modules/delegated_access/delegated_access.concepts';
 import { READ_MODELS_CONCEPT_SEEDS } from '../../modules/read_models/read_models.concepts';
 import { INTEGRATION_CONTRACTS_CONCEPT_SEEDS } from '../../modules/integration_contracts/integration_contracts.concepts';
-import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/scheduling.concepts';
+import { SCHEDULING_CONCEPT_SEEDS } from '../../modules/scheduling/domain/scheduling.concepts';
 import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures_perioperative/procedures_perioperative.concepts';
 import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
+import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -74,4 +75,5 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS,
   ...PHARMA_LAB_CONCEPT_SEEDS,
   ...SURVEYS_CONCEPT_SEEDS,
+  ...ALLERGY_CONCEPT_SEEDS,
 ];

@@ -52,12 +52,18 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
+import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
+import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
+import { BoProfessionsSeedService } from './bo-professions-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
@@ -69,6 +75,14 @@ import {
   FieldAssignments,
 } from '../../modules/forms/entities';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PeopleSeedService } from './people-seed.service';
+import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
+import { InsuranceModule } from '../../modules/insurance/insurance.module';
+import { PracticeModule } from '../../modules/practice/practice.module';
+import { ProfilesModule } from '../../modules/profiles/profiles.module';
+import { StickerPackSeedService } from './sticker-pack-seed.service';
+import { Files, FileVersions } from '../../modules/common/entities';
 
 /**
  * Módulo de datos estructurales iniciales. Registra los seeds (catálogo de
@@ -127,18 +141,29 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
       DynamicFieldDefinitions,
       FieldAssignments,
       AuthzPermissions,
+      // Pack de stickers (AG-17): filas de metadatos, sin bytes.
+      Files,
+      FileVersions,
     ]),
     // El seed del administrador reutiliza `IamUsersService.createUser` para que
     // la credencial se hashee con argon2id igual que por API, en vez de duplicar
     // aquí los parámetros del hash.
     IamModule,
+    InsuranceModule,
+    PracticeModule,
+    ProfilesModule,
   ],
   providers: [
     TerminologySeedService,
     DynamicEnumSeedService,
+    PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    LegalEntityTypesSeedService,
+    AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
+    BoProfessionsSeedService,
     BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
     BoliviaFeeScheduleSeedService,
@@ -150,17 +175,27 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
+    PracticeDefaultServicesSeedService,
+    PeopleSeedService,
+    DirectoryNetworksSeedService,
+    StickerPackSeedService,
   ],
   exports: [
     SeedBootstrapService,
     TerminologySeedService,
     DynamicEnumSeedService,
+    PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
+    LegalEntityTypesSeedService,
+    AffiliationCatalogsSeedService,
     BoOccupationsSeedService,
+    BoProfessionsSeedService,
     BoEmployersSeedService,
     BoliviaFacilitiesSeedService,
     BoliviaFeeScheduleSeedService,
@@ -172,8 +207,13 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
+    PracticeDefaultServicesSeedService,
+    PeopleSeedService,
+    DirectoryNetworksSeedService,
+    StickerPackSeedService,
   ],
 })
 export class SeedModule {}

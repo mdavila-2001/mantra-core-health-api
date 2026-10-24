@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   PaymentsReceivedRepository,
   PaymentsMadeRepository,
@@ -64,6 +65,7 @@ export class ReconciliationService {
       throw new PreconditionFailedException(
         'Debe indicar al menos un pago a conciliar',
         {},
+        BillingErrorReason.RECONCILIATION_NO_PAYMENTS_SELECTED,
       );
     }
 
@@ -72,13 +74,18 @@ export class ReconciliationService {
       for (const id of receivedIds) {
         const p = await this.paymentsReceivedRepo.findById(tx, id);
         if (!p)
-          throw new ResourceNotFoundException('Pago recibido no encontrado', {
-            paymentReceivedId: id,
-          });
+          throw new ResourceNotFoundException(
+            'Pago recibido no encontrado',
+            {
+              paymentReceivedId: id,
+            },
+            BillingErrorReason.RECONCILIATION_PAYMENT_RECEIVED_NOT_FOUND,
+          );
         if (p.clearingDocumentId) {
           throw new PreconditionFailedException(
             'El pago recibido ya está conciliado',
             { paymentReceivedId: id },
+            BillingErrorReason.RECONCILIATION_PAYMENT_RECEIVED_ALREADY_CLEARED,
           );
         }
         p.clearingDocumentId = dto.clearingDocumentId;
@@ -91,13 +98,18 @@ export class ReconciliationService {
       for (const id of madeIds) {
         const p = await this.paymentsMadeRepo.findById(tx, id);
         if (!p)
-          throw new ResourceNotFoundException('Pago emitido no encontrado', {
-            paymentMadeId: id,
-          });
+          throw new ResourceNotFoundException(
+            'Pago emitido no encontrado',
+            {
+              paymentMadeId: id,
+            },
+            BillingErrorReason.RECONCILIATION_PAYMENT_MADE_NOT_FOUND,
+          );
         if (p.clearingDocumentId) {
           throw new PreconditionFailedException(
             'El pago emitido ya está conciliado',
             { paymentMadeId: id },
+            BillingErrorReason.RECONCILIATION_PAYMENT_MADE_ALREADY_CLEARED,
           );
         }
         p.clearingDocumentId = dto.clearingDocumentId;

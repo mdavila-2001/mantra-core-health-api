@@ -7,28 +7,57 @@ import { AuditModule } from '../audit/audit.module';
 // porque `MessagingModule` ya exporta `NotificationsService` justamente para
 // esto, y no hay ciclo: `messaging` no sabe nada de `clinical`.
 import { MessagingModule } from '../messaging/messaging.module';
+// ALV-033 (reemplazo de ALV-032) — adjuntar un archivo a un diagnóstico liga
+// contra `FilesService.createLink`, que trae sus propios repos de `common`
+// (versiones, derivados, vínculos): se importa el módulo entero en vez de
+// proveer el servicio suelto, mismo criterio que ya usan `community`, `iam` y
+// `profiles`. `common` no depende de `clinical`, así que no cierra ciclo.
+import { CommonModule } from '../common/common.module';
+// FT-07-R08: `ClinicalRecordAccessGuard` evalúa relación asistencial/acceso
+// clínico contra el PDP de `authz` antes de servir PHI. Import unidireccional
+// (`clinical` → `authz`); `authz` no conoce `clinical`, así que no hay ciclo.
+import { AuthzModule } from '../authz/authz.module';
+// B.3 — el PDF oficial de receta resuelve medicamento, sustancia, vía,
+// unidad, especialidad y departamento emisor por su concepto:
+// `CatalogConceptsRepository.findByIds`, el mismo resolvedor en lote que ya
+// usa `chart` para el PDF del encuentro. Sin ciclo: `terminology` no conoce
+// a `clinical`.
+import { TerminologyModule } from '../terminology/terminology.module';
 import {
   ClinicalEncountersController,
+  ClinicalMedicalAspectsController,
   ClinicalObservationsController,
   ClinicalOrdersController,
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
   ClinicalReadController,
+  ClinicalPrescriptionsController,
+  ClinicalPrescriptionsPublicController,
 } from './controllers';
+import { ClinicalRecordAccessGuard } from './guards';
 import {
   CareEpisodesService,
   EncountersService,
+  EncounterSealService,
+  EncounterSealGuardService,
   ObservationsService,
   ServiceRequestsService,
   DiagnosticReportsService,
   ConditionsService,
   AllergyIntolerancesService,
   MedicationsService,
+  MedicalAspectsService,
   PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
   ClinicalReadService,
   ClinicalNotificationsService,
+  PrescriptionPdfService,
+  // Antiduplicación de estudios (subtarea 3.2, T-26): clase sin estado, mismo
+  // criterio que `DeclaredCoveragesReader` — se provee acá Y directo en
+  // `InsuranceModule` para que el detalle del reclamo la use sin importar
+  // este módulo entero.
+  DuplicateStudyDetector,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -39,8 +68,12 @@ import {
   DiagnosticReportsRepository,
   ConditionsRepository,
   AllergyIntolerancesRepository,
+  // BR-14 (CL-11): lectura de reacciones para el resumen; independiente de
+  // `AllergyIntolerancesRepository` (de M3).
+  AllergyReactionsReadRepository,
   MedicationRequestsRepository,
   MedicationRecordsRepository,
+  PatientReportedHealthStatementsRepository,
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
@@ -53,17 +86,62 @@ import {
 // ciclo: `profiles` ya cuenta lo que un profesional dejó asentado en `clinical`.
 import {
   HealthPractitionerProfilesRepository,
+  PatientPortalProxiesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../profiles/repositories';
+  // B.3 — el PDF oficial de receta necesita el nombre de paciente y
+  // profesional (CTI: `profile_id` es `persons.id`), la especialidad y la
+  // matrícula del prescriptor. Mismo criterio que el resto de este bloque:
+  // clases sin estado por `EntityManager`, sin importar `ProfilesModule`
+  // entero (cerraría el ciclo que el comentario de arriba ya explica).
+  PersonsRepository,
+  PractitionerSpecialtiesRepository,
+  JurisdictionAuthorizationsRepository,
+} from '../profiles/infrastructure/repositories';
+// B.1 — la historia de un menor la lee también quien lo representa, y quién
+// representa a quién lo sabe `profiles`. Mismo criterio que los repositorios de
+// arriba: es una clase sin estado que recibe el `EntityManager` por parámetro,
+// así que se provee suelta. Importar `ProfilesModule` cerraría el ciclo que el
+// comentario anterior ya explica.
+import { PatientRepresentationService } from '../profiles/application/services/patient-representation.service';
 // v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
 // clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
 // sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
 // existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
 // tampoco acá se importa el módulo entero ni se cierra un ciclo.
-import { SchedulingBookingsRepository } from '../scheduling/repositories';
-import { ClinicalPrescriptionsController } from './controllers/clinical-prescriptions.controller';
-import { PrescriptionDocumentsService } from './services/prescription-documents.service';
+import { SchedulingBookingsRepository } from '../scheduling/infrastructure/repositories';
+// ALV-029 — el permiso de lectura también nace de una relación asistencial
+// vigente (no sólo del turno de hoy), y esa tabla vive en `authz`. Mismo
+// criterio de arriba: repo sin estado por `EntityManager`, sin importar el
+// módulo entero ni cerrar ciclo (`authz` no depende de `clinical`).
+import { CareRelationshipsRepository } from '../authz/repositories';
+// C.4 — el sello del encuentro reusa el hash ya calculado por nota y las
+// actividades/archivos de plan de cuidados y documento. Mismo criterio que
+// los repositorios de arriba: son clases sin estado que reciben el
+// `EntityManager` por parámetro. `clinical` NO puede importar `ChartModule`
+// (cerraría un ciclo: `chart` ya importa `clinical`), así que se proveen
+// sueltos los tres repos de `chart` que `EncounterSealService` necesita.
+import {
+  CarePlansRepository,
+  ClinicalNotesRepository,
+  DocumentsRepository,
+} from '../chart/repositories';
+// B.3 — el bloque de cobertura declarada del PDF de receta es la misma
+// lectura que usa `GET /profiles/patients/me`. `DeclaredCoveragesReader` no
+// tiene constructor (clase sin estado, `EntityManager` por parámetro), así
+// que se provee directo acá y en `InsuranceModule` sin importar ese módulo
+// entero — mismo criterio que el resto de este archivo.
+import { DeclaredCoveragesReader } from '../insurance/application/services/declared-coverages-reader';
+// N-04 (M3) — la lectura del resumen clínico asienta su acceso en
+// `audit.data_access_log`. `AuditModule` exporta sólo la cadena WORM de
+// mutaciones (`AuditTrailService`, `AuditLogRepository`, `HistoryRepository`),
+// así que el repositorio del log de acceso se provee acá con el mismo
+// criterio del resto del archivo: clase sin estado por `EntityManager`.
+import { DataAccessLogRepository } from '../audit/repositories';
+// P43 — receta y orden pueden declarar de qué formulario médico cerrado salen.
+// La comprobación vive en `forms` y es una clase sin estado por `EntityManager`:
+// se provee suelta, sin importar `FormsModule` entero, igual que el resto.
+import { FormInstanceOriginValidator } from '../forms/services/form-instance-origin.validator';
 
 /**
  * Módulo Clinical (08): registro clínico nuclear, órdenes y logística del
@@ -76,22 +154,34 @@ import { PrescriptionDocumentsService } from './services/prescription-documents.
     MikroOrmModule.forFeature(Object.values(entities)),
     AuditModule,
     MessagingModule,
+    CommonModule,
+    AuthzModule,
+    TerminologyModule,
   ],
   controllers: [
     ClinicalEncountersController,
+    // D-B (FT-22): `GET|PUT /clinical/me/medical-aspects`. Sin `@Roles`, el
+    // titular sale del vínculo de la cuenta. `clinical.module.spec.ts` exige
+    // que esté acá: importarlo no lo publica.
+    ClinicalMedicalAspectsController,
     ClinicalObservationsController,
     ClinicalOrdersController,
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
     ClinicalReadController,
     ClinicalPrescriptionsController,
+    ClinicalPrescriptionsPublicController,
   ],
   providers: [
     // Repositorios
+    FormInstanceOriginValidator,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
+    PatientPortalProxiesRepository,
+    PatientRepresentationService,
     HealthPractitionerProfilesRepository,
     SchedulingBookingsRepository,
+    CareRelationshipsRepository,
     CareEpisodesRepository,
     AppointmentsRepository,
     EncountersRepository,
@@ -100,26 +190,42 @@ import { PrescriptionDocumentsService } from './services/prescription-documents.
     DiagnosticReportsRepository,
     ConditionsRepository,
     AllergyIntolerancesRepository,
+    AllergyReactionsReadRepository,
     MedicationRequestsRepository,
     MedicationRecordsRepository,
+    PatientReportedHealthStatementsRepository,
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
+    ClinicalNotesRepository,
+    CarePlansRepository,
+    DocumentsRepository,
+    // B.3 — el PDF oficial de receta.
+    PersonsRepository,
+    PractitionerSpecialtiesRepository,
+    JurisdictionAuthorizationsRepository,
+    DeclaredCoveragesReader,
+    DataAccessLogRepository,
     // Servicios
     CareEpisodesService,
     EncountersService,
+    EncounterSealService,
+    EncounterSealGuardService,
     ObservationsService,
     ServiceRequestsService,
     DiagnosticReportsService,
     ConditionsService,
     AllergyIntolerancesService,
     MedicationsService,
+    MedicalAspectsService,
     PrescriptionSignaturePoliciesService,
     ProceduresService,
     ImmunizationsService,
     ClinicalReadService,
     ClinicalNotificationsService,
-    PrescriptionDocumentsService,
+    ClinicalRecordAccessGuard,
+    PrescriptionPdfService,
+    DuplicateStudyDetector,
   ],
   // `procedures_perioperative` los usa para que el caso quirúrgico pueda dejar
   // su diagnóstico y su procedimiento en la historia sin escribir estas tablas:
@@ -128,11 +234,32 @@ import { PrescriptionDocumentsService } from './services/prescription-documents.
   // una reseña sólo vale si hubo atención real, y comprobarlo es leer el
   // encuentro. El repositorio ya estaba en `providers`; sin exportarlo, el
   // módulo que lo inyecta no puede verlo.
+  // `ClinicalReadService` se exporta para `medical_groups` (FT-21): el
+  // selector de diagnóstico del grupo médico necesita el mismo gate de
+  // autorización que ya usa `/clinical/patients/:id/summary`
+  // (`assertPuedeLeerHistoria` — titular, o quien atiende con turno hoy), no
+  // uno propio y más débil. Ver `medical_groups.module.ts`.
+  // `ClinicalRecordAccessGuard` se exporta para que `ChartModule` aplique el
+  // mismo guard sobre `GET /charts/patients/:id/chart` (FT-07-R08): es la
+  // misma pregunta de autorización sobre la misma persona. Exportar el guard
+  // NO alcanza: `@UseGuards(ClinicalRecordAccessGuard)` hace que Nest lo
+  // resuelva en el contenedor de `ChartModule`, y ahí necesita a
+  // `ClinicalReadService` visible como export propio — no como provider
+  // interno de este módulo. Sin esto, el arranque revienta con
+  // `UnknownDependenciesException` apenas `ChartModule` intenta instanciar el
+  // guard (confirmado reproduciendo el arranque real, no sólo leyendo el DI).
+  // `EncounterSealGuardService` se exporta por lo mismo (BR-14/CL-07):
+  // `ChartModule` la usa desde `chart-care-plans.service.ts` y
+  // `chart-documents.service.ts`.
   exports: [
     ConditionsService,
     ProceduresService,
     ServiceRequestsService,
     EncountersRepository,
+    ClinicalReadService,
+    ClinicalRecordAccessGuard,
+    EncounterSealGuardService,
+    DuplicateStudyDetector,
   ],
 })
 export class ClinicalModule {}

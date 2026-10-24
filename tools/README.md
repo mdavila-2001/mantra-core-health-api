@@ -9,7 +9,7 @@ Herramientas de mantenimiento, auditoría y automatización del repositorio.
 - [`catalog/`](./catalog/README.md): componentes de catalog.
 - [`documentation/`](./documentation/README.md): componentes de documentation.
 - [`postman/`](./postman/README.md): componentes de postman.
-- [`redesa/`](./redesa/README.md): componentes de redesa.
+- [`alovida/`](./alovida/README.md): componentes de alovida.
 
 ### Archivos
 

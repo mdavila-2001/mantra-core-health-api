@@ -1,0 +1,18 @@
+{ "head": {
+    "vars": [ "d" , "label" , "note" ]
+  } ,
+  "results": {
+    "bindings": [
+      { 
+        "d": { "type": "uri" , "value": "http://id.nlm.nih.gov/mesh/D003550" } ,
+        "label": { "type": "literal" , "xml:lang": "en" , "value": "Cystic Fibrosis" } ,
+        "note": { "type": "literal" , "xml:lang": "en" , "value": "An autosomal recessive genetic disease of the EXOCRINE GLANDS. It is caused by mutations in the gene encoding the CYSTIC FIBROSIS TRANSMEMBRANE CONDUCTANCE REGULATOR expressed in several organs including the LUNG, the PANCREAS, the BILIARY SYSTEM, and the SWEAT GLANDS. Cystic fibrosis is characterized by epithelial secretory dysfunction associated with ductal obstruction resulting in AIRWAY OBSTRUCTION; chronic RESPIRATORY INFECTIONS; PANCREATIC INSUFFICIENCY; maldigestion; salt depletion; and HEAT PROSTRATION." }
+      } ,
+      { 
+        "d": { "type": "uri" , "value": "http://id.nlm.nih.gov/mesh/D011014" } ,
+        "label": { "type": "literal" , "xml:lang": "en" , "value": "Pneumonia" } ,
+        "note": { "type": "literal" , "xml:lang": "en" , "value": "Infection of the lung often accompanied by inflammation." }
+      }
+    ]
+  }
+}

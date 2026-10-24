@@ -1,0 +1,172 @@
+{
+  "code": "NNAC25_NEU_05_ENCEFALITIS",
+  "name": "Encefalitis (NNAC 2025)",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Neurología (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/967-norma-nacional-de-atencion-clinica-de-neurologia?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 5, pág. 49; niveles de atención III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Encefalitis infecciosa: Puede ser causada por virus, bacterias, hongos, parásitos o protozoos",
+        "Encefalitis autoinmune: Es causada por un ataque del sistema inmunitario al cerebro"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Conteo total y diferencial de glóbulos blancos, conteo de glóbulos rojos, microscopía, cultivo y sensibilidades para bacterias (3)",
+        "Proteínas y glucosa, que debe compararse con una glucosa plasmática tomada justo antes de la PL (3)",
+        "Se debe enviar y almacenar una muestra para investigaciones virológicas u otras investigaciones futuras como se indica en la siguiente sección (3)",
+        "Mycobacterium tuberculosis cuando esté clínicamente indicado (3)",
+        "Estudio de imagen cerebral",
+        "Alteración de la conciencia moderada a severa",
+        "Signos neurológicos focales",
+        "Posturas anormales",
+        "Papiledema",
+        "Crisis epilépticas",
+        "Bradicardia e hipertensión",
+        "Ojos de muñeca",
+        "Inmunocompromiso",
+        "Proceso sistémico",
+        "Trastornos de la coagulación y terapia con anticoagulantes",
+        "Insuficiencia respiratoria"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "G04: Encefalitis, mielitis y encefalomielitis",
+        "G04.0: Encefalitis aguda diseminada",
+        "G04.1: Paraplejía espástica tropical",
+        "G04.2: Meningoencefalitis y meningomielitis bacterianas, no clasificadas en",
+        "G04.8: Otras encefalitis, mielitis y encefalomielitis",
+        "G04.9: Encefalitis, mielitis y encefalomielitis, no especificadas"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 5, pág. 49); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Alteración de la conciencia moderada a severa",
+        "Convulsión",
+        "Letargia",
+        "Coma",
+        "Sospecha diagnóstica es indicación de hospitalización. . Mantenimiento de medidas generales"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

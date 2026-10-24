@@ -14,6 +14,7 @@ import {
   type PermissionScope,
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
+import { AuthzErrorReason } from '../authz.error-reasons';
 
 /** Traducción código de acción → concept id. */
 const ACTION_CONCEPT: Record<PermissionAction, string> = {
@@ -68,9 +69,13 @@ export class AuthzCatalogService {
     return this.em.transactional(async (tx) => {
       const clash = await this.categoriesRepo.findByCode(tx, dto.code);
       if (clash) {
-        throw new ConflictException('Ya existe una categoría con ese código', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe una categoría con ese código',
+          {
+            code: dto.code,
+          },
+          AuthzErrorReason.PERMISSION_CATEGORY_CODE_ALREADY_EXISTS,
+        );
       }
       const category = this.categoriesRepo.create(tx, {
         code: dto.code,
@@ -100,16 +105,24 @@ export class AuthzCatalogService {
     return this.em.transactional(async (tx) => {
       const clash = await this.permissionsRepo.findByCode(tx, dto.code);
       if (clash) {
-        throw new ConflictException('Ya existe un permiso con ese código', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un permiso con ese código',
+          {
+            code: dto.code,
+          },
+          AuthzErrorReason.PERMISSION_CODE_ALREADY_EXISTS,
+        );
       }
       if (dto.categoryId) {
         const category = await this.categoriesRepo.findById(tx, dto.categoryId);
         if (!category) {
-          throw new ConflictException('La categoría referenciada no existe', {
-            categoryId: dto.categoryId,
-          });
+          throw new ConflictException(
+            'La categoría referenciada no existe',
+            {
+              categoryId: dto.categoryId,
+            },
+            AuthzErrorReason.PERMISSION_CATEGORY_NOT_FOUND,
+          );
         }
       }
       const permission = this.permissionsRepo.create(tx, {

@@ -8,6 +8,7 @@ import {
 import type { MedicalVisitors, PharmaLabs } from '../entities';
 import { OrganizationRepository, VisitorsRepository } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /**
  * Puerta única por la que pasan todas las operaciones del carril que dependen de
@@ -20,6 +21,9 @@ import { PHL } from '../pharma_lab.concepts';
  * escribir en once servicios distintos es una regla que en algún momento no se
  * escribe.
  */
+
+/** Roles que, con alcance global, administran todos los laboratorios. */
+const CROSS_LAB_ROLES: readonly string[] = ['PLATFORM_ADMIN', 'BUSINESS_ADMIN'];
 @Injectable()
 export class PharmaLabAccessService {
   /**
@@ -28,6 +32,85 @@ export class PharmaLabAccessService {
    * @param orgRepo - Repositorio del laboratorio y su personal.
    * @param visitorsRepo - Repositorio de visitadores.
    */
+  /**
+   * ¿Administra el actor todos los laboratorios de la red?
+   *
+   * Sólo `SUPERADMIN` y `PLATFORM_ADMIN`/`BUSINESS_ADMIN` con alcance global.
+   * Un código concedido dentro de un tenant (MCH-001, `scopedRoles`) no cuenta,
+   * igual que en `RolesGuard`.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns `true` si puede operar sobre cualquier laboratorio.
+   */
+  administersAllLabs(actor: AuthenticatedUser): boolean {
+    if (actor.roles.includes('SUPERADMIN')) return true;
+    return CROSS_LAB_ROLES.some(
+      (role) =>
+        actor.roles.includes(role) &&
+        !Object.values(actor.scopedRoles ?? {}).some((codes) =>
+          codes.includes(role),
+        ),
+    );
+  }
+
+  /**
+   * Exige que el actor sea miembro de la organización dada (o administre la
+   * red entera). Sirve para registrar un laboratorio, cuando todavía no hay
+   * personal vinculado.
+   *
+   * @param actor - Usuario autenticado.
+   * @param tenantId - Organización del laboratorio.
+   * @param pharmaLabId - Laboratorio, para el detalle del error.
+   * @throws ResourceNotFoundException si no lo es: responder 404 y no 403
+   *   evita confirmar que el laboratorio existe.
+   */
+  assertAdministers(
+    actor: AuthenticatedUser,
+    tenantId: string,
+    pharmaLabId?: string,
+  ): void {
+    if (this.administersAllLabs(actor)) return;
+    if ((actor.tenantIds ?? []).includes(tenantId)) return;
+    throw new ResourceNotFoundException('Laboratorio no encontrado', {
+      pharmaLabId,
+    });
+  }
+
+  /**
+   * Resuelve un laboratorio que el actor administra.
+   *
+   * Antes las rutas de `/pharma-labs/:pharmaLabId` sólo buscaban el
+   * laboratorio: el administrador de uno podía editar el perfil, el personal y
+   * los permisos de cualquier otro con sólo conocer su id.
+   *
+   * Cuenta como propio si el actor es miembro de la organización del
+   * laboratorio **o** personal con vínculo activo: vincular personal
+   * (`linkStaff`) no crea membresía de tenant, así que exigir sólo lo primero
+   * dejaría afuera a colaboradores legítimos.
+   *
+   * @param tx - Transacción activa.
+   * @param pharmaLabId - Laboratorio.
+   * @param actor - Usuario autenticado.
+   * @param options - `active: true` exige además que esté activo.
+   * @returns El laboratorio.
+   */
+  async requireAdministeredLab(
+    tx: EntityManager,
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+    options: { active?: boolean } = {},
+  ): Promise<PharmaLabs> {
+    const lab = await this.requireLab(tx, pharmaLabId);
+    const staff = this.administersAllLabs(actor)
+      ? null
+      : await this.orgRepo.findStaffByUser(tx, pharmaLabId, actor.id);
+    if (staff?.statusConceptId !== PHL.LINK_ACTIVE) {
+      this.assertAdministers(actor, lab.tenantId, pharmaLabId);
+    }
+    if (options.active) return this.requireActiveLab(tx, pharmaLabId);
+    return lab;
+  }
+
   constructor(
     private readonly orgRepo: OrganizationRepository,
     private readonly visitorsRepo: VisitorsRepository,
@@ -48,14 +131,18 @@ export class PharmaLabAccessService {
   ): Promise<PharmaLabs> {
     const lab = await this.orgRepo.findLab(tx, pharmaLabId);
     if (!lab) {
-      throw new ResourceNotFoundException('Laboratorio no encontrado', {
-        pharmaLabId,
-      });
+      throw new ResourceNotFoundException(
+        'Laboratorio no encontrado',
+        { pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_FOUND,
+      );
     }
     if (lab.statusConceptId !== PHL.LAB_ACTIVE) {
-      throw new PreconditionFailedException('El laboratorio no está activo', {
-        pharmaLabId,
-      });
+      throw new PreconditionFailedException(
+        'El laboratorio no está activo',
+        { pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_ACTIVE,
+      );
     }
     return lab;
   }
@@ -78,9 +165,11 @@ export class PharmaLabAccessService {
   ): Promise<PharmaLabs> {
     const lab = await this.orgRepo.findLab(tx, pharmaLabId);
     if (!lab) {
-      throw new ResourceNotFoundException('Laboratorio no encontrado', {
-        pharmaLabId,
-      });
+      throw new ResourceNotFoundException(
+        'Laboratorio no encontrado',
+        { pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_FOUND,
+      );
     }
     return lab;
   }
@@ -110,6 +199,7 @@ export class PharmaLabAccessService {
       throw new ResourceNotFoundException(
         'La cuenta no corresponde a un visitador médico',
         { userId: actor.id },
+        PharmaLabErrorReason.VISITOR_PROFILE_NOT_FOUND,
       );
     }
     return {
@@ -135,6 +225,7 @@ export class PharmaLabAccessService {
       throw new PreconditionFailedException(
         'El visitador no tiene una vinculación activa con un laboratorio',
         { medicalVisitorId: visitor.id },
+        PharmaLabErrorReason.VISITOR_LINK_NOT_ACTIVE,
       );
     }
     const lab = await this.orgRepo.findLab(tx, visitor.pharmaLabId);
@@ -142,6 +233,7 @@ export class PharmaLabAccessService {
       throw new PreconditionFailedException(
         'El laboratorio del visitador no está activo',
         { medicalVisitorId: visitor.id, pharmaLabId: visitor.pharmaLabId },
+        PharmaLabErrorReason.LAB_NOT_ACTIVE,
       );
     }
     return lab;
@@ -166,6 +258,7 @@ export class PharmaLabAccessService {
       throw new ResourceNotFoundException(
         'Visitador no encontrado en el laboratorio',
         { pharmaLabId, medicalVisitorId },
+        PharmaLabErrorReason.VISITOR_NOT_FOUND_IN_LAB,
       );
     }
     return visitor;

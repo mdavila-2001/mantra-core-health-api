@@ -5,12 +5,14 @@ import {
   TelemetryGovernanceController,
   TelemetryConsentController,
   TelemetryEventsController,
+  TelemetryAnalyticsController,
 } from './controllers';
 import {
   TelemetryGovernanceService,
   TelemetryConsentService,
   TelemetryEventsService,
   TelemetryWebAnalyticsService,
+  TelemetryAnalyticsService,
 } from './services';
 import { WEB_ANALYTICS_PORT } from './domain/web-analytics.port';
 import { DisabledWebAnalyticsAdapter } from './infrastructure/disabled-web-analytics.adapter';
@@ -32,6 +34,7 @@ import {
   FunnelDefinitionsRepository,
   FunnelStepsRepository,
   ConversionEventsRepository,
+  TelemetryAnalyticsRepository,
 } from './repositories';
 
 /**
@@ -51,6 +54,7 @@ import {
     TelemetryGovernanceController,
     TelemetryConsentController,
     TelemetryEventsController,
+    TelemetryAnalyticsController,
   ],
   providers: [
     // Repositorios
@@ -68,6 +72,7 @@ import {
     FunnelDefinitionsRepository,
     FunnelStepsRepository,
     ConversionEventsRepository,
+    TelemetryAnalyticsRepository,
     // Analítica web externa: adaptadores concretos y selección por entorno.
     DisabledWebAnalyticsAdapter,
     GoogleAnalyticsHttpClient,
@@ -85,6 +90,7 @@ import {
     TelemetryConsentService,
     TelemetryWebAnalyticsService,
     TelemetryEventsService,
+    TelemetryAnalyticsService,
   ],
   exports: [WEB_ANALYTICS_PORT, TelemetryWebAnalyticsService],
 })

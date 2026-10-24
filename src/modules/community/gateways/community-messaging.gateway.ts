@@ -1,7 +1,8 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -17,6 +18,7 @@ import { ConversationsRepository } from '../repositories';
 // barrel cierra un ciclo que deja `CommunityVisibilityService` `undefined` en
 // tiempo de ejecución (Nest lo reporta como "dependencia en el índice [3]").
 import { CommunityVisibilityService } from '../services/community-visibility.service';
+import { CommunityPresenceService } from '../services/community-presence.service';
 
 /** Un mensaje directo, tal como lo devuelve la lectura REST (`DirectMessageDto`). */
 export interface GatewayMessagePayload {
@@ -28,6 +30,7 @@ export interface GatewayMessagePayload {
   bodyText?: string | null;
   attachmentFileId?: string | null;
   isEdited?: boolean | null;
+  deletedAt?: Date | null;
   sentAt?: Date | null;
 }
 
@@ -44,20 +47,57 @@ export interface GatewayNewConversationPayload {
   peerProfileId: string;
 }
 
+/** `conversation:typing` — alguien está escribiendo (o dejó de hacerlo). F4.1. */
+export interface GatewayTypingPayload {
+  conversationId: string;
+  profileId: string;
+  typing: boolean;
+}
+
+/** `profile:presence` — alguien entró o salió de la mensajería. F4.2. */
+export interface GatewayPresencePayload {
+  profileId: string;
+  online: boolean;
+  lastSeenAt: Date | null;
+}
+
+/** `conversation:message:deleted` — un mensaje se eliminó. F4.5. */
+export interface GatewayMessageDeletedPayload {
+  conversationId: string;
+  messageId: string;
+  deletedAt: Date;
+}
+
+/** `conversation:pinned` — cambió el mensaje fijado. F4.6. */
+export interface GatewayPinnedPayload {
+  conversationId: string;
+  pinnedMessageId: string | null;
+}
+
 /** `client.data` de un socket ya autenticado en este gateway. */
 interface GatewaySocketData {
   user?: AuthenticatedUser;
+  /** Con qué perfiles se unió este socket (bandeja o hilo), para la presencia. */
+  profileIds?: Set<string>;
 }
+
+/** Tope de conversaciones a las que se avisa un cambio de presencia. */
+const CONVERSATIONS_BY_PRESENCE = 100;
 
 /**
  * Empuje en tiempo real de la mensajería directa de `community`.
  *
- * Sólo empuja — servidor a cliente. Enviar y marcar leído siguen siendo REST
- * puro (`CommunityMessagingController`); este gateway no acepta `message:send`
- * a propósito, para no tener una segunda copia de la validación de bloqueos y
+ * Enviar, editar, borrar, fijar y marcar leído siguen siendo REST puro
+ * (`CommunityMessagingController`); este gateway no acepta `message:send` a
+ * propósito, para no tener una segunda copia de la validación de bloqueos y
  * participación que ya vive en `CommunityMessagingService`. Ver
- * `community-messaging.service.ts`, que llama a `emitMessage`/`emitRead`/
- * `emitNewConversation` después de cada commit.
+ * `community-messaging.service.ts`, que llama a `emit*` después de cada commit.
+ *
+ * Lo único que **sí** acepta del cliente son dos cosas que no se persisten
+ * (F4.1 y F4.2 del plan del chat):
+ * - `typing` — se reemite a la sala del hilo como `conversation:typing`.
+ * - `presence:ping` — renueva el «en línea» de los perfiles del socket.
+ * La presencia nace sola con `join:inbox` y muere con la desconexión.
  *
  * Dos salas por perfil:
  * - `conversation:{id}` — el hilo abierto.
@@ -65,8 +105,10 @@ interface GatewaySocketData {
  *   aunque el hilo no esté abierto.
  */
 @Injectable()
-@WebSocketGateway({ cors: { origin: false } })
-export class CommunityMessagingGateway implements OnGatewayConnection {
+@WebSocketGateway() // CORS: lo impone `CorsIoAdapter` en `main.ts`
+export class CommunityMessagingGateway
+  implements OnGatewayInit, OnGatewayDisconnect
+{
   @WebSocketServer()
   private readonly server!: Server;
 
@@ -77,6 +119,7 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
    * @param wsAuth - Verifica el token del handshake.
    * @param conversationsRepo - Participación activa, para `join:conversation`.
    * @param visibility - Titularidad del perfil declarado, para las dos uniones.
+   * @param presence - Quién está en línea (Redis).
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -84,21 +127,61 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
     private readonly wsAuth: WsJwtGuard,
     private readonly conversationsRepo: ConversationsRepository,
     private readonly visibility: CommunityVisibilityService,
+    private readonly presence: CommunityPresenceService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingGateway.name);
   }
 
   /**
-   * Autentica al conectar. Un socket sin token válido nunca llega a poder
-   * unirse a nada — se corta acá, no en cada mensaje.
+   * Autentica **antes** de que exista la conexión, como middleware de
+   * socket.io del namespace (no como `OnGatewayConnection.handleConnection`).
+   *
+   * ## Por qué no alcanza con `handleConnection`
+   *
+   * Nest despacha los `@SubscribeMessage` de un socket apenas socket.io emite
+   * su evento `connection` — no espera a que `handleConnection` (async)
+   * termine. Con la autenticación ahí, un cliente que emitía `join:inbox` en
+   * el mismo tick que el `connect` del lado navegador podía ganarle la
+   * carrera a `await this.wsAuth.authenticate(client)`: el handler corría con
+   * `client.data.user` todavía `undefined`, `usuarioDe()` devolvía nada, y
+   * `handleJoinInbox`/`handleJoinConversation` retornaban en silencio sin
+   * emitir `error` ni loguear nada — el cliente se quedaba esperando un
+   * evento que nunca iba a llegar. Se reprodujo así contra Postgres real
+   * (`community-realtime-chat.int-spec.ts`, intermitente según la carga
+   * concurrente de la corrida) y nunca contra el `EntityManager` simulado:
+   * el doble de `wsAuth.authenticate` resuelve sincrónicamente.
+   *
+   * El middleware de namespace corre durante el *handshake*, antes de que
+   * exista el socket conectado y antes de que socket.io pueda despachar
+   * ningún mensaje suyo: rechazarlo acá dispara `connect_error` del lado
+   * cliente en vez de un `connect` seguido de `disconnect`, pero
+   * `community-realtime-chat.int-spec.ts` ya contemplaba las dos formas.
    */
-  handleConnection(client: Socket): void {
-    try {
-      const user = this.wsAuth.authenticate(client);
-      (client.data as GatewaySocketData).user = user;
-    } catch {
-      client.disconnect(true);
+  afterInit(server: Server): void {
+    server.use((client: Socket, next: (err?: Error) => void) => {
+      this.wsAuth
+        .authenticate(client)
+        .then((user) => {
+          (client.data as GatewaySocketData).user = user;
+          next();
+        })
+        .catch(() => next(new Error('Token inválido o expirado')));
+    });
+  }
+
+  /**
+   * Al desconectar, los perfiles de este socket que no tengan **otro** socket
+   * vivo pasan a desconectados (F4.2). Dos pestañas abiertas son un solo
+   * «en línea»: cerrar una no lo apaga.
+   */
+  async handleDisconnect(client: Socket): Promise<void> {
+    const profiles = (client.data as GatewaySocketData).profileIds;
+    if (!profiles || profiles.size === 0) return;
+    for (const profileId of profiles) {
+      if (this.socketsInRoom(this.profileRoom(profileId)) > 0) continue;
+      const lastSeenAt = await this.presence.markDisconnected(profileId);
+      await this.issuePresence({ profileId, online: false, lastSeenAt });
     }
   }
 
@@ -107,7 +190,7 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { profileId?: string },
   ): Promise<void> {
-    const user = this.usuarioDe(client);
+    const user = this.user(client);
     if (!user || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -117,7 +200,19 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
       client.emit('error', { code: 'NOT_OWN_PROFILE', event: 'join:inbox' });
       return;
     }
-    await client.join(this.salaDePerfil(body.profileId));
+    await client.join(this.profileRoom(body.profileId));
+    this.rememberProfile(client, body.profileId);
+
+    // Entrar a la bandeja es estar en línea. Se avisa sólo cuando de verdad
+    // cambió: renovar una presencia que ya existía no es noticia para nadie.
+    const justArrived = await this.presence.markInLine(body.profileId);
+    if (justArrived) {
+      await this.issuePresence({
+        profileId: body.profileId,
+        online: true,
+        lastSeenAt: new Date(),
+      });
+    }
   }
 
   @SubscribeMessage('join:conversation')
@@ -125,7 +220,7 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() body: { conversationId?: string; profileId?: string },
   ): Promise<void> {
-    const user = this.usuarioDe(client);
+    const user = this.user(client);
     if (!user || !body?.conversationId || !body?.profileId) return;
 
     const em = this.em.fork();
@@ -153,16 +248,73 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
       return;
     }
 
-    await client.join(this.salaDeConversacion(body.conversationId));
+    await client.join(this.conversationRoom(body.conversationId));
+    this.rememberProfile(client, body.profileId);
   }
 
   @SubscribeMessage('leave:conversation')
   async handleLeaveConversation(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { conversationId?: string },
+    @MessageBody() body: { conversationId?: string; profileId?: string },
   ): Promise<void> {
     if (!body?.conversationId) return;
-    await client.leave(this.salaDeConversacion(body.conversationId));
+    await client.leave(this.conversationRoom(body.conversationId));
+    // Salir del hilo es dejar de escribir en él, aunque el cliente no lo diga.
+    if (body.profileId && this.profileSocket(client, body.profileId)) {
+      client
+        .to(this.conversationRoom(body.conversationId))
+        .emit('conversation:typing', {
+          conversationId: body.conversationId,
+          profileId: body.profileId,
+          typing: false,
+        } satisfies GatewayTypingPayload);
+    }
+  }
+
+  /**
+   * F4.1 · «escribiendo…». Sin persistencia: se reemite a los demás del hilo
+   * y nada más. Sólo desde un socket que ya se unió a ese hilo con ese
+   * perfil — no se vuelve a la base por cada tecla.
+   */
+  @SubscribeMessage('typing')
+  handleTyping(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    body: { conversationId?: string; profileId?: string; typing?: boolean },
+  ): void {
+    if (!body?.conversationId || !body?.profileId) return;
+    const room = this.conversationRoom(body.conversationId);
+    if (!client.rooms.has(room)) return;
+    if (!this.profileSocket(client, body.profileId)) return;
+
+    const payload: GatewayTypingPayload = {
+      conversationId: body.conversationId,
+      profileId: body.profileId,
+      typing: body.typing !== false,
+    };
+    client.to(room).emit('conversation:typing', payload);
+  }
+
+  /**
+   * F4.2 · Renueva el «en línea» de los perfiles de este socket. El cliente
+   * lo manda cada 25 s; sin él, la presencia caduca en 60 s.
+   */
+  @SubscribeMessage('presence:ping')
+  async handlePresencePing(@ConnectedSocket() client: Socket): Promise<void> {
+    const profiles = (client.data as GatewaySocketData).profileIds;
+    if (!profiles) return;
+    for (const profileId of profiles) {
+      const returned = await this.presence.markInLine(profileId);
+      // Si había caducado (Redis reinició, o el ping llegó tarde), el
+      // renovar es volver a entrar, y hay que decirlo.
+      if (returned) {
+        await this.issuePresence({
+          profileId,
+          online: true,
+          lastSeenAt: new Date(),
+        });
+      }
+    }
   }
 
   /** Llamado por `CommunityMessagingService.sendMessage` tras el commit. */
@@ -170,25 +322,58 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
     message: GatewayMessagePayload,
     recipientProfileIds: string[],
   ): void {
-    try {
-      const salas = [
-        this.salaDeConversacion(message.conversationId),
-        ...recipientProfileIds.map((id) => this.salaDePerfil(id)),
-      ];
-      this.server.to(salas).emit('conversation:message', message);
-    } catch (error) {
-      this.logger.warn(
-        { operation: 'community.gateway.emitMessage', err: error },
-        'No se pudo empujar el mensaje por WS; el REST ya lo guardó',
-      );
-    }
+    this.issueA(
+      'conversation:message',
+      message,
+      message.conversationId,
+      recipientProfileIds,
+    );
+  }
+
+  /** Llamado por `CommunityMessagingService.editMessage` tras el commit (F4.5). */
+  emitMessageUpdated(
+    message: GatewayMessagePayload,
+    recipientProfileIds: string[],
+  ): void {
+    this.issueA(
+      'conversation:message:updated',
+      message,
+      message.conversationId,
+      recipientProfileIds,
+    );
+  }
+
+  /** Llamado por `CommunityMessagingService.deleteMessage` tras el commit (F4.5). */
+  emitMessageDeleted(
+    payload: GatewayMessageDeletedPayload,
+    recipientProfileIds: string[],
+  ): void {
+    this.issueA(
+      'conversation:message:deleted',
+      payload,
+      payload.conversationId,
+      recipientProfileIds,
+    );
+  }
+
+  /** Llamado al fijar o soltar un mensaje (F4.6). */
+  emitPinned(
+    payload: GatewayPinnedPayload,
+    recipientProfileIds: string[],
+  ): void {
+    this.issueA(
+      'conversation:pinned',
+      payload,
+      payload.conversationId,
+      recipientProfileIds,
+    );
   }
 
   /** Llamado por `CommunityMessagingService.markRead` tras el commit. */
   emitRead(payload: GatewayReadPayload): void {
     try {
       this.server
-        .to(this.salaDeConversacion(payload.conversationId))
+        .to(this.conversationRoom(payload.conversationId))
         .emit('conversation:read', payload);
     } catch (error) {
       this.logger.warn(
@@ -216,7 +401,7 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
           peerProfileId: peerProfileId ?? profileId,
         };
         this.server
-          .to(this.salaDePerfil(profileId))
+          .to(this.profileRoom(profileId))
           .emit('conversation:new', payload);
       }
     } catch (error) {
@@ -227,15 +412,80 @@ export class CommunityMessagingGateway implements OnGatewayConnection {
     }
   }
 
-  private usuarioDe(client: Socket): AuthenticatedUser | undefined {
+  /**
+   * Avisa un cambio de presencia a las salas de las conversaciones en las
+   * que participa el perfil: es donde se mira («en línea» bajo el nombre).
+   * A quien no tiene ese hilo abierto no le sirve de nada.
+   */
+  private async issuePresence(payload: GatewayPresencePayload): Promise<void> {
+    try {
+      const em = this.em.fork();
+      const participations =
+        await this.conversationsRepo.listActiveParticipationsOf(
+          em,
+          payload.profileId,
+          CONCEPTS.STATE_ACTIVE,
+          CONVERSATIONS_BY_PRESENCE,
+        );
+      const rooms = participations.map((participation) =>
+        this.conversationRoom(participation.conversationId),
+      );
+      if (rooms.length === 0) return;
+      this.server.to(rooms).emit('profile:presence', payload);
+    } catch (error) {
+      this.logger.warn(
+        { operation: 'community.gateway.emitPresence', err: error },
+        'No se pudo avisar la presencia por WS',
+      );
+    }
+  }
+
+  /** A la sala del hilo y a la bandeja de cada destinatario; nunca lanza. */
+  private issueA(
+    event: string,
+    payload: unknown,
+    conversationId: string,
+    recipientProfileIds: string[],
+  ): void {
+    try {
+      const rooms = [
+        this.conversationRoom(conversationId),
+        ...recipientProfileIds.map((id) => this.profileRoom(id)),
+      ];
+      this.server.to(rooms).emit(event, payload);
+    } catch (error) {
+      this.logger.warn(
+        { operation: `community.gateway.${event}`, err: error },
+        'No se pudo empujar por WS; el REST ya lo guardó',
+      );
+    }
+  }
+
+  private rememberProfile(client: Socket, profileId: string): void {
+    const data = client.data as GatewaySocketData;
+    data.profileIds ??= new Set<string>();
+    data.profileIds.add(profileId);
+  }
+
+  private profileSocket(client: Socket, profileId: string): boolean {
+    return (
+      (client.data as GatewaySocketData).profileIds?.has(profileId) ?? false
+    );
+  }
+
+  private socketsInRoom(room: string): number {
+    return this.server.sockets.adapter.rooms.get(room)?.size ?? 0;
+  }
+
+  private user(client: Socket): AuthenticatedUser | undefined {
     return (client.data as GatewaySocketData).user;
   }
 
-  private salaDeConversacion(conversationId: string): string {
+  private conversationRoom(conversationId: string): string {
     return `conversation:${conversationId}`;
   }
 
-  private salaDePerfil(profileId: string): string {
+  private profileRoom(profileId: string): string {
     return `profile:${profileId}`;
   }
 }

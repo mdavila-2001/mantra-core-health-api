@@ -92,4 +92,9 @@ export class MyRoleAssignmentResponseDto {
   @ApiPropertyOptional({ nullable: true }) validTo!: Date | null;
   /** Fecha de creación de la vinculación (o de la solicitud). */
   @ApiProperty() createdAt!: Date;
+  /**
+   * Logo de la organización, tomado de su ficha pública
+   * (`community.public_profiles`), o `null` si no tiene una.
+   */
+  @ApiPropertyOptional({ nullable: true }) avatarUrl!: string | null;
 }

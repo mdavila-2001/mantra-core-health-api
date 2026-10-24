@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical_ext`
 
-Referencia exhaustiva de 26 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 27 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
 - **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `PrescriptionFavoritesController`, `ReferralsController`, `VirtualEncountersController`
@@ -34,9 +34,10 @@ Referencia exhaustiva de 26 operación(es) del módulo `clinical_ext`, derivada 
 21. [GET /referrals](#21-get-referrals) — Listar derivaciones de un paciente
 22. [POST /referrals](#22-post-referrals) — Emitir una referencia desde un encuentro
 23. [PATCH /referrals/{id}/respond](#23-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
-24. [POST /virtual-encounters](#24-post-virtual-encounters) — Iniciar una sesión de telesalud
-25. [PATCH /virtual-encounters/{id}/end](#25-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
-26. [PATCH /virtual-encounters/{id}/join](#26-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
+24. [GET /referrals/me](#24-get-referrals-me) — Mis derivaciones
+25. [POST /virtual-encounters](#25-post-virtual-encounters) — Iniciar una sesión de telesalud
+26. [PATCH /virtual-encounters/{id}/end](#26-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
+27. [PATCH /virtual-encounters/{id}/join](#27-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
 
 ---
 
@@ -731,7 +732,7 @@ Content-Type: application/json
 | `ruleTypeConceptId` | No | `string` | formato `uuid` | Tipo de regla (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `severityConceptId` | No | `string` | formato `uuid` | Severidad de la alerta que genera (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `logicJson` | No | `object` | Sin restricción adicional declarada | Lógica de la regla (JSON) | `{}` |
-| `messageTemplate` | No | `string` | Sin restricción adicional declarada | Plantilla del mensaje de alerta | `valor-ejemplo` |
+| `messageTemplate` | No | `string` | longitud máxima 2000 | Plantilla del mensaje de alerta | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -801,6 +802,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El código de regla ya existe | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La lógica de la regla no se puede interpretar | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -936,6 +938,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Regla CDS no encontrada | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La lógica de la regla no se puede interpretar | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1085,6 +1088,7 @@ Ejemplo de error normalizado:
 
 Detectar interacciones medicamentosas al prescribir. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
+Contexto declarado en el controlador: UC-18-04. BR-14 (CL-09): mismo cierre que `cds/evaluate` — rol clínico y acceso al paciente. Antes cualquier sesión autenticada podía chequear interacciones de cualquier paciente.
 
 ### Descripción del sistema
 
@@ -1116,6 +1120,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1174,7 +1179,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "ruleId": "00000000-0000-4000-8000-000000000001"
     }
   ],
-  "count": 1
+  "count": 1,
+  "unevaluatedRuleIds": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -1188,6 +1196,7 @@ Campos de la respuesta:
 | `alerts[].severityConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `alerts[].ruleId` | No | `string` | formato `uuid` | Identificador asociado a rule. | `00000000-0000-4000-8000-000000000001` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Nº de alertas generadas | `1` |
+| `unevaluatedRuleIds` | No | `array<string>` | formato `uuid` | Reglas activas que no se pudieron evaluar porque su lógica no se entiende. Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no puede confundirse con una que no aplica. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1197,7 +1206,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1229,6 +1238,7 @@ Ejemplo de error normalizado:
 
 Evaluar reglas CDS y generar alertas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
+Contexto declarado en el controlador: UC-18-03. BR-14 (CL-09): antes, cualquier sesión autenticada —incluido un `PATIENT`— podía evaluar reglas CDS sobre cualquier paciente. Ahora exige rol clínico y acceso a ESE paciente (turno de hoy, relación asistencial vigente, o titularidad para leer/escribir su propia historia — la misma base que ya usa el resto del expediente, MCH-007).
 
 ### Descripción del sistema
 
@@ -1256,6 +1266,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1326,7 +1337,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "ruleId": "00000000-0000-4000-8000-000000000001"
     }
   ],
-  "count": 1
+  "count": 1,
+  "unevaluatedRuleIds": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -1340,6 +1354,7 @@ Campos de la respuesta:
 | `alerts[].severityConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `alerts[].ruleId` | No | `string` | formato `uuid` | Identificador asociado a rule. | `00000000-0000-4000-8000-000000000001` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Nº de alertas generadas | `1` |
+| `unevaluatedRuleIds` | No | `array<string>` | formato `uuid` | Reglas activas que no se pudieron evaluar porque su lógica no se entiende. Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no puede confundirse con una que no aplica. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1349,7 +1364,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1664,8 +1679,8 @@ Content-Type: application/json
 | `substanceAConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `substanceBConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `severityConceptId` | No | `string` | formato `uuid` | Severidad (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `mechanismText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `managementText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `mechanismText` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `managementText` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -2411,7 +2426,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2480,12 +2495,12 @@ Content-Type: application/json
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 120 | Rótulo del favorito, único dentro de la lista del profesional (p. ej. «ATB post extracción») | `Nombre de ejemplo` |
 | `medicationConceptId` | Sí | `string` | formato `uuid` | Medicamento codificado (terminology.catalog_concepts) | `00000000-0000-4000-8000-000000000001` |
 | `substanceAtcConceptId` | No | `string` | formato `uuid` | Principio activo ATC | `00000000-0000-4000-8000-000000000001` |
-| `doseText` | No | `string` | Sin restricción adicional declarada | Posología por defecto | `valor-ejemplo` |
+| `doseText` | No | `string` | longitud máxima 500 | Posología por defecto | `valor-ejemplo` |
 | `routeConceptId` | No | `string` | formato `uuid` | Vía de administración por defecto | `00000000-0000-4000-8000-000000000001` |
-| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia por defecto | `valor-ejemplo` |
+| `frequencyText` | No | `string` | longitud máxima 500 | Frecuencia por defecto | `valor-ejemplo` |
 | `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad por defecto | `1` |
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad de la cantidad | `00000000-0000-4000-8000-000000000001` |
-| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente por defecto, separadas de la posología | `valor-ejemplo` |
+| `patientInstructionsText` | No | `string` | longitud máxima 2000 | Indicaciones al paciente por defecto, separadas de la posología | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -2565,10 +2580,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 409 | `CONFLICT` | Ya tenés un favorito con ese nombre | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 409 | `CONFLICT` | Ya tiene un favorito con ese nombre | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
+| 422 | `PRECONDITION_FAILED` | La lista de favoritos llegó a su máximo; borre alguno antes de guardar otro | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2665,7 +2680,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
 | 404 | `NOT_FOUND` | Favorito no encontrado | Excepción explícita en src/modules/clinical_ext/services/prescription-favorites.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3044,7 +3059,97 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /virtual-encounters
+## 24. GET /referrals/me
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-referrals`
+- **Nombre:** Mis derivaciones
+- **Operation ID:** `ReferralsController_listMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReferralsController.listMine](../../src/modules/clinical_ext/controllers/referrals.controller.ts)
+
+### Descripción de negocio
+
+Mis derivaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CV-10 — el paciente lee sus propias derivaciones. La persona sale de la cuenta, nunca de un id que el cliente pudiera manipular; por eso pisa el `@Roles` de clase con uno propio en vez de reutilizar `listByPatient`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /referrals/me` en `ReferralsController_listMine`. El controlador delega en `ReferralsService.listMine`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /referrals/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /referrals/me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/referrals/me"
+}
+```
+
+---
+
+## 25. POST /virtual-encounters
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3156,6 +3261,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La sesión virtual pertenece a otra organización. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 403 | `FORBIDDEN` | No participa de este encuentro clínico. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 404 | `NOT_FOUND` | Encuentro clínico no encontrado | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 409 | `CONFLICT` | El encuentro ya tiene una sesión virtual | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3175,7 +3283,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. PATCH /virtual-encounters/{id}/end
+## 26. PATCH /virtual-encounters/{id}/end
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3283,7 +3391,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La sesión virtual pertenece a otra organización. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 403 | `FORBIDDEN` | No participa de este encuentro clínico. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 404 | `NOT_FOUND` | Sesión virtual no encontrada | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 404 | `NOT_FOUND` | Encuentro clínico no encontrado | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La sesión no está en progreso | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3303,7 +3414,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /virtual-encounters/{id}/join
+## 27. PATCH /virtual-encounters/{id}/join
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3341,7 +3452,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `PATIENT`.
 - Deben ser UUID válidos: `id`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3398,8 +3509,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La sesión virtual pertenece a otra organización. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 403 | `FORBIDDEN` | No participa de este encuentro clínico. | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 404 | `NOT_FOUND` | Sesión virtual no encontrada | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
+| 404 | `NOT_FOUND` | Encuentro clínico no encontrado | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no está agendada | Excepción explícita en src/modules/clinical_ext/services/virtual-encounters.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

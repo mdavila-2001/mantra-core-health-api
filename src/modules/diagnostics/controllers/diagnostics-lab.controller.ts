@@ -8,14 +8,17 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
-  Roles,
   requireTenantId,
+  AccessLogged,
   type AuthenticatedUser,
 } from '../../../common';
+import { LabStaffGuard } from '../guards';
 import { DiagnosticsLabService } from '../services';
 import {
   CreateWorkOrderDto,
@@ -35,7 +38,11 @@ import {
  */
 @ApiTags('diagnostics-laboratory')
 @ApiBearerAuth()
-@Roles('CLINICIAN', 'PRACTITIONER')
+// Mismo guard que la recepción: la cola la opera el personal del laboratorio
+// (membresía en un DIAGNOSTIC_CENTER) además de CLINICIAN/PRACTITIONER, que
+// siguen pasando con la misma regla de ámbito. Con `@Roles` en la clase,
+// `RolesGuard` rebotaba a la dueña del laboratorio antes de mirar su membresía.
+@UseGuards(LabStaffGuard)
 @Controller('diagnostics')
 export class DiagnosticsLabController {
   /**
@@ -54,6 +61,7 @@ export class DiagnosticsLabController {
    * pendiente.
    */
   @Get('work-orders')
+  @AccessLogged({ resourceType: 'LAB_WORK_ORDERS' })
   @ApiOperation({
     summary: 'Listar las órdenes de trabajo del laboratorio',
     description: 'Acotado siempre al tenant del contexto.',
@@ -64,6 +72,11 @@ export class DiagnosticsLabController {
     return this.service.listWorkOrders(requireTenantId(), query);
   }
 
+  @Audited({
+    action: 'LAB_WORK_ORDER_CREATED',
+    entity: 'laboratory_work_order',
+    entityId: 'result.id',
+  })
   @Post('work-orders')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir orden de trabajo y desglosar pruebas' })
@@ -75,6 +88,11 @@ export class DiagnosticsLabController {
   }
 
   /** Soporte: abrir corrida de analizador. */
+  @Audited({
+    action: 'ANALYZER_RUN_CREATED',
+    entity: 'analyzer_run',
+    entityId: 'result.id',
+  })
   @Post('analyzer-runs')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -88,6 +106,11 @@ export class DiagnosticsLabController {
   }
 
   /** UC-20-05. */
+  @Audited({
+    action: 'ANALYZER_MESSAGE_INGESTED',
+    entity: 'analyzer_run',
+    entityId: 'param:id',
+  })
   @Post('analyzer-runs/:id/messages')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -102,6 +125,11 @@ export class DiagnosticsLabController {
   }
 
   /** UC-20-06. */
+  @Audited({
+    action: 'LAB_RESULT_VERIFIED',
+    entity: 'observation',
+    entityId: 'param:observationId',
+  })
   @Post('results/:observationId/verifications')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Verificar (técnica/facultativa) un resultado' })

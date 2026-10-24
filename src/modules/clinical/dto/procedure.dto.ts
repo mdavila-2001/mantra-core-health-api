@@ -1,5 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
+
+/** Cuerpo de `POST /clinical/procedures/:id/attachments` (ALV-033, odontología). */
+export class AttachFileToProcedureDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}
 
 /** Cuerpo de `POST /clinical/procedures` (UC-08-12). */
 export class CreateProcedureDto {
@@ -148,9 +161,13 @@ export class CreateProcedureDto {
   /**
    * Valor de follow up text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Seguimiento en texto libre' })
+  @ApiPropertyOptional({
+    description: 'Seguimiento en texto libre',
+    maxLength: 2000,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   followUpText?: string;
 }
 

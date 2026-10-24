@@ -3,6 +3,38 @@
 Fuentes de datos gobernadas, definiciones versionadas con parámetros y columnas, corridas
 parametrizadas con snapshot, programación y distribución periódica, suscripciones y tableros.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/reporting -name '*.controller.ts' | wc -l
+  find src/modules/reporting -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/reporting -name '*.entity.ts' | wc -l
+  find src/modules/reporting -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 12 rutas HTTP, 12 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 12 de 12 archivos `*.entity.ts`): `dashboard_widgets`, `dashboards`, `report_columns`, `report_data_sources`, `report_definitions`, `report_distributions`, `report_executions`, `report_parameters`, `report_schedules`, `report_snapshots`, `report_subscriptions`, `report_versions`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /reporting/data-sources` | REPORTING_ADMIN, DATA_STEWARD | `reporting` |
+| `POST /reporting/definitions` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| `POST /reporting/definitions/:id/versions/publish` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| `POST /reporting/definitions/:id/executions` | REPORTING_ADMIN, REPORT_VIEWER | `reporting` |
+| `POST /reporting/executions/:id/snapshot` | SYSTEM | `reporting` |
+| `POST /reporting/definitions/:id/schedules` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| `POST /reporting/scheduler/tick` | SYSTEM | `reporting` |
+| `POST /reporting/executions/:id/distributions` | SYSTEM, REPORTING_ADMIN | `reporting` |
+| `POST /reporting/schedules/:id/subscriptions` | REPORT_VIEWER, REPORTING_ADMIN | `reporting` |
+| `POST /reporting/dashboards` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| `POST /reporting/executions/:id/retry` | SYSTEM, REPORTING_ADMIN | `reporting` |
+| `POST /reporting/definitions/:id/deprecate` | REPORTING_ADMIN | `reporting` |
+
 ## Casos de uso cubiertos (12)
 
 | UC | Endpoint | Descripción |
@@ -93,22 +125,24 @@ parámetros de ejecución ni direcciones de destinatarios.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=reporting` — 58 pruebas de servicio + delegación del controlador.
+`corepack yarn test src/modules/reporting --runInBand --silent` — 3 suites y 68 pruebas
+aprobadas durante la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real de la consulta**: este módulo gobierna el ciclo de vida de la corrida
-  (`queued → succeeded | failed`), pero no ejecuta SQL. El worker que lo hace llamará a
+  (`queued → succeeded | failed`), pero no ejecuta SQL. El worker que la ejecuta llama a
   `POST /executions/:id/snapshot` con el artefacto ya en el almacén.
 - **Cálculo del cron**: `next_run_at` se recibe en el alta y avanza por intervalo en el tick. La
   resolución de la expresión cron con su zona horaria pertenece al planificador, fuera de la
   transacción.
-- **Envío efectivo**: las distribuciones quedan en `pending`; marcarlas `sent` es de messaging
-  (módulo 35), consumiendo el outbox.
+- **Envío efectivo**: las distribuciones quedan en `pending`; marcarlas `sent` no es de este módulo.
 - **Consent-aware**: el caso de uso pide filtrar por consentimiento. La fuente declara
   `row_security_json` y la definición su permiso; aplicar el filtro pertenece a quien ejecuta la
   consulta.
 - **Limpieza por retención**: `expires_at` se fija en el snapshot; el barrido que borra artefactos
   vencidos pertenece al módulo de almacenamiento.
-- **Outbox**: `ReportPublished`, `ExecutionQueued`, `ReportDistributed` se emitirán cuando exista el
-  módulo 35.
+
+## Revisión ALOVIDA
+
+Las rutas por UUID no comparan el tenant activo con definición, ejecución o programación.

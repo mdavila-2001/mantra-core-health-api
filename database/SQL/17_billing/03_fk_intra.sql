@@ -51,6 +51,18 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_invoices"
+        ADD CONSTRAINT "fk_siat_simulated_invoices_invoice_id" FOREIGN KEY ("invoice_id")
+        REFERENCES "billing"."invoices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_outbox"
+        ADD CONSTRAINT "fk_siat_simulated_outbox_siat_invoice_id" FOREIGN KEY ("siat_invoice_id")
+        REFERENCES "billing"."siat_simulated_invoices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "billing"."budget_lines"
         ADD CONSTRAINT "fk_budget_lines_budget_id" FOREIGN KEY ("budget_id")
         REFERENCES "billing"."budgets" ("id");
@@ -102,4 +114,16 @@ DO $$ BEGIN
     ALTER TABLE "billing"."dunning_items"
         ADD CONSTRAINT "fk_dunning_items_invoice_id" FOREIGN KEY ("invoice_id")
         REFERENCES "billing"."invoices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotations"
+        ADD CONSTRAINT "fk_quotations_service_catalog_id" FOREIGN KEY ("service_catalog_id")
+        REFERENCES "billing"."service_catalog" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "billing"."quotation_installments"
+        ADD CONSTRAINT "fk_quotation_installments_quotation_id" FOREIGN KEY ("quotation_id")
+        REFERENCES "billing"."quotations" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

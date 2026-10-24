@@ -955,10 +955,20 @@ export class IssueSignedUrlDto {
   expiresInSeconds?: number;
 
   /**
-   * Valor de study instance uid mantenido por la instancia.
+   * Study UID declarado por el cliente. **Se acepta y se ignora** (MCH-020).
+   *
+   * La auditoría del acceso dependía de este campo: sin él no se creaba
+   * registro alguno, y con él se auditaba el estudio que el cliente nombrara.
+   * El servidor resuelve ahora las coordenadas DICOM por la jerarquía del
+   * objeto. Se mantiene en el contrato para no romper a quien ya lo envía; no
+   * influye en nada y desaparecerá en una versión próxima.
+   *
+   * @deprecated El estudio lo resuelve el servidor desde el objeto.
    */
   @ApiPropertyOptional({
-    description: 'Study UID si el objeto es DICOM',
+    deprecated: true,
+    description:
+      'Ignorado: el estudio se resuelve desde el objeto en el servidor',
     maxLength: 200,
   })
   @IsOptional()
@@ -978,10 +988,27 @@ export class SignedUrlResponseDto {
   objectVersionId!: string;
 
   /**
-   * Valor de provider uri mantenido por la instancia.
+   * Enlace temporal de descarga (MCH-009).
+   *
+   * Es una ruta de esta misma API con un token firmado, no la URI del
+   * proveedor: sólo sirve para esta versión, este actor y hasta `expiresAt`, y
+   * deja de servir en cuanto el objeto se marca para borrado.
    */
-  @ApiProperty({ description: 'URI del proveedor sobre la que se firma' })
-  providerUri!: string;
+  @ApiProperty({
+    description: 'Ruta de descarga con el token firmado; caduca en expiresAt',
+    example:
+      '/object-storage/versions/6b1e.../content/eyJ2Ijoi....c2lnbmF0dXJl',
+  })
+  url!: string;
+
+  /**
+   * Valor de method mantenido por la instancia.
+   */
+  @ApiProperty({
+    description: 'Único método que el enlace habilita',
+    example: 'GET',
+  })
+  method!: string;
 
   /**
    * Valor de expires at mantenido por la instancia.

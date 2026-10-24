@@ -36,7 +36,7 @@ import type { AnswerTypeCode } from '../surveys.concepts';
  * El lado de las respuestas: el paciente contesta, el profesional dueño lee.
  *
  * **La privacidad es el requisito central de este servicio**, no un añadido.
- * REDESA lo fija en dos frases —«solo podrán ser consultadas por el profesional
+ * ALOVIDA lo fija en dos frases —«solo podrán ser consultadas por el profesional
  * o la organización autorizada» y «no deberán mostrarse públicamente»— y la
  * decisión D-08 del proyecto la confirma. Acá eso se traduce en dos reglas que
  * no tienen excepción: un paciente solo alcanza sus propias invitaciones, y una
@@ -117,7 +117,7 @@ export class SurveysResponsesService {
     const patientProfileId = this.requirePatientProfile(actor);
     const tenantId = requireTenantId();
 
-    return this.em.transactional(async (tx) => {
+    const outcome = await this.em.transactional(async (tx) => {
       const invitation = await this.loadOwnInvitation(
         invitationId,
         patientProfileId,
@@ -133,13 +133,13 @@ export class SurveysResponsesService {
       if (now > invitation.expiresAt) {
         // Se persiste el vencimiento en vez de solo rechazarlo: si no, la
         // invitación seguiría figurando como pendiente en la lista del
-        // paciente para siempre.
+        // paciente para siempre. Por eso NO se lanza acá: `transactional`
+        // revierte ante cualquier excepción y el vencimiento se perdería. La
+        // transacción confirma y el rechazo sale después.
         invitation.statusConceptId = SURVEYS.INVITATION_EXPIRED;
         touch(invitation, actor.id);
-        throw new PreconditionFailedException(
-          'El plazo para responder este cuestionario venció',
-          { invitationId, expiresAt: invitation.expiresAt },
-        );
+        await tx.flush();
+        return { expiredAt: invitation.expiresAt };
       }
 
       const questions = await this.templatesRepo.listQuestions(
@@ -186,6 +186,14 @@ export class SurveysResponsesService {
       );
       return { id: response.id };
     });
+
+    if ('expiredAt' in outcome) {
+      throw new PreconditionFailedException(
+        'El plazo para responder este cuestionario venció',
+        { invitationId, expiresAt: outcome.expiredAt },
+      );
+    }
+    return outcome;
   }
 
   /** Las respuestas recibidas por una plantilla, para su profesional dueño. */
@@ -226,7 +234,6 @@ export class SurveysResponsesService {
     return responses.map((response) => ({
       id: response.id,
       invitationId: response.surveyInvitationId,
-      patientProfileId: response.patientProfileId,
       appointmentBookingId:
         invitationById.get(response.surveyInvitationId)?.appointmentBookingId ??
         '',

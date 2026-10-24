@@ -11,7 +11,7 @@ flowchart TB
     Partner[Sistema externo<br/>proveedor de pago, laboratorio, aseguradora]
   end
 
-  API[["REDESA Health API<br/>(NestJS, 61 módulos, 915 operaciones)"]]
+  API[["ALOVIDA Health API<br/>(NestJS, 61 módulos, 915 operaciones)"]]
 
   Patient -->|HTTPS + JWT| API
   Clinician -->|HTTPS + JWT| API
@@ -48,5 +48,4 @@ cualquier cliente HTTP autenticado.
 No se identificó en esta fase un catálogo verificado de sistemas externos reales conectados
 (nombres de proveedores de pago, laboratorios, aseguradoras concretas) — las conexiones se
 modelan como configuración de dominio (`gateway_connections` y equivalentes), no como
-integraciones fijas en código. Ver `docs/architecture/integration-map.md` §3 y `GAP-010` en
-[análisis de brechas](../reports/documentation-gap-analysis.md).
+integraciones fijas en código. Ver `docs/architecture/integration-map.md` §3.

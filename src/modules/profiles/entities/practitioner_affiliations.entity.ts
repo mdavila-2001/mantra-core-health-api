@@ -82,8 +82,8 @@ export class PractitionerAffiliations {
   /**
    * Cargo ejercido en la institución.
    */
-  @Property({ fieldName: 'role_title', columnType: 'varchar' })
-  roleTitle!: string;
+  @Property({ fieldName: 'role_title', columnType: 'varchar', nullable: true })
+  roleTitle?: string;
 
   /**
    * Servicio o departamento, cuando el cargo no lo dice solo.

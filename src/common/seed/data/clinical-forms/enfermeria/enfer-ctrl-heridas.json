@@ -1,0 +1,123 @@
+{
+  "code": "ENFER_CTRL_HERIDAS",
+  "name": "Curación y control de heridas",
+  "specialty": { "code": "ENFERMERIA", "display": "Enfermería" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Tipo, dimensiones, lecho, exudado, signos de infección y estadio de lesión por presión."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "tipo_herida",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Quirúrgica",
+        "Traumática",
+        "Lesión por presión",
+        "Úlcera venosa",
+        "Pie diabético",
+        "Quemadura"
+      ]
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "upp_estadio",
+      "name": "Estadio",
+      "dataType": "string",
+      "required": true,
+      "options": ["1", "2", "3", "4", "No estadificable"],
+      "showWhen": { "field": "tipo_herida", "equals": "Lesión por presión" }
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "dimensiones",
+      "name": "Largo × ancho × profundidad (cm)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "lecho",
+      "name": "Lecho",
+      "dataType": "string",
+      "required": false,
+      "options": ["Granulación", "Esfacelo", "Necrosis", "Epitelización"]
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "exudado",
+      "name": "Exudado",
+      "dataType": "string",
+      "required": false,
+      "options": ["Ninguno", "Escaso", "Moderado", "Abundante"]
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "infeccion",
+      "name": "Signos de infección",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Calor",
+        "Rubor",
+        "Dolor creciente",
+        "Mal olor",
+        "Secreción purulenta",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: herida",
+      "code": "aposito",
+      "name": "Apósito utilizado",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

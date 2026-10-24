@@ -4,6 +4,43 @@ Agentes con versiones publicables, herramientas con permiso, guardrails que deti
 pasar, workflows con pasos enlazados, ejecuciones con traza paso a paso, aprobaciones humanas y
 escritura de registros con deduplicación.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/automation -name '*.controller.ts' | wc -l
+  find src/modules/automation -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/automation -name '*.entity.ts' | wc -l
+  find src/modules/automation -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 17 rutas HTTP, 16 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 16 de 16 archivos `*.entity.ts`): `agent_guardrails`, `agent_memory`, `agent_run_steps`, `agent_runs`, `agent_tool_bindings`, `agent_tools`, `agent_versions`, `agents`, `automation_approvals`, `automation_triggers`, `guardrail_policies`, `knowledge_sources`, `record_automations`, `workflow_runs`, `workflow_steps`, `workflows`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /automation/agents` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/versions/publish` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/tools` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/versions/:versionId/tool-bindings` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/guardrails` | AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/guardrails` | AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/agents/:id/memory` | SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `agent-catalog` |
+| `POST /automation/workflows` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/triggers` | AUTOMATION_ENGINEER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/triggers/calendar/tick` | SYSTEM | `automation-orchestration` |
+| `POST /automation/workflows/:id/runs` | SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/runs/:workflowRunId/agent-runs` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/agent-runs/:id/steps` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/agent-runs/:id/approvals` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/approvals/:id/decide` | CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/agent-runs/:id/record-automations/:recordAutomationId/execute` | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `automation-orchestration` |
+| `POST /automation/runs/:workflowRunId/finalize` | SYSTEM, PLATFORM_ADMIN | `automation-orchestration` |
+
 ## Casos de uso cubiertos (14)
 
 | UC | Endpoint | Descripción |
@@ -23,7 +60,7 @@ escritura de registros con deduplicación.
 | UC-48-13 | `POST /automation/agent-runs/:id/record-automations/:recordAutomationId/execute` | Escribir con dedupe |
 | UC-48-14 | `POST /automation/runs/:workflowRunId/finalize` | Cerrar con resumen de coste |
 
-15 endpoints para 14 casos de uso: UC-48-05 y UC-48-09 tienen dos cada uno, y UC-48-10 se dispara
+15 endpoints para 14 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 17 rutas, ver «Rutas HTTP y alcance (medido)»): UC-48-05 y UC-48-09 tienen dos cada uno, y UC-48-10 se dispara
 además automáticamente desde el registro del paso.
 
 ## Flujo general
@@ -135,7 +172,7 @@ entre un campo del agente y una columna de una tabla clínica es exactamente lo 
 La validación, en cambio, **ignora lo que no entiende**: validar de más rechazaría escrituras
 legítimas de automatizaciones ya configuradas.
 
-## Permisos
+## Permisos y alcance
 
 `AUTOMATION_ENGINEER` define agentes, herramientas, enlaces, workflows y disparadores.
 `AI_GOVERNANCE_OFFICER` define y adjunta guardrails. `SYSTEM` y `AGENT_RUNTIME` ejecutan: arrancan
@@ -143,6 +180,9 @@ runs, registran pasos, piden aprobación y escriben registros. `CLINICAL_APPROVE
 `OPERATIONAL_APPROVER` deciden. `PLATFORM_ADMIN` cubre todo.
 
 Ninguna ruta es pública.
+
+Los servicios no aplican el alcance de tenant de la identidad a la cadena de
+workflows, runs y automatizaciones de registro.
 
 ## Concurrencia
 
@@ -159,9 +199,9 @@ aprobación —los dos momentos en que una persona tiene que intervenir—. No s
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/automation` — 127 pruebas (26 catálogo + 15 definición +
-39 ejecución + 18 escritura de registros + 13 del repositorio de destino + 16 de delegación de los
-dos controladores).
+`corepack yarn test src/modules/automation --runInBand --silent` — 6 suites y 133 pruebas
+aprobadas durante la revisión. No cubren dos tenants ni los errores HTTP
+catalogados del escritor dinámico.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -172,20 +212,18 @@ dos controladores).
   `tool_call`*. Se expone bajo el `agent_run` que lo ejecuta, que es donde el modelo lo sitúa
   (`agent_run_steps — INSERT`), para que el runtime pueda invocarlo y quede la traza.
 
-## Pendiente
+## Fuera de este módulo
 
 - **La ejecución real del agente**: llamar al modelo, ejecutar la herramienta HTTP contra
   `integrations.integration_endpoints`. Este módulo gobierna, registra y bloquea; el runtime del
   agente ejecuta y va reportando cada paso.
 - **`input_tokens` / `output_tokens` / `cost_amount` del `agent_run`**: los reporta el runtime, que es
   quien habla con el modelo. El cierre suma lo que haya.
-- **`workflow.automation_run_machine` (módulo 32)**: el caso de uso mantiene una máquina de estados
-  paralela en el esquema `workflow`. Aquí el estado vive en `workflow_runs.status_concept_id`;
-  reflejarlo además como agregado gobernado del módulo 32 exige registrar la máquina y decidir su
-  `machine_code`, que el modelo no declara.
+- **`workflow.automation_run_machine` (módulo 32)**: el estado vive en
+  `workflow_runs.status_concept_id`; no se refleja como agregado gobernado del módulo 32 porque el
+  modelo no declara su `machine_code`.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-48-08, 13): aquí lo cubren
-  el `FOR UPDATE` y la búsqueda de run vivo por contexto. Ese esquema es del módulo 56, **sin
-  asignar**.
+  el `FOR UPDATE` y la búsqueda de run vivo por contexto; este módulo no usa ese esquema.
 - **`knowledge_sources`**: la tabla existe en el esquema pero ningún caso de uso del módulo 48 la
   cubre. No se ha inventado un endpoint para ella.
 - **Suscripción real del disparador al bus** (`messaging.domain_events`) y registro del cron en el

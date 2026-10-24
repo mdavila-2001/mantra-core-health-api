@@ -1,0 +1,209 @@
+{
+  "code": "UCI_CTRL_SEPSIS",
+  "name": "Sepsis y shock séptico en cuidados intensivos",
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 2,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Disfunción orgánica por SOFA (publicado, de uso libre), lactato y metas de la primera hora. Ampliación internacional (2026-10-24): los seis componentes de la escala SOFA desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "foco_sepsis",
+      "name": "Foco",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa_respiratorio",
+      "name": "SOFA — respiratorio (PaO₂/FiO₂)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — PaO₂/FiO₂ ≥ 400 mmHg",
+        "1 — PaO₂/FiO₂ 300 a 399 mmHg",
+        "2 — PaO₂/FiO₂ < 300 mmHg",
+        "3 — Con ventilación mecánica y PaO₂/FiO₂ 100 a 199 mmHg",
+        "4 — Con ventilación mecánica y PaO₂/FiO₂ < 100 mmHg"
+      ],
+      "description": "Fuente: escala SOFA (Vincent JL et al. Intensive Care Med. 1996;22:707-10), según el arquetipo openEHR openEHR-EHR-OBSERVATION.sofa_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa_cardiovascular",
+      "name": "SOFA — cardiovascular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — PAM ≥ 70 mmHg",
+        "1 — PAM < 70 mmHg",
+        "2 — Dopamina ≤ 5 µg/kg/min o dobutamina a cualquier dosis",
+        "3 — Dopamina > 5 µg/kg/min, o noradrenalina o adrenalina ≤ 0,1 µg/kg/min",
+        "4 — Noradrenalina o adrenalina > 0,1 µg/kg/min"
+      ],
+      "description": "El arquetipo omite el criterio de dopamina > 15 µg/kg/min del puntaje 4 de la publicación original. Fuente: escala SOFA (Vincent JL et al. Intensive Care Med. 1996;22:707-10), según el arquetipo openEHR openEHR-EHR-OBSERVATION.sofa_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa_neurologico",
+      "name": "SOFA — sistema nervioso (Glasgow)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Glasgow 15",
+        "1 — Glasgow 13 a 14",
+        "2 — Glasgow 10 a 12",
+        "3 — Glasgow 6 a 9",
+        "4 — Glasgow < 6"
+      ],
+      "description": "Fuente: escala SOFA (Vincent JL et al. Intensive Care Med. 1996;22:707-10), según el arquetipo openEHR openEHR-EHR-OBSERVATION.sofa_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa_renal",
+      "name": "SOFA — renal (creatinina o diuresis)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Creatinina < 1,2 mg/dL",
+        "1 — Creatinina 1,2 a 1,9 mg/dL",
+        "2 — Creatinina 2,0 a 3,4 mg/dL",
+        "3 — Creatinina 3,5 a 4,9 mg/dL o diuresis < 500 mL/24 h",
+        "4 — Creatinina ≥ 5,0 mg/dL o diuresis < 200 mL/24 h"
+      ],
+      "description": "Fuente: escala SOFA (Vincent JL et al. Intensive Care Med. 1996;22:707-10), según el arquetipo openEHR openEHR-EHR-OBSERVATION.sofa_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa_hepatico",
+      "name": "SOFA — hepático (bilirrubina)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Bilirrubina < 1,2 mg/dL",
+        "1 — Bilirrubina 1,2 a 1,9 mg/dL",
+        "2 — Bilirrubina 2,0 a 5,9 mg/dL",
+        "3 — Bilirrubina 6,0 a 11,9 mg/dL",
+        "4 — Bilirrubina ≥ 12,0 mg/dL"
+      ],
+      "description": "Fuente: escala SOFA (Vincent JL et al. Intensive Care Med. 1996;22:707-10), según el arquetipo openEHR openEHR-EHR-OBSERVATION.sofa_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa_coagulacion",
+      "name": "SOFA — coagulación (plaquetas)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Plaquetas ≥ 150 000/µL",
+        "1 — Plaquetas < 150 000/µL",
+        "2 — Plaquetas < 100 000/µL",
+        "3 — Plaquetas < 50 000/µL",
+        "4 — Plaquetas < 20 000/µL"
+      ],
+      "description": "Fuente: escala SOFA (Vincent JL et al. Intensive Care Med. 1996;22:707-10), según el arquetipo openEHR openEHR-EHR-OBSERVATION.sofa_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "sofa",
+      "name": "Puntaje SOFA",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "lactato",
+      "name": "Lactato (mmol/L)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "presion_arterial_media",
+      "name": "Presión arterial media (mmHg)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "primera_hora",
+      "name": "Medidas de la primera hora",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemocultivos antes del antibiótico",
+        "Antibiótico en la primera hora",
+        "Cristaloides 30 mL/kg",
+        "Vasopresor si PAM < 65"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: sepsis",
+      "code": "diuresis",
+      "name": "Diuresis (mL/kg/h)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "PAM ≥ 65 mmHg",
+        "Lactato en descenso",
+        "Diuresis ≥ 0,5 mL/kg/h",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

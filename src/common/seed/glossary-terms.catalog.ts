@@ -1,14 +1,15 @@
 import type { GlossaryRelationType } from '../../modules/terminology/glossary.constants';
 
 /**
- * El catálogo curado del glosario médico (v1) — 64 términos.
+ * El catálogo curado del glosario médico (v1) — 80 términos (77 existentes
+ * más tres subdivisiones anatómicas del encéfalo).
  *
  * > Este es un catálogo inicial, curado y revisado médicamente a mano, no una
  * > importación de una nomenclatura externa (no hubo para este carril una carga
  * > masiva de CIE-10/SNOMED/LOINC disponible). Cada término se eligió por ser un
  * > concepto de alta frecuencia que un clínico o un paciente buscarían
  * > razonablemente en un consultorio ambulatorio / atención primaria, repartido
- * > deliberadamente entre las 11 categorías exigidas para que ninguna quede vacía
+ * > deliberadamente entre las 12 categorías exigidas para que ninguna quede vacía
  * > en el grid. Toda definición es texto original, no extraído de otra fuente. El
  * > texto en inglés sólo se escribió donde efectivamente se produjo una
  * > traducción de calidad de revisor (ver notas por término más abajo) — el
@@ -21,17 +22,33 @@ import type { GlossaryRelationType } from '../../modules/terminology/glossary.co
  * > datos de acá no necesita cambiar para absorberlos, sólo el paso de
  * > seed/import.
  *
+ * ## FND-25-01 — categoría `other` («Otros términos»)
+ *
+ * El pedido literal del carril («PROCEDIMIENTOS MÉDICOS, TRATAMIENTOS,
+ * ENFERMEDADES, OTROS TÉRMINOS, MEDICAMENTOS») no tenía equivalente para
+ * «OTROS TÉRMINOS» en las 11 categorías clínicas que trajo la reconstrucción
+ * de esta pantalla — un vacío de fidelidad al spec. Se agregaron 5 términos
+ * administrativos/legales de la atención (consentimiento informado, historia
+ * clínica, alta médica, receta médica, interconsulta): no son clínicos en sí
+ * mismos —no llevan dosis, diagnóstico ni indicación— así que no encajaban en
+ * ninguna de las 11, y son terminología real y de uso corriente en salud, no
+ * inventada para llenar un cupo.
+ *
+ * ## FND-25-02 — ficha de medicamento con datos reales
+ *
+ * Los 6 términos de `pharmacology` ahora declaran `drugFacts`: principios
+ * activos, forma farmacéutica, vía y fabricante copiados verbatim de un
+ * producto real del FDA NDC Directory ya importado (135 002 filas,
+ * `code_system=ndc`). Ver el docblock de `GlossaryTermSeed.drugFacts` para la
+ * regla de selección determinista. Posología, dosis y contraindicaciones
+ * siguen sin aparecer, a propósito — ninguna fuente importada las cubre
+ * (P-25-1, ver `glossary-drug-facts.ts` en el frontend).
+ *
  * ## Nota de transcripción — una relación huérfana en la fuente
  *
- * El término 13 (`hipertension-arterial`) declara en la fuente curada la
- * relación `PROCEDURE->control-de-signos-vitales`, pero ningún término de los
- * 64 tiene ese slug (el más cercano es `signos-vitales`, un concepto distinto:
- * el valor del signo vital, no el procedimiento de tomarlo). Se transcribió la
- * fuente verbatim en vez de inventar el término faltante o redirigir a un slug
- * parecido; `GlossarySeedService` valida cada relación contra el conjunto de
- * slugs conocido y **omite** —con advertencia en el log— cualquiera cuyo
- * destino no resuelva, en vez de fallar el seed completo o fabricar contenido.
- * Ver `CARRIL_REPORT.md` para el seguimiento de esta discrepancia de la fuente.
+ * La referencia `PROCEDURE->control-de-signos-vitales` de hipertensión ahora
+ * resuelve a una ficha propia. Se conserva separada de `signos-vitales`, que
+ * nombra los parámetros medidos y no el procedimiento de medirlos.
  *
  * ## Nota de transcripción — conteo de contenido en inglés
  *
@@ -74,9 +91,62 @@ export interface GlossaryTermSeed {
     readonly type: GlossaryRelationType;
     readonly targetSlug: string;
   }[];
+  /**
+   * Ficha de medicamento (FND-25-02), sólo en los 6 términos de
+   * `pharmacology`. Los cuatro campos son texto **verbatim** de un producto
+   * real del FDA National Drug Code (NDC) Directory ya importado
+   * (`code_system=ndc`, `tools/terminology-import/import-ndc.mjs`) — no texto
+   * de autor como el resto de este catálogo.
+   *
+   * ## Regla de selección (determinista, no editorial)
+   *
+   * Para cada principio activo se buscó, entre los productos NDC con
+   * `active_ingredients` de **un solo** componente cuyo nombre coincide
+   * (case-insensitive) con el nombre genérico/DCI del término, y cuyo
+   * `display` también contiene ese nombre (i.e. comercializado bajo su
+   * nombre genérico, no una marca), el de **código NDC alfabéticamente
+   * menor**. Es una regla mecánica y reproducible — no "cuál fabricante
+   * representa mejor a este genérico", que sí sería una decisión editorial
+   * (la que la ronda anterior de este carril evitó tomar):
+   *
+   * ```sql
+   * SELECT cc.code, cc.display, cp.value_json, cp2.value_json AS manufacturer,
+   *        cp3.value_json AS dosage_form, cp4.value_json AS route
+   * FROM terminology.catalog_concepts cc
+   * JOIN terminology.code_system_versions v ON v.id = cc.code_system_version_id
+   * JOIN terminology.code_systems cs ON cs.id = v.code_system_id
+   * JOIN terminology.concept_properties cp
+   *   ON cp.concept_id = cc.id AND cp.property_code = 'active_ingredients'
+   * LEFT JOIN terminology.concept_properties cp2
+   *   ON cp2.concept_id = cc.id AND cp2.property_code = 'manufacturer'
+   * LEFT JOIN terminology.concept_properties cp3
+   *   ON cp3.concept_id = cc.id AND cp3.property_code = 'dosage_form'
+   * LEFT JOIN terminology.concept_properties cp4
+   *   ON cp4.concept_id = cc.id AND cp4.property_code = 'route'
+   * WHERE cs.internal_code = 'ndc'
+   *   AND jsonb_array_length(cp.value_json) = 1
+   *   AND lower(cp.value_json->0->>'name') = lower(:genericName)
+   *   AND position(lower(:genericNameFirstWord) IN lower(cc.display)) > 0
+   *   AND cp4.value_json IS NOT NULL
+   * ORDER BY cc.code
+   * LIMIT 1;
+   * ```
+   *
+   * corrida el 2026-09-05 contra `mantra_redesa_health_e2e` para cada uno de
+   * los 6 principios activos; el `sourceNdc` de cada término de abajo es el
+   * `cc.code` que devolvió.
+   */
+  readonly drugFacts?: {
+    /** `product_ndc` real del producto elegido, para trazabilidad. */
+    readonly sourceNdc: string;
+    readonly activeIngredients: readonly string[];
+    readonly dosageForm: string;
+    readonly route: readonly string[];
+    readonly manufacturer: string;
+  };
 }
 
-/** Los 64 términos curados, en el orden del catálogo fuente. */
+/** Los términos curados, en el orden del catálogo fuente. */
 export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // --- Anatomía (glossary-category-anatomy) ---------------------------------
   // Referencias editoriales para la revisión de estas definiciones (redacción
@@ -87,6 +157,16 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // Riñones: https://www.ncbi.nlm.nih.gov/books/NBK482385/
   // Encéfalo: https://www.ncbi.nlm.nih.gov/books/NBK542179/
   // Columna: https://www.ncbi.nlm.nih.gov/books/NBK279468/
+  // Estómago: https://www.ncbi.nlm.nih.gov/books/NBK482334/
+  // Páncreas: https://www.ncbi.nlm.nih.gov/books/NBK532912/
+  // Piel: https://www.ncbi.nlm.nih.gov/books/NBK441980/
+  // Médula espinal: https://www.ncbi.nlm.nih.gov/books/NBK544267/
+  // Intestino: https://www.ncbi.nlm.nih.gov/books/NBK279303/
+  // Vasos sanguíneos: https://www.ncbi.nlm.nih.gov/books/NBK470401/
+  // Hueso: https://www.ncbi.nlm.nih.gov/books/NBK279149/
+  // Cerebro: https://www.ncbi.nlm.nih.gov/books/NBK549789/
+  // Cerebelo: https://www.ncbi.nlm.nih.gov/books/NBK538167/
+  // Tronco encefálico: https://www.ncbi.nlm.nih.gov/books/NBK544297/
   {
     key: 'corazon',
     slug: 'corazon',
@@ -158,9 +238,8 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     slug: 'encefalo',
     categoryKey: 'anatomy',
     tagKeys: ['neurologic'],
-    enDisplay: 'Brain',
-    esName: 'Encéfalo (cerebro)',
-    esSynonyms: ['Cerebro'],
+    enDisplay: 'Encephalon',
+    esName: 'Encéfalo',
     clinicalDefinitionEs:
       'Conjunto de estructuras del sistema nervioso central alojadas dentro del cráneo: cerebro, diencéfalo, cerebelo y tronco encefálico. Integra información sensorial, planifica y coordina movimientos, sustenta funciones cognitivas y participa en la regulación de funciones autónomas esenciales. Se continúa con la médula espinal a través del foramen magno; cerebro es una parte del encéfalo y no un sinónimo anatómico de todo el conjunto.',
     plainSummaryEs:
@@ -180,6 +259,155 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es la estructura de huesos y discos que recorre la espalda. Sostiene el tronco, permite inclinarse y girar, y rodea y protege la médula espinal.',
     relations: [],
+  },
+  {
+    key: 'estomago',
+    slug: 'estomago',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Stomach',
+    esName: 'Estómago',
+    esSynonyms: ['Víscera gástrica'],
+    clinicalDefinitionEs:
+      'Órgano muscular hueco del tubo digestivo, situado entre el esófago y el duodeno. Sus regiones anatómicas incluyen cardias, fondo, cuerpo y porción pilórica; almacena temporalmente los alimentos, los mezcla con secreciones gástricas y regula su paso al intestino delgado.',
+    plainSummaryEs:
+      'Es una bolsa muscular del abdomen que recibe los alimentos, los mezcla con jugos digestivos y los libera poco a poco hacia el intestino.',
+    relations: [{ type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' }],
+  },
+  {
+    key: 'pancreas',
+    slug: 'pancreas',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive', 'endocrine'],
+    enDisplay: 'Pancreas',
+    esName: 'Páncreas',
+    clinicalDefinitionEs:
+      'Glándula alargada situada detrás del estómago, con funciones exocrinas y endocrinas. El tejido acinar libera enzimas digestivas al duodeno; los islotes pancreáticos secretan hormonas, entre ellas insulina y glucagón, que participan en la regulación de la glucosa.',
+    plainSummaryEs:
+      'Es una glándula del abdomen que ayuda a digerir los alimentos y produce hormonas que regulan el azúcar en la sangre.',
+    relations: [{ type: 'DISEASE', targetSlug: 'diabetes-mellitus-tipo-2' }],
+  },
+  {
+    key: 'piel',
+    slug: 'piel',
+    categoryKey: 'anatomy',
+    tagKeys: ['dermatologic'],
+    enDisplay: 'Skin',
+    esName: 'Piel',
+    clinicalDefinitionEs:
+      'Órgano que cubre la superficie externa del cuerpo y está formado por epidermis y dermis, sobre el tejido subcutáneo. Actúa como barrera, participa en la percepción sensorial y contribuye a la regulación térmica y al equilibrio de agua.',
+    plainSummaryEs:
+      'Es la cubierta del cuerpo: protege frente al entorno, permite sentir y ayuda a regular la temperatura.',
+    relations: [],
+  },
+  {
+    key: 'medula-espinal',
+    slug: 'medula-espinal',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Spinal cord',
+    esName: 'Médula espinal',
+    clinicalDefinitionEs:
+      'Estructura del sistema nervioso central contenida en el conducto vertebral, continua con el tronco encefálico y organizada en segmentos cervicales, torácicos, lumbares y sacros. Conduce señales entre el encéfalo y el cuerpo e integra circuitos reflejos; los nervios espinales emergen de sus segmentos.',
+    plainSummaryEs:
+      'Es un cordón de tejido nervioso dentro de la columna que comunica el encéfalo con el cuerpo y participa en algunos reflejos.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'columna-vertebral' },
+      { type: 'RELATED_TERM', targetSlug: 'encefalo' },
+    ],
+  },
+  {
+    key: 'intestino',
+    slug: 'intestino',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Intestine',
+    esName: 'Intestino',
+    clinicalDefinitionEs:
+      'Porción del tubo digestivo que comprende el intestino delgado —duodeno, yeyuno e íleon— y el intestino grueso —ciego, colon y recto—. El intestino delgado completa gran parte de la digestión y absorbe nutrientes; el grueso absorbe agua y electrolitos y conduce las heces hacia su eliminación.',
+    plainSummaryEs:
+      'Es la parte del aparato digestivo que continúa después del estómago. Absorbe nutrientes y agua, y conduce los residuos para su eliminación.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'estomago' },
+      { type: 'ANATOMY', targetSlug: 'pancreas' },
+      { type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' },
+    ],
+  },
+  {
+    key: 'vasos-sanguineos',
+    slug: 'vasos-sanguineos',
+    categoryKey: 'anatomy',
+    tagKeys: ['cardiovascular'],
+    enDisplay: 'Blood vessels',
+    esName: 'Vasos sanguíneos',
+    esSynonyms: ['Sistema vascular sanguíneo'],
+    clinicalDefinitionEs:
+      'Conductos del sistema circulatorio que incluyen arterias, arteriolas, capilares, vénulas y venas. Las arterias distribuyen la sangre desde el corazón; en los capilares ocurre el intercambio de gases, nutrientes y productos de desecho con los tejidos, y las venas la devuelven al corazón.',
+    plainSummaryEs:
+      'Son los conductos por los que circula la sangre: las arterias la llevan desde el corazón, los capilares permiten intercambios con los tejidos y las venas la devuelven.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'corazon' },
+      { type: 'DISEASE', targetSlug: 'hipertension-arterial' },
+    ],
+  },
+  {
+    key: 'huesos',
+    slug: 'huesos',
+    categoryKey: 'anatomy',
+    tagKeys: ['musculoskeletal'],
+    enDisplay: 'Bones',
+    esName: 'Huesos',
+    esSynonyms: ['Tejido óseo'],
+    clinicalDefinitionEs:
+      'Estructuras de tejido conjuntivo mineralizado que, junto con el cartílago, forman el esqueleto. Proporcionan soporte y puntos de inserción muscular, protegen órganos, alojan médula ósea y participan en el almacenamiento y regulación de minerales como calcio y fosfato.',
+    plainSummaryEs:
+      'Son las estructuras rígidas del esqueleto: sostienen el cuerpo, protegen órganos, ayudan al movimiento y contienen médula ósea.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'columna-vertebral' }],
+  },
+  {
+    key: 'cerebro',
+    slug: 'cerebro',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Cerebrum',
+    esName: 'Cerebro (hemisferios cerebrales)',
+    esSynonyms: ['Hemisferios cerebrales'],
+    clinicalDefinitionEs:
+      'Parte principal y de mayor volumen del encéfalo, formada por dos hemisferios unidos por comisuras. La corteza cerebral y las estructuras subcorticales participan en la percepción consciente, el pensamiento, la memoria, el lenguaje y el control del movimiento voluntario; el cerebro es una parte del encéfalo, que también comprende diencéfalo, cerebelo y tronco encefálico.',
+    plainSummaryEs:
+      'Es la parte más grande del encéfalo, formada por dos hemisferios. Participa en el pensamiento, la memoria, el lenguaje, la percepción y los movimientos voluntarios.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'encefalo' }],
+  },
+  {
+    key: 'cerebelo',
+    slug: 'cerebelo',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Cerebellum',
+    esName: 'Cerebelo',
+    clinicalDefinitionEs:
+      'Estructura del encéfalo situada en la fosa craneal posterior, detrás del tronco encefálico. Sus circuitos integran información sensorial y señales de otras regiones para ajustar la coordinación, precisión y aprendizaje de movimientos; también participa en algunas funciones cognitivas.',
+    plainSummaryEs:
+      'Es una parte del encéfalo que ayuda a coordinar y ajustar los movimientos y participa en el aprendizaje motor.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'encefalo' }],
+  },
+  {
+    key: 'tronco-encefalico',
+    slug: 'tronco-encefalico',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Brainstem',
+    esName: 'Tronco encefálico',
+    esSynonyms: ['Tallo cerebral'],
+    clinicalDefinitionEs:
+      'Parte del encéfalo que conecta los hemisferios cerebrales y el cerebelo con la médula espinal. Está formado por mesencéfalo, puente y bulbo raquídeo; contiene vías nerviosas y núcleos que participan, entre otras funciones, en la respiración, el estado de alerta y el control cardiovascular.',
+    plainSummaryEs:
+      'Es la estructura que conecta el encéfalo con la médula espinal y contiene centros nerviosos importantes para funciones automáticas, como respirar.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'encefalo' },
+      { type: 'ANATOMY', targetSlug: 'cerebelo' },
+      { type: 'ANATOMY', targetSlug: 'medula-espinal' },
+    ],
   },
 
   // --- Signos y síntomas (glossary-category-signs-symptoms) ----------------
@@ -212,7 +440,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: ['infectious'],
     enDisplay: 'Fever',
     esName: 'Fiebre',
-    esSynonyms: ['Pirexia', 'Hipertermia'],
+    esSynonyms: ['Pirexia'],
     clinicalDefinitionEs:
       'Elevación de la temperatura corporal central por encima de 38.0 °C, generalmente mediada por pirógenos como respuesta inmunológica a una infección u otro proceso inflamatorio.',
     clinicalDefinitionEn:
@@ -305,10 +533,6 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       'When your blood pressure stays higher than normal all the time.',
     relations: [
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      // Referencia huérfana de la fuente curada: ningún término tiene el slug
-      // `control-de-signos-vitales` (ver nota de cabecera). Se deja declarada
-      // tal como está en la fuente; el seed la omite y advierte en vez de
-      // fallar o inventar el destino.
       { type: 'PROCEDURE', targetSlug: 'control-de-signos-vitales' },
     ],
   },
@@ -351,7 +575,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'espirometria' },
       { type: 'TREATMENT', targetSlug: 'oxigenoterapia' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
     ],
   },
   {
@@ -368,7 +592,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'radiografia-de-torax' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'fiebre' },
+      { type: 'SYMPTOM', targetSlug: 'fiebre' },
     ],
   },
   {
@@ -391,8 +615,8 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'ecocardiograma' },
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'electrocardiograma' },
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
-      { type: 'RELATED_TERM', targetSlug: 'edema' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'edema' },
     ],
   },
   {
@@ -533,7 +757,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'hemograma-completo',
     slug: 'hemograma-completo',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'lab',
     tagKeys: [],
     enDisplay: 'Complete blood count',
     esName: 'Hemograma completo',
@@ -547,7 +771,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'glucemia-en-ayunas',
     slug: 'glucemia-en-ayunas',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'lab',
     tagKeys: ['endocrine'],
     enDisplay: 'Fasting blood glucose',
     esName: 'Glucemia en ayunas',
@@ -561,7 +785,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'radiografia-de-torax',
     slug: 'radiografia-de-torax',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'imaging',
     tagKeys: ['respiratory'],
     enDisplay: 'Chest X-ray',
     esName: 'Radiografía de tórax',
@@ -585,7 +809,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     clinicalDefinitionEs:
       'Prueba funcional respiratoria que mide los volúmenes y flujos de aire movilizados durante una maniobra inspiratoria y espiratoria forzada, esencial para el diagnóstico y seguimiento del asma y la EPOC.',
     plainSummaryEs:
-      'Es un examen en el que soplas fuerte en un aparato para medir qué tan bien funcionan tus pulmones.',
+      'Es un examen en el que sopla fuerte en un aparato para medir qué tan bien funcionan sus pulmones.',
     relations: [
       { type: 'ANATOMY', targetSlug: 'pulmon' },
       { type: 'DISEASE', targetSlug: 'asma-bronquial' },
@@ -594,7 +818,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   {
     key: 'creatinina-serica',
     slug: 'creatinina-serica',
-    categoryKey: 'diagnostic-test',
+    categoryKey: 'lab',
     tagKeys: ['renal'],
     enDisplay: 'Serum creatinine',
     esName: 'Creatinina sérica',
@@ -624,6 +848,20 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'ANATOMY', targetSlug: 'corazon' },
       { type: 'DISEASE', targetSlug: 'insuficiencia-cardiaca' },
     ],
+  },
+  {
+    key: 'control-de-signos-vitales',
+    slug: 'control-de-signos-vitales',
+    categoryKey: 'procedure',
+    tagKeys: [],
+    enDisplay: 'Vital signs measurement',
+    esName: 'Control de signos vitales',
+    esSynonyms: ['Toma de signos vitales', 'Medición de signos vitales'],
+    clinicalDefinitionEs:
+      'Procedimiento de valoración que obtiene y registra parámetros fisiológicos —como presión arterial, frecuencia cardiaca, frecuencia respiratoria, temperatura y, cuando corresponde, saturación de oxígeno— mediante técnicas e instrumentos adecuados para cada medida.',
+    plainSummaryEs:
+      'Es medir y anotar parámetros básicos del cuerpo, como el pulso, la respiración, la presión y la temperatura.',
+    relations: [{ type: 'RELATED_TERM', targetSlug: 'signos-vitales' }],
   },
   {
     key: 'endoscopia-digestiva-alta',
@@ -659,7 +897,6 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: ['renal', 'chronic'],
     enDisplay: 'Dialysis',
     esName: 'Diálisis',
-    esSynonyms: ['Hemodiálisis'],
     clinicalDefinitionEs:
       'Procedimiento de depuración extracorpórea o peritoneal que suple la función excretora del riñón en pacientes con enfermedad renal avanzada, removiendo solutos y exceso de líquido.',
     plainSummaryEs:
@@ -793,6 +1030,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es el medicamento más usado para controlar el azúcar en la diabetes tipo 2.',
     relations: [{ type: 'DISEASE', targetSlug: 'diabetes-mellitus-tipo-2' }],
+    drugFacts: {
+      sourceNdc: '0378-6001',
+      activeIngredients: ['METFORMIN HYDROCHLORIDE 1000 mg/1'],
+      dosageForm: 'TABLET, FILM COATED, EXTENDED RELEASE',
+      route: ['ORAL'],
+      manufacturer: 'Mylan Pharmaceuticals Inc.',
+    },
   },
   {
     key: 'losartan',
@@ -805,6 +1049,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       'Antagonista del receptor de angiotensina II (ARA-II) indicado en el tratamiento de la hipertensión arterial y en la nefroprotección de pacientes diabéticos.',
     plainSummaryEs: 'Es un medicamento para bajar la presión arterial.',
     relations: [{ type: 'DISEASE', targetSlug: 'hipertension-arterial' }],
+    drugFacts: {
+      sourceNdc: '0615-7958',
+      activeIngredients: ['LOSARTAN POTASSIUM 25 mg/1'],
+      dosageForm: 'TABLET, FILM COATED',
+      route: ['ORAL'],
+      manufacturer: 'NCS HealthCare of KY, LLC dba Vangard Labs',
+    },
   },
   {
     key: 'salbutamol',
@@ -819,6 +1070,16 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es el inhalador que se usa para abrir rápido los bronquios cuando cuesta respirar.',
     relations: [{ type: 'DISEASE', targetSlug: 'asma-bronquial' }],
+    drugFacts: {
+      // El NDC estadounidense nombra este principio activo por su DCI/USAN
+      // "albuterol" (no "salbutamol", el nombre DCI usado fuera de EE. UU.
+      // para la misma molécula) — ver `esSynonyms` arriba.
+      sourceNdc: '0054-0742',
+      activeIngredients: ['ALBUTEROL SULFATE 90 ug/1'],
+      dosageForm: 'AEROSOL, METERED',
+      route: ['RESPIRATORY (INHALATION)'],
+      manufacturer: 'Hikma Pharmaceuticals USA Inc.',
+    },
   },
   {
     key: 'amoxicilina',
@@ -832,6 +1093,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es un antibiótico muy usado para tratar infecciones bacterianas.',
     relations: [{ type: 'DISEASE', targetSlug: 'neumonia' }],
+    drugFacts: {
+      sourceNdc: '0093-2263',
+      activeIngredients: ['AMOXICILLIN 500 mg/1'],
+      dosageForm: 'TABLET, FILM COATED',
+      route: ['ORAL'],
+      manufacturer: 'Teva Pharmaceuticals USA, Inc.',
+    },
   },
   {
     key: 'paracetamol',
@@ -846,6 +1114,13 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     plainSummaryEs:
       'Es el medicamento más común para bajar la fiebre y calmar el dolor.',
     relations: [{ type: 'DISEASE', targetSlug: 'fiebre' }],
+    drugFacts: {
+      sourceNdc: '0121-0657',
+      activeIngredients: ['ACETAMINOPHEN 160 mg/5mL'],
+      dosageForm: 'SOLUTION',
+      route: ['ORAL'],
+      manufacturer: 'PAI Holdings, LLC dba PAI Pharma',
+    },
   },
   {
     key: 'warfarina',
@@ -857,10 +1132,17 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     clinicalDefinitionEs:
       'Anticoagulante oral antagonista de la vitamina K, utilizado en la prevención de eventos tromboembólicos, que requiere monitoreo periódico del tiempo de protrombina/INR.',
     plainSummaryEs:
-      'Es un medicamento que hace la sangre más líquida para evitar coágulos.',
+      'Es un medicamento que hace que la sangre tarde más en coagular, para evitar coágulos.',
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'tiempo-de-protrombina' },
     ],
+    drugFacts: {
+      sourceNdc: '0093-1712',
+      activeIngredients: ['WARFARIN SODIUM 1 mg/1'],
+      dosageForm: 'TABLET',
+      route: ['ORAL'],
+      manufacturer: 'Teva Pharmaceuticals USA, Inc.',
+    },
   },
 
   // --- Laboratorio (glossary-category-lab) ------------------------------------
@@ -898,7 +1180,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     tagKeys: ['infectious'],
     enDisplay: 'C-reactive protein (CRP)',
     esName: 'Proteína C reactiva',
-    esSynonyms: ['PCR'],
+    esSynonyms: ['PCR (proteína C reactiva)'],
     clinicalDefinitionEs:
       'Reactante de fase aguda producido por el hígado en respuesta a la inflamación sistémica, utilizado como marcador inespecífico de infección o inflamación.',
     plainSummaryEs:
@@ -910,9 +1192,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     slug: 'tiempo-de-protrombina',
     categoryKey: 'lab',
     tagKeys: ['cardiovascular'],
-    enDisplay: 'Prothrombin time (INR)',
+    enDisplay: 'Prothrombin time (PT)',
     esName: 'Tiempo de protrombina',
-    esSynonyms: ['INR', 'TP'],
+    esSynonyms: ['TP'],
     clinicalDefinitionEs:
       'Prueba de coagulación que mide el tiempo que tarda el plasma en coagular por la vía extrínseca, estandarizada como INR, esencial para el monitoreo de la terapia con warfarina.',
     plainSummaryEs:
@@ -998,7 +1280,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     categoryKey: 'imaging',
     tagKeys: ['oncologic', 'gyn-ob'],
     enDisplay: 'Mammography',
-    esName: 'Mamografía',
+    esName: 'Mamografía de tamizaje',
     clinicalDefinitionEs:
       'Estudio radiológico de la glándula mamaria utilizado como método de tamizaje y diagnóstico para la detección temprana del cáncer de mama.',
     plainSummaryEs:
@@ -1106,5 +1388,83 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'RELATED_TERM', targetSlug: 'diabetes-mellitus-tipo-2' },
     ],
+  },
+
+  // --- Otros términos (glossary-category-other) — FND-25-01 -------------------
+  // Terminología general de la atención en salud que no es en sí misma
+  // clínica —es administrativa o legal del proceso de atención— y por eso no
+  // encaja en ninguna de las 11 categorías clínicas de arriba. Mismo criterio
+  // de autoría que el resto del catálogo (texto original, no extraído de otra
+  // fuente); ninguno es un dato clínico (dosis, contraindicación, etc.), así
+  // que no aplica la restricción de "fuente evidenciada por dato" de
+  // farmacología.
+  {
+    key: 'consentimiento-informado',
+    slug: 'consentimiento-informado',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Informed consent',
+    esName: 'Consentimiento informado',
+    esSynonyms: ['Consentimiento del paciente'],
+    clinicalDefinitionEs:
+      'Proceso por el cual una persona autoriza un procedimiento, estudio o tratamiento después de haber recibido información comprensible sobre su naturaleza, beneficios, riesgos y alternativas, y de haber tenido oportunidad de resolver sus dudas.',
+    plainSummaryEs:
+      'Es cuando el equipo de salud le explica bien un estudio o tratamiento, y usted decide si lo acepta después de entenderlo.',
+    relations: [],
+  },
+  {
+    key: 'historia-clinica',
+    slug: 'historia-clinica',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Medical record',
+    esName: 'Historia clínica',
+    esSynonyms: ['Expediente clínico', 'Ficha clínica'],
+    clinicalDefinitionEs:
+      'Documento —físico o electrónico— que reúne de forma cronológica los datos clínicos, diagnósticos, tratamientos y evolución de una persona a lo largo de su atención en salud.',
+    plainSummaryEs:
+      'Es el registro donde queda anotado todo lo que le atendieron: consultas, diagnósticos y tratamientos.',
+    relations: [],
+  },
+  {
+    key: 'alta-medica',
+    slug: 'alta-medica',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Medical discharge',
+    esName: 'Alta médica',
+    clinicalDefinitionEs:
+      'Decisión clínica que da por finalizada una internación o un episodio de atención, porque el estado del paciente ya no requiere ese nivel de cuidado.',
+    plainSummaryEs:
+      'Es cuando el médico determina que ya puede irse del hospital o terminar un tratamiento.',
+    relations: [],
+  },
+  {
+    key: 'receta-medica',
+    slug: 'receta-medica',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Medical prescription',
+    esName: 'Receta médica',
+    esSynonyms: ['Prescripción médica'],
+    clinicalDefinitionEs:
+      'Documento emitido por un profesional habilitado que indica el medicamento, la dosis y la duración del tratamiento que una persona debe seguir.',
+    plainSummaryEs:
+      'Es el papel (o mensaje digital) donde el médico le indica qué medicamento tomar y cómo.',
+    relations: [{ type: 'RELATED_TERM', targetSlug: 'paracetamol' }],
+  },
+  {
+    key: 'interconsulta',
+    slug: 'interconsulta',
+    categoryKey: 'other',
+    tagKeys: [],
+    enDisplay: 'Referral (specialist consultation)',
+    esName: 'Interconsulta',
+    esSynonyms: ['Referencia médica'],
+    clinicalDefinitionEs:
+      'Solicitud que hace un profesional de salud para que otra especialidad evalúe a un paciente y aporte su criterio sobre el diagnóstico o el tratamiento.',
+    plainSummaryEs:
+      'Es cuando su médico le deriva a otro especialista para que también le revise.',
+    relations: [],
   },
 ];

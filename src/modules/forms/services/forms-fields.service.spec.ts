@@ -8,10 +8,12 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { FormsFieldsService } from './forms-fields.service';
+import { ForbiddenException } from '@nestjs/common';
 import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 
 const actor = { id: 'steward-1', roles: ['USER'] } as any;
@@ -35,15 +37,139 @@ function build() {
     createAccessRule: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // CL-69: de quién es un campo (por sus asignaciones) y si ya tiene valores.
+  const assignmentsRepo = {
+    findAssignmentsByField: mockFn().mockResolvedValue([]),
+  };
+  const valuesRepo = {
+    countByField: mockFn().mockResolvedValue(0),
+    findCodesInUseByField: mockFn().mockResolvedValue([]),
+  };
   const service = new FormsFieldsService(
     em as any,
     fieldsRepo as any,
     logger as any,
+    assignmentsRepo as any,
+    valuesRepo as any,
   );
-  return { service, tx, fieldsRepo };
+  return { service, tx, fieldsRepo, assignmentsRepo, valuesRepo };
+}
+
+/** Una doctora del tenant A: contrato estrictamente menor que el gobierno. */
+const doctor = { id: 'doc-1', roles: ['PRACTITIONER'] } as any;
+
+/** Ejecuta dentro del contexto de tenant que exige la propiedad del campo. */
+function inTenantA<T>(fn: () => Promise<T>): Promise<T> {
+  return runWithTenant('tenant-a', fn);
 }
 
 describe('FormsFieldsService', () => {
+  // CL-61 / CL-69 — corregir un campo propio sin reescribir la historia.
+  describe('updateFieldDefinition (CL-69)', () => {
+    const fieldRecord = () => ({
+      id: 'f1',
+      name: 'Fuma',
+      dataType: 'string',
+      updatedAt: new Date(0),
+    });
+
+    it('renombra un campo colgado sólo del tenant del actor', async () => {
+      const d = build();
+      const field = fieldRecord();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      const res = await inTenantA(() =>
+        d.service.updateFieldDefinition('f1', { name: '¿Fuma?' }, doctor),
+      );
+      expect(res).toEqual({ ok: true });
+      expect(field.name).toBe('¿Fuma?');
+    });
+
+    it('un campo colgado del estándar (asignación global) responde 403', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue(fieldRecord());
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as-global', tenantId: undefined },
+      ]);
+      await expect(
+        inTenantA(() =>
+          d.service.updateFieldDefinition('f1', { name: 'x' }, doctor),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('un campo colgado de otro tenant responde 403', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue(fieldRecord());
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+        { id: 'as2', tenantId: 'tenant-b' },
+      ]);
+      await expect(
+        inTenantA(() =>
+          d.service.updateFieldDefinition('f1', { name: 'x' }, doctor),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('cambiar el tipo con valores capturados responde 409 y no toca el campo', async () => {
+      const d = build();
+      const field = fieldRecord();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      d.valuesRepo.countByField.mockResolvedValue(3);
+      await expect(
+        inTenantA(() =>
+          d.service.updateFieldDefinition(
+            'f1',
+            { dataType: 'integer' } as any,
+            doctor,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(field.dataType).toBe('string');
+    });
+
+    it('cambia el tipo cuando no hay valores capturados', async () => {
+      const d = build();
+      const field = fieldRecord();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      await inTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { dataType: 'integer' } as any,
+          doctor,
+        ),
+      );
+      expect(field.dataType).toBe('integer');
+    });
+
+    it('quien gobierna edita cualquier campo sin mirar sus asignaciones', async () => {
+      const d = build();
+      const field = fieldRecord();
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+      await d.service.updateFieldDefinition('f1', { name: 'Tabaco' }, admin);
+      expect(field.name).toBe('Tabaco');
+      expect(d.assignmentsRepo.findAssignmentsByField).not.toHaveBeenCalled();
+    });
+
+    it('responde 404 cuando el campo no existe', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldById.mockResolvedValue(null);
+      await expect(
+        d.service.updateFieldDefinition('nope', { name: 'x' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('createFieldDefinition (UC-09-02)', () => {
     it('creates the field then its validation rules', async () => {
       const d = build();
@@ -72,6 +198,159 @@ describe('FormsFieldsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+    it('creates a choice field with its own options', async () => {
+      const d = build();
+      d.fieldsRepo.findFieldByCode.mockResolvedValue(null);
+      d.fieldsRepo.createField.mockReturnValue({ id: 'f1' });
+      const res = await d.service.createFieldDefinition(
+        {
+          code: 'C',
+          name: 'N',
+          dataType: 'code',
+          options: ['Nunca', 'Ex fumador', 'Fumador'],
+          multiple: false,
+        } as any,
+        actor,
+      );
+      expect(res).toEqual({ id: 'f1' });
+      expect(d.fieldsRepo.createField).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          options: ['Nunca', 'Ex fumador', 'Fumador'],
+        }),
+      );
+    });
+
+    it('rejects a choice field with fewer than two options', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'code',
+            options: ['Sólo una'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.fieldsRepo.findFieldByCode).not.toHaveBeenCalled();
+    });
+
+    it('rejects repeated options', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'code',
+            options: ['Sí', 'Sí'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects declaring valueSetId and options together', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'code',
+            valueSetId: 'vs-1',
+            options: ['A', 'B'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('rejects options on a field that is not a choice field', async () => {
+      const d = build();
+      await expect(
+        d.service.createFieldDefinition(
+          {
+            code: 'C',
+            name: 'N',
+            dataType: 'string',
+            options: ['A', 'B'],
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('updateFieldDefinition — opciones de elección', () => {
+    it('replaces the options entirely when none in use', async () => {
+      const d = build();
+      const field: any = {
+        id: 'f1',
+        dataType: 'code',
+        options: ['Nunca', 'Ex fumador'],
+      };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.valuesRepo.findCodesInUseByField.mockResolvedValue([]);
+
+      const res = await inTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { options: ['Nunca', 'Ex fumador', 'Fumador'] } as any,
+          doctor,
+        ),
+      );
+
+      expect(res).toEqual({ ok: true });
+      expect(field.options).toEqual(['Nunca', 'Ex fumador', 'Fumador']);
+    });
+
+    it('rejects removing an option that already has a captured response', async () => {
+      const d = build();
+      const field: any = {
+        id: 'f1',
+        dataType: 'code',
+        options: ['Nunca', 'Ex fumador', 'Fumador'],
+      };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      // «Ex fumador» se retira y ya tiene respuestas.
+      d.valuesRepo.findCodesInUseByField.mockResolvedValue(['Ex fumador']);
+
+      await expect(
+        inTenantA(() =>
+          d.service.updateFieldDefinition(
+            'f1',
+            { options: ['Nunca', 'Fumador'] } as any,
+            doctor,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      // No se pisa el campo si la validación rechaza el reemplazo.
+      expect(field.options).toEqual(['Nunca', 'Ex fumador', 'Fumador']);
+    });
+
+    it('clears the description when it comes as null, and leaves it when absent', async () => {
+      const d = build();
+      const field: any = { id: 'f1', dataType: 'string', description: 'vieja' };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+
+      await inTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { description: null } as any,
+          doctor,
+        ),
+      );
+      expect(field.description).toBeUndefined();
+
+      field.description = 'vieja';
+      await inTenantA(() =>
+        d.service.updateFieldDefinition('f1', {} as any, doctor),
+      );
+      expect(field.description).toBe('vieja');
     });
   });
 

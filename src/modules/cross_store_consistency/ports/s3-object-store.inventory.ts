@@ -1,0 +1,111 @@
+import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
+import { Injectable } from '@nestjs/common';
+import { loadStorageEnv } from '../../../common/storage/storage.env';
+import type {
+  InventoryScope,
+  ObjectInventory,
+  ObjectStoreInventory,
+  InventoriedObject,
+} from './object-store-inventory.port';
+
+/** Backends que hablan S3: MinIO en el stack local, S3/R2 en despliegue. */
+const S3_BACKENDS: ReadonlySet<string> = new Set(['s3', 'minio']);
+
+/** Objetos por página; el tope real lo pone `alcance.limit`. */
+const PAGE = 1000;
+
+/**
+ * Inventario S3 compatible, para reconciliar el almacén contra Postgres.
+ *
+ * Reusa la conexión de `FILE_STORAGE_S3_*` igual que el lector del módulo 60, y
+ * como él arma el cliente al primer uso para que una configuración incompleta se
+ * note en la operación que la necesita y no al importar el módulo.
+ *
+ * Un fallo del proveedor devuelve `NO_DISPONIBLE`, nunca una lista vacía: son
+ * dos cosas distintas y confundirlas informaría «sin huérfanos» cuando lo cierto
+ * es «no se pudo mirar».
+ */
+@Injectable()
+export class S3ObjectStoreInventory implements ObjectStoreInventory {
+  private client?: S3Client;
+
+  async list(scope: InventoryScope): Promise<ObjectInventory> {
+    if (!S3_BACKENDS.has(scope.backendCode)) {
+      return {
+        estado: 'NO_DISPONIBLE',
+        motivo: `BACKEND_UNSUPPORTED:${scope.backendCode}`,
+      };
+    }
+
+    const objects: InventoriedObject[] = [];
+    let continuationToken: string | undefined;
+
+    try {
+      const client = this.createClient();
+      do {
+        const remaining = scope.limit - objects.length;
+        if (remaining <= 0) return { estado: 'TRUNCADO', objetos: objects };
+
+        const page = await client.send(
+          new ListObjectsV2Command({
+            Bucket: scope.bucket,
+            Prefix: scope.prefix || undefined,
+            MaxKeys: Math.min(PAGE, remaining),
+            ContinuationToken: continuationToken,
+          }),
+        );
+
+        for (const obj of page.Contents ?? []) {
+          if (obj.Key === undefined) continue;
+          objects.push({
+            key: obj.Key,
+            sizeBytes: BigInt(obj.Size ?? 0),
+          });
+        }
+
+        // Si el proveedor dice que hay más y ya llegamos al tope, el inventario
+        // está truncado: lo que no se vio no se puede declarar ausente.
+        continuationToken = page.IsTruncated
+          ? page.NextContinuationToken
+          : undefined;
+        if (continuationToken && objects.length >= scope.limit) {
+          return { estado: 'TRUNCADO', objetos: objects };
+        }
+      } while (continuationToken);
+    } catch (error) {
+      return {
+        estado: 'NO_DISPONIBLE',
+        motivo:
+          error instanceof Error
+            ? `PROVIDER_ERROR:${error.name}`
+            : 'PROVIDER_ERROR',
+      };
+    }
+
+    return { estado: 'COMPLETO', objetos: objects };
+  }
+
+  /**
+   * Arma el cliente S3 la primera vez que hace falta.
+   *
+   * @returns Cliente conectado a la configuración de `FILE_STORAGE_S3_*`.
+   */
+  private createClient(): S3Client {
+    if (!this.client) {
+      const { s3 } = loadStorageEnv();
+      this.client = new S3Client({
+        region: s3.region,
+        endpoint: s3.endpoint || undefined,
+        forcePathStyle: s3.forcePathStyle,
+        credentials:
+          s3.accessKeyId && s3.secretAccessKey
+            ? {
+                accessKeyId: s3.accessKeyId,
+                secretAccessKey: s3.secretAccessKey,
+              }
+            : undefined,
+      });
+    }
+    return this.client;
+  }
+}
