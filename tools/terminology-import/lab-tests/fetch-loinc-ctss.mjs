@@ -63,6 +63,11 @@ async function getJson(url) {
       await sleep(2000 * attempt);
       continue;
     }
+    // 404 en /loinc_form_definitions = el panel no tiene definición publicada: se registra como faltante.
+    if (res.status === 404 && url.startsWith(FORMS)) {
+      writeFileSync(file, 'null');
+      return null;
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
     const json = await res.json();
     writeFileSync(file, JSON.stringify(json));

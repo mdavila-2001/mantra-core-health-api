@@ -20,7 +20,7 @@ import { RELATION, buildPlan, planSummary } from '../lab-tests/lib/load-plan.mjs
 import { loincRecords, parseLinguisticIndex, parseLinguisticVariant, parseLoincTable, parsePanels } from '../lab-tests/lib/loinc.mjs';
 import { assertRecord, conceptIdFor, propertyIdFor } from '../lab-tests/lib/records.mjs';
 import { addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pamiOfficialItems, pcsAxisNames, pcsItems, pcsOrderFile, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
-import { partsFromFullySpecifiedName } from '../lab-tests/lib/loinc-tx.mjs';
+import { partsFromFullySpecifiedName, txToLoincInput } from '../lab-tests/lib/loinc-tx.mjs';
 import { ucumRecords } from '../lab-tests/lib/ucum.mjs';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'lab-tests');
@@ -295,4 +295,28 @@ test('PAMI (recorte real del CSV oficial de datos.pami.org.ar): nombre verbatim,
   const { records, stats } = tariffRecords('pami-nomenclador', items, TPROV);
   assert.deepEqual(records.map((r) => r.code).sort(), ['340101', '660002']);
   assert.equal(stats.excludedExplicitly[0].code, '187143');
+});
+
+test('LOINC vía tx.fhir.org + NLM (recorte real, LOINC 2.82): clase, ORDER_OBS, castellano oficial, ejes ES y miembros de panel', () => {
+  const fx = json('loinc-txfhir-ctss.recorte.json');
+  const { stats: inputStats, ...input } = txToLoincInput(fx.tx, fx.ctss, fx.panels);
+  assert.equal(inputStats.terms, Object.keys(fx.tx.terms).length);
+  const { records } = loincRecords(input, { release: '2.82', retrievedAt: fx.tx.finishedAt, files: { 'Loinc.csv': { file: 'fixture', sha256: 'f'.repeat(64) } }, esVariant: { id: 'tx', country: 'MX/AR', producer: null, file: 'tx' }, license: 'test', via: 'tx.fhir.org' });
+  records.forEach(assertRecord);
+  const by = Object.fromEntries(records.map((r) => [r.code, r]));
+  const glu = by['2345-7'];
+  assert.equal(glu.display, 'Glucose [Mass/volume] in Serum or Plasma');
+  assert.equal(glu.category.code, 'CHEM');
+  assert.equal(glu.domain, 'laboratory');
+  assert.equal(glu.properties.loinc_order_obs, 'Both');
+  assert.equal(glu.properties.component, 'Glucose');
+  assert.deepEqual(glu.properties.loinc_example_ucum_units, ['mg/dL']);
+  assert.equal(glu.designations[0].lang, 'es');
+  assert.match(glu.designations[0].value, /^Glucosa/);
+  assert.equal(glu.properties.loinc_parts_es.system, 'suero/plasma');
+  assert.match(glu.provenance.sourceName, /vía tx\.fhir\.org/);
+  const panel = by['24323-8'];
+  assert.ok(panel.valueSets.includes('lab-catalog-loinc-panels'));
+  assert.ok(panel.properties.loinc_panel_members.some((m) => m.loinc === '2345-7'));
+  assert.ok(glu.relations.some((x) => x.type === 'part-of' && x.targetCode === '24323-8'));
 });

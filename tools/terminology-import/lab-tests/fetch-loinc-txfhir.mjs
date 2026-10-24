@@ -28,6 +28,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { BUILD_DIR, USER_AGENT, ensureDir, nowIso, sleep, writeJson } from '../lib/glossary-es/common.mjs';
+import { loincDomain } from './lib/domains.mjs';
 
 export const TX_BASE = 'https://tx.fhir.org/r4';
 const OUT_DIR = ensureDir(join(BUILD_DIR, 'lab-tests-sources', 'loinc-txfhir'));
@@ -64,10 +65,26 @@ async function call(method, url, body) {
       await sleep(2000 * attempt);
       continue;
     }
+    if (res.status === 500) {
+      // Una regex sobre CLASS/COMPONENT que no coincide con ningún valor no da una expansión
+      // vacía: tx.fhir.org responde 500 «The filter "… regex …" is not supported for LOINC».
+      // Es determinista: se cachea y `expand` lo lee como «sin códigos».
+      const body = await res.text();
+      if (/regex .* is not supported for LOINC/.test(body)) {
+        const json = JSON.parse(body);
+        writeFileSync(file, JSON.stringify(json));
+        return json;
+      }
+      if (attempt >= 20) throw new Error(`HTTP 500 tras ${attempt} intentos: ${url} — ${body.slice(0, 200)}`);
+      if (attempt % 5 === 0) console.warn(`[tx] HTTP 500 persistente (${attempt} intentos), sigo esperando…`);
+      await sleep(Math.min(120000, 5000 * attempt));
+      continue;
+    }
     if (res.status === 429 || res.status >= 500) {
       // tx.fhir.org devuelve 500 transitorios bajo carga: se espera más antes de rendirse.
-      if (attempt >= 10) throw new Error(`HTTP ${res.status} tras ${attempt} intentos: ${url}`);
-      await sleep(Math.min(60000, 5000 * attempt));
+      if (attempt >= 20) throw new Error(`HTTP ${res.status} tras ${attempt} intentos: ${url}`);
+      if (attempt % 5 === 0) console.warn(`[tx] HTTP ${res.status} persistente (${attempt} intentos), sigo esperando…`);
+      await sleep(Math.min(120000, 5000 * attempt));
       continue;
     }
     const json = await res.json();
@@ -91,6 +108,7 @@ async function expand(include, exclude = [], { count = PAGE, offset = 0, designa
   if (designations) params.push({ name: 'includeDesignations', valueBoolean: true });
   const d = await call('POST', `${TX_BASE}/ValueSet/$expand`, JSON.stringify({ resourceType: 'Parameters', parameter: params }));
   if (isTooCostly(d)) return { tooCostly: true };
+  if (d?.resourceType === 'OperationOutcome' && d.issue?.some((i) => /regex .* is not supported for LOINC/.test(i.details?.text ?? ''))) return { contains: [], noMatch: true };
   if (d?.resourceType !== 'ValueSet') throw new Error(`$expand inesperado: ${JSON.stringify(d).slice(0, 300)}`);
   return { contains: d.expansion?.contains ?? [], version: (d.expansion?.parameter ?? []).find((p) => p.name === 'used-codesystem')?.valueUri ?? null };
 }
@@ -115,15 +133,21 @@ const reEscape = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
 const eq = (property, value) => ({ property, op: '=', value });
 const regex = (property, value) => ({ property, op: 'regex', value });
 
-/** Todas las páginas de una expansión de ≤ 3 000; `null` si es demasiado grande. */
+/**
+ * Todas las páginas de una expansión de ≤ 3 000; `null` si es más grande.
+ * tx.fhir.org sólo rechaza cuando offset + count pasa de 3 000: tres páginas
+ * llenas NO prueban que no haya más, así que se sondea offset = 3 000.
+ */
 async function allPages(include, designations) {
   const out = [];
   for (let offset = 0; offset < MAX_EXPANSION; offset += PAGE) {
     const r = await expand(include, [], { offset, designations });
     if (r.tooCostly) return null;
     out.push(...r.contains);
-    if (r.contains.length < PAGE) break;
+    if (r.contains.length < PAGE) return out;
   }
+  const probe = await expand(include, [], { offset: MAX_EXPANSION, count: 1 });
+  if (probe.tooCostly || probe.contains.length) return null;
   return out;
 }
 
@@ -196,6 +220,13 @@ async function main() {
       };
     }
     info.count = rows.length;
+    // STATUS y ORDER_OBS sólo donde el catálogo los usa: clases con dominio (domains.mjs).
+    // Las demás se enumeran igual (un panel incluido puede tener miembros de ellas).
+    info.statusQueried = Boolean(loincDomain(name, info.classType).domain);
+    if (!info.statusQueried) {
+      console.log(`[terms] ${name}: ${rows.length} (sin dominio: sin STATUS/ORDER_OBS; acumulado ${Object.keys(terms).length})`);
+      continue;
+    }
     for (const status of ['DEPRECATED', 'DISCOURAGED', 'TRIAL']) {
       for (const c of await enumerate([eq('CLASS', name), eq('STATUS', status)], false, stats)) {
         // Un término deprecado puede no venir en la expansión por clase: se agrega igual, sin designaciones.

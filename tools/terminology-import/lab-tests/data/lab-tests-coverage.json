@@ -1,7 +1,7 @@
 {
-  "builtAt": "2026-10-24T17:00:23.684Z",
+  "builtAt": "2026-10-24T17:57:09.723Z",
   "totals": {
-    "loinc": 0,
+    "loinc": 79462,
     "hl7-tho": 479,
     "ucum": 888,
     "fonasa-mle": 648,
@@ -13,11 +13,11 @@
     "gtr-ncbi": 63919
   },
   "byDomain": {
-    "laboratory": 6486,
-    "imaging": 4982,
-    "pathology": 180,
-    "genetics": 64108,
-    "functional": 1462
+    "laboratory": 69154,
+    "imaging": 13275,
+    "pathology": 1119,
+    "genetics": 67362,
+    "functional": 4871
   },
   "byCategory": {
     "(sin categoría):ucum": {
@@ -349,6 +349,776 @@
       "display": "Physical Rehabilitation and Diagnostic Audiology › Vestibular Assessment",
       "domain": "functional",
       "count": 16
+    },
+    "loinc-class:ABXBACT": {
+      "display": "ABXBACT",
+      "domain": "laboratory",
+      "count": 2115
+    },
+    "loinc-class:ADMIN": {
+      "display": "ADMIN",
+      "domain": null,
+      "count": 5
+    },
+    "loinc-class:ADMIN.FACILITY": {
+      "display": "ADMIN.FACILITY",
+      "domain": null,
+      "count": 7
+    },
+    "loinc-class:ADMIN.ID": {
+      "display": "ADMIN.ID",
+      "domain": null,
+      "count": 3
+    },
+    "loinc-class:ADMIN.PATIENT": {
+      "display": "ADMIN.PATIENT",
+      "domain": null,
+      "count": 8
+    },
+    "loinc-class:ADMIN.PATIENT.DEMOG": {
+      "display": "ADMIN.PATIENT.DEMOG",
+      "domain": null,
+      "count": 4
+    },
+    "loinc-class:ADMIN.PATIENT.ID": {
+      "display": "ADMIN.PATIENT.ID",
+      "domain": null,
+      "count": 4
+    },
+    "loinc-class:ALLERGY": {
+      "display": "ALLERGY",
+      "domain": "laboratory",
+      "count": 6024
+    },
+    "loinc-class:ATTACH.CLINRPT": {
+      "display": "ATTACH.CLINRPT",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:ATTACH.MEDS": {
+      "display": "ATTACH.MEDS",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:AUDIO": {
+      "display": "AUDIO",
+      "domain": "functional",
+      "count": 38
+    },
+    "loinc-class:BDYHGT.ATOM": {
+      "display": "BDYHGT.ATOM",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:BDYSURF.ATOM": {
+      "display": "BDYSURF.ATOM",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:BDYTMP.ATOM": {
+      "display": "BDYTMP.ATOM",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:BDYTMP.MOLEC": {
+      "display": "BDYTMP.MOLEC",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:BDYWGT.ATOM": {
+      "display": "BDYWGT.ATOM",
+      "domain": null,
+      "count": 3
+    },
+    "loinc-class:BDYWGT.MOLEC": {
+      "display": "BDYWGT.MOLEC",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:BLDBK": {
+      "display": "BLDBK",
+      "domain": "laboratory",
+      "count": 1113
+    },
+    "loinc-class:BLDBK.GENOTYPING": {
+      "display": "BLDBK.GENOTYPING",
+      "domain": "laboratory",
+      "count": 72
+    },
+    "loinc-class:BP.MOLEC": {
+      "display": "BP.MOLEC",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:CARD.PROC": {
+      "display": "CARD.PROC",
+      "domain": null,
+      "count": 126
+    },
+    "loinc-class:CARD.RISK": {
+      "display": "CARD.RISK",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:CARD.US": {
+      "display": "CARD.US",
+      "domain": "functional",
+      "count": 817
+    },
+    "loinc-class:CARD.US.DICOM": {
+      "display": "CARD.US.DICOM",
+      "domain": "functional",
+      "count": 184
+    },
+    "loinc-class:CARDIO-PULM": {
+      "display": "CARDIO-PULM",
+      "domain": "functional",
+      "count": 31
+    },
+    "loinc-class:CELLMARK": {
+      "display": "CELLMARK",
+      "domain": "laboratory",
+      "count": 1746
+    },
+    "loinc-class:CHAL": {
+      "display": "CHAL",
+      "domain": "laboratory",
+      "count": 3964
+    },
+    "loinc-class:CHAL.ROUTINE": {
+      "display": "CHAL.ROUTINE",
+      "domain": "laboratory",
+      "count": 27
+    },
+    "loinc-class:CHALSKIN": {
+      "display": "CHALSKIN",
+      "domain": "laboratory",
+      "count": 47
+    },
+    "loinc-class:CHEM": {
+      "display": "CHEM",
+      "domain": "laboratory",
+      "count": 10855
+    },
+    "loinc-class:CLIN": {
+      "display": "CLIN",
+      "domain": null,
+      "count": 24
+    },
+    "loinc-class:CLIN.RISK": {
+      "display": "CLIN.RISK",
+      "domain": null,
+      "count": 6
+    },
+    "loinc-class:CLINTRIAL": {
+      "display": "CLINTRIAL",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:COAG": {
+      "display": "COAG",
+      "domain": "laboratory",
+      "count": 1002
+    },
+    "loinc-class:CYTO": {
+      "display": "CYTO",
+      "domain": "pathology",
+      "count": 81
+    },
+    "loinc-class:DEVICES": {
+      "display": "DEVICES",
+      "domain": null,
+      "count": 17
+    },
+    "loinc-class:DOC.MISC": {
+      "display": "DOC.MISC",
+      "domain": null,
+      "count": 3
+    },
+    "loinc-class:DOC.ONTOLOGY": {
+      "display": "DOC.ONTOLOGY",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:DOC.PUBLICHEALTH": {
+      "display": "DOC.PUBLICHEALTH",
+      "domain": null,
+      "count": 3
+    },
+    "loinc-class:DRUG/TOX": {
+      "display": "DRUG/TOX",
+      "domain": "laboratory",
+      "count": 8921
+    },
+    "loinc-class:DRUGDOSE": {
+      "display": "DRUGDOSE",
+      "domain": "laboratory",
+      "count": 415
+    },
+    "loinc-class:ED": {
+      "display": "ED",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:EKG.ATOM": {
+      "display": "EKG.ATOM",
+      "domain": "functional",
+      "count": 9
+    },
+    "loinc-class:EKG.IMP": {
+      "display": "EKG.IMP",
+      "domain": "functional",
+      "count": 25
+    },
+    "loinc-class:EKG.MEAS": {
+      "display": "EKG.MEAS",
+      "domain": "functional",
+      "count": 414
+    },
+    "loinc-class:EYE.ANGIO": {
+      "display": "EYE.ANGIO",
+      "domain": "imaging",
+      "count": 1
+    },
+    "loinc-class:EYE.ERG": {
+      "display": "EYE.ERG",
+      "domain": "functional",
+      "count": 52
+    },
+    "loinc-class:EYE.ERG.NEI": {
+      "display": "EYE.ERG.NEI",
+      "domain": "functional",
+      "count": 30
+    },
+    "loinc-class:EYE.HETEROPHORIA": {
+      "display": "EYE.HETEROPHORIA",
+      "domain": "functional",
+      "count": 9
+    },
+    "loinc-class:EYE.OCT": {
+      "display": "EYE.OCT",
+      "domain": "functional",
+      "count": 54
+    },
+    "loinc-class:EYE.OCT.NEI": {
+      "display": "EYE.OCT.NEI",
+      "domain": "functional",
+      "count": 4
+    },
+    "loinc-class:EYE.REFRACTION": {
+      "display": "EYE.REFRACTION",
+      "domain": "functional",
+      "count": 357
+    },
+    "loinc-class:EYE.REFRACTION.NEI": {
+      "display": "EYE.REFRACTION.NEI",
+      "domain": "functional",
+      "count": 38
+    },
+    "loinc-class:EYE.SPECULAR MICROSCOPY": {
+      "display": "EYE.SPECULAR MICROSCOPY",
+      "domain": "functional",
+      "count": 21
+    },
+    "loinc-class:EYE.TONOMETRY": {
+      "display": "EYE.TONOMETRY",
+      "domain": "functional",
+      "count": 17
+    },
+    "loinc-class:EYE.TONOMETRY.NEI": {
+      "display": "EYE.TONOMETRY.NEI",
+      "domain": "functional",
+      "count": 3
+    },
+    "loinc-class:EYE.VISUAL_FIELD": {
+      "display": "EYE.VISUAL_FIELD",
+      "domain": "functional",
+      "count": 31
+    },
+    "loinc-class:EYE.VISUAL_FIELD.NEI": {
+      "display": "EYE.VISUAL_FIELD.NEI",
+      "domain": "functional",
+      "count": 5
+    },
+    "loinc-class:FERT": {
+      "display": "FERT",
+      "domain": "laboratory",
+      "count": 294
+    },
+    "loinc-class:GI": {
+      "display": "GI",
+      "domain": "functional",
+      "count": 6
+    },
+    "loinc-class:H&P.HX": {
+      "display": "H&P.HX",
+      "domain": null,
+      "count": 39
+    },
+    "loinc-class:H&P.HX.LAB": {
+      "display": "H&P.HX.LAB",
+      "domain": "laboratory",
+      "count": 7
+    },
+    "loinc-class:H&P.PX": {
+      "display": "H&P.PX",
+      "domain": null,
+      "count": 11
+    },
+    "loinc-class:HEM/BC": {
+      "display": "HEM/BC",
+      "domain": "laboratory",
+      "count": 2449
+    },
+    "loinc-class:HEMODYN.ATOM": {
+      "display": "HEMODYN.ATOM",
+      "domain": "functional",
+      "count": 10
+    },
+    "loinc-class:HEMODYN.MOLEC": {
+      "display": "HEMODYN.MOLEC",
+      "domain": "functional",
+      "count": 176
+    },
+    "loinc-class:HL7.CCDA": {
+      "display": "HL7.CCDA",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:HL7.CYTOGEN": {
+      "display": "HL7.CYTOGEN",
+      "domain": "laboratory",
+      "count": 24
+    },
+    "loinc-class:HL7.GENETICS": {
+      "display": "HL7.GENETICS",
+      "domain": "laboratory",
+      "count": 39
+    },
+    "loinc-class:HLA": {
+      "display": "HLA",
+      "domain": "genetics",
+      "count": 526
+    },
+    "loinc-class:HNA": {
+      "display": "HNA",
+      "domain": "laboratory",
+      "count": 13
+    },
+    "loinc-class:HPA": {
+      "display": "HPA",
+      "domain": "laboratory",
+      "count": 16
+    },
+    "loinc-class:HRTRATE.MOLEC": {
+      "display": "HRTRATE.MOLEC",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:IO_IN.INFUS": {
+      "display": "IO_IN.INFUS",
+      "domain": null,
+      "count": 4
+    },
+    "loinc-class:LABORDERS": {
+      "display": "LABORDERS",
+      "domain": "laboratory",
+      "count": 31
+    },
+    "loinc-class:LABORDERS.ONTOLOGY": {
+      "display": "LABORDERS.ONTOLOGY",
+      "domain": "laboratory",
+      "count": 2546
+    },
+    "loinc-class:MEDS": {
+      "display": "MEDS",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:MICRO": {
+      "display": "MICRO",
+      "domain": "laboratory",
+      "count": 14888
+    },
+    "loinc-class:MISC": {
+      "display": "MISC",
+      "domain": "laboratory",
+      "count": 151
+    },
+    "loinc-class:MOLPATH": {
+      "display": "MOLPATH",
+      "domain": "genetics",
+      "count": 704
+    },
+    "loinc-class:MOLPATH.DEL": {
+      "display": "MOLPATH.DEL",
+      "domain": "genetics",
+      "count": 67
+    },
+    "loinc-class:MOLPATH.DELDUP": {
+      "display": "MOLPATH.DELDUP",
+      "domain": "genetics",
+      "count": 67
+    },
+    "loinc-class:MOLPATH.INV": {
+      "display": "MOLPATH.INV",
+      "domain": "genetics",
+      "count": 12
+    },
+    "loinc-class:MOLPATH.MISC": {
+      "display": "MOLPATH.MISC",
+      "domain": "genetics",
+      "count": 22
+    },
+    "loinc-class:MOLPATH.MUT": {
+      "display": "MOLPATH.MUT",
+      "domain": "genetics",
+      "count": 1293
+    },
+    "loinc-class:MOLPATH.NUCREPEAT": {
+      "display": "MOLPATH.NUCREPEAT",
+      "domain": "genetics",
+      "count": 61
+    },
+    "loinc-class:MOLPATH.PHARMG": {
+      "display": "MOLPATH.PHARMG",
+      "domain": "genetics",
+      "count": 123
+    },
+    "loinc-class:MOLPATH.REARRANGE": {
+      "display": "MOLPATH.REARRANGE",
+      "domain": "genetics",
+      "count": 101
+    },
+    "loinc-class:MOLPATH.TRINUC": {
+      "display": "MOLPATH.TRINUC",
+      "domain": "genetics",
+      "count": 2
+    },
+    "loinc-class:MOLPATH.TRISOMY": {
+      "display": "MOLPATH.TRISOMY",
+      "domain": "genetics",
+      "count": 58
+    },
+    "loinc-class:MOLPATH.TRNLOC": {
+      "display": "MOLPATH.TRNLOC",
+      "domain": "genetics",
+      "count": 140
+    },
+    "loinc-class:NEMSIS": {
+      "display": "NEMSIS",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:NEURO": {
+      "display": "NEURO",
+      "domain": "functional",
+      "count": 146
+    },
+    "loinc-class:NR STATS": {
+      "display": "NR STATS",
+      "domain": "laboratory",
+      "count": 4
+    },
+    "loinc-class:OB.US": {
+      "display": "OB.US",
+      "domain": "imaging",
+      "count": 793
+    },
+    "loinc-class:ONCOLOGY": {
+      "display": "ONCOLOGY",
+      "domain": null,
+      "count": 6
+    },
+    "loinc-class:PANEL.ABXBACT": {
+      "display": "PANEL.ABXBACT",
+      "domain": "laboratory",
+      "count": 40
+    },
+    "loinc-class:PANEL.ADMIN": {
+      "display": "PANEL.ADMIN",
+      "domain": null,
+      "count": 3
+    },
+    "loinc-class:PANEL.ALLERGY": {
+      "display": "PANEL.ALLERGY",
+      "domain": "laboratory",
+      "count": 59
+    },
+    "loinc-class:PANEL.BLDBK": {
+      "display": "PANEL.BLDBK",
+      "domain": "laboratory",
+      "count": 24
+    },
+    "loinc-class:PANEL.BLDBK.GENOTYPE": {
+      "display": "PANEL.BLDBK.GENOTYPE",
+      "domain": "laboratory",
+      "count": 2
+    },
+    "loinc-class:PANEL.CARDIAC": {
+      "display": "PANEL.CARDIAC",
+      "domain": "functional",
+      "count": 23
+    },
+    "loinc-class:PANEL.CELLMARK": {
+      "display": "PANEL.CELLMARK",
+      "domain": "laboratory",
+      "count": 41
+    },
+    "loinc-class:PANEL.CHAL": {
+      "display": "PANEL.CHAL",
+      "domain": "laboratory",
+      "count": 64
+    },
+    "loinc-class:PANEL.CHEM": {
+      "display": "PANEL.CHEM",
+      "domain": "laboratory",
+      "count": 446
+    },
+    "loinc-class:PANEL.COAG": {
+      "display": "PANEL.COAG",
+      "domain": "laboratory",
+      "count": 53
+    },
+    "loinc-class:PANEL.DEVICES": {
+      "display": "PANEL.DEVICES",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:PANEL.DRUG/TOX": {
+      "display": "PANEL.DRUG/TOX",
+      "domain": "laboratory",
+      "count": 168
+    },
+    "loinc-class:PANEL.FERT": {
+      "display": "PANEL.FERT",
+      "domain": "laboratory",
+      "count": 8
+    },
+    "loinc-class:PANEL.H&P": {
+      "display": "PANEL.H&P",
+      "domain": null,
+      "count": 5
+    },
+    "loinc-class:PANEL.HEDIS": {
+      "display": "PANEL.HEDIS",
+      "domain": "laboratory",
+      "count": 184
+    },
+    "loinc-class:PANEL.HEM/BC": {
+      "display": "PANEL.HEM/BC",
+      "domain": "laboratory",
+      "count": 91
+    },
+    "loinc-class:PANEL.HL7.CYTOGEN": {
+      "display": "PANEL.HL7.CYTOGEN",
+      "domain": "laboratory",
+      "count": 18
+    },
+    "loinc-class:PANEL.HL7.GENETICS": {
+      "display": "PANEL.HL7.GENETICS",
+      "domain": "laboratory",
+      "count": 14
+    },
+    "loinc-class:PANEL.HLA": {
+      "display": "PANEL.HLA",
+      "domain": "genetics",
+      "count": 27
+    },
+    "loinc-class:PANEL.HNA": {
+      "display": "PANEL.HNA",
+      "domain": "laboratory",
+      "count": 3
+    },
+    "loinc-class:PANEL.HPA": {
+      "display": "PANEL.HPA",
+      "domain": "laboratory",
+      "count": 1
+    },
+    "loinc-class:PANEL.MICRO": {
+      "display": "PANEL.MICRO",
+      "domain": "laboratory",
+      "count": 487
+    },
+    "loinc-class:PANEL.MISC": {
+      "display": "PANEL.MISC",
+      "domain": "laboratory",
+      "count": 5
+    },
+    "loinc-class:PANEL.MOLPATH": {
+      "display": "PANEL.MOLPATH",
+      "domain": "genetics",
+      "count": 46
+    },
+    "loinc-class:PANEL.MOLPATH.PHARMG": {
+      "display": "PANEL.MOLPATH.PHARMG",
+      "domain": "genetics",
+      "count": 5
+    },
+    "loinc-class:PANEL.NEURO": {
+      "display": "PANEL.NEURO",
+      "domain": "functional",
+      "count": 26
+    },
+    "loinc-class:PANEL.OB.US": {
+      "display": "PANEL.OB.US",
+      "domain": "imaging",
+      "count": 2
+    },
+    "loinc-class:PANEL.OBS": {
+      "display": "PANEL.OBS",
+      "domain": "laboratory",
+      "count": 1
+    },
+    "loinc-class:PANEL.PATH": {
+      "display": "PANEL.PATH",
+      "domain": "pathology",
+      "count": 10
+    },
+    "loinc-class:PANEL.PULM": {
+      "display": "PANEL.PULM",
+      "domain": "functional",
+      "count": 5
+    },
+    "loinc-class:PANEL.RAD": {
+      "display": "PANEL.RAD",
+      "domain": "imaging",
+      "count": 5
+    },
+    "loinc-class:PANEL.SERO": {
+      "display": "PANEL.SERO",
+      "domain": "laboratory",
+      "count": 85
+    },
+    "loinc-class:PANEL.SPEC": {
+      "display": "PANEL.SPEC",
+      "domain": "laboratory",
+      "count": 2
+    },
+    "loinc-class:PANEL.SURVEY.CMS": {
+      "display": "PANEL.SURVEY.CMS",
+      "domain": null,
+      "count": 179
+    },
+    "loinc-class:PANEL.SURVEY.MDS": {
+      "display": "PANEL.SURVEY.MDS",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:PANEL.UA": {
+      "display": "PANEL.UA",
+      "domain": "laboratory",
+      "count": 34
+    },
+    "loinc-class:PANEL.US.URO": {
+      "display": "PANEL.US.URO",
+      "domain": "imaging",
+      "count": 2
+    },
+    "loinc-class:PATH": {
+      "display": "PATH",
+      "domain": "pathology",
+      "count": 707
+    },
+    "loinc-class:PATH.HISTO": {
+      "display": "PATH.HISTO",
+      "domain": "pathology",
+      "count": 57
+    },
+    "loinc-class:PATH.PROTOCOLS.BRST": {
+      "display": "PATH.PROTOCOLS.BRST",
+      "domain": "pathology",
+      "count": 18
+    },
+    "loinc-class:PATH.PROTOCOLS.GENER": {
+      "display": "PATH.PROTOCOLS.GENER",
+      "domain": "pathology",
+      "count": 29
+    },
+    "loinc-class:PATH.PROTOCOLS.PROST": {
+      "display": "PATH.PROTOCOLS.PROST",
+      "domain": "pathology",
+      "count": 19
+    },
+    "loinc-class:PATH.PROTOCOLS.SKIN": {
+      "display": "PATH.PROTOCOLS.SKIN",
+      "domain": "pathology",
+      "count": 18
+    },
+    "loinc-class:PHENX": {
+      "display": "PHENX",
+      "domain": null,
+      "count": 5
+    },
+    "loinc-class:PUBLICHEALTH": {
+      "display": "PUBLICHEALTH",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:PULM": {
+      "display": "PULM",
+      "domain": "functional",
+      "count": 878
+    },
+    "loinc-class:RAD": {
+      "display": "RAD",
+      "domain": "imaging",
+      "count": 7440
+    },
+    "loinc-class:SERO": {
+      "display": "SERO",
+      "domain": "laboratory",
+      "count": 3167
+    },
+    "loinc-class:SPEC": {
+      "display": "SPEC",
+      "domain": "laboratory",
+      "count": 311
+    },
+    "loinc-class:SURG": {
+      "display": "SURG",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:SURVEY.CMS": {
+      "display": "SURVEY.CMS",
+      "domain": null,
+      "count": 379
+    },
+    "loinc-class:SURVEY.MDS": {
+      "display": "SURVEY.MDS",
+      "domain": null,
+      "count": 1
+    },
+    "loinc-class:SURVEY.MISC": {
+      "display": "SURVEY.MISC",
+      "domain": null,
+      "count": 4
+    },
+    "loinc-class:TRNSPLNT.ORGAN": {
+      "display": "TRNSPLNT.ORGAN",
+      "domain": null,
+      "count": 2
+    },
+    "loinc-class:TUMRRGT": {
+      "display": "TUMRRGT",
+      "domain": null,
+      "count": 19
+    },
+    "loinc-class:UA": {
+      "display": "UA",
+      "domain": "laboratory",
+      "count": 597
+    },
+    "loinc-class:US.URO": {
+      "display": "US.URO",
+      "domain": "imaging",
+      "count": 50
+    },
+    "loinc-class:VACCIN": {
+      "display": "VACCIN",
+      "domain": null,
+      "count": 2
     },
     "pami-nomenclador:15": {
       "display": "Prefijo 15",
@@ -752,6 +1522,7 @@
     }
   },
   "bySource": {
+    "loinc": 79462,
     "hl7-tho": 595,
     "ucum": 772,
     "fonasa-mle": 648,
@@ -763,12 +1534,389 @@
     "gtr-ncbi": 63919
   },
   "loinc": {
-    "present": false,
-    "withSpanishDesignation": 10237,
-    "panels": 0,
-    "panelMembers": 0,
-    "unmappedClasses": {},
-    "excludedByClass": null
+    "present": true,
+    "withSpanishDesignation": 79435,
+    "panels": 1934,
+    "panelMembers": 18236,
+    "unmappedClasses": {
+      "ADMIN.ID": 3,
+      "ADMIN": 5,
+      "ATTACH.CLINRPT": 1,
+      "ADMIN.PATIENT": 8,
+      "ADMIN.PATIENT.ID": 4,
+      "ADMIN.PATIENT.DEMOG": 4,
+      "ATTACH.MEDS": 2,
+      "ADMIN.FACILITY": 7,
+      "BDYWGT.MOLEC": 1,
+      "BP.MOLEC": 1,
+      "BDYTMP.MOLEC": 2,
+      "BDYWGT.ATOM": 3,
+      "BDYTMP.ATOM": 2,
+      "BDYHGT.ATOM": 2,
+      "BDYSURF.ATOM": 1,
+      "CLIN": 24,
+      "CLIN.RISK": 6,
+      "CARD.PROC": 126,
+      "CARD.RISK": 2,
+      "CLINTRIAL": 1,
+      "DOC.ONTOLOGY": 1,
+      "DOC.MISC": 3,
+      "DEVICES": 17,
+      "DOC.PUBLICHEALTH": 3,
+      "ED": 1,
+      "H&P.HX": 39,
+      "H&P.PX": 11,
+      "HL7.CCDA": 1,
+      "HRTRATE.MOLEC": 2,
+      "IO_IN.INFUS": 4,
+      "MEDS": 1,
+      "NEMSIS": 1,
+      "ONCOLOGY": 6,
+      "PANEL.H&P": 5,
+      "PANEL.SURVEY.CMS": 179,
+      "PHENX": 5,
+      "PANEL.ADMIN": 3,
+      "PUBLICHEALTH": 1,
+      "PANEL.DEVICES": 1,
+      "PANEL.SURVEY.MDS": 1,
+      "SURG": 2,
+      "SURVEY.CMS": 379,
+      "SURVEY.MDS": 1,
+      "SURVEY.MISC": 4,
+      "TRNSPLNT.ORGAN": 2,
+      "TUMRRGT": 19,
+      "VACCIN": 2
+    },
+    "excludedByClass": {
+      "ADMIN.ID|2": 54,
+      "ADMIN|2": 344,
+      "ATTACH.CLINRPT|": 65,
+      "ATTACH|": 11,
+      "ADMIN.PATIENT|2": 39,
+      "ADMIN.PATIENT.ID|2": 12,
+      "ADMIN.PATIENT.DEMOG|2": 38,
+      "ATTACH.AMB|": 55,
+      "ATTACH.MEDS|": 52,
+      "ATTACH.ED|": 29,
+      "ATTACH.REHAB.PSYCH|": 75,
+      "ATTACH.REHAB|": 5,
+      "ATTACH.REHAB.ABUSE|": 93,
+      "ATTACH.LAB|": 22,
+      "ATTACH.MODIFIER|": 32,
+      "ATTACH.CARD|": 1,
+      "ATTACH.OBS|": 1,
+      "ATTACH.REHAB.CARDIAC|": 73,
+      "ATTACH.REHAB.NURS|": 73,
+      "ATTACH.REHAB.OT|": 76,
+      "ATTACH.REHAB.PT|": 76,
+      "ATTACH.REHAB.RT|": 70,
+      "ATTACH.REHAB.SOCIAL|": 73,
+      "ATTACH.GI|": 1,
+      "ATTACH.RESP|": 1,
+      "ATTACH.REHAB.SPEECH|": 76,
+      "ATTACH.CPHS|": 139,
+      "ADMIN.FACILITY|2": 31,
+      "ART|2": 44,
+      "ADMIN.DEMOG|2": 20,
+      "ATTACH.REHAB.PULM|": 54,
+      "ATTACH.PERIODONTAL|": 2,
+      "APTA|2": 59,
+      "BDYWGT.MOLEC|2": 34,
+      "BP.MOLEC|2": 129,
+      "BDYTMP.MOLEC|2": 25,
+      "BDYCRC.ATOM|2": 5,
+      "BDYWGT.ATOM|2": 15,
+      "BDYCRC.MOLEC|2": 23,
+      "BP.ATOM|2": 20,
+      "BDYTMP.ATOM|2": 6,
+      "BDYHGT.ATOM|2": 6,
+      "BDYSURF.ATOM|2": 3,
+      "BP.PSTN.MOLEC|2": 10,
+      "BP.CENT.MOLEC|2": 95,
+      "BDYHGT.MOLEC|2": 9,
+      "BDYTMP.TIMED.MOLEC|2": 15,
+      "BP.TIMED.MOLEC|2": 30,
+      "BP.VENOUS.MOLEC|2": 17,
+      "CLIN|2": 478,
+      "CLIN.RISK|2": 96,
+      "CARD.PROC|2": 49,
+      "CLIN.VET|2": 13,
+      "CARD.RISK|2": 22,
+      "CLINTRIAL|2": 10,
+      "DOC.ONTOLOGY|2": 3758,
+      "DOC.ADMIN|2": 68,
+      "DOC.MISC|2": 285,
+      "DOC.REF|2": 127,
+      "DEVICES|2": 179,
+      "DOCUMENT.REGULATORY|2": 84,
+      "DENTAL|2": 304,
+      "DOC.REF.CTP|2": 20,
+      "DOC.QUALITY|2": 8,
+      "DOC.PUBLICHEALTH|2": 10,
+      "EYE.PX|2": 82,
+      "ENDO.GI|2": 315,
+      "ENDO.PULM|2": 1,
+      "EYE|2": 150,
+      "ED|2": 85,
+      "EYE.US|2": 3,
+      "EYE.GLASSES|2": 102,
+      "EYE.CONTACT_LENS|2": 123,
+      "EYE.RETINAL_RX|2": 38,
+      "EYE.HX.NEI|2": 25,
+      "EYE.HX|2": 37,
+      "EYE.PX.NEI|2": 53,
+      "EYE.EOG.NEI|2": 4,
+      "EYE.ANGIO.NEI|2": 4,
+      "EYE.SLITLAMP.NEI|2": 23,
+      "EYE.LENSOMETRY|2": 38,
+      "FUNCTION|2": 17,
+      "GEN.US|2": 5,
+      "H&P.HX|2": 862,
+      "H&P.PX|2": 496,
+      "HL7.CCDA|2": 41,
+      "HRTRATE.ATOM|2": 20,
+      "H&P.SURG PROC|2": 29,
+      "HRTRATE.TIMED.MOL|2": 23,
+      "HL7.SMP|2": 9,
+      "HRTRATE.MOLEC|2": 58,
+      "HRTRATE.PSTN.MOLEC|2": 6,
+      "IO.TUBE|2": 98,
+      "IO_IN.MOLEC|2": 30,
+      "IO_IN_SALTS+CALS|2": 73,
+      "IO_OUT.MOLEC|2": 55,
+      "ICU|2": 1,
+      "IO_IN.SUMMARY|2": 7,
+      "IO_OUT.TIMED.MOLE|2": 113,
+      "IEEE Rosetta|2": 2,
+      "IO_IN.TIMED.MOLEC|2": 68,
+      "IO_IN.INFUS|2": 16,
+      "IO_OUT.ATOM|2": 7,
+      "IO_IN.ATOM|2": 6,
+      "MEPS|4": 3,
+      "MEDS|2": 66,
+      "NUTRITION&DIETETICS|2": 213,
+      "NEONAT|2": 54,
+      "NEMSIS|2": 141,
+      "NIH.MOTOR|2": 48,
+      "NIH.SENSORY|2": 1,
+      "NIH.COGNITIVE|2": 333,
+      "OBGYN|2": 37,
+      "ONCOLOGY|2": 16,
+      "PANEL.SURVEY.PNDS|4": 1,
+      "PANEL.CLIN|2": 47,
+      "PANEL.EYE|2": 15,
+      "PANEL.SURVEY.ORTHOPEDICS|4": 4,
+      "PANEL.SURVEY.GNHLTH|4": 330,
+      "PANEL.H&P|2": 60,
+      "PANEL.SURVEY.MTLHLTH|4": 47,
+      "PANEL.SURVEY.SDOH|4": 42,
+      "PANEL.SURVEY.R-OUTCOMES|4": 23,
+      "PANEL.DOC|2": 62,
+      "PANEL.SURVEY.CMS|4": 687,
+      "PANEL.CLIN.RISK|2": 23,
+      "PANEL.NUTRITION&DIET|2": 31,
+      "PANEL.NEONAT|2": 8,
+      "PATIENT SAFETY|2": 54,
+      "PANEL.PATIENT SAFETY|2": 4,
+      "PANEL.SURVEY.MEPS|4": 1,
+      "PANEL.SURVEY.HENDRICH|4": 1,
+      "PANEL.SURVEY.UNMETHELNEED|4": 1,
+      "PANEL.SURVEY.COVID|4": 20,
+      "PHENX|2": 3681,
+      "PANEL.PHENX|2": 704,
+      "PANEL.MEDS|2": 4,
+      "PANEL.ADMIN|2": 35,
+      "PANEL.SURVEY.RSS|4": 1,
+      "PANEL.SURVEY.NICHQ|4": 1,
+      "PANEL.SURVEY.WHYMPI|4": 2,
+      "PANEL.SURVEY.PAIN|4": 3,
+      "PANEL.CLIN.VET|2": 1,
+      "PANEL.SURVEY.PROMIS|4": 231,
+      "PANEL.SURVEY.NEURO|4": 8,
+      "PUBLICHEALTH|2": 197,
+      "PANEL.ATTACH.MOD|": 3,
+      "PANEL.IO|2": 3,
+      "PANEL.BP|2": 5,
+      "PANEL.VITALS|2": 6,
+      "PANEL.FUNCTION|2": 1,
+      "PANEL.BDYTMP|2": 1,
+      "PANEL.DEVICES|2": 15,
+      "PANEL.SURVEY.PHQ|4": 9,
+      "PANEL.CV|2": 3,
+      "PANEL.SURVEY.MDS|4": 223,
+      "PANEL.TUMRRGT|2": 19,
+      "PANEL.SURVEY.OASIS|4": 34,
+      "PANEL.SURVEY.RFC|4": 2,
+      "PANEL.ART|2": 1,
+      "PANEL.SURVEY.GDS|4": 2,
+      "PANEL.SURVEY.HHCC|4": 1,
+      "PANEL.SURVEY.OMAHA|4": 1,
+      "PANEL.SURVEY.LIV-HIV|4": 1,
+      "PANEL.SURVEY.HIV-SSC|4": 1,
+      "PANEL.SURVEY.QAM|4": 1,
+      "PANEL.SURVEY.CARE|4": 50,
+      "PANEL.SURVEY.BIMS|4": 3,
+      "PANEL.SURVEY.CAM|4": 1,
+      "PANEL.SURVEY.NMMDS|4": 30,
+      "PANEL.SURVEY.USSGFHT|4": 5,
+      "PANEL.VACCIN|2": 3,
+      "PANEL.ED|2": 11,
+      "PANEL.SURVEY.QRDA|4": 1,
+      "PANEL.PHR|2": 9,
+      "PANEL.SURVEY.MFS|4": 1,
+      "PANEL.TIMP|4": 5,
+      "PANEL.SURVEY.ESRD|4": 26,
+      "PANEL.NEMSIS|2": 21,
+      "PANEL.SURVEY.NEUROQ|4": 43,
+      "PANEL.SURVEY.SAMHSA|4": 1,
+      "PANEL.SURVEY.CDC|4": 81,
+      "PANEL.SURVEY.OPTIMAL|4": 7,
+      "PANEL.SURVEY.HHS|4": 15,
+      "PANEL.SURVEY.EPDS|4": 1,
+      "PANEL.SURVEY.MLHFQ|4": 1,
+      "PANEL.SURVEY.HAQ|4": 1,
+      "PANEL.SURVEY.NSRAS|4": 1,
+      "PANEL.SURVEY.AHRQ|4": 9,
+      "PANEL.SURVEY.NORTON|4": 1,
+      "PANEL.SURVEY.PCORI|4": 4,
+      "PANEL.ONCO|2": 3,
+      "PANEL.SURVEY.COOP|4": 2,
+      "PANEL.SURVEY.ADVAULT|4": 1,
+      "PANEL.SURVEY.PCORNET|4": 2,
+      "PANEL.SURVEY.PASII|4": 1,
+      "PANEL.SURVEY.PAS|4": 1,
+      "PANEL.IEEE ROSETTA|2": 12,
+      "PANEL.HL7.CCDA|2": 1,
+      "PANEL.APTA|2": 18,
+      "PANEL.SURVEY.HARK|4": 1,
+      "PANEL.SURVEY.NHANES|4": 1,
+      "PANEL.SURVEY.AMNART|4": 1,
+      "PANEL.SURVEY.BPI|4": 1,
+      "PANEL.SURVEY.IPAQ|4": 9,
+      "PANEL.UPDRS|2": 8,
+      "PANEL.SURVEY.GPCOG|4": 5,
+      "PANEL.SURG|2": 11,
+      "PANEL.SURVEY.DAST|4": 2,
+      "PANEL.SURVEY.ACT|4": 1,
+      "PANEL.SURVEY.ALSFRSR|4": 1,
+      "PANEL.NIH.MOTOR|2": 5,
+      "PANEL.NIH.COGNITIVE|2": 7,
+      "PANEL.SURVEY.NIH.EMO|4": 36,
+      "PANEL.TRAUMA|2": 2,
+      "PANEL.SURVEY.CESD|4": 1,
+      "PANEL.SURVEY.BDI|4": 2,
+      "PANEL.SURVEY.DUKE-AD|4": 1,
+      "PANEL.SURVEY.CSSRS|4": 9,
+      "PANEL.SURVEY.WELLRX|4": 1,
+      "PANEL.SURVEY.SEEK|4": 1,
+      "PANEL.SURVEY.NIDA|4": 8,
+      "PANEL.SURVEY.HITS|4": 1,
+      "PANEL.SURVEY.BRIEF|4": 1,
+      "PANEL.SURVEY.RUDAS|4": 1,
+      "PANEL.SURVEY.CHILD-PUGH|4": 1,
+      "PANEL.SURVEY.PROWL|4": 2,
+      "PANEL.SURVEY.CNPI|4": 3,
+      "PANEL.SURVEY.RMDQ|4": 1,
+      "PANEL.SURVEY.CBS-8|4": 1,
+      "PANEL.SURVEY.LKSS|4": 1,
+      "PANEL.SURVEY.SLP|4": 5,
+      "RESP.MOLEC|2": 16,
+      "RESP.ATOM|2": 20,
+      "RESP.TIMED.MOLEC|2": 16,
+      "SURVEY.PNDS|4": 42,
+      "SURVEY.PAIN|4": 63,
+      "SURVEY.ORTHOPEDICS|4": 53,
+      "SURG|2": 92,
+      "SURVEY.MTLHLTH|4": 403,
+      "SURVEY.SLP|4": 34,
+      "SURVEY.R-OUTCOMES|4": 79,
+      "SURVEY.GNHLTH|4": 1629,
+      "SURVEY.CMS|4": 589,
+      "SURVEY.COVID|4": 186,
+      "SURVEY.ADVAULT|4": 2,
+      "SURVEY.SDOH|4": 168,
+      "SURVEY.UNMETHELNEED|4": 6,
+      "SURVEY.PHQ|4": 82,
+      "SURVEY.NICHQ|4": 65,
+      "SURVEY.RSS|4": 2,
+      "SURVEY.WHYMPI|4": 3,
+      "SURVEY.PROMIS|4": 2463,
+      "SURVEY.BCAT|4": 1,
+      "SURVEY.NEURO|4": 44,
+      "SURVEY.NURSE.HHCC|4": 185,
+      "SURVEY.NURSE.LIV-HIV|4": 38,
+      "SURVEY.NURSE.OMAHA|4": 402,
+      "SURVEY.NURSE.QAM|4": 10,
+      "SURVEY.NURSE.HIV-SSC|4": 27,
+      "SURVEY.MDS|4": 863,
+      "SURVEY.OASIS|4": 152,
+      "SURVEY.RFC|4": 85,
+      "SURVEY.GDS|4": 31,
+      "SURVEY.CARE|4": 289,
+      "SURVEY.NMMDS|4": 161,
+      "SURVEY.USSGFHT|4": 22,
+      "SURVEY.QRDA|4": 9,
+      "SURVEY.MFS|4": 8,
+      "SURVEY.ESRD|4": 308,
+      "SURVEY.NEUROQ|4": 383,
+      "SURVEY.CDC|4": 214,
+      "SURVEY.SAMHSA|4": 35,
+      "SURVEY.CERNER|4": 3,
+      "SURVEY.OPTIMAL|4": 96,
+      "SURVEY.HHS|4": 13,
+      "SURVEY.EPDS|4": 11,
+      "SURVEY.AAOS|4": 1,
+      "SURVEY.MLHFQ|4": 24,
+      "SURVEY.NSRAS|4": 8,
+      "SURVEY.AHRQ|4": 76,
+      "SURVEY.MISC|4": 3,
+      "SURVEY.NORTON|4": 6,
+      "SURVEY.NIH_TOOLBOX|4": 2,
+      "SURVEY.PCORNET|4": 13,
+      "SURVEY.NHCS|4": 22,
+      "SURVEY.COOP|4": 20,
+      "SURVEY.HAQ|4": 37,
+      "SURVEY.PAS|4": 1,
+      "SURVEY.PASII|4": 1,
+      "SURVEY.HARK|4": 5,
+      "SURVEY.NHANES|4": 18,
+      "SURVEY.HWS|4": 29,
+      "SURVEY.AMNART|4": 48,
+      "SURVEY.BPI|4": 8,
+      "SURVEY.IPAQ|4": 53,
+      "SURVEY.ADHD|4": 5,
+      "SURVEY.GPCOG|4": 17,
+      "SURVEY.DAST|4": 2,
+      "SURVEY.ACT|4": 6,
+      "SURVEY.ALSFRSR|4": 14,
+      "SKNFLD.MOLEC|2": 3,
+      "SURVEY.NIH.EMO|4": 62,
+      "SURVEY.CESD|4": 1,
+      "SURVEY.BDI|4": 2,
+      "SURVEY.DUKE-AD|4": 1,
+      "SURVEY.PEG|4": 3,
+      "SURVEY.PRAPARE|4": 2,
+      "SURVEY.CSSRS|4": 56,
+      "SURVEY.WELLRX|4": 15,
+      "SURVEY.SEEK|4": 11,
+      "SURVEY.NIDA|4": 75,
+      "SURVEY.HITS|4": 1,
+      "SURVEY.BRIEF|4": 1,
+      "SURVEY.RUDAS|4": 1,
+      "SURVEY.CHILD-PUGH|4": 3,
+      "SURVEY.PROWL|4": 43,
+      "SURVEY.CNPI|4": 16,
+      "SURVEY.RMDQ|4": 2,
+      "SURVEY.CBS-8|4": 4,
+      "SURVEY.LKSS|4": 1,
+      "TRAUMA|2": 84,
+      "TRNSPLNT.ORGAN|2": 24,
+      "TUMRRGT|2": 462,
+      "TIMP|4": 53,
+      "UPDRS|2": 56,
+      "VACCIN|2": 105,
+      "VOLUME.MOLEC|2": 4
+    }
   },
   "tariffs": {
     "fonasa-mle": {
@@ -15064,72 +16212,55 @@
       ]
     }
   },
-  "missingLayers": [
-    {
-      "layer": "loinc",
-      "reason": "no hay Loinc.csv (exige cuenta en loinc.org) ni descarga por tx.fhir.org + NLM (fetch-loinc-txfhir.mjs, fetch-loinc-ctss.mjs)"
-    }
-  ],
+  "missingLayers": [],
   "gaps": [
     {
-      "source": "LOINC (distribución completa: Loinc.csv, PartFile, PanelsAndForms, LinguisticVariants, Universal Lab Orders, RSNA Playbook, Top 2000)",
+      "source": "LOINC, distribución oficial (zip «LOINC Table + Accessory Files»)",
       "url": "https://loinc.org/downloads/",
-      "reason": "Exige cuenta gratuita en loinc.org y aceptar la licencia (acción de una persona). Además, desde el entorno de esta sesión loinc.org responde 403 por la política de red.",
+      "reason": "Exige cuenta en loinc.org (403 del propio servidor a clientes sin sesión). LOINC se cargó por tx.fhir.org + NLM; lo que SÓLO trae el zip queda pendiente: TIME_ASPCT, SYSTEM y SCALE_TYP en inglés, partes LP (LoincPartLink), Universal Lab Orders, Top 2000 y la armonización RSNA Playbook. El parser del zip ya existe.",
       "status": "pendiente-usuario"
-    },
-    {
-      "source": "LOINC, subconjunto público por NLM Clinical Table Search Service (import-loinc.mjs)",
-      "url": "https://clinicaltables.nlm.nih.gov/api/loinc_items/v3/search",
-      "reason": "Sin cuenta, pero clinicaltables.nlm.nih.gov responde 403 desde esta sesión (política de red del entorno).",
-      "status": "bloqueado-red"
-    },
-    {
-      "source": "NCBI Genetic Testing Registry (GTR)",
-      "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/",
-      "reason": "Dominio público (NCBI). ftp.ncbi.nlm.nih.gov responde 403 desde esta sesión. No se escribió parser a ciegas: el formato se valida contra el archivo real cuando esté.",
-      "status": "bloqueado-red"
     },
     {
       "source": "RSNA RadLex Playbook (RPID)",
       "url": "https://playbook.radlex.org/",
-      "reason": "playbook.radlex.org responde 403 desde esta sesión. La armonización LOINC/RSNA viaja también dentro de la distribución de LOINC (LoincRsnaRadiologyPlaybook.csv), que sí está soportada por el parser.",
-      "status": "bloqueado-red"
+      "reason": "La descarga (api3.rsna.org/radlex/v1/createCsv) está detrás de la aceptación del «RadLex License Agreement and Terms of Use». No se acepta una licencia en nombre del propietario.",
+      "status": "licencia"
     },
     {
-      "source": "HL7 tx.fhir.org / fhir.loinc.org ($lookup de LOINC con partes y variante ES)",
-      "url": "https://tx.fhir.org/r4",
-      "reason": "403 desde esta sesión; fhir.loinc.org además exige cuenta de loinc.org.",
-      "status": "bloqueado-red"
-    },
-    {
-      "source": "UCUM (ucum-essence.xml oficial)",
-      "url": "https://ucum.org/ucum",
-      "reason": "ucum.org responde 403; se usó la tabla de @lhncbc/ucum-lhc (npm), que se genera de ucum-essence.xml.",
-      "status": "sustituido"
-    },
-    {
-      "source": "CUPS (Colombia), nomenclador de México, prestaciones SUS Bolivia, INLASA",
-      "url": "https://www.datos.gov.co/ · https://www.datos.gob.mx/ · https://www.minsalud.gob.bo/ · https://inlasa.gob.bo/",
-      "reason": "Todos responden 403 desde esta sesión (política de red del entorno) y no hay redistribución en npm/PyPI/Maven. INLASA ya tiene importador propio (import-inlasa.mjs).",
-      "status": "bloqueado-red"
-    },
-    {
-      "source": "Archivos oficiales de FONASA, DATASUS (SIGTAP), ANS (TUSS) y datos.gob.ar (PAMI)",
-      "url": "https://www.fonasa.cl/ · ftp://ftp2.datasus.gov.br/ · https://dadosabertos.ans.gov.br/ · https://www.datos.gob.ar/",
-      "reason": "Se cargaron desde redistribuciones en npm (ver SOURCES.md); los originales responden 403 desde esta sesión y no se pudieron cotejar. SIGTAP y TUSS declaran el ZIP oficial y su checksum; FONASA y PAMI no.",
-      "status": "sustituido"
-    },
-    {
-      "source": "Subgrupos mixtos (diagnóstico + tratamiento) de FONASA (11-01, 12-01, 13-01, 17-01, 17-07, 18-01, 19-01, 20-01), TUSS (4.02, 4.04, 4.07, 4.12, 4.13, 4.15) y PAMI (17, 26, 28, 29, 30, 31…)",
-      "url": "—",
-      "reason": "Contienen pruebas funcionales y endoscopias reales (ECG, espirometría, audiometría, campimetría, EEG) mezcladas con procedimientos terapéuticos. Clasificarlas exige curaduría ítem por ítem: quedan fuera, con su tamaño en lab-tests-coverage.json.",
-      "status": "curaduria-pendiente"
-    },
-    {
-      "source": "DICOM CID 29 (modalidades de adquisición)",
+      "source": "DICOM PS3.16 CID 29 (modalidades de adquisición)",
       "url": "https://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html",
-      "reason": "dicom.nema.org responde 403. El code system DCM completo viaja en @medplum/definitions, pero sin la lista de miembros de CID 29 no se puede saber cuáles son modalidades sin adivinar.",
-      "status": "bloqueado-red"
+      "reason": "Legible, pero la página de derechos de autor y marca de NEMA no responde (404) y el aviso del estándar es sólo un descargo de responsabilidad: la licencia no quedó verificada.",
+      "status": "licencia-sin-verificar"
+    },
+    {
+      "source": "SIGTAP (cotejo con el original)",
+      "url": "ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/",
+      "reason": "DATASUS publica sólo por FTP; el proxy del entorno sólo admite HTTPS. La redistribución npm declara el archivo y su checksum, pero no se cotejó.",
+      "status": "no-cotejado"
+    },
+    {
+      "source": "FONASA (cotejo con el XLSX oficial)",
+      "url": "https://www.fonasa.cl/",
+      "reason": "fonasa.cl responde 403. Se usa la redistribución npm, sin cotejar.",
+      "status": "no-cotejado"
+    },
+    {
+      "source": "CUPS completo (Colombia)",
+      "url": "https://www.datos.gov.co/",
+      "reason": "datos.gov.co no publica la tabla CUPS completa (búsquedas «CUPS» y «Clasificación Única de Procedimientos»); se usan los conjuntos POS Pópuli de MinSalud (laboratorio y PBS).",
+      "status": "parcial"
+    },
+    {
+      "source": "Nomencladores de México, prestaciones SUS Bolivia, INLASA",
+      "url": "https://www.datos.gob.mx/ · https://www.minsalud.gob.bo/ · https://inlasa.gob.bo/",
+      "reason": "minsalud.gob.bo e inlasa.gob.bo no responden (sin respuesta del servidor); no se encontró un catálogo nacional de análisis abierto de México. INLASA ya tiene importador propio (import-inlasa.mjs).",
+      "status": "sin-acceso"
+    },
+    {
+      "source": "Subgrupos mixtos (diagnóstico + tratamiento) de FONASA, TUSS, PAMI y PBS de Colombia",
+      "url": "—",
+      "reason": "Contienen pruebas funcionales y endoscopias reales mezcladas con procedimientos terapéuticos; clasificarlas exige curaduría ítem por ítem. Tamaños en lab-tests-coverage.json (excludedByPrefix).",
+      "status": "curaduria-pendiente"
     },
     {
       "source": "SNOMED CT (tipos de muestra y procedimientos)",
@@ -15146,7 +16277,7 @@
     {
       "source": "Catálogos de laboratorios de referencia (Mayo Clinic Labs, ARUP, Quest)",
       "url": "https://www.mayocliniclabs.com/",
-      "reason": "Sólo sirven para detectar huecos, nunca como fuente de códigos; además responden 403 desde esta sesión. Tubo/contenedor por análisis sólo lo publican estos catálogos: queda sin fuente.",
+      "reason": "Sólo sirven para detectar huecos, nunca como fuente de códigos. Tubo/contenedor por análisis y rangos de referencia sólo los publican estos catálogos: quedan sin fuente abierta.",
       "status": "solo-referencia"
     }
   ]

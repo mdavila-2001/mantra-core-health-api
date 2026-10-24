@@ -38,6 +38,17 @@
       "lab-tests-icd10pcs-cms.ndjson.gz"
     ]
   },
+  "lab-tests-loinc": {
+    "sha256": "cc02119685ed099d31e35259c6da1143413aa38d236d56f63eb9fb415f5cd9ab",
+    "lines": 79462,
+    "files": [
+      "lab-tests-loinc.part01.ndjson.gz",
+      "lab-tests-loinc.part02.ndjson.gz",
+      "lab-tests-loinc.part03.ndjson.gz",
+      "lab-tests-loinc.part04.ndjson.gz",
+      "lab-tests-loinc.part05.ndjson.gz"
+    ]
+  },
   "lab-tests-pami-nomenclador": {
     "sha256": "2e3e9855da64fd9ef3e0d589935d479123a60463891a36c8212bcc3139c3acb9",
     "lines": 3034,
