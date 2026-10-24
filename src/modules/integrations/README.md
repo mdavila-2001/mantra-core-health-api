@@ -132,10 +132,15 @@ base, no contra PostgreSQL.
   referencia (`secretRef`) de la credencial activa de la conexión, resuelta por
   `IntegrationsSecretsService` (`env:WEBHOOK_SECRET_<NOMBRE>`, ver `common/crypto/secret-ref.ts`). Para
   una rotación con ventana, la referencia admite dos entradas: `env:..._V2,env:..._V1` (firma con la
-  primera; valen ambas al verificar). Rotar la credencial retira la anterior. Sin credencial activa o
-  con una referencia que no resuelve se responde `412
+  primera; valen ambas al verificar). Cada entrada debe nombrar una variable del tenant dueño de la
+  conexión, `env:WEBHOOK_SECRET_<UUID DEL TENANT SIN GUIONES, EN MAYÚSCULAS>_<NOMBRE>`: el entorno es
+  compartido por todos los tenants y una referencia ajena no resuelve. Rotar la credencial retira la
+  anterior. Sin credencial activa o con una referencia que no resuelve se responde `412
   INTEGRATIONS_CONNECTION_SECRET_UNAVAILABLE`; no hay retroceso a una clave derivada del UUID.
 - **Callbacks idempotentes.** Un lock transaccional por `(conexión, firma)` serializa las entregas
   simultáneas y el índice único `uq_inbound_messages_connection_id_signature`
   (`database/SQL/patches/2026-10-24_integrations_inbound_signature_unique.sql`) es el respaldo: la
-  entrega perdedora responde como duplicado de la primera.
+  entrega perdedora responde como duplicado de la primera. La firma se normaliza antes de usarse como
+  clave (64 dígitos hex en minúsculas; sólo se admite el prefijo `sha256=` y se descarta), de modo que
+  reenviar una firma capturada con otra grafía no abre una segunda clave; una firma con otra forma se
+  rechaza con `401`.

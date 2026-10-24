@@ -16,6 +16,26 @@ import {
 import { InboundWebhookDto, InboundMessageResponseDto } from '../dto';
 import { INTEG } from '../integrations.concepts';
 
+/** Firma HMAC-SHA256 aceptada: 64 dígitos hex, con prefijo `sha256=` opcional. */
+const INBOUND_SIGNATURE = /^(?:sha256=)?([0-9a-f]{64})$/i;
+
+/**
+ * Forma única de una firma entrante: 64 dígitos hex en minúsculas, sin prefijo.
+ *
+ * Dos textos distintos (`sha256=` + hex, mayúsculas, un sufijo cualquiera tras
+ * `=`) pueden verificar contra el mismo HMAC; si la clave de deduplicación fuera
+ * el texto recibido, quien capturó una firma válida la reenviaría con otra
+ * grafía y duplicaría la entrega. La clave de deduplicación y la columna
+ * almacenada usan siempre esta forma, y lo que no la cumple no se acepta.
+ *
+ * @param raw - Firma tal como llegó.
+ * @returns La firma normalizada, o `null` si no tiene una forma admitida.
+ */
+function normalizeInboundSignature(raw: string | null | undefined) {
+  const match = raw ? INBOUND_SIGNATURE.exec(raw) : null;
+  return match ? match[1].toLowerCase() : null;
+}
+
 /**
  * Caso de uso de recepción de webhooks entrantes (UC-12-09).
  *
@@ -62,14 +82,12 @@ export class IntegrationsWebhooksService {
       // Respaldo del índice único (connection_id, signature): si dos entregas
       // llegaron a insertar a la vez, la segunda pierde la carrera y responde
       // como duplicado de la primera, ya confirmada.
-      if (
-        error instanceof UniqueConstraintViolationException &&
-        dto.signature
-      ) {
+      const signature = normalizeInboundSignature(dto.signature);
+      if (error instanceof UniqueConstraintViolationException && signature) {
         const existing = await this.inboundRepo.findByConnectionAndSignature(
           this.em.fork(),
           dto.connectionId,
-          dto.signature,
+          signature,
         );
         if (existing) {
           return {
@@ -106,10 +124,12 @@ export class IntegrationsWebhooksService {
         connection.id,
       );
       const rawBody = canonicalJson(dto.payloadJson);
+      // Sólo la forma canónica llega a verificarse: `verifySignature` tolera
+      // prefijos y grafías que no deben abrir una segunda clave de deduplicación.
+      const signature = normalizeInboundSignature(dto.signature);
       if (
-        !secrets.some((secret) =>
-          verifySignature(secret, rawBody, dto.signature),
-        )
+        !signature ||
+        !secrets.some((secret) => verifySignature(secret, rawBody, signature))
       ) {
         throw new UnauthorizedException('Firma del webhook inválida', {
           connectionId: dto.connectionId,
@@ -120,31 +140,28 @@ export class IntegrationsWebhooksService {
       // transaccional por (conexión, firma) serializa las entregas simultáneas:
       // la segunda espera el commit de la primera y ya la encuentra. El índice
       // único de la base es el respaldo si el lock se saltara.
-      if (dto.signature) {
-        await tx.execute(
-          'select pg_advisory_xact_lock(hashtextextended(?, 0))',
-          [`integrations.inbound:${dto.connectionId}:${dto.signature}`],
-        );
-        const existing = await this.inboundRepo.findByConnectionAndSignature(
-          tx,
-          dto.connectionId,
-          dto.signature,
-        );
-        if (existing) {
-          this.logger.info(
-            {
-              operation: 'integrations.webhook.inbound',
-              messageId: existing.id,
-              duplicate: true,
-            },
-            'De-duplicated inbound webhook',
-          );
-          return {
-            id: existing.id,
-            status: existing.statusConceptId,
+      await tx.execute('select pg_advisory_xact_lock(hashtextextended(?, 0))', [
+        `integrations.inbound:${connection.id}:${signature}`,
+      ]);
+      const existing = await this.inboundRepo.findByConnectionAndSignature(
+        tx,
+        dto.connectionId,
+        signature,
+      );
+      if (existing) {
+        this.logger.info(
+          {
+            operation: 'integrations.webhook.inbound',
+            messageId: existing.id,
             duplicate: true,
-          };
-        }
+          },
+          'De-duplicated inbound webhook',
+        );
+        return {
+          id: existing.id,
+          status: existing.statusConceptId,
+          duplicate: true,
+        };
       }
 
       const message = this.inboundRepo.create(tx, {
@@ -154,7 +171,7 @@ export class IntegrationsWebhooksService {
         payloadVersion: 1,
         endpointId: dto.endpointId,
         correlationId: dto.correlationId,
-        signature: dto.signature,
+        signature,
         receivedAt: new Date(),
       });
       await tx.flush();

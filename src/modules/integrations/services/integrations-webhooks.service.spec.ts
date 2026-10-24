@@ -367,4 +367,129 @@ describe('IntegrationsWebhooksService', () => {
       expect(d.tx.execute).not.toHaveBeenCalled();
     });
   });
+
+  describe('firma canónica para deduplicar (hallazgo de revisión de seguridad)', () => {
+    const payload = { a: 1 };
+
+    /** Base simulada que indexa por la firma tal como se almacena. */
+    function buildStore() {
+      const d = build();
+      d.connectionsRepo.findById.mockResolvedValue({ id: 'c1' });
+      const rows: Array<{
+        id: string;
+        signature: string;
+        statusConceptId: string;
+      }> = [];
+      d.inboundRepo.findByConnectionAndSignature.mockImplementation(
+        async (_em: unknown, _connectionId: string, signature: string) =>
+          rows.find((row) => row.signature === signature) ?? null,
+      );
+      d.inboundRepo.create.mockImplementation((_em: unknown, data: any) => {
+        const row = {
+          id: `i${rows.length + 1}`,
+          signature: data.signature,
+          statusConceptId: INTEG.INBOUND_RECEIVED,
+        };
+        rows.push(row);
+        return row;
+      });
+      return { d, rows };
+    }
+
+    it.each([
+      ['prefijo sha256=', (sig: string) => `sha256=${sig}`],
+      ['hex en mayúsculas', (sig: string) => sig.toUpperCase()],
+      ['prefijo y mayúsculas', (sig: string) => `sha256=${sig.toUpperCase()}`],
+    ])(
+      'reenviar la firma capturada con %s no duplica la entrega',
+      async (_name, vary) => {
+        const { d, rows } = buildStore();
+        const signature = sign(SECRET_NEW, payload);
+
+        const first = await d.service.receiveInbound({
+          connectionId: 'c1',
+          payloadJson: payload,
+          signature,
+        });
+        const replay = await d.service.receiveInbound({
+          connectionId: 'c1',
+          payloadJson: payload,
+          signature: vary(signature),
+        });
+
+        expect(first.duplicate).toBe(false);
+        expect(replay).toEqual({
+          id: first.id,
+          status: INTEG.INBOUND_RECEIVED,
+          duplicate: true,
+        });
+        expect(rows).toHaveLength(1);
+      },
+    );
+
+    it('almacena y bloquea con la firma normalizada, no con la grafía recibida', async () => {
+      const { d, rows } = buildStore();
+      const signature = sign(SECRET_NEW, payload);
+
+      await d.service.receiveInbound({
+        connectionId: 'c1',
+        payloadJson: payload,
+        signature: `sha256=${signature.toUpperCase()}`,
+      });
+
+      expect(rows[0].signature).toBe(signature);
+      expect(d.tx.execute).toHaveBeenCalledWith(
+        expect.stringContaining('pg_advisory_xact_lock'),
+        [`integrations.inbound:c1:${signature}`],
+      );
+    });
+
+    it('si el índice único rechaza una variante, relee con la firma normalizada', async () => {
+      const d = build();
+      const signature = sign(SECRET_NEW, payload);
+      d.em.transactional.mockRejectedValue(
+        new UniqueConstraintViolationException(new Error('duplicate key')),
+      );
+      d.inboundRepo.findByConnectionAndSignature.mockResolvedValue({
+        id: 'i0',
+        statusConceptId: INTEG.INBOUND_RECEIVED,
+      });
+
+      const res = await d.service.receiveInbound({
+        connectionId: 'c1',
+        payloadJson: payload,
+        signature: `sha256=${signature.toUpperCase()}`,
+      });
+
+      expect(res.duplicate).toBe(true);
+      expect(d.inboundRepo.findByConnectionAndSignature).toHaveBeenCalledWith(
+        d.tx,
+        'c1',
+        signature,
+      );
+    });
+
+    it.each([
+      ['un prefijo ajeno', (sig: string) => `md5=${sig}`],
+      ['un prefijo cualquiera con =', (sig: string) => `x=y=${sig}`],
+      ['un nibble sobrante (hex impar)', (sig: string) => `${sig}f`],
+      ['espacios alrededor', (sig: string) => ` ${sig} `],
+      ['el prefijo sin hex', () => 'sha256='],
+    ])(
+      'rechaza una firma con %s aunque el HMAC coincida',
+      async (_name, vary) => {
+        const { d, rows } = buildStore();
+
+        await expect(
+          d.service.receiveInbound({
+            connectionId: 'c1',
+            payloadJson: payload,
+            signature: vary(sign(SECRET_NEW, payload)),
+          }),
+        ).rejects.toBeInstanceOf(UnauthorizedException);
+        expect(rows).toHaveLength(0);
+        expect(d.tx.execute).not.toHaveBeenCalled();
+      },
+    );
+  });
 });
