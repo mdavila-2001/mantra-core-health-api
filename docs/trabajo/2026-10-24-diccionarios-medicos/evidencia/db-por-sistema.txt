@@ -1,0 +1,10 @@
+   internal_code   | conceptos | designaciones_es 
+-------------------+-----------+------------------
+ hgnc              |     41605 |            41842
+ fma               |      2331 |             6855
+ uberon            |      2113 |             5792
+ ncbitaxon         |      1006 |             1483
+ cl                |       217 |              532
+ sequence-ontology |        70 |              197
+(6 rows)
+

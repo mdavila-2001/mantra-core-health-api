@@ -45,10 +45,10 @@ export const RESTRICT_TO_CORPUS = { P685: 'ncbitaxon-medical' };
 /** Código del corpus → valor del identificador en Wikidata (NCBITaxon:1313 → 1313). */
 export const wikidataValue = (code) => String(code).replace(/^[A-Za-z]+:/, '');
 
-/** Valor del identificador en Wikidata → código del corpus (UBERON 0000948 → UBERON:0000948; FMA 7088 → FMA:7088). */
+/** Valor del identificador en Wikidata → código del corpus (UBERON 0000948 → UBERON:0000948; FMA 7088 → FMA:7088; CL_0000738 → CL:0000738). */
 export function corpusCode(prop, raw) {
   const spec = ID_PROPERTIES[prop];
-  const v = String(raw).trim();
+  const v = String(raw).trim().replace(/^([A-Za-z]+)_/, '$1:'); // P7963 viene como CL_0000738
   if (spec.prefix === 'HGNC' || spec.prefix === 'GO' || spec.prefix === 'SO' || spec.prefix === 'CL') return v.includes(':') ? v : `${spec.prefix}:${v}`;
   return `${spec.prefix}:${v.replace(/^[A-Za-z]+[:_]/, '')}`;
 }
