@@ -44,6 +44,9 @@ function build() {
   const patientProfilesRepo = { findById: mockFn() };
   const encountersRepo = { findById: mockFn() };
   const notifier = { notifyRecommended: mockFn(() => Promise.resolve(true)) };
+  const practitionersRepo = {
+    findById: mockFn(() => Promise.resolve({ profileId: 'hp-2' })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new ReferralsService(
     em as any,
@@ -52,6 +55,7 @@ function build() {
     patientProfilesRepo as any,
     encountersRepo as any,
     notifier as any,
+    practitionersRepo as any,
     logger as any,
   );
   return {
@@ -61,6 +65,7 @@ function build() {
     patientProfilesRepo,
     encountersRepo,
     notifier,
+    practitionersRepo,
   };
 }
 
@@ -233,6 +238,39 @@ describe('ReferralsService', () => {
         expect(d.referralsRepo.create.mock.calls[0][1].referringProfileId).toBe(
           'hp-1',
         );
+      });
+
+      it('sin perfil profesional en el token, el cuerpo no puede poner quién deriva', async () => {
+        const d = build();
+        d.referralsRepo.create.mockReturnValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+          createdAt: new Date(),
+        });
+
+        await d.service.create(
+          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          actor,
+        );
+
+        expect(
+          d.referralsRepo.create.mock.calls[0][1].referringProfileId,
+        ).toBeUndefined();
+      });
+
+      it('un destino que no es un perfil profesional responde 404 y no crea nada', async () => {
+        const d = build();
+        d.practitionersRepo.findById.mockResolvedValue(null);
+
+        await expect(
+          d.service.create(
+            { patientProfileId: 'p1', targetProfileId: 'no-existe' } as any,
+            doctor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
       });
     });
   });

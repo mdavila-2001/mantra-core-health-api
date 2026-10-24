@@ -12,6 +12,7 @@ import { EncountersRepository } from '../../clinical/repositories';
 import { ReferralsRepository } from '../repositories';
 import { ReferralNotifier } from './referral-notifier.service';
 import {
+  HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/infrastructure/repositories';
@@ -45,6 +46,7 @@ export class ReferralsService {
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly encountersRepo: EncountersRepository,
     private readonly notifier: ReferralNotifier,
+    private readonly practitionersRepo: HealthPractitionerProfilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReferralsService.name);
@@ -79,10 +81,14 @@ export class ReferralsService {
       },
       'Creating referral',
     );
-    const referringProfileId =
-      actor.practitionerProfileId ?? dto.referringProfileId;
+    // Sólo del token: un `referringProfileId` del cuerpo se puede falsear y
+    // el aviso saldría a nombre de otro médico.
+    const referringProfileId = actor.practitionerProfileId;
 
     const created = await this.em.transactional(async (tx) => {
+      if (dto.targetProfileId) {
+        await this.assertTargetIsPractitioner(tx, dto.targetProfileId);
+      }
       if (dto.sourceEncounterId) {
         await this.assertEncounterBelongsToPatient(
           tx,
@@ -141,6 +147,19 @@ export class ReferralsService {
       await this.notifier.notifyRecommended(created.id);
     }
     return created;
+  }
+
+  /** El destino tiene que ser un perfil profesional real, no cualquier uuid. */
+  private async assertTargetIsPractitioner(
+    tx: EntityManager,
+    targetProfileId: string,
+  ): Promise<void> {
+    const target = await this.practitionersRepo.findById(tx, targetProfileId);
+    if (!target) {
+      throw new ResourceNotFoundException('Profesional no encontrado', {
+        targetProfileId,
+      });
+    }
   }
 
   /**
