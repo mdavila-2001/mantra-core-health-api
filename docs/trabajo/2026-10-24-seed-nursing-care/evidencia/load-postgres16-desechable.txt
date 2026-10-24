@@ -1,0 +1,64 @@
+# Postgres 16 desechable (puerto 55432), DDL de database/SQL/00_shared + 03_terminology/01-04 (sin 90_fk_deferred: FKs a iam.users).
+# Prerrequisitos EMULADOS (fixture fuera del repo): 7 conceptos internos (estado, idiomas, tipos de designación, part-of, is-a), value sets glossary-all-terms y glossary-category-care, y 3 códigos LOINC de prueba (39135-9, 39126-8, 38228-3) con display 'FIXTURE (no es dato real)'.
+## Primera corrida: node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply
+[load] {"codeSystem":"openehr-ckm","concepts":8015,"designations":9017,"properties":114110,"relationships":7481,"memberships":134,"glossaryMembershipsSkipped":0,"loincMaps":3,"loincCodesNotInDb":98}
+[load] {"codeSystem":"es-msssi-cmdic-13606","concepts":617,"designations":617,"properties":6725,"relationships":559,"memberships":39,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+[load] {"codeSystem":"nursing-terminology-registry","concepts":12,"designations":12,"properties":156,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+  "segundos": 5
+## Segunda corrida (idempotencia)
+[load] {"codeSystem":"openehr-ckm","concepts":0,"designations":0,"properties":0,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":98}
+[load] {"codeSystem":"es-msssi-cmdic-13606","concepts":0,"designations":0,"properties":0,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+[load] {"codeSystem":"nursing-terminology-registry","concepts":0,"designations":0,"properties":0,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+## Conteos
+        internal_code         | count 
+------------------------------+-------
+ openehr-ckm                  |  8015
+ es-msssi-cmdic-13606         |   617
+ nursing-terminology-registry |    12
+ fixture-internal             |     7
+ loinc                        |     3
+(5 rows)
+
+ rels | maps | members | props  | desig | batches 
+------+------+---------+--------+-------+---------
+ 8040 |    3 |     173 | 120991 |  9646 |       6
+(1 row)
+
+        internal_code         | count 
+------------------------------+-------
+ nursing-care-clinical-models |   101
+ glossary-all-terms           |    36
+ glossary-category-care       |    36
+(3 rows)
+
+## link-check --db
+        "origin/justin/seed-procedures-treatments:src/common/seed/glossary-terms.catalog.ts:1372:      'Proceso clínico de enfermería que garantiza la entrega segura de un fármaco al paciente correcto, en la dosis, vía y horario correctos, verificando alergias e interacciones previas.',",
+        "origin/justin/seed-procedures-treatments:src/common/seed/glossary-terms.catalog.ts:1380:    categoryKey: 'care',",
+        "origin/justin/seed-procedures-treatments:src/common/seed/terminology-designations.es.ts:678:    CONCEPTS.TENANT_TYPE_NURSING,",
+        "origin/justin/seed-procedures-treatments:src/common/seed/terminology-designations.es.ts:680:      display: 'Centro de cuidados de enfermería',",
+        "origin/justin/seed-procedures-treatments:src/common/seed/terminology-designations.es.ts:682:        'Establecimiento de cuidados prolongados de enfermería: residencia geriátrica, centro de rehabilitación.',",
+        "origin/justin/seed-procedures-treatments:tools/alovida/datos/comunidad.mjs:160:    titular: 'Enfermera auxiliar · Red de Salud Sur',",
+        "origin/justin/seed-procedures-treatments:tools/alovida/datos/elenco-medico.mjs:64:      'Universidad Mayor de San Andrés — Facultad de Medicina, Enfermería, Nutrición y Tecnología Médica',"
+      ]
+    }
+  ],
+  "db": {
+    "sameCodeInOtherCodeSystems": [],
+    "careCategoryMembersByCodeSystem": [
+      {
+        "internal_code": "es-msssi-cmdic-13606",
+        "n": 8
+      },
+      {
+        "internal_code": "openehr-ckm",
+        "n": 28
+      }
+    ],
+    "loincMaps": [
+      {
+        "n": 3
+      }
+    ],
+    "relationsToOtherCodeSystems": []
+  }
+}
