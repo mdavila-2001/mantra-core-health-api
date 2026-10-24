@@ -1780,6 +1780,45 @@
             "description": "Test result is inconclusive"
           }
         ]
+      },
+      "HIV.D.DE1002": {
+        "sheet": "HIV.D HIV-TB",
+        "id": "HIV.D.DE1002",
+        "label": "TB treatment outcome",
+        "description": "Indicates patient's TB treatment outcome",
+        "multiple": false,
+        "options": [
+          {
+            "id": "HIV.D.DE1003",
+            "label": "Treatment failed",
+            "description": "The treatment regimen terminated or permanently changed to a new regimen or treatment strategy. Reasons for the change include: - no clinical response or no bacteriological response, or both (see note; - adverse drug reaction; or - evidence of additional drug-resistance to medicines in the regimen."
+          },
+          {
+            "id": "HIV.D.DE1004",
+            "label": "Cured",
+            "description": "Client with pulmonary TB with bacteriologically confirmed TB at the beginning of treatment who completed treatment as recommended by the national policy, with evidence of bacteriological response and no evidence of failure."
+          },
+          {
+            "id": "HIV.D.DE1005",
+            "label": "Treatment completed",
+            "description": "Patient completed treatment as recommended by the national policy but the outcome does not meet the definition for cure or treatment failure"
+          },
+          {
+            "id": "HIV.D.DE1006",
+            "label": "Died",
+            "description": "Client died before starting treatment or during the course of treatment"
+          },
+          {
+            "id": "HIV.D.DE1007",
+            "label": "Lost to follow-up",
+            "description": "Client was lost to follow-up"
+          },
+          {
+            "id": "HIV.D.DE1008",
+            "label": "Not evaluated",
+            "description": "No treatment outcome was assigned. This includes cases 'transferred out' to another treatment unit and whose treatment outcome is unknown; however, it excludes those lost to follow-up."
+          }
+        ]
       }
     }
   },

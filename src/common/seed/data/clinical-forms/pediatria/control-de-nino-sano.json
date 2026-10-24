@@ -2,7 +2,7 @@
   "code": "PEDIA_CONTROL_NINO_SANO",
   "name": "Pediatría — control de niño sano (ficha base)",
   "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, atención integral del niño",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS). v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "note": "Estructura del control periódico. Las curvas de crecimiento van en su propio formulario (PEDIA_CURVAS_CRECIMIENTO_OMS). v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): los estadios de Tanner desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -184,6 +184,51 @@
         "field": "desarrollo_global",
         "equals": ["Con alerta", "Con retraso"]
       }
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "tanner_mamas",
+      "name": "Tanner — desarrollo mamario",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Estadio 1 — prepuberal",
+        "Estadio 2 — botón mamario: elevación de la mama y la papila, aumento de la areola",
+        "Estadio 3 — mayor crecimiento de mama y areola, sin separación de sus contornos",
+        "Estadio 4 — areola y papila forman un montículo secundario sobre la mama",
+        "Estadio 5 — maduro: sólo se proyecta la papila"
+      ],
+      "description": "Para la evaluación del desarrollo puberal. Fuente: estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23), según el arquetipo openEHR openEHR-EHR-OBSERVATION.tanner.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "tanner_genitales",
+      "name": "Tanner — genitales masculinos",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Estadio 1 — prepuberal",
+        "Estadio 2 — aumento de escroto y testículos; piel escrotal enrojecida y de textura distinta",
+        "Estadio 3 — crecimiento del pene (primero en longitud) y de los testículos",
+        "Estadio 4 — pene más grueso y desarrollo del glande; escroto más oscuro",
+        "Estadio 5 — genitales adultos"
+      ],
+      "description": "Fuente: estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23), según el arquetipo openEHR openEHR-EHR-OBSERVATION.tanner.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Vacunas y desarrollo",
+      "code": "tanner_vello_pubico",
+      "name": "Tanner — vello púbico",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Estadio 1 — prepuberal (puede haber vello fino)",
+        "Estadio 2 — vello escaso, largo, algo pigmentado, en la base del pene o los labios",
+        "Estadio 3 — más oscuro, grueso y rizado, se extiende sobre el pubis",
+        "Estadio 4 — tipo adulto, en un área menor que el adulto; no llega a los muslos",
+        "Estadio 5 — adulto en tipo y cantidad, con límite superior horizontal"
+      ],
+      "description": "Fuente: estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23), según el arquetipo openEHR openEHR-EHR-OBSERVATION.tanner.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Vacunas y desarrollo",

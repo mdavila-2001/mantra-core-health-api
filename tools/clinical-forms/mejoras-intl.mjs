@@ -17,7 +17,7 @@
  * en `docs/seed-research/clinical-forms.md`.
  */
 import { alergias, b, control, i, s, seccion, si, t, una } from './lib.mjs';
-import { escala, factores } from './openehr/escalas.mjs';
+import { escala, factores, seleccion } from './openehr/escalas.mjs';
 import { citaDak, dak, DESCARGO_OMS } from './who-dak/dak.mjs';
 
 const CKM = (x) => `openEHR-EHR-OBSERVATION.${x}`;
@@ -1829,3 +1829,367 @@ MEJORAS.TRANSV_EPICRISIS = {
   nota: `Ampliación internacional (${FECHA}): secciones del International Patient Summary de HL7 que la epicrisis no tenía (alergias, inmunizaciones, dispositivos, embarazo, estado funcional, directivas anticipadas y alertas). Sólo la estructura de secciones: no se usan los value sets SNOMED CT del IPS.`,
   aplicar: (c) => antes(c, 'condicion_al_egreso', EPICRISIS_IPS),
 };
+
+/* -- Pasada 5: segundo barrido del CKM de openEHR ------------------------ */
+
+const HEART_FUENTE =
+  'puntaje HEART (Six AJ et al. Neth Heart J. 2008;16:191-6; Backus BE et al. Int J Cardiol. 2013;168:2153-8)';
+const HEART = [
+  [
+    'at0008',
+    'heart_historia',
+    'HEART — historia',
+    {
+      at0009: 'Historia inespecífica para síndrome coronario agudo',
+      at0010: 'Elementos mixtos (típicos y atípicos)',
+      at0011: 'Historia específica de síndrome coronario agudo',
+    },
+  ],
+  [
+    'at0005',
+    'heart_ecg',
+    'HEART — electrocardiograma',
+    {
+      at0012: 'Normal',
+      at0013:
+        'Alteración inespecífica de la repolarización, sin desviación significativa del ST',
+      at0014: 'Desviación significativa del ST (depresión o elevación)',
+    },
+  ],
+  [
+    'at0006',
+    'heart_edad',
+    'HEART — edad',
+    {
+      at0015: 'Menos de 45 años',
+      at0016: '45 a 64 años',
+      at0017: '65 años o más',
+    },
+  ],
+  [
+    'at0007',
+    'heart_factores_de_riesgo',
+    'HEART — factores de riesgo',
+    {
+      at0018: 'Ninguno conocido',
+      at0019: '1 a 2 factores de riesgo',
+      at0020: '3 o más factores, o enfermedad aterosclerótica conocida',
+    },
+  ],
+  [
+    'at0004',
+    'heart_troponina',
+    'HEART — troponina',
+    {
+      at0021: 'Menor que el nivel de discriminación del laboratorio',
+      at0022: 'Entre 1 y 3 veces el nivel de discriminación',
+      at0023: 'Más de 3 veces el nivel de discriminación',
+    },
+  ],
+].map(([at, code, nombre, traduccion]) =>
+  escala(CKM('heart_score.v0'), at, code, {
+    nombre,
+    fuente: HEART_FUENTE,
+    traduccion,
+    ...(code === 'heart_edad'
+      ? {
+          extra:
+            'El arquetipo dice «≤65 years or older»; se tradujo el criterio publicado: 65 años o más.',
+        }
+      : {}),
+    ...(code === 'heart_factores_de_riesgo'
+      ? {
+          extra:
+            'Factores: diabetes, tabaquismo, hipertensión, hipercolesterolemia, obesidad, antecedente familiar. La enfermedad aterosclerótica conocida (infarto, revascularización, ACV o arteriopatía periférica) puntúa 2.',
+        }
+      : {}),
+    ...(code === 'heart_troponina'
+      ? { extra: 'Suma 0 a 10: 0–3 riesgo bajo, 4–6 intermedio, 7–10 alto.' }
+      : {}),
+  }),
+);
+
+const ABCD2_FUENTE =
+  'puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92)';
+const ABCD2 = [
+  [
+    'at0004',
+    'abcd2_edad',
+    'ABCD² — edad ≥ 60 años',
+    { at0010: 'No', at0011: 'Sí' },
+  ],
+  [
+    'at0005',
+    'abcd2_presion',
+    'ABCD² — presión arterial inicial ≥ 140/90 mmHg',
+    {
+      at0012: 'No',
+      at0013: 'Sí',
+    },
+  ],
+  [
+    'at0007',
+    'abcd2_clinica',
+    'ABCD² — clínica',
+    {
+      at0014: 'Otros síntomas',
+      at0015: 'Trastorno del habla sin debilidad',
+      at0016: 'Debilidad unilateral',
+    },
+  ],
+  [
+    'at0009',
+    'abcd2_duracion',
+    'ABCD² — duración de los síntomas',
+    {
+      at0019: 'Menos de 10 minutos',
+      at0020: '10 a 59 minutos',
+      at0021: '60 minutos o más',
+    },
+  ],
+  [
+    'at0008',
+    'abcd2_diabetes',
+    'ABCD² — diabetes',
+    { at0017: 'No', at0018: 'Sí' },
+  ],
+].map(([at, code, nombre, traduccion]) =>
+  escala(CKM('abcd2_score.v0'), at, code, {
+    nombre,
+    fuente: ABCD2_FUENTE,
+    traduccion,
+    ...(code === 'abcd2_diabetes'
+      ? {
+          extra:
+            'Suma 0 a 7: riesgo precoz de ACV después de un accidente isquémico transitorio.',
+        }
+      : {}),
+  }),
+);
+
+const DOWNTON_ID = CKM('downton_fall_risk_index.v0');
+const DOWNTON_FUENTE =
+  'índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28)';
+const DOWNTON = [
+  seleccion(DOWNTON_ID, 'at0007', 'downton_medicamentos', {
+    nombre: 'Downton — medicamentos',
+    fuente: DOWNTON_FUENTE,
+    traduccion: {
+      at0008: 'Ninguno',
+      at0009: 'Tranquilizantes o sedantes',
+      at0010: 'Diuréticos',
+      at0011: 'Antihipertensivos (no diuréticos)',
+      at0012: 'Antiparkinsonianos',
+      at0013: 'Antidepresivos',
+      at0014: 'Otros medicamentos',
+    },
+  }),
+  seleccion(DOWNTON_ID, 'at0015', 'downton_deficits_sensoriales', {
+    nombre: 'Downton — déficits sensoriales',
+    fuente: DOWNTON_FUENTE,
+    traduccion: {
+      at0016: 'Ninguno',
+      at0017: 'Alteración visual',
+      at0018: 'Alteración auditiva',
+      at0019: 'Extremidades (amputación, ACV, neuropatía, etc.)',
+    },
+  }),
+  escala(DOWNTON_ID, 'at0020', 'downton_estado_mental', {
+    nombre: 'Downton — estado mental',
+    fuente: DOWNTON_FUENTE,
+    traduccion: { at0021: 'Orientado', at0022: 'Confuso' },
+  }),
+  escala(DOWNTON_ID, 'at0023', 'downton_marcha', {
+    nombre: 'Downton — marcha',
+    fuente: DOWNTON_FUENTE,
+    traduccion: {
+      at0024: 'Normal',
+      at0025: 'Segura con ayudas para caminar',
+      at0026: 'Insegura con o sin ayudas',
+      at0027: 'Imposible',
+    },
+    extra:
+      'Más «caídas previas» (1 punto si hubo alguna). Suma de 3 o más: riesgo alto de caídas.',
+  }),
+];
+
+const PADSS_FUENTE =
+  'puntaje PADSS de alta posanestésica (Marshall SI, Chung F. Anesth Analg. 1999;88:508-17)';
+const PADSS = [
+  [
+    'at0012',
+    'padss_signos_vitales',
+    'PADSS — signos vitales',
+    {
+      at0013: 'PA y pulso con variación > 40 % del basal preoperatorio',
+      at0014: 'PA y pulso con variación del 20 al 40 % del basal',
+      at0015: 'PA y pulso con variación < 20 % del basal',
+    },
+  ],
+  [
+    'at0004',
+    'padss_actividad',
+    'PADSS — actividad',
+    {
+      at0005: 'No puede deambular',
+      at0006: 'Requiere ayuda',
+      at0007: 'Marcha estable, sin mareo, o igual al nivel preoperatorio',
+    },
+  ],
+  [
+    'at0008',
+    'padss_nauseas_vomitos',
+    'PADSS — náuseas y vómitos',
+    {
+      at0009: 'Graves: persisten pese al tratamiento repetido',
+      at0010: 'Moderados: ceden con medicación parenteral',
+      at0011: 'Mínimos: ceden con medicación oral',
+    },
+  ],
+  [
+    'at0016',
+    'padss_dolor_aceptable',
+    'PADSS — dolor aceptable para el paciente',
+    {
+      at0018: 'No',
+      at0019: 'Sí',
+    },
+  ],
+  [
+    'at0020',
+    'padss_sangrado',
+    'PADSS — sangrado quirúrgico',
+    {
+      at0021: 'Grave: más de tres cambios de apósito',
+      at0022: 'Moderado: hasta dos cambios de apósito',
+      at0023: 'Mínimo: no requiere cambio de apósito',
+    },
+  ],
+].map(([at, code, nombre, traduccion]) =>
+  escala(CKM('padss.v0'), at, code, {
+    nombre,
+    fuente: PADSS_FUENTE,
+    traduccion,
+    ...(code === 'padss_signos_vitales'
+      ? {
+          extra:
+            'Para el alta domiciliaria de cirugía ambulatoria; la suma va de 0 a 10 (alta con 9 o más según los autores).',
+        }
+      : {}),
+  }),
+);
+
+const TANNER_FUENTE =
+  'estadios de Tanner (Marshall WA, Tanner JM. Arch Dis Child. 1969;44:291-303 y 1970;45:13-23)';
+const TANNER = [
+  [
+    'at0005',
+    'tanner_mamas',
+    'Tanner — desarrollo mamario',
+    {
+      at0012: 'Estadio 1 — prepuberal',
+      at0013:
+        'Estadio 2 — botón mamario: elevación de la mama y la papila, aumento de la areola',
+      at0014:
+        'Estadio 3 — mayor crecimiento de mama y areola, sin separación de sus contornos',
+      at0015:
+        'Estadio 4 — areola y papila forman un montículo secundario sobre la mama',
+      at0016: 'Estadio 5 — maduro: sólo se proyecta la papila',
+    },
+  ],
+  [
+    'at0004',
+    'tanner_genitales',
+    'Tanner — genitales masculinos',
+    {
+      at0007: 'Estadio 1 — prepuberal',
+      at0008:
+        'Estadio 2 — aumento de escroto y testículos; piel escrotal enrojecida y de textura distinta',
+      at0009:
+        'Estadio 3 — crecimiento del pene (primero en longitud) y de los testículos',
+      at0010:
+        'Estadio 4 — pene más grueso y desarrollo del glande; escroto más oscuro',
+      at0011: 'Estadio 5 — genitales adultos',
+    },
+  ],
+  [
+    'at0006',
+    'tanner_vello_pubico',
+    'Tanner — vello púbico',
+    {
+      at0017: 'Estadio 1 — prepuberal (puede haber vello fino)',
+      at0018:
+        'Estadio 2 — vello escaso, largo, algo pigmentado, en la base del pene o los labios',
+      at0019:
+        'Estadio 3 — más oscuro, grueso y rizado, se extiende sobre el pubis',
+      at0020:
+        'Estadio 4 — tipo adulto, en un área menor que el adulto; no llega a los muslos',
+      at0021:
+        'Estadio 5 — adulto en tipo y cantidad, con límite superior horizontal',
+    },
+  ],
+].map(([at, code, nombre, traduccion]) =>
+  escala(CKM('tanner.v1'), at, code, {
+    nombre,
+    fuente: TANNER_FUENTE,
+    traduccion,
+    ...(code === 'tanner_mamas'
+      ? { extra: 'Para la evaluación del desarrollo puberal.' }
+      : {}),
+  }),
+);
+
+const TB_RESULTADO = si('tb_fase', 'Terminado', [
+  dak('HIV', 'HIV.D.DE1002', 'tb_resultado_tratamiento', {
+    nombre: 'Resultado del tratamiento de tuberculosis',
+    traduccion: {
+      'HIV.D.DE1003': 'Fracaso',
+      'HIV.D.DE1004': 'Curado',
+      'HIV.D.DE1005': 'Tratamiento completo',
+      'HIV.D.DE1006': 'Fallecido',
+      'HIV.D.DE1007': 'Pérdida en el seguimiento',
+      'HIV.D.DE1008': 'No evaluado',
+    },
+    extra: 'Definiciones de resultado de la OMS para la tuberculosis.',
+  }),
+]);
+
+Object.assign(MEJORAS, {
+  EMERG_DOLOR_TORACICO: {
+    version: 2,
+    nota: NOTA_CKM(
+      'los cinco componentes del puntaje HEART (con la edad corregida respecto del arquetipo)',
+    ),
+    aplicar: (c) => antes(c, 'heart_score', HEART),
+  },
+  NEURO_CTRL_ACV: {
+    version: 2,
+    nota: NOTA_CKM('el puntaje ABCD² para el accidente isquémico transitorio'),
+    aplicar: (c) =>
+      despues(
+        c,
+        'acv_tipo',
+        si('acv_tipo', 'Accidente isquémico transitorio', ABCD2),
+      ),
+  },
+  GERIA_CTRL_CAIDAS: {
+    version: 2,
+    nota: NOTA_CKM('el índice de riesgo de caídas de Downton'),
+    aplicar: (c) => despues(c, 'caidas_riesgo', DOWNTON),
+  },
+  ANEST_CTRL_RECUPERACION: {
+    version: 2,
+    nota: NOTA_CKM('el puntaje PADSS de alta de cirugía ambulatoria'),
+    aplicar: (c) => despues(c, 'nauseas', PADSS),
+  },
+  PEDIA_CONTROL_NINO_SANO: {
+    version: 3,
+    nota: NOTA_CKM('los estadios de Tanner'),
+    aplicar: (c) => despues(c, 'desarrollo_social', TANNER),
+  },
+  NEUMO_CTRL_TB: {
+    version: 2,
+    nota: NOTA_DAK('el resultado del tratamiento de tuberculosis', 'HIV'),
+    aplicar: (c) => despues(c, 'tb_fase', TB_RESULTADO),
+  },
+});

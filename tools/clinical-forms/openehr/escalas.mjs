@@ -168,3 +168,28 @@ export function factores(
     ayuda: ayuda(a, origenes, fuente, extra),
   });
 }
+
+/**
+ * Un elemento ordinal cuyos valores pueden coexistir (p. ej. los grupos de
+ * fármacos del índice de Downton) como lista de varias respuestas, con el
+ * puntaje de cada uno en el rótulo.
+ */
+export function seleccion(
+  idArquetipo,
+  at,
+  code,
+  { nombre, fuente, traduccion, extra, ...resto },
+) {
+  const a = arquetipo(idArquetipo);
+  const e = elemento(a, at);
+  const origenes = [];
+  const options = e.values.map((v) => {
+    const r = texto(a, v, { traduccion });
+    origenes.push(r.origen);
+    return `${r.t} (${v.ordinal === 1 ? '1 punto' : `${v.ordinal} puntos`})`;
+  });
+  return varias(code, nombre, options, {
+    ...resto,
+    ayuda: ayuda(a, origenes, fuente, extra),
+  });
+}

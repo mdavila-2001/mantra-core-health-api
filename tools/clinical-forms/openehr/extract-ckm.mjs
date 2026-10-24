@@ -32,6 +32,12 @@ export const ARQUETIPOS = [
   'openEHR-EHR-OBSERVATION.karnofsky_performance_status_scale.v1',
   'openEHR-EHR-OBSERVATION.mayo_score.v1',
   'openEHR-EHR-OBSERVATION.nihss.v0',
+  // Pasada 5
+  'openEHR-EHR-OBSERVATION.heart_score.v0',
+  'openEHR-EHR-OBSERVATION.abcd2_score.v0',
+  'openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0',
+  'openEHR-EHR-OBSERVATION.padss.v0',
+  'openEHR-EHR-OBSERVATION.tanner.v1',
 ];
 
 const AQUI = dirname(fileURLToPath(import.meta.url));

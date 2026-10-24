@@ -3546,6 +3546,963 @@
           "values": []
         }
       ]
+    },
+    "openEHR-EHR-OBSERVATION.heart_score.v0": {
+      "revision": "0.0.1-alpha",
+      "lifecycle": "in_development",
+      "licence": "This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.",
+      "copyright": "© openEHR Foundation",
+      "references": "Backus BE, Six AJ, Kelder JC, et al. A prospective validation of the HEART score for chest pain patients at the emergency department. Int J Cardiol. 2013;168(3):2153–2158. doi:10.1016/j.ijcard.2013.01.255.\n\nBackus BE, Six AJ, Kelder JC, et al. Chest pain in the emergency room: a multicenter validation of the HEART Score. Crit Pathw Cardiol. 2010;9(3):164–169. doi:10.1097/HPC.0b013e3181ec36d8.\n\nBrady W, de Souza K. The HEART score: A guide to its application in the emergency department. Turk J Emerg Med. 2018;18(2):47–51. Published 2018 Jun 14. doi:10.1016/j.tjem.2018.04.004.\n\nThe Heart score [Internet]. Netherlands: Heart Study; 2019. Available from: www.heartscore.nl.\n\nPoldervaart JM, Reitsma JB, Koffijberg H, et al. The impact of the HEART risk score in the early assessment of patients with acute chest pain: design of a stepped wedge, cluster randomised trial. BMC Cardiovasc Disord. 2013;13:77. Published 2013 Sep 26. doi:10.1186/1471-2261-13-77.\n\nSix AJ, Backus BE, Kelder JC. Chest pain in the emergency room: value of the HEART score. Neth Heart J. 2008;16(6):191–196. doi:10.1007/bf03086144.\n\nSix AJ, Cullen L, Backus BE, et al. The HEART score for the assessment of patients with chest pain in the emergency department: a multinational validation study. Crit Pathw Cardiol. 2013;12(3):121–126. doi:10.1097/HPC.0b013e31828b327e.",
+      "concept": {
+        "en": {
+          "text": "HEART score",
+          "description": "An assessment tool tool used to identify patients at low, intermediate, and high risk for short-term adverse outcome resulting from Acute Coronary Syndrome (ACS)."
+        }
+      },
+      "elements": [
+        {
+          "id": "at0008",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "History",
+            "description": "The level of suspicion from patient history or anamnesis."
+          },
+          "values": [
+            {
+              "code": "at0009",
+              "ordinal": 0,
+              "en": {
+                "text": "Nonspecific history for ACS.",
+                "description": "A history that is not consistent with chest pain concerning for ACS."
+              }
+            },
+            {
+              "code": "at0010",
+              "ordinal": 1,
+              "en": {
+                "text": "Mixed historic elements.",
+                "description": "A history that contains traditional & non-traditional elements of typical ACS presentation."
+              }
+            },
+            {
+              "code": "at0011",
+              "ordinal": 2,
+              "en": {
+                "text": "Specific history for ACS",
+                "description": "A history with traditional features of ACS."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0005",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Electrocardiogram",
+            "description": "The interpretation of an electrocardiograph."
+          },
+          "values": [
+            {
+              "code": "at0012",
+              "ordinal": 0,
+              "en": {
+                "text": "Normal ECG.",
+                "description": "A normal ECG tracing."
+              }
+            },
+            {
+              "code": "at0013",
+              "ordinal": 1,
+              "en": {
+                "text": "Abnormal ECG.",
+                "description": "Abnormal ECG, with repolarization abnormalities* yet lacking significant ST depression. *BBB, LVH, digoxin effect, implanted right-ventricular pacemaker, past Ml, +/− unchanged repolarization abnormalities."
+              }
+            },
+            {
+              "code": "at0014",
+              "ordinal": 2,
+              "en": {
+                "text": "Abnormal ECG, with significant ST deviation (depression ± elevation).",
+                "description": "Either new or not known to be old significant ST deviation (i.e., no prior ECG available for comparison)."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0006",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Age",
+            "description": "The age of the patient, defined in years."
+          },
+          "values": [
+            {
+              "code": "at0015",
+              "ordinal": 0,
+              "en": {
+                "text": "<45 years.",
+                "description": "The patient is less than 45 years of age."
+              }
+            },
+            {
+              "code": "at0016",
+              "ordinal": 1,
+              "en": {
+                "text": "Between 45 and 64 years.",
+                "description": "The patient is aged between 45 and 64 years."
+              }
+            },
+            {
+              "code": "at0017",
+              "ordinal": 2,
+              "en": {
+                "text": "≤65 years or older.",
+                "description": "The patient is 65 years of age or older."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0007",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Risk factors",
+            "description": "Presence of risk factors for the development of coronary artery disease (CAD)."
+          },
+          "values": [
+            {
+              "code": "at0018",
+              "ordinal": 0,
+              "en": {
+                "text": "No risk factors.",
+                "description": "The patient has no identifiable risk factors."
+              }
+            },
+            {
+              "code": "at0019",
+              "ordinal": 1,
+              "en": {
+                "text": "1 to 2 risk factors",
+                "description": "Risk factors: DM, tobacco smoker, HTN, hypercholesterolemia, obesity, +/− family history of CAD."
+              }
+            },
+            {
+              "code": "at0020",
+              "ordinal": 2,
+              "en": {
+                "text": "3 or more risk factors",
+                "description": "Automatic score of 2 with established diagnosis of the any of the following conditions: peripheral arterial disease, myocardial infarction, past coronary revascularization procedure, or stroke."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0004",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Troponin",
+            "description": "The single serum troponin obtained during the emergency department assessment."
+          },
+          "values": [
+            {
+              "code": "at0021",
+              "ordinal": 0,
+              "en": {
+                "text": "Troponin < discriminative level.",
+                "description": "Hospital lab discriminative level and/or AccuTroponin <0.04 ng/ml."
+              }
+            },
+            {
+              "code": "at0022",
+              "ordinal": 1,
+              "en": {
+                "text": "Troponin elevated 1–3 times discriminative level.",
+                "description": "Hospital lab discriminative level and/or AccuTroponin 0.04–0.12 ng/ml."
+              }
+            },
+            {
+              "code": "at0023",
+              "ordinal": 2,
+              "en": {
+                "text": "Troponin elevated > 3 times discriminative Level.",
+                "description": "Hospital lab discriminative level and/or AccuTroponin >0.12 ng/ml."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0026",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Total score",
+            "description": "Sum of points assigned for each of the component parameters."
+          },
+          "values": []
+        },
+        {
+          "id": "at0028",
+          "type": "DV_CODED_TEXT",
+          "en": {
+            "text": "Risk category",
+            "description": "Risk category & recommended management strategy."
+          },
+          "values": [
+            {
+              "code": "at0029",
+              "en": {
+                "text": "0-3",
+                "description": "Low risk, potential candidate for early discharge."
+              }
+            },
+            {
+              "code": "at0030",
+              "en": {
+                "text": "4-6",
+                "description": "Moderate risk, potential candidate for observation & further evaluation."
+              }
+            },
+            {
+              "code": "at0031",
+              "en": {
+                "text": "7-10",
+                "description": "High risk, candidate for urgent or emergent intervention."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "openEHR-EHR-OBSERVATION.abcd2_score.v0": {
+      "revision": "0.0.1-alpha",
+      "lifecycle": "in_development",
+      "licence": "This work is licensed under the Creative Commons Attribution-ShareAlike 3.0 License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/3.0/.",
+      "copyright": "© Cambio Healthcare Systems, openEHR Foundation",
+      "references": "Johnston SC, Rothwell PM, Nguyen-Huynh MN, Giles MF, Elkins JS, Bernstein AL, Sidney S. Validation and refinement of scores to predict very early stroke risk after transient ischaemic attack. Lancet. 2007 Jan 27;369(9558):283-92. PubMed PMID: 17258668.\n\nPerry JJ, Sharma M, Sivilotti ML, Sutherland J, Symington C, Worster A, Émond M, Stotts G, Jin AY, Oczkowski WJ, et al. Prospective validation of the ABCD2 score for patients in the emergency department with transient ischemic attack. CMAJ. 2011 Jul 12;183(10):1137-45. doi: 10.1503/cmaj.101668. Epub 2011 Jun 6. PubMed PMID: 21646462; PubMed Central PMCID: PMC3134721.\n\nRothwell PM, Giles MF, Flossmann E, Lovelock CE, Redgrave JN, Warlow CP, Mehta Z. A simple score (ABCD) to identify individuals at high early risk of stroke after transient ischaemic attack. Lancet. 2005 Jul 2-8;366(9479):29-36. PubMed PMID: 15993230.",
+      "concept": {
+        "en": {
+          "text": "ABCD2 score",
+          "description": "Tool to assess the risk of subsequent stroke in an individual presenting with a transient ischaemic attack (TIA)."
+        }
+      },
+      "elements": [
+        {
+          "id": "at0004",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Age ≥ 60 years",
+            "description": "Is the person 60 years or older?"
+          },
+          "values": [
+            {
+              "code": "at0010",
+              "ordinal": 0,
+              "en": {
+                "text": "Absent",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0011",
+              "ordinal": 1,
+              "en": {
+                "text": "Present",
+                "description": "*"
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0005",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Blood pressure elevation",
+            "description": "Was the initial systolic pressure >140 mmHg and/or diastolic pressure ≥ 90 mmHg?"
+          },
+          "values": [
+            {
+              "code": "at0012",
+              "ordinal": 0,
+              "en": {
+                "text": "Absent",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0013",
+              "ordinal": 1,
+              "en": {
+                "text": "Present",
+                "description": "*"
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0007",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Clinical features",
+            "description": "What are the clinical features of the TIA?"
+          },
+          "values": [
+            {
+              "code": "at0014",
+              "ordinal": 0,
+              "en": {
+                "text": "Other symptoms",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0015",
+              "ordinal": 1,
+              "en": {
+                "text": "Speech disturbance without focal weakness",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0016",
+              "ordinal": 2,
+              "en": {
+                "text": "Unilateral weakness",
+                "description": "*"
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0008",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Diabetes history",
+            "description": "Does the patient have a history of  diabetes mellitus?"
+          },
+          "values": [
+            {
+              "code": "at0017",
+              "ordinal": 0,
+              "en": {
+                "text": "Absent",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0018",
+              "ordinal": 1,
+              "en": {
+                "text": "Present",
+                "description": "*"
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0009",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Symptom duration",
+            "description": "What is the duration of symptoms?"
+          },
+          "values": [
+            {
+              "code": "at0019",
+              "ordinal": 0,
+              "en": {
+                "text": "<10 minutes",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0020",
+              "ordinal": 1,
+              "en": {
+                "text": "10-59 minutes",
+                "description": "*"
+              }
+            },
+            {
+              "code": "at0021",
+              "ordinal": 2,
+              "en": {
+                "text": "≥60 minutes",
+                "description": "*"
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0022",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Total score",
+            "description": "Sum of the individual scores assigned for each of the contributing variables."
+          },
+          "values": []
+        }
+      ]
+    },
+    "openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0": {
+      "revision": "0.0.1-alpha",
+      "lifecycle": "in_development",
+      "licence": "This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.",
+      "copyright": "© openEHR Foundation",
+      "references": "Downton JH, Andrews K. Prevalence, characteristics and factors associated with falls among the elderly living at home. Aging (Milano). 1991 Sep;3(3):219-28. doi: 10.1007/BF03324009. PMID: 1764490.\n\nRosendahl E, Lundin-Olsson L, Kallin K, Jensen J, Gustafson Y, Nyberg L. Prediction of falls among older people in residential care facilities by the Downton index. Aging Clin Exp Res. 2003 Apr;15(2):142-7. doi: 10.1007/BF03324492. PMID: 12889846. Available from: https://www.researchgate.net/publication/6432597_Prediction_of_falls_among_older_people_in_residential_care_facilities_by_the_Downton_index.",
+      "concept": {
+        "en": {
+          "text": "Downton Fall Risk Index (DFRI)",
+          "description": "A validated assessment tool used to identify risk factors for falls."
+        }
+      },
+      "elements": [
+        {
+          "id": "at0004",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Known previous falls",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0005",
+              "ordinal": 0,
+              "en": {
+                "text": "No",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0006",
+              "ordinal": 1,
+              "en": {
+                "text": "Yes",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0007",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Medications",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0008",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0009",
+              "ordinal": 1,
+              "en": {
+                "text": "Tranquillisers/sedatives",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0010",
+              "ordinal": 1,
+              "en": {
+                "text": "Diuretics",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0011",
+              "ordinal": 1,
+              "en": {
+                "text": "Antihypertensives (other than diuretics)",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0012",
+              "ordinal": 1,
+              "en": {
+                "text": "Antiparkinsonian drugs",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0013",
+              "ordinal": 1,
+              "en": {
+                "text": "Antidepressants",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0014",
+              "ordinal": 0,
+              "en": {
+                "text": "Other medications",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0015",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Sensory deficits",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0016",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0017",
+              "ordinal": 1,
+              "en": {
+                "text": "Visual impairment",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0018",
+              "ordinal": 1,
+              "en": {
+                "text": "Hearing impairment",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0019",
+              "ordinal": 1,
+              "en": {
+                "text": "Limbs (amputation, stroke, neuropathy, etc.)",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0020",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Mental state",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0021",
+              "ordinal": 0,
+              "en": {
+                "text": "Orientated",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0022",
+              "ordinal": 1,
+              "en": {
+                "text": "Confused (MTS <7/10)",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0023",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Gait",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0024",
+              "ordinal": 0,
+              "en": {
+                "text": "Normal",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0025",
+              "ordinal": 0,
+              "en": {
+                "text": "Safe with walking aids",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0026",
+              "ordinal": 1,
+              "en": {
+                "text": "Unsafe with/without aids",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0027",
+              "ordinal": 0,
+              "en": {
+                "text": "Unable",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0028",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Total score",
+            "description": "The total sum of each component parameter for the DFRI."
+          },
+          "values": []
+        }
+      ]
+    },
+    "openEHR-EHR-OBSERVATION.padss.v0": {
+      "revision": "0.0.1-alpha",
+      "lifecycle": "in_development",
+      "licence": "This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.",
+      "copyright": "© openEHR Foundation",
+      "references": "Marshall SI, Chung F. Discharge criteria and complications after ambulatory surgery. Anesth Analg. 1999 Mar;88(3):508-17. doi: 10.1097/00000539-199903000-00008. PMID: 10071996.",
+      "concept": {
+        "en": {
+          "text": "Post Anaesthesia Discharge Scoring System (PADSS)",
+          "description": "An assessment score used to evaluate recovery after anaesthesia for determining home-readiness."
+        }
+      },
+      "elements": [
+        {
+          "id": "at0012",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Vital signs",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0013",
+              "ordinal": 0,
+              "en": {
+                "text": "BP and pulse ±>40% of pre-operative baseline",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0014",
+              "ordinal": 1,
+              "en": {
+                "text": "BP and pulse ±20-40% of pre-operative baseline",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0015",
+              "ordinal": 2,
+              "en": {
+                "text": "BP and pulse ±<20% of pre-operative baseline",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0004",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Activity level",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0005",
+              "ordinal": 0,
+              "en": {
+                "text": "Unable to ambulate",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0006",
+              "ordinal": 1,
+              "en": {
+                "text": "Requires assistance",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0007",
+              "ordinal": 2,
+              "en": {
+                "text": "Steady gait, no dizziness, or meets preoperative level",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0008",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Nausea and vomiting",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0009",
+              "ordinal": 0,
+              "en": {
+                "text": "Severe: continues after repeated treatment",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0010",
+              "ordinal": 1,
+              "en": {
+                "text": "Moderate: successfully treated with IM medication",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0011",
+              "ordinal": 2,
+              "en": {
+                "text": "Minimal: successfully treated with PO medication",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0016",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Pain acceptable",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0018",
+              "ordinal": 1,
+              "en": {
+                "text": "No",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0019",
+              "ordinal": 2,
+              "en": {
+                "text": "Yes",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0020",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Surgical bleeding",
+            "description": ""
+          },
+          "values": [
+            {
+              "code": "at0021",
+              "ordinal": 0,
+              "en": {
+                "text": "Severe: more than three dressing changes required",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0022",
+              "ordinal": 1,
+              "en": {
+                "text": "Moderate: up to two dressing changes required",
+                "description": ""
+              }
+            },
+            {
+              "code": "at0023",
+              "ordinal": 2,
+              "en": {
+                "text": "Minimal: does not require dressing change",
+                "description": ""
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0024",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Total score",
+            "description": "The total sum of each component parameter for the PADSS."
+          },
+          "values": []
+        }
+      ]
+    },
+    "openEHR-EHR-OBSERVATION.tanner.v1": {
+      "revision": "1.0.0",
+      "lifecycle": "published",
+      "licence": "This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.",
+      "copyright": "© Nasjonal IKT HF, openEHR Foundation",
+      "references": "Derived from: Tanner stadier, Draft archetype [Internet]. Nasjonal IKT, Nasjonal IKT Clinical Knowledge Manager [cited: 2017-05-05]. Available from: http://arketyper.no/ckm/#showArchetype_1078.36.1823\n\nMarshall WA, Tanner JM. Variations in the Pattern of Pubertal Changes in Boys. Archives of Disease in Childhood. 1970 [cited 2017 Mar 17]; 45(239): 13-23. Available from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2020414/\n\nMarshall WA, Tanner JM. Variations in pattern of pubertal changes in girls. Archives of Disease in Childhood. 1969 [cited 2017 Mar 17]; 44(235): 291-303. Available from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2020314/\n\nBiro F M, Chan Y-M (Dec 14, 2016). Normal puberty. UpToDate [Internett]. \nAvailable at: https://www.uptodate.com/contents/normal-puberty?source=search_result&search=tanner&selectedTitle=1~66#H4 [Accessed 2017 Apr 25].\n\nNorsk Elektronisk Legehåndbok (Nov 15.2015). Tanner Stadier. [Internett]. \nAvailable at: https://legehandboka.no/handboken/kliniske-kapitler/pediatri/pasientinformasjon/vekst-og-utvikling/pubertet-for-tidlig/ [Accessed 2017 Apr 25].",
+      "concept": {
+        "en": {
+          "text": "Tanner stages",
+          "description": "A scale to describe the onset and progression of pubertal changes."
+        }
+      },
+      "elements": [
+        {
+          "id": "at0004",
+          "type": "DV_CODED_TEXT",
+          "en": {
+            "text": "Genitals",
+            "description": "The stages for development in male genitals."
+          },
+          "values": [
+            {
+              "code": "at0007",
+              "en": {
+                "text": "Stage 1",
+                "description": "Prepubertal."
+              }
+            },
+            {
+              "code": "at0008",
+              "en": {
+                "text": "Stage 2",
+                "description": "Enlargement of scrotum and testes; scrotal skin reddens and changes in texture."
+              }
+            },
+            {
+              "code": "at0009",
+              "en": {
+                "text": "Stage 3",
+                "description": "Enlargement of penis (length at first); further growth of testes."
+              }
+            },
+            {
+              "code": "at0010",
+              "en": {
+                "text": "Stage 4",
+                "description": "Increased size of penis with growth in breadth and development of glans; testes and scrotum larger, scrotal skin darker."
+              }
+            },
+            {
+              "code": "at0011",
+              "en": {
+                "text": "Stage 5",
+                "description": "Adult genitalia."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0005",
+          "type": "DV_CODED_TEXT",
+          "en": {
+            "text": "Breasts",
+            "description": "The stages for breast development in young women."
+          },
+          "values": [
+            {
+              "code": "at0012",
+              "en": {
+                "text": "Stage 1",
+                "description": "Prepubertal."
+              }
+            },
+            {
+              "code": "at0013",
+              "en": {
+                "text": "Stage 2",
+                "description": "Breast bud stage with elevation of breast and papilla; enlargement of areola."
+              }
+            },
+            {
+              "code": "at0014",
+              "en": {
+                "text": "Stage 3",
+                "description": "Further enlargement of breast and areola; no separation of their contour."
+              }
+            },
+            {
+              "code": "at0015",
+              "en": {
+                "text": "Stage 4",
+                "description": "Areola and papilla form a secondary mound above level of breast."
+              }
+            },
+            {
+              "code": "at0016",
+              "en": {
+                "text": "Stage 5",
+                "description": "Mature stage: projection of papilla only, related to recession of areola."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0006",
+          "type": "DV_CODED_TEXT",
+          "en": {
+            "text": "Pubic hair",
+            "description": "The stages for pubic hair development in females and males."
+          },
+          "values": [
+            {
+              "code": "at0017",
+              "en": {
+                "text": "Stage 1",
+                "description": "Prepubertal (the pubic area may have vellus hair, similar to that of forearms)."
+              }
+            },
+            {
+              "code": "at0018",
+              "en": {
+                "text": "Stage 2",
+                "description": "Sparse growth of long, slightly pigmented hair, straight or curled, at base of penis or along labia."
+              }
+            },
+            {
+              "code": "at0019",
+              "en": {
+                "text": "Stage 3",
+                "description": "Darker, coarser and more curled hair, spreading sparsely over junction of pubes."
+              }
+            },
+            {
+              "code": "at0020",
+              "en": {
+                "text": "Stage 4",
+                "description": "Hair adult in type, but covering smaller area than in adult; no spread to medial surface of thighs."
+              }
+            },
+            {
+              "code": "at0021",
+              "en": {
+                "text": "Stage 5",
+                "description": "Adult in type and quantity, with horizontal upper border."
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }
