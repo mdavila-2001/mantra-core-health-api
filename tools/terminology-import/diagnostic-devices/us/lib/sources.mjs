@@ -12,9 +12,9 @@ export const OFFICIAL_RECORD_URL = Object.freeze({
   HDE: (id) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfhde/hde.cfm?id=${encodeURIComponent(id)}`,
   /** Informe MAUDE (`mdrfoi__id` = MDR_REPORT_KEY). */
   MAUDE: (key, pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfmaude/detail.cfm?mdrfoi__id=${encodeURIComponent(key)}&pc=${encodeURIComponent(pc)}`,
-  /** Registro de retiro en la API oficial de openFDA (enforcement), por número de retiro `Z-NNNN-AAAA`. */
   /** Informe MAUDE en la API oficial de openFDA, por número de informe (cuando no hay MDR_REPORT_KEY). */
   MAUDE_REPORT: (n) => `https://api.fda.gov/device/event.json?search=report_number:%22${encodeURIComponent(n)}%22`,
+  /** Registro de retiro en la API oficial de openFDA (enforcement), por número de retiro `Z-NNNN-AAAA`. */
   RECALL: (z) => `https://api.fda.gov/device/enforcement.json?search=recall_number:%22${encodeURIComponent(z)}%22`,
   GUDID: (di) => `https://accessgudid.nlm.nih.gov/devices/${encodeURIComponent(di)}`,
   PRODUCT_CODE: (pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=${encodeURIComponent(pc)}`,

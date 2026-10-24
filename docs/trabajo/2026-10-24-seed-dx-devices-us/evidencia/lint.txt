@@ -1,2 +1,2 @@
-# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn lint   (estado final)
+# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn lint   (sobre origin/dev eb34a8ae)
 exit=0

@@ -1,5 +1,5 @@
-# node --test "tools/terminology-import/test/*.test.mjs"  (regresión de librerías compartidas)
-# tests 34
-# pass 34
+# node --test "tools/terminology-import/test/*.test.mjs"  (regresión, sobre origin/dev eb34a8ae)
+# tests 46
+# pass 46
 # fail 0
 exit=0

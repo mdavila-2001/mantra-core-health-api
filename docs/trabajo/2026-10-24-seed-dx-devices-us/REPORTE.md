@@ -16,7 +16,7 @@
 | H3 | Cargador de tipos (product codes de alcance diagnóstico) a `terminology` | `load-dx-device-types-us.mjs --apply` ×2 | 3 268 conceptos + 29 226 propiedades; la 2.ª corrida, 0 (`evidencia/load-postgres16-desechable.txt`) |
 | H4.S1.M1 | Saturación con /loop: 10 pasadas; las 9 y 10 aportan 0 | tabla de pasadas en `docs/seed-research/diagnostic-devices-us.md` | corte cumplido |
 | H4.S1.M2 | typecheck y lint | `NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck` / `… lint` | `exit=0` / `exit=0` |
-| H4.S1.M3 | PR contra `dev` | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/695 |
+| H4.S1.M3 | PR contra `dev` | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/695 (mergeado en `db3b648b`, con las pasadas 1 a 7). Las pasadas 8 a 10, este reporte final y la evidencia final van en un PR de seguimiento rebasado sobre el `dev` actual |
 
 ## A medias
 ### H2.S1.M1 — Descargador oficial (openFDA, AccessGUDID, FDA)

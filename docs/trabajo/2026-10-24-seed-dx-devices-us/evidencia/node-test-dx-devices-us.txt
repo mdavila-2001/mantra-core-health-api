@@ -1,4 +1,4 @@
-# node --test "tools/terminology-import/diagnostic-devices/us/test/*.test.mjs"
+# node --test "tools/terminology-import/diagnostic-devices/us/test/*.test.mjs"   (sobre origin/dev eb34a8ae + seguimiento)
 # Subtest: scope: subpartes diagnósticas dentro, terapéuticas y prostéticas fuera
 ok 1 - scope: subpartes diagnósticas dentro, terapéuticas y prostéticas fuera
 # Subtest: scope: helpers
@@ -46,5 +46,5 @@ ok 20 - MAUDE aplanado como mapa de texto: sólo corta en claves conocidas
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 248.72982
+# duration_ms 2176.691394
 exit=0
