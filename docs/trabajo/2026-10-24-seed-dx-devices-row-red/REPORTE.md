@@ -21,7 +21,7 @@
 | H5.S1.M8 | MDA Malasia: hueco con motivo (listado sin fabricante) | `manifest.gaps` | `mda-mdar` |
 | H6.S1.M1 | `typecheck` y `lint` | `corepack yarn typecheck` / `lint` | exit 0 (con `NODE_OPTIONS=--max-old-space-size=8192`, ver Riesgos) |
 | H6.S1.M2 | `COVERAGE.md`, `SOURCES.md`, registro de pasadas | `coverage.mjs` | 14 239 561 filas |
-| H6.S1.M3 | PR contra `dev`, listo para revisión, sin mergear | `create_pull_request` | URL en la descripción de la sesión |
+| H6.S1.M3 | PR contra `dev`, listo para revisión, sin mergear | `create_pull_request` | [mdavila-2001/mantra-core-health-api#821](https://github.com/mdavila-2001/mantra-core-health-api/pull/821) |
 | H6.S1.M4 | Este reporte | `ls` | existe |
 
 ## A medias
