@@ -325,7 +325,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Listar las prácticas activas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.
 
 Contexto declarado en el controlador: Prácticas activas del tenant. Abierta a los actores clínicos y de programación, no sólo a `SECURITY_ADMIN`: es el primer paso para resolver el quirófano que exige programar una intervención, y sin él ese uuid había que averiguarlo fuera del sistema. Sólo devuelve identificación y estado, no configuración.
 
@@ -1000,7 +1000,7 @@ Ejemplo de error normalizado:
 
 Consola de organización médica: estructura, plantilla y legajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: El árbol completo de una organización médica — CARRIL 13. Sedes, áreas, infraestructura, servicios, plantilla, documentación legal e inventario en una sola lectura. Existe porque el módulo tenía once escrituras y tres lecturas: se podían dar de alta quirófanos, áreas, servicios y personal, y ninguna operación los volvía a mencionar. Los roles son los mismos que ya admite `GET /practices`: quien puede enumerar las prácticas del tenant puede ver la estructura de la suya. El aislamiento real lo hace el servicio, que responde 404 ante una práctica de otra organización.
+Contexto declarado en el controlador: El árbol completo de una organización médica — CARRIL 13. Sedes, áreas, infraestructura, servicios, plantilla, documentación legal e inventario en una sola lectura. Existe porque el módulo tenía once escrituras y tres lecturas: se podían dar de alta quirófanos, áreas, servicios y personal, y ninguna operación los volvía a mencionar. Los roles son los mismos que ya admite `GET /practices`: quien puede enumerar las prácticas del tenant puede ver la estructura de la suya. El aislamiento real lo hace el servicio, que responde 404 ante una práctica de otra organización o, para un `PRACTITIONER`, sin vinculación ACTIVE.
 
 ### Descripción del sistema
 
