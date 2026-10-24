@@ -32,6 +32,17 @@ export const EMDN_IVD_URL =
  */
 export const IVD_RISK_CLASS = /^(eu-ivdr|eu-ivdd):|^au:.*\bIVD\b/;
 
+/**
+ * Fuentes cuyo alcance publicado es, por definición, un listado de pruebas de
+ * diagnóstico. CDC LIVD: «maps all SARS-CoV-2 diagnostic tests that have
+ * received FDA Emergency Use Authorizations»
+ * (https://www.cdc.gov/locs/2020/new_livd_test_code_mappings_for_sars-cov-2_test_results.html).
+ */
+export const DIAGNOSTIC_SCOPE_SOURCES = Object.freeze({
+  'cdc-livd-sars-cov-2':
+    'https://www.cdc.gov/locs/2020/new_livd_test_code_mappings_for_sars-cov-2_test_results.html',
+});
+
 export const nodeKey = (system, code, name) =>
   `${system}|${code ?? `name:${(name ?? '').trim().toUpperCase()}`}`;
 
@@ -279,6 +290,11 @@ export class Taxonomy {
     // Clase de riesgo de un esquema que el regulador define solo para IVD
     // (IVDR/IVDD de la UE, «Class N - IVD» de la TGA): es diagnóstico in vitro
     // por definición del propio registro.
+    if (DIAGNOSTIC_SCOPE_SOURCES[row.source])
+      return {
+        diagnostic: true,
+        types: [...nodes.map((n) => n.key), `source-scope|${row.source}`],
+      };
     if (row.riskClass && IVD_RISK_CLASS.test(row.riskClass))
       return {
         diagnostic: true,

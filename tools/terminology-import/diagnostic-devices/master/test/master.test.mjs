@@ -679,3 +679,25 @@ test('EMDN: W es IVD, un título de grupo diagnóstico decide y uno mixto no', (
     'emdn-group-title',
   );
 });
+
+test('decideRow: clase IVD del regulador y alcance publicado de la fuente', () => {
+  const tax = new Taxonomy();
+  assert.equal(
+    tax.decideRow(row({ riskClass: 'au:Class 3 - IVD' })).diagnostic,
+    true,
+  );
+  assert.equal(tax.decideRow(row({ riskClass: 'eu-ivdr:C' })).diagnostic, true);
+  assert.equal(
+    tax.decideRow(row({ riskClass: 'au:Class IIa' })).diagnostic,
+    null,
+  );
+  assert.equal(
+    tax.decideRow(row({ riskClass: 'in:B' })).diagnostic,
+    null,
+    'India usa A–D para dispositivos e IVD',
+  );
+  assert.deepEqual(
+    tax.decideRow(row({ source: 'cdc-livd-sars-cov-2' })).types,
+    ['source-scope|cdc-livd-sars-cov-2'],
+  );
+});
