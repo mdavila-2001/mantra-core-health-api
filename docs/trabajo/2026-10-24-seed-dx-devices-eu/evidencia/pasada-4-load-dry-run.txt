@@ -1,0 +1,10 @@
+{
+  "mode": "DRY-RUN",
+  "emdnConcepts": 8453,
+  "emdnVersions": [
+    "EMDN V2 (según RELEASE.md);via=batirmedical@e0131762;sha256:7972865360a3"
+  ],
+  "emdnProperties": 67601,
+  "devicesNotLoaded": 716,
+  "devicesNotLoadedReason": "el modelo no tiene tabla de catálogo de equipos (fabricante/marca/modelo/UDI-DI); ver propuesta en docs/seed-research/diagnostic-devices-eu.md"
+}
