@@ -18,6 +18,8 @@ import { PersonAccountLinksRepository } from '../profiles/infrastructure/reposit
 // no tiene estado —no cachea, y su propio TSDoc explica por qué— así que una
 // segunda instancia responde exactamente lo mismo que la de `profiles`.
 import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
+import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
+import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
 // De acá sale `ValueSetsRepository`, que es de donde el servicio de arriba lee
 // los 36 conceptos, y `CatalogConceptsRepository`, que da el rótulo con el que
 // el índice de búsqueda guarda la especialidad. `terminology` no importa ningún
@@ -172,6 +174,13 @@ import {
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,
+    // El servicio de arriba lee el value set por el puerto de terminología de
+    // `profiles`; se provee el mismo adaptador, que sólo envuelve los
+    // repositorios de `TerminologyModule`.
+    {
+      provide: PROFILES_TERMINOLOGY_PORT,
+      useClass: ProfilesTerminologyAdapter,
+    },
     // Filtro territorial en dos pasos del directorio (subtarea 2.3); lee los
     // mismos repositorios de `TerminologyModule`.
     PublicTerritoryFilterService,
