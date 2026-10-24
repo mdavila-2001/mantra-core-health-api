@@ -426,7 +426,7 @@ test('MeSH: métodos de investigación, placebos y la raíz «Therapeutics» no 
 test('Cochrane (indexación MeSH de NLM): procedimiento × condición con calificador terapéutico', async () => {
   const { readMeshDescriptors } = await import('../lib/sources/mesh.mjs');
   const { parsePubmedArticle, cochraneCorpus } =
-    await import('../lib/sources/cochrane.mjs');
+    await import('../lib/sources/pubmed.mjs');
   const { descriptors } = await readMeshDescriptors(
     join(FIX, 'mesh-excerpt.xml'),
   );
@@ -454,4 +454,23 @@ test('Cochrane (indexación MeSH de NLM): procedimiento × condición con califi
     assertions.every((a) => /no implica eficacia/.test(a.relationType.label)),
   );
   assert.deepEqual(assertions[0].evidence.pmids, ['40970433']);
+  assert.ok(
+    assertions.every(
+      (a) => a.relationType.code === 'pubmed-cochrane:co-indexed',
+    ),
+  );
+});
+
+test('subconjuntos de MEDLINE: cada uno con su tipo literal registrado y sin afirmar indicación', async () => {
+  const { PUBMED_SUBSETS } = await import('../lib/sources/pubmed.mjs');
+  for (const [key, sub] of Object.entries(PUBMED_SUBSETS)) {
+    const t = RELATION_TYPES[sub.typeCode];
+    assert.ok(t, `${key}: falta el tipo ${sub.typeCode}`);
+    assert.equal(t.kind, 'procedure-disease');
+    assert.match(t.label, /no implica/);
+  }
+  assert.equal(
+    RELATION_TYPES['pubmed-rct:co-indexed'].assertion,
+    'investigational',
+  );
 });

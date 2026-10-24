@@ -1,8 +1,9 @@
 // =============================================================================
-// Revisiones sistemáticas Cochrane → intervención no farmacológica ↔ condición,
-// según la INDEXACIÓN MeSH de NLM (metadatos de MEDLINE, sin texto de la revisión).
+// Subconjuntos de MEDLINE (revisiones Cochrane, guías de práctica clínica,
+// ensayos aleatorizados) → intervención no farmacológica ↔ condición, según la
+// INDEXACIÓN MeSH de NLM (metadatos de MEDLINE, sin texto de los artículos).
 //
-// Una revisión aporta el par (procedimiento, condición) cuando NLM la indexó con:
+// Un registro aporta el par (procedimiento, condición) cuando NLM lo indexó con:
 //  - un descriptor de intervención no farmacológica (árbol MeSH, ver mesh.mjs), y
 //  - un descriptor de condición (árbol C/F03) con algún calificador terapéutico
 //    no farmacológico: therapy Q000628, surgery Q000601, rehabilitation Q000534,
@@ -10,8 +11,9 @@
 //    «drug therapy» Q000188 no cuenta (es de la sesión de fármacos).
 // Las publicaciones retractadas (tipo D016441) no aportan.
 //
-// La relación dice «evaluados en revisiones sistemáticas Cochrane»: no dice que
-// la intervención funcione (una revisión puede concluir lo contrario).
+// El tipo de relación depende del subconjunto (`PUBMED_SUBSETS`) y nunca dice que
+// la intervención funcione ni que esté indicada: una revisión o un ensayo
+// pueden concluir lo contrario, y una guía puede desaconsejarla.
 // =============================================================================
 
 import { readdirSync, readFileSync } from 'node:fs';
@@ -33,6 +35,29 @@ export const THERAPEUTIC_QUALIFIERS = {
   Q000532: 'radiotherapy',
   Q000517: 'prevention & control',
 };
+
+/** Subconjuntos de MEDLINE: búsqueda exacta, carpeta de caché y tipo de relación. */
+export const PUBMED_SUBSETS = {
+  cochrane: {
+    cache: 'pubmed-cochrane',
+    term: '"Cochrane Database Syst Rev"[Journal]',
+    name: 'Revisiones Cochrane en MEDLINE/PubMed',
+    typeCode: 'pubmed-cochrane:co-indexed',
+  },
+  guidelines: {
+    cache: 'pubmed-guidelines',
+    term: '(Guideline[pt] OR Practice Guideline[pt])',
+    name: 'Guías de práctica clínica en MEDLINE/PubMed',
+    typeCode: 'pubmed-guideline:co-indexed',
+  },
+  rct: {
+    cache: 'pubmed-rct',
+    term: 'Randomized Controlled Trial[pt]',
+    name: 'Ensayos controlados aleatorizados en MEDLINE/PubMed',
+    typeCode: 'pubmed-rct:co-indexed',
+  },
+};
+
 const RETRACTED_PUBLICATION = 'D016441';
 export const pubmedUri = (pmid) => `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
 
@@ -76,7 +101,7 @@ export function parsePubmedArticle(xml) {
   };
 }
 
-export function* cochraneRecords(dir) {
+export function* pubmedRecords(dir) {
   for (const f of readdirSync(dir)
     .filter((x) => x.endsWith('.json.gz'))
     .sort()) {
@@ -84,7 +109,13 @@ export function* cochraneRecords(dir) {
   }
 }
 
-export function cochraneCorpus(records, mesh, meta, meshMeta) {
+export function pubmedSubsetCorpus(
+  records,
+  mesh,
+  meta,
+  meshMeta,
+  typeCode = PUBMED_SUBSETS.cochrane.typeCode,
+) {
   const pairs = new Map(); // "Dproc|Dcond" → Set<PMID>
   const stats = {
     records: 0,
@@ -129,7 +160,7 @@ export function cochraneCorpus(records, mesh, meta, meshMeta) {
     procedureCodes.add(p);
     assertions.push(
       assertionRecord({
-        typeCode: 'pubmed-cochrane:co-indexed',
+        typeCode,
         subject: { system: 'mesh', code: p, label: mesh.get(p).name },
         object: { system: 'mesh', code: c, label: mesh.get(c).name },
         sourceRecordId: key,
@@ -144,19 +175,21 @@ export function cochraneCorpus(records, mesh, meta, meshMeta) {
       }),
     );
   }
-  const procedures = [...procedureCodes]
-    .sort()
-    .map((ui) =>
-      procedureRecord({
-        system: 'mesh',
-        code: ui,
-        display: mesh.get(ui).name,
-        category: meshInterventionCategory(mesh.get(ui)),
-        owned: true,
-        meta: meshMeta,
-        uri: meshUri(ui),
-        extra: { meshTrees: mesh.get(ui).trees },
-      }),
-    );
+  const procedures = [...procedureCodes].sort().map((ui) =>
+    procedureRecord({
+      system: 'mesh',
+      code: ui,
+      display: mesh.get(ui).name,
+      category: meshInterventionCategory(mesh.get(ui)),
+      owned: true,
+      meta: meshMeta,
+      uri: meshUri(ui),
+      extra: { meshTrees: mesh.get(ui).trees },
+    }),
+  );
   return { assertions, procedures, stats: { ...stats, pairs: pairs.size } };
 }
+
+/** Compatibilidad con la pasada 6 (revisiones Cochrane). */
+export const cochraneCorpus = pubmedSubsetCorpus;
+export const cochraneRecords = pubmedRecords;
