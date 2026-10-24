@@ -339,6 +339,28 @@ que esta pasada no es la segunda en 0: el contador vuelve a empezar.
 - **Sin decisión**: 6 408 748 filas. 2 286 312 no traen tipo (MDALL); el resto son nomenclaturas nacionales sin criterio publicado (nome técnico, TFDA, JMDN).
 - **Descartadas**: ninguna fuente nueva.
 
+### Pasada 11 (2026-10-24): fuente oficial de la FDA
+
+- **Regiones**: sin cambios desde la pasada 10.
+- **Fuente nueva propia**: openFDA `device/classification`, la exportación oficial del 2026-10-21.
+  - Datos: 7 096 product codes, CC0 1.0. Zip con sha256 `0141400f…` y JSON con sha256 `36518da2…`.
+  - Pasa a ser la principal de la taxonomía de la FDA. La copia de `ej86` queda como verificación y para completar códigos; el suplemento de `bjoleary` solo aporta los que no están en ninguna de las dos.
+  - El `foiclass.zip` de `accessdata.fda.gov` no se pudo usar: redirige a la página de detección de abuso de la FDA, y eso no se elude.
+- **Verificación de la copia en git** (`coverage.json` → `fdaCopies`):
+  - Los 7 088 códigos de la copia están en la oficial, y la oficial trae 8 más (los mismos 8 que ya daba el suplemento).
+  - Difieren:
+    - 10 nombres: 7 por codificación (la copia tiene «�», la oficial el carácter de cp1252 tal cual, p. ej. `\x92`) y 3 cambios de texto (`MNT`, `SFH`, `ONG`);
+    - 4 clases y 4 regulaciones: `PNK`, `NYQ`, `OWE`, `MVD` ahora tienen 864.1890 y clase 2.
+  - Gana la oficial, verbatim, incluidos los caracteres de control de cp1252, que no se corrigen.
+  - Del suplemento solo queda `SHJ` (868.5830, no diagnóstico), que no está en la exportación del 2026-10-21.
+- **Nuevos tras deduplicar** (contra la pasada 10):
+  - Catálogo: **0** (376 114 registros, 288 325 modelos y 21 528 fabricantes, sin cambios).
+  - Taxonomía: 0 nodos nuevos. Hay 18 correcciones de atributos desde la fuente oficial. 4 códigos pasan de `fda-review-panel-ivd` a `cfr-ivd-part` y su decisión no cambia.
+- **Taxonomía cargada**: +15 designaciones (los nombres nuevos) y la 2.ª corrida da 0.
+  - **Limitación del importador**: solo inserta (`ON CONFLICT DO NOTHING`), así que en una base ya cargada no actualiza la regulación ni la clase corregidas de esos 4 códigos.
+  - Queda anotado como pendiente: hace falta una actualización explícita de propiedades con versión, no un upsert silencioso.
+- **Descartadas**: `foiclass.zip` oficial (detección de abuso de la FDA).
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

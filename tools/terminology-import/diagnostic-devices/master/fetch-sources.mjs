@@ -23,7 +23,13 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { CACHE_DIR, MIRRORS, mirrorFilePath } from './lib/sources.mjs';
+import {
+  CACHE_DIR,
+  MIRRORS,
+  OFFICIAL,
+  mirrorFilePath,
+  officialFilePath,
+} from './lib/sources.mjs';
 
 const FORCE = process.argv.includes('--force');
 const sha256 = (path) =>
@@ -87,6 +93,55 @@ for (const [key, m] of Object.entries(MIRRORS)) {
     };
     console.log(`[${key}] ${f.path} ✓ ${got.slice(0, 12)}`);
   }
+}
+
+// Descargas oficiales: curl (respeta el proxy del entorno) + sha256 del zip y
+// del archivo. Un hash distinto no corta la etapa: avisa y la build usa la
+// copia en git.
+manifest.official = {};
+for (const [key, o] of Object.entries(OFFICIAL)) {
+  const path = officialFilePath(key);
+  if (FORCE || !existsSync(path) || sha256(path) !== o.sha256) {
+    const dir = dirname(path);
+    rmSync(dir, { recursive: true, force: true });
+    mkdirSync(dir, { recursive: true });
+    const zip = join(dir, 'download.zip');
+    try {
+      execFileSync('curl', ['-sSfL', '-m', '300', '-o', zip, o.url], {
+        stdio: ['ignore', 'ignore', 'pipe'],
+      });
+    } catch (e) {
+      console.warn(`[${key}] no se pudo bajar ${o.url}: ${e.message}`);
+      continue;
+    }
+    const gotZip = sha256(zip);
+    if (gotZip !== o.zipSha256) {
+      console.warn(
+        `[${key}] el zip publicado tiene sha256 ${gotZip} ≠ fijado ${o.zipSha256} (otra exportación): no se usa; actualizá el pin en lib/sources.mjs`,
+      );
+      rmSync(dir, { recursive: true, force: true });
+      continue;
+    }
+    writeFileSync(
+      path,
+      execFileSync('unzip', ['-p', zip, o.path], { maxBuffer: 1 << 30 }),
+    );
+    rmSync(zip, { force: true });
+  }
+  const got = sha256(path);
+  if (got !== o.sha256) {
+    console.warn(`[${key}] ${o.path} sha256 ${got} ≠ ${o.sha256}: no se usa`);
+    rmSync(path, { force: true });
+    continue;
+  }
+  manifest.official[key] = {
+    url: o.url,
+    exportDate: o.exportDate,
+    zipSha256: o.zipSha256,
+    path: o.path,
+    sha256: got,
+  };
+  console.log(`[${key}] ${o.path} ✓ ${got.slice(0, 12)} (${o.exportDate})`);
 }
 
 writeFileSync(

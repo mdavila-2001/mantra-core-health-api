@@ -1,7 +1,7 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T17:49:42Z",
+  "generatedAt": "2026-10-24T18:01:42Z",
   "regions": [
     {
       "region": "us",
@@ -13,6 +13,7 @@
       "alternatives": [
         "origin/dev",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/inspiring-planck-xhpf4w",
         "origin/claude/adoring-curie-xdkt83",
         "origin/justin/seed-dx-devices-master-p8",
@@ -48,6 +49,7 @@
       "alternatives": [
         "origin/dev",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/inspiring-planck-xhpf4w",
         "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
@@ -141,6 +143,7 @@
       "alternatives": [
         "origin/dev",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/adoring-curie-xdkt83",
         "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
@@ -255,8 +258,8 @@
     {
       "path": "taxonomy-nodes.ndjson.gz",
       "rows": 37200,
-      "bytes": 1916460,
-      "sha256": "d414871108c802e8ad56b3e689b5d7889c1b4b931eabfe784a48a516f0c0cf3a"
+      "bytes": 2014632,
+      "sha256": "6e377fad52b93b2fcfc61e967451eb198ddf1da2edc7c636cb8aad8680b5b956"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -267,32 +270,32 @@
     {
       "path": "manufacturers.ndjson.gz",
       "rows": 21528,
-      "bytes": 4895414,
-      "sha256": "87ce1a8ea1f8d2e16c638122d66023335ecadb5326417c9e323b852ff905b42c"
+      "bytes": 4896122,
+      "sha256": "1d0ac5462efd920a441b5104790773404adac0ad3e5785961c44e7c7964eee5a"
     },
     {
       "path": "models-0001.ndjson.gz",
       "rows": 137073,
-      "bytes": 9603462,
-      "sha256": "3bbb22f4117d4e9863dec2191f3bbd32c53ff8f1753f0ba743d3ebfbe8be8ac3"
+      "bytes": 9603475,
+      "sha256": "1a62fa8b3d4d34105297233903364417cdcfb2ebeff71c59d0d33d19aa42d19e"
     },
     {
       "path": "models-0002.ndjson.gz",
       "rows": 132766,
-      "bytes": 9630280,
-      "sha256": "9094cc0ad67958d015b0e0cf88acdd889ca74831dcb7aefd611ffd1895754c47"
+      "bytes": 9630342,
+      "sha256": "b68c024aba9b0b072282f8062d52d4a43047d6fa99925d51f00cbaf73a177cef"
     },
     {
       "path": "models-0003.ndjson.gz",
       "rows": 18486,
-      "bytes": 1274634,
-      "sha256": "1cc5fd7cf736fa59a4c3ca41a424e6e981b1e22d5408c85562fdb61642edc78e"
+      "bytes": 1274641,
+      "sha256": "0d67428ed3225c839c4efa9ba0d663fd9ab1f4cc4bf24675dc61fdabcd5bcf16"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
       "rows": 11316,
-      "bytes": 1361332,
-      "sha256": "0bf260bc4092767a3defe1dba4c24b31990d5615596155561f595509027d0659"
+      "bytes": 1361338,
+      "sha256": "8a78ba442ded0dd0bc9814cf58f2b3637702c019b3dd45ea05fd22d8da934ecb"
     },
     {
       "path": "industry-mentions.ndjson.gz",

@@ -19,6 +19,7 @@
 //   … --skip-regions                                                 (solo fuentes propias)
 // =============================================================================
 
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,9 +41,15 @@ import { aimlRows } from './lib/own-sources.mjs';
 import {
   CACHE_DIR,
   MIRRORS,
+  OFFICIAL,
   mirrorFilePath,
   mirrorVersion,
+  officialFilePath,
 } from './lib/sources.mjs';
+import {
+  comparePcdCopies,
+  parseOpenfdaClassification,
+} from './lib/openfda-classification.mjs';
 import { Taxonomy } from './lib/taxonomy.mjs';
 import { mentionIdOf, resolveManufacturers } from './lib/manufacturers.mjs';
 import { consolidate, labelKey } from './lib/consolidate.mjs';
@@ -88,14 +95,15 @@ const retrievedAtOfCache = () => {
 const retrievedAt = retrievedAtOfCache().replace(/\.\d+Z$/, 'Z');
 
 // --- 1. Taxonomía FDA --------------------------------------------------------
+// Primaria: la exportación oficial de openFDA si está en el caché con el hash
+// fijado; si no, la copia literal en git. La otra copia completa los códigos
+// que falten y se compara campo a campo (coverage.json → fdaCopies).
 const taxonomy = new Taxonomy();
 const pcdFile = MIRRORS['ej86-fda-ai'].files.foiclass;
-const pcdRows = parsePcd(
+const mirrorPcdRows = parsePcd(
   readFileSync(mirrorFilePath('ej86-fda-ai', 'foiclass'), 'utf8'),
 );
-const panelParts = derivePanelParts(pcdRows);
-const ivdPanels = ivdPanelsFrom(panelParts);
-const pcdProvenance = {
+const mirrorPcdProvenance = {
   source: pcdFile.source,
   sourceUrl: pcdFile.officialUrl,
   sourceVersion: mirrorVersion('ej86-fda-ai'),
@@ -107,9 +115,52 @@ const pcdProvenance = {
     sha256: pcdFile.sha256,
   },
 };
+const openfda = OFFICIAL['openfda-device-classification'];
+const openfdaPath = officialFilePath('openfda-device-classification');
+const openfdaText =
+  existsSync(openfdaPath) &&
+  createHash('sha256').update(readFileSync(openfdaPath)).digest('hex') ===
+    openfda.sha256
+    ? readFileSync(openfdaPath, 'utf8')
+    : null;
+const openfdaRows = openfdaText
+  ? parseOpenfdaClassification(openfdaText).rows
+  : null;
+const pcdRows = openfdaRows ?? mirrorPcdRows;
+const panelParts = derivePanelParts(pcdRows);
+const ivdPanels = ivdPanelsFrom(panelParts);
+const pcdProvenance = openfdaRows
+  ? {
+      source: openfda.source,
+      sourceUrl: openfda.officialUrl,
+      sourceVersion: `openFDA device/classification export ${openfda.exportDate}`,
+      retrievedAt,
+      download: {
+        url: openfda.url,
+        zipSha256: openfda.zipSha256,
+        path: openfda.path,
+        sha256: openfda.sha256,
+      },
+    }
+  : mirrorPcdProvenance;
 for (const r of pcdRows) taxonomy.addNode(pcdNode(r, pcdProvenance, ivdPanels));
+let pcdMirrorAdded = 0;
+if (openfdaRows)
+  for (const r of mirrorPcdRows) {
+    if (taxonomy.nodes.has(`fda-product-code|${r.PRODUCTCODE.trim()}`))
+      continue;
+    taxonomy.addNode(pcdNode(r, mirrorPcdProvenance, ivdPanels));
+    pcdMirrorAdded++;
+  }
+const fdaCheck = openfdaRows
+  ? {
+      a: `openFDA ${openfda.exportDate}`,
+      b: mirrorVersion('ej86-fda-ai'),
+      ...comparePcdCopies(openfdaRows, mirrorPcdRows),
+    }
+  : null;
 console.log(
-  `taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
+  `taxonomía FDA: ${pcdRows.length} product codes (${openfdaRows ? `openFDA ${openfda.exportDate}; copia en git: +${pcdMirrorAdded}, difieren nombre ${fdaCheck.diffs.name.length}, clase ${fdaCheck.diffs.class.length}, regulación ${fdaCheck.diffs.regulation.length}` : 'copia en git; openFDA no está en el caché'}); paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
 );
 
 // --- 1a. Suplemento del PCD: solo los product codes que la copia literal no
@@ -139,7 +190,7 @@ if (existsSync(pcdSupplementPath)) {
     pcdSupplementAdded++;
   }
   console.log(
-    `suplemento del PCD (bjoleary/fdadata): ${pcdSupplementAdded} product codes que la copia literal no tiene`,
+    `suplemento del PCD (bjoleary/fdadata): ${pcdSupplementAdded} product codes que no están en ${openfdaRows ? 'openFDA ni en la copia en git' : 'la copia literal'}`,
   );
 }
 
@@ -489,12 +540,14 @@ const coverage = coverageReport({
   resolution,
   industry: industry.stats,
   emdnCheck,
+  fdaCheck,
   actorStats,
   sourceStats: [...sourceStats.values()],
   regionStatus,
   panelParts,
   ivdPanels: [...ivdPanels].sort(),
   mirrors: MIRRORS,
+  official: openfdaRows ? OFFICIAL : {},
 });
 writeFileSync(
   join(OUT, 'coverage.json'),

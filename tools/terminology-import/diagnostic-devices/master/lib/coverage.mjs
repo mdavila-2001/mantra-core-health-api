@@ -23,12 +23,14 @@ export function coverageReport({
   resolution,
   industry = null,
   emdnCheck = null,
+  fdaCheck = null,
   actorStats = [],
   sourceStats,
   regionStatus,
   panelParts,
   ivdPanels,
   mirrors,
+  official = {},
 }) {
   const nodes = taxonomy.nodes;
   const dxNodes = nodes.filter((n) => n.diagnostic === true);
@@ -100,7 +102,21 @@ export function coverageReport({
     },
     industry,
     emdnCopies: emdnCheck,
+    fdaCopies: fdaCheck,
     actors: actorStats,
+    official: Object.fromEntries(
+      Object.entries(official).map(([k, o]) => [
+        k,
+        {
+          url: o.url,
+          exportDate: o.exportDate,
+          zipSha256: o.zipSha256,
+          path: o.path,
+          sha256: o.sha256,
+          license: o.license,
+        },
+      ]),
+    ),
     mirrors: Object.fromEntries(
       Object.entries(mirrors).map(([k, m]) => [
         k,
@@ -161,6 +177,12 @@ export function coverageReport({
       'Valor',
     ),
     '',
+    ...(fdaCheck
+      ? [
+          `Product codes de la FDA: ${fdaCheck.a} (${fdaCheck.countA}) contra ${fdaCheck.b} (${fdaCheck.countB}); solo en la oficial ${fdaCheck.onlyA.length}, solo en la copia ${fdaCheck.onlyB.length}; difieren nombre ${fdaCheck.diffs.name.length}, clase ${fdaCheck.diffs.class.length}, regulación ${fdaCheck.diffs.regulation.length}.`,
+          '',
+        ]
+      : []),
     table(json.taxonomy.bySystem, 'Nomenclatura', 'Nodos'),
     '',
     table(

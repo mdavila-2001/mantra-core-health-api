@@ -7,16 +7,19 @@ cuenta y los criterios publicados de la taxonomía.
 
 ## 1. Archivos de datos (fijados por commit y sha256)
 
-Desde este entorno los servidores oficiales no responden (ver §4), así que se
-usan copias en git que reproducen el archivo oficial **con su cabecera
-original**. `fetch-sources.mjs` rechaza cualquier archivo cuyo sha256 no
+Hasta la pasada 10 los servidores oficiales no respondían desde este entorno
+(ver §4), así que se usaron copias en git que reproducen el archivo oficial
+**con su cabecera original**. Desde la pasada 11 la red es completa y la
+taxonomía de la FDA sale de la descarga oficial de openFDA; las copias quedan
+para verificar y completar. `fetch-sources.mjs` rechaza cualquier archivo cuyo sha256 no
 coincida.
 
 | Fuente (`source`) | Archivo oficial | Copia usada | sha256 | Filas | Licencia |
 |---|---|---|---|---:|---|
-| `fda-pcd` | FDA Product Classification Database, `foiclass` ([página de descarga](https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files); se reemplaza cada domingo) | `github.com/ej86/fda-ai-medical-device-analytics` @ `8840a03632ffdc346a8bf05a459236c913b9198c` (2026-08-28), `foiclass.csv` | `ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de` | 7 088 | Obra del Gobierno de EE. UU.: dominio público (17 U.S.C. § 105). El repositorio no declara licencia propia; se usa solo el dato público de la FDA. |
+| `fda-pcd` (**principal desde la pasada 11**) | openFDA `device/classification`, exportación del **2026-10-21** (listada en <https://api.fda.gov/download.json>) | descarga oficial: <https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip> (zip `0141400f49b9f2e8f075eabb8d0a841123e5904be061fab8addb42229b6bfa3d`) | `36518da242de3d516c2a3de7ba35bc1a1f97f5d3160740b42e3c072e181c04e4` (JSON) | 7 096 | openFDA: dominio público, dedicación CC0 1.0 (<https://open.fda.gov/license/>, leída el 2026-10-24). Es el mismo Product Classification Database en JSON; no trae `PHYSICALSTATE`, `TECHNICALMETHOD` ni `TARGETAREA`. La URL sirve siempre la última exportación: si el hash cambia, `fetch-sources.mjs` avisa, no la usa y el build vuelve a la copia en git hasta que se actualice el pin en `lib/sources.mjs`. |
+| `fda-pcd` | FDA Product Classification Database, `foiclass` ([página de descarga](https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files); se reemplaza cada domingo) | `github.com/ej86/fda-ai-medical-device-analytics` @ `8840a03632ffdc346a8bf05a459236c913b9198c` (2026-08-28), `foiclass.csv` | `ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de` | 7 088 | Obra del Gobierno de EE. UU.: dominio público (17 U.S.C. § 105). El repositorio no declara licencia propia; se usa solo el dato público de la FDA. Desde la pasada 11 es la copia de verificación: los 7 088 códigos están en openFDA; difieren 10 nombres, 4 clases y 4 regulaciones (gana la oficial, detalle en `out/coverage.json` → `fdaCopies`). |
 | `fda-ai-enabled-devices` | FDA, [Artificial Intelligence-Enabled Medical Devices](https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices) (CSV de la página) | mismo commit, `aiml-devices-csv.csv` | `4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d` | 1 524 | Ídem. La FDA aclara que la lista no es exhaustiva. |
-| `fda-pcd` (suplemento) | ídem `fda-pcd`, refresco 2026-10-20 | `github.com/bjoleary/fdadata` @ `227bdaa24aec8565e333cc67689ff2c63ce5cea7` (2026-10-20), `data/product_codes.rda` | `4423c192af7a282af72270f0e732e83a58504e083b6c9d588a7356b228f3894b` | 9 | MIT (repositorio); datos de la FDA. **No es literal**: bjoleary limpia el archivo (paneles por nombre, regulación numérica). Solo se usan los 9 códigos que faltan en la copia literal, extraídos con `extract-pcd-supplement.py` a `data/fda-pcd-supplement.json`. |
+| `fda-pcd` (suplemento) | ídem `fda-pcd`, refresco 2026-10-20 | `github.com/bjoleary/fdadata` @ `227bdaa24aec8565e333cc67689ff2c63ce5cea7` (2026-10-20), `data/product_codes.rda` | `4423c192af7a282af72270f0e732e83a58504e083b6c9d588a7356b228f3894b` | 9 | MIT (repositorio); datos de la FDA. **No es literal**: bjoleary limpia el archivo (paneles por nombre, regulación numérica). Solo se usan los 9 códigos que faltan en la copia literal, extraídos con `extract-pcd-supplement.py` a `data/fda-pcd-supplement.json`. Con openFDA como principal, 8 de los 9 ya vienen de la oficial; solo queda `SHJ` (868.5830, no diagnóstico), ausente de la exportación del 2026-10-21. |
 | `ec-emdn` | Comisión Europea, [EMDN](https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en), versión 2 | `github.com/BatirMedical/nomenclature-emdn` @ `e0131762b3385c1085b97da9c5f74d32edb89df3` (2025-04-02), `EMDN_BatirMedical.csv` | `7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379` | 8 453 | La Comisión la publica libre y gratuita; el repo es MIT y aclara que los datos siguen siendo de la Comisión. |
 | `ec-emdn` (verificación) | ídem | `github.com/lisadonlon/GMDNEMDN` @ `ef6086489b942d96ff0d2e18f9f1f8434a94f954` (2025-10-30), `data/EMDN.txt` | `033572eb47bb3f595c3fd9b1e8494680fd2dd189c4ee21261b4d64e3cab26f3f` | 8 454 | Ídem (MIT). Solo para verificar la primera copia: coinciden código, término y nivel en los 8 453 comunes; `V020303` (TEATS) falta en la primera y se toma de esta, citándola. |
 
@@ -51,7 +54,7 @@ no pudieron verificarse desde acá, así que se guardan los códigos tal cual.
 
 | Nomenclatura | Uso que se hace | Licencia / términos |
 |---|---|---|
-| FDA product codes | Completa (7 088 códigos, con definición) | Dominio público. |
+| FDA product codes | Completa (7 096 códigos de openFDA más `SHJ` del suplemento, con definición) | Dominio público; openFDA, CC0 1.0. |
 | EMDN | Completa (V2, 8 454 términos, desde dos copias verificadas entre sí) más los códigos que traen los registros y no están en V2 (hoy `W0105040619`, de EUDAMED vía `eu/`, sin nombre publicado) | La Comisión la publica libre y gratuita (MDR art. 26; descarga en <https://webgate.ec.europa.eu/dyna2/emdn/>). |
 | GMDN | Solo los términos que AccessGUDID publica junto a cada dispositivo (nombre, definición y, desde su actualización, el código) | La nomenclatura completa exige membresía de la GMDN Agency (<https://www.gmdnagency.org/>). No se descarga ni se reconstruye la nomenclatura: solo lo que GUDID publica por dispositivo. |
 | Correspondencia EMDN↔GMDN | **No hay** mapeo oficial publicado: la Comisión dijo que lo haría «to the extent possible» y el estudio de la GMDN Agency (2023) concluye que el mapeo término a término no es efectivo (solo 26 % de correspondencia cercana). No se usa ningún mapeo EMDN↔GMDN. | <https://www.gmdnagency.org/wp-content/uploads/2023/09/Feasibility-of-mapping-GMDN-to-EMDN-article.pdf> |
@@ -69,7 +72,8 @@ de mezclarlos con el catálogo.
 
 | Qué | Dónde | Motivo |
 |---|---|---|
-| `foiclass.zip` oficial, openFDA (`api.fda.gov`, `download.open.fda.gov`), AccessGUDID (`accessgudid.nlm.nih.gov`) | FDA / NLM | 403 del proxy de salida del entorno (CONNECT rechazado); WebFetch tampoco resuelve DNS. Se usó la copia fijada de §1. |
+| `foiclass.zip` oficial | `accessdata.fda.gov/premarket/ftparea/foiclass.zip` | Hasta la pasada 10, 403 del proxy. Con la red completa (pasada 11), la FDA redirige a `apology_objects/abuse-detection-apology.html` (404): es su detección de abuso y no se elude. Se usa la misma base desde openFDA (§1). |
+| AccessGUDID completo | `accessgudid.nlm.nih.gov` | Responde desde la pasada 11; no se bajó en master (lo cubre `us/`). |
 | Archivo EMDN oficial (y versiones posteriores a la 2) | `webgate.ec.europa.eu/dyna2/emdn/` | 403 del proxy. Se usó la V2 de dos copias en git (§1); no se encontró copia de una versión posterior. |
 | EUDAMED (actores, SRN) | `ec.europa.eu/tools/eudamed` | 403 del proxy (lo cubre `eu/`). |
 | GLEIF, Wikidata, OpenCorporates | `api.gleif.org`, `query.wikidata.org`, `api.opencorporates.com` | 403 del proxy (GLEIF, Wikidata); OpenCorporates sin clave y con licencia ODbL a acordar. Sin grupos/filiales publicados en esta pasada. |

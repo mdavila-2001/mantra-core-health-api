@@ -1,6 +1,6 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T17:49:42Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T18:01:42Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 
@@ -41,6 +41,8 @@ Generado: 2026-10-24T17:49:42Z. Se genera con `build.mjs`; no lo edite a mano.
 | Mapeos publicados | 218 |
 | Tipos de diagnóstico con al menos un modelo | 3.897 |
 
+Product codes de la FDA: openFDA 2026-10-21 (7096) contra git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28) (7088); solo en la oficial 8, solo en la copia 0; difieren nombre 10, clase 4, regulación 4.
+
 | Nomenclatura | Nodos |
 |---|---:|
 | in:cdsco-device-name | 11.371 |
@@ -71,7 +73,7 @@ Generado: 2026-10-24T17:49:42Z. Se genera con `build.mjs`; no lo edite a mano.
 | fda-product-code:false:cfr-non-diagnostic-subpart | 3.096 |
 | br:anvisa-nome-tecnico:null:null | 2.867 |
 | emdn:true:emdn-category-w | 2.263 |
-| fda-product-code:true:cfr-ivd-part | 2.077 |
+| fda-product-code:true:cfr-ivd-part | 2.081 |
 | gmdn-pt:null:null | 1.743 |
 | tw:tfda-classification:null:null | 1.366 |
 | fda-product-code:true:cfr-subpart-title | 975 |
@@ -80,7 +82,7 @@ Generado: 2026-10-24T17:49:42Z. Se genera con `build.mjs`; no lo edite a mano.
 | emdn:true:emdn-group-title-inherited | 199 |
 | emdn:null:emdn-group-title-mixed-inherited | 173 |
 | gmdn:true:crosswalk-published | 79 |
-| fda-product-code:true:fda-review-panel-ivd | 71 |
+| fda-product-code:true:fda-review-panel-ivd | 67 |
 | fda-product-code:false:cfr-blood-establishment | 37 |
 | emdn:true:emdn-group-title | 30 |
 | fda-product-code:false:cfr-non-device-part | 5 |

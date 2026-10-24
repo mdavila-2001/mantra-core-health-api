@@ -3,8 +3,9 @@
 // `regions.mjs`). Cada una fija repositorio, commit y sha256 de cada archivo:
 // `fetch-sources.mjs` se niega a usar un archivo cuyo hash no coincide.
 //
-// Por qué copias en git: desde este entorno la FDA, la Comisión Europea, la NLM,
-// GLEIF y Wikidata responden 403 al proxy (ver SOURCES.md, «Huecos»). Solo se
+// Por qué copias en git: hasta la pasada 10 la FDA, la Comisión Europea, la NLM,
+// GLEIF y Wikidata respondían 403 al proxy (ver SOURCES.md, «Huecos»); desde
+// la pasada 11 hay descargas oficiales en `OFFICIAL`. Solo se
 // usan copias que reproducen el archivo oficial con su cabecera original; la
 // URL oficial queda en `officialUrl` y es la que se cita en cada fila.
 // =============================================================================
@@ -88,6 +89,34 @@ export const MIRRORS = Object.freeze({
     },
   },
 });
+
+/**
+ * Descargas oficiales fijadas por sha256 (desde la pasada 11 la red del entorno
+ * llega a openFDA). La URL siempre sirve la última exportación: si cambia el
+ * hash, `fetch-sources.mjs` avisa y no la usa, y `build.mjs` vuelve a la copia
+ * en git. Para adoptar una exportación nueva se actualiza el pin.
+ */
+export const OFFICIAL = Object.freeze({
+  'openfda-device-classification': {
+    url: 'https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip',
+    index: 'https://api.fda.gov/download.json',
+    exportDate: '2026-10-21',
+    zipSha256:
+      '0141400f49b9f2e8f075eabb8d0a841123e5904be061fab8addb42229b6bfa3d',
+    path: 'device-classification-0001-of-0001.json',
+    sha256: '36518da242de3d516c2a3de7ba35bc1a1f97f5d3160740b42e3c072e181c04e4',
+    records: 7096,
+    source: 'fda-pcd',
+    name: 'FDA Product Classification Database (openFDA device/classification)',
+    officialUrl:
+      'https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files',
+    license:
+      'openFDA: dominio público, dedicación CC0 1.0 (https://open.fda.gov/license/).',
+  },
+});
+
+export const officialFilePath = (key) =>
+  resolve(CACHE_DIR, key, OFFICIAL[key].path);
 
 /** `sourceVersion` de un archivo espejo: sha del commit + fecha del commit. */
 export const mirrorVersion = (mirrorKey) => {

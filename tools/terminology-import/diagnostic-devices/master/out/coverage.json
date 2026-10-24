@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T17:49:42Z",
+  "generatedAt": "2026-10-24T18:01:42Z",
   "regions": [
     {
       "region": "us",
@@ -11,6 +11,7 @@
       "alternatives": [
         "origin/dev",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/inspiring-planck-xhpf4w",
         "origin/claude/adoring-curie-xdkt83",
         "origin/justin/seed-dx-devices-master-p8",
@@ -46,6 +47,7 @@
       "alternatives": [
         "origin/dev",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/inspiring-planck-xhpf4w",
         "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
@@ -139,6 +141,7 @@
       "alternatives": [
         "origin/dev",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/adoring-curie-xdkt83",
         "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
@@ -474,7 +477,7 @@
       "fda-product-code:false:cfr-non-diagnostic-subpart": 3096,
       "br:anvisa-nome-tecnico:null:null": 2867,
       "emdn:true:emdn-category-w": 2263,
-      "fda-product-code:true:cfr-ivd-part": 2077,
+      "fda-product-code:true:cfr-ivd-part": 2081,
       "gmdn-pt:null:null": 1743,
       "tw:tfda-classification:null:null": 1366,
       "fda-product-code:true:cfr-subpart-title": 975,
@@ -483,7 +486,7 @@
       "emdn:true:emdn-group-title-inherited": 199,
       "emdn:null:emdn-group-title-mixed-inherited": 173,
       "gmdn:true:crosswalk-published": 79,
-      "fda-product-code:true:fda-review-panel-ivd": 71,
+      "fda-product-code:true:fda-review-panel-ivd": 67,
       "fda-product-code:false:cfr-blood-establishment": 37,
       "emdn:true:emdn-group-title": 30,
       "fda-product-code:false:cfr-non-device-part": 5,
@@ -513,6 +516,20 @@
       "TX"
     ],
     "panelParts": {
+      "DE": {
+        "872": 318,
+        "878": 3,
+        "880": 2,
+        "890": 3
+      },
+      "CV": {
+        "868": 1,
+        "870": 317,
+        "876": 1,
+        "878": 4,
+        "880": 1,
+        "892": 1
+      },
       "AN": {
         "868": 220,
         "870": 8,
@@ -524,38 +541,52 @@
         "890": 1
       },
       "CH": {
-        "862": 472,
+        "862": 473,
         "864": 8,
         "866": 4,
         "868": 1,
         "880": 5
       },
-      "CV": {
+      "SU": {
         "868": 1,
-        "870": 316,
-        "876": 1,
-        "878": 4,
-        "880": 1,
-        "892": 1
-      },
-      "DE": {
-        "872": 317,
-        "878": 3,
-        "880": 2,
-        "890": 3
-      },
-      "EN": {
-        "868": 3,
-        "872": 3,
-        "874": 229,
-        "878": 1,
-        "880": 2,
+        "870": 1,
+        "874": 2,
+        "876": 21,
+        "878": 466,
+        "880": 12,
         "882": 2,
-        "892": 4
+        "890": 4,
+        "892": 2
+      },
+      "PM": {
+        "882": 3,
+        "888": 1,
+        "890": 199
+      },
+      "OR": {
+        "878": 16,
+        "882": 6,
+        "888": 269,
+        "890": 2
+      },
+      "MI": {
+        "610": 2,
+        "862": 5,
+        "864": 1,
+        "866": 508
+      },
+      "PA": {
+        "864": 268,
+        "866": 33
+      },
+      "TX": {
+        "862": 316,
+        "864": 2,
+        "866": 1
       },
       "GU": {
         "870": 5,
-        "876": 528,
+        "876": 529,
         "878": 10,
         "880": 1,
         "882": 1,
@@ -571,40 +602,10 @@
         "868": 1,
         "880": 1
       },
-      "HO": {
-        "864": 2,
-        "868": 3,
-        "870": 7,
-        "872": 1,
-        "876": 7,
-        "878": 46,
-        "880": 295,
-        "882": 1,
-        "890": 6,
-        "892": 2
-      },
       "IM": {
         "862": 2,
         "864": 6,
         "866": 247
-      },
-      "MG": {
-        "864": 1,
-        "866": 4
-      },
-      "MI": {
-        "610": 2,
-        "862": 5,
-        "864": 1,
-        "866": 508
-      },
-      "NE": {
-        "870": 9,
-        "874": 2,
-        "878": 2,
-        "882": 211,
-        "888": 6,
-        "890": 7
       },
       "OB": {
         "862": 1,
@@ -621,20 +622,17 @@
         "886": 308,
         "892": 5
       },
-      "OR": {
-        "878": 16,
-        "882": 6,
-        "888": 268,
-        "890": 2
-      },
-      "PA": {
-        "864": 265,
-        "866": 33
-      },
-      "PM": {
-        "882": 3,
-        "888": 1,
-        "890": 199
+      "HO": {
+        "864": 2,
+        "868": 3,
+        "870": 7,
+        "872": 1,
+        "876": 7,
+        "878": 46,
+        "880": 296,
+        "882": 1,
+        "890": 6,
+        "892": 2
       },
       "RA": {
         "872": 6,
@@ -642,21 +640,26 @@
         "884": 9,
         "892": 184
       },
-      "SU": {
-        "868": 1,
-        "870": 1,
-        "874": 2,
-        "876": 21,
-        "878": 466,
-        "880": 12,
+      "EN": {
+        "868": 3,
+        "872": 3,
+        "874": 229,
+        "878": 1,
+        "880": 2,
         "882": 2,
-        "890": 4,
-        "892": 2
+        "892": 4
       },
-      "TX": {
-        "862": 316,
+      "NE": {
+        "870": 9,
+        "874": 2,
+        "878": 2,
+        "882": 212,
+        "888": 6,
+        "890": 7
+      },
+      "MG": {
         "864": 2,
-        "866": 1
+        "866": 4
       }
     }
   },
@@ -867,6 +870,121 @@
     ],
     "differ": []
   },
+  "fdaCopies": {
+    "a": "openFDA 2026-10-21",
+    "b": "git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28)",
+    "countA": 7096,
+    "countB": 7088,
+    "onlyA": [
+      "QEO",
+      "SIW",
+      "SJA",
+      "SJB",
+      "SJD",
+      "SJH",
+      "SJJ",
+      "SJL"
+    ],
+    "onlyB": [],
+    "diffs": {
+      "name": [
+        {
+          "code": "QSE",
+          "a": "AlzheimerS Disease Pathology Assessment Test",
+          "b": "Alzheimer�S Disease Pathology Assessment Test"
+        },
+        {
+          "code": "SFH",
+          "a": "Pathology Software Algorithm Device Analyzing Digital Images For Prostate Cancer Prognosis",
+          "b": "Pathology Software Algorithm Device Analyzing Digital Images For Cancer Prognosis"
+        },
+        {
+          "code": "MNT",
+          "a": "Continuous, Minimal Ventilatory Support, Facility Use Ventilator",
+          "b": "Sv70 Ventilator"
+        },
+        {
+          "code": "PQV",
+          "a": "ß-Glucocerebrosidase (Gba) Newborn Screening Test System",
+          "b": "�-Glucocerebrosidase (Gba) Newborn Screening Test System"
+        },
+        {
+          "code": "QCM",
+          "a": "ß-Galactocerebrosidase (Galc) Newborn Screening Test System",
+          "b": "�-Galactocerebrosidase (Galc) Newborn Screening Test System"
+        },
+        {
+          "code": "SCG",
+          "a": "Modified Version Of Another ManufacturerS Fda-Authorized Test Within Scope Described In Preamble To Ldt Final Rule",
+          "b": "Modified Version Of Another Manufacturer�S Fda-Authorized Test Within Scope Described In Preamble To Ldt Final Rule"
+        },
+        {
+          "code": "ONG",
+          "a": "Powered Laser Surgical Instrument With MicrobeamFractional Output",
+          "b": "Powered Laser Surgical Instrument With Microbeam\\Fractional Output"
+        },
+        {
+          "code": "QMT",
+          "a": "Prep Kit  Vaccine Injection",
+          "b": "Prep Kit � Vaccine Injection"
+        },
+        {
+          "code": "PQO",
+          "a": "Anti-Müllerian Hormone Test System",
+          "b": "Anti-M�llerian Hormone Test System"
+        },
+        {
+          "code": "QEH",
+          "a": "Piston Syringe With Neuraxial Connector  Epidural, Peripheral, And/Or Indirect Cerebral Spinal Fluid Contact",
+          "b": "Piston Syringe With Neuraxial Connector � Epidural, Peripheral, And/Or Indirect Cerebral Spinal Fluid Contact"
+        }
+      ],
+      "class": [
+        {
+          "code": "OWE",
+          "a": "2",
+          "b": "3"
+        },
+        {
+          "code": "NYQ",
+          "a": "2",
+          "b": "3"
+        },
+        {
+          "code": "PNK",
+          "a": "2",
+          "b": "3"
+        },
+        {
+          "code": "MVD",
+          "a": "2",
+          "b": "3"
+        }
+      ],
+      "regulation": [
+        {
+          "code": "OWE",
+          "a": "864.1890",
+          "b": ""
+        },
+        {
+          "code": "NYQ",
+          "a": "864.1890",
+          "b": ""
+        },
+        {
+          "code": "PNK",
+          "a": "864.1890",
+          "b": ""
+        },
+        {
+          "code": "MVD",
+          "a": "864.1890",
+          "b": ""
+        }
+      ]
+    }
+  },
   "actors": [
     {
       "region": "eu",
@@ -882,6 +1000,16 @@
       "invalid": 0
     }
   ],
+  "official": {
+    "openfda-device-classification": {
+      "url": "https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip",
+      "exportDate": "2026-10-21",
+      "zipSha256": "0141400f49b9f2e8f075eabb8d0a841123e5904be061fab8addb42229b6bfa3d",
+      "path": "device-classification-0001-of-0001.json",
+      "sha256": "36518da242de3d516c2a3de7ba35bc1a1f97f5d3160740b42e3c072e181c04e4",
+      "license": "openFDA: dominio público, dedicación CC0 1.0 (https://open.fda.gov/license/)."
+    }
+  },
   "mirrors": {
     "ej86-fda-ai": {
       "repo": "https://github.com/ej86/fda-ai-medical-device-analytics.git",
