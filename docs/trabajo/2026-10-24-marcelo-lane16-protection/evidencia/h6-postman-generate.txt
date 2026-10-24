@@ -1,0 +1,16 @@
+Colección generada: 144 dominios · 1512 requests · 755 variables
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\Salud-API.postman_collection.json
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\Salud-Local.postman_environment.json
+Colección por actor · Paciente: 8 pasos
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Paciente.postman_collection.json
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Paciente.postman_environment.json
+Colección por actor · Médico: 9 pasos
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Medico.postman_collection.json
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Medico.postman_environment.json
+Colección por actor · Organización: 14 pasos
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Organizacion.postman_collection.json
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Organizacion.postman_environment.json
+Colección por actor · Administrador: 10 pasos
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Administrador.postman_collection.json
+  C:\Alovida\wt-marcelo-api-lane16\docs\postman\actores\Salud-Administrador.postman_environment.json
+exit=0

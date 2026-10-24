@@ -196,12 +196,15 @@ test('RDF/XML (IDO): clase con definición IAO e is_a; declaraciones de una lín
 });
 
 test('Wikidata ES: el valor del identificador se lleva al código del corpus', () => {
-  // Sólo forma del identificador (los valores reales los trae la corrida, hoy bloqueada).
+  // Forma del identificador; los valores con guion bajo salen de la corrida real.
   assert.equal(corpusCode('P1554', '0000948'), 'UBERON:0000948');
   assert.equal(corpusCode('P1402', '7088'), 'FMA:7088');
   assert.equal(corpusCode('P354', 'HGNC:1100'), 'HGNC:1100');
   assert.equal(corpusCode('P685', '9606'), 'NCBITaxon:9606');
   assert.equal(corpusCode('P686', 'GO:0008150'), 'GO:0008150');
+  // Wikidata guarda P7963 con guion bajo (valor real de Q-ítems de la corrida 2026-10-24).
+  assert.equal(corpusCode('P7963', 'CL_0000738'), 'CL:0000738');
+  assert.equal(corpusCode('P7963', 'CL:0000738'), 'CL:0000738');
 });
 
 test('registro: cada fuente tiene prefijo → code system (las aristas y xrefs entre fuentes se resuelven por ahí)', async () => {

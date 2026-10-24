@@ -1,0 +1,27 @@
+(node:33528) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[33m[Nest] 33528  - [39m24/10/2026, 12:35:13 [33m   WARN[39m [38;5;3m[MikroORM] [39mObject(5) {
+  msg: [32m'consulta lenta'[39m,
+  tookMs: [33m270[39m,
+  thresholdMs: [33m200[39m,
+  rows: [90mundefined[39m,
+  query: [32m'insert into "billing"."invoice_lines" ("id", "invoice_id", "insurance_claim_line_id", "description", "quantity", "unit_price", "line_total", "created_at", "updated_at", "created_by_user_id", "updated_by_user_id") values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) returning "row_version"'[39m
+}
+[33m[Nest] 33528  - [39m24/10/2026, 12:35:14 [33m   WARN[39m [38;5;3m[MikroORM] [39mObject(5) {
+  msg: [32m'consulta lenta'[39m,
+  tookMs: [33m449[39m,
+  thresholdMs: [33m200[39m,
+  rows: [33m1[39m,
+  query: [32m'delete from iam.users where id = ?'[39m
+}
+  console.log
+    LANE16 limpieza (marca LANE16-220a18c4): reclamos conservados = 17, facturas conservadas = 9, beneficios restantes = 0. Lo conservado tiene historial en audit.* (sólo inserción) y no se fuerza.
+
+      at Object.log (test/integration/lane16-patient-invoice-flow.int-spec.ts:577:15)
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        13.537 s
+Ran all test suites matching lane16-patient-invoice-flow.
+exit=0

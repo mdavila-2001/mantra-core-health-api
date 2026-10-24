@@ -14,23 +14,26 @@ import {
   reviewVerdict,
   submissionViolations,
   type ContentPatch,
+  type TargetKind,
 } from '../catalog/annotation.rules';
+import { esUnicidad } from '../catalog/db-errors';
 import { TEXT_FIELDS } from '../catalog/catalog.constants';
 import type {
   AnnotationPatchDto,
   EvidenceInputDto,
   ReviewInputDto,
 } from '../dto/catalog-request.dto';
-import { CatalogRepository } from '../repositories/catalog.repository';
+import {
+  CatalogRepository,
+  type AnnotationRow,
+} from '../repositories/catalog.repository';
 import { presentarEvidencia, presentarFicha } from './catalog-read.service';
 
-/** `true` si el error es la violación de unicidad de Postgres (la ficha ya la creó otra petición). */
-function esUnicidad(error: unknown): boolean {
-  const e = error as { code?: string; message?: string };
-  return (
-    e?.code === '23505' ||
-    /duplicate key|unique constraint/i.test(e?.message ?? '')
-  );
+/** A qué ficha se escribe: la del objeto, o la de una de sus columnas. */
+interface AnnotationTarget {
+  kind: TargetKind;
+  objectId: string;
+  columnId: string | null;
 }
 
 /**
@@ -49,17 +52,57 @@ export class CatalogGovernanceService {
   ) {}
 
   /** Crea (`expectedVersion` 0) o edita la ficha del objeto. Devuelve la ficha resultante. */
-  async saveAnnotation(
+  saveAnnotation(userId: string, objectId: string, dto: AnnotationPatchDto) {
+    return this.save(
+      userId,
+      async (tx) => {
+        if (!(await this.repo.objectById(tx, objectId)))
+          throw new ResourceNotFoundException(
+            'Objeto del catálogo no encontrado',
+          );
+        return { kind: 'OBJECT', objectId, columnId: null };
+      },
+      dto,
+    );
+  }
+
+  /** Crea o edita la ficha de una columna. Mismas reglas que la del objeto. */
+  saveColumnAnnotation(
     userId: string,
-    objectId: string,
+    columnId: string,
+    dto: AnnotationPatchDto,
+  ) {
+    return this.save(
+      userId,
+      async (tx) => {
+        const columna = await this.repo.columnById(tx, columnId);
+        if (!columna)
+          throw new ResourceNotFoundException(
+            'Columna del catálogo no encontrada',
+          );
+        return { kind: 'COLUMN', objectId: columna.object_id, columnId };
+      },
+      dto,
+    );
+  }
+
+  private fichaDe(
+    tx: EntityManager,
+    t: AnnotationTarget,
+  ): Promise<AnnotationRow | null> {
+    return t.columnId
+      ? this.repo.annotationOfColumn(tx, t.columnId)
+      : this.repo.annotationOfObject(tx, t.objectId);
+  }
+
+  private save(
+    userId: string,
+    resolver: (tx: EntityManager) => Promise<AnnotationTarget>,
     dto: AnnotationPatchDto,
   ) {
     return this.em.fork().transactional(async (tx) => {
-      if (!(await this.repo.objectById(tx, objectId)))
-        throw new ResourceNotFoundException(
-          'Objeto del catálogo no encontrado',
-        );
-      const ficha = await this.repo.annotationOfObject(tx, objectId);
+      const target = await resolver(tx);
+      const ficha = await this.fichaDe(tx, target);
       const version = ficha?.row_version ?? 0;
       if (dto.expectedVersion !== version)
         throw new ConcurrencyConflictException(
@@ -72,7 +115,7 @@ export class CatalogGovernanceService {
 
       const proximo = applyPatch(ficha?.content ?? EMPTY_CONTENT, parche(dto));
       if (dto.submit) {
-        const violations = submissionViolations(proximo);
+        const violations = submissionViolations(proximo, target.kind);
         if (violations.length)
           throw new DomainException(
             422,
@@ -81,6 +124,7 @@ export class CatalogGovernanceService {
             { violations },
           );
       }
+      // guardar a mano siempre saca la ficha de AUTO_DETECTED: pasa a borrador o a revisión
       const estado = dto.submit ? 'NEEDS_REVIEW' : 'DRAFT';
       const revisionNo = (ficha?.current_revision_no ?? 0) + 1;
       let id: string;
@@ -88,7 +132,8 @@ export class CatalogGovernanceService {
         try {
           id = (
             await this.repo.insertAnnotation(tx, {
-              objectId,
+              objectId: target.objectId,
+              columnId: target.columnId,
               content: proximo,
               reviewStatus: estado,
               userId,
@@ -110,6 +155,7 @@ export class CatalogGovernanceService {
           content: proximo,
           reviewStatus: estado,
           revisionNo,
+          origin: 'MANUAL',
           userId,
         });
         if (!ok)
@@ -139,16 +185,49 @@ export class CatalogGovernanceService {
         throw new ResourceNotFoundException(
           'Objeto del catálogo no encontrado',
         );
-      const fila = await this.repo.addEvidence(tx, {
-        objectId,
-        kind: dto.kind,
-        reference: dto.reference.trim(),
-        excerpt: dto.excerpt?.trim() || null,
-        sourceRevision: dto.sourceRevision?.trim() || null,
-        userId,
-      });
-      return presentarEvidencia(fila);
+      return this.guardarEvidencia(tx, userId, objectId, null, dto);
     });
+  }
+
+  /** Enlaza evidencia a una columna (la FK de una tabla, por ejemplo). */
+  async addColumnEvidence(
+    userId: string,
+    columnId: string,
+    dto: EvidenceInputDto,
+  ) {
+    return this.em.fork().transactional(async (tx) => {
+      const columna = await this.repo.columnById(tx, columnId);
+      if (!columna)
+        throw new ResourceNotFoundException(
+          'Columna del catálogo no encontrada',
+        );
+      return this.guardarEvidencia(
+        tx,
+        userId,
+        columna.object_id,
+        columnId,
+        dto,
+      );
+    });
+  }
+
+  private async guardarEvidencia(
+    tx: EntityManager,
+    userId: string,
+    objectId: string,
+    columnId: string | null,
+    dto: EvidenceInputDto,
+  ) {
+    const fila = await this.repo.addEvidence(tx, {
+      objectId,
+      columnId,
+      kind: dto.kind,
+      reference: dto.reference.trim(),
+      excerpt: dto.excerpt?.trim() || null,
+      sourceRevision: dto.sourceRevision?.trim() || null,
+      userId,
+    });
+    return presentarEvidencia(fila);
   }
 
   /** Decide sobre la revisión vigente de una ficha. */
@@ -165,7 +244,10 @@ export class CatalogGovernanceService {
             ficha.id,
             ficha.current_revision_no,
           ),
-          evidenceCount: await this.repo.evidenceCount(tx, ficha.object_id),
+          evidenceCount:
+            ficha.target_kind === 'COLUMN' && ficha.column_id
+              ? await this.repo.columnEvidenceCount(tx, ficha.column_id)
+              : await this.repo.evidenceCount(tx, ficha.object_id),
         },
         dto,
         userId,

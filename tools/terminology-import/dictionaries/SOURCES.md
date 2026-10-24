@@ -73,14 +73,16 @@ SHA-256, fecha, licencia, URI del término).
 - **Metainventario de abreviaturas**: CC BY 4.0 (`LICENSE.txt` del repositorio). Incluye registros
   derivados de UMLS-LRABR (léxico SPECIALIST de la NLM, de uso libre) y de ADAM; ésos son los que quedan
   opt-in.
-- **Etiquetas ES de Wikidata** (`import-wikidata-es-labels.mjs`, no corrido): CC0; son nombres de la
-  comunidad, no traducciones oficiales, y se cargarían como sinónimos ES con su ítem Q.
+- **Etiquetas ES de Wikidata** (`import-wikidata-es-labels.mjs`, corrido el 2026-10-24 contra
+  `query.wikidata.org`): CC0 1.0; son nombres de la comunidad, no traducciones oficiales, y se cargan como
+  sinónimos ES con su ítem Q (propiedad `dictionary-es-labels`). 49 615 filas; entran 47 342 conceptos.
+  Antes de consultar se verifica la etiqueta inglesa de las 7 propiedades (todas coincidieron).
 
 ## Fuentes que NO se usaron
 
 | Fuente | Motivo |
 |---|---|
-| DeCS/MeSH en castellano (BIREME/OPS) | `decs.bvsalud.org`, `api.bvsalud.org` e `id.nlm.nih.gov` bloqueados por la política de red de la sesión (403). |
+| DeCS/MeSH en castellano (BIREME/OPS) | 2026-10-24, con la red habilitada: `decs.bvsalud.org` y `api.bvsalud.org` cortan la conexión del lado del servidor (reset), `bvsalud.org` responde 403 de su CDN y la API pide clave. No se pudo leer la descarga ni la licencia: sin importador. |
 | Terminologia Anatomica 2 (FIPAT) | `fipat.library.dal.ca` y `ta2viewer.openanatomy.org` bloqueados. El TA98 en latín entra vía FMA. |
 | Diccionario de Términos Médicos (RANM) / Diccionario panhispánico (RAE-RANM) | Con copyright: no se copian; además `dtme.ranm.es` y `dpej.rae.es` bloqueados. A lo sumo, enlace. |
 | Cosnautas / Tremédica, TERMCAT, IATE | De pago (Cosnautas) o hosts bloqueados (`www.termcat.cat`, `iate.europa.eu`). |
@@ -94,7 +96,6 @@ SHA-256, fecha, licencia, URI del término).
 | UMLS Metathesaurus | Exige cuenta UTS: **sin cuenta** (no se creó). |
 | SNOMED CT | Bolivia no es miembro de SNOMED International; además se descartan los xrefs `SCTID` de las OBO. |
 | MedlinePlus en español | Ya está en el glosario (`import-medlineplus-es.mjs`); `medlineplus.gov` bloqueado. |
-| Wikidata | `query.wikidata.org` y `www.wikidata.org` bloqueados: el importador ES queda escrito y no corrido. |
 | AbreMES-DB (abreviaturas médicas en español, PlanTL) | Licencia permisiva (MIT, SEAD 2018), pero los datos están en Zenodo (bloqueado); el repo de GitHub sólo trae README y licencia. |
 | PubMed / Europe PMC | `eutils.ncbi.nlm.nih.gov` y `www.ebi.ac.uk` bloqueados: no se pudo buscar literatura para detectar huecos. |
 | Wiktionary / Wikipedia (prefijos, sufijos, raíces, epónimos) | Bloqueados; no hay otra fuente estructurada y abierta alcanzable. Los epónimos anatómicos salen de FMA (267 estructuras). |

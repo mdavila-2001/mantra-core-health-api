@@ -24,6 +24,9 @@ export const OBSERVATION_STATUSES = [
 export type ObservationStatus = (typeof OBSERVATION_STATUSES)[number];
 
 export const REVIEW_STATUSES = [
+  /** Lo que la clasificación automática detectó y nadie curó. Nunca lo pone una persona. */
+  'AUTO_DETECTED',
+  /** Borrador que una persona guardó sin enviar a revisión. */
   'DRAFT',
   'NEEDS_REVIEW',
   'APPROVED',
@@ -31,15 +34,45 @@ export const REVIEW_STATUSES = [
 ] as const;
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 
+/** Estado de revisión de las fichas que sólo crea la clasificación automática. */
+export const AUTO_DETECTED_STATUS = 'AUTO_DETECTED' satisfies ReviewStatus;
+
+/**
+ * Quién escribió una ficha o una revisión. `MANUAL` es una persona (incluye el importador de la
+ * bóveda, que actúa con credenciales de una persona); `AUTO_CLASSIFIER` es la clasificación
+ * automática, que nunca pisa lo `MANUAL`.
+ */
+export const ANNOTATION_ORIGINS = ['MANUAL', 'AUTO_CLASSIFIER'] as const;
+export type AnnotationOrigin = (typeof ANNOTATION_ORIGINS)[number];
+
+/**
+ * Nivel de sensibilidad de un dato (HIPAA 45 CFR 160.103 y 164.514(b)(2); LGPD arts. 5, 11, 12, 13).
+ * `UNKNOWN` significa «sin clasificar» y no es un nivel. Son los `code` de
+ * `system_ops.data_classifications`; el enlace es por código, sin DDL.
+ *
+ * El orden importa: va de menos a más sensible. `SENSITIVITY_RANK` lo usa para decidir que la
+ * clasificación automática nunca baja un nivel.
+ */
 export const SENSITIVITIES = [
   'UNKNOWN',
-  'NONE',
+  'ANONYMIZED',
+  'PUBLIC',
   'INTERNAL',
-  'PII',
-  'PHI',
-  'SECRET',
+  'PSEUDONYMIZED',
+  'PERSONAL',
+  'PHI_IDENTIFIER',
+  'PHI_SENSITIVE',
+  'PHI_SPECIAL',
+  'CREDENTIAL',
 ] as const;
 export type Sensitivity = (typeof SENSITIVITIES)[number];
+
+/** Posición de cada nivel en la escala de sensibilidad; `UNKNOWN` queda debajo de todo. */
+export const SENSITIVITY_RANK: Readonly<Record<Sensitivity, number>> =
+  Object.fromEntries(SENSITIVITIES.map((nivel, i) => [nivel, i])) as Record<
+    Sensitivity,
+    number
+  >;
 
 export const SCAN_STATUSES = [
   'QUEUED',
@@ -96,6 +129,9 @@ export const REQUIRED_SEMANTIC_FIELDS = [
   'rowGrain',
 ] as const;
 
+/** Lo que la ficha de una columna debe responder para enviarse a revisión. */
+export const COLUMN_REQUIRED_SEMANTIC_FIELDS = ['definition'] as const;
+
 /** Largo mínimo de una respuesta semántica: menos que esto no explica nada. */
 export const MIN_SEMANTIC_LENGTH = 30;
 
@@ -120,6 +156,15 @@ export const IMPACT_SCOPE =
 
 /** Un escaneo RUNNING cuyo lease venció se considera abandonado. */
 export const SCAN_LEASE_SECONDS = 300;
+
+/**
+ * Cada cuánto pide un escaneo la sonda (el worker `scan-tick` golpea cada pocos segundos; sólo
+ * escanea si pasó este intervalo desde que terminó el último). 15 min: propuesta a confirmar.
+ */
+export const PROBE_INTERVAL_MS = 15 * 60 * 1000;
+
+/** Código de error de un escaneo que falló al observar o aplicar. */
+export const SCAN_FAILED_CODE = 'SCAN_FAILED';
 
 /** Qué no puede decir un escaneo; se informa con cada corrida. */
 export const SCAN_LIMITATIONS = [

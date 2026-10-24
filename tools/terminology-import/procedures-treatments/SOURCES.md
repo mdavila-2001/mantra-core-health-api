@@ -18,10 +18,17 @@ determinista: re-correr `snapshot.mjs` sobre el mismo corpus no genera cambios e
 | `maxo-annotations` | Monarch Initiative — curación POET | git `42edd966faac` | `raw.githubusercontent.com/monarch-initiative/maxo-annotations/42edd966…/data/poet/annotations.tsv` | `92e6dcfe…` | CC BY 4.0 | 293 afirmaciones procedimiento → enfermedad (MONDO) con PMID, tipo literal `TREATS`/`PREVENTS`/`NO_OBSERVED_BENEFIT`; 145 filas farmacológicas excluidas |
 | `ncit-obo` | NCIt OBO Edition (derivada de NCI Thesaurus, NCI EVS) | NCIt `24.04e` (`releases/2024-05-07`) | `github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo` | `e90ebb7e…` | CC BY 4.0 (términos de uso de NCIt) | 331 procedimientos NCIt; 438 roles procedimiento → anatomía (R163, R165–R171) |
 | `ohd` | OHD project — Oral Health and Disease Ontology (OBO Foundry) | `releases/2026-10-01` (git `9cbaa1a17270`) | `raw.githubusercontent.com/oral-health-and-disease-ontologies/ohd-ontology/9cbaa1a1…/ohd.obo` | `f8518e5b…` | CC BY 4.0 | 81 procedimientos odontológicos (descendientes de `OHD:0000002` «dental procedure»); 0 relaciones (pasada 2) |
-| `mondo` | Monarch Initiative — Mondo Disease Ontology | `releases/2026-10-06` | `github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo` | `2631e8e1…` | CC BY 4.0 | Equivalencias `MONDO:equivalentTo` de las 167 enfermedades enlazadas (ICD-10-CM, MeSH, Orphanet, OMIM, NCIt, DOID, ICD-11 Foundation) |
+| `ncit-evs` | NCI Enterprise Vocabulary Services — NCI Thesaurus **edición oficial** | `26.09d` (Last-Modified 2026-09-30) | `evs.nci.nih.gov/ftp1/NCI_Thesaurus/Thesaurus.OWL.zip` | `a6b0897d…` | CC BY 4.0 | 346 procedimientos NCIt; 450 roles procedimiento → anatomía (R163, R165–R171); 0 R180 (pasada 5) |
+| `icd10pcs` | CMS — ICD-10-PCS FY2027, tablas e índice + archivo de orden (títulos largos) | FY2027 (vigente desde 2026-10-01; archivos del 2026-06-05) | `www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip` y `…/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip` | `db77f8b9…`, `c9064c5c…` | Dominio público (EE. UU.) | 79 169 procedimientos con título oficial; 79 169 relaciones procedimiento → eje 4 (parte del cuerpo / región / sitio de tratamiento / sistema) por definición del código; 1 692 valores de eje (pasada 5) |
+| `mesh` | NLM — MeSH 2026, descriptores | `desc2026.xml` (Last-Modified 2026-08-12) | `nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz` | `ccd4d0d3…` | Términos de uso de MeSH (sin cargo, con atribución) | Clasificación por árbol (`lib/sources/mesh.mjs`): 1 526 intervenciones no farmacológicas usadas (E01.370, E02 bajo su raíz, E03, E04, E06, E07 o F04.754; sin E05 —métodos de investigación—, sin conceptos de estrategia/tiempo de E02/E04, sin insumos de laboratorio de E07, sin subárboles farmacológicos ni D); condiciones = árbol C o F03 |
+| `ctgov` | NLM — ClinicalTrials.gov API v2 | API 2.0.5, datos del 2026-10-23T09:00:04 | `clinicaltrials.gov/api/v2/studies` (464 253 estudios intervencionales, 465 páginas) | — (API; extracto exacto en `data/raw/ctgov/`) | Dominio público (NLM); términos de uso de ClinicalTrials.gov | 34 083 relaciones intervención MeSH ↔ condición MeSH **«en estudio»** con todos los NCT de respaldo (40 539 estudios aportan un par) (pasada 5, cifra corregida en la 6 al depurar la clasificación MeSH) |
+| `wikidata-p924` | Comunidad de Wikidata — P924 «possible treatment» | consulta SPARQL del 2026-10-24T16:49Z | `query.wikidata.org/sparql` (consulta en `meta.json`) | `f230c469…` | CC0 1.0 | 45 relaciones procedimiento → enfermedad de declaraciones **con referencia real** (P248 o P854); fuente colaborativa, no oficial, con su propio tipo (pasada 5) |
+| `pubmed-cochrane` | NLM (indexación MeSH de MEDLINE) — revisiones de «Cochrane Database Syst Rev» | PubMed, consulta del 2026-10-24T17:17Z (17 554 registros, 3 particiones por fecha) | `eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi` (metadatos en `data/raw/pubmed-cochrane/`) | — | Metadatos bibliográficos e indexación MeSH de MEDLINE (NLM); sin texto de las revisiones | 8 075 relaciones procedimiento ↔ condición «evaluados en revisiones sistemáticas Cochrane»: intervención no farmacológica × condición con calificador therapy/surgery/rehabilitation/diet therapy/radiotherapy/prevention & control (5 886 revisiones aportan un par; 13 retractadas excluidas) (pasada 6) |
+| `pubmed-guidelines` | NLM (indexación MeSH de MEDLINE) — guías de práctica clínica (tipos de publicación `Guideline` / `Practice Guideline`) | PubMed, consulta del 2026-10-24T17:29Z (44 031 en la búsqueda; 42 934 artículos de revista; 47 particiones por fecha de alta `[EDAT]`) | `eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi` (metadatos en `data/raw/pubmed-guidelines/`) | — | Metadatos bibliográficos e indexación MeSH de MEDLINE (NLM); sin texto de las guías | 25 469 relaciones procedimiento ↔ condición «tratados en guías de práctica clínica» (no implica recomendación): mismo criterio que Cochrane (13 197 guías aportan un par; 30 retractadas excluidas). Los 1 097 registros restantes son libros de Bookshelf (`PubmedBookArticle`), sin indexación MeSH de artículo, verificado con `pubmed books[filter]` (pasada 7) |
+| `mondo` | Monarch Initiative — Mondo Disease Ontology | `releases/2026-10-06` | `github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo` | `2631e8e1…` | CC BY 4.0 | Equivalencias `MONDO:equivalentTo` de las enfermedades MONDO enlazadas (174 tras la pasada 5) (ICD-10-CM, MeSH, Orphanet, OMIM, NCIt, DOID, ICD-11 Foundation) |
 | `uberon` | Uberon consortium (OBO Foundry) | `releases/2026-10-01` | `github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo` | `d4751a15…` | CC BY 3.0 | Xrefs Uberon → NCIt (sitio NCIt expresado en Uberon, solo uno a uno) y Uberon → FMA/MeSH |
 
-Atribución: «Oral Health and Disease Ontology (OHD), CC BY 4.0»; «Contains data from the Medical Action Ontology (MAxO) and MAxO annotations, Monarch Initiative,
+Atribución: «Contains data from MeSH and ClinicalTrials.gov, U.S. National Library of Medicine» (versiones arriba; no implica respaldo de NLM); «ICD-10-PCS, CMS»; «Oral Health and Disease Ontology (OHD), CC BY 4.0»; «Contains data from the Medical Action Ontology (MAxO) and MAxO annotations, Monarch Initiative,
 CC BY 4.0»; «NCI Thesaurus, National Cancer Institute (OBO Edition), CC BY 4.0» — la edición OBO es un
 derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontology, CC BY 4.0»; «Uberon, CC BY 3.0».
 
@@ -34,6 +41,7 @@ derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontol
 | NCIt R172 `Regimen_Has_Accepted_Use_For_Disease` | Regímenes de quimioterapia: fármacos, de la sesión `justin/seed-drug-treatments`. |
 | SNOMED CT (xrefs `SCTID` en MONDO/Uberon/MAxO) | Bolivia no es miembro de SNOMED International: no se cargan ni se usan para resolver. |
 | CPT | Propiedad de la AMA. No se usa. |
+| NLM MEDLINE Co-Occurrences (MRCOC) | NLM retiró el producto: la página redirige a su archivo en Archive-It (desde 2024-12). Pasada 6. |
 | CDT (términos `CDT:` dentro de OHD) | Códigos de facturación odontológica de la ADA, con copyright: no se cargan aunque OHD los incluya. |
 | SCDO — Sickle Cell Disease Ontology (`scdodev/scdo-ontology`, release 2021-04-15) | Tiene 286 relaciones `SCDO:1000018 treats` (cirugía, transfusión, fisioterapia, trasplante… → complicaciones de la drepanocitosis), pero la licencia declarada es **GPL-3.0**: incorporarlas en una base propietaria es una decisión del propietario. Hueco por licencia (pasada 2). |
 | CIDO — Coronavirus Infectious Disease Ontology (git `d1ebe2ef`) | La propiedad `CIDO_0000012 treatment for` se usa una sola vez (clase «COVID-19 treatment», sustancias): 0 relaciones procedimiento ↔ enfermedad o sitio (pasada 2). |
@@ -46,24 +54,19 @@ derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontol
 | HPO `releases/2026-09-01` | 0 relaciones hacia MAxO o procedimientos. Pasada 4. |
 | Relaciones propias de MONDO | 7 `therapeutic uses` (fármaco → CHEBI) y 3 `NCIT:R163` ya presentes por NCIt. Pasada 4. |
 
-## Fuentes bloqueadas por la red del entorno (huecos)
+## Red del entorno y huecos que quedan
 
-La política de red de esta sesión responde **403 al CONNECT** para estos hosts (sondeo en
-`cache/_network.json`, `fetch.mjs --probe`). Para cerrarlos hay que permitir el host en la
-configuración de red del entorno y correr `fetch.mjs` + un normalizador nuevo para la fuente.
+Hasta el 2026-10-24 16:29 UTC la política de red solo dejaba salir a GitHub, npm y PyPI (pasadas 1–4).
+Desde entonces el entorno tiene red completa; el sondeo de `fetch.mjs --probe` (copiado en
+`data/sources/_network.json`) responde para ClinicalTrials.gov, CMS, OMS, MinSalud CO, NLM, NCI EVS,
+EBI, Wikidata, NICE y Sanidad ES. Quedan como huecos:
 
-| Fuente | Host(s) | Licencia | Qué aportaría |
-|---|---|---|---|
-| ClinicalTrials.gov API v2 | `clinicaltrials.gov` | Dominio público (NLM) | Intervenciones `PROCEDURE`/`BEHAVIORAL`/`DEVICE`/`RADIATION`/`DIETARY_SUPPLEMENT` ↔ condición con MeSH, **solo «en estudio»** |
-| ICD-10-PCS (tablas oficiales) | `www.cms.gov` | Dominio público (CMS) | Procedimiento → parte del cuerpo por el eje Body Part del propio código |
-| WHO ICHI | `icd.who.int`, `icdcdn.who.int` | CC BY-ND 3.0 IGO | Procedimiento → Target (sitio/función) por eje del código |
-| ICD-11 MMS | `id.who.int` (+ credenciales: no se crean cuentas) | CC BY-ND 3.0 IGO | Post-coordinación y relaciones |
-| CUPS Colombia | `www.minsalud.gov.co`, `web.sispro.gov.co` | Acto administrativo público | Catálogo de procedimientos (lo carga `seed-specialty-services`) |
-| MeSH | `nlmpubs.nlm.nih.gov`, `id.nlm.nih.gov` | Términos NLM | Árbol E; une intervenciones de ensayos con procedimientos |
-| NCI Thesaurus oficial | `evs.nci.nih.gov` | CC BY 4.0 | Todos los roles (la edición OBO trae solo 438 de procedimiento) |
-| PubMed / Europe PMC | `eutils.ncbi.nlm.nih.gov`, `www.ebi.ac.uk` | Metadatos | Detección de huecos |
-| Wikidata | `query.wikidata.org` | CC0 | P924 «tratamiento posible» (colaborativa, no oficial) |
-| NICE IPG | `www.nice.org.uk` | Términos NICE | Procedimiento ↔ indicación citada |
-| Cochrane | `www.cochranelibrary.com` | Metadatos | Intervención ↔ condición de revisiones |
-| Ministerio de Salud de Bolivia (NNAC) | `www.minsalud.gob.bo` | Por verificar | Guías nacionales citadas |
-| CIE-10-ES Procedimientos | `www.sanidad.gob.es` | Aviso legal, reutilización con cita | Nombres oficiales en castellano de ICD-10-PCS |
+| Fuente | Estado | Motivo |
+|---|---|---|
+| WHO ICHI | hueco | La OMS publica ICHI en un navegador web; la descarga y la API exigen registro (cuenta). No se crean cuentas ni se raspan los endpoints internos del navegador. |
+| ICD-11 MMS (relaciones, post-coordinación) | hueco | La API exige credenciales de registro. |
+| Cochrane Library (sitio) | cubierta por PubMed | `www.cochranelibrary.com` responde 403; los metadatos de las revisiones se toman de MEDLINE (fila `pubmed-cochrane`). |
+| Ministerio de Salud de Bolivia (NNAC) | hueco | `www.minsalud.gob.bo` no responde (respuesta vacía). |
+| CUPS Colombia (catálogo completo) | descartada | Solo agrega códigos de procedimiento sin eje anatómico ni relación con enfermedades; el catálogo es de `seed-specialty-services`. |
+| NICE interventional procedures guidance | descartada | Relaciona procedimiento e indicación por nombre en el título; no publica códigos en una forma reutilizable sin cuenta (OPCS-4 exige TRUD). Unir por nombre está prohibido. |
+| CIE-10-ES Procedimientos (Sanidad) | sin aporte por código | Aporta nombres oficiales en castellano de ICD-10-PCS, no códigos ni relaciones nuevas; ya los carga la capa `cie10es-procedimientos` del glosario. |

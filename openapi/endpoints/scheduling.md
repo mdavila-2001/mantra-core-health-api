@@ -4921,7 +4921,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.
+Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada paciente.
 
 Contexto declarado en el controlador: Cierra cupos sueltos y deja el bloqueo que impide que vuelvan. Lo que el pedido pone entre paréntesis es su razón de ser: cerrar un cupo **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el rato que el profesional había cerrado se ofrece otra vez. Un cupo con cita viva NO se cierra por acá: se rechaza entero y se nombran cuáles. Cancelar el turno de alguien exige motivo y avisa a esa persona; hacerlo de arrastre sería decidir por quien está esperando.
 
@@ -4967,6 +4967,7 @@ Content-Type: application/json
 | `exceptionType` | Sí | `string` | valores: `ABSENCE`, `HOLIDAY`, `VACATION`, `CONFERENCE`, `ERRAND`, `EXTRA`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `ABSENCE` |
 | `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 | `slotIds` | Sí | `array<string>` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `cancelAffectedBookings` | No | `boolean` | Sin restricción adicional declarada | true: cancela las citas de esos cupos y avisa a cada paciente. Ausente o false: si hay citas, responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no cierra. | `false` |
 
 ### Payload completo de ejemplo
 
@@ -4983,7 +4984,8 @@ Content-Type: application/json
   "reason": "Texto descriptivo de ejemplo",
   "slotIds": [
     "00000000-0000-4000-8000-000000000001"
-  ]
+  ],
+  "cancelAffectedBookings": false
 }
 ```
 
@@ -5007,6 +5009,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "closedSlots": 1,
+  "cancelledBookings": 1,
   "exceptionId": "00000000-0000-4000-8000-000000000001",
   "from": "2026-07-31T12:00:00.000Z",
   "to": "2026-07-31T12:00:00.000Z"
@@ -5018,6 +5021,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `closedSlots` | Sí | `number` | Sin restricción adicional declarada | Cuántos cupos quedaron cerrados. | `1` |
+| `cancelledBookings` | Sí | `number` | Sin restricción adicional declarada | Citas canceladas (o rechazadas) al cerrar, con aviso al paciente. | `1` |
 | `exceptionId` | Sí | `string` | formato `uuid` | La excepción que se creó para que regenerar no los devuelva. Es la parte que el pedido pone entre paréntesis y que es su razón de ser: sin ella, cerrar un cupo dura hasta la próxima generación. | `00000000-0000-4000-8000-000000000001` |
 | `from` | Sí | `string` | formato `date-time` | Desde cuándo cubre la excepción. | `2026-07-31T12:00:00.000Z` |
 | `to` | Sí | `string` | formato `date-time` | Hasta cuándo. | `2026-07-31T12:00:00.000Z` |
@@ -5034,9 +5038,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
 | 404 | `NOT_FOUND` | Ninguno de esos cupos es de esta agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
-| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: confirme para cancelar cada cita y avisar a cada persona | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5339,7 +5348,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.
+Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente y bloquea.
 
 
 ### Descripción del sistema
@@ -5385,6 +5394,7 @@ Content-Type: application/json
 | `endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `reason` | No | `string` | longitud máxima 500 | Texto libre del motivo. OBLIGATORIO cuando el tipo es OTHER; lo lee el profesional | `Texto descriptivo de ejemplo` |
 | `isAvailable` | No | `boolean` | Sin restricción adicional declarada | true cuando la excepción **añade** disponibilidad extraordinaria | `false` |
+| `cancelAffectedBookings` | No | `boolean` | Sin restricción adicional declarada | true: cancela las citas del rato y avisa a cada paciente. Ausente o false: si hay citas, responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea. | `false` |
 
 ### Payload completo de ejemplo
 
@@ -5401,7 +5411,8 @@ Content-Type: application/json
   "startAt": "2026-07-31T12:00:00.000Z",
   "endAt": "2026-07-31T12:00:00.000Z",
   "reason": "Texto descriptivo de ejemplo",
-  "isAvailable": false
+  "isAvailable": false,
+  "cancelAffectedBookings": false
 }
 ```
 
@@ -5452,10 +5463,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La excepción debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
-| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${               first.resourceName ? ` en «${first.resourceName}»` : ''             }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${           first.resourceName ? ` en «${first.resourceName}»` : ''         }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Ese rato tiene ${n} ${n === 1 ? 'cita' : 'citas'} con paciente. Confirme para cancelarlas y avisar a cada persona. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

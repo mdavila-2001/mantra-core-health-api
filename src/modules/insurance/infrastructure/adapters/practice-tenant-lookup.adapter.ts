@@ -10,4 +10,8 @@ export class PracticeTenantLookupAdapter implements InsurancePracticeTenantLooku
   findActivePracticeIdsForTenant(tenantId: string): Promise<string[]> {
     return this.service.findActivePracticeIdsForTenant(tenantId);
   }
+
+  findTenantOfPractice(practiceId: string): Promise<string | null> {
+    return this.service.findTenantOfPractice(practiceId);
+  }
 }

@@ -51,6 +51,47 @@ export const OWNED_CODE_SYSTEMS = {
     },
     createIfAbsent: true,
   },
+  mesh: {
+    internalCode: 'mesh',
+    name: 'Medical Subject Headings (MeSH)',
+    canonicalUrl: 'http://id.nlm.nih.gov/mesh',
+    source: {
+      code: 'NLM_MESH',
+      name: 'Medical Subject Headings (U.S. National Library of Medicine)',
+      owner: 'U.S. National Library of Medicine',
+      officialUrl: 'https://www.nlm.nih.gov/mesh/',
+      license:
+        'Términos de uso de MeSH (NLM): sin cargo, con atribución y versión identificada',
+    },
+    createIfAbsent: true,
+  },
+  icd10pcs: {
+    internalCode: 'icd10pcs',
+    name: 'ICD-10 Procedure Coding System (ICD-10-PCS)',
+    canonicalUrl: 'http://www.cms.gov/Medicare/Coding/ICD10',
+    source: {
+      code: 'CMS_ICD10PCS',
+      name: 'ICD-10-PCS (Centers for Medicare & Medicaid Services)',
+      owner: 'Centers for Medicare & Medicaid Services (CMS)',
+      officialUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+      license: 'Dominio público (obra del gobierno de EE. UU.)',
+    },
+    createIfAbsent: true,
+  },
+  'icd10pcs-body-part': {
+    internalCode: 'icd10pcs-body-part',
+    name: 'ICD-10-PCS — valores del eje 4 (parte del cuerpo / región / sitio) por sección y sistema',
+    canonicalUrl:
+      'https://mantracore.health/fhir/CodeSystem/icd10pcs-body-part',
+    source: {
+      code: 'CMS_ICD10PCS',
+      name: 'ICD-10-PCS (Centers for Medicare & Medicaid Services)',
+      owner: 'Centers for Medicare & Medicaid Services (CMS)',
+      officialUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+      license: 'Dominio público (obra del gobierno de EE. UU.)',
+    },
+    createIfAbsent: true,
+  },
   ncit: {
     internalCode: 'ncit',
     name: 'NCI Thesaurus',
@@ -85,7 +126,44 @@ export const PROVENANCE_SOURCE_CODE = {
   'maxo-annotations': 'MONARCH_MAXO',
   'ncit-obo': 'NCI_EVS_NCIT',
   ohd: 'OBO_OHD',
+  'ncit-evs': 'NCI_EVS_NCIT',
+  icd10pcs: 'CMS_ICD10PCS',
+  mesh: 'NLM_MESH',
+  ctgov: 'NLM_CTGOV',
+  'wikidata-p924': 'WIKIDATA',
+  'pubmed-cochrane': 'NLM_PUBMED',
+  'pubmed-guidelines': 'NLM_PUBMED',
+  'pubmed-rct': 'NLM_PUBMED',
 };
+
+/**
+ * Fuentes que publican relaciones sin ser dueñas de un code system de este
+ * importador (p. ej. ClinicalTrials.gov relaciona códigos MeSH). El cargador
+ * las crea en `terminology_sources` si faltan, para colgar la procedencia.
+ */
+export const RELATION_ONLY_SOURCES = [
+  {
+    code: 'NLM_CTGOV',
+    name: 'ClinicalTrials.gov (U.S. National Library of Medicine)',
+    owner: 'U.S. National Library of Medicine',
+    officialUrl: 'https://clinicaltrials.gov/',
+    license: 'Dominio público (NLM); términos de uso de ClinicalTrials.gov',
+  },
+  {
+    code: 'WIKIDATA',
+    name: 'Wikidata (Wikimedia Foundation, CC0)',
+    owner: 'Comunidad de Wikidata / Wikimedia Foundation',
+    officialUrl: 'https://www.wikidata.org/',
+    license: 'CC0 1.0',
+  },
+  {
+    code: 'NLM_PUBMED',
+    name: 'PubMed / MEDLINE (U.S. National Library of Medicine)',
+    owner: 'U.S. National Library of Medicine',
+    officialUrl: 'https://pubmed.ncbi.nlm.nih.gov/',
+    license: 'Metadatos bibliográficos e indexación MeSH de MEDLINE (NLM)',
+  },
+];
 
 /** Columnas mínimas de la tabla de procedencia propuesta (ver la propuesta para el modelo). */
 export const PROVENANCE_TABLE = 'concept_relationship_assertions';

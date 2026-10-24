@@ -84,6 +84,58 @@ describe('InvoicesService', () => {
       expect(d.linksRepo.create).toHaveBeenCalled();
     });
 
+    it('rechaza una factura que declara un reclamo a la aseguradora (carril 16, REQ-16-029)', async () => {
+      const d = build();
+      d.invoicesRepo.findByNumber.mockResolvedValue(null);
+
+      const error = await d.service
+        .issueFromEncounter(
+          {
+            practiceId: 'pr1',
+            patientProfileId: 'p1',
+            tenantId: 't1',
+            claimId: '00000000-0000-4000-8000-000000000001',
+            lines: [{ quantity: '1', unitPrice: '500.00' }],
+          } as any,
+          actor,
+        )
+        .catch((e: any) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.reason).toBe('INVOICE_LINE_SERVICE_ALREADY_CLAIMED');
+      expect(error.details).toEqual({
+        claimId: '00000000-0000-4000-8000-000000000001',
+      });
+      // Se rechaza antes de abrir transacción: no se crea ni se vincula nada.
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.invoicesRepo.create).not.toHaveBeenCalled();
+      expect(d.linksRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin reclamo declarado la factura se emite como siempre', async () => {
+      const d = build();
+      d.invoicesRepo.findByNumber.mockResolvedValue(null);
+      d.invoicesRepo.create.mockReturnValue({
+        id: 'inv1',
+        invoiceNumber: 'INV-1',
+        patientProfileId: 'p1',
+        statusConceptId: BILL.INVOICE_ISSUED,
+        total: '100.00',
+        balance: '100.00',
+      });
+
+      const res = await d.service.issueFromEncounter(
+        {
+          practiceId: 'pr1',
+          patientProfileId: 'p1',
+          lines: [{ quantity: '1', unitPrice: '100.00' }],
+        } as any,
+        actor,
+      );
+
+      expect(res.id).toBe('inv1');
+    });
+
     it('rejects a duplicate invoice number (conflict)', async () => {
       const d = build();
       d.invoicesRepo.findByNumber.mockResolvedValue({ id: 'other' });
