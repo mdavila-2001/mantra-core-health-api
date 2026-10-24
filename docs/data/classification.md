@@ -44,12 +44,10 @@ salud, la postura conservadora correcta es: **toda tabla que referencia a `profi
 `clinical.*`, `diagnostics.*`, `pharmacy.*`, o que porta `*_concept_id` de naturaleza clínica, se
 trata como PHI hasta que se verifique lo contrario** — no al revés.
 
-## Acción pendiente
+## Población de `entity_registry`
 
-Verificar contra una base real qué porcentaje de las 1184 entidades tiene `entity_registry`
-poblado, y completar las que falten — candidato para un script de auditoría análogo a
-`yarn orm:audit`, no existente en esta fase. Ver `GOV-005` en
-[matriz de trazabilidad](../governance/traceability-matrix.md).
+Qué porcentaje de las 1184 entidades tiene `entity_registry` poblado es una pregunta de datos de
+cada base: el repositorio no trae un script que lo mida.
 
 ## Ver también
 

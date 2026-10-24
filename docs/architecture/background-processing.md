@@ -54,8 +54,7 @@ flowchart TB
 | `worker-time_series` | `time_series` | Compresión/rollups automáticos de TimescaleDB, retención opt-in por tabla vía `TS_RETENTION_POLICIES` |
 
 **Añadidos durante esta auditoría** (no presentes en el inventario original de Fase 1-12,
-incorporados en un commit paralelo al trabajo documental — ver
-[nota de reconciliación](../reports/final-validation.md)): `worker-vector_rag`,
+incorporados en un commit paralelo al trabajo documental): `worker-vector_rag`,
 `worker-lakehouse`, `worker-time_series`. Posteriormente, el 2026-08-10, se añadió `worker-audio-assets` como consumidor persistente de la cola `audio-generation`, con evidencia en `src/worker-audio-assets.ts` y `src/worker/jobs/audio_assets/`. Confirma el patrón: cada uno de los tres dominios que
 más eventos de dominio publican ([catálogo de eventos](../events/event-catalog.md) — `vector_rag`
 16, `lakehouse` 12) terminó necesitando su propio worker, coherente con el resto del sistema.
@@ -69,14 +68,6 @@ datos reales. Es una decisión de honestidad técnica explícita, no un descuido
 ## Por qué no hay broker de mensajería
 
 Ver [contenedores](containers.md) §"Sin broker de mensajería como contenedor propio" —
-outbox transaccional propio sobre PostgreSQL, no Kafka/RabbitMQ/BullMQ. Catálogo completo de
-colas y eventos: Fase 12 (AsyncAPI).
-
-## Brecha operativa conocida
-
-`docs/progress/ESTADO-Y-PENDIENTES.md` (P0) documenta que la infraestructura base de los 21 workers ya existe,
-pero varios jobs siguen dependiendo de completar llamadas externas periódicas (planificadores de
-`reporting`, `automation`, `qa_lab`, `health_context`; reconciliación de `cross_store_consistency`,
-`graph_intelligence`, `vector_rag`, `lakehouse`, `time_series`). No se documenta aquí como
-"completo" lo que el propio equipo registra como trabajo en curso — ver `OPS-001` en
-[matriz de trazabilidad](../governance/traceability-matrix.md).
+outbox transaccional propio sobre PostgreSQL, no Kafka/RabbitMQ/BullMQ. Catálogo de colas y
+eventos: [`asyncapi/asyncapi.yaml`](https://github.com/mdavila-2001/mantra-core-health-redesa-api/blob/master/asyncapi/asyncapi.yaml)
+y el [catálogo de eventos](../events/event-catalog.md).

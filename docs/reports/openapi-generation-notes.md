@@ -35,8 +35,7 @@ ambos analizadores miden cosas ligeramente distintas (parseo de decoradores por 
 introspección real del `Reflector` de Nest en runtime); la diferencia de 9 no se investigó a fondo
 en esta fase — se registra como nota, no como blocker, porque ninguna de las dos cifras es
 "incorrecta": son dos métodos de conteo válidos con un margen de discrepancia esperable en un
-sistema de 850 endpoints. Ver `GOV-003` en `docs/governance/traceability-matrix.md` si se decide
-investigar la causa exacta en una fase futura.
+sistema de 850 endpoints.
 
 ## 3. Problema encontrado y corregido — DTOs con nombre duplicado (23 clases)
 
@@ -51,10 +50,8 @@ documentaba el shape equivocado para uno de los dos endpoints reales.
 una ausencia): se añadió el decorador `@ApiSchema({ name: '<Módulo><Clase>' })` a las 46
 ocurrencias (23 pares) para que cada una tenga un nombre de esquema único y estable en el
 documento OpenAPI, sin renombrar ninguna clase TypeScript ni tocar ningún import/uso existente.
-Detalle completo, lista de las 23 clases y justificación en
-`docs/reports/inconsistency-remediation.md` §2 (nota: ese documento cubre `ARCH-001`; la lista de
-DTOs vive en el propio commit — `git show` sobre `tools/openapi/generate-openapi.mjs` no aplica
-aquí, el codemod fue una utilidad de sesión, no persistida en `tools/`).
+La lista de DTOs vive en el propio commit (el codemod fue una utilidad de sesión, no persistida
+en `tools/`).
 
 **Verificación:** `yarn test` completo (369→370 suites, 3724→3732 tests, 100% verde) tras el
 cambio — el decorador es puramente de metadata Swagger, no afecta validación ni lógica de negocio.
@@ -111,12 +108,12 @@ salta el guard JWT global — verificado archivo por línea, no asumido), y 1
 
 | Regla Redocly | Ocurrencias | Por qué queda como `warn` |
 |---|---:|---|
-| `operation-4xx-response` | 841 | Documentar la respuesta 4xx real de cada una de las 841 operaciones requiere `@ApiResponse` por endpoint en 191 controllers — volumen que excede el alcance de esta fase; el modelo de error compartido ya existe en código (`docs/api/error-model.md`) y describe la forma real, aunque no está enlazado operación por operación todavía. |
+| `operation-4xx-response` | 841 | Documentar la respuesta 4xx real de cada una de las 841 operaciones requiere `@ApiResponse` por endpoint en 191 controllers — volumen que excede el alcance de esta fase; el modelo de error compartido ya existe en código (`docs/api/error-model.md`) y describe la forma real, sin enlazarse operación por operación. |
 | `operation-description` | 530 | Las operaciones tienen `summary` (vía `@ApiOperation`) pero no siempre `description` extendida. Mejora de contenido, no de exactitud. |
-| `tag-description` | 169 | Los 169 tags se derivan automáticamente de `@ApiTags`; no tienen descripción propia todavía (ver `docs/modules/*/overview.md`, Fase 9, como fuente futura). |
+| `tag-description` | 169 | Los 169 tags se derivan automáticamente de `@ApiTags` y no tienen descripción propia. |
 
-Ninguna de estas advertencias afecta la corrección del contrato — describen contenido narrativo
-pendiente, no datos incorrectos.
+Ninguna de estas advertencias afecta la corrección del contrato: describen contenido narrativo
+ausente, no datos incorrectos.
 
 ## 7. Ambigüedad de rutas aceptada (2 pares, ver `ARCH-004`)
 
@@ -132,12 +129,11 @@ por orden de registro sin colisión en producción. Rediseñar las rutas es un c
 API que no se hace sin que el usuario lo pida; se documenta y acepta en `ARCH-004`
 (`docs/governance/traceability-matrix.md`).
 
-## 8. No incluido en esta fase
+## 8. Límites del contrato
 
-- `@ApiResponse` de error por operación (841 operaciones) — ver §6.
-- Servidor de producción/staging en `openapi/openapi.yaml` — no existe una URL real conocida que
-  documentar sin inventarla; solo se declara `http://localhost:3000`. Añadir cuando exista un
-  dominio real (Fase 14, `docs/operations/environments.md`).
+- Sin `@ApiResponse` de error por operación (841 operaciones) — ver §6.
+- Sin servidor de producción/staging en `openapi/openapi.yaml`: solo se declara
+  `http://localhost:3000`, porque no hay una URL real que documentar sin inventarla.
 
 ## Cuerpos de request: homónimos y `additionalProperties: false` (2026-10-09)
 

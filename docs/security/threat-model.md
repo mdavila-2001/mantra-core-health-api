@@ -51,14 +51,14 @@ tráfico entrante.
 8. Mínimo privilegio y separación de deberes: quien ejecuta una acción sensible no debe ser quien
    la revisa.
 
-## Riesgos residuales — no cerrados por esta documentación
+## Riesgos residuales
 
 | Riesgo | Amenaza STRIDE | Probabilidad | Impacto | Mitigación actual | Riesgo residual |
 |---|---|---|---|---|---|
-| `RLS_ENFORCE` no verificado por entorno (`SEC-001`) | Information disclosure | Media (depende de configuración operativa) | **Crítico** — fuga cross-tenant de PHI | RLS implementado en código; verificación operativa pendiente | **Abierto** — no se declara mitigado sin verificación real contra cada entorno |
-| `SUPERADMIN` como bypass total de RBAC | Elevation of privilege | Baja (requiere comprometer una cuenta específica) | Crítico — bypass completo | Ninguna mitigación adicional identificada (sin aprobación dual, sin alerta especial de uso) | **Abierto** — candidato a mecanismo de aprobación dual o alerta de uso |
-| Población real de `entity_registry`/clasificación no verificada (`GOV-005`) | Information disclosure | — | Alto si hay tablas con PHI sin marcar | Mecanismo de gobernanza implementado en código | **Abierto** — requiere auditoría contra base real |
-| Cobertura de `data_access_log` sobre toda lectura de PHI | Repudiation / Information disclosure | — | Alto | Mecanismo existe; cobertura real no verificada (recomendación explícita del propio estándar de diseño del proyecto: "verificar por `entity_registry.contains_phi`") | **Abierto** |
+| `RLS_ENFORCE` no verificado por entorno | Information disclosure | Media (depende de configuración operativa) | **Crítico** — fuga cross-tenant de PHI | RLS implementado en código; su activación depende de cada entorno | **Sin mitigar** mientras no se verifique en el entorno concreto |
+| `SUPERADMIN` como bypass total de RBAC | Elevation of privilege | Baja (requiere comprometer una cuenta específica) | Crítico — bypass completo | Ninguna mitigación adicional identificada (sin aprobación dual, sin alerta especial de uso) | **Sin mitigar** |
+| Población real de `entity_registry`/clasificación no verificada | Information disclosure | — | Alto si hay tablas con PHI sin marcar | Mecanismo de gobernanza implementado en código | **Sin mitigar** (depende de los datos de cada base) |
+| Cobertura de `data_access_log` sobre toda lectura de PHI | Repudiation / Information disclosure | — | Alto | Mecanismo existe; cobertura real no verificada (recomendación explícita del propio estándar de diseño del proyecto: "verificar por `entity_registry.contains_phi`") | **Sin mitigar** |
 | 16 vulnerabilidades `high` en dependencias de desarrollo (`SEC-003`) | Denial of service (vía herramientas de build/test) | Baja — sin ruta de alcance a producción | Bajo | Ninguna — sin ruta de explotación en runtime de producción | **Aceptado**, ver `docs/reports/baseline.md` §3.3 |
 
 ## Por qué el break-glass importa (ejemplo real del propio diseño)

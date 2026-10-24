@@ -1642,7 +1642,6 @@ describe('SchedulingCatalogService', () => {
        * Un médico en ejercicio siempre tiene citas confirmadas: con el 409 no
        * podía cambiar su horario nunca. El retiro ya conservaba los cupos con
        * cita (`keptSlots`); ahora corre, y dice cuáles citas quedaron vivas.
-       * Ver `docs/progress/evidence/lane-B10/DECISIONS.md` (Q-06).
        */
       it('con citas comprometidas retira igual: conserva sus cupos y dice cuáles citas siguen vivas', async () => {
         const d = buildCatalog();

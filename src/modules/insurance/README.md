@@ -129,11 +129,8 @@ Evidencia: `services/practitioner-settlement-batch.spec.ts` (dominio puro,
 18 pruebas correcto/límite/inválido), `services/practitioner-settlement-batches.service.spec.ts`
 (servicio con dobles de `EntityManager`, 8 pruebas) y las aserciones de
 `controllers/insurance-controllers.spec.ts` sobre roles y ausencia de
-propiedades de pago en los DTOs. La prueba de integración HTTP end-to-end
-queda **bloqueada** por un defecto ajeno a este carril (MikroORM/`ts-morph`
-no resuelve los metadatos de `terminology.catalog_concepts` en este entorno);
-ver el contrato §12 y el `REPORTE.md` de
-`docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/`.
+propiedades de pago en los DTOs. No hay prueba de integración HTTP de punta a
+punta de los lotes.
 
 ## Administración de planes y coberturas
 

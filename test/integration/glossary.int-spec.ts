@@ -101,9 +101,8 @@ describe('Glosario médico (integración)', () => {
       // (`CatalogConceptsRepository.search`, sin cambios en este carril), no
       // sobre la designación ES: se busca sin tilde, que es lo que calza contra
       // el código determinista `GLOSSARY_CORAZON`. Buscar "Corazón" con tilde
-      // no encontraría nada por la misma razón — limitación preexistente de la
-      // búsqueda por texto, documentada en `CARRIL_REPORT.md`, no algo que este
-      // carril deba resolver.
+      // no encontraría nada por la misma razón: es una limitación de la búsqueda
+      // por texto.
       const res = await http()
         .get('/terminology/concepts')
         .query({ q: 'corazon', valueSetId: allTermsValueSetId, lang: 'ES' })

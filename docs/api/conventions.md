@@ -38,8 +38,8 @@ No hay un mecanismo genérico de cabecera `Idempotency-Key` aplicado transversal
 middleware — se implementa **por dominio**, donde el negocio lo exige. Ejemplo real verificado:
 `POST /payments/intents` (`src/modules/payments/controllers/payments-intents.controller.ts`):
 repetir la misma `idempotencyKey` devuelve el intent existente en lugar de generar un segundo
-cobro. Otros flujos con semántica idempotente conocida (documentados en
-`docs/progress/ESTADO-Y-PENDIENTES.md`): emisión de solicitudes de medicación (perioperatorio).
+cobro. Otro flujo con semántica idempotente conocida: emisión de solicitudes de medicación
+(perioperatorio).
 
 **Brecha:** no existe un catálogo consolidado de qué endpoints son idempotentes y con qué
 mecanismo (`Idempotency-Key` header vs. campo del body vs. `UNIQUE` constraint natural). Se

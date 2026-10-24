@@ -1,7 +1,0 @@
-$ psql: estado tras 2 corridas de la importación real de iam
-fichas | importadas | borrador | aprobadas:
-14|14|14|0
-evidencias | distintas:
-76|76
-revisiones por origen:
-IMPORTED_VAULT|14

@@ -101,11 +101,7 @@ Columnas: Controllers · Services · Repositories · Entities · DTOs · Unit sp
 | **Total** | **191** | **252** | **352** | **1184** | **363** | **365** | 60/60 |
 
 **Cobertura documental de partida:** los **60/60 módulos ya tienen `README.md` propio**
-(`src/modules/<módulo>/README.md`), confirmando la política ya vigente descrita en
-`docs/progress/ESTADO-Y-PENDIENTES.md` ("Contrato por dominio"). Esto es una base real para Fase 9
-(documentación de negocio por módulo): no se parte de cero, se **valida y enriquece** cada README
-existente hacia la estructura `docs/modules/<nombre>/{overview,use-cases,endpoints,domain-rules,...}.md`
-del plan maestro, en vez de reescribirlo.
+(`src/modules/<módulo>/README.md`): es el contrato por dominio, mantenido junto al código.
 
 ## 4. Totales verificados cruzando ambas fuentes
 
@@ -127,10 +123,8 @@ de `src/modules/`: `automation`, `billing`, `consent`, `cross_store_consistency`
 
 **40 módulos de negocio sin worker propio** (60 directorios − 17 con worker − 3 de infraestructura
 sin entidades): operan exclusivamente request/response síncrono vía la API, sin procesamiento
-periódico propio. Confirmado contra `docs/progress/ESTADO-Y-PENDIENTES.md` §"P0 · Terminar y operar los
-workers", que ya identifica expiraciones/barridos pendientes en varios de los 20 dominios con
-worker — el detalle de qué jobs concretos corren en cada uno se documenta en Fase 13
-(`docs/operations/runbooks/`).
+periódico propio. Qué jobs corren en cada dominio con worker está en
+[procesamiento en segundo plano](../architecture/background-processing.md).
 
 ### Actualización de inventario — 2026-08-10
 
@@ -143,9 +137,5 @@ sin broker de mensajería externo, outbox propio sobre Postgres).
 
 ## 7. Brechas de inventario detectadas
 
-- Ninguna: la reconciliación entre árbol de código, analizador ALOVIDA y grafo de Graphify no
-  arrojó discrepancias sin explicar (ver §2 y §4).
-- Pendiente para Fase 10: revisar los 17 repositorios con baja/nula conectividad en el grafo
-  (§4) uno por uno, clasificándolos como catálogo cargado indirectamente, reservado para fase
-  futura, o candidato real a eliminación — mismo criterio que `docs/progress/ESTADO-Y-PENDIENTES.md` aplica a
-  las 195 entidades candidatas a revisión.
+Ninguna: la reconciliación entre árbol de código, analizador ALOVIDA y grafo de Graphify no arrojó
+discrepancias sin explicar (ver §2 y §4).

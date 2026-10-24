@@ -1,8 +1,0 @@
-$ NODE_OPTIONS=--max-old-space-size=8192 yarn typecheck
-TYPECHECK_EXIT=0
-$ NODE_OPTIONS=--max-old-space-size=8192 yarn lint --max-warnings=0
-LINT_EXIT=0
-$ npx redocly lint openapi/openapi.yaml   (rama)
-❌ Validation failed with 3 errors and 1 warning.
-$ npx redocly lint openapi/openapi.yaml   (origin/dev)
-❌ Validation failed with 3 errors and 1 warning.

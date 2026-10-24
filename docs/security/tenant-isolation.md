@@ -27,9 +27,7 @@ el código:
    PostgreSQL — un rol con `BYPASSRLS`, o el propio rol propietario del esquema, ignora las
    políticas RLS por completo sin ningún error.
 
-## Procedimiento de verificación (pendiente de ejecutar contra cada entorno)
-
-Copiado de `docs/progress/ESTADO-Y-PENDIENTES.md` (ya identificado como prioridad P0 antes de esta auditoría):
+## Procedimiento de verificación por entorno
 
 1. Usar `DB_APP_USER`/`DB_APP_PASSWORD` (rol sin `BYPASSRLS`) para el runtime de la API y los
    workers — nunca el rol propietario del esquema.
@@ -81,15 +79,9 @@ secreto del ambiente.
 **El mecanismo está implementado y pasó 6/6 pruebas en la base local
 desechable.** Lo que esta auditoría no verificó es: (a) que la misma prueba pase
 contra cada entorno real, y (b) que `RLS_ENFORCE=true` esté efectivamente activo en staging/
-producción (el default en `docker-compose.yml` es `false`). Ver `SEC-001` en
-[matriz de trazabilidad](../governance/traceability-matrix.md), clasificado `CRITICAL`, **abierto**
-— reclasificado de "sin verificación posible" a "verificación disponible, pendiente de ejecutar
-contra cada entorno real y confirmar `RLS_ENFORCE=true`".
-
-**Esta sigue siendo la brecha de todo el Plan Maestro que no se cierra solo con documentación** —
-cerrarla requiere ejecutar `RLS_TEST=1 yarn test:integration` deliberadamente contra cada entorno
-(o una réplica fiel) y confirmar `RLS_ENFORCE=true` en producción. Ningún informe de esta
-auditoría declara "apto para producción" sin esa verificación explícita (ver Fase 18).
+producción (el default en `docker-compose.yml` es `false`). La comprobación contra un entorno es
+`RLS_TEST=1 yarn test:integration` apuntado a ese entorno (o a una réplica fiel), más confirmar
+`RLS_ENFORCE=true` en su configuración.
 
 ## Ver también
 

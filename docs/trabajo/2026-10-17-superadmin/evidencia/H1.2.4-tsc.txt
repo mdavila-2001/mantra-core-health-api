@@ -1,2 +1,0 @@
-$ npx tsc --noEmit -p tsconfig.json (errores filtrados: sólo los del stub de xlsx de la copia de trabajo)
-0

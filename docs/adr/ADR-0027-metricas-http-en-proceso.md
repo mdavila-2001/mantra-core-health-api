@@ -65,7 +65,6 @@ Dos restricciones mandan:
 
 ## Verificación
 
-Evidencia en `docs/trabajo/2026-10-17-superadmin/` (`REPORTE.md`, `evidencia/H1.*`): pruebas unitarias del agregador,
-del middleware y del volcado; integración contra PostgreSQL real (`ops-traffic.int-spec.ts`, incluido RLS con un rol
+Pruebas unitarias del agregador, del middleware y del volcado; integración contra PostgreSQL real (`ops-traffic.int-spec.ts`, incluido RLS con un rol
 sin privilegios); y una corrida con la API real y tráfico HTTP real. Límites: la serie fue una tabla común, no una
 hipertabla Timescale; no se probó en Docker.
