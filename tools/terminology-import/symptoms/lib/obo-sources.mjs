@@ -11,7 +11,7 @@
 //     cuyo tipo semántico sea «Finding» o «Sign or Symptom» (quedan fuera los
 //     que NCIt tipa como resultado de laboratorio, enfermedad o neoplasia).
 // Quedan fuera los descendientes de C2991 «Disease or Disorder» (NCIt es
-// polijerárquico: «Colic» cuelga de Sign y de Disease): los carga la sesión
+// polijerárquico: en 26.02d «Erectile Dysfunction» es signo y también enfermedad): los carga la sesión
 // `seed-diseases` como code system `ncit-disease` y no se duplican.
 // El criterio sale de la fuente; no se elige concepto por concepto. Cada fila
 // dice por qué regla entró (`scopeRule`).

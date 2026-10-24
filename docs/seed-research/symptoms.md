@@ -165,7 +165,7 @@ cardiovascular 34, reproductor 19. NCIt 26.02d (3 988): 1 113 por la regla de si
 síntomas y 2 875 hallazgos clínicos por sistema (cardiovascular 905, reproductor
 466, digestivo 282, cabeza y cuello 281, tejido conectivo 251, nervioso 243,
 hematopoyético 199…). Se excluyen 19 conceptos que NCIt también clasifica bajo
-C2991 «Disease or Disorder» (p. ej. «Colic», «Erectile Dysfunction»): los carga
+C2991 «Disease or Disorder» (p. ej. «Erectile Dysfunction», «Menorrhagia»): los carga
 `seed-diseases` como `ncit-disease` y no se duplican.
 
 **Idioma.** Sólo HPO publica nombres oficiales en castellano (19 345 de 19 894).

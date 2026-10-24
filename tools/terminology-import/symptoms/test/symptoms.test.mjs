@@ -194,7 +194,7 @@ test('sistemas de enfermedad por defecto = formatos confirmados por seed-disease
   assert.deepEqual([D.MESH.internalCodes, D.MESH.codes('D003920')], [['mesh'], ['D003920']]);
 });
 
-test('NCIt: signos por tipo semántico, sin los descendientes de C2991 (los carga seed-diseases)', async () => {
+test('NCIt: signos por tipo semántico, sin los descendientes de C2991 (recorte real de 24.04e, donde Colic cuelga de C2991)', async () => {
   const terms = new Map();
   const header = await readObo(join(FX, 'ncit-excerpt.obo'), (t) => terms.set(t.id, t));
   const { rows, stats } = ncitRows(terms, header, PROV);

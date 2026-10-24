@@ -13,7 +13,7 @@ ok 11 - cruces: prefijo Orphanet de Monarch = ORPHA de HPOA; CUI compartido marc
 ok 12 - plan de términos: display ES oficial, sólo sinónimos EXACT como designación, ids deterministas
 ok 13 - plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia HPO resuelta
 ok 14 - sistemas de enfermedad por defecto = formatos confirmados por seed-diseases (\#688)
-ok 15 - NCIt: signos por tipo semántico, sin los descendientes de C2991 (los carga seed-diseases)
+ok 15 - NCIt: signos por tipo semántico, sin los descendientes de C2991 (recorte real de 24.04e, donde Colic cuelga de C2991)
 ok 16 - deterministicId replica exacta de src/common/constants/concepts.ts
 ok 17 - md5uuid equivale a md5(key)::uuid de Postgres
 ok 18 - slugify y htmlToText
