@@ -31,14 +31,13 @@ transformación de datos.
 que no revierte el esquema puede dejar la aplicación anterior corriendo contra una base con un
 esquema más nuevo, incompatible.
 
-## Qué falta para un rollback confiable
+## Límites del procedimiento
 
-1. Publicar imágenes versionadas a un registro, no reconstruir desde git en cada rollback.
-2. Adoptar migraciones versionadas con `down` explícito (ver
-   [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md) §"Plan de revisión"), o al menos
-   mantener el DDL inverso junto a cada cambio de esquema en los `.puml` del modelo canónico → `SQL/` (ver [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md)).
-3. Practicar (no solo documentar) un rollback real antes de depender de este procedimiento en un
-   incidente.
+- Las imágenes no se publican versionadas en un registro: un rollback reconstruye desde git.
+- No hay migraciones con `down` explícito ni DDL inverso junto a cada cambio de esquema (ver
+  [ADR-0016](../adr/ADR-0016-migraciones-sql-plano.md) y
+  [ADR-0021](../adr/ADR-0021-fuente-unica-de-ddl.md)).
+- El procedimiento no se ensayó en un rollback real.
 
 ## Ver también
 

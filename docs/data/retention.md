@@ -59,4 +59,4 @@ tiempo de ejecución, no de código. Se documenta el mecanismo, no se asume su c
 ## Ver también
 
 - [Clasificación de sensibilidad](classification.md)
-- Auditabilidad (Fase 13, en construcción)
+- [Auditabilidad](../security/auditability.md)

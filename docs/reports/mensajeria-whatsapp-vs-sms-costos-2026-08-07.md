@@ -130,7 +130,7 @@ recaen en el equipo.
 | Número de teléfono dedicado | Costo del número | No puede estar activo en la app de WhatsApp normal |
 | Aprobación de plantillas | USD 0 | Horas a días por plantilla; cada cambio de texto reinicia la revisión |
 | Almacenamiento de media | Infraestructura propia | Sólo si se envían PDFs/imágenes; el repo ya tiene `object_storage` |
-| Endpoint de webhooks público con TLS | Infraestructura propia | Ya existe el controlador; falta exponerlo |
+| Endpoint de webhooks público con TLS | Infraestructura propia | El controlador existe; exponerlo es infraestructura |
 
 **Límites de envío (no cuestan dinero, pero limitan la operación):** una WABA sin
 verificar arranca en 250 conversaciones iniciadas por el negocio cada 24 h, y
@@ -517,11 +517,9 @@ Justificación en una línea por punto:
   debe depender del mismo canal que las notificaciones — es una decisión de
   seguridad, no de costo.
 
-Orden de trabajo sugerido: canal SMS primero si urge tener *cualquier* canal
-externo (5 jornadas), WhatsApp después (12–17 jornadas). Si no urge, WhatsApp
-directo y saltarse el SMS hasta tener datos de fallo reales.
+Esfuerzo estimado: canal SMS, 5 jornadas; WhatsApp, 12–17 jornadas.
 
-**Antes de escribir código hacen falta tres decisiones que no son técnicas:**
+**Tres preguntas que no son técnicas cambian el diseño:**
 
 1. ¿Qué entidad legal es titular de la WABA — la plataforma o cada clínica? Esto
    cambia el modelo: una WABA por tenant (aísla la reputación y los límites, pero

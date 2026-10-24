@@ -101,9 +101,3 @@ flowchart LR
   su valor real por entorno es una decisión operativa crítica documentada en
   `docs/security/tenant-isolation.md` (Fase 12), coherente con el hallazgo de auditoría previo
   registrado en memoria de sesión ("validar aislamiento por tenant en cada entorno").
-
-## 5. Brechas para fases posteriores
-
-- Catálogo formal de eventos de dominio (nombre, productor, consumidores, esquema) → Fase 11 (AsyncAPI).
-- Runbook de arranque/apagado ordenado de los 21 workers → Fase 13 (operación).
-- Inventario de proveedores externos reales desde `gateway_connections` y tablas equivalentes → Fase 10.

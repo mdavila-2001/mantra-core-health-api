@@ -42,8 +42,8 @@ cobro. Otro flujo con semántica idempotente conocida: emisión de solicitudes d
 (perioperatorio).
 
 **Brecha:** no existe un catálogo consolidado de qué endpoints son idempotentes y con qué
-mecanismo (`Idempotency-Key` header vs. campo del body vs. `UNIQUE` constraint natural). Se
-construye módulo por módulo en Fase 9 (`docs/modules/*/domain-rules.md`).
+mecanismo (`Idempotency-Key` header vs. campo del body vs. `UNIQUE` constraint natural); cada
+README de módulo describe la suya.
 
 ## Formato de fecha/hora
 

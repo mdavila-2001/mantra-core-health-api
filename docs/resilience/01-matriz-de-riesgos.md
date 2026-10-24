@@ -319,5 +319,4 @@ El descarte de ticks solapados (R-01) convierte una degradación en pérdida de
 frecuencia, que es lo correcto. Pero si el descarte se sostiene, el sistema está
 procesando menos de lo que debería y **eso no es visible sin mirar el contador**.
 
-`skipped` está en `GET :9100/status`. Falta la alerta, por el mismo motivo que
-R-17.
+`skipped` está en `GET :9100/status`, sin alerta, por el mismo motivo que R-17.

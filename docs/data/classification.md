@@ -51,6 +51,6 @@ cada base: el repositorio no trae un script que lo mida.
 
 ## Ver también
 
-- Modelo de amenazas (Fase 13, en construcción) — cómo estas clasificaciones
-  alimentan los controles STRIDE del sistema.
-- Auditabilidad (Fase 13, en construcción).
+- [Modelo de amenazas](../security/threat-model.md) — cómo estas clasificaciones alimentan los
+  controles STRIDE del sistema.
+- [Auditabilidad](../security/auditability.md).
