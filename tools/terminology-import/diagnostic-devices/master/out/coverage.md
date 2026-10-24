@@ -1,12 +1,12 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T04:35:01Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T14:01:02Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 
 | Región | Estado | Rama / carpeta | Commit | Filas leídas |
 |---|---|---|---|---:|
-| us | consolidada | origin/justin/seed-dx-devices-us | dc28f18c0b52 | 204096 |
+| us | consolidada | origin/justin/seed-dx-devices-us | 1792086f99b3 | 215690 |
 | eu | consolidada | origin/claude/adoring-curie-xdkt83 | 2e7f6e46f8db | 716 |
 | row | consolidada | origin/claude/inspiring-planck-xhpf4w | 33e67ca12cc5 | 3534775 |
 
@@ -20,7 +20,7 @@ Generado: 2026-10-24T04:35:01Z. Se genera con `build.mjs`; no lo edite a mano.
 | fda-pma | us | 2646 | 2646 | 0 | 0 |
 | fda-rl | us | 110614 | 110614 | 0 | 0 |
 | fda-gudid | us | 3130 | 3130 | 0 | 0 |
-| fda-maude | us | 1336 | 1336 | 0 | 0 |
+| fda-maude | us | 12930 | 12930 | 0 | 0 |
 | fda-recall | us | 13692 | 13692 | 0 | 0 |
 | cdc-livd-sars-cov-2 | us | 483 | 483 | 0 | 0 |
 | eudamed-udi | eu | 716 | 716 | 0 | 0 |
@@ -37,7 +37,7 @@ Generado: 2026-10-24T04:35:01Z. Se genera con `build.mjs`; no lo edite a mano.
 |---|---:|
 | Nodos | 33.616 |
 | Mapeos publicados | 218 |
-| Tipos de diagnóstico con al menos un modelo | 3.033 |
+| Tipos de diagnóstico con al menos un modelo | 3.038 |
 
 | Nomenclatura | Nodos |
 |---|---:|
@@ -86,45 +86,45 @@ Generado: 2026-10-24T04:35:01Z. Se genera con `build.mjs`; no lo edite a mano.
 
 | Medida | Valor |
 |---|---:|
-| Filas de diagnóstico consolidadas | 250.151 |
-| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 349 |
-| Filas no diagnósticas (descartadas) | 2.624 |
-| Filas sin decisión (tipo sin criterio publicado) | 3.488.336 |
-| … de ellas sin ningún tipo | 2.286.266 |
-| Fabricantes | 19.941 |
-| Marcas | 80.165 |
-| Modelos | 165.195 |
-| Registros | 250.151 |
+| Filas de diagnóstico consolidadas | 261.339 |
+| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 400 |
+| Filas no diagnósticas (descartadas) | 2.769 |
+| Filas sin decisión (tipo sin criterio publicado) | 3.488.597 |
+| … de ellas sin ningún tipo | 2.286.254 |
+| Fabricantes | 20.755 |
+| Marcas | 88.948 |
+| Modelos | 175.070 |
+| Registros | 261.339 |
 
 | Jurisdicción | Modelos con registro |
 |---|---:|
-| US | 120.536 |
-| CA | 43.839 |
+| US | 130.411 |
+| CA | 43.847 |
 | EU | 434 |
-| AU | 405 |
-| BR | 238 |
-| IN | 36 |
+| AU | 420 |
+| BR | 241 |
+| IN | 39 |
 
 | Jurisdicciones por modelo | Modelos |
 |---|---:|
-| 1 | 164.909 |
-| 2 | 279 |
+| 1 | 174.755 |
+| 2 | 308 |
 | 3 | 7 |
 
 ## Fabricantes: fusiones y revisión
 
 | Regla de fusión | Fusiones |
 |---|---:|
-| same-name-same-country | 10.722 |
-| same-name-unique-country | 1.602 |
-| same-name-no-country | 1.003 |
+| same-name-same-country | 10.756 |
+| same-name-no-country | 2.014 |
+| same-name-unique-country | 1.957 |
 | same-registry-id | 109 |
 
 | Caso para revisión (no fusionado) | Casos |
 |---|---:|
-| possible-group-shared-first-word | 7.667 |
+| possible-group-shared-first-word | 7.712 |
 | same-name-different-country | 1.244 |
-| same-name-ambiguous-country | 414 |
+| same-name-ambiguous-country | 461 |
 | name-match-conflicting-ids | 233 |
 
 ## Listados del sector (asociaciones y ferias)
@@ -134,6 +134,6 @@ Generado: 2026-10-24T04:35:01Z. Se genera con `build.mjs`; no lo edite a mano.
 | Organizaciones | 46 |
 | Menciones con URL | 552 |
 | Empresas distintas | 370 |
-| … que cruzan con un fabricante de los registros | 192 |
-| … solo en listados del sector (candidatas) | 178 |
+| … que cruzan con un fabricante de los registros | 194 |
+| … solo en listados del sector (candidatas) | 176 |
 

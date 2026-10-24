@@ -1,20 +1,23 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T04:35:02Z",
+  "generatedAt": "2026-10-24T14:01:03Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
-      "commitDate": "2026-10-24T04:13:39+00:00",
+      "commit": "1792086f99b3bdc0529958d402c4dcf9093cf3b2",
+      "commitDate": "2026-10-24T06:04:43+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/compassionate-brown-tr71nn"
+        "origin/dev",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/itzan/fix-forms-entity-registration"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
-      "rowsRead": 204096,
+      "manifestGeneratedAt": "2026-10-24T05:47:44.811Z",
+      "rowsRead": 215690,
       "gaps": [
         {
           "source": "fda-gudid",
@@ -31,7 +34,16 @@
       "commitDate": "2026-10-24T03:59:33+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/adoring-curie-xdkt83-test"
+        "origin/test",
+        "origin/dev",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/claude/adoring-curie-xdkt83-test",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/leonardo/carril-03-alta-paciente-test",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
       ],
       "manifestGeneratedAt": "2026-10-24T03:48:44Z",
       "rowsRead": 716,
@@ -100,7 +112,15 @@
       "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
       "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
-      "alternatives": [],
+      "alternatives": [
+        "origin/dev",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
+      ],
       "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
       "rowsRead": 3534775,
       "gaps": [
@@ -206,8 +226,8 @@
     {
       "path": "taxonomy-nodes.ndjson.gz",
       "rows": 33616,
-      "bytes": 1831432,
-      "sha256": "e2cd23c56d8c59e7bcde9bd5ec07ac517071945a075fce6056455171beafe87f"
+      "bytes": 1831970,
+      "sha256": "a09b114ce4f4f70cc69e0928491251186a06ab20320b6b2360a96260ab45d9ee"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -217,39 +237,39 @@
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 19941,
-      "bytes": 3813288,
-      "sha256": "592d836e24c32c352b540d463f762a38a7d33dbfebd56047d155c57a950ab9a0"
+      "rows": 20755,
+      "bytes": 4106512,
+      "sha256": "8f53dbae2edb90505694fd3fcceb4a611115f5195c5abd8fe111768cd17520e1"
     },
     {
       "path": "models-0001.ndjson.gz",
-      "rows": 136309,
-      "bytes": 10092254,
-      "sha256": "247d7ef0d7b557ba600ce79a51f55e2af2c8a147241cc7a883adef1972fa8efc"
+      "rows": 136807,
+      "bytes": 10330700,
+      "sha256": "d5806b937c64c8227f32ae893335a0f31d32854be8d78320e0655c54a8e04b41"
     },
     {
       "path": "models-0002.ndjson.gz",
-      "rows": 28886,
-      "bytes": 2238514,
-      "sha256": "96b36b765f5981e13b1dd708c566c6bd2577bb83c0571785b8556252a33dc4c9"
+      "rows": 38263,
+      "bytes": 2936171,
+      "sha256": "c931daf75792991cd2e76c1b486c3de57fb70e6a437f1142030cf7c4acaad06a"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
-      "rows": 9558,
-      "bytes": 1136910,
-      "sha256": "43e53b2f0e3620b50333ce01f9df45a6c96b4afc4ee562750032fd7abcf5ad16"
+      "rows": 9650,
+      "bytes": 1155783,
+      "sha256": "159445bd92e5801f8a72499ccb7e2b8e86442190c4187f546c130a44dd96b9dd"
     },
     {
       "path": "industry-mentions.ndjson.gz",
       "rows": 552,
-      "bytes": 26845,
-      "sha256": "e0aa5de17a9e5cab76a611a2795fbcc680fa29a1b2c868f0799f732cc8524cc8"
+      "bytes": 26899,
+      "sha256": "4646fb46b08d820695b7ccb4a96f3873326504358da34d4f30d7299dd2c179fc"
     },
     {
       "path": "industry-candidates.ndjson.gz",
-      "rows": 178,
-      "bytes": 9815,
-      "sha256": "7675ad1549f9b14b3af5a973d4571aed332e2abe777df5fe2bb5471b9f46ccad"
+      "rows": 176,
+      "bytes": 9751,
+      "sha256": "8c920886375e3460d9401d980956fe0ca504cb073543d3f69d0eb88c938e3525"
     }
   ]
 }

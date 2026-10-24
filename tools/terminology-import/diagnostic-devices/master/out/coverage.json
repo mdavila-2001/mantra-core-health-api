@@ -1,18 +1,21 @@
 {
-  "generatedAt": "2026-10-24T04:35:01Z",
+  "generatedAt": "2026-10-24T14:01:02Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
-      "commitDate": "2026-10-24T04:13:39+00:00",
+      "commit": "1792086f99b3bdc0529958d402c4dcf9093cf3b2",
+      "commitDate": "2026-10-24T06:04:43+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/compassionate-brown-tr71nn"
+        "origin/dev",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/itzan/fix-forms-entity-registration"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
-      "rowsRead": 204096,
+      "manifestGeneratedAt": "2026-10-24T05:47:44.811Z",
+      "rowsRead": 215690,
       "gaps": [
         {
           "source": "fda-gudid",
@@ -29,7 +32,16 @@
       "commitDate": "2026-10-24T03:59:33+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/adoring-curie-xdkt83-test"
+        "origin/test",
+        "origin/dev",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/claude/adoring-curie-xdkt83-test",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/leonardo/carril-03-alta-paciente-test",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
       ],
       "manifestGeneratedAt": "2026-10-24T03:48:44Z",
       "rowsRead": 716,
@@ -98,7 +110,15 @@
       "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
       "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
-      "alternatives": [],
+      "alternatives": [
+        "origin/dev",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
+      ],
       "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
       "rowsRead": 3534775,
       "gaps": [
@@ -270,12 +290,12 @@
     {
       "source": "fda-maude",
       "region": "us",
-      "read": 1336,
-      "valid": 1336,
+      "read": 12930,
+      "valid": 12930,
       "invalid": 0,
       "duplicates": 0,
-      "diagnostic": 1104,
-      "attachedBySameModel": 5,
+      "diagnostic": 12241,
+      "attachedBySameModel": 24,
       "invalidSamples": []
     },
     {
@@ -319,7 +339,7 @@
       "invalid": 0,
       "duplicates": 0,
       "diagnostic": 0,
-      "attachedBySameModel": 243,
+      "attachedBySameModel": 246,
       "invalidSamples": []
     },
     {
@@ -352,7 +372,7 @@
       "invalid": 0,
       "duplicates": 0,
       "diagnostic": 47732,
-      "attachedBySameModel": 40,
+      "attachedBySameModel": 48,
       "invalidSamples": []
     },
     {
@@ -363,7 +383,7 @@
       "invalid": 0,
       "duplicates": 0,
       "diagnostic": 424,
-      "attachedBySameModel": 6,
+      "attachedBySameModel": 21,
       "invalidSamples": []
     },
     {
@@ -374,7 +394,7 @@
       "invalid": 0,
       "duplicates": 0,
       "diagnostic": 0,
-      "attachedBySameModel": 49,
+      "attachedBySameModel": 55,
       "invalidSamples": []
     }
   ],
@@ -430,7 +450,7 @@
       "fda-product-code→gmdn": 109,
       "gmdn→fda-product-code": 109
     },
-    "diagnosticTypesWithModels": 3033,
+    "diagnosticTypesWithModels": 3038,
     "ivdPanelsMeasured": [
       "IM",
       "MG",
@@ -586,13 +606,13 @@
     }
   },
   "catalog": {
-    "rowsIncluded": 250151,
-    "rowsNotDiagnostic": 2624,
-    "rowsAttachedBySameModel": 349,
-    "rowsUndetermined": 3488336,
-    "rowsWithoutType": 2286266,
+    "rowsIncluded": 261339,
+    "rowsNotDiagnostic": 2769,
+    "rowsAttachedBySameModel": 400,
+    "rowsUndetermined": 3488597,
+    "rowsWithoutType": 2286254,
     "undeterminedTopTypes": {
-      "(sin tipo)": 2286266,
+      "(sin tipo)": 2286254,
       "br:anvisa-nome-tecnico|name:INSTRUMENTOS CIRÚRGICOS": 130916,
       "br:anvisa-nome-tecnico|name:BROCAS CIRURGICAS": 74940,
       "br:anvisa-nome-tecnico|name:SISTEMAS DE FIXAÇÃO ORTOPÉDICOS E DISPOSITIVOS ASSOCIADOS": 39811,
@@ -636,72 +656,72 @@
       "br:anvisa-nome-tecnico|name:TAMPÕES, DILUENTES E DEMAIS SOLUÇÕES PARA ANÁLISE LABORATORIAL": 4766,
       "br:anvisa-nome-tecnico|name:MASCARAS": 4726,
       "br:anvisa-nome-tecnico|name:ENDOSCOPIO RIGIDO": 4648,
-      "br:anvisa-nome-tecnico|name:CATETER BALÃO PARA ANGIOPLASTIA PERIFÉRICA": 4638,
+      "br:anvisa-nome-tecnico|name:CATETER BALÃO PARA ANGIOPLASTIA PERIFÉRICA": 4637,
       "br:anvisa-nome-tecnico|name:KIT DE MONITORACAO": 4571,
       "br:anvisa-nome-tecnico|name:STENT NÃO VASCULAR (NÃO ENQUADRADO COMO BILIAR, BRONQUIAL, ESOFÁGICO, PANCREÁTICO, URINÁRIO E VAGINAL)": 4540,
       "br:anvisa-nome-tecnico|name:CABO PARA ELETRODOS": 4316,
       "br:anvisa-nome-tecnico|name:LIMAS PARA ODONTOLOGIA": 4216,
       "br:anvisa-nome-tecnico|name:FIXADORES EXTERNOS": 4179
     },
-    "manufacturers": 19941,
-    "brands": 80165,
-    "models": 165195,
-    "registrations": 250151,
+    "manufacturers": 20755,
+    "brands": 88948,
+    "models": 175070,
+    "registrations": 261339,
     "modelsByJurisdictionCount": {
-      "1": 164909,
-      "2": 279,
+      "1": 174755,
+      "2": 308,
       "3": 7
     },
     "modelsByJurisdiction": {
-      "US": 120536,
-      "CA": 43839,
+      "US": 130411,
+      "CA": 43847,
       "EU": 434,
-      "AU": 405,
-      "BR": 238,
-      "IN": 36
+      "AU": 420,
+      "BR": 241,
+      "IN": 39
     },
     "manufacturersByCountry": {
-      "US": 13687,
-      "CN": 1283,
-      "(sin país)": 768,
-      "CA": 525,
-      "DE": 450,
-      "GB": 328,
-      "IL": 300,
+      "US": 13706,
+      "(sin país)": 1532,
+      "CN": 1284,
+      "CA": 527,
+      "DE": 453,
+      "GB": 329,
+      "IL": 301,
       "KR": 281,
       "TW": 256,
-      "JP": 219,
-      "FR": 202,
-      "IT": 155,
+      "JP": 224,
+      "FR": 204,
+      "IT": 156,
       "NL": 123,
       "AU": 114,
       "SE": 100,
       "CH": 96,
-      "IE": 91,
+      "IE": 96,
       "IN": 89,
       "DK": 80,
-      "MX": 76,
-      "BE": 58,
+      "MX": 80,
+      "BE": 59,
       "ES": 58,
       "FI": 56,
       "HK": 51,
       "SG": 50,
-      "PK": 47,
+      "PK": 48,
       "AT": 33,
       "TR": 29,
       "MY": 26,
       "BR": 24,
+      "CR": 24,
       "VN": 23,
-      "CR": 21,
       "NO": 21,
       "NZ": 18,
       "PL": 18,
       "HU": 16,
       "LT": 11,
       "ZA": 11,
+      "DO": 10,
       "AR": 9,
       "CZ": 9,
-      "DO": 9,
       "TH": 9,
       "IS": 6,
       "RU": 6,
@@ -757,17 +777,17 @@
     }
   },
   "manufacturers": {
-    "entitiesAll": 63337,
+    "entitiesAll": 64078,
     "mergesByRule": {
-      "same-name-same-country": 10722,
-      "same-name-unique-country": 1602,
-      "same-name-no-country": 1003,
+      "same-name-same-country": 10756,
+      "same-name-no-country": 2014,
+      "same-name-unique-country": 1957,
       "same-registry-id": 109
     },
     "reviewByKind": {
-      "possible-group-shared-first-word": 7667,
+      "possible-group-shared-first-word": 7712,
       "same-name-different-country": 1244,
-      "same-name-ambiguous-country": 414,
+      "same-name-ambiguous-country": 461,
       "name-match-conflicting-ids": 233
     }
   },
@@ -775,8 +795,8 @@
     "organizations": 46,
     "mentions": 552,
     "companies": 370,
-    "companiesMatchedToRegistry": 192,
-    "companiesOnlyInIndustryLists": 178
+    "companiesMatchedToRegistry": 194,
+    "companiesOnlyInIndustryLists": 176
   },
   "emdnCopies": {
     "rowsA": 8453,
