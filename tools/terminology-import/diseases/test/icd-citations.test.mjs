@@ -128,3 +128,31 @@ test('enfermedades comunes de HPO (Groza 2015): MeSH y DOID; los ceros a la izqu
   assert.equal(resolveDoidCode('DOID:0009917', doid, alt), 'DOID:5158'); // por alt_id
   assert.equal(resolveDoidCode('DOID:0005898', doid, alt), 'DOID:0005898'); // sin match: queda sin resolver
 });
+
+test('saturación: un código retirado se sigue por su replaced_by; uno retirado sin reemplazo no cuenta como nuevo', () => {
+  const rec = (cs, code, status = 'active', replacedBy = null) => ({ cs, code, status, replacedBy, parents: [], designations: [], properties: {}, provenance: { version: 'v' }, xrefs: [] });
+  const bySystem = {
+    mondo: [rec('mondo', 'MONDO:1'), rec('mondo', 'MONDO:9', 'deprecated', 'MONDO:1'), rec('mondo', 'MONDO:8', 'deprecated')],
+  };
+  const measured = { 'monarch-clingen': [{ id: 'MONDO:9', links: [{ cs: 'mondo', code: 'MONDO:9' }] }, { id: 'MONDO:8', links: [{ cs: 'mondo', code: 'MONDO:8' }] }, { id: 'MONDO:7', links: [{ cs: 'mondo', code: 'MONDO:7' }] }] };
+  const { passes } = computeCoverage(bySystem, {}, measured);
+  assert.equal(passes.find((x) => x.source === 'monarch-clingen').newConcepts, 1, 'sólo MONDO:7, que no existe');
+});
+
+test('Monarch KG: ids de enfermedad de la columna object; DOID retirado por alt_id', async () => {
+  const { mkdtempSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { measureMonarchEdges } = await import('../lib/measure.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'monarch-'));
+  // Formato de clingen_gene_disease_edges.tsv / alliance_disease_edges.tsv (Monarch KG 2026-10-07): la 1.ª fila es real;
+  // en la 2.ª el `object` se cambió por un DOID retirado (DOID:9917, alt_id de DOID:5158) para probar esa resolución.
+  writeFileSync(
+    join(dir, 'edges.tsv'),
+    'id\tsubject\tpredicate\tobject\tcategory\n58e87643-4101-455c-a71e-eb0d242e2d13\tHGNC:34\tbiolink:causes\tMONDO:0800406\tbiolink:CausalGeneToDiseaseAssociation\n64529718-bd52-11f1-a344-afe3483c6d5c\tMGI:6388425\tbiolink:model_of\tDOID:9917\tbiolink:GenotypeToDiseaseAssociation\n',
+  );
+  const items = measureMonarchEdges(join(dir, 'edges.tsv'), [{ code: 'DOID:5158', properties: { disease_alt_ids: ['DOID:9917'] } }]);
+  assert.deepEqual(items, [
+    { id: 'MONDO:0800406', links: [{ cs: 'mondo', code: 'MONDO:0800406' }] },
+    { id: 'DOID:9917', links: [{ cs: 'doid', code: 'DOID:5158' }] },
+  ]);
+});

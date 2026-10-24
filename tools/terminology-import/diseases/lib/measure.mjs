@@ -69,6 +69,28 @@ export function measureHetionet(path, doidRecords) {
 }
 
 /**
+ * Ingestas del Monarch KG (ClinGen, ClinVar, Alliance, CURE ID): ids de
+ * enfermedad de la columna `object` (MONDO, DOID, OMIM, Orphanet). Un DOID
+ * retirado resuelve por su `alt_id`.
+ */
+export function measureMonarchEdges(path, doidRecords) {
+  const alt = new Map();
+  for (const r of doidRecords) for (const a of r.properties.disease_alt_ids ?? []) alt.set(a, r.code);
+  const lines = readFileSync(path, 'utf8').split('\n');
+  const col = lines[0].split('\t').indexOf('object');
+  const ids = new Set(lines.slice(1).map((l) => l.split('\t')[col]).filter(Boolean));
+  const link = (id) => {
+    const [p, c] = id.split(':');
+    if (p === 'MONDO') return { cs: 'mondo', code: id };
+    if (p === 'DOID') return { cs: 'doid', code: alt.get(id) ?? id };
+    if (p === 'OMIM') return { cs: 'omim', code: c };
+    if (p === 'Orphanet' || p === 'ORPHA') return { cs: 'orphanet', code: c };
+    return null;
+  };
+  return [...ids].map((id) => ({ id, link: link(id) })).filter((x) => x.link).map((x) => ({ id: x.id, links: [x.link] }));
+}
+
+/**
  * GARD (conversión PyOBO de NCATS GARD, ids heredados): enlazado si DOID lo
  * cita como xref u Orphanet lo alinea con relación E. GARD no publica cruces.
  */

@@ -2,21 +2,25 @@
 
 | Pasada | Fuente | Tipo | Versión | Ítems | Conceptos nuevos | Entidades nuevas |
 |---|---|---|---|---:|---:|---:|
-| 1 | `mondo` | ontología | 2026-10-06 | 23264 | 23264 | 20088 |
-| 2 | `orphanet` | ontología | 2026-06-23 | 9757 | 1551 | 1549 |
-| 3 | `doid` | ontología | 2026-09-30 | 12335 | 342 | 342 |
-| 4 | `ncit-disease` | ontología | 26.02d | 22379 | 14515 | 14515 |
-| 5 | `icd11-mms` | ontología | 2026-01 | 37052 | 29310 | 23841 |
-| 6 | `efo-disease` | ontología | 3.95.0 | 1111 | 472 | 472 |
-| 7 | `hpo-annotations` | claves citadas | — | 12880 | 181 | 181 |
-| 8 | `nando` | medida (no se carga) | — | 2768 | 693 | 693 |
+| 1 | `mondo` | ontología | 2026-10-06 | 23774 | 23774 | 20495 |
+| 2 | `orphanet` | ontología | 2026-06-23 | 9757 | 1534 | 1533 |
+| 3 | `doid` | ontología | 2026-09-30 | 12335 | 277 | 277 |
+| 4 | `ncit-disease` | ontología | 26.02d | 22379 | 14511 | 14511 |
+| 5 | `icd11-mms` | ontología | 2026-01 | 37052 | 29257 | 23811 |
+| 6 | `efo-disease` | ontología | 3.95.0 | 1159 | 495 | 495 |
+| 7 | `hpo-annotations` | claves citadas | — | 12880 | 67 | 67 |
+| 8 | `nando` | medida (no se carga) | — | 2768 | 685 | 685 |
 | 9 | `phenopacket-store` | claves citadas | — | 780 | 1 | 1 |
 | 10 | `oncotree` | medida (no se carga) | — | 865 | 189 | 189 |
 | 11 | `hetionet` | medida (no se carga) | — | 137 | 0 | 0 |
-| 12 | `who-icd10-to-icd11` | claves citadas | — | 12597 | 887 | 887 |
-| 13 | `mesh-c` | medida (no se carga) | — | 5067 | 1585 | 1585 |
+| 12 | `who-icd10-to-icd11` | claves citadas | — | 12597 | 886 | 886 |
+| 13 | `mesh-c` | medida (no se carga) | — | 5067 | 1562 | 1562 |
 | 14 | `gard` | medida (no se carga) | — | 6109 | 2598 | 2598 |
-| 15 | `hpo-common-diseases` | claves citadas | — | 3647 | 670 | 670 |
+| 15 | `hpo-common-diseases` | claves citadas | — | 3647 | 394 | 394 |
+| 16 | `monarch-clingen` | medida (no se carga) | — | 118 | 0 | 0 |
+| 17 | `monarch-clinvar` | medida (no se carga) | — | 5052 | 0 | 0 |
+| 18 | `monarch-alliance` | medida (no se carga) | — | 2160 | 0 | 0 |
+| 19 | `monarch-cureid` | medida (no se carga) | — | 25 | 0 | 0 |
 
 ## Conceptos por sistema
 
@@ -24,28 +28,28 @@
 |---|---|---:|---:|---:|---:|---:|
 | `decipher` | sí | 61 | 61 | 0 | 0 | 0 |
 | `doid` | no | 14854 | 12335 | 0 | 10684 | 0 |
-| `efo-disease` | no | 1111 | 1111 | 0 | 1086 | 0 |
-| `icd10-who` | sí | 12639 | 12639 | 0 | 0 | 0 |
-| `icd11-foundation` | sí | 4630 | 4630 | 0 | 0 | 0 |
+| `efo-disease` | no | 1159 | 1159 | 0 | 1133 | 0 |
+| `icd10-who` | sí | 12640 | 12640 | 0 | 0 | 0 |
+| `icd11-foundation` | sí | 4631 | 4631 | 0 | 0 | 0 |
 | `icd11-mms` | no | 37052 | 37052 | 0 | 0 | 0 |
-| `mesh` | sí | 9264 | 9264 | 0 | 0 | 0 |
-| `mondo` | no | 27185 | 23264 | 0 | 16749 | 0 |
+| `mesh` | sí | 9320 | 9320 | 0 | 0 | 0 |
+| `mondo` | no | 27695 | 23774 | 0 | 16927 | 0 |
 | `ncit-disease` | no | 22379 | 22379 | 0 | 22376 | 0 |
-| `omim` | sí | 10744 | 10744 | 0 | 0 | 0 |
+| `omim` | sí | 10871 | 10871 | 0 | 0 | 0 |
 | `orphanet` | no | 11645 | 9757 | 11645 | 6898 | 6868 |
-| `umls` | sí | 32150 | 32150 | 0 | 0 | 0 |
+| `umls` | sí | 32589 | 32589 | 0 | 0 | 0 |
 
 ## Cobertura contra MONDO
 
 | Sistema | Vigentes | Enlazados a MONDO | % |
 |---|---:|---:|---:|
-| `orphanet` | 9757 | 8206 | 84.1 |
-| `doid` | 12335 | 11980 | 97.1 |
-| `ncit-disease` | 22379 | 7843 | 35 |
-| `icd11-mms` | 37052 | 7670 | 20.7 |
-| `efo-disease` | 1111 | 434 | 39.1 |
+| `orphanet` | 9757 | 8223 | 84.3 |
+| `doid` | 12335 | 12055 | 97.7 |
+| `ncit-disease` | 22379 | 7849 | 35.1 |
+| `icd11-mms` | 37052 | 7723 | 20.8 |
+| `efo-disease` | 1159 | 443 | 38.2 |
 
-MONDO vigentes con al menos una equivalencia publicada hacia otro sistema cargado: 17834.
+MONDO vigentes con al menos una equivalencia publicada hacia otro sistema cargado: 17923.
 
 ## CIE-11 MMS por capítulo
 
@@ -72,8 +76,8 @@ MONDO vigentes con al menos una equivalencia publicada hacia otro sistema cargad
 | 19 Certain conditions originating in the perinatal period | 17 | 625 | 110 |
 | 20 Developmental anomalies | 30 | 1323 | 1049 |
 | 21 Symptoms, signs or clinical findings, not elsewhere classified | 47 | 1241 | 249 |
-| 22 Injury, poisoning or certain other consequences of external causes | 30 | 1982 | 39 |
-| 23 External causes of morbidity or mortality | 85 | 909 | 8 |
+| 22 Injury, poisoning or certain other consequences of external causes | 30 | 1982 | 90 |
+| 23 External causes of morbidity or mortality | 85 | 909 | 9 |
 | 24 Factors influencing health status or contact with health services | 45 | 851 | 0 |
 | 25 Codes for special purposes | 2 | 20 | 8 |
 | 26 Supplementary Chapter Traditional Medicine Conditions | 125 | 1120 | 0 |
@@ -187,30 +191,30 @@ MONDO vigentes con al menos una equivalencia publicada hacia otro sistema cargad
 | doid → orphanet | sin equivalencia declarada: 2357 |
 | doid → umls | sin equivalencia declarada: 7218 |
 | efo-disease → doid | sin equivalencia declarada: 126 |
-| efo-disease → icd10-who | sin equivalencia declarada: 120 |
-| efo-disease → mesh | sin equivalencia declarada: 294 |
-| efo-disease → mondo | sin equivalencia declarada: 16 |
+| efo-disease → icd10-who | sin equivalencia declarada: 177 |
+| efo-disease → mesh | sin equivalencia declarada: 300 |
+| efo-disease → mondo | sin equivalencia declarada: 17 |
 | efo-disease → ncit-disease | sin equivalencia declarada: 223 |
-| efo-disease → omim | sin equivalencia declarada: 164 |
+| efo-disease → omim | sin equivalencia declarada: 165 |
 | efo-disease → orphanet | sin equivalencia declarada: 152 |
 | efo-disease → umls | sin equivalencia declarada: 82 |
 | icd10-who → icd11-mms | sin equivalencia declarada: 11649 |
 | icd11-mms → icd10-who | sin equivalencia declarada: 16831 |
-| icd11-mms → icd11-foundation | equivalent: 2192 |
+| icd11-mms → icd11-foundation | equivalent: 2193 |
 | mondo → decipher | sin equivalencia declarada: 1 · equivalent: 60 |
-| mondo → doid | equivalent: 11881 · sin equivalencia declarada: 111 |
+| mondo → doid | equivalent: 11960 · sin equivalencia declarada: 124 |
 | mondo → efo-disease | equivalent: 9 |
-| mondo → icd10-who | equivalent: 208 |
-| mondo → icd11-foundation | equivalent: 4627 · narrower: 2 · wider: 2 |
-| mondo → mesh | equivalent: 8007 · sin equivalencia declarada: 25 · wider: 2 · narrower: 1 |
-| mondo → ncit-disease | equivalent: 7104 · sin equivalencia declarada: 4 · narrower: 2 · wider: 2 · inexact: 1 |
-| mondo → omim | equivalent: 10235 · sin equivalencia declarada: 134 |
-| mondo → orphanet | equivalent: 9740 · sin equivalencia declarada: 707 |
-| mondo → umls | equivalent: 21204 |
+| mondo → icd10-who | equivalent: 209 |
+| mondo → icd11-foundation | equivalent: 4628 · narrower: 2 · wider: 2 |
+| mondo → mesh | equivalent: 8075 · sin equivalencia declarada: 25 · wider: 2 · narrower: 1 |
+| mondo → ncit-disease | equivalent: 7106 · sin equivalencia declarada: 4 · narrower: 2 · wider: 2 · inexact: 1 |
+| mondo → omim | equivalent: 10661 · sin equivalencia declarada: 136 |
+| mondo → orphanet | equivalent: 9759 · sin equivalencia declarada: 708 |
+| mondo → umls | equivalent: 21661 |
 | ncit-disease → umls | sin equivalencia declarada: 13981 |
 | orphanet → icd10-who | wider: 7034 · equivalent: 605 · narrower: 800 · inexact: 11 |
 | orphanet → icd11-mms | wider: 5156 · equivalent: 1497 · narrower: 206 |
 | orphanet → mesh | equivalent: 3209 |
-| orphanet → mondo | equivalent: 8899 |
+| orphanet → mondo | equivalent: 8918 |
 | orphanet → omim | equivalent: 3781 · narrower: 4138 · wider: 797 · inexact: 29 |
 | orphanet → umls | equivalent: 9586 |

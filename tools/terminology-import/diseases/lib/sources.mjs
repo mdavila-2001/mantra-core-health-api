@@ -228,3 +228,26 @@ export const MEASURE_FILES = [
     license: 'CC0 1.0',
   },
 ];
+
+const MONARCH_KG = 'https://storage.googleapis.com/data-public-monarchinitiative/monarch-kg/2026-10-07/transform_output';
+/**
+ * Ingestas del Monarch KG 2026-10-07 (bucket público de Monarch = data.monarchinitiative.org):
+ * curaciones independientes cuyos hosts están bloqueados en esta red. Sólo se
+ * miden los ids de enfermedad que citan (columna `object`); no se carga nada.
+ */
+for (const [key, file, publisher, version, sha] of [
+  ['monarch-clingen', 'clingen_gene_disease_edges.tsv', 'ClinGen — validez gen-enfermedad (vía Monarch KG)', 'clingen-ingest 2026-08-31', 'f03a332f62a919ed63510baa8c5a9411ad46ebef906b7e8e214b0f6e34964ad3'],
+  ['monarch-clinvar', 'clinvar_variant_edges.tsv', 'ClinVar (NCBI) — variante-enfermedad (vía Monarch KG)', 'clinvar-ingest 2026-09-29', 'e6ad45de40a836922efc2333290b0d61dc05c64383efa83ce73259abcf4b5935'],
+  ['monarch-alliance', 'alliance_disease_edges.tsv', 'Alliance of Genome Resources — modelos de enfermedad (vía Monarch KG)', 'alliance-ingest 9.1.0', '46f46d474564ab31064d3340948d0610aabe79518ee7a6669e40e82f19910ed6'],
+  ['monarch-cureid', 'cureid_edges.tsv', 'CURE ID (FDA/NCATS) — usos en enfermedades (vía Monarch KG)', 'cureid-ingest 2026-05-28', 'f5d98832b4698d7f7746adfd724f3f21c18bb1afefd1d89220b44b6c03eb1c07'],
+]) {
+  MEASURE_FILES.push({
+    key,
+    file: `monarch-kg/${file}`,
+    url: `${MONARCH_KG}/${file}`,
+    expectedSha256: sha,
+    publisher,
+    version: `Monarch KG 2026-10-07 · ${version}`,
+    license: 'Licencia no declarada en metadata.yaml del Monarch KG; sólo se usan los ids de enfermedad para medir.',
+  });
+}
