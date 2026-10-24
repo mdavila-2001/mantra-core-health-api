@@ -39,6 +39,13 @@ export const PRESENT_BOOKING_STATES: readonly string[] = [
 /** El código con el que la pantalla reconoce «hay citas: confirme». */
 export const BOOKINGS_REQUIRE_CONFIRMATION = 'BOOKINGS_REQUIRE_CONFIRMATION';
 
+/**
+ * El motivo que lee el paciente cuando su cita cae por retirar o cambiar el
+ * horario de atención (etapa C, 24/10/2026).
+ */
+export const SCHEDULE_CHANGE_CANCELLATION_REASON =
+  'Cambio en el horario de atención del profesional';
+
 /** Una cita que el bloqueo alcanza, como se la muestra al profesional. */
 export interface AffectedBooking {
   readonly bookingId: string;
@@ -98,6 +105,7 @@ export class BlockedBookingsCanceller {
   async describe(
     tx: EntityManager,
     slots: readonly BookableSlots[],
+    authorize?: () => void,
   ): Promise<AffectedBookings> {
     if (slots.length === 0) return { cancellable: [], present: [] };
 
@@ -114,6 +122,11 @@ export class BlockedBookingsCanceller {
       slotIds,
       PRESENT_BOOKING_STATES,
     );
+
+    // Con citas de por medio, quien pide tiene que poder verlas: se comprueba
+    // ANTES de resolver un solo nombre. Sin citas no hay nada que proteger, y
+    // bloquear un rato vacío sigue como siempre.
+    if (cancellable.length + present.length > 0) authorize?.();
 
     const describe = async (
       bookingId: string,

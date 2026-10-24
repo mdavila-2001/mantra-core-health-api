@@ -14,11 +14,13 @@ import { fileURLToPath } from 'node:url';
 
 import { md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { loincDomain } from '../lab-tests/lib/domains.mjs';
+import { TEST_VERSION_COLUMNS, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv } from '../lab-tests/lib/gtr.mjs';
 import { thoRecords } from '../lab-tests/lib/hl7-tho.mjs';
-import { RELATION, buildPlan, planSummary } from '../lab-tests/lib/load-plan.mjs';
+import { RELATION, buildPlan, planSummary, relationshipTuples } from '../lab-tests/lib/load-plan.mjs';
 import { loincRecords, parseLinguisticIndex, parseLinguisticVariant, parseLoincTable, parsePanels } from '../lab-tests/lib/loinc.mjs';
 import { assertRecord, conceptIdFor, propertyIdFor } from '../lab-tests/lib/records.mjs';
-import { fonasaItems, pamiItems, pcsItems, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
+import { addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pamiOfficialItems, pcsAxisNames, pcsItems, pcsOrderFile, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
+import { partsFromFullySpecifiedName, txToLoincInput } from '../lab-tests/lib/loinc-tx.mjs';
 import { ucumRecords } from '../lab-tests/lib/ucum.mjs';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'lab-tests');
@@ -122,6 +124,19 @@ test('dominios: reglas por CLASS/CLASSTYPE; lo no reconocido queda sin dominio',
   assert.equal(loincDomain('SURVEY.X', '4').domain, null);
 });
 
+test('relaciones: un miembro repetido en el mismo panel conserva cada posición (NLM 41200-7 repite 50546-1 en 273 y 274)', () => {
+  const r = { id: conceptIdFor('loinc', '50546-1'), relations: [
+    { type: 'part-of', targetCodeSystem: 'loinc', targetCode: '41200-7', ordinal: 273 },
+    { type: 'part-of', targetCodeSystem: 'loinc', targetCode: '41200-7', ordinal: 274 },
+  ] };
+  const t = relationshipTuples(r);
+  assert.equal(new Set(t.map((x) => x[0])).size, 2);
+  assert.deepEqual(t.map((x) => x[4]), [273, 274]);
+  // Sin orden (jerarquía «es un» de HL7), el id no cambia respecto de la versión anterior.
+  const isA = { id: conceptIdFor('hl7-v2-0487', 'ABS'), relations: [{ type: 'is-a', targetCodeSystem: 'hl7-v2-0487', targetCode: 'X' }] };
+  assert.equal(relationshipTuples(isA)[0][0], md5uuid(`mantra:lab-tests:rel:is-a:${isA.id}:${conceptIdFor('hl7-v2-0487', 'X')}`));
+});
+
 test('plan de carga: relaciones dentro del plan, value sets y conteos deterministas', () => {
   const { records } = syntheticLoinc();
   const meta = { codeSystems: [{ internalCode: 'loinc', name: 'LOINC', canonicalUrl: 'http://loinc.org', version: '0.00-sintetico', sourceKey: 'loinc' }] };
@@ -195,4 +210,126 @@ test('ICD-10-PCS (recorte real): B imagen, C1 imagen, C7 terapia fuera, 4A y F0 
   assert.equal(by['4A0002Z'].domain, 'functional');
   assert.equal(by.F003GKZ.domain, 'functional');
   assert.equal(ruleFor('icd10pcs-cms', 'CW70NZZ'), null);
+});
+
+// --- NCBI GTR (recorte real de test_version.gz / test_condition_gene.txt) ------
+test('GTR (recorte real): sólo la versión vigente, con tipo, genes, condiciones y categoría mayor oficial', () => {
+  const g = json('gtr.recorte.json');
+  const versions = parseTsv(g.test_version, TEST_VERSION_COLUMNS, 'test_version');
+  const { records, stats } = gtrRecords(versions, conditionGeneMap(g.test_condition_gene), methodCategoryMap(g.tests_by_method_category), { sourceVersion: 'test', sourceFile: 'fixture', sourceSha256: 'f'.repeat(64), retrievedAt: '2026-10-24T00:00:00.000Z' });
+  records.forEach(assertRecord);
+  assert.equal(new Set(records.map((r) => r.code)).size, records.length);
+  assert.equal(stats.current, records.length);
+  const fx = records.find((r) => r.code === 'GTR000004006');
+  assert.ok(fx, 'el test vigente de GTR000004006 está');
+  assert.equal(fx.domain, 'genetics');
+  assert.equal(fx.properties.gtr_test_type, 'Clinical');
+  assert.ok(fx.properties.gtr_genes.some((x) => x.symbol === 'FMR1' && x.geneId === '2332'));
+  assert.ok(fx.properties.gtr_conditions.some((x) => x.medgenCui === 'C0016667'));
+  assert.equal(fx.provenance.sourceUrl, 'https://www.ncbi.nlm.nih.gov/gtr/tests/4006/');
+  // GTR000053361.5 trae una categoría con caracteres mal codificados en la propia fuente («Karyotypingâ„¢»):
+  // no se adivina su categoría mayor, se reporta; las demás categorías del test sí resuelven.
+  const sky = records.find((r) => r.code === 'GTR000053361');
+  assert.ok(sky.properties.gtr_major_method_categories.includes('Molecular Genetics'));
+  assert.equal(Object.keys(stats.unmappedMethodCategories).length, 1);
+  assert.match(Object.keys(stats.unmappedMethodCategories)[0], /Karyotyping/);
+  assert.throws(() => parseTsv('a\tb\n1\t2\n', TEST_VERSION_COLUMNS, 'x'), /Cabeceras encontradas: a, b/);
+});
+
+// --- CUPS de MinSalud Colombia (recorte real de POS Pópuli, datos.gov.co) -------
+test('CUPS (recorte real): «Qué es» oficial como definición, prefijos verificados, 5 dígitos fuera, exclusión terapéutica', () => {
+  const fx = json('cups-co.recorte.json');
+  const { records, stats } = tariffRecords('cups-co', cupsItems(fx.lab, fx.pbs, { 'Procedimiento del PBS': { sourceUrl: 'https://www.datos.gov.co/x/9zcz-bjue' } }), TPROV);
+  records.forEach(assertRecord);
+  const by = byCode(records);
+  assert.deepEqual(Object.keys(by).sort(), ['870001', '901001']); // 890201 (consulta) fuera por prefijo; 954610 terapia; 10101 tiene 5 dígitos
+  assert.equal(by['901001'].domain, 'laboratory');
+  assert.match(by['901001'].definition, /sensibilidad a los antibióticos/);
+  assert.equal(by['901001'].properties.tariff_official_name, 'ANTIBIOGRAMA (DISCO)');
+  assert.equal(by['870001'].domain, 'imaging');
+  assert.equal(by['870001'].provenance.sourceUrl, 'https://www.datos.gov.co/x/9zcz-bjue');
+  assert.equal(by['901001'].provenance.sourceUrl, TPROV.sourceUrl);
+  assert.equal(stats.excludedExplicitly[0].code, '954610');
+});
+
+test('ICD-10-PCS + CIE-10-ES: designación oficial en castellano sólo por igualdad exacta de código', () => {
+  const sections = new Map(TAR.pcs.sections.map((x) => [x.value, x.meaning]));
+  const { records } = tariffRecords('icd10pcs-cms', pcsItems(TAR.pcs.codes, sections), TPROV);
+  // Textos verbatim de Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx (hoja «ES2026 Completa + Marcadores»).
+  const es = new Map([
+    ['B00B0ZZ', 'Radiografía simple de médula espinal, con contraste, hiperosmolar'],
+    ['4A0002Z', 'Medición de conductividad, nervioso central, abordaje abierto'],
+  ]);
+  const r = addCie10esDesignations(records, es, { edition: '2026', url: 'https://example.invalid/px.xlsx', file: 'fixture', sha256: 'f'.repeat(64) });
+  assert.deepEqual(r, { added: 2, missing: records.length - 2 });
+  const b = records.find((x) => x.code === 'B00B0ZZ');
+  assert.deepEqual(b.designations, [{ lang: 'es', type: 'preferred', value: 'Radiografía simple de médula espinal, con contraste, hiperosmolar' }]);
+  assert.match(b.properties.designation_es_source.source, /CIE-10-ES Procedimientos 2026/);
+  assert.deepEqual(records.find((x) => x.code === 'F003GKZ').designations, []);
+});
+
+test('LOINC vía tx.fhir.org: el nombre corto es-AR (FSN) se corta en los seis ejes sólo si son exactamente seis', () => {
+  // Valor real de tx.fhir.org para 2345-7 (designación es-AR SHORTNAME, LOINC 2.82).
+  assert.deepEqual(partsFromFullySpecifiedName('glucosa:concentración de masa:punto en el tiempo:suero/plasma:cuantitativo:'), {
+    component: 'glucosa',
+    property: 'concentración de masa',
+    time_aspct: 'punto en el tiempo',
+    system: 'suero/plasma',
+    scale_typ: 'cuantitativo',
+  });
+  assert.equal(partsFromFullySpecifiedName('Glucose SerPl-mCnc'), null);
+  assert.equal(partsFromFullySpecifiedName('a:b:c'), null);
+});
+
+test('ICD-10-PCS FY2027 (recorte real de cms.gov): order file de ancho fijo y nombres oficiales de sección y tipo', () => {
+  const fx = json('cms-icd10pcs-2027.recorte.json');
+  const codes = pcsOrderFile(fx.order);
+  assert.deepEqual(codes.map((c) => c.code).sort(), ['4A0002Z', 'B00B0ZZ', 'CW70NZZ', 'F003GKZ']); // «B00» es encabezado (válido = 0)
+  assert.equal(codes.find((c) => c.code === 'B00B0ZZ').long_desc, 'Plain Radiography of Spinal Cord using High Osmolar Contrast');
+  const { sections, types } = pcsAxisNames(fx.tables);
+  assert.equal(sections.get('F'), 'Physical Rehabilitation and Diagnostic Audiology');
+  assert.equal(types.get('F0'), 'Speech Assessment');
+  assert.equal(types.get('B0'), 'Plain Radiography');
+  const { records } = tariffRecords('icd10pcs-cms', pcsItems(codes, sections, types), TPROV);
+  assert.equal(records.find((r) => r.code === 'F003GKZ').category.display, 'Physical Rehabilitation and Diagnostic Audiology › Speech Assessment');
+  assert.equal(records.find((r) => r.code === 'CW70NZZ'), undefined);
+});
+
+test('PAMI (recorte real del CSV oficial de datos.pami.org.ar): nombre verbatim, módulo y valor en pesos', () => {
+  const fx = json('pami-oficial.recorte.json');
+  const rows = fx.csv_latin1_decoded.split('\r\n').filter(Boolean).map((l) => l.split(';'));
+  const items = pamiOfficialItems(rows);
+  const acet = items.find((i) => i.code === '660002');
+  assert.equal(acet.name, 'ACETONURIA');
+  assert.equal(acet.display, 'Acetonuria');
+  assert.equal(acet.properties.pami_module, '5');
+  assert.deepEqual(acet.properties.reference_price, { currency: 'ARS', schedule: 'NOMENCLADOR ESTRUCTURA UNIDADES FEBRERO 2019', amount: '27.26', priceText: '$ 27,26' });
+  assert.equal(items.find((i) => i.code === '187143').properties.reference_price.amount, '2935.17');
+  const { records, stats } = tariffRecords('pami-nomenclador', items, TPROV);
+  assert.deepEqual(records.map((r) => r.code).sort(), ['340101', '660002']);
+  assert.equal(stats.excludedExplicitly[0].code, '187143');
+});
+
+test('LOINC vía tx.fhir.org + NLM (recorte real, LOINC 2.82): clase, ORDER_OBS, castellano oficial, ejes ES y miembros de panel', () => {
+  const fx = json('loinc-txfhir-ctss.recorte.json');
+  const { stats: inputStats, ...input } = txToLoincInput(fx.tx, fx.ctss, fx.panels);
+  assert.equal(inputStats.terms, Object.keys(fx.tx.terms).length);
+  const { records } = loincRecords(input, { release: '2.82', retrievedAt: fx.tx.finishedAt, files: { 'Loinc.csv': { file: 'fixture', sha256: 'f'.repeat(64) } }, esVariant: { id: 'tx', country: 'MX/AR', producer: null, file: 'tx' }, license: 'test', via: 'tx.fhir.org' });
+  records.forEach(assertRecord);
+  const by = Object.fromEntries(records.map((r) => [r.code, r]));
+  const glu = by['2345-7'];
+  assert.equal(glu.display, 'Glucose [Mass/volume] in Serum or Plasma');
+  assert.equal(glu.category.code, 'CHEM');
+  assert.equal(glu.domain, 'laboratory');
+  assert.equal(glu.properties.loinc_order_obs, 'Both');
+  assert.equal(glu.properties.component, 'Glucose');
+  assert.deepEqual(glu.properties.loinc_example_ucum_units, ['mg/dL']);
+  assert.equal(glu.designations[0].lang, 'es');
+  assert.match(glu.designations[0].value, /^Glucosa/);
+  assert.equal(glu.properties.loinc_parts_es.system, 'suero/plasma');
+  assert.match(glu.provenance.sourceName, /vía tx\.fhir\.org/);
+  const panel = by['24323-8'];
+  assert.ok(panel.valueSets.includes('lab-catalog-loinc-panels'));
+  assert.ok(panel.properties.loinc_panel_members.some((m) => m.loinc === '2345-7'));
+  assert.ok(glu.relations.some((x) => x.type === 'part-of' && x.targetCode === '24323-8'));
 });

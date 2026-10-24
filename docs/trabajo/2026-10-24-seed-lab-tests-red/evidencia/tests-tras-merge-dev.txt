@@ -1,0 +1,10 @@
+$ git rev-parse --short HEAD  # tras merge de origin/dev c3d08ca5
+71b183f7
+
+$ node --test "tools/terminology-import/test/*.test.mjs"
+# tests 54
+# pass 54
+# fail 0
+# skipped 0
+# todo 0
+exit=0

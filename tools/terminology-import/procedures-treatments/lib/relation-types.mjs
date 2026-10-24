@@ -177,6 +177,22 @@ export const RELATION_TYPES = {
     label:
       'En estudio: ensayos controlados aleatorizados publicados (indexación MeSH de NLM); no implica indicación ni eficacia',
   },
+  'pubmed-review:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico en la misma revisión sistemática o metaanálisis (fuera de Cochrane) indexado por NLM',
+    assertion: 'literature-indexing',
+    label:
+      'Evaluados en revisiones sistemáticas o metaanálisis (indexación MeSH de NLM); no implica eficacia ni indicación',
+  },
+  'pubmed-trial:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico en el mismo ensayo clínico no aleatorizado publicado e indexado por NLM',
+    assertion: 'investigational',
+    label:
+      'En estudio: ensayos clínicos no aleatorizados publicados (indexación MeSH de NLM); no implica indicación ni eficacia',
+  },
 
   // --- ClinicalTrials.gov (procedimiento ↔ condición, solo en estudio) --------
   'ctgov:investigational': {

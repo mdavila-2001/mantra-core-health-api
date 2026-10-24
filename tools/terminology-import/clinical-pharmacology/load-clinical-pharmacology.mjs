@@ -22,9 +22,9 @@ import 'dotenv/config';
 import pg from 'pg';
 import { existsSync } from 'node:fs';
 
-import { readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
+import { writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
-import { parseArgs } from './lib/cli.mjs';
+import { parseArgs, readNdjsonLarge } from './lib/cli.mjs';
 import { CODE_SYSTEM, EQUIV_EQUIVALENT, LANG_EN, PROPERTY_PREFIX, REL_IS_A, planFor, vademecumMapTuple } from './lib/load-plan.mjs';
 import { DRY_RUN_PLAN, MONOGRAPHS_NDJSON } from './lib/paths.mjs';
 
@@ -124,7 +124,7 @@ async function prune(client, csvId, planIds) {
 async function main() {
   const t0 = Date.now();
   if (!existsSync(MONOGRAPHS_NDJSON())) throw new Error(`Falta ${MONOGRAPHS_NDJSON()}: corré build-monographs.mjs.`);
-  const monographs = readNdjson(MONOGRAPHS_NDJSON());
+  const monographs = readNdjsonLarge(MONOGRAPHS_NDJSON());
   const plan = planFor(monographs);
   const summary = {
     codeSystem: CODE_SYSTEM,

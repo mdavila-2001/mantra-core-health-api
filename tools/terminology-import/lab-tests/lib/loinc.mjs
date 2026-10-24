@@ -164,7 +164,7 @@ export function parseTop2000(text, label) {
  * @param {object} prov  { release, retrievedAt, files: { <archivo>: { file, sha256 } }, esVariant? }
  */
 export function loincRecords(input, prov) {
-  const { table, classNames = new Map(), partLinks = new Map(), panels = new Map(), es = null, universalLabOrders = new Set(), playbook = new Map(), top2000Us = new Map(), top2000Si = new Map() } = input;
+  const { table, classNames = new Map(), partLinks = new Map(), panels = new Map(), es = null, universalLabOrders = new Set(), playbook = new Map(), top2000Us = new Map(), top2000Si = new Map(), extra = new Map() } = input;
   const byCode = new Map(table.map((r) => [r.LOINC_NUM, r]));
   const domainOf = new Map(table.map((r) => [r.LOINC_NUM, loincDomain(r.CLASS, r.CLASSTYPE)]));
 
@@ -256,7 +256,8 @@ export function loincRecords(input, prov) {
         radlex_playbook: pb ? compact({ rpid: pb.rpid, longName: pb.longName, parts: pb.parts }) : null,
         loinc_parts_es: esRow && Object.keys(esRow.parts).length ? esRow.parts : null,
         loinc_related_names_es: esRow?.relatedNames ?? [],
-        designation_es_source: esRow && esInfo ? { variantId: esInfo.id, country: esInfo.country, producer: esInfo.producer, release: prov.release, file: esInfo.file } : null,
+        designation_es_source: esRow && esInfo ? compact({ variantId: esInfo.id, country: esInfo.country, producer: esInfo.producer, release: prov.release, file: esInfo.file, variants: esRow.variants }) : null,
+        ...(extra.get(code) ?? {}),
         lab_catalog_domain: domain,
         lab_catalog_domain_rule: rule,
       }),
@@ -265,7 +266,7 @@ export function loincRecords(input, prov) {
       valueSets,
       provenance: {
         source: 'loinc',
-        sourceName: `LOINC ${prov.release} (Regenstrief Institute)`,
+        sourceName: `LOINC ${prov.release} (Regenstrief Institute)${prov.via ? ` — vía ${prov.via}` : ''}`,
         sourceId: code,
         sourceVersion: prov.release,
         sourceUrl: `https://loinc.org/${code}/`,

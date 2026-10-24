@@ -77,3 +77,112 @@ test('lector en streaming: objetos completos aunque el corte caiga dentro de str
     assert.equal(sp.state, 'done');
   }
 });
+
+// --- RxNav real (2026-10-24): ATC 5 → RxCUI → UNII, combinado con el GSRS -----------------
+import { combineLinks, moietiesOf, rxnavIndex } from '../lib/gsrs.mjs';
+import { readBridge } from '../lib/inputs.mjs';
+
+const RXNAV_ATC = ['N02BE01', 'J01CA04', 'J01CR02', 'C09AA02', 'C09BA02', 'N01BB02', 'D04AB01', 'C01BB01', 'N02AJ13'];
+const bridges = RXNAV_ATC.map((atc) => readBridge(atc, join(HERE, 'fixtures', 'rxnav-real', atc)));
+const gsrsFull = buildGsrsIndex(read('gsrs-entries-real.json'));
+
+test('RxNav real: el ATC 5 de una combinación no tiene ingrediente; un MIN se abre en sus IN', () => {
+  const by = Object.fromEntries(bridges.map((b) => [b.atc, b]));
+  assert.deepEqual(by.J01CA04.unii, ['804826J2HU']);
+  assert.equal(by.J01CR02.complete, false, 'amoxicilina + clavulánico: RxNav no la mapea a ingredientes');
+  assert.deepEqual(by.N02AJ13.ingredients, ['161', '10689']);
+  assert.deepEqual(by.N02AJ13.unii, ['362O9ITL9D', '39J1LGJ30J']);
+  assert.equal(by.N01BB02.rxcuis[0].rxcui, '6387');
+});
+
+test('GSRS + RxNav: resuelve lo que el GSRS deja ambiguo sólo si RxNav da UN ATC dentro de sus candidatos', () => {
+  const rx = rxnavIndex(bridges, gsrsFull);
+  const decide = (uniis) => combineLinks(linkUniiSet(uniis, gsrsFull), rx.get(moietiesOf(uniis, gsrsFull).join('+')) ?? []);
+  assert.deepEqual(decide(['804826J2HU']), { atc: 'J01CA04', rule: 'gsrs-ambiguous+rxnav-unique' }, 'amoxicilina');
+  assert.deepEqual(decide(['9O25354EPJ']), { atc: 'C09AA02', rule: 'gsrs-ambiguous+rxnav-unique' }, 'enalapril maleato → fracción enalaprilat');
+  assert.deepEqual(decide(['V13007Z41A']), { atc: null, rule: 'ambiguous:rxnav-multiple' }, 'lidocaína: tres ATC por vía/uso, sigue sin enlazar');
+  assert.deepEqual(decide(['362O9ITL9D', '9N7R477WCK']), { atc: 'N02AJ13', rule: 'gsrs:unique+rxnav' });
+  assert.equal(combineLinks({ status: 'linked', atc: 'X01XX01', rule: 'unique', candidates: [] }, ['Y01YY01']).rule, 'conflict:gsrs-vs-rxnav');
+  assert.equal(combineLinks({ status: 'ambiguous', atc: null, candidates: ['A'] }, ['B']).rule, 'conflict:rxnav-outside-gsrs-candidates');
+});
+
+test('desempate GSRS/RxNav por los ATC que la AEMPS usa en medicamentos autorizados', () => {
+  const g = { status: 'linked', atc: 'L01XC02', rule: 'unique', candidates: ['L01XC02'] };
+  assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01FA01']) }), { atc: 'L01FA01', rule: 'rxnav-over-gsrs:aemps-in-use' });
+  assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01XC02']) }), { atc: 'L01XC02', rule: 'gsrs-over-rxnav:aemps-in-use' });
+  assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01XC02', 'L01FA01']) }), { atc: null, rule: 'conflict:gsrs-vs-rxnav' });
+  assert.deepEqual(combineLinks(g, ['L01FA01']), { atc: null, rule: 'conflict:gsrs-vs-rxnav' }, 'sin CIMA no se desempata');
+});
+
+// --- EMA real: informe «Medicines output» generado el 24/10/2026 18:10 (filas recortadas) ---------
+import { emaDate, emaIndicationSection, emaRecords, isHumanAuthorised, reportGeneratedAt } from '../lib/ema.mjs';
+
+test('EMA real: sólo uso humano autorizado, ATC 5 asignado por la EMA, indicación literal citando a la EMA', () => {
+  const rows = read('ema-medicines-real.json');
+  assert.equal(reportGeneratedAt(rows), '2026-10-24T18:10');
+  const recs = emaRecords(rows);
+  assert.deepEqual(recs.map((r) => [r.productNumber, isHumanAuthorised(r), r.atc5]), [
+    ['EMEA/H/C/003737', true, ['J02AC03']],
+    ['EMEA/H/C/005333', true, []],
+    ['EMEA/H/C/000088', true, ['A10AB04', 'A10AD04']],
+    ['EMEA/H/C/004136', false, ['J06BB21']],
+    ['EMEA/V/C/006713', false, []],
+  ]);
+  const s = assertSection(emaIndicationSection(recs[0], WHEN));
+  assert.equal(s.source, 'ema-epar');
+  assert.equal(s.language, 'en');
+  assert.equal(s.text, String(rows[2][rows[1].indexOf('Therapeutic indication')]).trim(), 'literal');
+  assert.equal(s.document.id, 'EMEA/H/C/003737');
+  assert.equal(s.document.effectiveDate, '2026-10-23');
+  assert.match(s.license, /provided that EMA is always acknowledged as the source/);
+  assert.match(s.citation, /^European Medicines Agency \(EMA\)\. Voriconazole Hikma/);
+  assert.equal(emaDate('2026-10-23'), null, 'otra forma de fecha: no se adivina');
+});
+
+// --- DailyMed real: SPL de ZEGFROVY (set_id 349fa84e…, versión 1, effective 2026-09-16) ---------
+import { readFileSync as readRaw } from 'node:fs';
+import { dailyMedSections, splIdentity, topSections } from '../lib/dailymed.mjs';
+
+test('DailyMed real: identidad, UNII del principio activo y secciones LOINC de primer nivel, literales', () => {
+  const xml = readRaw(join(HERE, 'fixtures', 'dailymed-spl-349fa84e.xml'), 'utf8');
+  const id = splIdentity(xml);
+  assert.deepEqual([id.setId, id.version, id.effectiveDate, id.docType, id.unii, id.routes], ['349fa84e-1fdb-4976-b1bb-689b80eac8ad', '1', '2026-09-16', '34391-3', ['L1Q2K5JYO8'], ['ORAL']]);
+  const rows = dailyMedSections(xml, { criterion: 'prueba', group: {} }, WHEN).map(assertSection);
+  assert.deepEqual(rows.map((r) => r.section.number), ['34067-9', '34068-7', '43678-2', '34070-3', '43685-7', '34084-4', '34073-7', '43684-0', '34089-3', '34090-1', '43680-8']);
+  const tops = topSections(xml).filter((s) => s.code === '34067-9');
+  assert.equal(tops.length, 1, 'una sola sección de indicaciones de primer nivel');
+  assert.match(rows[0].text, /^1\. INDICATIONS AND USAGE\n\nZEGFROVY is indicated for the treatment of adult patients/);
+  assert.ok(rows.find((r) => r.key === 'adverse_reactions').tables.length > 0);
+  assert.match(rows[0].citation, /set_id 349fa84e-1fdb-4976-b1bb-689b80eac8ad, versión 1 \(effective_time 2026-09-16\), sección LOINC 34067-9/);
+});
+
+// --- OMS eEML real: JSON-LD de recomendaciones 17, 41 y 143 (consultadas el 2026-10-24) -------------
+import { EML_SOURCE, emlRecommendation, emlSections, isCurrentRecommendation, recommendationIdsFromHome } from '../lib/eml.mjs';
+
+test('eEML real: ATC 5 asignado por la OMS, indicación CIE-11 y formulaciones literales, sin ATC no se enlaza', () => {
+  const raw = read('eml-recommendations-real.json');
+  const atropine = emlRecommendation('41', raw['41']);
+  assert.deepEqual(atropine.atc5, ['A03BA01']);
+  assert.equal(atropine.guidelineDate, '2025-05-09');
+  assert.deepEqual(atropine.icd11, { code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' });
+  assert.ok(isCurrentRecommendation(atropine));
+  const [ind, forms] = emlSections(atropine, WHEN).map(assertSection);
+  assert.equal(ind.source, EML_SOURCE);
+  assert.equal(ind.key, 'indications');
+  assert.equal(ind.text, 'Exposure to or harmful effects of undetermined intent of pesticides');
+  assert.deepEqual(ind.codes, [{ system: 'ICD-11', code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' }]);
+  assert.equal(ind.document.effectiveDate, '2025-05-09');
+  assert.match(ind.license, /Licence: CC BY 3\.0 IGO/);
+  assert.match(ind.disclaimer, /The PDF versions are the binding versions/);
+  assert.equal(forms.key, 'pharmaceutical_form');
+  assert.equal(forms.text, 'Parenteral > General injections > unspecified: 1 mg in 1 mL ampoule or vial (sulfate)');
+
+  const iron = emlRecommendation('143', raw['143']);
+  assert.deepEqual(iron.atc5, ['B03AA02', 'B03AA07'], 'varios ATC: cuenta en cada uno');
+  const ironForms = emlSections(iron, WHEN).find((s) => s.key === 'pharmaceutical_form');
+  assert.equal(ironForms.text, 'Oral > Liquid: 25 mg per  mL elemental iron; 9 mg per  mL elemental iron\n\nOral > Solid > tablet: 60 to 65 mg elemental iron', 'literal, doble espacio incluido');
+
+  const codeine = emlRecommendation('17', raw['17']);
+  assert.deepEqual(codeine.atc5, [], 'la OMS no asigna ATC a esta recomendación: no se enlaza por nombre');
+  assert.deepEqual(recommendationIdsFromHome('<a href="https://list.essentialmeds.org/recommendations/41">x</a><a href="/recommendations/17">y</a><a href="/recommendations/41">'), [17, 41]);
+});
