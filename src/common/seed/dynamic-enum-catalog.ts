@@ -10,6 +10,7 @@ import {
   SPECIMEN_TYPE_CONCEPTS,
 } from '../../modules/diagnostics/diagnostics.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
+import { ALLERGY_DYNAMIC_ENUMS } from './data/allergies/allergy-dynamic-enums';
 
 /**
  * Catálogo declarativo de las enumeraciones bien conocidas de la plataforma.
@@ -1403,7 +1404,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       'diagnostics.specimen_containers.container_type_concept_id',
       'diagnostics.specimens.container_type_concept_id',
     ],
-  },
+  }, // --- clinical: alergias e intolerancias (HL7 FHIR AllergyIntolerance) ---
+  ...ALLERGY_DYNAMIC_ENUMS,
 ];
 
 /**
