@@ -43,6 +43,8 @@ export const ARQUETIPOS = [
   'openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0',
   'openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1',
   'openEHR-EHR-OBSERVATION.beighton_score.v0',
+  // Pasada 8
+  'openEHR-EHR-OBSERVATION.hirsutism_scales.v1',
 ];
 
 /** Busca el .adl en todo el espejo: `local/` y los CKM nacionales de `remote/`. */

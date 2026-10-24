@@ -2,7 +2,7 @@
   "code": "ENDO_EVALUACION_BASE",
   "name": "Endocrinología — consulta inicial (ficha base)",
   "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico con registro antropométrico",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "note": "De la norma salen la estructura común de la consulta: motivo, tiempo de evolución, antecedentes personales y familiares, examen físico con peso y talla, diagnóstico y conducta. Son agregados propios de la especialidad la anamnesis dirigida de síntomas tiroideos y de alteración de la glucemia (poliuria, polidipsia, polifagia), el registro del cambio de peso y del perímetro abdominal, y el examen de tiroides, piel y anexos. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): la escala de Ferriman-Gallwey modificada para el hirsutismo desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -224,6 +224,165 @@
       "name": "Piel y anexos — detalle",
       "dataType": "text",
       "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "hirsutismo",
+      "name": "Hirsutismo (vello terminal en zonas de distribución masculina)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_labio_superior",
+      "name": "Ferriman-Gallwey — labio superior",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Algunos pelos en el borde externo",
+        "2 — Bigote pequeño en el borde externo",
+        "3 — Bigote que llega a la mitad desde el borde externo",
+        "4 — Bigote que llega a la línea media"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_menton",
+      "name": "Ferriman-Gallwey — mentón",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Algunos pelos dispersos",
+        "2 — Pelos dispersos con pequeñas concentraciones",
+        "3 — Cobertura completa ligera",
+        "4 — Cobertura completa densa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_torax",
+      "name": "Ferriman-Gallwey — tórax",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Pelos periareolares",
+        "2 — Pelos periareolares y en la línea media",
+        "3 — Fusión de las áreas periareolar y media, con tres cuartos de cobertura",
+        "4 — Cobertura completa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_espalda_superior",
+      "name": "Ferriman-Gallwey — espalda superior",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Algunos pelos dispersos",
+        "2 — Más pelos, todavía dispersos",
+        "3 — Cobertura completa ligera",
+        "4 — Cobertura completa densa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_espalda_inferior",
+      "name": "Ferriman-Gallwey — espalda inferior",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Mechón sacro",
+        "2 — Mechón sacro con alguna extensión lateral",
+        "3 — Tres cuartos de cobertura",
+        "4 — Cobertura completa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_abdomen_superior",
+      "name": "Ferriman-Gallwey — abdomen superior",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Algunos pelos en la línea media",
+        "2 — Más pelos, todavía en la línea media",
+        "3 — Media cobertura",
+        "4 — Cobertura completa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_abdomen_inferior",
+      "name": "Ferriman-Gallwey — abdomen inferior",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Algunos pelos en la línea media",
+        "2 — Una franja de pelo en la línea media",
+        "3 — Una banda de pelo en la línea media",
+        "4 — Crecimiento en V invertida"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_brazo",
+      "name": "Ferriman-Gallwey — brazo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Crecimiento escaso, en no más de un cuarto de la superficie",
+        "2 — Más que escaso, cobertura todavía incompleta",
+        "3 — Cobertura completa ligera",
+        "4 — Cobertura completa densa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_muslo",
+      "name": "Ferriman-Gallwey — muslo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin vello excesivo",
+        "1 — Crecimiento escaso, en no más de un cuarto de la superficie",
+        "2 — Más que escaso, cobertura todavía incompleta",
+        "3 — Cobertura completa ligera",
+        "4 — Cobertura completa densa"
+      ],
+      "description": "Fuente: escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30), según el arquetipo openEHR openEHR-EHR-OBSERVATION.hirsutism_scales.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "hirsutismo", "equals": true }
+    },
+    {
+      "section": "Examen físico",
+      "code": "fg_total",
+      "name": "Ferriman-Gallwey modificada — puntaje total (0 a 36)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "hirsutismo", "equals": true }
     },
     {
       "section": "Diagnóstico presuntivo y observaciones",

@@ -5388,6 +5388,700 @@
           "values": []
         }
       ]
+    },
+    "openEHR-EHR-OBSERVATION.hirsutism_scales.v1": {
+      "path": "local/archetypes/entry/observation/openEHR-EHR-OBSERVATION.hirsutism_scales.v1.adl",
+      "revision": "1.0.0",
+      "lifecycle": "published",
+      "licence": "This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.",
+      "copyright": "© openEHR Foundation",
+      "ipAcknowledgements": "This artefact includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyrighted material of the International Health Terminology Standards Development Organisation (IHTSDO). Where an implementation of this artefact makes use of SNOMED CT content, the implementer must have the appropriate SNOMED CT Affiliate license - for more information contact https://www.snomed.org/snomed-ct/get-snomed or info@snomed.org.",
+      "references": "Ferriman, D. and J.D. Gallwey, CLINICAL ASSESSMENT OF BODY HAIR GROWTH IN WOMEN. The Journal of Clinical Endocrinology & Metabolism, 1961. 21(11): p. 1440-1447.\n\nHatch, R., et al., Hirsutism: Implications, etiology, and management. American Journal of Obstetrics and Gynecology, 1981. 140(7): p. 815-830.\n\nRosenfield, R.L., Clinical practice. Hirsutism. N Engl J Med, 2005. 353(24): p. 2578-88.\n\nThe Practice Committee of the American Society for Reproductive Medicine. The evaluation and treatment of androgen excess. Fertility and Sterility, 2006. 86(5): p. S241-S247.\n\nYildiz, B.O., et al., Visually scoring hirsutism. Human Reproduction Update, 2010. 16(1): p. 51-64.",
+      "concept": {
+        "en": {
+          "text": "Hirsutism scales",
+          "description": "A grouping of related assessment scales used to quantify distribution and growth of body hair in women."
+        }
+      },
+      "elements": [
+        {
+          "id": "at0005",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Upper lip hair",
+            "description": "Hair score on the upper lip."
+          },
+          "values": [
+            {
+              "code": "at0007",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0008",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A few hairs at outer margin."
+              }
+            },
+            {
+              "code": "at0009",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "A small moustache at outer margin."
+              }
+            },
+            {
+              "code": "at0010",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "A moustache extending halfway from outer margin."
+              }
+            },
+            {
+              "code": "at0011",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "A moustache extending to mid-line."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0019",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Chin hair",
+            "description": "Hair score on the chin."
+          },
+          "values": [
+            {
+              "code": "at0020",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0021",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A few scattered hairs."
+              }
+            },
+            {
+              "code": "at0022",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Scattered hairs with small concentrations."
+              }
+            },
+            {
+              "code": "at0023",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Complete light cover."
+              }
+            },
+            {
+              "code": "at0024",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0082",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Sideburn hair",
+            "description": "Hair score on the sideburns."
+          },
+          "values": [
+            {
+              "code": "at0083",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0084",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A few scattered hairs."
+              }
+            },
+            {
+              "code": "at0085",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Scattered hairs with small concentrations."
+              }
+            },
+            {
+              "code": "at0086",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Complete light cover."
+              }
+            },
+            {
+              "code": "at0087",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0025",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Chest hair",
+            "description": "Hair score on the chest."
+          },
+          "values": [
+            {
+              "code": "at0026",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0027",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "Circumareolar hairs."
+              }
+            },
+            {
+              "code": "at0028",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Circumareolar hairs with midline hair in addition."
+              }
+            },
+            {
+              "code": "at0029",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Fusion of circumareolar and midline areas, with three-quarter cover."
+              }
+            },
+            {
+              "code": "at0030",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0031",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Upper back hair",
+            "description": "Hair score on the upper back."
+          },
+          "values": [
+            {
+              "code": "at0032",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0033",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A few scattered hairs."
+              }
+            },
+            {
+              "code": "at0034",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Rather more hairs, still scattered."
+              }
+            },
+            {
+              "code": "at0035",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Complete light cover."
+              }
+            },
+            {
+              "code": "at0036",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0037",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Lower back hair",
+            "description": "Hair score on the lower back."
+          },
+          "values": [
+            {
+              "code": "at0038",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0039",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A sacral tuft of hair."
+              }
+            },
+            {
+              "code": "at0040",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "A sacral tuft of hair with some lateral extension."
+              }
+            },
+            {
+              "code": "at0041",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Three-quarter cover."
+              }
+            },
+            {
+              "code": "at0042",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0043",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Upper abdomen hair",
+            "description": "Hair score on the upper abdomen."
+          },
+          "values": [
+            {
+              "code": "at0044",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0045",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A few mid-line hairs."
+              }
+            },
+            {
+              "code": "at0046",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Rather more hairs, still mid-line."
+              }
+            },
+            {
+              "code": "at0047",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Half cover."
+              }
+            },
+            {
+              "code": "at0048",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Full cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0049",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Lower abdomen hair",
+            "description": "Hair score on the lower abdomen."
+          },
+          "values": [
+            {
+              "code": "at0050",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0051",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "A few mid-line hairs."
+              }
+            },
+            {
+              "code": "at0052",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "A mid-line streak of hair."
+              }
+            },
+            {
+              "code": "at0053",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "A mid-line band of hair."
+              }
+            },
+            {
+              "code": "at0054",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "An inverted V-shaped growth."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0055",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Upper arm hair",
+            "description": "Hair score on the upper arms."
+          },
+          "values": [
+            {
+              "code": "at0056",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0057",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "Sparse growth not affecting more than a quarter of the limb surface."
+              }
+            },
+            {
+              "code": "at0058",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "More than sparse growth, cover still incomplete."
+              }
+            },
+            {
+              "code": "at0059",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Complete light cover."
+              }
+            },
+            {
+              "code": "at0060",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0061",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Lower arm hair",
+            "description": "Hair score on the lower arms."
+          },
+          "values": [
+            {
+              "code": "at0062",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0063",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "Light cover of dorsal surface."
+              }
+            },
+            {
+              "code": "at0064",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Complete light cover of dorsal surface."
+              }
+            },
+            {
+              "code": "at0065",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Heavy cover of dorsal surface."
+              }
+            },
+            {
+              "code": "at0066",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy cover of dorsal surface."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0067",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Thigh hair",
+            "description": "Hair score on the thighs."
+          },
+          "values": [
+            {
+              "code": "at0068",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0069",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "Sparse growth affecting not more than a quarter of the limb surface."
+              }
+            },
+            {
+              "code": "at0070",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "More than sparse growth, cover still incomplete."
+              }
+            },
+            {
+              "code": "at0071",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Complete light cover."
+              }
+            },
+            {
+              "code": "at0072",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy cover."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0073",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Lower leg hair",
+            "description": "Hair score on the lower legs."
+          },
+          "values": [
+            {
+              "code": "at0074",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0075",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "Sparse growth affecting not more than a quarter of the limb surface."
+              }
+            },
+            {
+              "code": "at0076",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "More than sparse growth, cover still incomplete."
+              }
+            },
+            {
+              "code": "at0077",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Complete light growth."
+              }
+            },
+            {
+              "code": "at0078",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete heavy growth."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0091",
+          "type": "DV_ORDINAL",
+          "en": {
+            "text": "Perineum hair",
+            "description": "Hair score on the perineum."
+          },
+          "values": [
+            {
+              "code": "at0092",
+              "ordinal": 0,
+              "en": {
+                "text": "None",
+                "description": "No excess hair."
+              }
+            },
+            {
+              "code": "at0093",
+              "ordinal": 1,
+              "en": {
+                "text": "Grade 1",
+                "description": "Perianal terminal hair."
+              }
+            },
+            {
+              "code": "at0094",
+              "ordinal": 2,
+              "en": {
+                "text": "Grade 2",
+                "description": "Lateral extension of terminal hair to edge of gluteal cleft."
+              }
+            },
+            {
+              "code": "at0095",
+              "ordinal": 3,
+              "en": {
+                "text": "Grade 3",
+                "description": "Three-quarter coverage of buttocks."
+              }
+            },
+            {
+              "code": "at0096",
+              "ordinal": 4,
+              "en": {
+                "text": "Grade 4",
+                "description": "Complete coverage of buttocks."
+              }
+            }
+          ]
+        },
+        {
+          "id": "at0079",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Total score",
+            "description": "The total sum of the hair scores recorded for each of the body area."
+          },
+          "values": []
+        },
+        {
+          "id": "at0089",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Ferriman-Gallwey score",
+            "description": "The total sum of the hair scores recorded for each of eleven body areas."
+          },
+          "values": []
+        },
+        {
+          "id": "at0090",
+          "type": "DV_COUNT",
+          "en": {
+            "text": "Modified Ferriman-Gallwey score",
+            "description": "The total sum of the hair scores recorded for each of nine body areas."
+          },
+          "values": []
+        }
+      ]
     }
   }
 }

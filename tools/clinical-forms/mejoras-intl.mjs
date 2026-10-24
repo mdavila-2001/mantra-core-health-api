@@ -2422,3 +2422,145 @@ ESPECIFICAS_INTL.push({
       ...si('carcinoma_presente', true, GLEASON),
     ]),
 });
+
+/* -- Pasada 8: cuarto barrido del CKM ------------------------------------ */
+
+const FG_ID = 'openEHR-EHR-OBSERVATION.hirsutism_scales.v1';
+const FG_FUENTE =
+  'escala de Ferriman-Gallwey modificada, 9 áreas (Ferriman D, Gallwey JD. J Clin Endocrinol Metab. 1961;21:1440-7; Hatch R et al. Am J Obstet Gynecol. 1981;140:815-30)';
+const fg = (at, code, area, grados) =>
+  escala(FG_ID, at, code, {
+    nombre: `Ferriman-Gallwey — ${area}`,
+    fuente: FG_FUENTE,
+    traduccion: Object.fromEntries(
+      ['Sin vello excesivo', ...grados].map((g, k) => [
+        `at00${String(Number(grados.codigos[0]) + k).padStart(2, '0')}`,
+        g,
+      ]),
+    ),
+  });
+const g = (primero, ...textos) => Object.assign(textos, { codigos: [primero] });
+const FERRIMAN_GALLWEY = si('hirsutismo', true, [
+  fg(
+    'at0005',
+    'fg_labio_superior',
+    'labio superior',
+    g(
+      '07',
+      'Algunos pelos en el borde externo',
+      'Bigote pequeño en el borde externo',
+      'Bigote que llega a la mitad desde el borde externo',
+      'Bigote que llega a la línea media',
+    ),
+  ),
+  fg(
+    'at0019',
+    'fg_menton',
+    'mentón',
+    g(
+      '20',
+      'Algunos pelos dispersos',
+      'Pelos dispersos con pequeñas concentraciones',
+      'Cobertura completa ligera',
+      'Cobertura completa densa',
+    ),
+  ),
+  fg(
+    'at0025',
+    'fg_torax',
+    'tórax',
+    g(
+      '26',
+      'Pelos periareolares',
+      'Pelos periareolares y en la línea media',
+      'Fusión de las áreas periareolar y media, con tres cuartos de cobertura',
+      'Cobertura completa',
+    ),
+  ),
+  fg(
+    'at0031',
+    'fg_espalda_superior',
+    'espalda superior',
+    g(
+      '32',
+      'Algunos pelos dispersos',
+      'Más pelos, todavía dispersos',
+      'Cobertura completa ligera',
+      'Cobertura completa densa',
+    ),
+  ),
+  fg(
+    'at0037',
+    'fg_espalda_inferior',
+    'espalda inferior',
+    g(
+      '38',
+      'Mechón sacro',
+      'Mechón sacro con alguna extensión lateral',
+      'Tres cuartos de cobertura',
+      'Cobertura completa',
+    ),
+  ),
+  fg(
+    'at0043',
+    'fg_abdomen_superior',
+    'abdomen superior',
+    g(
+      '44',
+      'Algunos pelos en la línea media',
+      'Más pelos, todavía en la línea media',
+      'Media cobertura',
+      'Cobertura completa',
+    ),
+  ),
+  fg(
+    'at0049',
+    'fg_abdomen_inferior',
+    'abdomen inferior',
+    g(
+      '50',
+      'Algunos pelos en la línea media',
+      'Una franja de pelo en la línea media',
+      'Una banda de pelo en la línea media',
+      'Crecimiento en V invertida',
+    ),
+  ),
+  fg(
+    'at0055',
+    'fg_brazo',
+    'brazo',
+    g(
+      '56',
+      'Crecimiento escaso, en no más de un cuarto de la superficie',
+      'Más que escaso, cobertura todavía incompleta',
+      'Cobertura completa ligera',
+      'Cobertura completa densa',
+    ),
+  ),
+  fg(
+    'at0067',
+    'fg_muslo',
+    'muslo',
+    g(
+      '68',
+      'Crecimiento escaso, en no más de un cuarto de la superficie',
+      'Más que escaso, cobertura todavía incompleta',
+      'Cobertura completa ligera',
+      'Cobertura completa densa',
+    ),
+  ),
+  i('fg_total', 'Ferriman-Gallwey modificada — puntaje total (0 a 36)'),
+]);
+
+MEJORAS.ENDO_EVALUACION_BASE = {
+  version: 3,
+  nota: NOTA_CKM('la escala de Ferriman-Gallwey modificada para el hirsutismo'),
+  aplicar: (c) =>
+    despues(c, 'piel_y_anexos', [
+      b(
+        'hirsutismo',
+        'Hirsutismo (vello terminal en zonas de distribución masculina)',
+      ),
+      ...FERRIMAN_GALLWEY,
+    ]),
+};
