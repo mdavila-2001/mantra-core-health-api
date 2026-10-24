@@ -19,7 +19,7 @@
 | H1.S1.M10 | Build determinista, sin fechas inventadas | dos `build.mjs` + `sha256sum … \| diff` | «salida idéntica byte a byte» |
 | H1.S2.M1 | Tests dirigidos | `node --test tools/terminology-import/diagnostic-devices/eu/test/*.test.mjs` | `# tests 37 · # pass 37 · # fail 0` |
 | H1.S2.M3 | Documentación: `SOURCES.md`, investigación (pasadas 7 y 8), este reporte | archivos en disco | escritos |
-| H1.S2.M4 | PR a `dev` y a `test`, sin draft y sin mergear | MCP de GitHub | links en la descripción de cada PR |
+| H1.S2.M4 | PR a `dev` y a `test`, sin draft y sin mergear | MCP de GitHub | https://github.com/mdavila-2001/mantra-core-health-api/pull/724 (`dev`) · https://github.com/mdavila-2001/mantra-core-health-api/pull/725 (`test`) |
 
 ## A medias
 ninguna
@@ -27,7 +27,7 @@ ninguna
 ## Pendiente
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H1.S2.M2 | BLOQUEADO | `yarn typecheck` sale con exit 2 por imports duplicados en `src/modules/insurance/insurance-patient-settlement.module.ts`, que ya están en `origin/dev` (9337e964). Esta rama no toca `src/`. Lo tiene que arreglar quien hizo ese cambio; `yarn lint` y prettier están en verde. |
+| H1.S2.M2 | BLOQUEADO | `yarn typecheck` sale con exit 2 por imports duplicados en `src/modules/insurance/insurance-patient-settlement.module.ts`, que ya están en `origin/dev` (9337e964). Esta rama no toca `src/`. Lo tiene que arreglar quien hizo ese cambio; sobre `dev`, `yarn lint` y prettier están en verde. Sobre la base `test` pasa al revés: typecheck exit 0 y `yarn lint` exit 1 por prettier en `src/modules/iam/…` y `src/modules/telemetry/…`, también ajenos. |
 
 ## Evidencia
 Salidas literales en [`evidencia/`](./evidencia/):

@@ -11,7 +11,7 @@
 
 ## H1 — Descarga oficial (red abierta desde 2026-10-24 16:29 UTC)
 **CA:** Dados los hosts oficiales alcanzables, cuando se corre el pipeline, entonces EUDAMED se baja por código EMDN y reemplaza a las réplicas como fuente principal, sin perder procedencia.
-**DoD:** corridas pegadas en `evidencia/`, tests dirigidos en verde, typecheck y lint en exit 0. **Estado:** EN CURSO
+**DoD:** corridas pegadas en `evidencia/`, tests dirigidos en verde, typecheck y lint en exit 0. **Estado:** A MEDIAS (todo HECHO salvo H1.S2.M2, BLOQUEADO por errores ajenos en `src/`; ver REPORTE.md)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
@@ -28,7 +28,7 @@
 | H1.S2.M1 | Tests dirigidos actualizados | verde | `node --test …/eu/test/*.test.mjs` | HECHO |
 | H1.S2.M2 | Gates del repo | typecheck y lint exit 0 | `yarn typecheck`, `yarn lint` | BLOQUEADO |
 | H1.S2.M3 | Documentación: `SOURCES.md`, investigación (pasada 7) y `REPORTE.md` | escritos | archivos en disco | HECHO |
-| H1.S2.M4 | PR a `dev` y a `test` | abiertos, sin draft, sin mergear | links | TODO |
+| H1.S2.M4 | PR a `dev` y a `test` | abiertos, sin draft, sin mergear | links | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
