@@ -39,6 +39,13 @@ export const PRESENT_BOOKING_STATES: readonly string[] = [
 /** El código con el que la pantalla reconoce «hay citas: confirme». */
 export const BOOKINGS_REQUIRE_CONFIRMATION = 'BOOKINGS_REQUIRE_CONFIRMATION';
 
+/**
+ * El motivo que lee el paciente cuando su cita cae por retirar o cambiar el
+ * horario de atención (etapa C, 24/10/2026).
+ */
+export const SCHEDULE_CHANGE_CANCELLATION_REASON =
+  'Cambio en el horario de atención del profesional';
+
 /** Una cita que el bloqueo alcanza, como se la muestra al profesional. */
 export interface AffectedBooking {
   readonly bookingId: string;

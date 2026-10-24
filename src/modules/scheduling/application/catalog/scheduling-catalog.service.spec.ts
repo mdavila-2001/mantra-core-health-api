@@ -83,6 +83,9 @@ function buildCatalog() {
     // Bloquear mira los cupos que PISAN la ventana, con bloqueo de escritura.
     // Sin cupos no hay citas que cancelar, que es el caso de casi todo.
     findSlotsOverlappingForUpdate: mockFn().mockResolvedValue([]),
+    // Retirar con cancelación y su vista previa miran los cupos de la plantilla.
+    findSlotsOfTemplate: mockFn().mockResolvedValue([]),
+    findSlotsOfTemplateForUpdate: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
@@ -1772,6 +1775,161 @@ describe('SchedulingCatalogService', () => {
         expect(JSON.stringify(res)).not.toMatch(/name|nombre/i);
         // Hay 12 vivas y la muestra trae 2: la lista está recortada.
         expect(res.truncated).toBe(true);
+      });
+
+      /**
+       * Cambiar el horario avisa al paciente (pedido del propietario,
+       * 24/10/2026). El contrato de M4 —retirar conserva las citas— sigue
+       * siendo el de por omisión; lo nuevo es la opción de cancelarlas con
+       * aviso, elegida por el profesional después de ver a quién alcanza.
+       */
+      describe('retirar cancelando las citas (affectedBookings=cancel)', () => {
+        const slot = {
+          id: 's-1',
+          startAt: new Date('2026-06-02T09:00:00Z'),
+          endAt: new Date('2026-06-02T09:30:00Z'),
+        };
+        const confirmed = {
+          id: 'b1',
+          patientProfileId: 'pp-1',
+          bookableSlotId: 's-1',
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        };
+
+        function withLiveBooking(
+          d: ReturnType<typeof buildCatalog>,
+          booking = confirmed,
+        ) {
+          withOwnTemplate(d);
+          d.catalogRepo.findSlotsOfTemplateForUpdate.mockResolvedValue([slot]);
+          d.catalogRepo.findSlotsOfTemplate.mockResolvedValue([slot]);
+          d.catalogRepo.findBookingsOfSlots
+            .mockResolvedValueOnce([booking])
+            .mockResolvedValueOnce([]);
+          d.noticeRepo.findDisplayNameForProfile.mockResolvedValue(
+            'Rosa Quispe',
+          );
+          d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+            total: 1,
+            live: 0,
+            sample: [],
+          });
+          d.catalogRepo.retireTemplate.mockResolvedValue({
+            releasedSlots: 20,
+            keptSlots: 1,
+          });
+        }
+
+        it('por omisión NO cancela nada: el contrato de M4 sigue igual', async () => {
+          const d = buildCatalog();
+          withLiveBooking(d);
+          d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+            total: 1,
+            live: 1,
+            sample: [confirmed],
+          });
+
+          const res = await d.service.retireTemplate('tpl-1', owner as never);
+
+          expect(res.liveBookings).toBe(1);
+          expect(res.cancelledBookings).toBe(0);
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+          expect(
+            d.catalogRepo.findSlotsOfTemplateForUpdate,
+          ).not.toHaveBeenCalled();
+        });
+
+        it('con cancel: cancela cada cita en la transacción, retira y avisa DESPUÉS con el motivo de cambio de horario', async () => {
+          const d = buildCatalog();
+          withLiveBooking(d);
+          const order: string[] = [];
+          d.em.transactional = mockFn(async (cb: any) => {
+            const out = await cb(d.tx);
+            order.push('commit');
+            return out;
+          });
+          d.cancelBooking.announceChange = mockFn(async () => {
+            order.push('announce');
+          });
+
+          const res = await d.service.retireTemplate('tpl-1', owner as never, {
+            cancelAffectedBookings: true,
+          });
+
+          expect(d.cancelBooking.cancelInTransaction).toHaveBeenCalledWith(
+            d.tx,
+            'b1',
+            {
+              cancelledBy: 'PROVIDER',
+              reasonText: 'Cambio en el horario de atención del profesional',
+            },
+            owner,
+            'CANCELLED',
+          );
+          expect(d.tx.flush).toHaveBeenCalled();
+          expect(d.catalogRepo.retireTemplate).toHaveBeenCalled();
+          expect(res.cancelledBookings).toBe(1);
+          expect(d.cancelBooking.announceChange).toHaveBeenCalledWith(
+            'b1',
+            'CANCELLED',
+            'Cambio en el horario de atención del profesional',
+            'PROVIDER',
+          );
+          expect(order).toEqual(['commit', 'announce']);
+        });
+
+        it('con cancel y un paciente ya recibido: 422 y no retira', async () => {
+          const d = buildCatalog();
+          withOwnTemplate(d);
+          d.catalogRepo.findSlotsOfTemplateForUpdate.mockResolvedValue([slot]);
+          d.catalogRepo.findBookingsOfSlots
+            .mockResolvedValueOnce([])
+            .mockResolvedValueOnce([
+              { ...confirmed, statusConceptId: CONCEPTS.BOOKING_CHECKED_IN },
+            ]);
+
+          await expect(
+            d.service.retireTemplate('tpl-1', owner as never, {
+              cancelAffectedBookings: true,
+            }),
+          ).rejects.toThrow(/ya recibido/);
+          expect(d.catalogRepo.retireTemplate).not.toHaveBeenCalled();
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+        });
+
+        it('la vista previa (live-bookings) nombra a cada paciente, sólo para quien administra la agenda', async () => {
+          const d = buildCatalog();
+          withLiveBooking(d);
+
+          const res = await d.service.listTemplateLiveBookings(
+            'tpl-1',
+            owner as never,
+          );
+
+          expect(res).toEqual({
+            templateId: 'tpl-1',
+            total: 1,
+            bookings: [
+              {
+                bookingId: 'b1',
+                startAt: '2026-06-02T09:00:00.000Z',
+                endAt: '2026-06-02T09:30:00.000Z',
+                patientName: 'Rosa Quispe',
+                pending: false,
+              },
+            ],
+            present: [],
+          });
+
+          await expect(
+            d.service.listTemplateLiveBookings('tpl-1', {
+              id: 'user-otro',
+              roles: ['PRACTITIONER'],
+              practitionerProfileId: 'hp-otro',
+              tenantIds: [TENANT],
+            } as never),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+        });
       });
 
       it('sin citas comprometidas retira, y dice qué soltó', async () => {

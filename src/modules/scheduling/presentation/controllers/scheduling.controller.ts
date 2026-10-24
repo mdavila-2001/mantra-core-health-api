@@ -44,6 +44,8 @@ import {
   UpdateTemplateDto,
   AvailabilityExceptionListDto,
   RetireTemplateResponseDto,
+  RetireTemplateQueryDto,
+  TemplateLiveBookingsResponseDto,
   ReactivateTemplateResponseDto,
   TemplateListDto,
   TemplateResponseDto,
@@ -329,13 +331,35 @@ export class SchedulingController {
   @ApiOperation({
     summary: 'Retirar una plantilla de agenda y soltar sus cupos libres',
     description:
-      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.',
+      'La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Por omisión las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds. Con ?affectedBookings=cancel se cancelan con el motivo «cambio de horario» y se avisa a cada paciente (cancelledBookings).',
   })
   retireTemplate(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() query: RetireTemplateQueryDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<RetireTemplateResponseDto> {
-    return this.catalogService.retireTemplate(id, actor);
+    return this.catalogService.retireTemplate(id, actor, {
+      cancelAffectedBookings: query.affectedBookings === 'cancel',
+    });
+  }
+
+  /**
+   * La vista previa del retiro: a quién alcanza, con nombre y hora, para que
+   * el profesional elija entre cancelar y avisar o conservar. Sólo para quien
+   * administra la agenda (trae nombres de pacientes).
+   */
+  @Get('templates/:id/live-bookings')
+  @Roles('SCHEDULING_ADMIN', 'PRACTITIONER')
+  @ApiOperation({
+    summary: 'Listar las citas vivas de una plantilla antes de retirarla',
+    description:
+      'Las citas confirmadas o pendientes que un retiro con affectedBookings=cancel cancelaría, y las de pacientes ya recibidos, que lo frenan. Sólo para quien administra la agenda.',
+  })
+  listTemplateLiveBookings(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<TemplateLiveBookingsResponseDto> {
+    return this.catalogService.listTemplateLiveBookings(id, actor);
   }
 
   /** UC-41-03. */

@@ -937,6 +937,67 @@ export class RetireTemplateResponseDto {
   /** `true` si hay más citas vivas que las listadas en `liveBookingIds`. */
   @ApiProperty()
   truncated!: boolean;
+
+  /**
+   * Citas canceladas por este retiro, con aviso al paciente. Sólo es mayor que
+   * 0 cuando se pidió `?affectedBookings=cancel` (24/10/2026).
+   */
+  @ApiProperty()
+  cancelledBookings!: number;
+}
+
+/** Qué hacer con las citas vivas al retirar: `DELETE /scheduling/templates/:id`. */
+export class RetireTemplateQueryDto {
+  /**
+   * `cancel`: cancela cada cita viva con el motivo «cambio de horario» y
+   * avisa al paciente. `keep` o ausente: las conserva (el contrato de siempre).
+   */
+  @ApiPropertyOptional({
+    enum: ['cancel', 'keep'],
+    description:
+      'cancel: cancela las citas vivas del horario y avisa a cada paciente. keep o ausente: las conserva, como siempre.',
+  })
+  @IsOptional()
+  @IsIn(['cancel', 'keep'])
+  affectedBookings?: 'cancel' | 'keep';
+}
+
+/** Una cita que un retiro o un bloqueo alcanza, como se la muestra al profesional. */
+export class AffectedBookingDto {
+  @ApiProperty({ format: 'uuid' })
+  bookingId!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  startAt!: string;
+
+  @ApiProperty({ format: 'date-time' })
+  endAt!: string;
+
+  /** El nombre del paciente; `null` si no se pudo resolver. */
+  @ApiProperty({ type: String, nullable: true })
+  patientName!: string | null;
+
+  /** Solicitud sin responder: se rechaza en vez de cancelarse. */
+  @ApiProperty()
+  pending!: boolean;
+}
+
+/** Lo que responde `GET /scheduling/templates/:id/live-bookings`: la vista previa del retiro. */
+export class TemplateLiveBookingsResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  templateId!: string;
+
+  /** Citas vivas en total: las cancelables y las de pacientes ya recibidos. */
+  @ApiProperty()
+  total!: number;
+
+  /** Las que un retiro con `affectedBookings=cancel` cancelaría (o rechazaría). */
+  @ApiProperty({ type: [AffectedBookingDto] })
+  bookings!: AffectedBookingDto[];
+
+  /** Pacientes ya recibidos: frenan el retiro con cancelación (422). */
+  @ApiProperty({ type: [AffectedBookingDto] })
+  present!: AffectedBookingDto[];
 }
 
 /** Un motivo de bloqueo tal como lo ofrece la pantalla. */
