@@ -1,0 +1,82 @@
+{
+ "head": {
+  "vars": [
+   "d",
+   "s",
+   "t",
+   "tm",
+   "dm",
+   "dmondo",
+   "urls",
+   "stated"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "d": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q605576"
+    },
+    "s": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/statement/Q605576-05b1ab43-4680-a5a9-b544-ac4b55bd6676"
+    },
+    "t": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q539795"
+    },
+    "tm": {
+     "type": "literal",
+     "value": "D017130"
+    },
+    "dm": {
+     "type": "literal",
+     "value": "D062108"
+    },
+    "urls": {
+     "type": "literal",
+     "value": "https://my.clevelandclinic.org/health/diseases/17213-may-thurner-syndrome/management-and-treatment"
+    },
+    "stated": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "d": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q121041"
+    },
+    "s": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/statement/Q121041-28526fd1-4208-74f3-8830-18c42b39ae61"
+    },
+    "t": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q620840"
+    },
+    "tm": {
+     "type": "literal",
+     "value": "D001062"
+    },
+    "dm": {
+     "type": "literal",
+     "value": "D001064"
+    },
+    "urls": {
+     "type": "literal",
+     "value": ""
+    },
+    "stated": {
+     "type": "literal",
+     "value": ""
+    },
+    "dmondo": {
+     "type": "literal",
+     "value": "MONDO_0005649"
+    }
+   }
+  ]
+ }
+}
