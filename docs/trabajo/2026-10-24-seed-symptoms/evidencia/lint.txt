@@ -1,0 +1,2 @@
+$ corepack yarn lint   # eslint "{src,apps,libs,test}/**/*.ts" --cache: sin salida si pasa
+exit=0

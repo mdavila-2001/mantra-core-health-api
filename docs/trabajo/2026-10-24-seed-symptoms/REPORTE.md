@@ -58,7 +58,7 @@ Test Suites: 2 passed, 2 total
 Tests:       17 passed, 17 total
 ```
 
-Postgres 16 desechable (DDL `00_shared` + `03_terminology`; andamio descrito en Decisiones), `evidencia/postgres-desechable-corrida-completa.log`:
+Postgres 16 desechable (DDL `00_shared` + `03_terminology`; andamio descrito en Decisiones), `evidencia/postgres-desechable-corrida-completa.txt`:
 
 ```
 ### terms run 1
@@ -81,7 +81,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 (34 s)
 ```
 
-`evidencia/postgres-desechable-check-formato-688.log` (omim/orphanet/decipher con código sin prefijo):
+`evidencia/postgres-desechable-check-formato-688.txt` (omim/orphanet/decipher con código sin prefijo):
 
 ```
 == --check --sources hpoa

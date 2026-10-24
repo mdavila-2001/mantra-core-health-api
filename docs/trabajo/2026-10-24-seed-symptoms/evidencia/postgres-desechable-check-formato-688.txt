@@ -1,0 +1,82 @@
+omim 8478
+orphanet 4355
+decipher 47
+== --check --sources hpoa
+=== Relaciones enfermedad → síntoma (CHECK) — 286651 filas de hpoa ===
+{
+  "loadedDiseaseSystems": {
+    "omim": 8478,
+    "decipher": 47,
+    "orphanet": 4355
+  },
+  "stats": {
+    "read": 286651,
+    "notPhenotype": 17745,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 0,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 268906,
+    "relationships": 268306
+  },
+  "unresolvedDiseasesByPrefix": {},
+  "negatedNeeds": null
+}
+== --check --sources mondo
+=== Relaciones enfermedad → síntoma (CHECK) — 974 filas de mondo ===
+{
+  "loadedDiseaseSystems": {
+    "mondo": 700
+  },
+  "stats": {
+    "read": 974,
+    "notPhenotype": 159,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 0,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 815,
+    "relationships": 815
+  },
+  "unresolvedDiseasesByPrefix": {},
+  "negatedNeeds": null
+}
+== --check --sources doid
+=== Relaciones enfermedad → síntoma (CHECK) — 2268 filas de doid ===
+{
+  "loadedDiseaseSystems": {},
+  "stats": {
+    "read": 2268,
+    "notPhenotype": 0,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 20,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 2248,
+    "evidence": 2248,
+    "relationships": 2248
+  },
+  "unresolvedDiseasesByPrefix": {
+    "DOID": 10
+  },
+  "negatedNeeds": null
+}
+== --check --sources hpo-common-disease
+=== Relaciones enfermedad → síntoma (CHECK) — 132600 filas de hpo-common-disease ===
+{
+  "loadedDiseaseSystems": {},
+  "stats": {
+    "read": 132600,
+    "notPhenotype": 323,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 30035,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 102242,
+    "evidence": 102242,
+    "relationships": 101220
+  },
+  "unresolvedDiseasesByPrefix": {
+    "DOID": 358,
+    "MESH": 540
+  },
+  "negatedNeeds": null
+}
