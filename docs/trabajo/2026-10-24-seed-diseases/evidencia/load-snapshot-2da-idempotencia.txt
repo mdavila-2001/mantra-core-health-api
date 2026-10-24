@@ -1,0 +1,137 @@
+=== Catálogo de enfermedades → terminology.*  ===
+Leyendo la instantánea versionada /home/user/mantra-core-health-api/tools/terminology-import/diseases/data
+Totales: {
+  concepts: 183714,
+  designations: 309745,
+  properties: 492030,
+  relationships: 147251,
+  maps: 190313,
+  externalMapsCandidates: 11806
+}
+[concepts] decipher +0
+[concepts] doid +0
+[concepts] efo-disease +0
+[concepts] icd10-who +0
+[concepts] icd11-foundation +0
+[concepts] icd11-mms +0
+[concepts] mesh +0
+[concepts] mondo +0
+[concepts] ncit-disease +0
+[concepts] omim +0
+[concepts] orphanet +0
+[concepts] umls +0
+[load] decipher {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] doid {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] efo-disease {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd10-who {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd11-foundation {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd11-mms {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] mesh {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] mondo {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] ncit-disease {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] omim {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] orphanet {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+[load] umls {"concepts":0,"designations":0,"properties":0,"relationships":0,"maps":0,"externalMaps":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "decipher": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "doid": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "efo-disease": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd10-who": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd11-foundation": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd11-mms": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "mesh": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "mondo": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "ncit-disease": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "omim": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "orphanet": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "umls": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    }
+  },
+  "segundos": 43
+}

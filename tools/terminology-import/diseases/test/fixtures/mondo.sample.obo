@@ -1,0 +1,261 @@
+format-version: 1.2
+data-version: releases/2026-10-06
+
+[Term]
+id: MONDO:0000001
+name: disease
+def: "A disease is a disposition to undergo pathological processes that exists in an organism because of one or more disorders in that organism." [OGMS:0000031]
+subset: ordo_disorder {source="Orphanet:377788"}
+synonym: "condition" EXACT [NCIT:C2991]
+synonym: "disease" EXACT [DOID:4, NCIT:C2991, Orphanet:377788]
+synonym: "disease or disorder" EXACT [NCIT:C2991]
+synonym: "disease or disorder, non-neoplastic" EXACT [NCIT:C2991]
+synonym: "diseases" EXACT [NCIT:C2991]
+synonym: "diseases and disorders" EXACT [NCIT:C2991]
+synonym: "disorder" EXACT [NCIT:C2991]
+synonym: "disorders" EXACT [NCIT:C2991]
+synonym: "medical condition" EXACT []
+synonym: "other disease" EXACT [NCIT:C2991]
+xref: DOID:4 {source="MONDO:equivalentTo", source="EFO:0000408"}
+xref: ICD9:799.9 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: MEDGEN:4347 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D004194 {source="MONDO:equivalentTo", source="DOID:4", source="EFO:0000408"}
+xref: NCIT:C2991 {source="MONDO:equivalentTo", source="DOID:4"}
+xref: OGMS:0000031 {source="MONDO:equivalentTo"}
+xref: Orphanet:377788 {source="MONDO:equivalentTo"}
+xref: SCTID:64572001 {source="MONDO:equivalentTo", source="DOID:4", source="EFO:0000408"}
+xref: UMLS:C0012634 {source="MEDGEN:4347", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: BFO:0000016 ! disposition
+property_value: skos:exactMatch DOID:4
+property_value: skos:exactMatch MEDGEN:4347
+property_value: skos:exactMatch MESH:D004194
+property_value: skos:exactMatch NCIT:C2991
+property_value: skos:exactMatch Orphanet:377788
+property_value: skos:exactMatch SCTID:64572001
+property_value: skos:exactMatch UMLS:C0012634
+
+[Term]
+id: MONDO:0001933
+name: endocrine pancreas disorder
+def: "A disease involving the endocrine pancreas." [https://orcid.org/0000-0002-6601-2165]
+subset: otar {source="MONDO:OTAR"}
+synonym: "disease of endocrine pancreas" EXACT [MONDO:patterns/location_top]
+synonym: "disease or disorder of endocrine pancreas" EXACT []
+synonym: "disorder of endocrine pancreas" EXACT [MONDO:patterns/location_top]
+synonym: "endocrine pancreas disease" EXACT [DOID:1428, MONDO:patterns/location, NCIT:C27067]
+synonym: "endocrine pancreas disease or disorder" EXACT [MONDO:design_pattern, MONDO:patterns/location]
+synonym: "endocrine pancreas disorder" EXACT [NCIT:C27067]
+xref: DOID:1428 {source="MONDO:equivalentTo"}
+xref: ICD9:251 {source="DOID:1428"}
+xref: MEDGEN:124407 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: NCIT:C27067 {source="MONDO:equivalentTo"}
+xref: SCTID:17346000 {source="MONDO:equivalentTo"}
+xref: UMLS:C0271633 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:124407"}
+is_a: MONDO:0002356 {source="DOID:1428", source="MONDO:Redundant", source="NCIT:C27067"} ! pancreas disorder
+intersection_of: MONDO:0000001 ! disease
+intersection_of: disease_has_location UBERON:0000016 ! endocrine pancreas
+relationship: disease_has_location UBERON:0000016 ! endocrine pancreas
+property_value: curated_content_resource "https://www.malacards.org/card/endocrine_pancreas_disease" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: skos:exactMatch DOID:1428
+property_value: skos:exactMatch MEDGEN:124407
+property_value: skos:exactMatch NCIT:C27067
+property_value: skos:exactMatch SCTID:17346000
+property_value: skos:exactMatch UMLS:C0271633
+property_value: terms:conformsTo http://purl.obolibrary.org/obo/mondo/patterns/location.yaml
+property_value: terms:conformsTo location:top.yaml
+
+[Term]
+id: MONDO:0002908
+name: glucose metabolism disease
+def: "A metabolic disorder characterized by abnormal blood glucose levels." [NCIT:P378]
+subset: otar {source="MONDO:OTAR"}
+synonym: "disorder of glucose metabolism" EXACT [DOID:4194, NCIT:C53655]
+synonym: "glucose metabolism disorder" EXACT [NCIT:C53655]
+xref: DOID:4194 {source="MONDO:equivalentTo"}
+xref: EFO:0009406 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: ICD9:271.8 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: MEDGEN:226229 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D044882 {source="MONDO:equivalentTo", source="DOID:4194"}
+xref: NCIT:C53655 {source="MONDO:equivalentTo", source="DOID:4194"}
+xref: SCTID:126877002 {source="MONDO:equivalentTo", source="DOID:4194"}
+xref: UMLS:C1257958 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:226229"}
+is_a: MONDO:0005066 {source="DOID:4194/inferred", source="MESH:D044882", source="MONDO:Redundant", source="NCIT:C53655/inferred"} ! metabolic disease
+intersection_of: MONDO:0005066 ! metabolic disease
+intersection_of: disease_disrupts GO:0006006 ! glucose metabolic process
+relationship: disease_disrupts GO:0006006 ! glucose metabolic process
+property_value: curated_content_resource "https://www.malacards.org/card/glucose_metabolism_disease" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: skos:exactMatch DOID:4194
+property_value: skos:exactMatch EFO:0009406
+property_value: skos:exactMatch MEDGEN:226229
+property_value: skos:exactMatch MESH:D044882
+property_value: skos:exactMatch NCIT:C53655
+property_value: skos:exactMatch SCTID:126877002
+property_value: skos:exactMatch UMLS:C1257958
+property_value: terms:conformsTo http://purl.obolibrary.org/obo/mondo/patterns/specific_disease_by_disrupted_process.yaml
+
+[Term]
+id: MONDO:0005015
+name: diabetes mellitus
+def: "A metabolic disorder characterized by abnormally high blood sugar levels due to diminished production of insulin or insulin resistance/desensitization." [NCIT:P378]
+subset: otar {source="MONDO:OTAR"}
+synonym: "diabetes" EXACT [DOID:9351, NCIT:C2985]
+synonym: "diabetes mellitus" EXACT [DOID:9351, ICD10CM:E08-E13, ICD10WHO:E10-E14, icd11.foundation:465177735, MONDO:ambiguous, NCIT:C2985]
+synonym: "diabetes mellitus (disease)" EXACT [https://orcid.org/0000-0002-6601-2165]
+synonym: "DM" EXACT ABBREVIATION [NCIT:C2985]
+xref: DOID:9351 {source="EFO:0000400", source="MONDO:equivalentTo"}
+xref: EFO:0000400 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: HP:0000819 {source="MONDO:otherHierarchy"}
+xref: ICD10CM:E08-E13 {source="https://github.com/monarch-initiative/mondo/issues/4536", source="MONDO:equivalentTo", source="DOID:9351", source="https://orcid.org/0000-0001-5208-3432", source="https://orcid.org/0000-0002-4142-7153"}
+xref: ICD10WHO:E10-E14 {source="https://orcid.org/0000-0002-7941-5545", source="MONDO:equivalentTo", source="https://orcid.org/0000-0001-9439-5346"}
+xref: icd11.foundation:465177735 {source="MONDO:equivalentTo"}
+xref: ICD9:250 {source="EFO:0000400", source="DOID:9351"}
+xref: MEDGEN:8350 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D003920 {source="EFO:0000400", source="MONDO:equivalentTo", source="DOID:9351"}
+xref: NANDO:2100157 {source="MONDO:NANDO", source="https://orcid.org/0000-0003-0011-764X", source="https://orcid.org/0000-0002-0170-9172"}
+xref: NANDO:2100158 {source="MONDO:NANDO", source="https://orcid.org/0000-0003-0011-764X", source="https://orcid.org/0000-0002-0170-9172"}
+xref: NCIT:C2985 {source="EFO:0000400", source="MONDO:equivalentTo", source="DOID:9351"}
+xref: SCTID:73211009 {source="EFO:0000400", source="MONDO:equivalentTo", source="DOID:9351"}
+xref: UMLS:C0011849 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:8350"}
+is_a: MONDO:0001933 {source="NCIT:C2985"} ! endocrine pancreas disorder
+is_a: MONDO:0002908 {source="DOID:9351", source="MESH:D003920", source="NCIT:C2985"} ! glucose metabolism disease
+property_value: curated_content_resource "https://www.malacards.org/card/diabetes_mellitus" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/5723" xsd:anyURI
+property_value: IAO:0000589 "diabetes mellitus (disease)" xsd:string
+property_value: skos:exactMatch DOID:9351
+property_value: skos:exactMatch EFO:0000400
+property_value: skos:exactMatch icd10cm:E08-E13
+property_value: skos:exactMatch ICD10WHO:E10-E14
+property_value: skos:exactMatch icd11.foundation:465177735
+property_value: skos:exactMatch MEDGEN:8350
+property_value: skos:exactMatch MESH:D003920
+property_value: skos:exactMatch NCIT:C2985
+property_value: skos:exactMatch SCTID:73211009
+property_value: skos:exactMatch UMLS:C0011849
+
+[Term]
+id: MONDO:0005066
+name: metabolic disease
+def: "A congenital disorder (due to inherited enzyme abnormality) or acquired (due to failure of a metabolically important organ) disorder resulting from an abnormal metabolic process." [NCIT:C3235]
+subset: harrisons_view
+subset: otar {source="MONDO:OTAR"}
+subset: rare_grouping
+synonym: "disorder of metabolic process" EXACT [MONDO:patterns/basis_in_disruption_of_process]
+synonym: "metabolic disease" EXACT [DOID:0014667, NCIT:C3235]
+synonym: "metabolic disorder" EXACT [NCIT:C3235]
+synonym: "metabolic process disease" EXACT [MONDO:design_pattern]
+xref: DOID:0014667 {source="MONDO:equivalentTo", source="EFO:0000589"}
+xref: EFO:0000589 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: ICD10CM:E70-E88 {source="https://github.com/monarch-initiative/mondo/issues/4536", source="MONDO:equivalentTo", source="https://orcid.org/0000-0001-5208-3432", source="https://orcid.org/0000-0002-4142-7153"}
+xref: ICD10WHO:E70-E90 {source="MONDO:equivalentTo"}
+xref: ICD9:277.8 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: ICD9:277.9 {source="MONDO:equivalentTo", source="MONDO:i2s", source="EFO:0000589", source="DOID:0014667"}
+xref: MEDGEN:44376 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D008659 {source="MONDO:equivalentTo", source="EFO:0000589", source="DOID:0014667"}
+xref: NANDO:1100002 {source="MONDO:NANDO", source="https://orcid.org/0000-0003-0011-764X", source="https://orcid.org/0000-0002-0170-9172"}
+xref: NCIT:C3235 {source="MONDO:equivalentTo", source="EFO:0000589", source="DOID:0014667"}
+xref: SCTID:75934005 {source="MONDO:equivalentTo", source="EFO:0000589", source="DOID:0014667"}
+xref: UMLS:C0025517 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:44376"}
+is_a: MONDO:7770007 ! disease by developmental or physiological process
+intersection_of: MONDO:0700096 ! human disease
+intersection_of: disease_has_basis_in_disruption_of GO:0008152 ! metabolic process
+relationship: disease_has_basis_in_disruption_of GO:0008152 ! metabolic process
+property_value: skos:exactMatch DOID:0014667
+property_value: skos:exactMatch EFO:0000589
+property_value: skos:exactMatch icd10cm:E70-E88
+property_value: skos:exactMatch ICD10WHO:E70-E90
+property_value: skos:exactMatch MEDGEN:44376
+property_value: skos:exactMatch MESH:D008659
+property_value: skos:exactMatch NCIT:C3235
+property_value: skos:exactMatch SCTID:75934005
+property_value: skos:exactMatch UMLS:C0025517
+
+[Term]
+id: MONDO:0005583
+name: non-human animal disease
+def: "A disease that occurs in animals." [EFO:0005932]
+subset: otar {source="MONDO:OTAR"}
+synonym: "animal disease" EXACT [MESH:D000820]
+synonym: "diseases, animal" EXACT [MESH:D000820]
+xref: EFO:0005932 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: MESH:D000820 {source="MONDO:equivalentTo"}
+is_a: MONDO:0000001 {source="EFO:0005932"} ! disease
+disjoint_from: MONDO:0700096 ! human disease
+relationship: never_in_taxon NCBITaxon:9606 ! Homo sapiens
+property_value: skos:exactMatch EFO:0005932
+property_value: skos:exactMatch MESH:D000820
+
+[Term]
+id: MONDO:0021125
+name: disease characteristic
+def: "An attribute of a disease." [https://orcid.org/0000-0002-6601-2165]
+synonym: "disease qualifier" EXACT []
+synonym: "modifier" EXACT [NCIT:C41009]
+synonym: "qualifier" EXACT [NCIT:C41009]
+xref: NCIT:C41009 {source="MONDO:equivalentTo"}
+is_a: PATO:0000001 ! characteristic
+property_value: skos:exactMatch NCIT:C41009
+
+[Term]
+id: MONDO:0021199
+name: obsolete disease by anatomical system
+def: "OBSOLETE. A disease that disrupts the functioning of an organ system." [https://orcid.org/0000-0002-6601-2165]
+comment: This is a grouping class- it is difficult to maintain the children terms and it was determined that is no longer needed.
+subset: metaclass
+synonym: "anatomical system disease" EXACT [MONDO:patterns/location]
+synonym: "disease of anatomical system" EXACT [MONDO:patterns/location_top]
+synonym: "disorder of anatomical system" RELATED [MONDO:patterns/location_top]
+xref: DOID:7 {source="MONDO:obsoleteEquivalent"}
+xref: ICD9:796.4 {source="MONDO:relatedTo", source="MONDO:i2s"}
+xref: SCTID:362965005 {source="MONDO:obsoleteEquivalent"}
+property_value: IAO:0000231 OMO:0001000
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/3661" xsd:anyURI
+property_value: skos:exactMatch DOID:7
+property_value: skos:exactMatch SCTID:362965005
+is_obsolete: true
+
+[Term]
+id: MONDO:0024905
+name: bird disease
+def: "Diseases of birds not considered poultry, therefore usually found in zoos, parks, and the wild. The concept is differentiated from poultry diseases which is for birds raised as a source of meat or eggs for human consumption, and usually found in barnyards, hatcheries, etc." [MESH:D001715]
+subset: otar {source="MONDO:OTAR"}
+synonym: "Avian disease" RELATED [MESH:D001715]
+synonym: "Avian diseases" RELATED [MESH:D001715]
+synonym: "bird disease" EXACT [MESH:D001715]
+synonym: "disease, Avian" RELATED [MESH:D001715]
+synonym: "disease, Bird" RELATED [MESH:D001715]
+synonym: "diseases, Avian" RELATED [MESH:D001715]
+synonym: "diseases, Bird" RELATED [MESH:D001715]
+xref: MESH:D001715 {source="MONDO:equivalentTo"}
+is_a: MONDO:0005583 {source="MESH:D001715"} ! non-human animal disease
+intersection_of: MONDO:0000001 ! disease
+intersection_of: in_taxon NCBITaxon:8782 ! Aves
+relationship: in_taxon NCBITaxon:8782 {source="https://orcid.org/0000-0002-4142-7153", source="https://orcid.org/0000-0002-5002-8648"} ! Aves
+property_value: skos:exactMatch MESH:D001715
+
+[Term]
+id: MONDO:0700096
+name: human disease
+subset: rare_grouping
+synonym: "human disease or disorder" EXACT [https://orcid.org/0000-0001-5208-3432]
+is_a: MONDO:0000001 {source="http://orcid.org/0000-0002-4142-7153"} ! disease
+intersection_of: MONDO:0000001 ! disease
+intersection_of: in_taxon NCBITaxon:9606 ! Homo sapiens
+relationship: in_taxon NCBITaxon:9606 ! Homo sapiens
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/5858" xsd:anyURI
+property_value: RO:0002175 NCBITaxon:9606
+property_value: terms:creator https://orcid.org/0000-0002-4142-7153
+
+[Term]
+id: MONDO:7770006
+name: disease by body system or component
+def: "A grouping class for human diseases classified by the body system or anatomical component primarily affected." [https://orcid.org/0000-0003-2360-2664]
+comment: This term is intended solely for classification purposes and should not be used for direct data annotation.
+is_a: MONDO:0700096 ! human disease
+
+[Term]
+id: MONDO:7770007
+name: disease by developmental or physiological process
+def: "A grouping class for human diseases classified by the molecular, biochemical, cellular, anatomic, developmental or physiological process that is disrupted." [https://orcid.org/0000-0003-2360-2664]
+comment: This term is intended solely for classification purposes and should not be used for direct data annotation.
+is_a: MONDO:0700096 ! human disease
+

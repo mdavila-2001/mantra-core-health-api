@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JDBOR date="2026-06-23 07:53:50" version="1.3.42 / 4.1.8 [2025-03-03]" copyright="Orphanet (c) 2026" dbserver="jdbc:sybase:Tds:canard.orpha.net:2020">
+  <Availability> 
+    <Licence>
+      <FullName lang="en">Creative Commons Attribution 4.0 International</FullName>
+      <ShortIdentifier>CC-BY-4.0</ShortIdentifier>
+      <LegalCode>https://creativecommons.org/licenses/by/4.0/legalcode</LegalCode>
+    </Licence>
+  </Availability>
+  <DisorderList count="6">
+    <Disorder id="17601">
+      <OrphaCode>166024</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=166024</ExpertLink>
+      <Name lang="en">Multiple epiphyseal dysplasia-macrocephaly-facial dysmorphism syndrome</Name>
+      <DisorderFlagList count="1">
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="1">
+        <Synonym lang="en">Multiple epiphyseal dysplasia, Al-Gazali type</Synonym>
+      </SynonymList>
+      <DisorderType id="21394">
+        <Name lang="en">Disease</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="en">Disorder</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="5">
+        <ExternalReference id="120419">
+          <Source>ICD-10</Source>
+          <Reference>Q77.3</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="en">NTBT (ORPHAcode is narrower than the targeted code used to represent it)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21604">
+            <Name lang="en">Attributed code (ICD-10/ICD-11: The targeted code is assigned by Orphanet)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="212360">
+          <Source>ICD-11</Source>
+          <Reference>LD24.61</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="en">NTBT (ORPHAcode is narrower than the targeted code used to represent it)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21597">
+            <Name lang="en">Index term (ICD-10: Orphanet entity listed in the ICD-10 Index. ICD-11: Orphanet entity listed in the ICD-11 Foundation)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl>https://icd.who.int/browse/latest-release/mms/en#2009123831</DisorderMappingICDRefUrl>
+          <DisorderMappingICDRefUri>1359939784</DisorderMappingICDRefUri>
+        </ExternalReference>
+        <ExternalReference id="256970">
+          <Source>MONDO</Source>
+          <Reference>0011778</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="38949">
+          <Source>OMIM</Source>
+          <Reference>607131</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="219782">
+          <Source>UMLS</Source>
+          <Reference>C4304500</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="63385" lang="en">
+          <TextSectionList count="1">
+            <TextSection id="83697" lang="en">
+              <TextSectionType id="16907">
+                <Name lang="en">Definition</Name>
+              </TextSectionType>
+              <Contents>A rare primary bone dysplasia characterized by the association of multiple epiphyseal dysplasia with macrocephaly and dysmorphic facial features (such as frontal bossing, hypertelorism, flat malar region, low-set ears, and short neck). Patients are of normal stature and present with joint swelling and &lt;i&gt;genu valgum&lt;/i&gt;. Additional reported manifestations include clinodactyly, spindle-shaped fingers, and &lt;i&gt;pectus excavatum&lt;/i&gt;.</Contents>
+            </TextSection>
+          </TextSectionList>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="17609">
+      <OrphaCode>166068</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=166068</ExpertLink>
+      <Name lang="en">Pontocerebellar hypoplasia type 5</Name>
+      <DisorderFlagList count="3">
+        <DisorderFlag id="495">
+          <Value>8192</Value>
+          <Label>Inactive</Label>
+        </DisorderFlag>
+        <DisorderFlag id="459">
+          <Value>256</Value>
+          <Label>Deprecated entity</Label>
+        </DisorderFlag>
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="2">
+        <Synonym lang="en">PCH5</Synonym>
+        <Synonym lang="en">Fetal-onset olivopontocerebellar hypoplasia</Synonym>
+      </SynonymList>
+      <DisorderType id="21401">
+        <Name lang="en">Malformation syndrome</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="en">Disorder</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="3">
+        <ExternalReference id="244209">
+          <Source>GARD</Source>
+          <Reference>10709</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="38970">
+          <Source>OMIM</Source>
+          <Reference>610204</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="139338">
+          <Source>UMLS</Source>
+          <Reference>C1857762</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="1">
+        <DisorderDisorderAssociation>
+          <TargetDisorder id="17608">
+            <OrphaCode>166063</OrphaCode>
+            <Name lang="en">Pontocerebellar hypoplasia type 4</Name>
+          </TargetDisorder>
+          <RootDisorder id="17609" cycle="true"/>
+          <DisorderDisorderAssociationType id="21471">
+            <Name lang="en">Moved to</Name>
+          </DisorderDisorderAssociationType>
+        </DisorderDisorderAssociation>
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="-1" lang="en">
+          <TextSectionList count="0">
+          </TextSectionList>
+          <TextAuto>
+            <Info lang="en">This entity has been excluded from the Orphanet nomenclature of rare diseases and moved to  Pontocerebellar hypoplasia type 4</Info>
+          </TextAuto>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="109">
+      <OrphaCode>558</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=558</ExpertLink>
+      <Name lang="en">Marfan syndrome</Name>
+      <DisorderFlagList count="1">
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="1">
+        <Synonym lang="en">MFS</Synonym>
+      </SynonymList>
+      <DisorderType id="21394">
+        <Name lang="en">Disease</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="en">Disorder</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="8">
+        <ExternalReference id="104868">
+          <Source>ICD-10</Source>
+          <Reference>Q87.4</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="en">Specific code (ICD-10/ICD-11: ORPHAcode has its own code in the targeted terminology)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="205828">
+          <Source>ICD-11</Source>
+          <Reference>LD28.01</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="en">Specific code (ICD-10/ICD-11: ORPHAcode has its own code in the targeted terminology)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl>https://icd.who.int/browse/latest-release/mms/en#236564145</DisorderMappingICDRefUrl>
+          <DisorderMappingICDRefUri>236564145</DisorderMappingICDRefUri>
+        </ExternalReference>
+        <ExternalReference id="255803">
+          <Source>MONDO</Source>
+          <Reference>0007947</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104864">
+          <Source>MeSH</Source>
+          <Reference>D008382</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104866">
+          <Source>MedDRA</Source>
+          <Reference>10026829</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="71097">
+          <Source>OMIM</Source>
+          <Reference>154700</Reference>
+          <DisorderMappingRelation id="21541">
+            <Name lang="en">BTNT (ORPHAcode is broader than the targeted code used to represent it)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="89715">
+          <Source>OMIM</Source>
+          <Reference>610168</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="en">NTBT (ORPHAcode is narrower than the targeted code used to represent it)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104865">
+          <Source>UMLS</Source>
+          <Reference>C0024796</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="1282" lang="en">
+          <TextSectionList count="1">
+            <TextSection id="81033" lang="en">
+              <TextSectionType id="16907">
+                <Name lang="en">Definition</Name>
+              </TextSectionType>
+              <Contents>Marfan syndrome is a systemic disease of connective tissue characterized by a variable combination of cardiovascular, musculo-skeletal, ophthalmic and pulmonary manifestations.</Contents>
+            </TextSection>
+          </TextSectionList>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="20628">
+      <OrphaCode>284963</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=284963</ExpertLink>
+      <Name lang="en">Marfan syndrome type 1</Name>
+      <DisorderFlagList count="1">
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="1">
+        <Synonym lang="en">MFS1</Synonym>
+      </SynonymList>
+      <DisorderType id="21450">
+        <Name lang="en">Clinical subtype</Name>
+      </DisorderType>
+      <DisorderGroup id="36554">
+        <Name lang="en">Subtype of disorder</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="4">
+        <ExternalReference id="122879">
+          <Source>ICD-10</Source>
+          <Reference>Q87.4</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="en">NTBT (ORPHAcode is narrower than the targeted code used to represent it)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21604">
+            <Name lang="en">Attributed code (ICD-10/ICD-11: The targeted code is assigned by Orphanet)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="213110">
+          <Source>ICD-11</Source>
+          <Reference>LD28.01</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="en">NTBT (ORPHAcode is narrower than the targeted code used to represent it)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21597">
+            <Name lang="en">Index term (ICD-10: Orphanet entity listed in the ICD-10 Index. ICD-11: Orphanet entity listed in the ICD-11 Foundation)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl>https://icd.who.int/browse/latest-release/mms/en#236564145</DisorderMappingICDRefUrl>
+          <DisorderMappingICDRefUri>1420571785</DisorderMappingICDRefUri>
+        </ExternalReference>
+        <ExternalReference id="54719">
+          <Source>OMIM</Source>
+          <Reference>154700</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="247721">
+          <Source>UMLS</Source>
+          <Reference>C4721845</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="1">
+        <DisorderDisorderAssociation>
+          <TargetDisorder id="20628" cycle="true"/>
+          <RootDisorder id="14288">
+            <OrphaCode>99715</OrphaCode>
+            <Name lang="en">MASS syndrome</Name>
+          </RootDisorder>
+          <DisorderDisorderAssociationType id="21471">
+            <Name lang="en">Moved to</Name>
+          </DisorderDisorderAssociationType>
+        </DisorderDisorderAssociation>
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="-1" lang="en">
+          <TextSectionList count="0">
+          </TextSectionList>
+          <TextAuto>
+            <Info lang="en">This disease is described under  Marfan syndrome</Info>
+          </TextAuto>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="13041">
+      <OrphaCode>98023</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=98023</ExpertLink>
+      <Name lang="en">Rare systemic or rheumatologic disease</Name>
+      <DisorderFlagList count="2">
+        <DisorderFlag id="458">
+          <Value>128</Value>
+          <Label>Head of classification</Label>
+        </DisorderFlag>
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="0">
+      </SynonymList>
+      <DisorderType id="36561">
+        <Name lang="en">Category</Name>
+      </DisorderType>
+      <DisorderGroup id="36540">
+        <Name lang="en">Group of disorders</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="1">
+        <ExternalReference id="218712">
+          <Source>UMLS</Source>
+          <Reference>C5681546</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="-1" lang="en">
+          <TextSectionList count="0">
+          </TextSectionList>
+          <TextAuto>
+            <Info lang="en">This term does not characterize a disease but a group of diseases. To learn about the diseases included under this term, you can consult the classifications.</Info>
+          </TextAuto>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="12333">
+      <OrphaCode>93419</OrphaCode>
+      <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=93419</ExpertLink>
+      <Name lang="en">Rare bone disease</Name>
+      <DisorderFlagList count="2">
+        <DisorderFlag id="458">
+          <Value>128</Value>
+          <Label>Head of classification</Label>
+        </DisorderFlag>
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="0">
+      </SynonymList>
+      <DisorderType id="36561">
+        <Name lang="en">Category</Name>
+      </DisorderType>
+      <DisorderGroup id="36540">
+        <Name lang="en">Group of disorders</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="1">
+        <ExternalReference id="218824">
+          <Source>UMLS</Source>
+          <Reference>C5681602</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="en">E (Exact mapping: the two concepts are equivalent)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="en">Validated</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="-1" lang="en">
+          <TextSectionList count="0">
+          </TextSectionList>
+          <TextAuto>
+            <Info lang="en">This term does not characterize a disease but a group of diseases. To learn about the diseases included under this term, you can consult the classifications.</Info>
+          </TextAuto>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+  </DisorderList>
+</JDBOR>

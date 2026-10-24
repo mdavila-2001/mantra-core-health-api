@@ -1,0 +1,3 @@
+Disease ID	Disease Name	Gene ID	Gene Name	Genotype	Gene Symbol(s)	Phenotype ID	Phenotype Name	Age of Onset ID	Age of Onset Name	Evidence ID	Evidence Name	Frequency	Sex ID	Sex Name	Negation ID	Negation Name	Description	Pub	Assigned by	Date Created
+MESH:D002375	Catalepsy					HP:0000733	Stereotypic behavior			ITM	ITM						Parsed by BioLark from Pubmed abstract (additional info: 1832.5672229984898/220).	PMID:7201400;PMID:2136307;PMID:6147830;PMID:1034924;PMID:1034926	HPO	11.05.2015
+MESH:D002375	Catalepsy					HP:0000752	Hyperactivity			ITM	ITM						Parsed by BioLark from Pubmed abstract (additional info: 745.7360969267319/115).	PMID:7201400;PMID:10091712;PMID:9798264;PMID:138146;PMID:15215559	HPO	11.05.2015
