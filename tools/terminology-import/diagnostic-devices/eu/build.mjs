@@ -20,13 +20,14 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import {
   cacheDir,
   nowIso,
   outDir,
   parseCsv,
   readJson,
+  readPageFile,
   RowError,
   writeJson,
   writeNdjsonGzParts,
@@ -37,11 +38,10 @@ import {
   INCLUDED_CATEGORIES,
   INCLUDED_TYPE_PREFIXES,
   REVIEW_CATEGORIES,
-  assertTypePrefixesExist,
 } from './lib/emdn-scope.mjs';
 import { classifyEmdn } from './lib/emdn-scope.mjs';
 import { mirrorById } from './lib/mirrors.mjs';
-import { parseEmdnRows, readFirstSheet } from './lib/sources/emdn.mjs';
+import { loadEmdn } from './lib/load-emdn.mjs';
 import {
   assertActorsHeader,
   normalizeActorRow,
@@ -52,11 +52,16 @@ import {
   assertDlinrtHeader,
   normalizeDlinrtRow,
 } from './lib/sources/dlinrt.mjs';
-import { parsePage } from './lib/sources/eudamed-datalake.mjs';
+import {
+  buildUrl,
+  normalizeDatalakeActor,
+  parsePage,
+} from './lib/sources/eudamed-datalake.mjs';
 import {
   assertColumnMap,
   loadColumnMap,
   normalizeBdrdmRow,
+  readBdrdmCsv,
 } from './lib/sources/it-bdrdm.mjs';
 import { SOURCES, requiredHosts } from './lib/sources.mjs';
 
@@ -123,7 +128,7 @@ function readPagedDirs(root) {
     for (const page of readJson(join(dir, '_complete.json')).pages) {
       const meta = fileMeta.get(page);
       out.push({
-        rows: parsePage(JSON.parse(readFileSync(page, 'utf8'))).rows,
+        rows: parsePage(readPageFile(page)).rows,
         sourceUrl: meta?.url ?? page,
         retrievedAt: meta?.retrievedAt ?? nowIso(),
       });
@@ -132,65 +137,50 @@ function readPagedDirs(root) {
   return out;
 }
 
-async function loadEmdn() {
-  const xlsx = cache.files.find(
-    (f) => f.source === 'EMDN' && /\.xlsx?$/i.test(f.file),
-  );
-  let concepts;
-  if (xlsx) {
-    const { header, records } = await readFirstSheet(xlsx.file);
-    concepts = parseEmdnRows(header, records, {
-      sourceUrl: xlsx.url,
-      sourceVersion: `sha256:${xlsx.sha256.slice(0, 12)}`,
-      retrievedAt: xlsx.retrievedAt,
-    });
-  } else {
-    const m = mirror('batirmedical-emdn');
-    if (!m) return [];
-    const { header, records } = parseCsv(
-      readFileSync(join(m.dir, m.data), 'utf8'),
-    );
-    concepts = parseEmdnRows(header, records, {
-      sourceUrl: `${m.repo}/blob/${m.commit}/${m.data}`,
-      sourceVersion: `${mirrorById(m.id).upstreamVersion};via=batirmedical@${m.commit.slice(0, 8)};sha256:${m.sha256.slice(0, 12)}`,
-      retrievedAt: m.retrievedAt,
-    });
-  }
-  assertTypePrefixesExist(new Set(concepts.map((c) => c.code)));
-  return concepts;
-}
-
-function loadBdrdm() {
+async function loadBdrdm() {
   const csv = cache.files.find(
     (f) => f.source === 'IT_BDRDM' && /\.csv$/i.test(f.file),
   );
   if (!csv) return [];
-  const text = readFileSync(csv.file, 'utf8');
-  const firstLine = text.slice(0, text.indexOf('\n'));
-  const delimiter =
-    firstLine.split(';').length > firstLine.split(',').length ? ';' : ',';
-  const { header, records } = parseCsv(text, { delimiter });
   const map = loadColumnMap();
-  try {
-    assertColumnMap(map, header);
-  } catch (err) {
-    gaps.push({ source: 'it-salute-bdrdm', url: csv.url, reason: err.message });
-    console.warn(`[it-salute-bdrdm] ${err.message}`);
-    return [];
-  }
+  const ctx = {
+    sourceUrl: csv.url,
+    sourceVersion: `${basename(csv.file).replace(/\.csv$/i, '')};sha256:${csv.sha256.slice(0, 12)}`,
+    retrievedAt: csv.retrievedAt,
+  };
   const rows = [];
-  for (const row of records)
-    try {
-      rows.push(
-        normalizeBdrdmRow(row, map, {
-          sourceUrl: csv.url,
-          sourceVersion: `sha256:${csv.sha256.slice(0, 12)}`,
-          retrievedAt: csv.retrievedAt,
-        }),
-      );
-    } catch (err) {
-      if (!(err instanceof RowError)) throw err;
+  let read = 0;
+  let checked = false;
+  for await (const { header, records } of readBdrdmCsv(csv.file)) {
+    if (!checked) {
+      try {
+        assertColumnMap(map, header);
+      } catch (err) {
+        gaps.push({
+          source: 'it-salute-bdrdm',
+          url: csv.url,
+          reason: err.message,
+        });
+        console.warn(`[it-salute-bdrdm] ${err.message}`);
+        return [];
+      }
+      checked = true;
     }
+    for (const row of records) {
+      read++;
+      // Filtro barato antes de normalizar: el ~85 % de la base no es diagnóstico.
+      const cnd = row[map.columns.cndCode]?.trim();
+      if (!cnd || !classifyEmdn(cnd).inScope) continue;
+      try {
+        rows.push(normalizeBdrdmRow(row, map, ctx));
+      } catch (err) {
+        if (!(err instanceof RowError)) throw err;
+      }
+    }
+  }
+  console.log(
+    `[it-salute-bdrdm] ${read} filas leídas · ${rows.length} en alcance`,
+  );
   return rows;
 }
 
@@ -392,19 +382,49 @@ ${cov.gaps.map((g) => `| ${g.source} | ${g.reason} | ${(g.note ?? '').replace(/\
 }
 
 async function main() {
-  const emdnConcepts = await loadEmdn();
+  const { concepts: emdnConcepts, origin: emdnOrigin } = await loadEmdn();
   const referenceRows = readPagedDirs(cacheDir('eudamed', 'reference')).flatMap(
     (p) => p.rows,
   );
   const udiPages = readPagedDirs(cacheDir('eudamed', 'udi'));
-  const actorRows = readPagedDirs(cacheDir('eudamed', 'actors')).flatMap(
-    (p) => p.rows,
-  );
-  const bdrdm = loadBdrdm();
+  const actorPages = readPagedDirs(cacheDir('eudamed', 'actors'));
+  const actorRows = actorPages.flatMap((p) => p.rows);
+  const bdrdm = await loadBdrdm();
   const emdnByCode = new Map(emdnConcepts.map((c) => [c.code, c]));
   const firstbase = loadFirstbase(emdnByCode);
   const dlinrt = loadDlinrt();
-  const actors = loadActors();
+  // Fabricantes: la lista oficial del Data Lake si se descargó; si no, la réplica.
+  const officialActors = [
+    ...new Map(
+      actorPages
+        .flatMap((p) =>
+          p.rows.map((r) =>
+            normalizeDatalakeActor(r, {
+              sourceUrl: buildUrl('actors', { ACTOR_ID: r.ACTOR_ID }),
+              retrievedAt: p.retrievedAt,
+            }),
+          ),
+        )
+        .filter(Boolean)
+        .map((a) => [a.sourceRecordId, a]),
+    ).values(),
+  ];
+  const actors = officialActors.length ? officialActors : loadActors();
+  const actorsOrigin = officialActors.length ? 'eudamed-datalake' : 'mirror';
+  // Certificados de la réplica por UUID de EUDAMED, para completar el Data Lake.
+  const certificatesByUuid = new Map(
+    firstbase
+      .filter((r) => r.authorizationId)
+      .map((r) => [
+        r.sourceRecordId,
+        {
+          authorizationId: r.authorizationId,
+          authorizationDate: r.authorizationDate,
+          certificates: r.extra.certificates ?? null,
+          mirror: r.extra.mirror,
+        },
+      ]),
+  );
   if (!emdnConcepts.length)
     gaps.push({
       source: 'ec-emdn',
@@ -418,13 +438,16 @@ async function main() {
     udiPages,
     actorRows,
     extraDevices: [...firstbase, ...dlinrt, ...bdrdm],
+    certificatesByUuid,
     gaps,
   });
   coverage.generatedAt = nowIso();
+  coverage.emdnOrigin = emdnOrigin;
   coverage.rejectedRows += rejectedFromMirrors.count;
   coverage.totalRead += rejectedFromMirrors.count;
   coverage.rejectedSamples.push(...rejectedFromMirrors.samples);
   coverage.actors = actors.length;
+  coverage.actorsOrigin = actorsOrigin;
   coverage.mirrors = mirrorsCache.mirrors.map(
     ({ id, repo, commit, files, sha256, error }) => ({
       id,
