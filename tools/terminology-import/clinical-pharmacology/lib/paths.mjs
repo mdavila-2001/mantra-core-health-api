@@ -38,3 +38,6 @@ export const atcMasterPath = (page) => cpCache('cima', 'maestra-atc', `page-${pa
 export const rxnavPath = (atc, kind, id = '') => cpCache('rxnav', atc, `${kind}${id ? `-${id}` : ''}.json`);
 export const openFdaDir = () => cpCache('openfda');
 export const splIdentityPath = (setid) => cpCache('dailymed', 'spl-id', `${setid}.json`);
+
+// OMS eEML
+export const emlRecommendationPath = (id) => cpCache('eml', 'recommendations', `${id}.json`);

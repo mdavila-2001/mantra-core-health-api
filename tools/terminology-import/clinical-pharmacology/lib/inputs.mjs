@@ -9,6 +9,7 @@ import { readNdjson } from '../../lib/glossary-es/common.mjs';
 
 import { atcMasterRows, cimaProduct, groupByAtc5, isAtc5 } from './cima.mjs';
 import { listJson, readJsonIfExists, retrievedAtOf } from './cli.mjs';
+import { emlRecommendation } from './eml.mjs';
 import { loadLiname, loadVademecumAtc } from './liname.mjs';
 import { CIMA_SHARED_CACHE, cpCache, cpOut } from './paths.mjs';
 import { RXNAV_LICENSE, atcBridge } from './rxnorm.mjs';
@@ -81,6 +82,19 @@ export function readEma() {
   const wb = XLSX.read(readFileSync(path), { type: 'buffer' });
   const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null });
   return { rows, retrievedAt: statSync(path).mtime.toISOString() };
+}
+
+/** Recomendaciones de la eEML de la OMS desde la caché (fetch-eml.mjs) → `{ records: [{ rec, retrievedAt }] }`, o null. */
+export function readEml() {
+  const dir = cpCache('eml', 'recommendations');
+  if (!existsSync(dir)) return null;
+  const records = [];
+  for (const name of listJson(dir)) {
+    const path = join(dir, name);
+    const json = readJsonIfExists(path);
+    if (json) records.push({ rec: emlRecommendation(name.replace(/\.json$/, ''), json), retrievedAt: retrievedAtOf(path) });
+  }
+  return { records: records.sort((a, b) => Number(a.rec.id) - Number(b.rec.id)) };
 }
 
 /**

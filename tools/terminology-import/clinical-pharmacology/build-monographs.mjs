@@ -21,7 +21,8 @@ import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex } from './lib/gsrs.mjs';
 import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
-import { readAllInputs, readBridge, readDailyMedIdentities, readEma } from './lib/inputs.mjs';
+import { emlSections, isCurrentRecommendation } from './lib/eml.mjs';
+import { readAllInputs, readBridge, readDailyMedIdentities, readEma, readEml } from './lib/inputs.mjs';
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
@@ -33,6 +34,8 @@ const GRANULARITY = opt('--granularity', 'route');
 const NO_CIMA = has('--no-cima');
 /** `--no-ema`: arma sin el informe de la EMA (medición por pasada). */
 const NO_EMA = has('--no-ema');
+/** `--no-eml`: arma sin la eEML de la OMS (medición por pasada). */
+const NO_EML = has('--no-eml');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -206,6 +209,39 @@ async function main() {
     }
   }
 
+  // eEML (OMS): indicación (CIE-11) y formulaciones de cada recomendación vigente, por el ATC 5 que asigna la OMS.
+  const emlRaw = NO_EML ? null : readEml();
+  const emlByAtc = new Map();
+  const emlStats = { recommendations: 0, current: 0, withoutAtc5: 0, duplicateSections: 0 };
+  if (emlRaw) {
+    emlStats.recommendations = emlRaw.records.length;
+    for (const { rec, retrievedAt } of emlRaw.records) {
+      if (!isCurrentRecommendation(rec)) continue;
+      emlStats.current++;
+      if (rec.atc5.length === 0) {
+        emlStats.withoutAtc5++;
+        continue;
+      }
+      const rows = emlSections(rec, retrievedAt);
+      for (const code of rec.atc5) {
+        if (!emlByAtc.has(code)) emlByAtc.set(code, new Map());
+        const seen = emlByAtc.get(code);
+        for (const s of rows) {
+          // Misma clave y misma huella en otra recomendación del mismo ATC: se anota en `alsoIn`, no se repite.
+          const k = `${s.key}|${s.textSha256}`;
+          if (seen.has(k)) {
+            const kept = seen.get(k);
+            kept.document.alsoIn = [...(kept.document.alsoIn ?? []), s.document.id];
+            emlStats.duplicateSections++;
+            continue;
+          }
+          seen.set(k, structuredClone(s));
+        }
+        if (!universe.has(code)) universe.set(code, ['who-eeml']);
+      }
+    }
+  }
+
   const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, cimaDuplicateSections: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
@@ -272,6 +308,7 @@ async function main() {
       if (pc) fdaPharmClasses.push(pc);
     }
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
+    for (const s of emlByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     const externalDocuments = fda.pointers.get(code) ?? [];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
@@ -286,8 +323,9 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
-    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', 'openFDA', 'GSRS', 'RxNav'].join(', '),
+    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', 'openFDA', 'GSRS', 'RxNav'].join(', '),
     ema: emaStats,
+    eml: emlStats,
     universe: universe.size,
     monographs: out.length,
     sections: out.reduce((n, m) => n + m.sections.length, 0),

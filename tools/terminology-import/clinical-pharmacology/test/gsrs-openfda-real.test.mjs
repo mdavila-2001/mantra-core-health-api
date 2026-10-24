@@ -155,3 +155,34 @@ test('DailyMed real: identidad, UNII del principio activo y secciones LOINC de p
   assert.ok(rows.find((r) => r.key === 'adverse_reactions').tables.length > 0);
   assert.match(rows[0].citation, /set_id 349fa84e-1fdb-4976-b1bb-689b80eac8ad, versión 1 \(effective_time 2026-09-16\), sección LOINC 34067-9/);
 });
+
+// --- OMS eEML real: JSON-LD de recomendaciones 17, 41 y 143 (consultadas el 2026-10-24) -------------
+import { EML_SOURCE, emlRecommendation, emlSections, isCurrentRecommendation, recommendationIdsFromHome } from '../lib/eml.mjs';
+
+test('eEML real: ATC 5 asignado por la OMS, indicación CIE-11 y formulaciones literales, sin ATC no se enlaza', () => {
+  const raw = read('eml-recommendations-real.json');
+  const atropine = emlRecommendation('41', raw['41']);
+  assert.deepEqual(atropine.atc5, ['A03BA01']);
+  assert.equal(atropine.guidelineDate, '2025-05-09');
+  assert.deepEqual(atropine.icd11, { code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' });
+  assert.ok(isCurrentRecommendation(atropine));
+  const [ind, forms] = emlSections(atropine, WHEN).map(assertSection);
+  assert.equal(ind.source, EML_SOURCE);
+  assert.equal(ind.key, 'indications');
+  assert.equal(ind.text, 'Exposure to or harmful effects of undetermined intent of pesticides');
+  assert.deepEqual(ind.codes, [{ system: 'ICD-11', code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' }]);
+  assert.equal(ind.document.effectiveDate, '2025-05-09');
+  assert.match(ind.license, /Licence: CC BY 3\.0 IGO/);
+  assert.match(ind.disclaimer, /The PDF versions are the binding versions/);
+  assert.equal(forms.key, 'pharmaceutical_form');
+  assert.equal(forms.text, 'Parenteral > General injections > unspecified: 1 mg in 1 mL ampoule or vial (sulfate)');
+
+  const iron = emlRecommendation('143', raw['143']);
+  assert.deepEqual(iron.atc5, ['B03AA02', 'B03AA07'], 'varios ATC: cuenta en cada uno');
+  const ironForms = emlSections(iron, WHEN).find((s) => s.key === 'pharmaceutical_form');
+  assert.equal(ironForms.text, 'Oral > Liquid: 25 mg per  mL elemental iron; 9 mg per  mL elemental iron\n\nOral > Solid > tablet: 60 to 65 mg elemental iron', 'literal, doble espacio incluido');
+
+  const codeine = emlRecommendation('17', raw['17']);
+  assert.deepEqual(codeine.atc5, [], 'la OMS no asigna ATC a esta recomendación: no se enlaza por nombre');
+  assert.deepEqual(recommendationIdsFromHome('<a href="https://list.essentialmeds.org/recommendations/41">x</a><a href="/recommendations/17">y</a><a href="/recommendations/41">'), [17, 41]);
+});
