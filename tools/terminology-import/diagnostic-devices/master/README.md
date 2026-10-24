@@ -72,6 +72,18 @@ Solo criterios publicados, nunca palabras clave del nombre:
    queda sin decisión salvo por mapeo publicado.
 4. **GMDN y nacionales**: solo por mapeo publicado, y solo si todos los
    destinos coinciden.
+5. **Lo que el propio registro declara** (`decideRow` en `lib/taxonomy.mjs`):
+   tipo de licencia IVD (Health Canada «Test Kit»), alcance publicado de la
+   fuente (CDC LIVD), clase de un esquema exclusivo de IVD (IVDR/IVDD, «Class
+   N - IVD» de la TGA) y, en ANVISA, el área de interés del trámite cuando
+   todas sus áreas son de diagnóstico in vitro («Dispositivos Médicos para
+   Diagnóstico in Vitro», «Produtos para diagnóstico de uso in vitro»).
+6. **Mismo modelo**: una fila sin decisión entra si es del mismo fabricante,
+   marca y modelo (o UDI-DI) que una fila de diagnóstico.
+
+No son criterio: las categorías A, B y C de la TFDA (el 醫療器材分類分級管理辦法
+las agrupa por especialidad, art. 2, sin decir que sean IVD) ni el 類別 de la
+JMDN.
 
 Lo que no se puede decidir (`diagnostic: null`) queda en la taxonomía y en el
 reporte, fuera del catálogo, para revisión.

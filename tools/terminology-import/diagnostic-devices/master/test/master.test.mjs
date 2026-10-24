@@ -25,12 +25,17 @@ import {
 } from '../lib/exchange.mjs';
 import { classifyRegulation } from '../lib/cfr.mjs';
 import {
+  decidePcd,
   derivePanelParts,
   ivdPanelsFrom,
   parsePcd,
   pcdNode,
 } from '../lib/fda-pcd.mjs';
 import { aimlRows, fdaSubmissionUrl, parseCsv } from '../lib/own-sources.mjs';
+import {
+  comparePcdCopies,
+  parseOpenfdaClassification,
+} from '../lib/openfda-classification.mjs';
 import { Taxonomy, emdnParent } from '../lib/taxonomy.mjs';
 import {
   normalizeManufacturerName,
@@ -702,6 +707,40 @@ test('decideRow: clase IVD del regulador y alcance publicado de la fuente', () =
   );
 });
 
+test('decideRow: área de interés IVD de ANVISA, solo si todas lo son', () => {
+  const tax = new Taxonomy();
+  const anvisa = (areas) =>
+    row({
+      source: 'anvisa-produtos',
+      deviceTypeSystem: 'br:anvisa-nome-tecnico',
+      deviceTypeName: 'PROTEÍNA TOTAL',
+      extra: { anvisaPetitions: { areas, primarySubjects: [] } },
+    });
+  assert.deepEqual(
+    tax.decideRow(
+      anvisa([
+        'Dispositivos Médicos para Diagnóstico in Vitro',
+        'Produtos para diagnóstico de uso in vitro',
+      ]),
+    ).types,
+    ['ivd-interest-area|anvisa-produtos'],
+  );
+  assert.equal(
+    tax.decideRow(
+      anvisa([
+        'Dispositivos Médicos',
+        'Dispositivos Médicos para Diagnóstico in Vitro',
+      ]),
+    ).diagnostic,
+    null,
+  );
+  assert.equal(
+    tax.decideRow(anvisa(['Dispositivos Médicos'])).diagnostic,
+    null,
+  );
+  assert.equal(tax.decideRow(anvisa([])).diagnostic, null);
+});
+
 test('suplemento del PCD: el código nuevo se decide por su regulación reconstruida', () => {
   const sup = JSON.parse(
     readFileSync(
@@ -722,4 +761,43 @@ test('suplemento del PCD: el código nuevo se decide por su regulación reconstr
     ),
     'sección a 4 dígitos',
   );
+});
+
+test('openFDA classification: misma forma que el foiclass y misma decisión', () => {
+  const { meta, rows } = parseOpenfdaClassification(
+    readFileSync(join(FX, 'openfda-classification.sample.json'), 'utf8'),
+  );
+  assert.equal(meta.last_updated, '2026-10-21');
+  const byCode = Object.fromEntries(rows.map((r) => [r.PRODUCTCODE, r]));
+  assert.equal(byCode.CGA.REGULATIONNUMBER, '862.1345');
+  assert.equal(byCode.CGA.REVIEW_PANEL, 'CH');
+  assert.equal(byCode.CGA.PHYSICALSTATE, '');
+  assert.equal(decidePcd(byCode.CGA).diagnostic, true);
+  assert.equal(decidePcd(byCode.EJY).diagnostic, false);
+  // PNK: la copia fijada lo trae sin regulación; la oficial, con 864.1890.
+  assert.equal(decidePcd(byCode.PNK).branch, 'ivd');
+  const literal = parsePcd(
+    readFileSync(join(FX, 'foiclass.sample.txt'), 'utf8'),
+  );
+  const cmp = comparePcdCopies(rows, literal);
+  assert.deepEqual(cmp.onlyA, ['EJY', 'JJX', 'PNK']);
+  assert.equal(cmp.diffs.name.length + cmp.diffs.regulation.length, 0);
+});
+
+test('mapeos: dos niveles de la clasificación TFDA no son un mapeo entre nomenclaturas', () => {
+  const tax = new Taxonomy();
+  tax.addFromRow(
+    row({
+      source: 'tfda-devices',
+      deviceTypeSystem: 'tw:tfda-classification',
+      deviceTypeCode: 'E.9999',
+      deviceTypeName: '其他',
+      extra: {
+        deviceTypes: [
+          { system: 'tw:tfda-category', code: 'E', name: '心臟血管醫學科學' },
+        ],
+      },
+    }),
+  );
+  assert.equal(tax.crosswalks.size, 0);
 });

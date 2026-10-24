@@ -297,6 +297,48 @@ detiene con dos pasadas seguidas en 0.
 - **Nuevos tras deduplicar: 0.**
 - **Estado de la saturación**: primera pasada en 0. La regla pide dos seguidas: falta una más (pasada 10) con las entradas sin cambios.
 
+### Pasada 10 (2026-10-24)
+
+La red del entorno pasó a completa y las hermanas volvieron a publicar, así
+que esta pasada no es la segunda en 0: el contador vuelve a empezar.
+
+- **Regiones**:
+  - `us` @`b6999585`: 215 690 filas (sin cambios).
+  - `eu` @`63de12cb`: 716 filas. El código de `eu` ya baja EUDAMED y la EMDN v2026 oficiales, pero su `out/` todavía es el de antes.
+  - `row` @`fef932d6`: **6 569 701 filas** (antes 3 534 775), todas válidas:
+    - ANVISA desde los archivos oficiales: `anvisa-produtos` 100 681 y `anvisa-produtos-modelos` 3 274 089;
+    - nuevas de Taiwán: `tfda-devices` 93 430 y `tfda-tudid` 688 258;
+    - PMDA con el código JMDN, la clase y el 類別 en `extra.deviceTypes`.
+- **Criterio nuevo** (publicado por el regulador en el propio registro):
+  - **Área de interés de ANVISA.** Los archivos `CICLO_ANALISE_PETICOES_*` de `dados.anvisa.gov.br` publican el área con que se tramita cada proceso (`DESC_AREA_INTERESSE`).
+  - Si **todas** las áreas del proceso son «Dispositivos Médicos para Diagnóstico in Vitro» o «Produtos para diagnóstico de uso in vitro», el registro es IVD (`ivd-interest-area`).
+  - Si se mezclan con «Dispositivos Médicos» o «Correlatos», queda sin decisión.
+  - Entran 113 762 registros (18 265 de productos y 95 497 de modelos).
+- **Criterios revisados y no adoptados**:
+  - **Categorías A, B y C de la TFDA.** Se leyó el texto vigente del 醫療器材分類分級管理辦法 (law.moj.gov.tw, `pcode=L0030120`, modificado el 2023-08-22) y su 附表 (PDF, sha256 `94d06091…`).
+    - El art. 2 clasifica «視其應用科別» (por especialidad) en 16 clases: 臨床化學及臨床毒理學, 血液學、病理學及基因學, 免疫學及微生物學…
+    - Ni el texto ni el 附表 dicen que esas tres sean IVD. Que la numeración coincida con 21 CFR 862/864/866 es una convención, no un mapeo publicado.
+    - Las filas de TFDA quedan sin decisión, salvo 9 que entran por mismo modelo.
+  - **類別 de la JMDN**: no tiene una marca publicada de diagnóstico, y decidir por el nombre de la clase (p. ej. «検査用») sería por palabra clave.
+- **Corrección**: la misma fila de TFDA declara el código de clasificación (`E.9999`) y su categoría (`E`). El build los contaba como mapeo entre nomenclaturas (+3 560 mapeos).
+  - Son niveles de la misma clasificación del regulador. `NOMENCLATURE_FAMILY` en `lib/taxonomy.mjs` los excluye y los mapeos vuelven a 218.
+  - No había cambiado ninguna decisión: los nodos heredados por mapeo siguen en 79.
+- **Nuevos tras deduplicar** (contra la pasada 9):
+  - Registros: **+114 774** (376 114).
+  - Modelos: **+113 254** (288 325).
+  - Fabricantes: **+773** (21 528).
+  - Marcas: +18 458 (107 407).
+  - Jurisdicciones: **BR 113 912** (antes 241), US 130 010, CA 43 845, EU 434, AU 420, IN 42 y **TW 9** (nueva).
+  - Modelos en 2 jurisdicciones: 335 (+27); en 3: 6 (−1).
+  - Tipos de diagnóstico con al menos un modelo: 3 897 (+858).
+  - Fusiones `same-registry-id`: 970 (+861, CNPJ de ANVISA).
+  - Listados del sector: 197 empresas cruzan con un registro (+3).
+  - Nodos: 37 200 (+3 576: 1 782 JMDN con código, 1 366 códigos y 346 categorías TFDA, 82 «nome técnico»), todos sin decisión.
+  - **EE. UU.: 0 registros perdidos** (212 376 → 212 377). La baja de 402 modelos de EE. UU. (130 412 → 130 010) viene de fusiones de fabricantes por las reglas publicadas: juntan modelos con la misma marca y modelo.
+- **Taxonomía cargada** en el Postgres 16 desechable: +3 786 conceptos (ANVISA 292, JMDN 1 782, TFDA 1 712). El value set no cambia (5 694 miembros) y la 2.ª corrida da 0.
+- **Sin decisión**: 6 408 748 filas. 2 286 312 no traen tipo (MDALL); el resto son nomenclaturas nacionales sin criterio publicado (nome técnico, TFDA, JMDN).
+- **Descartadas**: ninguna fuente nueva.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`
