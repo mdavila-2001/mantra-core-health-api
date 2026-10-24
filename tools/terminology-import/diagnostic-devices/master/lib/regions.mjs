@@ -106,11 +106,12 @@ export function readRegionManifest(loc, { repoDir } = {}) {
 }
 
 /**
- * Filas de una región, archivo por archivo, verificando el sha256 del
- * manifest. Llama `onFile({ path, rows, sha256, ok })` por archivo.
+ * Filas de una lista de archivos de una región (`manifest.files`, o
+ * `manifest.actors`), verificando el sha256 declarado. Llama
+ * `onFile({ path, declaredRows, sha256, ok })` por archivo.
  */
-export function* readRegionRows(loc, manifest, { repoDir, onFile } = {}) {
-  for (const f of manifest.files ?? []) {
+export function* readRegionFiles(loc, files, { repoDir, onFile } = {}) {
+  for (const f of files ?? []) {
     const buf =
       loc.kind === 'git'
         ? git(
@@ -124,4 +125,9 @@ export function* readRegionRows(loc, manifest, { repoDir, onFile } = {}) {
     if (!ok) continue;
     yield* parseNdjsonGzBuffer(buf, `${loc.region}/${f.path}`);
   }
+}
+
+/** Filas de equipos de una región (`manifest.files`). */
+export function* readRegionRows(loc, manifest, opts = {}) {
+  yield* readRegionFiles(loc, manifest.files, opts);
 }

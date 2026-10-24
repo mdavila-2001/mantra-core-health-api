@@ -1,24 +1,19 @@
 {
-  "generatedAt": "2026-10-24T03:41:52Z",
+  "generatedAt": "2026-10-24T03:59:13Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "c5efecb6e91f8a129279f48170fd25c6c84019d1",
-      "commitDate": "2026-10-24T03:37:09+00:00",
+      "commit": "3ba3358ecbcc274afb50f71137eda581621e2b6a",
+      "commitDate": "2026-10-24T03:53:13+00:00",
       "dir": null,
       "alternatives": [
         "origin/claude/compassionate-brown-tr71nn"
       ],
-      "manifestGeneratedAt": "2026-10-24T03:27:50.039Z",
-      "rowsRead": 77971,
+      "manifestGeneratedAt": "2026-10-24T03:49:57.207Z",
+      "rowsRead": 189072,
       "gaps": [
-        {
-          "source": "fda-rl",
-          "url": "https://download.open.fda.gov/device/registrationlisting/",
-          "reason": "403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento."
-        },
         {
           "source": "fda-gudid",
           "url": "https://accessgudid.nlm.nih.gov/download/delimited",
@@ -30,66 +25,66 @@
       "region": "eu",
       "status": "consolidated",
       "ref": "origin/claude/adoring-curie-xdkt83",
-      "commit": "14f81a41725a794be29cd072a9bb0f50ebf1b8dd",
-      "commitDate": "2026-10-24T03:36:10+00:00",
+      "commit": "e1601ac209c9c73d9e56fbc11a723efa9d2ee97d",
+      "commitDate": "2026-10-24T03:54:17+00:00",
       "dir": null,
       "alternatives": [],
-      "manifestGeneratedAt": "2026-10-24T03:31:17Z",
-      "rowsRead": 0,
+      "manifestGeneratedAt": "2026-10-24T03:48:44Z",
+      "rowsRead": 716,
       "gaps": [
         {
           "source": "ec-emdn",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
           "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
         },
         {
           "source": "eudamed-udi",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
           "url": "https://developer.datalake.sante.service.ec.europa.eu/"
         },
         {
           "source": "eudamed-certificates",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
           "url": "https://ec.europa.eu/tools/eudamed/"
         },
         {
           "source": "mhra-pard",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
           "url": "https://pard.mhra.gov.uk/"
         },
         {
           "source": "swissmedic-swissdamed",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
           "url": "https://swissdamed.ch/"
         },
         {
           "source": "it-salute-bdrdm",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
           "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
         },
         {
           "source": "it-salute-cnd",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
           "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/"
         },
         {
           "source": "ec-nando",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
           "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
         },
         {
           "source": "de-bfarm",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
           "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
         },
         {
           "source": "es-aemps-ccps",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
           "url": "https://www.aemps.gob.es/"
         },
         {
           "source": "fr-ansm",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No aplica.",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No aplica.",
           "url": "https://ansm.sante.fr/"
         }
       ]
@@ -138,6 +133,15 @@
       "invalidSamples": []
     },
     {
+      "source": "fda-rl",
+      "region": "us",
+      "read": 110614,
+      "valid": 110614,
+      "invalid": 0,
+      "duplicates": 0,
+      "invalidSamples": []
+    },
+    {
       "source": "fda-gudid",
       "region": "us",
       "read": 3130,
@@ -145,24 +149,67 @@
       "invalid": 0,
       "duplicates": 0,
       "invalidSamples": []
+    },
+    {
+      "source": "cdc-livd-sars-cov-2",
+      "region": "us",
+      "read": 487,
+      "valid": 483,
+      "invalid": 4,
+      "duplicates": 0,
+      "invalidSamples": [
+        {
+          "sourceRecordId": "Cue COVID-19 Test for Home and Over The Counter (OTC) Use (Proctored)_Cue Health Inc.",
+          "errors": [
+            "manufacturerName no puede ser null ni vacío"
+          ]
+        },
+        {
+          "sourceRecordId": "Test_Home_Device",
+          "errors": [
+            "manufacturerName no puede ser null ni vacío"
+          ]
+        },
+        {
+          "sourceRecordId": "Test_OTC_Device",
+          "errors": [
+            "manufacturerName no puede ser null ni vacío"
+          ]
+        },
+        {
+          "sourceRecordId": "Test_Unproctored_Device",
+          "errors": [
+            "manufacturerName no puede ser null ni vacío"
+          ]
+        }
+      ]
+    },
+    {
+      "source": "eudamed-udi",
+      "region": "eu",
+      "read": 716,
+      "valid": 716,
+      "invalid": 0,
+      "duplicates": 0,
+      "invalidSamples": []
     }
   ],
   "taxonomy": {
-    "nodes": 15624,
+    "nodes": 15625,
     "bySystem": {
-      "emdn": 8454,
+      "emdn": 8455,
       "fda-product-code": 7091,
       "gmdn": 79
     },
     "diagnosticBySystem": {
       "fda-product-code": 3122,
-      "emdn": 2491,
+      "emdn": 2492,
       "gmdn": 79
     },
     "byDecision": {
       "emdn:null:null": 5786,
       "fda-product-code:false:cfr-non-diagnostic-subpart": 3089,
-      "emdn:true:emdn-category-w": 2262,
+      "emdn:true:emdn-category-w": 2263,
       "fda-product-code:true:cfr-ivd-part": 2076,
       "fda-product-code:true:cfr-subpart-title": 975,
       "fda-product-code:null:no-regulation": 831,
@@ -178,7 +225,7 @@
       "fda-product-code:null:fda-code-not-in-pcd": 3
     },
     "diagnosticByBranch": {
-      "emdn:ivd": 2262,
+      "emdn:ivd": 2263,
       "fda-product-code:ivd": 2147,
       "fda-product-code:diagnostic": 777,
       "emdn:diagnostic": 229,
@@ -191,7 +238,7 @@
       "fda-product-code→gmdn": 109,
       "gmdn→fda-product-code": 109
     },
-    "diagnosticTypesWithModels": 2428,
+    "diagnosticTypesWithModels": 2976,
     "ivdPanelsMeasured": [
       "IM",
       "MG",
@@ -347,150 +394,189 @@
     }
   },
   "catalog": {
-    "rowsIncluded": 78145,
-    "rowsNotDiagnostic": 742,
-    "rowsUndetermined": 608,
-    "rowsWithoutType": 0,
+    "rowsIncluded": 186837,
+    "rowsNotDiagnostic": 2371,
+    "rowsUndetermined": 2100,
+    "rowsWithoutType": 483,
     "undeterminedTopTypes": {
-      "fda-product-code|MDS": 233,
-      "fda-product-code|MAQ": 80,
-      "fda-product-code|NCD": 62,
-      "fda-product-code|OZO": 56,
-      "fda-product-code|OZP": 44,
-      "fda-product-code|MYL": 18,
-      "fda-product-code|MYM": 14,
-      "fda-product-code|OYC": 11,
-      "fda-product-code|OJN": 10,
-      "fda-product-code|LKV": 10,
-      "fda-product-code|OYB": 8,
-      "fda-product-code|PZE": 8,
+      "fda-product-code|MDS": 274,
+      "fda-product-code|QKP": 116,
+      "fda-product-code|MAQ": 98,
+      "fda-product-code|OZO": 88,
+      "fda-product-code|QJR": 86,
+      "fda-product-code|QKO": 75,
+      "emdn|Z12020801": 73,
+      "fda-product-code|MZI": 68,
+      "fda-product-code|NCD": 66,
+      "fda-product-code|OZP": 66,
+      "emdn|Z12021003": 54,
+      "fda-product-code|QMN": 30,
+      "fda-product-code|OYC": 26,
+      "emdn|V0301010202": 25,
+      "emdn|U0580": 24,
+      "fda-product-code|MYL": 22,
+      "fda-product-code|PZE": 20,
+      "fda-product-code|MYM": 17,
+      "emdn|Z11040182": 17,
+      "emdn|Z121605": 16,
+      "fda-product-code|PQF": 15,
+      "fda-product-code|LKV": 15,
+      "fda-product-code|QLW": 13,
+      "emdn|Z11069001": 13,
+      "emdn|Z11040192": 13,
+      "fda-product-code|OYB": 12,
+      "fda-product-code|QCD": 12,
+      "fda-product-code|PJF": 12,
+      "fda-product-code|OJN": 11,
+      "fda-product-code|QHJ": 11,
+      "fda-product-code|OTV": 11,
+      "fda-product-code|OTT": 10,
+      "fda-product-code|QLT": 10,
+      "fda-product-code|QCZ": 9,
+      "fda-product-code|KSJ": 8,
+      "emdn|Z12020406": 8,
+      "emdn|Z12160401": 8,
+      "emdn|Z11049092": 8,
+      "fda-product-code|NWY": 7,
       "fda-product-code|SFI": 6,
-      "fda-product-code|PQF": 5,
-      "fda-product-code|QCD": 5,
-      "fda-product-code|QHJ": 5,
-      "fda-product-code|PRD": 3,
-      "fda-product-code|LMY": 3,
-      "fda-product-code|LQI": 3,
-      "fda-product-code|OTE": 2,
-      "fda-product-code|QZS": 2,
-      "fda-product-code|LHE": 2,
-      "fda-product-code|PEJ": 2,
-      "fda-product-code|NCT": 2,
-      "fda-product-code|SHH": 1,
-      "fda-product-code|MVK": 1,
-      "fda-product-code|LDK": 1,
-      "fda-product-code|QNK": 1,
-      "fda-product-code|OEE": 1,
-      "fda-product-code|MWM": 1,
-      "fda-product-code|OIH": 1,
-      "fda-product-code|QIF": 1,
-      "fda-product-code|LTC": 1,
-      "fda-product-code|QXD": 1,
-      "fda-product-code|SHY": 1,
-      "fda-product-code|SJD": 1,
-      "fda-product-code|SIO": 1,
-      "fda-product-code|MHR": 1
+      "fda-product-code|MTN": 6,
+      "fda-product-code|POA": 6,
+      "fda-product-code|QTP": 5,
+      "fda-product-code|MYY": 5,
+      "fda-product-code|QZS": 4,
+      "fda-product-code|PRD": 4,
+      "fda-product-code|LQI": 4,
+      "fda-product-code|MYK": 4,
+      "fda-product-code|MTL": 4,
+      "fda-product-code|QWY": 4
     },
-    "manufacturers": 13303,
-    "brands": 71266,
-    "models": 73333,
-    "registrations": 78145,
+    "manufacturers": 18978,
+    "brands": 71481,
+    "models": 81440,
+    "registrations": 186837,
     "modelsByJurisdictionCount": {
-      "1": 73333
+      "1": 81440
     },
     "modelsByJurisdiction": {
-      "US": 73333
+      "US": 81011,
+      "EU": 429
     },
     "manufacturersByCountry": {
-      "US": 9910,
-      "CN": 666,
-      "CA": 325,
-      "IL": 258,
-      "DE": 245,
-      "GB": 224,
-      "(sin país)": 198,
-      "TW": 194,
-      "KR": 172,
-      "FR": 139,
-      "JP": 115,
-      "IT": 91,
-      "AU": 85,
-      "NL": 76,
-      "SE": 72,
-      "IE": 65,
-      "DK": 61,
-      "CH": 55,
-      "FI": 42,
-      "ES": 35,
-      "IN": 34,
-      "BE": 33,
-      "AT": 25,
-      "SG": 20,
-      "HK": 18,
-      "NO": 16,
-      "TR": 15,
-      "NZ": 13,
-      "BR": 12,
-      "HU": 7,
-      "ZA": 7,
-      "AR": 6,
-      "LT": 5,
-      "MX": 5,
-      "PL": 5,
-      "IS": 4,
-      "MY": 4,
-      "SI": 4,
+      "US": 13563,
+      "CN": 1264,
+      "DE": 421,
+      "CA": 414,
+      "GB": 313,
+      "IL": 296,
+      "KR": 270,
+      "TW": 255,
+      "JP": 211,
+      "FR": 191,
+      "(sin país)": 182,
+      "IT": 150,
+      "NL": 120,
+      "AU": 110,
+      "CH": 93,
+      "SE": 92,
+      "IN": 88,
+      "IE": 87,
+      "DK": 79,
+      "MX": 75,
+      "ES": 57,
+      "BE": 55,
+      "FI": 53,
+      "HK": 51,
+      "SG": 49,
+      "PK": 47,
+      "AT": 32,
+      "TR": 29,
+      "MY": 26,
+      "BR": 23,
+      "VN": 23,
+      "CR": 21,
+      "NO": 20,
+      "NZ": 18,
+      "PL": 18,
+      "HU": 16,
+      "LT": 11,
+      "ZA": 11,
+      "AR": 9,
+      "CZ": 9,
+      "DO": 9,
+      "TH": 9,
+      "IS": 6,
+      "RU": 6,
+      "SK": 6,
+      "AE": 5,
+      "CO": 5,
+      "SI": 5,
+      "PA": 4,
+      "BG": 3,
+      "CL": 3,
+      "EG": 3,
       "GR": 3,
+      "PH": 3,
       "PT": 3,
-      "RU": 3,
+      "RO": 3,
+      "UY": 3,
       "VG": 3,
-      "BG": 2,
+      "BB": 2,
+      "GT": 2,
+      "HR": 2,
+      "ID": 2,
       "LU": 2,
-      "PK": 2,
-      "VN": 2,
-      "AE": 1,
-      "BB": 1,
+      "LV": 2,
+      "MC": 2,
+      "MU": 2,
+      "PE": 2,
+      "SC": 2,
+      "AM": 1,
       "BY": 1,
-      "CO": 1,
-      "CZ": 1,
-      "DO": 1,
+      "EE": 1,
+      "FL": 1,
       "GA": 1,
       "HN": 1,
-      "HR": 1,
-      "ID": 1,
+      "IM": 1,
       "IR": 1,
+      "JM": 1,
       "JO": 1,
+      "KH": 1,
       "KN": 1,
       "KP": 1,
       "KY": 1,
-      "MC": 1,
-      "MU": 1,
-      "PH": 1,
-      "RO": 1,
+      "LI": 1,
+      "MA": 1,
+      "MM": 1,
+      "MT": 1,
+      "NI": 1,
       "RS": 1,
-      "SC": 1,
-      "SK": 1
+      "SA": 1,
+      "TN": 1,
+      "TT": 1,
+      "WS": 1
     }
   },
   "manufacturers": {
-    "entitiesAll": 13424,
+    "entitiesAll": 45748,
     "mergesByRule": {
-      "same-name-same-country": 798,
-      "same-name-unique-country": 628,
-      "same-name-no-country": 226
+      "same-name-same-country": 4843,
+      "same-name-unique-country": 716,
+      "same-name-no-country": 250,
+      "same-registry-id": 107
     },
     "reviewByKind": {
-      "possible-group-shared-first-word": 1562,
-      "same-name-different-country": 635,
-      "same-name-ambiguous-country": 77
+      "possible-group-shared-first-word": 5091,
+      "same-name-different-country": 827,
+      "name-match-conflicting-ids": 233,
+      "same-name-ambiguous-country": 104
     }
   },
   "industry": {
     "organizations": 46,
     "mentions": 552,
     "companies": 370,
-    "companiesMatchedToRegistry": 130,
-    "companiesOnlyInIndustryLists": 240
+    "companiesMatchedToRegistry": 148,
+    "companiesOnlyInIndustryLists": 222
   },
   "emdnCopies": {
     "rowsA": 8453,
@@ -501,6 +587,21 @@
     ],
     "differ": []
   },
+  "actors": [
+    {
+      "region": "eu",
+      "files": [
+        {
+          "path": "actors/eudamed-actors-0001.ndjson.gz",
+          "declaredRows": 26583,
+          "sha256": "0ffc5948dddc3ddc22c0ad26e8fc4d8f7c1f500b57fa6233ef0d0124afa6ae21",
+          "ok": true
+        }
+      ],
+      "valid": 26583,
+      "invalid": 0
+    }
+  ],
   "mirrors": {
     "ej86-fda-ai": {
       "repo": "https://github.com/ej86/fda-ai-medical-device-analytics.git",

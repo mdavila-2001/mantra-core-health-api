@@ -250,3 +250,39 @@ export function listOutFiles(dir) {
     .filter((f) => f.endsWith('.ndjson.gz'))
     .sort();
 }
+
+/**
+ * Fila de identidad de un fabricante (actores de EUDAMED y similares, en
+ * `manifest.actors`): no describe un equipo, solo publica nombre, país e id.
+ */
+export function validateActorRow(row) {
+  const errors = [];
+  if (row === null || typeof row !== 'object')
+    return ['la fila no es un objeto'];
+  for (const f of [
+    'source',
+    'sourceRecordId',
+    'sourceUrl',
+    'sourceVersion',
+    'retrievedAt',
+    'manufacturerName',
+    'manufacturerRegistryId',
+  ]) {
+    if (typeof row[f] !== 'string' || row[f].trim() === '')
+      errors.push(`${f} obligatorio`);
+  }
+  if (errors.length) return errors;
+  if (!REGISTRY_ID_RE.test(row.manufacturerRegistryId))
+    errors.push(
+      `manufacturerRegistryId sin prefijo de esquema: ${row.manufacturerRegistryId}`,
+    );
+  if (
+    row.manufacturerCountry !== null &&
+    row.manufacturerCountry !== undefined &&
+    !COUNTRY_RE.test(row.manufacturerCountry)
+  )
+    errors.push(
+      `manufacturerCountry no es ISO alfa-2: ${row.manufacturerCountry}`,
+    );
+  return errors;
+}

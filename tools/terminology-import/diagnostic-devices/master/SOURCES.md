@@ -16,6 +16,8 @@ coincida.
 |---|---|---|---|---:|---|
 | `fda-pcd` | FDA Product Classification Database, `foiclass` ([página de descarga](https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files); se reemplaza cada domingo) | `github.com/ej86/fda-ai-medical-device-analytics` @ `8840a03632ffdc346a8bf05a459236c913b9198c` (2026-08-28), `foiclass.csv` | `ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de` | 7 088 | Obra del Gobierno de EE. UU.: dominio público (17 U.S.C. § 105). El repositorio no declara licencia propia; se usa solo el dato público de la FDA. |
 | `fda-ai-enabled-devices` | FDA, [Artificial Intelligence-Enabled Medical Devices](https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices) (CSV de la página) | mismo commit, `aiml-devices-csv.csv` | `4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d` | 1 524 | Ídem. La FDA aclara que la lista no es exhaustiva. |
+| `ec-emdn` | Comisión Europea, [EMDN](https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en), versión 2 | `github.com/BatirMedical/nomenclature-emdn` @ `e0131762b3385c1085b97da9c5f74d32edb89df3` (2025-04-02), `EMDN_BatirMedical.csv` | `7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379` | 8 453 | La Comisión la publica libre y gratuita; el repo es MIT y aclara que los datos siguen siendo de la Comisión. |
+| `ec-emdn` (verificación) | ídem | `github.com/lisadonlon/GMDNEMDN` @ `ef6086489b942d96ff0d2e18f9f1f8434a94f954` (2025-10-30), `data/EMDN.txt` | `033572eb47bb3f595c3fd9b1e8494680fd2dd189c4ee21261b4d64e3cab26f3f` | 8 454 | Ídem (MIT). Solo para verificar la primera copia: coinciden código, término y nivel en los 8 453 comunes; `V020303` (TEATS) falta en la primera y se toma de esta, citándola. |
 
 Cabeceras verificadas: `foiclass` trae las 18 columnas publicadas
 (`REVIEW_PANEL|MEDICALSPECIALTY|PRODUCTCODE|DEVICENAME|DEVICECLASS|…|SummaryMalfunctionReporting`);
@@ -49,7 +51,7 @@ no pudieron verificarse desde acá, así que se guardan los códigos tal cual.
 | Nomenclatura | Uso que se hace | Licencia / términos |
 |---|---|---|
 | FDA product codes | Completa (7 088 códigos, con definición) | Dominio público. |
-| EMDN | Solo los códigos y nombres que traen los registros (EUDAMED vía `eu/`); el archivo EMDN completo, cuando se pueda bajar | La Comisión la publica libre y gratuita (MDR art. 26; descarga en <https://webgate.ec.europa.eu/dyna2/emdn/>). |
+| EMDN | Completa (V2, 8 454 términos, desde dos copias verificadas entre sí) más los códigos que traen los registros y no están en V2 (hoy `W0105040619`, de EUDAMED vía `eu/`, sin nombre publicado) | La Comisión la publica libre y gratuita (MDR art. 26; descarga en <https://webgate.ec.europa.eu/dyna2/emdn/>). |
 | GMDN | Solo los términos que AccessGUDID publica junto a cada dispositivo (nombre, definición y, desde su actualización, el código) | La nomenclatura completa exige membresía de la GMDN Agency (<https://www.gmdnagency.org/>). No se descarga ni se reconstruye la nomenclatura: solo lo que GUDID publica por dispositivo. |
 | Correspondencia EMDN↔GMDN | **No hay** mapeo oficial publicado: la Comisión dijo que lo haría «to the extent possible» y el estudio de la GMDN Agency (2023) concluye que el mapeo término a término no es efectivo (solo 26 % de correspondencia cercana). No se usa ningún mapeo EMDN↔GMDN. | <https://www.gmdnagency.org/wp-content/uploads/2023/09/Feasibility-of-mapping-GMDN-to-EMDN-article.pdf> |
 | Product code ↔ GMDN | Solo el que declara una misma UDI-DI en GUDID (salida de `us/`), con cuántos registros lo declaran | Ídem GUDID. |
@@ -67,10 +69,12 @@ de mezclarlos con el catálogo.
 | Qué | Dónde | Motivo |
 |---|---|---|
 | `foiclass.zip` oficial, openFDA (`api.fda.gov`, `download.open.fda.gov`), AccessGUDID (`accessgudid.nlm.nih.gov`) | FDA / NLM | 403 del proxy de salida del entorno (CONNECT rechazado); WebFetch tampoco resuelve DNS. Se usó la copia fijada de §1. |
-| Archivo EMDN completo | `webgate.ec.europa.eu/dyna2/emdn/` | 403 del proxy. EMDN entra solo por lo que traigan los registros de `eu/`. |
+| Archivo EMDN oficial (y versiones posteriores a la 2) | `webgate.ec.europa.eu/dyna2/emdn/` | 403 del proxy. Se usó la V2 de dos copias en git (§1); no se encontró copia de una versión posterior. |
 | EUDAMED (actores, SRN) | `ec.europa.eu/tools/eudamed` | 403 del proxy (lo cubre `eu/`). |
 | GLEIF, Wikidata, OpenCorporates | `api.gleif.org`, `query.wikidata.org`, `api.opencorporates.com` | 403 del proxy (GLEIF, Wikidata); OpenCorporates sin clave y con licencia ODbL a acordar. Sin grupos/filiales publicados en esta pasada. |
-| Dataset del proyecto de mapeo GMDN↔EMDN (Zenodo 13890613) | `zenodo.org` | 403 del proxy; el repo de GitHub asociado no es público. Tampoco sería un mapeo oficial. |
+| Dataset del proyecto de mapeo GMDN↔EMDN (Zenodo 13890613) y mapeos GMDN↔EMDN en git (`lisadonlon/GMDNEMDN`, `Kilanopi/GMDNtoEMDN`, `cl-tud/riskman-device-code-validation-scripts`) | `zenodo.org`, GitHub | Zenodo: 403 del proxy. Los de GitHub son mapeos automáticos por similitud de texto, no publicados por una autoridad: no se usan. |
+| Lista compilada de 12 275 términos GMDN (`lisadonlon/GMDNEMDN/exports/gmdn-from-gudid`) | GitHub | Es la nomenclatura GMDN compilada y su autor la retiró «for licensing compliance»: no se usa. |
+| PCD de la FDA más nuevo (`bjoleary/fdadata`, 2026-10-20, `.rda`) | GitHub | No hay lector de `.rda` en el entorno; lo usa `us/` (7 119 product codes en su `fda-product-codes.json`). |
 | Listados de expositores y socios (RSNA, MEDICA, CMEF, WHX, ADLM, ECR, ITEM, KIMES, Hospitalar, Expo MED, FIME; AdvaMed, MedTech Europe, BVMed, VDGH, SPECTARIS, SNITEM, ABHI, Swiss Medtech, JIRA, JACRI, JAIMA, JMOIA, MTJAPAN, ABIMED, CBDL, MTAA, …) | sitios de cada organización | Sin acceso directo (DNS/403). Lo que hay viene de resultados de búsqueda que citan la URL: `data/industry-directories.json`, marcado `method: web-search-snippets`. KMDIA, CAMDI, Fenin, Medtech Canada, MDMA y AiMeD no publican un listado que se haya encontrado (MDMA: solo con inicio de sesión; WHX Dubai: con la entrada de visitante). No se revisaron `robots.txt` ni términos de cada sitio porque no se pudo acceder. |
 | Regiones `us`, `eu`, `row` | ramas hermanas | Ver `out/coverage.md`: una región sin `out/manifest.json` empujado queda **pendiente**; `build.mjs` la consolida en cuanto aparezca. |
 

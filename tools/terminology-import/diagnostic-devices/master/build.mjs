@@ -23,7 +23,12 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { rowKey, validateRow, writeNdjsonGzSharded } from './lib/exchange.mjs';
+import {
+  rowKey,
+  validateActorRow,
+  validateRow,
+  writeNdjsonGzSharded,
+} from './lib/exchange.mjs';
 import {
   derivePanelParts,
   ivdPanelsFrom,
@@ -38,6 +43,7 @@ import { consolidate } from './lib/consolidate.mjs';
 import {
   REGIONS,
   locateRegion,
+  readRegionFiles,
   readRegionManifest,
   readRegionRows,
 } from './lib/regions.mjs';
@@ -209,6 +215,9 @@ console.log(
 );
 
 const regionStatus = [];
+// Filas de identidad de fabricantes (`manifest.actors`): solo para resolver.
+const actorRows = [];
+const actorStats = [];
 for (const region of REGIONS) {
   if (SKIP_REGIONS) {
     regionStatus.push({ region, status: 'skipped' });
@@ -233,6 +242,26 @@ for (const region of REGIONS) {
     accept(row, region);
     n++;
   }
+  const actorFiles = [];
+  let actorsValid = 0;
+  let actorsInvalid = 0;
+  for (const a of readRegionFiles(loc, manifest.actors ?? [], {
+    repoDir: REPO,
+    onFile: (f) => actorFiles.push(f),
+  })) {
+    if (validateActorRow(a).length) actorsInvalid++;
+    else {
+      actorsValid++;
+      actorRows.push(a);
+    }
+  }
+  if (manifest.actors?.length)
+    actorStats.push({
+      region,
+      files: actorFiles,
+      valid: actorsValid,
+      invalid: actorsInvalid,
+    });
   regionStatus.push({
     region,
     status: 'consolidated',
@@ -254,7 +283,11 @@ for (const region of REGIONS) {
 // --- 3. Taxonomía de los registros, fabricantes y catálogo --------------------
 for (const row of rows) taxonomy.addFromRow(row);
 const propagated = taxonomy.propagateByCrosswalk();
-const resolution = resolveManufacturers(rows);
+const resolution = resolveManufacturers([...rows, ...actorRows]);
+if (actorRows.length)
+  console.log(
+    `identidades de fabricantes publicadas (actores): ${actorRows.length}`,
+  );
 const catalog = consolidate(rows, taxonomy, resolution);
 console.log(
   `filas válidas ${rows.length}; de diagnóstico ${catalog.included}; fabricantes ${catalog.manufacturers.length}; modelos ${catalog.models.length}; nodos heredados por mapeo ${propagated}`,
@@ -286,6 +319,7 @@ const coverage = coverageReport({
   resolution,
   industry: industry.stats,
   emdnCheck,
+  actorStats,
   sourceStats: [...sourceStats.values()],
   regionStatus,
   panelParts,

@@ -23,6 +23,7 @@ export function coverageReport({
   resolution,
   industry = null,
   emdnCheck = null,
+  actorStats = [],
   sourceStats,
   regionStatus,
   panelParts,
@@ -98,6 +99,7 @@ export function coverageReport({
     },
     industry,
     emdnCopies: emdnCheck,
+    actors: actorStats,
     mirrors: Object.fromEntries(
       Object.entries(mirrors).map(([k, m]) => [
         k,

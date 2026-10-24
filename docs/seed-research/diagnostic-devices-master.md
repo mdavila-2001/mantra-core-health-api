@@ -150,7 +150,7 @@ detiene con dos pasadas seguidas en 0.
   `coverage.json`.
 - **Taxonomía cargada** en el Postgres 16 desechable: EMDN 8 454 conceptos y
   8 431 relaciones is-a, 218 mapeos, 5 692 miembros del value set; 2.ª corrida
-  en 0 (`evidence/load-postgres16-pasada2.txt`).
+  en 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada2.txt`).
 - **Listados del sector**: `data/industry-directories.json` (46
   organizaciones, 552 menciones con URL). Con el corpus de `us`, 130 de 370
   empresas cruzan con un fabricante de los registros; 240 quedan como
@@ -177,6 +177,24 @@ detiene con dos pasadas seguidas en 0.
     de GitHub fuera del repositorio de esta sesión, cosa que no debía; no se
     repite. Los repositorios encontrados son públicos y se bajaron con
     `git clone`.
+
+### Pasada 3 (2026-10-24)
+
+- **Regiones**:
+  - `us` @`3ba3358e`: 189 072 filas. Sumó `fda-rl` (110 614) y `cdc-livd-sars-cov-2` (487). De LIVD, 4 filas son inválidas (sin `manufacturerName`; tres son filas de prueba `Test_*` de la planilla) y las 483 válidas no traen tipo de dispositivo, así que quedan sin decisión. Se lo avisé a `us`.
+  - `eu` @`e1601ac2` (`origin/claude/adoring-curie-xdkt83`): 716 filas `eudamed-udi`, todas válidas, más 26 583 actores EUDAMED con SRN en `manifest.actors`.
+  - `row`: pendiente. Avisó que va a empujar a `origin/claude/inspiring-planck-xhpf4w`.
+- **Fuente nueva para la resolución**: los actores EUDAMED (SRN, nombre, país) entran al resolvedor como identidad publicada. No son equipos.
+- **Nuevos tras deduplicar** (contra la pasada 2):
+  - Fabricantes: +5 675 (18 978).
+  - Modelos: +8 107 (81 440). Hay 429 modelos con registro en la UE y ninguno todavía en dos jurisdicciones a la vez: EUDAMED y la FDA no comparten UDI-DI en esta muestra, y las marcas o modelos no coinciden verbatim.
+  - Registros: +108 692 (186 837).
+  - EMDN: +1 código que no está en V2 (`W0105040619`, de EUDAMED, sin nombre publicado).
+  - Tipos con al menos un modelo: 2 976 (+548).
+  - Fusiones `same-registry-id`: 107 (SRN). A revisión: 233 `name-match-conflicting-ids`, porque el mismo nombre aparece con SRN distintos y no se fusiona.
+  - Listados del sector: 148 empresas cruzan con un fabricante (+18).
+- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada3.txt`).
+- **Descartadas**: ninguna nueva.
 
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
