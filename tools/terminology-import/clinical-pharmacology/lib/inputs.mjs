@@ -1,7 +1,7 @@
 // Lectura de lo YA descargado (sin red): productos de CIMA, maestra ATC, LINAME
 // y vademécum, y el universo de ATC 5 que se busca en las demás fuentes.
 
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
@@ -98,11 +98,28 @@ export function readEml() {
 }
 
 /**
+ * Registros de LactMed desde la caché (fetch-lactmed.mjs): iterador de `{ xml, retrievedAt }` (se leen de a
+ * uno) y Map(id LM… → accession NBK…). null si no se bajó.
+ */
+export function readLactmed() {
+  const dir = cpCache('lactmed', 'nxml');
+  if (!existsSync(dir)) return null;
+  const names = readdirSync(dir).filter((n) => n.endsWith('.nxml')).sort();
+  const retrievedAt = retrievedAtOf(cpCache('lactmed', 'lactmed_NBK501922.tar.gz'));
+  const accessions = new Map(Object.entries(readJsonIfExists(cpCache('lactmed', 'accessions.json')) ?? {}));
+  return {
+    accessions,
+    *records() {
+      for (const n of names) yield { xml: readFileSync(join(dir, n), 'utf8'), retrievedAt };
+    },
+  };
+}
+
+/**
  * set_id de openFDA → si la etiqueta trae UNII (`openfda.unii`). Recorre las
  * particiones bajadas en streaming. Vacío si openFDA no se bajó.
  */
 export async function openFdaSetIndex() {
-  const { readdirSync } = await import('node:fs');
   const { zipResults } = await import('./json-stream.mjs');
   const dir = join(cpCache('openfda'), 'label');
   const out = new Map();

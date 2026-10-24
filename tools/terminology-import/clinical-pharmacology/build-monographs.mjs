@@ -22,7 +22,8 @@ import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, 
 import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
 import { emlSections, isCurrentRecommendation } from './lib/eml.mjs';
-import { readAllInputs, readBridge, readDailyMedIdentities, readEma, readEml } from './lib/inputs.mjs';
+import { lactmedIdentity, lactmedSections } from './lib/lactmed.mjs';
+import { readAllInputs, readBridge, readDailyMedIdentities, readEma, readEml, readLactmed } from './lib/inputs.mjs';
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
@@ -38,6 +39,8 @@ const NO_EMA = has('--no-ema');
 const NO_EML = has('--no-eml');
 /** `--no-dailymed`: arma sin las identidades SPL de DailyMed (medición por pasada). */
 const NO_DAILYMED = has('--no-dailymed');
+/** `--no-lactmed`: arma sin LactMed (medición por pasada). */
+const NO_LACTMED = has('--no-lactmed');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -75,6 +78,15 @@ const OPENFDA_TYPES = new Set(['HUMAN PRESCRIPTION DRUG', 'HUMAN OTC DRUG']);
  * candidatos → se enlaza; GSRS sin ATC + RxNav único → se enlaza.
  * Pasada A: identidades y enlace; pasada B: texto completo de las de referencia.
  */
+/** UNII de los principios → ATC 5, con la misma regla para toda fuente (GSRS + RxNav + desempate AEMPS). */
+function uniiDecider({ bridges, gsrs, inUse, rxnavByMoieties = rxnavIndex(bridges.values(), gsrs) }) {
+  return (unii) => {
+    const g = gsrs ? linkUniiSet(unii, gsrs) : { status: 'none', atc: null, rule: null, moieties: [], candidates: [] };
+    const decided = combineLinks(g, rxnavByMoieties.get(moietiesOf(unii, gsrs).join('+')) ?? [], { inUse });
+    return { g, decided };
+  };
+}
+
 async function openFdaLinked({ bridges, gsrs, inUse, dailymed }) {
   const rxnavByMoieties = rxnavIndex(bridges.values(), gsrs);
   const link = {
@@ -88,11 +100,7 @@ async function openFdaLinked({ bridges, gsrs, inUse, dailymed }) {
   const groups = new Map(); // atc → Map(uniiKey → { ids, rules:Set })
   const ambiguous = new Map(); // fracciones→candidatos → etiquetas (las que siguen sin enlazar)
   const seenSetIds = new Set();
-  const decide = (unii) => {
-    const g = gsrs ? linkUniiSet(unii, gsrs) : { status: 'none', atc: null, rule: null, moieties: [], candidates: [] };
-    const decided = combineLinks(g, rxnavByMoieties.get(moietiesOf(unii, gsrs).join('+')) ?? [], { inUse });
-    return { g, decided };
-  };
+  const decide = uniiDecider({ bridges, gsrs, inUse, rxnavByMoieties });
   for await (const { label } of openFdaLabels()) {
     link.scanned++;
     if (label.set_id) seenSetIds.add(label.set_id);
@@ -244,6 +252,48 @@ async function main() {
     }
   }
 
+  // LactMed (NLM): secciones de lactancia, enlazadas por los UNII del registro con la misma regla que openFDA.
+  const lactmedRaw = NO_LACTMED ? null : readLactmed();
+  const lactmedByAtc = new Map();
+  const lactmedStats = { records: 0, withoutUnii: 0, withoutSections: 0, linked: 0, final: {}, duplicateSections: 0 };
+  if (lactmedRaw) {
+    const decide = uniiDecider({ bridges, gsrs, inUse });
+    for (const { xml, retrievedAt } of lactmedRaw.records()) {
+      const id = lactmedIdentity(xml);
+      if (!id.id) continue;
+      lactmedStats.records++;
+      if (id.unii.length === 0) {
+        lactmedStats.withoutUnii++;
+        continue;
+      }
+      const { decided } = decide(id.unii);
+      lactmedStats.final[decided.rule] = (lactmedStats.final[decided.rule] ?? 0) + 1;
+      if (!decided.atc) continue;
+      const rows = lactmedSections(xml, retrievedAt, {
+        accession: lactmedRaw.accessions.get(id.id) ?? null,
+        selection: { criterion: 'Registro de LactMed cuyos UNII enlazan, por código, a este ATC 5 (misma regla GSRS + RxNav que openFDA).', group: { unii: id.unii, atcLinkRule: decided.rule } },
+      });
+      if (rows.length === 0) {
+        lactmedStats.withoutSections++;
+        continue;
+      }
+      lactmedStats.linked++;
+      if (!lactmedByAtc.has(decided.atc)) lactmedByAtc.set(decided.atc, new Map());
+      const seen = lactmedByAtc.get(decided.atc);
+      for (const r of rows) {
+        const k = `${r.key}|${r.textSha256}`;
+        if (seen.has(k)) {
+          const kept = seen.get(k);
+          kept.document.alsoIn = [...(kept.document.alsoIn ?? []), r.document.id];
+          lactmedStats.duplicateSections++;
+          continue;
+        }
+        seen.set(k, r);
+      }
+      if (!universe.has(decided.atc)) universe.set(decided.atc, ['nlm-lactmed']);
+    }
+  }
+
   const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, cimaDuplicateSections: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
@@ -311,6 +361,7 @@ async function main() {
     }
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of emlByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
+    for (const s of lactmedByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     const externalDocuments = fda.pointers.get(code) ?? [];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
@@ -325,9 +376,10 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
-    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', 'openFDA', 'GSRS', 'RxNav'].join(', '),
+    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', NO_LACTMED ? 'sin LactMed' : 'LactMed', 'openFDA', 'GSRS', 'RxNav'].join(', '),
     ema: emaStats,
     eml: emlStats,
+    lactmed: lactmedStats,
     universe: universe.size,
     monographs: out.length,
     sections: out.reduce((n, m) => n + m.sections.length, 0),

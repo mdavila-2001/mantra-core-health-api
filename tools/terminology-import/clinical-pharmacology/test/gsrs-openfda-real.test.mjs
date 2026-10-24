@@ -186,3 +186,24 @@ test('eEML real: ATC 5 asignado por la OMS, indicación CIE-11 y formulaciones l
   assert.deepEqual(codeine.atc5, [], 'la OMS no asigna ATC a esta recomendación: no se enlaza por nombre');
   assert.deepEqual(recommendationIdsFromHome('<a href="https://list.essentialmeds.org/recommendations/41">x</a><a href="/recommendations/17">y</a><a href="/recommendations/41">'), [17, 41]);
 });
+
+// --- LactMed real: NXML del paquete de NCBI (actualizado 2026-10-22): LM514, LM995 y LM1337 ------------
+import { LACTMED_SOURCE, accessionsFromSummary, lactmedIdentity, lactmedSections } from '../lib/lactmed.mjs';
+
+test('LactMed real: identidad por UNII, secciones de lactancia literales con atribución de la NLM', () => {
+  const xml = (id) => readRaw(join(HERE, 'fixtures', 'lactmed', `${id}.nxml`), 'utf8');
+  assert.deepEqual(lactmedIdentity(xml('LM514')), { id: 'LM514', title: 'Colestipol', revised: '2026-07-15', unii: ['X7D10K905G'], casrn: '50925-79-6' });
+  const rows = lactmedSections(xml('LM514'), WHEN, { accession: 'NBK501393' }).map(assertSection);
+  assert.deepEqual(rows.map((r) => r.section.number), ['Summary of Use during Lactation', 'Drug Levels', 'Effects in Breastfed Infants', 'Effects on Lactation and Breastmilk', 'Alternate Drugs to Consider']);
+  assert.ok(rows.every((r) => r.key === 'pregnancy_lactation' && r.source === LACTMED_SOURCE && r.language === 'en'));
+  assert.equal(rows[0].text, "Colestipol is a nonabsorbable resin. Because it does not enter the mother's bloodstream, it will not reach the infant via breastmilk. It is acceptable for use during lactation.");
+  assert.equal(rows[0].document.url, 'https://www.ncbi.nlm.nih.gov/books/NBK501393/');
+  assert.equal(rows[0].document.effectiveDate, '2026-07-15');
+  assert.match(rows[0].license, /Courtesy of the U\.S\. National Library of Medicine/);
+  assert.match(rows[0].disclaimer, /not meant as a substitute for professional judgment/);
+  assert.match(rows[1].text, /^Maternal Levels\. Relevant published information was not found as of the revision date\./, 'el rótulo en cursiva queda en el texto');
+  assert.deepEqual(lactmedIdentity(xml('LM995')).unii, [], 'sin UNII: no se enlaza (se cuenta)');
+  assert.deepEqual(lactmedIdentity(xml('LM1337')).unii, ['2XLN4Y044H', '7AXV542LZ4'], 'todos los UNII del registro; el puente los reduce a la fracción activa');
+  const sum = { result: { uids: ['1', '2'], 1: { id: 'lactmed/chapter/LM514/PMC', book: 'lactmed', rtype: 'chapter', accessionid: 'NBK501393' }, 2: { id: 'lactmed/LM514.s1/PMC', book: 'lactmed', rtype: 'section', accessionid: 'NBK501393' } } };
+  assert.deepEqual([...accessionsFromSummary(sum)], [['LM514', 'NBK501393']], 'sólo capítulos');
+});
