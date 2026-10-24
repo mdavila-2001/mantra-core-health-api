@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   requireTenantId,
   ResourceNotFoundException,
@@ -144,6 +145,29 @@ export class ClaimsService {
           throw new ConflictException('El pedido ya tiene un reclamo activo');
         await this.validatePriorAuthorization(tx, dto);
       } else {
+        // El prestador que cobra es una práctica de la organización activa: sin
+        // esto, quien cobra en una organización podría presentar el reclamo a
+        // nombre de la práctica de otra. Mismo 403 que «no existe». La plataforma
+        // (SUPERADMIN) que no indica organización conserva su acceso excepcional;
+        // si la indica, rige el mismo alcance que para todos.
+        const platformWithoutTenant =
+          getCurrentTenantId() === undefined &&
+          (actor.roles ?? []).includes('SUPERADMIN');
+        if (!platformWithoutTenant) {
+          const practiceIds = await this.practiceIdsInScope();
+          if (
+            !this.claimBelongsTo(
+              {
+                billingProviderTypeConceptId:
+                  INS.BILLING_PROVIDER_TYPE_PRACTICE,
+                billingProviderEntityId: dto.billingProviderEntityId,
+              },
+              practiceIds,
+            )
+          ) {
+            throw this.accessDenied();
+          }
+        }
         const coverage = await this.coverage.findCoverage(
           tx,
           dto.patientCoverageId,
