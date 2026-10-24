@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { UniqueConstraintViolationException } from '@mikro-orm/postgresql';
 import { LedgerService } from './ledger.service';
 import { ACCT } from '../accounting.concepts';
 import {
@@ -160,6 +161,120 @@ describe('LedgerService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  /*
+   * ACC-02 — `uq_journal_transactions_transaction_number` es global y la lectura
+   * previa es por práctica: dos prácticas con el mismo número (o una carrera en
+   * la misma) pasan la lectura y la base responde con `unique_violation`. Ese
+   * error tiene que salir como el mismo 409 catalogado, no como error de base.
+   */
+  describe('número de asiento y unique_violation (ACC-02)', () => {
+    const NUMBER_CONSTRAINT = 'uq_journal_transactions_transaction_number';
+    const dto = {
+      practiceId: 'p1',
+      transactionNumber: 'JT-1',
+      transactionDate: '2026-01-31',
+      lines: [
+        { accountId: 'acc-d', direction: 'DEBIT', amount: '100.00' },
+        { accountId: 'acc-c', direction: 'CREDIT', amount: '100.00' },
+      ],
+    };
+    const uniqueViolation = (constraint: string) =>
+      new UniqueConstraintViolationException(
+        Object.assign(new Error('duplicate key value'), {
+          code: '23505',
+          constraint,
+        }),
+      );
+    const practitioner = {
+      id: 'u-1',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'hp-1',
+    } as any;
+
+    it('postJournal: la colisión que sólo detecta la base es 409 JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS', async () => {
+      const d = build();
+      d.tx.flush.mockRejectedValueOnce(uniqueViolation(NUMBER_CONSTRAINT));
+
+      const error = await d.service
+        .postJournal(dto as any, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getStatus()).toBe(409);
+      expect((error as ConflictException).reason).toBe(
+        'JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS',
+      );
+      expect(d.journalRepo.createLedgerEntry).not.toHaveBeenCalled();
+    });
+
+    it('createDraft: la misma traducción', async () => {
+      const d = build();
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['p1'],
+      );
+      d.tx.flush.mockRejectedValueOnce(uniqueViolation(NUMBER_CONSTRAINT));
+
+      const error = await d.service
+        .createDraft(dto as any, practitioner)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).reason).toBe(
+        'JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS',
+      );
+    });
+
+    it('la traducción no filtra el valor en conflicto del motor ni el nombre de la restricción', async () => {
+      const d = build();
+      d.tx.flush.mockRejectedValueOnce(uniqueViolation(NUMBER_CONSTRAINT));
+
+      const error = (await d.service
+        .postJournal(dto as any, actor)
+        .catch((e: unknown) => e)) as ConflictException;
+
+      expect(JSON.stringify(error.getResponse())).not.toContain(
+        NUMBER_CONSTRAINT,
+      );
+      expect(error.message).not.toContain('duplicate key');
+    });
+
+    it('una unique_violation de OTRA restricción no se disfraza de número duplicado', async () => {
+      const d = build();
+      const other = uniqueViolation('uq_otra_cosa');
+      d.tx.flush.mockRejectedValueOnce(other);
+
+      await expect(d.service.postJournal(dto as any, actor)).rejects.toBe(
+        other,
+      );
+    });
+
+    it('un error que no es unique_violation se propaga igual', async () => {
+      const d = build();
+      const boom = new Error('conexión caída');
+      d.tx.flush.mockRejectedValueOnce(boom);
+
+      await expect(d.service.postJournal(dto as any, actor)).rejects.toBe(boom);
+    });
+
+    it('la lectura previa sigue dando el 409 catalogado para el duplicado visible en la práctica', async () => {
+      const d = build();
+      d.journalRepo.findByTransactionNumber.mockResolvedValue({ id: 'dup' });
+
+      const error = await d.service
+        .postJournal(dto as any, actor)
+        .catch((e: unknown) => e);
+
+      expect((error as ConflictException).reason).toBe(
+        'JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS',
+      );
+      expect(d.journalRepo.findByTransactionNumber).toHaveBeenCalledWith(
+        expect.anything(),
+        'p1',
+        'JT-1',
+      );
     });
   });
 

@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import {
+  EntityManager,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
@@ -38,6 +41,25 @@ import {
   PracticeTenantLookupService,
   practiceAccessScope,
 } from '../../practice/services';
+
+/**
+ * Restricción única del número de asiento en la base. Hoy es global (sólo
+ * `transaction_number`); el servicio la reconoce por prefijo para seguir
+ * traduciéndola si pasa a ser por práctica con el mismo nombre base.
+ */
+const TRANSACTION_NUMBER_CONSTRAINT =
+  'uq_journal_transactions_transaction_number';
+
+/** Si la `unique_violation` es la del número de asiento (por el nombre de la restricción). */
+function isTransactionNumberConstraint(
+  error: UniqueConstraintViolationException,
+): boolean {
+  const constraint = (error as { constraint?: unknown }).constraint;
+  return (
+    typeof constraint === 'string' &&
+    constraint.startsWith(TRANSACTION_NUMBER_CONSTRAINT)
+  );
+}
 
 /** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
 const JOURNAL_AUDIT_ENTITY = 'journal_transaction';
@@ -172,8 +194,10 @@ export class LedgerService {
    * conserva para no romper integraciones/tests existentes y está controlado por:
    *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
    *     rol con autoridad de aprobación; equivale a auto-aprobar el asiento.
-   *   - IDEMPOTENCIA: `transactionNumber` es único por práctica (409 si se repite),
-   *     de modo que un reintento no duplica el asiento.
+   *   - IDEMPOTENCIA: `transactionNumber` se rechaza con 409 si se repite, de modo
+   *     que un reintento no duplica el asiento. La lectura previa es por práctica y
+   *     el índice de la base es global (ver #778): la colisión que sólo ve la base
+   *     sale igual como 409 (`translateNumberClash`).
    * El posteo efectivo (líneas del mayor + `postedAt`) ocurre aquí, igual que en
    * `post`, aplicando las mismas validaciones (balance de partida doble y periodo
    * ABIERTO).
@@ -192,7 +216,20 @@ export class LedgerService {
     );
 
     const { debitCents } = this.assertBalanced(dto.lines);
+    const number = dto.transactionNumber ?? this.generateNumber('JT');
 
+    return this.translateNumberClash(number, () =>
+      this.postJournalInTransaction(dto, actor, number, debitCents),
+    );
+  }
+
+  /** Cuerpo transaccional de {@link postJournal}. */
+  private postJournalInTransaction(
+    dto: PostJournalDto,
+    actor: AuthenticatedUser,
+    number: string,
+    debitCents: number,
+  ): Promise<JournalTransactionResponseDto> {
     return this.em.transactional(async (tx) => {
       // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO.
       if (dto.fiscalPeriodId) {
@@ -221,7 +258,6 @@ export class LedgerService {
         }
       }
 
-      const number = dto.transactionNumber ?? this.generateNumber('JT');
       const clash = await this.journalRepo.findByTransactionNumber(
         tx,
         dto.practiceId,
@@ -290,6 +326,39 @@ export class LedgerService {
   }
 
   /**
+   * Ejecuta el alta de un asiento y traduce la `unique_violation` del número a
+   * un 409 catalogado.
+   *
+   * La lectura previa (`findByTransactionNumber`) es por práctica y el índice
+   * único de la base es global, y además hay carreras entre dos altas del mismo
+   * número: ambos casos pasan la lectura y fallan recién al escribir. Sin esta
+   * traducción salían como error de base. Sólo se traduce la restricción del
+   * número; cualquier otro error se propaga tal cual. El mensaje no dice «en la
+   * práctica» porque la colisión puede ser con otra práctica, y no lleva el
+   * detalle del motor (que incluye el valor en conflicto).
+   */
+  private async translateNumberClash<T>(
+    number: string,
+    run: () => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await run();
+    } catch (error) {
+      if (
+        error instanceof UniqueConstraintViolationException &&
+        isTransactionNumberConstraint(error)
+      ) {
+        throw new ConflictException(
+          'El número de asiento ya está en uso',
+          { transactionNumber: number },
+          AccountingErrorReason.JOURNAL_TRANSACTION_NUMBER_ALREADY_EXISTS,
+        );
+      }
+      throw error;
+    }
+  }
+
+  /**
    * ALOVIDA C-17 — estado inicial DRAFT. Registra el asiento y sus líneas del mayor
    * SIN postearlo: queda en DRAFT (`postedAt` nulo). El efecto en el mayor se aplaza
    * al comando `post`. Se valida la partida doble por adelantado para no aceptar un
@@ -301,9 +370,21 @@ export class LedgerService {
   ): Promise<JournalTransactionResponseDto> {
     const { debitCents } = this.assertBalanced(dto.lines);
     await this.assertPractitionerOwnsPractice(actor, dto.practiceId);
+    const number = dto.transactionNumber ?? this.generateNumber('JT');
 
+    return this.translateNumberClash(number, () =>
+      this.createDraftInTransaction(dto, actor, number, debitCents),
+    );
+  }
+
+  /** Cuerpo transaccional de {@link createDraft}. */
+  private createDraftInTransaction(
+    dto: PostJournalDto,
+    actor: AuthenticatedUser,
+    number: string,
+    debitCents: number,
+  ): Promise<JournalTransactionResponseDto> {
     return this.em.transactional(async (tx) => {
-      const number = dto.transactionNumber ?? this.generateNumber('JT');
       const clash = await this.journalRepo.findByTransactionNumber(
         tx,
         dto.practiceId,
