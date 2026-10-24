@@ -55,7 +55,7 @@
 | H3.S1.M1 | Pasadas 1-8 registradas | 7 y 8 = 0 | tabla en el doc | HECHO |
 | H3.S1.M2 | Clasificación de las 191 ontologías activas de OBO Foundry | 191/191 | lista en el doc | HECHO |
 | H3.S2.M1 | Etiquetas ES de Wikidata | designaciones ES cargadas | `import-wikidata-es-labels.mjs` | BLOQUEADO (query.wikidata.org 403) |
-| H3.S3.M1 | PR contra `dev` sin merge | PR abierto | URL del PR | TODO |
+| H3.S3.M1 | PR contra `dev` sin merge | PR abierto | https://github.com/mdavila-2001/mantra-core-health-api/pull/687 | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

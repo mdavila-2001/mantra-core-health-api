@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `claude/vigilant-ramanujan-ms3xcw` (PR contra `dev`)
 - Peldaño de evidencia alcanzado: `VERIFIED` para el ETL (camino real fetch → build → load ejercitado contra Postgres 16 con el DDL del módulo 03, persistencia contada, re-run 0). No `REGRESSION_VERIFIED`: no se corrió contra el stack completo con el glosario cargado, y la suite completa de Jest no se corrió (sólo los specs dirigidos).
-- Avance: 15 / 17 microtareas HECHO (88 %). 2 BLOQUEADO.
+- Avance: 15 / 17 microtareas HECHO (88 %). 2 BLOQUEADO. PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/687
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -14,6 +14,7 @@
 | H2.S1.M3 | Enlace por código a una enfermedad ya cargada | concepto de prueba `J13` en `icd10cm` de la base desechable + `load --only ncbitaxon-medical` | 1 relación `infectious-agent` J13 → *Streptococcus pneumoniae* (declarada por Mondo y DOID, deduplicada); concepto de prueba borrado |
 | H2.S2.M1 | Carga e idempotencia | `load-dictionaries.mjs --apply` ×4 | 1.ª: 46 s, 111 389 conceptos, 7 601 maps; 2.ª: 0; 3.ª: +13 maps (defecto corregido, ver Desvíos); 4.ª: 0 (`evidencia/load-corrida-*.json`) |
 | H3.S1 | Pasadas 1-8, 7 y 8 en 0; registro OBO 191/191 | — | `docs/seed-research/medical-dictionaries.md` |
+| H3.S3.M1 | PR contra `dev`, sin merge | `create_pull_request` | https://github.com/mdavila-2001/mantra-core-health-api/pull/687 |
 
 ## A medias
 ninguna
@@ -23,7 +24,6 @@ ninguna
 |---|---|---|
 | H2.S2.M2 | BLOQUEADO | Correr `load-dictionaries.mjs --apply` contra el stack con el glosario cargado (la sesión no tenía el stack ni el corpus del glosario, que vive en la Mac del equipo). Es lo que mide los enlaces reales por MeSH/TA98/CIE-10. |
 | H3.S2.M1 | BLOQUEADO | Habilitar `query.wikidata.org` y `www.wikidata.org` en la red del entorno y correr `import-wikidata-es-labels.mjs`. |
-| H3.S3.M1 | TODO → se cierra con el PR | — |
 
 ## Evidencia
 ```
