@@ -16,12 +16,14 @@ pierde al cerrar la sesión): `pack-data.mjs` lo copia comprimido a `data/`, en 
 pasada. Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson`.
 
 ```sh
+# Con proxy de salida, anteponer NODE_USE_ENV_PROXY=1 a los fetch-*.mjs (el fetch de Node no lee HTTPS_PROXY).
 D=tools/terminology-import/clinical-pharmacology
 node $D/fetch-cima.mjs --plan                 # cuántos pedidos faltan
 node $D/fetch-cima.mjs                        # listado, detalle, maestra ATC, fichas completas, notas (reanudable)
 node $D/fetch-cima.mjs --granularity product  # pasada exhaustiva: todas las fichas segmentadas
 node $D/fetch-rxnorm.mjs                      # ATC 5 → RxCUI → UNII (por código)
-node $D/fetch-openfda.mjs                     # particiones de drug/label (descarga masiva)
+node $D/fetch-openfda.mjs                     # particiones de drug/label (descarga masiva, ~1,8 GB)
+node $D/fetch-gsrs.mjs                        # sustancias FDA GSRS → out/gsrs-entries.ndjson (puente UNII ↔ WHO-ATC)
 node $D/build-monographs.mjs                  # sin red → out/monographs.ndjson
 node $D/coverage-report.mjs                   # out/coverage.json + coverage.md
 node $D/load-clinical-pharmacology.mjs --dry-run
@@ -32,6 +34,12 @@ node --test $D/test/*.test.mjs
 ```
 
 Medido en un Postgres 16 desechable (DDL de `database/SQL/00_shared` + `03_terminology`, sin la
-API) con la ficha real de bencilpenicilina procaína (nº reg. 15419): 1.ª carga 5 conceptos,
-3 designaciones, 4 IS_A, 14 propiedades, 1 `concept_map` a `vademecum`; 2.ª carga 0 filas nuevas y
-0 borradas; con la ficha en otra versión, 2 retiradas y 2 nuevas, y el total se mantiene.
+API), con el corpus de la pasada 1 (openFDA + GSRS, 1 033 monografías):
+- 1.ª carga: 1 696 conceptos, 969 designaciones, 1 682 IS_A, 24 137 propiedades y 199
+  `concept_maps` a `vademecum`, en 9 s. `concept_properties` ocupa 71 MB.
+- 2.ª carga: 0 filas nuevas y 0 borradas.
+- Con el valor de las secciones cambiado (se agregó el aviso de openFDA): 18 853 filas retiradas
+  y 18 853 nuevas; la corrida siguiente vuelve a 0/0.
+
+`build-monographs` y `load-clinical-pharmacology` se corren con `node --max-old-space-size=8192`,
+porque el armado recorre las 263 000 etiquetas dos veces y la carga lee ~108 MB de NDJSON.

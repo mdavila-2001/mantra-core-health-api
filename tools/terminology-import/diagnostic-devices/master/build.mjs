@@ -19,7 +19,7 @@
 //   … --skip-regions                                                 (solo fuentes propias)
 // =============================================================================
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -111,6 +111,37 @@ for (const r of pcdRows) taxonomy.addNode(pcdNode(r, pcdProvenance, ivdPanels));
 console.log(
   `taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
 );
+
+// --- 1a. Suplemento del PCD: solo los product codes que la copia literal no
+// tiene, del foiclass más nuevo de bjoleary/fdadata (ver
+// extract-pcd-supplement.py y data/fda-pcd-supplement.json).
+const pcdSupplementPath = join(HERE, 'data', 'fda-pcd-supplement.json');
+let pcdSupplementAdded = 0;
+if (existsSync(pcdSupplementPath)) {
+  const sup = JSON.parse(readFileSync(pcdSupplementPath, 'utf8'));
+  for (const r of sup.rows) {
+    if (taxonomy.nodes.has(`fda-product-code|${r.PRODUCTCODE}`)) continue;
+    const node = pcdNode(
+      r,
+      {
+        source: sup.source,
+        sourceUrl: sup.officialUrl,
+        sourceVersion: `git:bjoleary/fdadata@${sup.via.commit.slice(0, 12)} (${sup.via.commitDate.slice(0, 10)})`,
+        retrievedAt,
+        mirror: sup.via,
+        transformation: sup.transformation,
+      },
+      ivdPanels,
+    );
+    node.attributes.reviewPanelName = r.reviewPanelName;
+    node.attributes.submissionType = r.submissionType;
+    taxonomy.addNode(node);
+    pcdSupplementAdded++;
+  }
+  console.log(
+    `suplemento del PCD (bjoleary/fdadata): ${pcdSupplementAdded} product codes que la copia literal no tiene`,
+  );
+}
 
 // --- 1b. EMDN completa (copia fijada + verificación con una segunda copia) ---
 const emdnFile = MIRRORS['batirmedical-emdn'].files.emdn;

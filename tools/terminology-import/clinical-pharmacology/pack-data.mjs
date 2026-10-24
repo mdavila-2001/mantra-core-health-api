@@ -10,7 +10,7 @@
 // reproducen con los fetchers, que guardan URL, fecha y sha256 en sus metas.
 //
 // `data/MANIFEST.json` lista cada archivo con su sha256, bytes y filas.
-// Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson`.
+// Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson` (ídem `gsrs-entries`).
 //
 // Uso: node tools/terminology-import/clinical-pharmacology/pack-data.mjs
 // =============================================================================
@@ -64,16 +64,18 @@ function main() {
     manifest.files.push({ name, from, bytes: gz.length, sha256: sha256(gz), rows });
   };
 
-  const ndjson = cpOut('monographs.ndjson');
-  if (existsSync(ndjson)) {
+  manifest.ndjson = {};
+  for (const name of ['monographs', 'gsrs-entries']) {
+    const ndjson = cpOut(`${name}.ndjson`);
+    if (!existsSync(ndjson)) continue;
     const text = readFileSync(ndjson, 'utf8');
     const parts = splitNdjson(text);
-    parts.forEach((p, i) => add(`monographs.part-${String(i + 1).padStart(3, '0')}.ndjson.gz`, p.gz, p.rows, 'out/monographs.ndjson'));
-    manifest.monographsSha256 = sha256(Buffer.from(text, 'utf8'));
-    manifest.monographs = parts.reduce((n, p) => n + p.rows, 0);
+    parts.forEach((p, i) => add(`${name}.part-${String(i + 1).padStart(3, '0')}.ndjson.gz`, p.gz, p.rows, `out/${name}.ndjson`));
+    manifest.ndjson[name] = { sha256: sha256(Buffer.from(text, 'utf8')), rows: parts.reduce((n, p) => n + p.rows, 0), parts: parts.length };
   }
   const small = [
     ['out/monographs.meta.json', cpOut('monographs.meta.json')],
+    ['out/gsrs-entries.meta.json', cpOut('gsrs-entries.meta.json')],
     ['out/coverage.json', cpOut('coverage.json')],
     ['out/coverage.md', cpOut('coverage.md')],
     ['out/validate-links.json', cpOut('validate-links.json')],

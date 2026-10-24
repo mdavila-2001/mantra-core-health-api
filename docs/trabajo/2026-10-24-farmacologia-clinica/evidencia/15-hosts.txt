@@ -1,0 +1,12 @@
+16:01:49Z https://cima.aemps.es/cima/rest/medicamentos?pagina=1 -> 000
+16:01:49Z https://rxnav.nlm.nih.gov/REST/rxcui.json?idtype=ATC&id=N02BE01 -> 000
+16:01:49Z https://dailymed.nlm.nih.gov/dailymed/services/v2/spls.json?pagesize=1 -> 000
+16:01:50Z https://www.ema.europa.eu/en/medicines/download-medicine-data -> 000
+16:01:50Z https://open.fda.gov/license/ -> 000
+16:01:50Z https://api.fda.gov/download.json -> 200
+--- proxy (recentRelayFailures)
+2026-10-24T16:01:49.702Z cima.aemps.es:443 connect_rejected gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-24T16:01:49.931Z rxnav.nlm.nih.gov:443 connect_rejected gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-24T16:01:50.138Z dailymed.nlm.nih.gov:443 connect_rejected gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-24T16:01:50.379Z www.ema.europa.eu:443 connect_rejected gateway answered 403 to CONNECT (policy denial or upstream failure)
+2026-10-24T16:01:50.616Z open.fda.gov:443 connect_rejected gateway answered 403 to CONNECT (policy denial or upstream failure)

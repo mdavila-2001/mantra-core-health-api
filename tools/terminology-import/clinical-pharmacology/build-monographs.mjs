@@ -12,17 +12,18 @@
 // Uso: node tools/terminology-import/clinical-pharmacology/build-monographs.mjs [--granularity route|product]
 // =============================================================================
 
-import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
+import { readNdjson, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from './lib/cima.mjs';
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
+import { buildGsrsIndex, gsrsDisplayFor, linkUniiSet } from './lib/gsrs.mjs';
 import { readAllInputs, readBridge } from './lib/inputs.mjs';
+import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
-import { MONOGRAPHS_META, MONOGRAPHS_NDJSON, ftPath, ftSectionPath, notesPath, openFdaDir } from './lib/paths.mjs';
+import { MONOGRAPHS_META, MONOGRAPHS_NDJSON, cpOut, ftPath, ftSectionPath, notesPath, openFdaDir } from './lib/paths.mjs';
 
 const { opt } = parseArgs();
 const GRANULARITY = opt('--granularity', 'route');
@@ -38,38 +39,94 @@ function readCimaDoc(nreg) {
   return { doc: parts.filter(Array.isArray).flat(), retrievedAt };
 }
 
-/** Itera las etiquetas de cada partición bajada (zip → JSON en memoria, una partición por vez). */
-function* openFdaLabels() {
+/** Itera las etiquetas de cada partición bajada, en streaming (una etiqueta por vez). */
+async function* openFdaLabels() {
   const dir = join(openFdaDir(), 'label');
   if (!existsSync(dir)) return;
   const zips = readdirSync(dir).filter((n) => n.endsWith('.zip')).sort();
   for (const zip of zips) {
     const path = join(dir, zip);
-    const data = JSON.parse(execFileSync('unzip', ['-p', path], { maxBuffer: 1 << 30 }).toString('utf8'));
     const retrievedAt = retrievedAtOf(path);
-    for (const label of data.results ?? []) yield { label, partition: zip, retrievedAt };
+    for await (const label of zipResults(path)) yield { label, partition: zip, retrievedAt };
   }
 }
 
-function openFdaByUniiSet(wantedKeys) {
-  if (wantedKeys.size === 0) return { refs: new Map(), labels: new Map(), scanned: 0 };
-  // Pasada A: identidades de las etiquetas cuyo conjunto de UNII se busca.
-  const identities = new Map();
-  let scanned = 0;
-  for (const { label } of openFdaLabels()) {
-    scanned++;
-    const id = labelIdentity(label);
-    const key = id.unii.join('+');
-    if (!wantedKeys.has(key)) continue;
-    if (!identities.has(key)) identities.set(key, []);
-    identities.get(key).push(id);
+const OPENFDA_TYPES = new Set(['HUMAN PRESCRIPTION DRUG', 'HUMAN OTC DRUG']);
+
+/**
+ * Etiquetas de openFDA enlazadas a un ATC 5 SÓLO por código: por el GSRS
+ * (fracción activa + WHO-ATC, `lib/gsrs.mjs#linkUniiSet`) y/o por el puente
+ * RxNav (conjunto exacto de UNII). Pasada A: identidades y enlace; pasada B:
+ * texto completo sólo de las etiquetas de referencia.
+ */
+async function openFdaLinked({ bridges, gsrs }) {
+  const rxnavByKey = new Map();
+  for (const b of bridges.values()) {
+    if (!b?.complete) continue;
+    const key = b.unii.join('+');
+    if (!rxnavByKey.has(key)) rxnavByKey.set(key, []);
+    rxnavByKey.get(key).push(b.atc);
   }
-  const refs = new Map([...identities.entries()].map(([key, ids]) => [key, referenceLabels(ids, key.split('+'))]));
-  // Pasada B: el texto completo sólo de las etiquetas elegidas.
+  const link = { scanned: 0, humanRxOrOtc: 0, withoutUnii: 0, gsrs: { unique: 0, 'who-atc-50-series': 0, ambiguous: 0, none: 0, 'unknown-unii': 0 }, rxnav: 0 };
+  const groups = new Map(); // atc → Map(uniiKey → { ids, rules:Set })
+  const ambiguous = new Map(); // fracciones→candidatos → etiquetas
+  for await (const { label } of openFdaLabels()) {
+    link.scanned++;
+    const id = labelIdentity(label);
+    if (!OPENFDA_TYPES.has(id.productType)) continue;
+    link.humanRxOrOtc++;
+    if (id.unii.length === 0) {
+      link.withoutUnii++;
+      continue;
+    }
+    const key = id.unii.join('+');
+    const targets = new Map();
+    if (gsrs) {
+      const r = linkUniiSet(id.unii, gsrs);
+      if (r.status === 'linked') {
+        link.gsrs[r.rule]++;
+        targets.set(r.atc, `gsrs:${r.rule}`);
+      } else {
+        link.gsrs[r.status]++;
+        if (r.status === 'ambiguous') {
+          const k = `${r.moieties.join('+')}→${r.candidates.join(',')}`;
+          ambiguous.set(k, (ambiguous.get(k) ?? 0) + 1);
+        }
+      }
+    }
+    for (const atc of rxnavByKey.get(key) ?? []) {
+      link.rxnav++;
+      targets.set(atc, targets.has(atc) ? `${targets.get(atc)}+rxnav` : 'rxnav:exact-unii');
+    }
+    for (const [atc, rule] of targets) {
+      if (!groups.has(atc)) groups.set(atc, new Map());
+      const g = groups.get(atc);
+      if (!g.has(key)) g.set(key, { ids: [], rules: new Set() });
+      g.get(key).ids.push(id);
+      g.get(key).rules.add(rule);
+    }
+  }
+  const refs = new Map();
+  for (const [atc, byKey] of groups) {
+    const list = [];
+    for (const [key, { ids, rules }] of byKey) {
+      for (const ref of referenceLabels(ids, key.split('+'))) {
+        list.push({ ...ref, group: { ...ref.group, atc, atcLinkRule: [...rules].sort().join(', ') } });
+      }
+    }
+    refs.set(atc, list);
+  }
   const chosen = new Set([...refs.values()].flat().map((r) => r.identity.id));
   const labels = new Map();
-  for (const { label, retrievedAt } of openFdaLabels()) if (chosen.has(label.id)) labels.set(label.id, { label, retrievedAt });
-  return { refs, labels, scanned };
+  for await (const { label, retrievedAt } of openFdaLabels()) if (chosen.has(label.id)) labels.set(label.id, { label, retrievedAt });
+  link.ambiguousTop = [...ambiguous.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 40)
+    .map(([k, labels]) => {
+      const [moieties, candidates] = k.split('→');
+      return { moieties: moieties.split('+').map((u) => ({ unii: u, name: gsrs?.byUnii.get(u)?.name ?? null })), candidates: candidates.split(','), labels };
+    });
+  return { refs, labels, link };
 }
 
 async function main() {
@@ -80,11 +137,12 @@ async function main() {
   console.log(`=== Monografías: universo ${universe.size} ATC 5; CIMA ${products.length} medicamentos (${withoutAtc5.length} sin ATC 5) ===`);
 
   const bridges = new Map([...universe.keys()].map((c) => [c, readBridge(c)]));
-  const wanted = new Set([...bridges.values()].filter((b) => b?.complete).map((b) => b.unii.join('+')));
-  const fda = openFdaByUniiSet(wanted);
-  console.log(`[openfda] ${fda.scanned} etiquetas leídas; ${fda.labels.size} de referencia para ${fda.refs.size} conjuntos de UNII`);
+  const gsrs = existsSync(cpOut('gsrs-entries.ndjson')) ? buildGsrsIndex(readNdjson(cpOut('gsrs-entries.ndjson'))) : null;
+  const fda = await openFdaLinked({ bridges, gsrs });
+  console.log(`[openfda] ${fda.link.scanned} etiquetas leídas; ${fda.labels.size} de referencia en ${fda.refs.size} ATC 5`);
+  for (const code of [...fda.refs.keys()].sort()) if (!universe.has(code)) universe.set(code, ['openfda-gsrs']);
 
-  const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, skippedWithoutData: 0, uniiWithoutLabel: 0 };
+  const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
     const cimaProducts = byAtc.get(code) ?? [];
@@ -105,23 +163,29 @@ async function main() {
     }
     const bridge = bridges.get(code);
     const fdaPharmClasses = [];
-    if (bridge?.complete) {
-      const refs = fda.refs.get(bridge.unii.join('+')) ?? [];
-      if (refs.length === 0) stats.uniiWithoutLabel++;
-      for (const ref of refs) {
-        const hit = fda.labels.get(ref.identity.id);
-        if (!hit) continue;
-        for (const s of openFdaSections(hit.label, ref, hit.retrievedAt)) if (hasVersion(s)) sections.push(assertSection(s));
-        const pc = openFdaPharmClasses(hit.label, hit.retrievedAt);
-        if (pc) fdaPharmClasses.push(pc);
+    const refs = fda.refs.get(code) ?? [];
+    if (bridge?.complete && refs.length === 0) stats.uniiWithoutLabel++;
+    for (const ref of refs) {
+      const hit = fda.labels.get(ref.identity.id);
+      if (!hit) {
+        stats.fdaRefsWithoutLabel++;
+        continue;
       }
+      const rows = openFdaSections(hit.label, ref, hit.retrievedAt);
+      if (rows.length === 0) stats.fdaRefsWithoutMappedSections++;
+      for (const s of rows) {
+        if (hasVersion(s)) sections.push(assertSection(s));
+        else stats.fdaSectionsWithoutVersion++;
+      }
+      const pc = openFdaPharmClasses(hit.label, hit.retrievedAt);
+      if (pc) fdaPharmClasses.push(pc);
     }
     if (cimaProducts.length === 0 && sections.length === 0) {
       stats.skippedWithoutData++;
       continue;
     }
     const lin = liname.get(code);
-    const fallbackName = lin ? { display: lin.presentations[0].name, source: 'liname-bo' } : null;
+    const fallbackName = lin ? { display: lin.presentations[0].name, source: 'liname-bo', language: 'es' } : gsrs ? gsrsDisplayFor(code, gsrs) : null;
     out.push({ ...buildMonograph({ code, names, cimaProducts, sections, safetyNotes, rxnorm: bridge, fdaPharmClasses, fallbackName }), universeOrigin: origin });
   }
 
@@ -134,7 +198,8 @@ async function main() {
     sections: out.reduce((n, m) => n + m.sections.length, 0),
     sectionsBySource: out.flatMap((m) => m.sections).reduce((acc, s) => ({ ...acc, [s.source]: (acc[s.source] ?? 0) + 1 }), {}),
     cimaProductsWithoutAtc5: withoutAtc5.length,
-    openFdaLabelsScanned: fda.scanned,
+    openFda: fda.link,
+    gsrsIndex: gsrs ? { substances: gsrs.byUnii.size, atc5: gsrs.moietiesByAtc.size } : null,
     ...stats,
     segundos: Math.round((Date.now() - t0) / 1000),
   };

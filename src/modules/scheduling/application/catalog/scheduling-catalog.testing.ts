@@ -1,5 +1,6 @@
 import { SchedulingCatalogService } from './scheduling-catalog.service';
 import { AgendaOverlapGuard, CatalogAccess, SlotMoveNotifier } from './support';
+import { BlockedBookingsCanceller } from './support/blocked-bookings-canceller';
 import { CloseSlotsUseCase } from './use-cases/close-slots.use-case';
 import { CreateBookingPolicyUseCase } from './use-cases/create-booking-policy.use-case';
 import { CreateExceptionUseCase } from './use-cases/create-exception.use-case';
@@ -26,6 +27,12 @@ export interface CatalogServiceDoubles {
   professionalTime: any;
   noticeRepo: any;
   notices: any;
+  /**
+   * El caso de uso de cancelar, simulado. Opcional: las pruebas que no
+   * bloquean ratos con citas no lo tocan, y un doble que no cancela nada
+   * basta para ellas.
+   */
+  cancelBooking?: any;
 }
 
 /**
@@ -43,6 +50,20 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     d.logger,
   );
   const { em, catalogRepo, logger, professionalTime } = d;
+  const noticeRepo = {
+    findDisplayNameForProfile: async () => null,
+    ...d.noticeRepo,
+  };
+  const blockedBookings = new BlockedBookingsCanceller(
+    catalogRepo,
+    noticeRepo,
+    d.cancelBooking ?? {
+      cancelInTransaction: async () => {
+        throw new Error('la prueba no esperaba cancelar ninguna cita');
+      },
+      announceChange: async () => undefined,
+    },
+  );
 
   return new SchedulingCatalogService(
     new CreateResourceUseCase(em, catalogRepo, access, logger),
@@ -52,9 +73,15 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     new ReactivateTemplateUseCase(em, catalogRepo, access, logger),
     new RetireTemplateUseCase(em, catalogRepo, access, logger),
     new GenerateSlotsUseCase(em, catalogRepo, professionalTime, access, logger),
-    new CloseSlotsUseCase(em, catalogRepo, access, logger),
+    new CloseSlotsUseCase(em, catalogRepo, access, blockedBookings, logger),
     new ShiftSlotsUseCase(em, catalogRepo, access, moveNotifier, logger),
-    new CreateExceptionUseCase(em, catalogRepo, professionalTime, logger),
+    new CreateExceptionUseCase(
+      em,
+      catalogRepo,
+      professionalTime,
+      blockedBookings,
+      logger,
+    ),
     new UpdateExceptionUseCase(em, catalogRepo, access, logger),
     new RemoveExceptionUseCase(em, catalogRepo, access, logger),
     new ListTemplatesUseCase(em, catalogRepo, access),

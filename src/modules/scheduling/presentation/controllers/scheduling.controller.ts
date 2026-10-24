@@ -429,7 +429,7 @@ export class SchedulingController {
   @ApiOperation({
     summary: 'Cerrar cupos sueltos, dejando el bloqueo que impide regenerarlos',
     description:
-      'Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.',
+      'Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada paciente.',
   })
   closeSlots(
     @Param('id', ParseUUIDPipe) id: string,
@@ -527,7 +527,7 @@ export class SchedulingController {
   @ApiOperation({
     summary: 'Registrar una excepción de disponibilidad',
     description:
-      'Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.',
+      'Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente y bloquea.',
   })
   createException(
     @Param('id', ParseUUIDPipe) id: string,
