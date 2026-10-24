@@ -146,8 +146,10 @@ MEDLINE, medido el 2026-10-24 sin las clases ya cubiertas: estudios observaciona
 269 798, multicéntricos 256 079, de validación 124 721, comparativos 1 759 188, reportes de casos 2 577 297,
 revisiones narrativas 3 599 384 y `Journal Article` 37 174 406. A ~7 500 registros por minuto por descarga,
 las de más de un millón llevan días por E-utilities. Cada clase nueva agrega una evidencia más débil
-(coindexación en un artículo, sin tratar de la eficacia), y `data/` ya pesa 79 MB: hasta dónde extender es una
-decisión del propietario (ver mdavila-2001/mantra-core-health-api#825).
+(coindexación en un artículo, sin decir nada de la eficacia), y `data/` ya pesa 79 MB. Por eso el corpus
+se detiene en la pasada 10 (decisión registrada en mdavila-2001/mantra-core-health-api#825). Sumar una clase
+más es agregar su búsqueda a `PUBMED_SUBSETS` (`lib/sources/pubmed.mjs`) y correr
+`fetch-pubmed.mjs --subset <clase>` y `build.mjs`.
 
 ## Cobertura (acumulada a la pasada 10)
 
