@@ -21,7 +21,7 @@ import { join } from 'node:path';
 
 import { BUILD_DIR, nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { SYSTEMS } from './lib/code-systems.mjs';
-import { measureGard, measureHetionet, measureMeshC, measureNando, measureOncotree } from './lib/measure.mjs';
+import { measureGard, measureHetionet, measureMeshC, measureMonarchEdges, measureNando, measureOncotree } from './lib/measure.mjs';
 import { readObo } from './lib/obo.mjs';
 import { addToSnapshot } from './lib/snapshot.mjs';
 import { MEASURE_FILES, NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
@@ -47,6 +47,10 @@ export const PASSES = [
   { measure: 'mesh-c' },
   { measure: 'gard' },
   { citer: 'hpo-common-diseases' },
+  { measure: 'monarch-clingen' },
+  { measure: 'monarch-clinvar' },
+  { measure: 'monarch-alliance' },
+  { measure: 'monarch-cureid' },
 ];
 const SYSTEM_PASSES = PASSES.filter((p) => p.cs && !p.citer).map((p) => p.cs);
 const DEDUP_EQUIVALENCES = new Set(['equivalent', null]);
@@ -111,6 +115,18 @@ export function computeCoverage(bySystem, citations = {}, measured = {}) {
     }
   }
 
+  // Un código retirado se sigue por su reemplazo publicado (`replaced_by`); uno
+  // retirado sin reemplazo ya está en el catálogo como obsoleto: no es nuevo.
+  const replacement = new Map();
+  const retired = new Set();
+  for (const rows of Object.values(bySystem)) {
+    for (const r of rows) {
+      if (r.status === 'active') continue;
+      if (r.replacedBy) replacement.set(key(r.cs, r.code), key(r.cs, r.replacedBy));
+      else retired.add(key(r.cs, r.code));
+    }
+  }
+  const current = (k) => replacement.get(k) ?? k;
   const seenComponents = new Set();
   const passes = PASSES.map((p, i) => {
     const label = p.citer ?? p.measure ?? p.cs;
@@ -119,7 +135,10 @@ export function computeCoverage(bySystem, citations = {}, measured = {}) {
     if (p.measure) {
       // Ítem nuevo si ninguno de sus cruces cae en un componente ya visto.
       items = measured[p.measure] ?? [];
-      const known = (l) => uf.p.has(key(l.cs, l.code)) && seenComponents.has(uf.find(key(l.cs, l.code)));
+      const known = (l) => {
+        const k = current(key(l.cs, l.code));
+        return retired.has(k) || (uf.p.has(k) && seenComponents.has(uf.find(k)));
+      };
       const fresh = items.filter((it) => !it.links.some(known)).length;
       return { pass: i + 1, source: label, kind: 'medida (no se carga)', version, items: items.length, newConcepts: fresh, newEntities: fresh };
     }
@@ -134,10 +153,10 @@ export function computeCoverage(bySystem, citations = {}, measured = {}) {
     const newComponents = new Set();
     const newByChapter = {};
     for (const it of items) {
-      const k = key(it.cs, it.code);
+      const k = p.citer ? current(key(it.cs, it.code)) : key(it.cs, it.code);
       // Una cita a un código que ninguna ontología cargó es un concepto nuevo y sin componente.
       const c = uf.p.has(k) ? uf.find(k) : k;
-      if (!seenComponents.has(c)) {
+      if (!(p.citer && retired.has(k)) && !seenComponents.has(c)) {
         newConcepts += 1;
         newComponents.add(c);
         const ch = it.properties?.icd11_classification?.chapterNo;
@@ -241,6 +260,7 @@ async function main() {
     oncotree: measureOncotree(measuredPath('oncotree'), bySystem.mondo),
     hetionet: measureHetionet(measuredPath('hetionet'), bySystem.doid),
     gard: measureGard(measuredPath('gard'), bySystem.doid, bySystem.orphanet),
+    ...Object.fromEntries(['monarch-clingen', 'monarch-clinvar', 'monarch-alliance', 'monarch-cureid'].map((k) => [k, measureMonarchEdges(measuredPath(k), bySystem.doid)])),
   };
   const meshTerms = [];
   await readObo(measuredPath('mesh-c'), (t) => t.id.startsWith('mesh:D') && meshTerms.push(t));

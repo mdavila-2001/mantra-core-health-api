@@ -95,14 +95,15 @@ function pushDesignation(list, value, lang, preferred) {
 
 /**
  * Hojas a excluir de una ontología: los descendientes de `excludedRoots` que no
- * tienen ningún otro camino hasta `root`. Devuelve el conjunto de ids a CONSERVAR.
+ * tienen ningún otro camino hasta una de las `roots`. Devuelve el conjunto de ids a CONSERVAR.
  */
-export function keepReachable(terms, root, excludedRoots) {
+export function keepReachable(terms, roots, excludedRoots) {
+  const rootSet = new Set([roots].flat());
   const parents = new Map(terms.map((t) => [t.id, t.isA.map((p) => p.id)]));
   const memo = new Map();
   const visiting = new Set();
   const ok = (id) => {
-    if (id === root) return true;
+    if (rootSet.has(id)) return true;
     if (excludedRoots.has(id)) return false;
     if (memo.has(id)) return memo.get(id);
     if (visiting.has(id)) return false;
@@ -133,11 +134,16 @@ function addExternalRef(refs, curie) {
 
 // --- MONDO ---------------------------------------------------------------------
 
+export const MONDO_ROOTS = ['MONDO:0000001', 'MONDO:0042489', 'MONDO:0021178'];
+
 export async function buildMondo(file, meta) {
   const { header, terms } = await oboTerms(file.path, 'MONDO');
   const version = (header['data-version']?.[0] ?? '').replace(/^releases\//, '') || meta.version;
   const live = terms.filter((t) => !t.obsolete);
-  const keep = keepReachable(live, 'MONDO:0000001', new Set(['MONDO:0005583', 'MONDO:0021125']));
+  // Tres raíces de MONDO son condiciones humanas: «disease», «disease susceptibility»
+  // (susceptibilidades de OMIM, fuera de «disease») e «injury» (lesiones). Se excluyen
+  // los animales no humanos y «disease characteristic» (calificadores, no condiciones).
+  const keep = keepReachable(live, MONDO_ROOTS, new Set(['MONDO:0005583', 'MONDO:0021125']));
   const excluded = { nonHumanOrCharacteristic: live.length - keep.size };
   const records = [];
   for (const t of terms) {
@@ -475,7 +481,7 @@ export async function buildEfo(file, meta) {
   const header = await readObo(file.path, (t) => terms.push(t));
   const version = /releases\/v([\d.]+)\//.exec(header['data-version']?.[0] ?? '')?.[1] ?? meta.version;
   const live = terms.filter((t) => !t.obsolete);
-  const keep = keepReachable(live, 'MONDO:0000001', new Set());
+  const keep = keepReachable(live, MONDO_ROOTS, new Set());
   const native = (id) => id.startsWith('efo:EFO_');
   const records = [];
   for (const t of live) {

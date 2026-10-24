@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T03:13:05.591Z",
+  "generatedAt": "2026-10-24T05:27:38.695Z",
   "versions": {
     "mondo": "2026-10-06",
     "orphanet": "2026-06-23",
@@ -27,44 +27,44 @@
     {
       "file": "efo-disease.part-01.ndjson.gz",
       "codeSystem": "efo-disease",
-      "records": 1111,
-      "bytes": 162442,
-      "sha256": "e3dcd2d35b03a3a20a87734ead839a5c6a604db7950e01e224f90099258b4179"
+      "records": 1159,
+      "bytes": 166796,
+      "sha256": "2635d81144da6c5f40f9db3967f537ac63fb75c8cb4b157eef2fac3791b6d9fc"
     },
     {
       "file": "icd10-who.part-01.ndjson.gz",
       "codeSystem": "icd10-who",
-      "records": 12639,
-      "bytes": 198985,
-      "sha256": "60c4abb7c74b451cf269d2ceeef6856c478d2c8b8b5aec1e9056c471fc8f5bb6"
+      "records": 12640,
+      "bytes": 199079,
+      "sha256": "58a81b465feaa581bdbfc588d933ce1ecbc9e7d68d6b3a89a87fe4720beba9cd"
     },
     {
       "file": "icd11-foundation.part-01.ndjson.gz",
       "codeSystem": "icd11-foundation",
-      "records": 4630,
-      "bytes": 98881,
-      "sha256": "64ca9a8a4d0be8434eec1f0e8c86d766185d50f579fc1d78cadeed158624da30"
+      "records": 4631,
+      "bytes": 98902,
+      "sha256": "dd13903cf8f020b04d0aed651c5248ac0c27cbd1fce1dbc86b6e155dcf08437b"
     },
     {
       "file": "icd11-mms.part-01.ndjson.gz",
       "codeSystem": "icd11-mms",
       "records": 37052,
-      "bytes": 1657847,
-      "sha256": "cf77a193b9ed05dfe12ac2b97d79a26dcde6fd8168d821048605215c79d1a05b"
+      "bytes": 1657876,
+      "sha256": "2b849368f863d385be226dfd63ad25d4cdf42b785713d7221e428321a8f65516"
     },
     {
       "file": "mesh.part-01.ndjson.gz",
       "codeSystem": "mesh",
-      "records": 9264,
-      "bytes": 156812,
-      "sha256": "fad409966b7c5697774ccf8362bc23ffcea7fde9c397ca05ce5e03fce7df327c"
+      "records": 9320,
+      "bytes": 157693,
+      "sha256": "a2b2e33c3c24f341e21be36750e30dbacdb39d3033d1edd54b11fe45e7721827"
     },
     {
       "file": "mondo.part-01.ndjson.gz",
       "codeSystem": "mondo",
-      "records": 27185,
-      "bytes": 4162925,
-      "sha256": "a7063afd65a452b22676aaa62479040300a5a8fc65ca040e949d140e37f7d741"
+      "records": 27695,
+      "bytes": 4211345,
+      "sha256": "f7c7f7f18d2f7e9d6f8e624f9feaafe761541c0504a04b75a59c9fdd5e0a3275"
     },
     {
       "file": "ncit-disease.part-01.ndjson.gz",
@@ -76,23 +76,23 @@
     {
       "file": "omim.part-01.ndjson.gz",
       "codeSystem": "omim",
-      "records": 10744,
-      "bytes": 161916,
-      "sha256": "5c5aa1cff09469557aa2d3ca7cf2a714d386328c38aa8161779bc11e832e16af"
+      "records": 10871,
+      "bytes": 163050,
+      "sha256": "efc99d2eb6b02238e0e4240373071dd06d0869d351e2b31f659837824a014c4f"
     },
     {
       "file": "orphanet.part-01.ndjson.gz",
       "codeSystem": "orphanet",
       "records": 11645,
-      "bytes": 2819088,
-      "sha256": "63913642eba02b387a1d1ceb1bbcb72fc3500efd5505c49c481b7e5905967a96"
+      "bytes": 2818768,
+      "sha256": "c37ca0419770bc5453d84ca8a7706373cb8d033def0f904c62eb601cf5fb68ab"
     },
     {
       "file": "umls.part-01.ndjson.gz",
       "codeSystem": "umls",
-      "records": 32150,
-      "bytes": 558353,
-      "sha256": "ae2db7e0c89a32bf8081200791da0e9b70f55fcfaae01f2304801dc7f8903dfd"
+      "records": 32589,
+      "bytes": 564875,
+      "sha256": "6cc07e42e939064e83e96f86c8c5ecc1afa356c3693b1d505017b543443f9fb8"
     },
     {
       "file": "_systems.json",
@@ -101,13 +101,13 @@
     },
     {
       "file": "diseases-build-stats.json",
-      "bytes": 4037,
-      "sha256": "4c8fb0b8cedc4e4d7518b59f9d1f1c87998725b792340ddca154fbbdd9d5a3af"
+      "bytes": 3979,
+      "sha256": "89f91f05ed3fed730204315183149432a771c168f9d80d69a54da492b903810a"
     },
     {
       "file": "diseases-citations.json",
       "bytes": 541065,
-      "sha256": "058220646b80b85bbf28face4993d17d4d25e4da416aea29b9328fcd7dee4b60"
+      "sha256": "d2271678a9088ce5440ba79e5812e21d1033ab2f075cb2c52ebc1e049076ac93"
     },
     {
       "file": "sources-manifest.json",
@@ -116,13 +116,13 @@
     },
     {
       "file": "diseases-coverage.json",
-      "bytes": 19159,
-      "sha256": "fa0d5d9c9190900846054da5722381e28852c169617b3f9fc883e65b169dffb9"
+      "bytes": 19936,
+      "sha256": "8181575c918d91949471be24aa9ef6ec551472af64e9543a69bc9b289bccdc40"
     },
     {
       "file": "diseases-coverage.md",
-      "bytes": 11016,
-      "sha256": "9a645b02eafebcda93ba83a1209eaa5da0dc84710d0f11f1dd0cdf48dd65ed1c"
+      "bytes": 11297,
+      "sha256": "2eb7325f5d5843a87cbce066706d97d1d1b0c51b87e98ea3c15bc5b0d9e949ec"
     }
   ]
 }

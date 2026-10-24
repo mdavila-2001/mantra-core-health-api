@@ -52,9 +52,11 @@
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H3.S1.M1 | Regla de deduplicación (union-find por equivalencia / xref sin semántica) | «más amplio/estrecho» no deduplica | test «saturación: …» ok | HECHO |
-| H3.S1.M2 | 14 pasadas registradas | Tabla con 14 filas | `coverage-report.mjs` → 14 filas | HECHO |
-| H3.S1.M3 | Dos pasadas seguidas con 0 | Las dos últimas en 0 | ídem | BLOQUEADO |
+| H3.S1.M2 | 19 pasadas registradas | Tabla con 19 filas | `coverage-report.mjs` → 19 filas | HECHO |
+| H3.S1.M3 | Dos pasadas seguidas con 0 | Las dos últimas en 0 | ídem → pasadas 16–19 en 0 | HECHO |
 | H3.S1.M4 | Pasada 15 (enfermedades comunes de HPO, Groza 2015) | DOID resuelto por código/alt_id; MeSH como claves | test «enfermedades comunes de HPO …» ok; `coverage-report.mjs` → fila 15 | HECHO |
+| H3.S1.M5 | Pasadas 16–19: ClinGen, ClinVar, Alliance, CURE ID (Monarch KG 2026-10-07) | Ids de enfermedad citados; obsoletos por `replaced_by` | tests «Monarch KG …» y «… replaced_by …» ok; `coverage-report.mjs` → filas 16–19 en 0 | HECHO |
+| H3.S1.M6 | Corrección del filtro de MONDO (raíces «disease susceptibility» e «injury») | Las susceptibilidades de OMIM e «injury» entran; animales no humanos siguen fuera | test «MONDO: …» ok; build → `[mondo] 27695 (excluidos 8360)`; ClinGen/ClinVar 0 MONDO vigentes faltantes | HECHO |
 | H3.S2.M1 | Cobertura contra MONDO | % por sistema | `coverage-report.mjs` → bloque `vsMondo` | HECHO |
 | H3.S2.M2 | Cobertura contra UMLS | % contra conceptos de enfermedad de UMLS | — (cuenta UTS) | BLOQUEADO |
 

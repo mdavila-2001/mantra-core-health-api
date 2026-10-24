@@ -259,3 +259,89 @@ def: "A grouping class for human diseases classified by the molecular, biochemic
 comment: This term is intended solely for classification purposes and should not be used for direct data annotation.
 is_a: MONDO:0700096 ! human disease
 
+[Term]
+id: MONDO:0042489
+name: disease susceptibility
+def: "A constitution or condition of the body which makes the tissues react in special ways to certain extrinsic stimuli and thus tends to make the individual more than usually susceptible to certain diseases." [MESH:D004198]
+subset: predisposition
+synonym: "diatheses" RELATED [MESH:D004198]
+synonym: "diathesis" RELATED [MESH:D004198]
+synonym: "disease susceptibilities" RELATED [MESH:D004198]
+synonym: "susceptibilities, disease" RELATED [MESH:D004198]
+synonym: "susceptibility, disease" RELATED [MESH:D004198]
+xref: MEDGEN:41610 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D004198 {source="MONDO:equivalentTo"}
+xref: UMLS:C0012655 {source="MEDGEN:41610", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: BFO:0000016 ! disposition
+property_value: skos:exactMatch MEDGEN:41610
+property_value: skos:exactMatch MESH:D004198
+property_value: skos:exactMatch UMLS:C0012655
+
+[Term]
+id: MONDO:0020573
+name: inherited disease susceptibility
+def: "A latent susceptibility to disease at the genetic level, which may be activated under certain conditions." [MESH:D020022]
+subset: predisposition
+synonym: "genetic predisposition" RELATED [MESH:D020022]
+synonym: "genetic predispositions" RELATED [MESH:D020022]
+synonym: "genetic susceptibilities" RELATED [MESH:D020022]
+synonym: "genetic susceptibility" RELATED [MESH:D020022]
+synonym: "hereditary disease susceptibility" EXACT [MONDO:patterns/hereditary]
+synonym: "hereditary predisposition to disease" EXACT [MONDO:patterns/hereditary]
+synonym: "predisposition, genetic" RELATED [MESH:D020022]
+synonym: "predispositions, genetic" RELATED [MESH:D020022]
+synonym: "susceptibilities, genetic" RELATED [MESH:D020022]
+synonym: "susceptibility, genetic" RELATED [MESH:D020022]
+xref: ICD10CM:Z15 {source="https://github.com/monarch-initiative/mondo/issues/4536", source="MONDO:equivalentTo", source="https://orcid.org/0000-0001-5208-3432", source="https://orcid.org/0000-0002-4142-7153"}
+xref: MEDGEN:1876499 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D020022 {source="MONDO:equivalentTo"}
+xref: UMLS:C1455997 {source="MEDGEN:1876499", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: MONDO:0042489 ! disease susceptibility
+intersection_of: MONDO:0042489 {source="MESH:D020022"} ! disease susceptibility
+intersection_of: has_characteristic MONDO:0021152 {source="MESH:D020022"} ! inherited
+relationship: has_characteristic MONDO:0021152 ! inherited
+property_value: skos:exactMatch icd10cm:Z15
+property_value: skos:exactMatch MEDGEN:1876499
+property_value: skos:exactMatch MESH:D020022
+property_value: skos:exactMatch UMLS:C1455997
+property_value: terms:creator https://orcid.org/0000-0002-6601-2165
+creation_date: 2017-09-30T12:01:25Z
+
+[Term]
+id: MONDO:0010255
+name: diabetes mellitus, insulin-dependent, X-linked, susceptibility to
+subset: predisposition
+synonym: "diabetes mellitus, insulin-dependent, X-linked" EXACT []
+synonym: "diabetes mellitus, insulin-dependent, X-linked, susceptibility to" EXACT [OMIM:300136]
+xref: MEDGEN:338376 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: OMIM:300136 {source="MONDO:equivalentTo"}
+xref: UMLS:C1848042 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:338376"}
+is_a: MONDO:0020573 ! inherited disease susceptibility
+intersection_of: MONDO:0020573 ! inherited disease susceptibility
+intersection_of: predisposes_towards MONDO:0005147 ! type 1 diabetes mellitus
+relationship: predisposes_towards MONDO:0005147 ! type 1 diabetes mellitus
+property_value: curated_content_resource "https://www.malacards.org/card/type_1_diabetes_mellitus_x_linked" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/4521" xsd:anyURI
+property_value: skos:exactMatch MEDGEN:338376
+property_value: skos:exactMatch OMIM:300136
+property_value: skos:exactMatch UMLS:C1848042
+property_value: terms:conformsTo inherited:susceptibility.yaml
+
+[Term]
+id: MONDO:0021178
+name: injury
+def: "Damage inflicted on the body as the direct or indirect result of an external force, with or without disruption of structural continuity." [NCIT:C3671]
+subset: harrisons_view
+subset: otar {source="MONDO:OTAR"}
+subset: other_hierarchy
+synonym: "injury" EXACT [NCIT:C3671]
+synonym: "trauma" EXACT [NCIT:C3671]
+synonym: "traumatic injury" EXACT [NCIT:C3671]
+synonym: "wound" EXACT [NCIT:C3671]
+xref: EFO:0000546 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: MESH:D014947 {source="MONDO:equivalentTo"}
+xref: NCIT:C3671 {source="MONDO:equivalentTo", source="MONDO:otherHierarchy"}
+property_value: skos:exactMatch EFO:0000546
+property_value: skos:exactMatch MESH:D014947
+property_value: skos:exactMatch NCIT:C3671
+

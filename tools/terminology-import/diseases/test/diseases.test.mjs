@@ -81,6 +81,10 @@ test('MONDO: sólo enfermedad humana; animales no humanos y «disease characteri
   assert.ok(dm.xrefs.some((x) => x.cs === 'icd10cm' && x.external));
   assert.ok(!JSON.stringify(dm).includes('SCTID'), 'SNOMED CT no entra ni como referencia');
   assert.ok(dm.properties.disease_external_xrefs.MEDGEN.includes('MEDGEN:8350'));
+  // «disease susceptibility» e «injury» son raíces propias de MONDO (no cuelgan de «disease») y entran.
+  assert.ok(m.has('MONDO:0042489') && m.has('MONDO:0020573') && m.has('MONDO:0010255'), 'susceptibilidades');
+  assert.ok(m.has('MONDO:0021178'), 'injury');
+  assert.deepEqual(m.get('MONDO:0010255').parents, ['MONDO:0020573']);
   const obsolete = m.get('MONDO:0021199');
   assert.equal(obsolete.status, 'deprecated');
   assert.deepEqual(obsolete.parents, []);

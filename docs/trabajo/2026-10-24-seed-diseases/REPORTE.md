@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/eager-pasteur-hxks7i` (la tarea pedía `justin/seed-diseases`) · PR: [#688](https://github.com/mdavila-2001/mantra-core-health-api/pull/688) contra `dev`, sin mergear
 - Peldaño de evidencia alcanzado: **VERIFIED — carga real en Postgres 16 desechable**: filas, tiempo, idempotencia y consultas del contrato ejercitadas. **No** `REGRESSION_VERIFIED`: no se corrieron `yarn build`, `yarn test`, `yarn docs:validate` ni `yarn docs:build`, y la carga no se hizo contra una base sembrada por la API real (los 12 conceptos internos se insertaron a mano en la base desechable).
-- Avance: **29 / 31 microtareas HECHO (93,5 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
+- Avance: **32 / 33 microtareas HECHO (97,0 %)**, calculado. 1 BLOQUEADO (H3.S2.M2, cobertura contra UMLS). El hito H3 queda **A MEDIAS** sólo por eso.
 
 ## Completado
 
@@ -13,10 +13,13 @@
 | H1.S2.M1 | Registro de fuentes | `node -e "import('./tools/terminology-import/diseases/lib/sources.mjs')…"` | `47 5` |
 | H1.S2.M2 | Descarga + hash verificado | `node tools/terminology-import/diseases/fetch-sources.mjs` | `[ok] icd11-mms 4214980 B sha256=f1356588f409…` · `Manifiesto: … (52 archivos)` |
 | H1.S3.M1 | `SOURCES.md` | lectura | 13 fuentes cargadas, 5 medidas, 16 descartadas con motivo |
-| H2.S1.M1–H2.S3.M1 | Lectores, reglas, resolución y plan | `node --test "tools/terminology-import/diseases/test/*.test.mjs"` | `# pass 16` `# fail 0` |
+| H2.S1.M1–H2.S3.M1 | Lectores, reglas, resolución y plan | `node --test "tools/terminology-import/diseases/test/*.test.mjs"` | `# pass 18` `# fail 0` |
 | H2.S3.M2 | Mapeos condicionales | carga con 2 conceptos de prueba (`icd10cm-Q87.4`, `cie10es-Q87.4`) | `[load] mondo {…"externalMaps":2}`; 2.ª corrida `"externalMaps":0` |
 | H3.S1.M1 | Regla de deduplicación | test «saturación: …» | ok |
-| H3.S1.M2 | 14 pasadas | `coverage-report.mjs` | tabla de 14 filas (`evidencia/coverage.md`) |
+| H3.S1.M2 | 19 pasadas | `coverage-report.mjs` | tabla de 19 filas (`evidencia/coverage.md`) |
+| H3.S1.M3 | Dos pasadas seguidas en 0 | `coverage-report.mjs` | pasadas 16 (ClinGen 118), 17 (ClinVar 5 052), 18 (Alliance 2 160) y 19 (CURE ID 25): `newConcepts 0` |
+| H3.S1.M5 | Pasadas del Monarch KG 2026-10-07 | `fetch-sources.mjs --only monarch-` + `coverage-report.mjs` | 4 archivos con SHA-256 esperado; 0 nuevos tras seguir el `replaced_by` de 8 MONDO obsoletos |
+| H3.S1.M6 | Bug del filtro de MONDO corregido (encontrado por la pasada 16: 64 MONDO humanos vigentes citados por ClinGen/ClinVar faltaban) | build + test | `[mondo] 27695 (excluidos 8360)` (antes 27 185 / 8 870); 0 faltantes; carga desde la instantánea ×2 → `184908\|311525\|495193\|147815\|191467`, 2.ª en 0, 88 s / 42 s |
 | H3.S2.M1 | Cobertura contra MONDO | ídem | DOID 97,1 % · Orphanet 84,1 % · EFO 39,1 % · NCIt 35,0 % · CIE-11 20,7 % |
 | H4.S1.M1 | 1.ª carga | `load-catalog.mjs` | `"segundos": 72` (`evidencia/load-1ra-corrida.txt`) |
 | H4.S1.M2 | 2.ª carga = 0 nuevas | `load-catalog.mjs` | 12/12 `[load]` en 0, `"segundos": 43` (`evidencia/load-2da-corrida-idempotencia.txt`) |
@@ -34,17 +37,16 @@
 
 ## A medias
 
-### H3 — Saturación
-- Qué anda: 14 pasadas registradas, con dedup por código y cruce publicado. 7 fuentes cargadas, 3 que sólo citan códigos y 5 medidas que no se cargan. También hay cobertura contra MONDO.
-- Qué no anda: no hay **dos pasadas seguidas con 0**. La 11 (Hetionet) dio 0, pero la 12 (CIE-10 OMS) aportó 887. Las 13 (MeSH árbol C, +1 585) y 14 (GARD, +2 598) siguen aportando desde fuentes que no se pueden cargar. Tampoco se midió contra UMLS.
-- Qué falta exactamente: abrir en el entorno `nlmpubs.nlm.nih.gov` (MeSH oficial con números de árbol), `rarediseases.info.nih.gov` (GARD), `www.orphadata.com`, `icd.who.int`/`icdcdn.who.int` (CIE-11 ES), `eutils.ncbi.nlm.nih.gov`/`www.ebi.ac.uk` (literatura). También confirmar las licencias de NANDO y OncoTree y conseguir la cuenta UTS para UMLS. Después hay que sumar cada fuente a `lib/sources.mjs` + `PASSES` y volver a correr `coverage-report.mjs`.
+### H3 — Saturación y cobertura
+- Qué anda: 19 pasadas registradas, con dedup por código y cruce publicado. Las cuatro últimas (ClinGen, ClinVar, Alliance, CURE ID) aportan 0, así que el criterio de dos pasadas seguidas en 0 **se cumple**. La cobertura contra MONDO está medida.
+- Qué no anda: la cobertura contra UMLS no se midió (cuenta UTS). Además, las pasadas 16–19 llegan con ids ya normalizados a MONDO por Monarch: prueban que ninguna enfermedad que usan quedó afuera, pero no traen nomenclatura propia. Las fuentes que **sí** aportarían siguen sin poder cargarse: MeSH oficial (+1 562 medidos con la conversión de terceros), GARD (+2 598), NANDO (+685), OncoTree (+189).
+- Qué falta exactamente: la cuenta UTS para UMLS. Abrir en el entorno `nlmpubs.nlm.nih.gov` (MeSH), `rarediseases.info.nih.gov` (GARD), `icd.who.int`/`icdcdn.who.int` (CIE-11 ES) y `eutils.ncbi.nlm.nih.gov`/`www.ebi.ac.uk` (literatura). Confirmar las licencias de NANDO y OncoTree. Cada fuente nueva se suma a `lib/sources.mjs` + `PASSES` y se vuelve a correr `coverage-report.mjs`.
 - Dónde quedó: rama `claude/eager-pasteur-hxks7i`, `tools/terminology-import/diseases/coverage-report.mjs`; tabla en `docs/seed-research/diseases.md` §5.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H3.S1.M3 — dos pasadas seguidas en 0 | BLOQUEADO | Hosts bloqueados y licencias (ver A medias) |
 | H3.S2.M2 — cobertura contra UMLS | BLOQUEADO | Cuenta UTS del propietario (no se creó) |
 | Licencias: CIE-10 OMS (títulos), CIE-10 OPS ES, OMIM, DeCS, ICD-O-3, CIAP-2, NANDO, OncoTree | BLOQUEADO | Decisión y gestión del propietario |
 | Orphanet ES en `/glossary` | TODO | Decisión de curación del propietario y resolver el `IN` de `ConceptsService.searchConcepts` |
@@ -58,8 +60,8 @@ Salidas completas en `evidencia/`. Extractos literales:
 
 ```
 $ node --test "tools/terminology-import/diseases/test/*.test.mjs"
-# tests 16
-# pass 16
+# tests 18
+# pass 18
 # fail 0
 exit 0
 
@@ -79,8 +81,8 @@ $ node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.
 
 $ psql … -c "select count(*) …"
  concepts | desig  | props  |  rels  |  maps  |   db
-   183726 | 309745 | 492030 | 147251 | 190313 | 420 MB   (tras la pasada 15, desde la instantánea)
-(183 726 = 183 714 del catálogo + 12 conceptos internos de prueba)
+   184908 | 311525 | 495193 | 147815 | 191467 | 423 MB   (tras la corrección de MONDO, desde la instantánea)
+(184 908 = 184 896 del catálogo + 12 conceptos internos de prueba)
 ```
 
 Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidencia/build-stats.json`. Pasadas y cobertura: `evidencia/coverage.md`.
@@ -101,7 +103,8 @@ Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidenci
 - La rama: se pushea a `claude/eager-pasteur-hxks7i` (única permitida para esta sesión), no a `justin/seed-diseases`.
 - Fuentes de la tarea que cambiaron de vía por la red: Orphanet sale del espejo oficial en GitHub; la CIE-11 y las tablas OMS salen de copias de terceros con hash verificado. NCIt pasó de la edición 2024-05 a la 26.02d al encontrarse la publicación oficial más nueva.
 - **Datos en git**: el brief decía «fuentes fuera de git». Una orden posterior del propietario, recibida por la sesión coordinadora, pidió subir todo lo normalizado. Se versiona `diseases/data/` (14 MB gzip, partes < 45 MB). Las fuentes crudas (1,3 GB) siguen fuera y se reproducen con `fetch-sources.mjs` (URL, versión, SHA-256).
-- No se usó `/loop`: las 14 pasadas se iteraron en la propia sesión hasta agotar las fuentes accesibles.
+- **Error del catálogo encontrado y corregido**: el filtro de MONDO exigía llegar a «disease» (MONDO:0000001) y dejaba afuera las raíces «disease susceptibility» (MONDO:0042489, susceptibilidades de OMIM) e «injury» (MONDO:0021178). Lo destapó la pasada 16: ClinGen y ClinVar citaban 64 MONDO humanos vigentes que no estaban. Las pasadas 1–15 se recalcularon con el catálogo corregido.
+- No se usó `/loop`: las 19 pasadas se iteraron en la propia sesión hasta agotar las fuentes accesibles.
 
 ## Riesgos residuales
 

@@ -1,12 +1,12 @@
 === Catálogo de enfermedades → terminology.*  ===
 Leyendo la instantánea versionada /home/user/mantra-core-health-api/tools/terminology-import/diseases/data
 Totales: {
-  concepts: 183714,
-  designations: 309745,
-  properties: 492030,
-  relationships: 147251,
-  maps: 190313,
-  externalMapsCandidates: 11806
+  concepts: 184896,
+  designations: 311525,
+  properties: 495193,
+  relationships: 147815,
+  maps: 191467,
+  externalMapsCandidates: 11814
 }
 [concepts] decipher +0
 [concepts] doid +0
@@ -133,5 +133,5 @@ Totales: {
       "externalMaps": 0
     }
   },
-  "segundos": 43
+  "segundos": 42
 }

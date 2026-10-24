@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-10-24T03:13:13.171Z",
+  "generatedAt": "2026-10-24T05:29:21.046Z",
   "passes": [
     {
       "pass": 1,
       "source": "mondo",
       "kind": "ontología",
       "version": "2026-10-06",
-      "items": 23264,
-      "newConcepts": 23264,
-      "newEntities": 20088
+      "items": 23774,
+      "newConcepts": 23774,
+      "newEntities": 20495
     },
     {
       "pass": 2,
@@ -16,8 +16,8 @@
       "kind": "ontología",
       "version": "2026-06-23",
       "items": 9757,
-      "newConcepts": 1551,
-      "newEntities": 1549
+      "newConcepts": 1534,
+      "newEntities": 1533
     },
     {
       "pass": 3,
@@ -25,8 +25,8 @@
       "kind": "ontología",
       "version": "2026-09-30",
       "items": 12335,
-      "newConcepts": 342,
-      "newEntities": 342
+      "newConcepts": 277,
+      "newEntities": 277
     },
     {
       "pass": 4,
@@ -34,8 +34,8 @@
       "kind": "ontología",
       "version": "26.02d",
       "items": 22379,
-      "newConcepts": 14515,
-      "newEntities": 14515
+      "newConcepts": 14511,
+      "newEntities": 14511
     },
     {
       "pass": 5,
@@ -43,8 +43,8 @@
       "kind": "ontología",
       "version": "2026-01",
       "items": 37052,
-      "newConcepts": 29310,
-      "newEntities": 23841,
+      "newConcepts": 29257,
+      "newEntities": 23811,
       "newByChapter": {
         "10": 82,
         "11": 291,
@@ -58,8 +58,8 @@
         "19": 533,
         "20": 287,
         "21": 1040,
-        "22": 1974,
-        "23": 987,
+        "22": 1922,
+        "23": 986,
         "24": 897,
         "25": 15,
         "26": 1246,
@@ -81,9 +81,9 @@
       "source": "efo-disease",
       "kind": "ontología",
       "version": "3.95.0",
-      "items": 1111,
-      "newConcepts": 472,
-      "newEntities": 472
+      "items": 1159,
+      "newConcepts": 495,
+      "newEntities": 495
     },
     {
       "pass": 7,
@@ -91,8 +91,8 @@
       "kind": "claves citadas",
       "version": null,
       "items": 12880,
-      "newConcepts": 181,
-      "newEntities": 181
+      "newConcepts": 67,
+      "newEntities": 67
     },
     {
       "pass": 8,
@@ -100,8 +100,8 @@
       "kind": "medida (no se carga)",
       "version": null,
       "items": 2768,
-      "newConcepts": 693,
-      "newEntities": 693
+      "newConcepts": 685,
+      "newEntities": 685
     },
     {
       "pass": 9,
@@ -136,8 +136,8 @@
       "kind": "claves citadas",
       "version": null,
       "items": 12597,
-      "newConcepts": 887,
-      "newEntities": 887
+      "newConcepts": 886,
+      "newEntities": 886
     },
     {
       "pass": 13,
@@ -145,8 +145,8 @@
       "kind": "medida (no se carga)",
       "version": null,
       "items": 5067,
-      "newConcepts": 1585,
-      "newEntities": 1585
+      "newConcepts": 1562,
+      "newEntities": 1562
     },
     {
       "pass": 14,
@@ -163,8 +163,44 @@
       "kind": "claves citadas",
       "version": null,
       "items": 3647,
-      "newConcepts": 670,
-      "newEntities": 670
+      "newConcepts": 394,
+      "newEntities": 394
+    },
+    {
+      "pass": 16,
+      "source": "monarch-clingen",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 118,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 17,
+      "source": "monarch-clinvar",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 5052,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 18,
+      "source": "monarch-alliance",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 2160,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 19,
+      "source": "monarch-cureid",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 25,
+      "newConcepts": 0,
+      "newEntities": 0
     }
   ],
   "systems": {
@@ -189,17 +225,17 @@
     "efo-disease": {
       "name": "Experimental Factor Ontology — enfermedades propias de EFO",
       "keyOnly": false,
-      "concepts": 1111,
-      "active": 1111,
+      "concepts": 1159,
+      "active": 1159,
       "withSpanishName": 0,
-      "withDefinition": 1086,
+      "withDefinition": 1133,
       "withSpanishDefinition": 0
     },
     "icd10-who": {
       "name": "CIE-10 (OMS) — claves citadas por MONDO y Orphanet",
       "keyOnly": true,
-      "concepts": 12639,
-      "active": 12639,
+      "concepts": 12640,
+      "active": 12640,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -207,8 +243,8 @@
     "icd11-foundation": {
       "name": "CIE-11 Fundación — entidades citadas por MONDO y Orphanet",
       "keyOnly": true,
-      "concepts": 4630,
-      "active": 4630,
+      "concepts": 4631,
+      "active": 4631,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -225,8 +261,8 @@
     "mesh": {
       "name": "MeSH (NLM) — descriptores citados por MONDO, Orphanet y DOID",
       "keyOnly": true,
-      "concepts": 9264,
-      "active": 9264,
+      "concepts": 9320,
+      "active": 9320,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -234,10 +270,10 @@
     "mondo": {
       "name": "Mondo Disease Ontology (MONDO)",
       "keyOnly": false,
-      "concepts": 27185,
-      "active": 23264,
+      "concepts": 27695,
+      "active": 23774,
       "withSpanishName": 0,
-      "withDefinition": 16749,
+      "withDefinition": 16927,
       "withSpanishDefinition": 0
     },
     "ncit-disease": {
@@ -252,8 +288,8 @@
     "omim": {
       "name": "OMIM — claves de fenotipo citadas por MONDO, Orphanet y DOID",
       "keyOnly": true,
-      "concepts": 10744,
-      "active": 10744,
+      "concepts": 10871,
+      "active": 10871,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -270,8 +306,8 @@
     "umls": {
       "name": "UMLS (NLM) — CUI citados por MONDO, Orphanet, DOID y NCIt",
       "keyOnly": true,
-      "concepts": 32150,
-      "active": 32150,
+      "concepts": 32589,
+      "active": 32589,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0
@@ -409,13 +445,13 @@
         "chapter": 1,
         "block": 30,
         "category": 1982,
-        "linkedToMondo": 39
+        "linkedToMondo": 90
       },
       "23 External causes of morbidity or mortality": {
         "chapter": 1,
         "block": 85,
         "category": 909,
-        "linkedToMondo": 8
+        "linkedToMondo": 9
       },
       "24 Factors influencing health status or contact with health services": {
         "chapter": 1,
@@ -553,19 +589,19 @@
       "sin equivalencia declarada": 6236
     },
     "efo-disease → omim": {
-      "sin equivalencia declarada": 164
+      "sin equivalencia declarada": 165
     },
     "efo-disease → doid": {
       "sin equivalencia declarada": 126
     },
     "efo-disease → mesh": {
-      "sin equivalencia declarada": 294
+      "sin equivalencia declarada": 300
     },
     "efo-disease → ncit-disease": {
       "sin equivalencia declarada": 223
     },
     "efo-disease → icd10-who": {
-      "sin equivalencia declarada": 120
+      "sin equivalencia declarada": 177
     },
     "efo-disease → orphanet": {
       "sin equivalencia declarada": 152
@@ -574,52 +610,52 @@
       "sin equivalencia declarada": 82
     },
     "efo-disease → mondo": {
-      "sin equivalencia declarada": 16
+      "sin equivalencia declarada": 17
     },
     "icd10-who → icd11-mms": {
       "sin equivalencia declarada": 11649
     },
     "icd11-mms → icd11-foundation": {
-      "equivalent": 2192
+      "equivalent": 2193
     },
     "icd11-mms → icd10-who": {
       "sin equivalencia declarada": 16831
     },
     "mondo → doid": {
-      "equivalent": 11881,
-      "sin equivalencia declarada": 111
+      "equivalent": 11960,
+      "sin equivalencia declarada": 124
     },
     "mondo → mesh": {
-      "equivalent": 8007,
+      "equivalent": 8075,
       "sin equivalencia declarada": 25,
       "wider": 2,
       "narrower": 1
     },
     "mondo → ncit-disease": {
-      "equivalent": 7104,
+      "equivalent": 7106,
       "sin equivalencia declarada": 4,
       "narrower": 2,
       "wider": 2,
       "inexact": 1
     },
     "mondo → umls": {
-      "equivalent": 21204
+      "equivalent": 21661
     },
     "mondo → icd11-foundation": {
-      "equivalent": 4627,
+      "equivalent": 4628,
       "narrower": 2,
       "wider": 2
     },
     "mondo → omim": {
-      "equivalent": 10235,
-      "sin equivalencia declarada": 134
+      "equivalent": 10661,
+      "sin equivalencia declarada": 136
     },
     "mondo → orphanet": {
-      "equivalent": 9740,
-      "sin equivalencia declarada": 707
+      "equivalent": 9759,
+      "sin equivalencia declarada": 708
     },
     "mondo → icd10-who": {
-      "equivalent": 208
+      "equivalent": 209
     },
     "mondo → efo-disease": {
       "equivalent": 9
@@ -643,7 +679,7 @@
       "narrower": 206
     },
     "orphanet → mondo": {
-      "equivalent": 8899
+      "equivalent": 8918
     },
     "orphanet → omim": {
       "equivalent": 3781,
@@ -661,29 +697,29 @@
   "vsMondo": {
     "orphanet": {
       "active": 9757,
-      "linkedToMondo": 8206,
-      "pct": 84.1
+      "linkedToMondo": 8223,
+      "pct": 84.3
     },
     "doid": {
       "active": 12335,
-      "linkedToMondo": 11980,
-      "pct": 97.1
+      "linkedToMondo": 12055,
+      "pct": 97.7
     },
     "ncit-disease": {
       "active": 22379,
-      "linkedToMondo": 7843,
-      "pct": 35
+      "linkedToMondo": 7849,
+      "pct": 35.1
     },
     "icd11-mms": {
       "active": 37052,
-      "linkedToMondo": 7670,
-      "pct": 20.7
+      "linkedToMondo": 7723,
+      "pct": 20.8
     },
     "efo-disease": {
-      "active": 1111,
-      "linkedToMondo": 434,
-      "pct": 39.1
+      "active": 1159,
+      "linkedToMondo": 443,
+      "pct": 38.2
     }
   },
-  "mondoWithEquivalentInAnotherSystem": 17834
+  "mondoWithEquivalentInAnotherSystem": 17923
 }
