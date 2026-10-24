@@ -387,9 +387,10 @@ if (livd) {
     fileUrl: `https://github.com/CDCgov/routes/blob/${m.commit}/ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv`,
   };
   const rows = parseCsv(readFileSync(livd, 'utf8').replace(/^\uFEFF/, ''));
-  const out = fromLivd(rows, prov);
+  const discarded = [];
+  const out = fromLivd(rows, prov, discarded);
   out.forEach(add);
-  inputs.push({ source: 'mirror cdcgov-routes LIVD SARS-CoV-2', version: prov.sourceVersion, records: rows.length, testKits: out.length });
+  inputs.push({ source: 'mirror cdcgov-routes LIVD SARS-CoV-2', version: prov.sourceVersion, records: rows.length, testKits: out.length, rowsDiscardedWithoutManufacturer: [...new Set(discarded)].sort() });
 }
 
 // --- 3a. Enriquecimiento: base CLIA de FDA (analitos por documento / K-number) ------
@@ -458,7 +459,7 @@ ensureDir(OUT_DIR);
 // Lo que había en out/ antes de esta corrida: base para contar lo nuevo de la pasada.
 const brandKey = (r) => `${manufacturerKey(r.manufacturerName) ?? ''}|${r.brandName.toUpperCase()}`;
 const previous = { records: new Set(), manufacturers: new Set(), brands: new Set(), udiDi: new Set() };
-for (const f of readdirSync(OUT_DIR).filter((x) => /^fda-[a-z0-9-]+-\d{4}\.ndjson\.gz$/.test(x))) {
+for (const f of readdirSync(OUT_DIR).filter((x) => /^[a-z0-9-]+-\d{4}\.ndjson\.gz$/.test(x))) {
   for (const line of gunzipSync(readFileSync(join(OUT_DIR, f))).toString('utf8').split('\n')) {
     if (!line) continue;
     const r = JSON.parse(line);

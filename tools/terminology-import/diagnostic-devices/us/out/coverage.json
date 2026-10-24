@@ -1,35 +1,32 @@
 {
  "rawDir": "<raw>/us",
  "totals": {
-  "rows": 189072,
+  "rows": 189068,
   "bySource": {
    "fda-rl": 110614,
    "fda-510k": 71955,
    "fda-gudid": 3130,
    "fda-pma": 2646,
-   "cdc-livd-sars-cov-2": 487,
+   "cdc-livd-sars-cov-2": 483,
    "fda-denovo": 240
   },
   "byRecordLevel": {
    "listing": 110614,
-   "authorization": 75328,
+   "authorization": 75324,
    "udi_di": 3130
   },
   "manufacturers": 18396,
-  "brands": 72594,
+  "brands": 72590,
   "udiDi": 3137,
   "withModel": 3130,
   "withCountry": 182809
  },
  "deltaVsPrevious": {
-  "records": 111101,
-  "manufacturers": 5755,
-  "brands": 475,
-  "udiDi": 7,
-  "bySource": {
-   "fda-rl": 110614,
-   "cdc-livd-sars-cov-2": 487
-  }
+  "records": 0,
+  "manufacturers": 0,
+  "brands": 0,
+  "udiDi": 0,
+  "bySource": {}
  },
  "productCodes": {
   "seen": 7119,
@@ -119,7 +116,7 @@
   "HO": 2995,
   "OR": 2576,
   "PM": 851,
-  "sin panel": 487,
+  "sin panel": 483,
   "SU": 436,
   "MG": 43
  },
@@ -3024,12 +3021,12 @@
   "fda:1": 37216,
   "fda:3": 1741,
   "fda:U": 615,
-  "sin clase": 492,
+  "sin clase": 488,
   "fda:N": 471,
   "fda:f": 6
  },
  "byStatus": {
-  "sin estado": 111101,
+  "sin estado": 111097,
   "Substantially Equivalent": 71726,
   "In Commercial Distribution": 2923,
   "Approved": 1369,
@@ -3256,7 +3253,16 @@
    "source": "mirror cdcgov-routes LIVD SARS-CoV-2",
    "version": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
    "records": 1144,
-   "testKits": 487
+   "testKits": 483,
+   "rowsDiscardedWithoutManufacturer": [
+    "10811877011290",
+    "Cue COVID-19 Test for Home and Over The Counter (OTC) Use (Proctored)_Cue Health Inc.",
+    "Cue COVID-19 Test_Cue Health Inc.",
+    "TaqPath COVID-19 RNase P Combo Kit 2.0_Thermo Fisher Scientific Inc.",
+    "Test_Home_Device",
+    "Test_OTC_Device",
+    "Test_Unproctored_Device"
+   ]
   },
   {
    "source": "mirror unmtransinfo-cfde-biomarkers (CLIA)",

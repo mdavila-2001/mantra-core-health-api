@@ -32,7 +32,8 @@ export const FIELDS = Object.freeze([
 ]);
 
 /** Campos que nunca pueden faltar: sin ellos la fila no es trazable. */
-export const REQUIRED_NON_NULL = Object.freeze(['source', 'sourceRecordId', 'sourceUrl', 'sourceVersion', 'retrievedAt']);
+/** Nunca `null`: procedencia y razón social (obligatoria en el README común). */
+export const REQUIRED_NON_NULL = Object.freeze(['source', 'sourceRecordId', 'sourceUrl', 'sourceVersion', 'retrievedAt', 'manufacturerName']);
 
 export const FORMAT_VERSION = 1;
 

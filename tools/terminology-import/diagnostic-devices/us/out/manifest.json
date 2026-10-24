@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T03:49:57.207Z",
+ "generatedAt": "2026-10-24T04:03:14.085Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -48,9 +48,9 @@
    "path": "cdc-livd-sars-cov-2-0001.ndjson.gz",
    "source": "cdc-livd-sars-cov-2",
    "sourceVersion": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
-   "rows": 487,
-   "bytes": 37306,
-   "sha256": "ff3342e932d2b6a632c27907de22e812828ac9350546bc4382c0b33d31ee2d15"
+   "rows": 483,
+   "bytes": 37026,
+   "sha256": "f631f790d54709d20c8d80cd43da67a817337506f76a65f4c6f527318ac64230"
   }
  ],
  "gaps": [
@@ -114,7 +114,16 @@
    "source": "mirror cdcgov-routes LIVD SARS-CoV-2",
    "version": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
    "records": 1144,
-   "testKits": 487
+   "testKits": 483,
+   "rowsDiscardedWithoutManufacturer": [
+    "10811877011290",
+    "Cue COVID-19 Test for Home and Over The Counter (OTC) Use (Proctored)_Cue Health Inc.",
+    "Cue COVID-19 Test_Cue Health Inc.",
+    "TaqPath COVID-19 RNase P Combo Kit 2.0_Thermo Fisher Scientific Inc.",
+    "Test_Home_Device",
+    "Test_OTC_Device",
+    "Test_Unproctored_Device"
+   ]
   },
   {
    "source": "mirror unmtransinfo-cfde-biomarkers (CLIA)",

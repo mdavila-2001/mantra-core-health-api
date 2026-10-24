@@ -42,23 +42,23 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 | 2 | 2026-10-24 | FDA `foiclass.zip` crudo, espejo `ej86/fda-ai-medical-device-analytics@8840a036` (7 088 product codes) · paquete R `bjoleary/fdadata@227bdaa2` (archivos de descarga FDA `pmn*.zip`, `pma.zip`, `foiclass.zip`, «accessed 2026-10-20»: 176 466 510(k)/De Novo con dirección y país, 57 373 PMA con suplementos, 7 097 product codes) · lista FDA «AI-Enabled Medical Devices» (1 524, espejo ej86) | 3 081 (2 646 PMA + 432 510(k) + 3 De Novo) · además: nombre FDA del tipo en 3 268 de 3 270 product codes y país en 72 195 registros | 121 | 3 710 | `premarket.rda` (une `pmn` y `pma`: duplicado); país de `pma.rda` (fdadata pone `USA` a todos: no es dato de FDA, queda sólo en `extra.countryAsPublished`); 230 product codes retirados que sólo aparecen en 510(k) viejos sin clasificación publicada |
 | 3 | 2026-10-24 | AccessGUDID **Full Release XML 2025-05-01** filtrado a especialidad dental, espejo `Delapro/GUDID@9237402a` (20 zip, 812 322 registros de dispositivo) | 3 130 UDI-DI (radiología dental extraoral/intraoral, portapelículas, seguimiento mandibular, procesamiento de imagen, probadores pulpares, detectores de caries…) con modelo, DUNS, 510(k) y GMDN con código | 71 | 809 | 809 192 registros dentales fuera de alcance (implantes, prótesis, instrumental); el resto de GUDID (otros paneles) no tiene espejo público alcanzable. Se conservan tal cual los product codes que declara el etiquetador, aunque alguno sea dudoso (p. ej. un TENS declarado como `MUH`): GUDID es declaración del fabricante |
 | 4 | 2026-10-24 | Lista FDA «Nucleic Acid Based Tests» por patógeno, `double-strand/IVDmicrobialNAATregistry@6cdd1e5e` (456 filas, 255 K-numbers) · listas FDA de IA `lotterlab/fda_ai_search@adcdeda1` (1 248) y `dcxht/ValidMed@4f9c75f3` (1 430) · subconjunto openFDA de neurología `mehulseth/bci-fda-rnpv@df4f768c` (6 176) | **0** (sólo enriquecimiento: 253 510(k) moleculares con `extra.fdaNaatList`, patógenos con TaxID de NCBI y tecnología) | 0 | 0 | `K133448` y `K133883` de la lista NAAT no están en ningún archivo de descarga FDA alcanzable: sin fabricante ni product code verificable, no se crean filas; `P140011/S008` de ValidMed, ídem; listas de IA y neurología: todos sus envíos ya estaban (subconjuntos de pmn/pma) |
-| 5 | 2026-10-24 | FDA **Establishment Registration & Device Listing**, archivos planos 2024 (`Registration.txt` 46 496, `registration_listing.txt` 325 731, `Listing_PCD.txt` 316 023, `Owner_Operator.txt`), espejo `sdgoldberg/MedDev@6cbd231b` · **LIVD SARS-CoV-2** de CDC (pruebas IVD con EUA de FDA; 1 144 filas), `CDCgov/routes@e2e16eed` · extracto de la base **CLIA** de FDA (20 832 filas documento → sistema de prueba → analito, 2025-03), `unmtransinfo/cfde-biomarkers@9a121841` | 111 101 (110 614 listados de establecimiento por product code + 487 kits de prueba con EUA, 7 con UDI-DI) · además: 2 218 autorizaciones con analitos CLIA | 5 755 | 475 | GUDID `device.txt` ~2020-02 de `misterrPink1/symmetric@a43a1a58` (2 424 295 dispositivos **sin product code**: decidir el alcance exigiría cruzar por nombre, prohibido); extracto GUDID 2026-07-23 de `russellmiller49/Interventional-Pulm-Education-Project@b18a0f5b` (15 229, sin product code, mismo motivo); UDI de audífonos de `SyneticSLZ/MarketIntel@13c86b7b` (874.3300, prótesis: fuera de alcance); muestras de 100 a 1 000 filas (`mgree/ffs`, `AmitXShukla/P2P.ai`, `ikmdev/tinkar-core`); EUA COVID 2020 de `TommyJones/covid_fda_eua_tests` (59, contenidas en LIVD); `datasets.zip` de `symmetric` es MDALL de Health Canada (se pasó a la sesión ROW) |
+| 5 | 2026-10-24 | FDA **Establishment Registration & Device Listing**, archivos planos 2024 (`Registration.txt` 46 496, `registration_listing.txt` 325 731, `Listing_PCD.txt` 316 023, `Owner_Operator.txt`), espejo `sdgoldberg/MedDev@6cbd231b` · **LIVD SARS-CoV-2** de CDC (pruebas IVD con EUA de FDA; 1 144 filas; se descartan 4 kits sin `Manufacturer`, 3 de ellos filas de prueba de la planilla `Test_*_Device`), `CDCgov/routes@e2e16eed` · extracto de la base **CLIA** de FDA (20 832 filas documento → sistema de prueba → analito, 2025-03), `unmtransinfo/cfde-biomarkers@9a121841` | 111 097 (110 614 listados de establecimiento por product code + 483 kits de prueba con EUA, 7 con UDI-DI) · además: 2 218 autorizaciones con analitos CLIA | 5 755 | 471 | GUDID `device.txt` ~2020-02 de `misterrPink1/symmetric@a43a1a58` (2 424 295 dispositivos **sin product code**: decidir el alcance exigiría cruzar por nombre, prohibido); extracto GUDID 2026-07-23 de `russellmiller49/Interventional-Pulm-Education-Project@b18a0f5b` (15 229, sin product code, mismo motivo); UDI de audífonos de `SyneticSLZ/MarketIntel@13c86b7b` (874.3300, prótesis: fuera de alcance); muestras de 100 a 1 000 filas (`mgree/ffs`, `AmitXShukla/P2P.ai`, `ikmdev/tinkar-core`); EUA COVID 2020 de `TommyJones/covid_fda_eua_tests` (59, contenidas en LIVD); `datasets.zip` de `symmetric` es MDALL de Health Canada (se pasó a la sesión ROW) |
 
 <!-- coverage:start -->
 ## Cobertura (generada por `coverage-report.mjs`)
 
 | | Cantidad |
 |---|---|
-| Registros (filas del NDJSON) | 189 072 |
+| Registros (filas del NDJSON) | 189 068 |
 | · `fda-rl` | 110 614 |
 | · `fda-510k` | 71 955 |
 | · `fda-gudid` | 3 130 |
 | · `fda-pma` | 2 646 |
-| · `cdc-livd-sars-cov-2` | 487 |
+| · `cdc-livd-sars-cov-2` | 483 |
 | · `fda-denovo` | 240 |
 | UDI-DI (con modelo/versión) | 3 137 |
 | Fabricantes distintos (razón social normalizada exacta) | 18 396 |
-| Marcas distintas (fabricante + nombre comercial) | 72 594 |
+| Marcas distintas (fabricante + nombre comercial) | 72 590 |
 | Registros con país del fabricante | 182 809 |
 | Product codes vistos / incluidos / excluidos | 7 119 / 3 270 / 3 849 |
 
@@ -292,9 +292,9 @@ La lista completa, código por código con nombre, panel, clase, regulación, re
 
 ### Clase de riesgo y estado
 
-Clase: `fda:2` 148 531 · `fda:1` 37 216 · `fda:3` 1 741 · `fda:U` 615 · `sin clase` 492 · `fda:N` 471 · `fda:f` 6.
+Clase: `fda:2` 148 531 · `fda:1` 37 216 · `fda:3` 1 741 · `fda:U` 615 · `sin clase` 488 · `fda:N` 471 · `fda:f` 6.
 
-Estado (verbatim de la fuente): sin estado 111 101 · Substantially Equivalent 71 726 · In Commercial Distribution 2 923 · Approved 1 369 · Accepted 1 068 · De Novo Granted 240 · Not in Commercial Distribution 207 · Approved - Reclassified 123 · Approved - Withdrawn 78 · Substantially Equivalent - Kit 73 · SN 55 · Substantially Equivalent - With Limitations 44.
+Estado (verbatim de la fuente): sin estado 111 097 · Substantially Equivalent 71 726 · In Commercial Distribution 2 923 · Approved 1 369 · Accepted 1 068 · De Novo Granted 240 · Not in Commercial Distribution 207 · Approved - Reclassified 123 · Approved - Withdrawn 78 · Substantially Equivalent - Kit 73 · SN 55 · Substantially Equivalent - With Limitations 44.
 
 ### Huecos
 

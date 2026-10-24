@@ -752,11 +752,16 @@ export function fromRlFlat({ reg, link, pcd, owner, estabTypes }, table, prov) {
  * `authorizationId` quedan `null`; los equipos (instrumentos) y los LOINC van
  * en `extra`.
  */
-export function fromLivd(rows, prov) {
+export function fromLivd(rows, prov, discarded = []) {
   const groups = new Map();
   for (const r of rows) {
     const id = verbatim(r['Testkit Name ID']);
     if (!id) continue;
+    // Filas sin fabricante (incluye las de prueba de la planilla, `Test_*_Device`): no se inventa la razón social.
+    if (!verbatim(r.Manufacturer)) {
+      discarded.push(id);
+      continue;
+    }
     const g = groups.get(id) ?? [];
     g.push(r);
     groups.set(id, g);

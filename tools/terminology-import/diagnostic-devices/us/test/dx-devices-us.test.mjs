@@ -77,7 +77,8 @@ test('format: clase, fechas, claves', () => {
 
 test('format: makeRecord exige procedencia y las 18 claves', () => {
   assert.throws(() => makeRecord({ source: 'fda-510k', sourceRecordId: 'K1' }), /sourceUrl vacío/);
-  const r = makeRecord({ source: 'fda-510k', sourceRecordId: 'K1', sourceUrl: 'https://x.test/K1', sourceVersion: 'v', retrievedAt: '2026-01-01T00:00:00Z' });
+  assert.throws(() => makeRecord({ source: 'fda-510k', sourceRecordId: 'K1', sourceUrl: 'https://x.test', sourceVersion: 'v', retrievedAt: '2026-01-01T00:00:00Z' }), /manufacturerName vacío/);
+  const r = makeRecord({ source: 'fda-510k', sourceRecordId: 'K1', sourceUrl: 'https://x.test/K1', sourceVersion: 'v', retrievedAt: '2026-01-01T00:00:00Z', manufacturerName: 'M' });
   assert.deepEqual(Object.keys(r), FIELDS);
   assert.deepEqual(validateRecord({ ...r, riskClass: 'FDA:II' }).length, 1);
 });
