@@ -1,0 +1,45 @@
+LINK TO DIRECTORY WITHOUT index.md: C:\Alovida\wt-marcelo-api-lane16\docs\trabajo\2026-10-24-farmacologia-clinica\REPORTE.md -> ./evidencia/
+
+Páginas huérfanas (sin ningún enlace entrante desde otra página de docs/):
+  - C:\Alovida\wt-marcelo-api-lane16\docs\api\flujos-verificados-frontend.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\architecture\decisions\ADR-2026-08-10-audio-assets-worker.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\architecture\domain-boundaries-hardening.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\architecture\flows.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\architecture\module-layout.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\contracts\insurer-practitioner-settlement-batches.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\contracts\insurer-preventive-campaigns.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\endpoints\audio-assets.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\governance\ALOVIDA-TRAZABILIDAD.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\graphify.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\guides\patient-coverage-copays.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\operations\ci-integration-recipe.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\operations\ci-runner-self-hosted.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\operations\corpus-mesh.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\reports\ALOVIDA-COBERTURA.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\reports\costo-infraestructura-y-operacion-2026-08-07.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\runbooks\audio-assets-production.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\allergies.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\clinical-forms.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\clinical-pharmacology.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\diagnostic-devices-eu.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\diagnostic-devices-master.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\diagnostic-devices-row.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\diagnostic-devices-us.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\diseases.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\drug-treatments.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\lab-tests.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\medical-dictionaries.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\nursing-care.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\procedures-treatments.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\specialty-services.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\seed-research\symptoms.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\terminology-expansion\MEDLINEPLUS-REVIEW.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\terminology-expansion\SOURCE-REGISTER.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\trabajo\2026-10-15-route-health-api-startup\REPORTE.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\trabajo\2026-10-24-farmacologia-clinica\REPORTE.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\trabajo\2026-10-24-marcelo-lane16-protection\PLAN.md
+  - C:\Alovida\wt-marcelo-api-lane16\docs\trabajo\2026-10-24-seed-dx-devices-us-official\REPORTE.md
+
+2565 enlaces internos verificados en 469 páginas.
+1 enlaces rotos.
+exit=1

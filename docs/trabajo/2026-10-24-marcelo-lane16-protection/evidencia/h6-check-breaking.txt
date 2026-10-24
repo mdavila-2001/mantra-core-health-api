@@ -1,0 +1,2 @@
+Sin cambios incompatibles no aprobados en el contrato OpenAPI.
+exit=0

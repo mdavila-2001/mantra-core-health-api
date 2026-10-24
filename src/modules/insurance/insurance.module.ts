@@ -14,6 +14,12 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // transaccional. `MessagingModule` sólo importa MikroORM, así que no cierra
 // ningún ciclo con `insurance`.
 import { MessagingModule } from '../messaging/messaging.module';
+// Carril 16 — la factura al paciente se persiste con el repositorio de `billing`,
+// alcanzado sólo desde su adaptador de infraestructura. Se provee directo (como
+// `PersonAccountLinksRepository` más abajo) y no se importa `BillingModule`: el
+// import cambiaba el orden en que Nest descubre los módulos y, con él, el de todo
+// el contrato OpenAPI. El repositorio no tiene dependencias.
+import { InvoicesRepository } from '../billing/repositories';
 import * as entities from './entities';
 import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
 import { LinkedClaimAccessService } from './application/services/linked-claim-access.service';
@@ -47,6 +53,10 @@ import {
   PriorAuthReadService,
   ClaimsService,
   ClaimCoveragePolicy,
+  ClaimQuoteService,
+  ClaimPatientInvoiceService,
+  PatientConsentValidator,
+  PatientChargeObjectionService,
   ClaimsReadService,
   AppealsService,
   ReconciliationService,
@@ -112,6 +122,12 @@ import { ClaimDecisionPublisherAdapter } from './infrastructure/adapters/claim-d
 import { CLAIM_DECISION_PUBLISHER_PORT } from './application/ports/claim-decision-publisher.port';
 import { PatientOwnershipAdapter } from './infrastructure/adapters/patient-ownership.adapter';
 import { PATIENT_OWNERSHIP_PORT } from './application/ports/patient-ownership.port';
+import { BillingPatientInvoiceAdapter } from './infrastructure/adapters/billing-patient-invoice.adapter';
+import { PATIENT_BILLING_PORT } from './application/ports/patient-billing.port';
+import { NoPatientChargeAcceptanceAdapter } from './infrastructure/adapters/no-patient-charge-acceptance.adapter';
+import { PATIENT_CHARGE_ACCEPTANCE_PORT } from './application/ports/patient-charge-acceptance.port';
+import { PatientNoticeAdapter } from './infrastructure/adapters/patient-notice.adapter';
+import { PATIENT_NOTICE_PORT } from './application/ports/patient-notice.port';
 import { AuditTrailAdapter } from './infrastructure/adapters/audit-trail.adapter';
 import { INSURANCE_AUDIT_TRAIL_PORT } from './application/ports/audit-trail.port';
 import { InsurancePortabilitySupportAdapter } from './infrastructure/adapters/insurance-portability-support.adapter';
@@ -184,6 +200,21 @@ import {
     },
     PatientOwnershipAdapter,
     { provide: PATIENT_OWNERSHIP_PORT, useExisting: PatientOwnershipAdapter },
+    InvoicesRepository,
+    BillingPatientInvoiceAdapter,
+    {
+      provide: PATIENT_BILLING_PORT,
+      useExisting: BillingPatientInvoiceAdapter,
+    },
+    // REQ-16-030: sin tabla de aceptaciones en el modelo, el cobro particular
+    // falla cerrado hasta que llegue el PR del modelo (ver el puerto).
+    NoPatientChargeAcceptanceAdapter,
+    {
+      provide: PATIENT_CHARGE_ACCEPTANCE_PORT,
+      useExisting: NoPatientChargeAcceptanceAdapter,
+    },
+    PatientNoticeAdapter,
+    { provide: PATIENT_NOTICE_PORT, useExisting: PatientNoticeAdapter },
     AuditTrailAdapter,
     { provide: INSURANCE_AUDIT_TRAIL_PORT, useExisting: AuditTrailAdapter },
     InsurancePortabilitySupportAdapter,
@@ -247,6 +278,10 @@ import {
     PriorAuthReadService,
     ClaimsService,
     ClaimCoveragePolicy,
+    ClaimQuoteService,
+    ClaimPatientInvoiceService,
+    PatientConsentValidator,
+    PatientChargeObjectionService,
     ClaimsReadService,
     AppealsService,
     ReconciliationService,

@@ -1,0 +1,11 @@
+(node:25340) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7476) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 7 passed, 7 total
+Tests:       120 passed, 120 total
+Snapshots:   0 total
+Time:        4.072 s
+Ran all test suites matching src/modules/insurance/domain|src/modules/insurance/application/services/claims.service.spec.ts.
+exit=0

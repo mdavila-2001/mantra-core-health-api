@@ -1,0 +1,2 @@
+AsyncAPI válido: 0 advertencia(s), 0 errores.
+exit=0

@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1523 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1523 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1525 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1525 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -49960,7 +49960,7 @@
       ]
     },
     {
-      "name": "insurance-claims (7)",
+      "name": "insurance-claims (9)",
       "item": [
         {
           "name": "GET /insurance-claims · Listar las solicitudes de seguro presentadas (cursor)",
@@ -50105,6 +50105,65 @@
           ]
         },
         {
+          "name": "POST /insurance-claims/quote · Cotizar un cobro a la aseguradora (sin guardar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-claims/quote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-claims",
+                "quote"
+              ]
+            },
+            "description": "Cotizar un cobro a la aseguradora (sin guardar). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/quote`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_quote`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"patientCoverageId\": \"{{patientCoverageId}}\",\n  \"priorAuthorizationRequestId\": \"{{priorAuthorizationRequestId}}\",\n  \"lines\": [\n    {\n      \"lineSequence\": 1,\n      \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"quantity\": \"1\",\n      \"billedAmount\": \"100.00\",\n      \"inventoryReservationLineId\": \"<inventoryReservationLineId: uuid existente>\",\n      \"diagnosticStudyOfferingId\": \"{{diagnosticStudyOfferingId}}\",\n      \"supportingClinicalReference\": \"ENC-2026-00412\",\n      \"patientResponsibilityAmount\": \"20.00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{insuranceClaimId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.insuranceClaimId);",
+                  "  if (id) pm.environment.set('insuranceClaimId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "POST /insurance-claims/{id}/adjudications · Adjudicar reclamo por línea (835)",
           "request": {
             "method": "POST",
@@ -50208,7 +50267,7 @@
             "description": "Abrir disputa sobre adjudicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/disputes`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_openDispute`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"initiatedBy\": \"PROVIDER\",\n  \"filingDeadline\": \"2026-01-01\"\n}",
+              "raw": "{\n  \"initiatedBy\": \"PROVIDER\",\n  \"filingDeadline\": \"2026-01-01\",\n  \"objectionReason\": \"AMOUNT_DIFFERS\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -50273,6 +50332,73 @@
               ]
             },
             "description": "Publicar Explicación de Beneficios (EOB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/eob`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_publishEob`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{insuranceClaimId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.insuranceClaimId);",
+                  "  if (id) pm.environment.set('insuranceClaimId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /insurance-claims/{id}/patient-invoice · Facturar al paciente su parte de un servicio reclamado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-claims/:id/patient-invoice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-claims",
+                ":id",
+                "patient-invoice"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{insuranceClaimId}}",
+                  "description": "Identificador de ruta · variable `{{insuranceClaimId}}`"
+                }
+              ]
+            },
+            "description": "Facturar al paciente su parte de un servicio reclamado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/patient-invoice`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_issuePatientInvoice`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"claimLineId\": \"<claimLineId: uuid existente>\",\n  \"patientAmount\": \"140.00\",\n  \"description\": \"description-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": [],
           "event": [

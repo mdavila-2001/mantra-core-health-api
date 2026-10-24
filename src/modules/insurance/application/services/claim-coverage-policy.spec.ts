@@ -771,3 +771,283 @@ describe('ClaimCoveragePolicy', () => {
     });
   });
 });
+
+/**
+ * Cotización previa de una línea (carril 16, REQ-16-026): las mismas reglas que
+ * `evaluate`, sin bloquear la aprobación previa y sin lanzar.
+ */
+describe('ClaimCoveragePolicy.quoteLine', () => {
+  const quote = (
+    ctx: ReturnType<typeof setup>,
+    toQuote: ClaimToEvaluate,
+    index = 0,
+    shared = new Map<string, string>(),
+  ) => ctx.policy.quoteLine(ctx.em, toQuote, toQuote.lines[index], shared);
+
+  const withSurgery = (rows: Parameters<typeof setup>[0]) =>
+    setup({ benefits: [surgeryBenefit()], ...rows });
+  const approvedSurgery = (extra: Row = {}) =>
+    withSurgery({
+      requests: [paRequest()],
+      items: [paItem()],
+      determinations: [determination(extra)],
+    });
+
+  describe('correcto', () => {
+    it('500 Bs, copago 50, 80 % → paciente 140 y aseguradora 360', async () => {
+      const ctx = setup({});
+      expect(await quote(ctx, claim())).toEqual({
+        lineSequence: 1,
+        benefitId: 'benefit-consult',
+        coveragePercent: '80',
+        copayAmount: '50.00',
+        deductibleAmount: null,
+        requiresPriorAuthorization: false,
+        priorAuthorizationStatus: 'NOT_REQUIRED',
+        patientAmount: '140.00',
+        insurerAmount: '360.00',
+        reason: null,
+        message: null,
+      });
+    });
+
+    it('no toma ningún lock, ni siquiera con aprobación previa', async () => {
+      const ctx = approvedSurgery();
+      const line = await quote(ctx, surgeryClaim());
+      expect(line.priorAuthorizationStatus).toBe('APPROVED');
+      expect(ctx.memory.locks).toEqual([]);
+    });
+
+    it('`evaluate` sigue bloqueando la aprobación (no cambió)', async () => {
+      const ctx = approvedSurgery();
+      await ctx.policy.evaluate(ctx.em, surgeryClaim());
+      expect(ctx.memory.locks).toContain(PriorAuthorizationRequests);
+    });
+
+    it('informa el deducible pero no lo aplica al reparto', async () => {
+      const ctx = setup({
+        benefits: [benefit({ deductibleAmount: '25.00' })],
+      });
+      const line = await quote(ctx, claim());
+      expect(line.deductibleAmount).toBe('25.00');
+      expect(line.patientAmount).toBe('140.00');
+    });
+
+    it('ignora la parte del paciente que declara el cliente', async () => {
+      const ctx = setup({});
+      const declared = claim({
+        lines: [
+          {
+            lineSequence: 1,
+            serviceConceptId: CONSULT,
+            billedAmount: '500.00',
+            patientResponsibilityAmount: '300.00',
+          },
+        ],
+      });
+      const line = await quote(ctx, declared);
+      expect(line.reason).toBeNull();
+      expect(line.patientAmount).toBe('140.00');
+    });
+
+    it('aprobación PARTIAL se informa como aprobada, con su tope', async () => {
+      const ctx = approvedSurgery({
+        decisionConceptId: INS.DECISION_PARTIAL,
+        approvedAmount: '1000.00',
+      });
+      const line = await quote(ctx, surgeryClaim());
+      expect(line.priorAuthorizationStatus).toBe('APPROVED');
+      expect(line.reason).toBeNull();
+    });
+  });
+
+  describe('sin beneficio utilizable', () => {
+    const uncovered = {
+      benefitId: null,
+      coveragePercent: null,
+      copayAmount: null,
+      patientAmount: null,
+      insurerAmount: null,
+      priorAuthorizationStatus: null,
+    };
+
+    it('servicio sin beneficio en el plan', async () => {
+      const line = await quote(setup({ benefits: [] }), claim());
+      expect(line).toMatchObject({
+        ...uncovered,
+        reason: CLAIM_COVERAGE_REASON.SERVICE_NOT_COVERED,
+        message: 'El plan del paciente no cubre este servicio',
+      });
+    });
+
+    it('beneficio vencido', async () => {
+      const ctx = setup({
+        benefits: [benefit({ effectiveTo: new Date(NOW.getTime() - DAY) })],
+      });
+      expect((await quote(ctx, claim())).reason).toBe(
+        CLAIM_COVERAGE_REASON.SERVICE_NOT_COVERED,
+      );
+    });
+
+    it('beneficio de otro plan', async () => {
+      const ctx = setup({
+        benefits: [benefit({ insurancePlanId: OTHER_PLAN })],
+      });
+      expect((await quote(ctx, claim())).reason).toBe(
+        CLAIM_COVERAGE_REASON.SERVICE_NOT_COVERED,
+      );
+    });
+
+    it('dos beneficios vigentes para el mismo servicio', async () => {
+      const ctx = setup({
+        benefits: [benefit(), benefit({ id: 'benefit-other' })],
+      });
+      expect((await quote(ctx, claim())).reason).toBe(
+        CLAIM_COVERAGE_REASON.BENEFIT_AMBIGUOUS,
+      );
+    });
+
+    it('ítem sin servicio', async () => {
+      const ctx = setup({});
+      const noService = claim({
+        lines: [{ lineSequence: 1, billedAmount: '500.00' }],
+      });
+      expect((await quote(ctx, noService)).reason).toBe(
+        CLAIM_COVERAGE_REASON.SERVICE_REQUIRED,
+      );
+    });
+  });
+
+  describe('reparto que no se puede calcular', () => {
+    it('beneficio sin porcentaje ni copago conserva el beneficio y deja los importes en null', async () => {
+      const ctx = setup({
+        benefits: [benefit({ coveragePercent: null, copayAmount: null })],
+      });
+      expect(await quote(ctx, claim())).toMatchObject({
+        benefitId: 'benefit-consult',
+        patientAmount: null,
+        insurerAmount: null,
+        reason: CLAIM_COVERAGE_REASON.BENEFIT_WITHOUT_TERMS,
+      });
+    });
+
+    it('monto con tres decimales', async () => {
+      const ctx = setup({});
+      const invalid = claim({
+        lines: [
+          { lineSequence: 1, serviceConceptId: CONSULT, billedAmount: '1.234' },
+        ],
+      });
+      expect(await quote(ctx, invalid)).toMatchObject({
+        patientAmount: null,
+        reason: CLAIM_COVERAGE_REASON.INVALID_AMOUNT,
+      });
+    });
+  });
+
+  describe('aprobación previa', () => {
+    it('exigida y ausente: informa el reparto y no pide nada más', async () => {
+      const ctx = withSurgery({});
+      const line = await quote(
+        ctx,
+        surgeryClaim({ priorAuthorizationRequestId: null }),
+      );
+      expect(line).toMatchObject({
+        requiresPriorAuthorization: true,
+        priorAuthorizationStatus: 'MISSING',
+        reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_REQUIRED,
+        patientAmount: '100.00',
+        insurerAmount: '900.00',
+      });
+    });
+
+    it('de otra cobertura', async () => {
+      const ctx = withSurgery({
+        requests: [paRequest({ patientCoverageId: 'coverage-other' })],
+        items: [paItem()],
+        determinations: [determination()],
+      });
+      expect(await quote(ctx, surgeryClaim())).toMatchObject({
+        priorAuthorizationStatus: 'MISMATCH',
+        reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_MISMATCH,
+      });
+    });
+
+    it('sin respuesta de la aseguradora', async () => {
+      const ctx = withSurgery({
+        requests: [paRequest()],
+        items: [paItem()],
+        determinations: [],
+      });
+      expect(await quote(ctx, surgeryClaim())).toMatchObject({
+        priorAuthorizationStatus: 'PENDING',
+        reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_PENDING,
+      });
+    });
+
+    it('denegada', async () => {
+      const ctx = approvedSurgery({ decisionConceptId: INS.DECISION_DENIED });
+      expect(await quote(ctx, surgeryClaim())).toMatchObject({
+        priorAuthorizationStatus: 'DENIED',
+        reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_DENIED,
+      });
+    });
+
+    it('vencida', async () => {
+      const ctx = approvedSurgery({
+        validTo: new Date(NOW.getTime() - DAY),
+      });
+      expect(await quote(ctx, surgeryClaim())).toMatchObject({
+        priorAuthorizationStatus: 'EXPIRED',
+        reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_EXPIRED,
+      });
+    });
+
+    it('el tope aprobado es acumulado entre las líneas de la misma cotización', async () => {
+      const ctx = approvedSurgery({ approvedAmount: '1500.00' });
+      const twoLines = surgeryClaim({
+        lines: [
+          {
+            lineSequence: 1,
+            serviceConceptId: SURGERY,
+            billedAmount: '1000.00',
+          },
+          {
+            lineSequence: 2,
+            serviceConceptId: SURGERY,
+            billedAmount: '1000.00',
+          },
+        ],
+      });
+      const shared = new Map<string, string>();
+      const first = await quote(ctx, twoLines, 0, shared);
+      const second = await quote(ctx, twoLines, 1, shared);
+      expect(first.priorAuthorizationStatus).toBe('APPROVED');
+      expect(second).toMatchObject({
+        priorAuthorizationStatus: 'AMOUNT_EXCEEDED',
+        reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED,
+      });
+      expect(ctx.memory.locks).toEqual([]);
+    });
+  });
+
+  describe('fallos que no son de negocio', () => {
+    it('no los traga: un error de la base se relanza', async () => {
+      const ctx = setup({});
+      const broken = {
+        ...ctx.memory,
+        find: async () => {
+          throw new Error('connection reset');
+        },
+      };
+      await expect(
+        ctx.policy.quoteLine(
+          broken as never,
+          claim(),
+          claim().lines[0],
+          new Map(),
+        ),
+      ).rejects.toThrow('connection reset');
+    });
+  });
+});
