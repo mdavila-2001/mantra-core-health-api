@@ -26,7 +26,7 @@
 
 import 'dotenv/config';
 import pg from 'pg';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { BUILD_DIR, nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
@@ -106,9 +106,9 @@ async function upsertSystem(client, plan) {
   );
   const { rows: cs } = await client.query('SELECT id FROM terminology.code_systems WHERE internal_code = $1', [plan.codeSystem.internalCode]);
   await client.query(
-    `INSERT INTO terminology.code_system_versions (id, code_system_id, version, published_at, is_default, state_concept_id, created_at, updated_at, row_version)
-     VALUES ($1::uuid, $2::uuid, $3, now(), true, $4::uuid, now(), now(), 1) ON CONFLICT DO NOTHING`,
-    [plan.version.id, cs[0].id, plan.version.version, INTERNAL.TERM_ACTIVE],
+    `INSERT INTO terminology.code_system_versions (id, code_system_id, version, published_at, checksum, is_default, state_concept_id, created_at, updated_at, row_version)
+     VALUES ($1::uuid, $2::uuid, $3, now(), $4, true, $5::uuid, now(), now(), 1) ON CONFLICT DO NOTHING`,
+    [plan.version.id, cs[0].id, plan.version.version, plan.checksum, INTERNAL.TERM_ACTIVE],
   );
   const { rows: csv } = await client.query('SELECT id FROM terminology.code_system_versions WHERE code_system_id = $1 AND version = $2', [cs[0].id, plan.version.version]);
   // Si otra corrida creó la versión con otro id, las tuplas se reescriben a ese id.
@@ -123,13 +123,15 @@ const MAP_CASTS = ['uuid', 'uuid', 'uuid', 'uuid', null, null, 'uuid'];
 
 function readPlans() {
   if (!existsSync(NDJSON_DIR)) throw new Error(`Falta ${NDJSON_DIR}. Corré primero build-catalog.mjs.`);
+  const files = JSON.parse(readFileSync(join(NDJSON_DIR, '_systems.json'), 'utf8'));
   const plans = [];
   for (const f of readdirSync(NDJSON_DIR).filter((n) => n.endsWith('.ndjson')).sort()) {
     const cs = f.replace(/\.ndjson$/, '');
     if (ONLY && !ONLY.has(cs)) continue;
     const records = readNdjson(join(NDJSON_DIR, f));
     const version = records[0]?.provenance.version;
-    plans.push(planFor(cs, version, records));
+    // `checksum`: SHA-256 de los archivos de origen, en el orden de `_systems.json`.
+    plans.push({ ...planFor(cs, version, records), checksum: (files[cs] ?? []).map((f) => `${f.key}:sha256:${f.sha256}`).join(' ') || null });
   }
   return plans;
 }

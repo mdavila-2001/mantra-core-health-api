@@ -1,0 +1,6 @@
+﻿10ClassKind	10DepthInKind	icd10Code	icd10Chapter	icd10Title	11ClassKind	11DepthInKind	ICD-11 FoundationURI	Linearization (releaseURI)	icd11Code	icd11Chapter	icd11Title	2025-Jan-24
+category	1	A00	I	Cholera	category	1	http://id.who.int/icd/entity/257068234	http://id.who.int/icd/release/11/2025-01/mms/257068234	1A00	01	Cholera
+category	2	A00.9	I	Cholera, unspecified	category	1	http://id.who.int/icd/entity/257068234	http://id.who.int/icd/release/11/2025-01/mms/257068234	1A00	01	Cholera
+category	2	A01.0	I	Typhoid fever	category	2	http://id.who.int/icd/entity/1528414070	http://id.who.int/icd/release/11/2025-01/mms/1528414070/unspecified	1A07.Z	01	Typhoid fever, unspecified
+category	2	A04.0	I	Enteropathogenic Escherichia coli infection	category	2	http://id.who.int/icd/entity/2099226249	http://id.who.int/icd/release/11/2025-01/mms/2099226249	1A03.0	01	Enteropathogenic Escherichia coli infection
+category	2	A00.0	I	Cholera due to Vibrio cholerae 01, biovar cholerae	category	1	http://id.who.int/icd/entity/1205958647	http://id.who.int/icd/release/11/2025-01/mms/257068234	1A00&XN8P1	01	Cholera [Vibrio cholerae O1, biovar cholerae]

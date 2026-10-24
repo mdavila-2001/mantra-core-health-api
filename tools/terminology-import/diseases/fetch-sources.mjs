@@ -14,11 +14,14 @@
 // =============================================================================
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { ensureDir, nowIso, sha256File, writeJson } from '../lib/glossary-es/common.mjs';
-import { SOURCE_FILES, SOURCES_DIR } from './lib/sources.mjs';
+import { MEASURE_FILES, SOURCE_FILES, SOURCES_DIR } from './lib/sources.mjs';
+
+// Las fuentes que sólo se miden también se bajan y se registran (mismo manifiesto, `measureOnly`).
+const ALL_FILES = [...SOURCE_FILES, ...MEASURE_FILES.map((f) => ({ ...f, measureOnly: true }))];
 
 const args = process.argv.slice(2);
 const FORCE = args.includes('--force');
@@ -32,7 +35,7 @@ function download(url, dest) {
 function main() {
   const manifestPath = join(SOURCES_DIR, 'manifest.json');
   const entries = [];
-  for (const src of SOURCE_FILES) {
+  for (const src of ALL_FILES) {
     if (ONLY && !ONLY.has(src.key) && ![...ONLY].some((k) => src.key.startsWith(k))) continue;
     const dest = join(SOURCES_DIR, src.file);
     const had = existsSync(dest) && statSync(dest).size > 1024;
@@ -47,11 +50,24 @@ function main() {
       sha256: sha256File(dest),
       retrievedAt: had && !FORCE ? statSync(dest).mtime.toISOString() : nowIso(),
     };
+    // Copias de terceros de un archivo oficial: el hash tiene que ser el publicado.
+    if (src.expectedSha256 && entry.sha256 !== src.expectedSha256) {
+      throw new Error(`${src.key}: SHA-256 ${entry.sha256} ≠ esperado ${src.expectedSha256}. No se usa.`);
+    }
+    if (src.unzipTo) {
+      ensureDir(join(SOURCES_DIR, src.unzipTo));
+      execFileSync('unzip', ['-oq', dest, '-d', join(SOURCES_DIR, src.unzipTo)], { stdio: 'inherit' });
+      entry.unzippedTo = join(SOURCES_DIR, src.unzipTo);
+    }
     entries.push(entry);
     console.log(`[ok] ${src.key} ${entry.bytes} B sha256=${entry.sha256.slice(0, 12)}…`);
   }
-  writeJson(manifestPath, { generatedAt: nowIso(), sources: entries }, true);
-  console.log(`Manifiesto: ${manifestPath} (${entries.length} archivos)`);
+  // Con --only se conservan las entradas previas de las demás fuentes.
+  const previous = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')).sources : [];
+  const keys = new Set(entries.map((e) => e.key));
+  const merged = [...previous.filter((e) => !keys.has(e.key) && ALL_FILES.some((s) => s.key === e.key)), ...entries];
+  writeJson(manifestPath, { generatedAt: nowIso(), sources: merged }, true);
+  console.log(`Manifiesto: ${manifestPath} (${merged.length} archivos)`);
 }
 
 main();

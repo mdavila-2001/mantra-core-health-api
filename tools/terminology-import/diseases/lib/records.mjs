@@ -24,6 +24,7 @@
 // =============================================================================
 
 import { SYSTEMS } from './code-systems.mjs';
+import { foundationId, mmsCode, parse11To10, parseSimpleTabulation } from './icd11.mjs';
 import { readObo } from './obo.mjs';
 import { parseProduct1, parseProduct3, parseProduct7 } from './orphanet.mjs';
 
@@ -47,6 +48,7 @@ export function normalizeCurie(curie) {
     case 'ORPHA':
       return { cs: 'orphanet', code: local };
     case 'NCIT':
+    case 'NCIt':
     case 'NCI':
       return /^C\d+$/.test(local) ? { cs: 'ncit-disease', code: local } : null;
     case 'OMIM':
@@ -61,7 +63,12 @@ export function normalizeCurie(curie) {
     case 'UMLS_CUI':
       return /^C\d{7}$/.test(local) ? { cs: 'umls', code: local } : null;
     case 'ICD10WHO':
+    case 'ICD10': // EFO: CIE-10 de la OMS
       return { cs: 'icd10-who', code: local };
+    case 'EFO':
+      return /^\d{7}$/.test(local) ? { cs: 'efo-disease', code: `EFO:${local}` } : null;
+    case 'DECIPHER':
+      return /^\d+$/.test(local) ? { cs: 'decipher', code: local } : null;
     case 'icd11.foundation':
       return /^\d+$/.test(local) ? { cs: 'icd11-foundation', code: local } : null;
     case 'ICD10CM':
@@ -385,15 +392,127 @@ export function readOrphanet(paths) {
 
 // --- Procedencia ---------------------------------------------------------------
 
+/**
+ * Procedencia por concepto: fuente, id de origen, versión, URI y fecha de
+ * descarga. La licencia vive en `terminology_sources.license` y el archivo
+ * (URL + SHA-256) en `code_system_versions.checksum` / `_systems.json`: repetirlos
+ * en cada uno de los ~180 000 conceptos duplicaba el peso de la tabla.
+ */
 function provenance(meta, version, sourceId, cs, code = sourceId) {
   return {
-    source: SYSTEMS[cs].name,
+    source: SYSTEMS[cs].sourceCode,
     sourceId,
     version,
     uri: SYSTEMS[cs].uri(code),
-    file: meta.url,
-    sha256: meta.sha256 ?? null,
     retrievedAt: meta.retrievedAt ?? null,
-    license: SYSTEMS[cs].license,
   };
+}
+
+// --- CIE-11 MMS ----------------------------------------------------------------
+
+/**
+ * Un concepto por entidad de la tabulación (capítulo, bloque, categoría); la
+ * jerarquía es la columna `Parent` (URI de la Fundación del padre). Una
+ * entidad puede figurar con más de un padre: se suman.
+ */
+export function buildIcd11Mms(files, meta) {
+  const tab = parseSimpleTabulation(files.tabulation);
+  const to10 = parse11To10(files.map11To10);
+  const codeByFoundation = new Map(tab.rows.filter((r) => r.foundationUri).map((r) => [r.foundationUri, mmsCode(r)]));
+  const records = [];
+  for (const r of tab.rows) {
+    const code = mmsCode(r);
+    const parentCode = r.parentUri ? codeByFoundation.get(r.parentUri) : null;
+    const xrefs = [];
+    const fid = foundationId(r.foundationUri);
+    if (fid) xrefs.push({ cs: 'icd11-foundation', code: fid, equivalence: 'equivalent', context: 'who:mms Foundation URI' });
+    if (r.code && to10.map.has(r.code)) xrefs.push({ cs: 'icd10-who', code: to10.map.get(r.code), equivalence: null, context: `who:11To10MapToOneCategory ${to10.version}` });
+    records.push({
+      cs: 'icd11-mms',
+      code,
+      display: r.title,
+      lang: 'en',
+      definition: null,
+      definitionLang: null,
+      definitionRefs: [],
+      designations: [{ value: r.title, lang: 'en', preferred: true }],
+      parents: parentCode ? [parentCode] : [],
+      status: 'active',
+      replacedBy: null,
+      properties: {
+        icd11_classification: {
+          classKind: r.classKind,
+          chapterNo: r.chapterNo,
+          blockId: r.blockId,
+          depthInKind: r.depthInKind,
+          isResidual: r.isResidual,
+          isLeaf: r.isLeaf,
+          primaryTabulation: r.primaryTabulation,
+          groupings: r.groupings,
+          linearizationUri: r.linearizationUri,
+          foundationUri: r.foundationUri,
+        },
+        ...(r.codingNote ? { icd11_coding_note: r.codingNote } : {}),
+      },
+      xrefs,
+      provenance: { ...provenance(meta, '2026-01', r.linearizationUri, 'icd11-mms', code), uri: r.linearizationUri },
+    });
+  }
+  // Una entidad con varios padres aparece una vez por padre: un concepto con todos.
+  const merged = new Map();
+  for (const r of records) {
+    const prev = merged.get(r.code);
+    if (!prev) merged.set(r.code, r);
+    else prev.parents = [...new Set([...prev.parents, ...r.parents])];
+  }
+  return { version: '2026-01', tabulationVersion: tab.version, records: [...merged.values()], excluded: {}, map11To10Version: to10.version };
+}
+
+// --- EFO (sólo clases propias EFO_ bajo «disease» MONDO:0000001) ------------------
+
+export async function buildEfo(file, meta) {
+  const terms = [];
+  const header = await readObo(file.path, (t) => terms.push(t));
+  const version = /releases\/v([\d.]+)\//.exec(header['data-version']?.[0] ?? '')?.[1] ?? meta.version;
+  const live = terms.filter((t) => !t.obsolete);
+  const keep = keepReachable(live, 'MONDO:0000001', new Set());
+  const native = (id) => id.startsWith('efo:EFO_');
+  const records = [];
+  for (const t of live) {
+    if (!native(t.id) || !keep.has(t.id)) continue;
+    const code = `EFO:${t.id.slice(8)}`;
+    const designations = [];
+    pushDesignation(designations, t.name, 'en', true);
+    t.synonyms.forEach((s) => pushDesignation(designations, s.text, 'en', false));
+    const xrefs = [];
+    const external = {};
+    for (const x of t.xrefs) {
+      const target = normalizeCurie(x.id);
+      if (!target || (target.cs === 'efo-disease' && target.code === code)) addExternalRef(external, x.id);
+      else xrefs.push({ cs: target.cs, code: target.code, equivalence: null, context: 'efo:xref', external: Boolean(target.external) });
+    }
+    // Padres: otra clase EFO propia (mismo sistema) o una clase MONDO (se registra como referencia).
+    const parents = t.isA.map((p) => p.id).filter((p) => native(p) && keep.has(p)).map((p) => `EFO:${p.slice(8)}`);
+    const mondoParents = t.isA.map((p) => p.id).filter((p) => p.startsWith('MONDO:'));
+    records.push({
+      cs: 'efo-disease',
+      code,
+      display: t.name ?? code,
+      lang: 'en',
+      definition: t.def,
+      definitionLang: t.def ? 'en' : null,
+      definitionRefs: t.defRefs,
+      designations,
+      parents,
+      status: 'active',
+      replacedBy: null,
+      properties: {
+        ...(mondoParents.length ? { efo_mondo_parents: mondoParents } : {}),
+        ...(Object.keys(external).length ? { disease_external_xrefs: external } : {}),
+      },
+      xrefs,
+      provenance: provenance(meta, version, code, 'efo-disease'),
+    });
+  }
+  return { version, records, excluded: { notDiseaseOrImported: terms.length - records.length } };
 }

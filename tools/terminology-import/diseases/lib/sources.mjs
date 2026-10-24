@@ -33,6 +33,10 @@ export const LICENSES = {
   DOID: 'CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/) — Human Disease Ontology',
   NCIT: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — NCI Thesaurus, National Cancer Institute (EVS)',
   ORPHANET: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode) — Orphanet (c) INSERM',
+  ICD11: 'CC BY-ND 3.0 IGO (https://icd.who.int/en/docs/icd11-license.pdf) — © Organización Mundial de la Salud; se redistribuye sin modificar',
+  HPO: 'Licencia propia de HPO (LICENSE.md del repo remite a https://hpo.jax.org/app/license): uso libre con atribución y versión',
+  PHENOPACKET_STORE: 'BSD-3-Clause (https://github.com/monarch-initiative/phenopacket-store/blob/main/LICENSE) — Monarch Initiative',
+  EFO: 'Apache-2.0 (https://github.com/EBISPOT/efo/blob/master/LICENSE) — EMBL-EBI',
 };
 
 /**
@@ -59,11 +63,73 @@ export const SOURCE_FILES = [
   },
   {
     key: 'ncit',
-    file: 'ncit/ncit.obo',
-    url: 'https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo',
-    publisher: 'National Cancer Institute — NCI Thesaurus OBO Edition',
-    version: '24.04e (release 2024-05-07)',
+    file: 'ncit2026/ncit.obo',
+    url: 'https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo',
+    publisher: 'NCI Thesaurus OBO Edition (ncit-obo-org)',
+    version: '26.02d (release 2026-03-19)',
     license: LICENSES.NCIT,
+  },
+  {
+    // Zip ORIGINAL de la OMS (icdcdn.who.int/static/releasefiles/2026-01/SimpleTabulation-ICD-11-MMS-en.zip,
+    // bloqueado en esta red) tal como lo versiona un tercero; su SHA-256 coincide con el manifiesto
+    // publicado junto al archivo y el TSV declara «Version:2026 Jan 17 - 05:30 UTC». Ver SOURCES.md.
+    key: 'icd11-mms',
+    file: 'icd11/SimpleTabulation-ICD-11-MMS-en-2026-01.zip',
+    url: 'https://raw.githubusercontent.com/Wulfgardr/mediflow/3fa8899af07bbf70e802c9f2b01607820bd437c7/assets/reference-data/icd11/catalog.zip',
+    officialUrl: 'https://icdcdn.who.int/static/releasefiles/2026-01/SimpleTabulation-ICD-11-MMS-en.zip',
+    expectedSha256: 'f1356588f40953a83e3af2b662deab47c5e269f944d1ea4ed0cfeb2007c7cd39',
+    publisher: 'Organización Mundial de la Salud — CIE-11 MMS (tabulación simple, inglés)',
+    version: '2026-01',
+    license: LICENSES.ICD11,
+    unzipTo: 'icd11/mms-2026-01',
+  },
+  {
+    // Tabla oficial de la OMS «11To10MapToOneCategory» de la release 2025-01, extraída sin cambios
+    // por un tercero (README del repo); la del 2026-01 no está accesible desde esta red.
+    key: 'icd11-to-icd10',
+    file: 'icd11/map-2025-01-11To10MapToOneCategory.txt',
+    url: 'https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/11To10MapToOneCategory.txt',
+    officialUrl: 'https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip',
+    publisher: 'Organización Mundial de la Salud — tablas de correspondencia CIE-11 ↔ CIE-10',
+    version: '2025-01 (2025-Jan-24)',
+    license: LICENSES.ICD11,
+  },
+  {
+    key: 'icd10-to-icd11',
+    file: 'icd11/map-2025-01-10To11MapToOneCategory.txt',
+    url: 'https://raw.githubusercontent.com/drguptavivek/DigitVA/9aeff9688e1a9951a102e03a2768a067fdd22c9b/docs/icd-causegrp-mappings/migration-artifacts/icd11-icd10-mapping-tables-2025-01-base-2026-09-16/10To11MapToOneCategory.txt',
+    officialUrl: 'https://icdcdn.who.int/static/releasefiles/2025-01/mapping.zip',
+    // MD5 publicado por el repo que lo conserva: baae34f03596f46d198169b7bf94c0ea (coincide).
+    expectedSha256: '1af732d79829d1752457bcc5d254098e576f19ac8f447534ce31744c873224e7',
+    publisher: 'Organización Mundial de la Salud — tablas de correspondencia CIE-10 ↔ CIE-11',
+    version: '2025-01 (2025-Jan-24)',
+    license: LICENSES.ICD11,
+  },
+  {
+    // Sólo los identificadores de enfermedad (OMIM, ORPHA, DECIPHER): los nombres de OMIM son de OMIM.
+    key: 'hpo-annotations',
+    file: 'hpo/phenotype.hpoa',
+    url: 'https://github.com/obophenotype/human-phenotype-ontology/releases/download/v2026-09-01/phenotype.hpoa',
+    publisher: 'Human Phenotype Ontology (Monarch Initiative / JAX)',
+    version: '2026-09-02 (hp 2026-09-01)',
+    license: LICENSES.HPO,
+  },
+  {
+    key: 'phenopacket-store',
+    file: 'phenopacket-store/all_phenopackets.zip',
+    url: 'https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip',
+    publisher: 'Monarch Initiative — phenopacket-store',
+    version: '0.1.27',
+    license: LICENSES.PHENOPACKET_STORE,
+    unzipTo: 'phenopacket-store/x',
+  },
+  {
+    key: 'efo',
+    file: 'efo/efo.obo',
+    url: 'https://github.com/EBISPOT/efo/releases/download/v3.95.0/efo.obo',
+    publisher: 'EMBL-EBI — Experimental Factor Ontology',
+    version: '3.95.0',
+    license: LICENSES.EFO,
   },
   {
     key: 'orphanet-es-product1',
@@ -100,3 +166,50 @@ export const SOURCE_FILES = [
 ];
 
 export const ORPHANET_REPO = ORPHA_GH;
+
+/**
+ * Fuentes que sólo se MIDEN en la saturación (no se cargan): su licencia no está
+ * declarada en el repositorio de origen, o no aportan conceptos (Hetionet).
+ */
+export const MEASURE_FILES = [
+  {
+    key: 'nando',
+    file: 'nando/nando.ttl',
+    url: 'https://raw.githubusercontent.com/aidrd/nando/9af59ee203fabf7ca479a9a30e972d44124f1843/results/nando.ttl',
+    publisher: 'NANDO — Nanbyo Disease Ontology (DBCLS / NIBIOHN, Japón)',
+    version: 'commit 9af59ee (2024-07-23)',
+    license: 'No declarada en el repositorio (sin LICENSE): no se carga hasta confirmarla.',
+  },
+  {
+    key: 'oncotree',
+    file: 'oncotree/oncotree_2025_10_03.json',
+    url: 'https://raw.githubusercontent.com/cBioPortal/oncotree/3cf9fb3035cbdf75ac8983700935f9daa5dc08eb/trees/oncotree_2025_10_03.json',
+    publisher: 'OncoTree — Memorial Sloan Kettering Cancer Center',
+    version: '2025-10-03',
+    license: 'No declarada en el repositorio (sin LICENSE): no se carga hasta confirmarla.',
+  },
+  {
+    key: 'mesh-c',
+    file: 'mesh/mesh-2025.obo',
+    url: 'https://raw.githubusercontent.com/biopragmatics/obo-db-ingest/77e65923b484a2aa1c38306a03e916592f1d5f36/export/mesh/2025/mesh.obo',
+    publisher: 'MeSH 2025 (NLM) convertido a OBO por PyOBO (biopragmatics/obo-db-ingest)',
+    version: 'MeSH 2025 (conversión 2025-10-30)',
+    license: 'CC0 1.0 según la cabecera; es una conversión de terceros sin números de árbol: sólo se mide.',
+  },
+  {
+    key: 'gard',
+    file: 'gard/gard.obo',
+    url: 'https://raw.githubusercontent.com/biopragmatics/obo-db-ingest/77e65923b484a2aa1c38306a03e916592f1d5f36/export/gard/gard.obo',
+    publisher: 'GARD (NCATS) convertido a OBO por PyOBO (biopragmatics/obo-db-ingest)',
+    version: 'conversión 2025-10-31',
+    license: 'No declarada en la conversión; GARD oficial (rarediseases.info.nih.gov) no es accesible: sólo se mide.',
+  },
+  {
+    key: 'hetionet',
+    file: 'hetionet/hetionet-v1.0-nodes.tsv',
+    url: 'https://raw.githubusercontent.com/hetio/hetionet/8a6cc0c5604d0e2908786e4de38af67b8e46ee4a/hetnet/tsv/hetionet-v1.0-nodes.tsv',
+    publisher: 'Hetionet (Himmelstein et al.)',
+    version: 'v1.0',
+    license: 'CC0 1.0',
+  },
+];

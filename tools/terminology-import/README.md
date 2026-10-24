@@ -252,3 +252,12 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
+
+## Catálogo de enfermedades (2026-10-24)
+
+MONDO, Orphanet (castellano), DOID, NCIt (C2991), CIE-11 MMS 2026-01 y EFO, con
+jerarquía, alineamientos publicados y claves cruzadas (OMIM, CIE-10 OMS, CIE-11
+Fundación, MeSH, UMLS, DECIPHER). Importador en
+[`diseases/`](diseases/README.md); fuentes y licencias en
+[`diseases/SOURCES.md`](diseases/SOURCES.md); saturación, cobertura y claves para
+enlazar en [`docs/seed-research/diseases.md`](../../docs/seed-research/diseases.md).

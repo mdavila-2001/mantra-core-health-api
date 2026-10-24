@@ -55,6 +55,15 @@ export const SYSTEMS = {
     codeFormat: 'C2985',
     uri: (code) => `http://purl.obolibrary.org/obo/NCIT_${code}`,
   },
+  'efo-disease': {
+    name: 'Experimental Factor Ontology — enfermedades propias de EFO',
+    sourceCode: 'EBI_EFO',
+    owner: 'EMBL-EBI',
+    officialUrl: 'https://www.ebi.ac.uk/efo/',
+    license: LICENSES.EFO,
+    codeFormat: 'EFO:0000195',
+    uri: (code) => `http://www.ebi.ac.uk/efo/${code.replace(':', '_')}`,
+  },
   omim: {
     name: 'OMIM — claves de fenotipo citadas por MONDO, Orphanet y DOID',
     sourceCode: 'JHU_OMIM',
@@ -76,13 +85,13 @@ export const SYSTEMS = {
     uri: (code) => `https://icd.who.int/browse10/2019/en#/${code}`,
   },
   'icd11-mms': {
-    name: 'CIE-11 MMS — claves citadas por Orphanet',
+    name: 'CIE-11 para Estadísticas de Mortalidad y Morbilidad (MMS), 2026-01',
     sourceCode: 'WHO_ICD11',
     owner: 'Organización Mundial de la Salud',
-    officialUrl: 'https://icd.who.int/browse/latest-release/mms/es',
-    license: 'Sólo el código. La CIE-11 es CC BY-ND 3.0 IGO; su descarga (icd.who.int/icdcdn) no es accesible desde esta red.',
-    codeFormat: '5A11',
-    keyOnly: true,
+    officialUrl: 'https://icd.who.int/browse/2026-01/mms/en',
+    license: LICENSES.ICD11,
+    codeFormat: '5A11 (categoría) · BlockL1-1A0 (bloque) · chapter-01 (capítulo)',
+    // La URI es la de linealización de cada fila (la pone buildIcd11Mms); no se arma desde el código.
     uri: () => null,
   },
   'icd11-foundation': {
@@ -94,6 +103,16 @@ export const SYSTEMS = {
     codeFormat: '465177735',
     keyOnly: true,
     uri: (code) => `http://id.who.int/icd/entity/${code}`,
+  },
+  decipher: {
+    name: 'DECIPHER — síndromes citados por las anotaciones HPO y por MONDO',
+    sourceCode: 'WTSI_DECIPHER',
+    owner: 'DECIPHER (Wellcome Sanger Institute)',
+    officialUrl: 'https://www.deciphergenomics.org/',
+    license: 'Sólo el identificador, tal como lo citan HPO y MONDO; deciphergenomics.org no es accesible desde esta red.',
+    codeFormat: '16',
+    keyOnly: true,
+    uri: () => null,
   },
   mesh: {
     name: 'MeSH (NLM) — descriptores citados por MONDO, Orphanet y DOID',
