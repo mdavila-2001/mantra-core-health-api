@@ -1,0 +1,98 @@
+# Carga del corpus de la pasada 6 (granularidad por vía, todas las fuentes) en Postgres 16 DESECHABLE (base nueva cp_p6; DDL tal cual; nunca una base viva)
+
+$ load-clinical-pharmacology.mjs   (corrida 1)
+=== Farmacología clínica → terminology.*  ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 2760,
+  "concepts": 3832,
+  "designations": 3816,
+  "properties": 93986,
+  "relationships": 3818,
+  "uniqueIds": 105452
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 3832,
+    "designations": 3816,
+    "relationships": 3818,
+    "prunedProperties": 0,
+    "properties": 93986,
+    "vademecumMaps": 426,
+    "vademecumMapsPlanned": 426
+  },
+  "segundos": 29
+}
+
+$ load-clinical-pharmacology.mjs   (corrida 2: idempotencia)
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 0,
+    "properties": 0,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 426
+  },
+  "segundos": 17
+}
+
+$ psql: tamaño de concept_properties
+356 MB
+$ psql: secciones por fuente
+aemps-cima|41998
+openfda-label|27583
+(coverage)|2702
+who-eeml|1568
+ema-epar|1401
+$ psql: secciones con textSha256 ≠ sha256(texto)
+0
+$ psql: punteros DailyMed (pharmacology_external_documents) y si alguno trae texto
+164|275
+0
+
+$ validate-links.mjs
+{
+  "generatedAt": "2026-10-24T18:46:32.583Z",
+  "monographConcepts": 2760,
+  "vademecum": {
+    "atc5": 483,
+    "withMonograph": 426,
+    "withMap": 426,
+    "withoutMonograph": [
+      "A01AB11",
+      "A06AC07",
+      "A06AD04",
+      "A06AG06",
+      "A12CD01",
+      "B01AX06",
+      "B02BX01",
+      "B03AC02",
+      "B03AE10",
+      "B05CB01",
+      "B05CB04",
+      "B05CB10",
+      "B05CX04",
+      "C01CA01",
+      "C02AB02",
+      "C03AX01",
+      "D01AA01",
+      "D01AA20",
+      "D01AC06",
+      "D01AE02",
+      "… (57)"
+    ]
+  },
+  "productCatalog": {},
+  "relationshipsTouchingAtc5": {},
+  "rxnorm": {
+    "rxcuis": 2018,
+    "presentInRxnormCodeSystems": 0
+  }
+}

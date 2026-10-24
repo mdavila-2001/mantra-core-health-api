@@ -1,0 +1,106 @@
+$ node --max-old-space-size=12288 coverage-report.mjs   (corpus de la pasada 6, granularidad por vía)
+
+# Cobertura · farmacología clínica (2026-10-24)
+
+Universo ATC 5: **6242** (cima-maestra-atc 6029, cima-medicamentos 2237, fda-gsrs 4730, liname-bo 482, vademecum 483, ema 5, who-eeml 6). Monografías: **2760**.
+
+Nombre mostrado por fuente: aemps-cima:maestra-atc 2716, fda-gsrs 25, código 16, liname-bo 3.
+
+| Nivel ATC | Códigos | Con nombre ATC oficial (AEMPS) |
+|---|---:|---:|
+| 1 | 14 | 14 |
+| 2 | 92 | 92 |
+| 3 | 246 | 246 |
+| 4 | 720 | 720 |
+| 5 | 2760 | 2716 |
+
+## aemps-cima
+
+Monografías con al menos una sección: 2158 · completas: 1594 · incompletas: 564
+
+| Requisito | Monografías que lo cubren |
+|---|---:|
+| mechanism | 2151 |
+| pharmacokinetics | 1989 |
+| indications | 2152 |
+| posology | 1836 |
+| contraindications | 2156 |
+| warnings | 2152 |
+| interactions | 2154 |
+| adverse_reactions | 2155 |
+| pregnancy_lactation | 1742 |
+| overdose | 2150 |
+
+## who-eeml
+
+Monografías con al menos una sección: 509 · completas: 0 · incompletas: 509
+
+| Requisito | Monografías que lo cubren |
+|---|---:|
+| mechanism | 0 |
+| pharmacokinetics | 0 |
+| indications | 509 |
+| posology | 0 |
+| contraindications | 0 |
+| warnings | 0 |
+| interactions | 0 |
+| adverse_reactions | 0 |
+| pregnancy_lactation | 0 |
+| overdose | 0 |
+
+## openfda-label
+
+Monografías con al menos una sección: 1490 · completas: 891 · incompletas: 599
+
+| Requisito | Monografías que lo cubren |
+|---|---:|
+| mechanism | 1395 |
+| pharmacokinetics | 1393 |
+| indications | 1486 |
+| posology | 1488 |
+| contraindications | 1393 |
+| warnings | 1457 |
+| interactions | 1089 |
+| adverse_reactions | 1398 |
+| pregnancy_lactation | 1330 |
+| overdose | 1046 |
+
+## ema-epar
+
+Monografías con al menos una sección: 822 · completas: 0 · incompletas: 822
+
+| Requisito | Monografías que lo cubren |
+|---|---:|
+| mechanism | 0 |
+| pharmacokinetics | 0 |
+| indications | 822 |
+| posology | 0 |
+| contraindications | 0 |
+| warnings | 0 |
+| interactions | 0 |
+| adverse_reactions | 0 |
+| pregnancy_lactation | 0 |
+| overdose | 0 |
+
+## Catálogo de productos
+
+No se encontraron `medicines-*.ndjson`: no se midió el cruce.
+
+## Huecos
+
+- LINAME (esenciales de Bolivia) sin monografía: 57
+- Universo sin monografía: 3482
+- universe: 6242
+- monographs: 2760
+- sections: 72550
+- cimaProductsWithoutAtc5: 468
+- cimaDocsMissing: 0
+- cimaSectionsWithoutVersion: 0
+- cimaSectionsVersionUnpublished: 11552
+- cimaDuplicateSections: 1107
+- skippedWithoutData: 3482
+- uniiWithoutLabel: 1193
+- fdaRefsWithoutLabel: 0
+- fdaRefsWithoutMappedSections: 48
+- fdaSectionsWithoutVersion: 0
+- segundos: 167
