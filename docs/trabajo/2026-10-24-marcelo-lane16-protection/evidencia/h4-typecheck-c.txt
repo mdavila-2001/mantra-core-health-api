@@ -1,4 +1,0 @@
-src/modules/insurance/application/services/claims.service.spec.ts(238,13): error TS2339: Property 'claimAdjudicationVersionId' does not exist on type 'never'.
-src/modules/insurance/presentation/controllers/insurance-controllers.spec.ts(56,15): error TS2554: Expected 4 arguments, but got 3.
-src/modules/insurance/presentation/controllers/insurance-controllers.spec.ts(73,13): error TS2554: Expected 4 arguments, but got 3.
-exit=2
