@@ -543,4 +543,319 @@
   </TreeNumberList>
   
  </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000328</DescriptorUI>
+  <DescriptorName>
+   <String>Adult</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>23</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <Annotation>almost always check tag: NIM no qualifiers; see Manual Chapter 9
+  </Annotation>
+  <HistoryNote>66
+  </HistoryNote>
+  <PublicMeSHNote>66
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>M01.060.116</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D006801</DescriptorUI>
+  <DescriptorName>
+   <String>Humans</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>08</Month>
+   <Day>13</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2005</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>NIM as check tag only; ; Homo species other than Homo sapiens are indexed HOMO see HOMINIDAE, but note NEANDERTHALS is  available
+  </Annotation>
+  <HistoryNote>2005 (1966); was check tag only (not a descriptor) 1966-2004; for HOMO SAPIENS use HOMINIDAE 1989-2004; for MAN (TAXONOMY) use HOMINIDAE 1998-2004
+  </HistoryNote>
+  <PublicMeSHNote>2005; for HOMO SAPIENS see HOMINIDAE 1989-2004; for MAN (TAXONOMY) see HOMINIDAE 1998-2004
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D006803</DescriptorUI>
+     <DescriptorName>
+      <String>Human Development</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>B01.050.150.900.649.313.988.400.112.400.400</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D007902</DescriptorUI>
+  <DescriptorName>
+   <String>Length of Stay</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>29</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1972</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <HistoryNote>72(69)
+  </HistoryNote>
+  <PublicMeSHNote>72
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Hospitalization (1966-1968)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>E02.760.400.480</TreeNumber>
+   <TreeNumber>N02.421.585.400.480</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D010535</DescriptorUI>
+  <DescriptorName>
+   <String>Laparoscopy</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2016</Year>
+   <Month>02</Month>
+   <Day>26</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <Annotation>/ instrum permitted but consider also LAPAROSCOPES
+  </Annotation>
+  <HistoryNote>1993, 1971-1977; use PERITONEOSCOPY 1978-1992
+  </HistoryNote>
+  <PublicMeSHNote>1993, 1973-1977; for SURGICAL PROCEDURES, LAPAROSCOPIC and LAPAROSCOPIC SURGICAL PROCEDURES see SURGICAL PROCEDURES, LAPROSCOPIC 1998-1999, see SURGERY, LAPAROSCOPIC 1993-1997; for PERITONEOSCOPY see PERITONEOSCOPY 1963-1992
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D020706</DescriptorUI>
+     <DescriptorName>
+      <String>Laparoscopes</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>E01.370.388.250.520</TreeNumber>
+   <TreeNumber>E04.502.250.520</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D010919</DescriptorUI>
+  <DescriptorName>
+   <String>Placebos</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2009</Year>
+   <Month>07</Month>
+   <Day>13</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <Annotation>usually NIM; do not index routinely for articles on CLINICAL TRIALS AS TOPIC; DOUBLE-BLIND METHOD; etc., unless particularly discussed; Manual 18.12.13
+  </Annotation>
+  <NLMClassificationNumber>WB 330</NLMClassificationNumber>
+  <TreeNumberList>
+   <TreeNumber>D26.660</TreeNumber>
+   <TreeNumber>E02.785</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D011183</DescriptorUI>
+  <DescriptorName>
+   <String>Postoperative Complications</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2016</Year>
+   <Month>11</Month>
+   <Day>10</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1964</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <Annotation>coordinate with specific postoperative complication (if not treed under POSTOPERATIVE COMPLICATIONS) and specific surgical procedure if pertinent;  effective 2017:  for postoperative complications that are a direct result of the surgical procedure, coordinate with specific postoperative complication(if not treed under POSTOPERATIVE COMPLICATIONS) and specific surgical procedure /adv eff
+  </Annotation>
+  <HistoryNote>64
+  </HistoryNote>
+  <PublicMeSHNote>64
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>C23.550.767</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D013812</DescriptorUI>
+  <DescriptorName>
+   <String>Therapeutics</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>29</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <Annotation>avoid: too general: prefer /ther with diseases
+  </Annotation>
+  <TreeNumberList>
+   <TreeNumber>E02</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D016032</DescriptorUI>
+  <DescriptorName>
+   <String>Randomized Controlled Trials as Topic</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>06</Month>
+   <Day>29</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1990</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  
+  <Annotation>for general design, methodology, economics, etc. of randomized controlled trials; a different heading RANDOMIZED CONTROLLED TRIAL is used for reports of a specific randomized trial
+  </Annotation>
+  <HistoryNote>2008(1990)
+  </HistoryNote>
+  <PublicMeSHNote>2008; see RANDOMIZED CONTROLLED TRIALS 1990-2007
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Clinical Trials (1966-1989)</PreviousIndexing>
+  </PreviousIndexingList>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D065228</DescriptorUI>
+     <DescriptorName>
+      <String>Non-Randomized Controlled Trials as Topic</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>E05.318.372.250.250.365.500</TreeNumber>
+   <TreeNumber>N05.715.360.330.250.250.365.500</TreeNumber>
+   <TreeNumber>N06.850.520.450.250.250.365.500</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D035061</DescriptorUI>
+  <DescriptorName>
+   <String>Control Groups</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>06</Month>
+   <Day>29</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2003</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>do not use routinely for the presence of control groups in a study design; reserve for discussions about control groups.
+  </Annotation>
+  <HistoryNote>2003
+  </HistoryNote>
+  <PublicMeSHNote>2003
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Research Design (1973-2002)</PreviousIndexing>
+  </PreviousIndexingList>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D018849</DescriptorUI>
+     <DescriptorName>
+      <String>Controlled Clinical Trials as Topic</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>E05.318.370.074</TreeNumber>
+   <TreeNumber>E05.581.500.149</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D061646</DescriptorUI>
+  <DescriptorName>
+   <String>Operative Time</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>29</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2013</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <HistoryNote>2013
+  </HistoryNote>
+  <PublicMeSHNote>2013
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Time Factors (1981-2012)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>E04.614.374.500</TreeNumber>
+   <TreeNumber>N02.421.585.753.374.500</TreeNumber>
+  </TreeNumberList>
+  
+ </DescriptorRecord>
 </DescriptorRecordSet>

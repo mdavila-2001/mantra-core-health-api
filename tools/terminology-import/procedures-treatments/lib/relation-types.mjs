@@ -12,6 +12,7 @@
 //   by-definition       eje del propio código (ICD-10-PCS Body Part, ICHI Target)
 //   investigational     ensayo clínico registrado: SIEMPRE «en estudio», nunca «indicado»
 //   collaborative-referenced  fuente colaborativa (Wikidata) con referencia citada; no oficial
+//   literature-indexing intervención y condición en la indexación MeSH de una revisión sistemática
 // =============================================================================
 
 export const RELATION_TYPES = {
@@ -148,6 +149,16 @@ export const RELATION_TYPES = {
     assertion: 'collaborative-referenced',
     label:
       'Tratamiento posible según Wikidata (fuente colaborativa, no oficial; declaración con referencia)',
+  },
+
+  // --- Revisiones Cochrane (indexación MeSH de NLM en MEDLINE) ----------------
+  'pubmed-cochrane:co-indexed': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición con calificador terapéutico (therapy, surgery, rehabilitation, diet therapy, radiotherapy, prevention & control) en la misma revisión Cochrane indexada por NLM',
+    assertion: 'literature-indexing',
+    label:
+      'Evaluados en revisiones sistemáticas Cochrane (indexación MeSH de NLM); no implica eficacia ni indicación',
   },
 
   // --- ClinicalTrials.gov (procedimiento ↔ condición, solo en estudio) --------

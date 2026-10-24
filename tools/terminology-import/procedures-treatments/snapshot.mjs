@@ -31,6 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { cacheDir, ensureDir, outDir, writeJson } from './lib/common.mjs';
 import { ctgovStudies } from './lib/sources/ctgov.mjs';
+import { cochraneRecords } from './lib/sources/cochrane.mjs';
 
 const DATA = join(dirname(fileURLToPath(import.meta.url)), 'data');
 const PART_LIMIT = 45 * 1024 * 1024; // GitHub rechaza > 100 MB y advierte > 50 MB
@@ -132,6 +133,14 @@ for (const key of readdirSync(cacheDir()).sort()) {
     continue;
   const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
   writeJson(join(DATA, 'sources', `${key}.meta.json`), meta);
+  if (key === 'pubmed-cochrane') {
+    // Metadatos compactos (PMID, tipos de publicación, MeSH) tal como se descargaron.
+    const lines = [...cochraneRecords(join(dir, 'pages'))].map((r) =>
+      JSON.stringify(r),
+    );
+    writeNdjsonGzParts('raw/pubmed-cochrane/records', lines, { source: key });
+    continue;
+  }
   if (key === 'ctgov') {
     // ~70 MB de páginas que la API reemplaza a diario: no se suben, y volver a
     // bajarlas no reproduce este corpus. Se sube el extracto exacto que usa el

@@ -131,6 +131,7 @@ export const PROVENANCE_SOURCE_CODE = {
   mesh: 'NLM_MESH',
   ctgov: 'NLM_CTGOV',
   'wikidata-p924': 'WIKIDATA',
+  'pubmed-cochrane': 'NLM_PUBMED',
 };
 
 /**
@@ -152,6 +153,13 @@ export const RELATION_ONLY_SOURCES = [
     owner: 'Comunidad de Wikidata / Wikimedia Foundation',
     officialUrl: 'https://www.wikidata.org/',
     license: 'CC0 1.0',
+  },
+  {
+    code: 'NLM_PUBMED',
+    name: 'PubMed / MEDLINE (U.S. National Library of Medicine)',
+    owner: 'U.S. National Library of Medicine',
+    officialUrl: 'https://pubmed.ncbi.nlm.nih.gov/',
+    license: 'Metadatos bibliográficos e indexación MeSH de MEDLINE (NLM)',
   },
 ];
 

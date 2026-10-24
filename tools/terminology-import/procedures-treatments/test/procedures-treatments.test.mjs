@@ -404,3 +404,54 @@ test('Wikidata P924: solo con referencia real (P248/P854), tipo colaborativo, id
   assert.ok(a.evidence.referenceUrls.length >= 1);
   assert.match(a.provenance.sourceRecordId, /^Q\d+-/);
 });
+
+test('MeSH: métodos de investigación, placebos y la raíz «Therapeutics» no son procedimientos', async () => {
+  const { readMeshDescriptors, isNonPharmacologicalIntervention } =
+    await import('../lib/sources/mesh.mjs');
+  const { descriptors } = await readMeshDescriptors(
+    join(FIX, 'mesh-excerpt.xml'),
+  );
+  for (const ui of ['D016032', 'D035061', 'D010919', 'D013812']) {
+    assert.ok(
+      !isNonPharmacologicalIntervention(descriptors.get(ui)),
+      `${ui} ${descriptors.get(ui).name}`,
+    );
+  }
+  assert.ok(
+    isNonPharmacologicalIntervention(descriptors.get('D010535')),
+    'Laparoscopy',
+  );
+});
+
+test('Cochrane (indexación MeSH de NLM): procedimiento × condición con calificador terapéutico', async () => {
+  const { readMeshDescriptors } = await import('../lib/sources/mesh.mjs');
+  const { parsePubmedArticle, cochraneCorpus } =
+    await import('../lib/sources/cochrane.mjs');
+  const { descriptors } = await readMeshDescriptors(
+    join(FIX, 'mesh-excerpt.xml'),
+  );
+  const rec = parsePubmedArticle(
+    readFileSync(join(FIX, 'pubmed-cochrane-excerpt.xml'), 'utf8'),
+  );
+  assert.equal(rec.pmid, '40970433');
+  const { assertions, stats } = cochraneCorpus(
+    [rec],
+    descriptors,
+    meta('pubmed-cochrane'),
+    meta('mesh'),
+  );
+  assert.equal(stats.withPair, 1);
+  // Appendicitis/surgery es la única condición con calificador terapéutico; «Postoperative
+  // Complications/epidemiology» no lo es. «Randomized Controlled Trials as Topic» no es procedimiento.
+  assert.deepEqual(
+    assertions.map((a) => `${a.subject.code}|${a.object.code}`).sort(),
+    ['D001062|D001064', 'D010535|D001064'],
+  );
+  assert.ok(
+    assertions.every((a) => a.relationType.assertion === 'literature-indexing'),
+  );
+  assert.ok(
+    assertions.every((a) => /no implica eficacia/.test(a.relationType.label)),
+  );
+  assert.deepEqual(assertions[0].evidence.pmids, ['40970433']);
+});
