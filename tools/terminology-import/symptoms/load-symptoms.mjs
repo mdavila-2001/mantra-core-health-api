@@ -28,7 +28,7 @@
 import 'dotenv/config';
 import pg from 'pg';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { valueSetVersionId } from '../lib/glossary-es/load-plan.mjs';
 import { DB_CONFIG, conceptIdsByCode, ensureCodeSystem, insertMany } from './lib/db.mjs';
@@ -153,7 +153,7 @@ async function main() {
   console.log(JSON.stringify({ result, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));
 }
 
-if (process.argv[1]?.endsWith('load-symptoms.mjs')) {
+if (basename(process.argv[1] ?? '') === 'load-symptoms.mjs') {
   main().catch((err) => {
     console.error('ERROR FATAL en load-symptoms:', err);
     process.exitCode = 1;

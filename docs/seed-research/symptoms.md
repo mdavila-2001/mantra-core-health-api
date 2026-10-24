@@ -281,13 +281,19 @@ corrida y sistema (es el registro de cada corrida, no dato).
 
 ## Cómo correr
 
+El corpus normalizado está versionado en `tools/terminology-import/symptoms/data/`
+(20,9 MB comprimidos): para cargar sin re-bajar nada alcanza con
+`unpack-data.mjs` y los cargadores.
+
 ```sh
-node tools/terminology-import/symptoms/fetch-symptom-sources.mjs        # ~1 min, 510 MB, reanudable
+node tools/terminology-import/symptoms/unpack-data.mjs                  # data/*.gz → glossary-data-build/symptoms (verifica SHA-256)
+node tools/terminology-import/symptoms/fetch-symptom-sources.mjs        # o desde cero: ~1 min, 510 MB, reanudable
 node tools/terminology-import/symptoms/build-symptoms-corpus.mjs        # ~25 s, sin red ni base
+node tools/terminology-import/symptoms/pack-data.mjs                    # regenera data/ para commitear
 node tools/terminology-import/symptoms/load-symptoms.mjs                # dry-run: plan y conteos
 node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos (.env DB_*); --glossary opcional
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs      # dry-run del plan de relaciones
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --check   # modelo + resolución, sin escribir
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # sólo cuando el modelo tenga la tabla
-node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 15 pruebas con recortes reales
+node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 16 pruebas con recortes reales
 ```

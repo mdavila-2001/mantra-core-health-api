@@ -1,9 +1,16 @@
 # Fuentes del corpus de síntomas, signos y fenotipos
 
-Los archivos **no** están en git: `fetch-symptom-sources.mjs` los baja a
+Los archivos **crudos no** están en git (~510 MB): `fetch-symptom-sources.mjs` los baja a
 `<GLOSSARY_BUILD_DIR>/symptoms-sources/` (por defecto `../glossary-data-build/`,
 hermana del repo) y escribe ahí `manifest.json` con URL, SHA-256, bytes, fecha y
 versión declarada. La tabla es la corrida del **2026-10-24**.
+
+El corpus **normalizado** sí está en git, comprimido: `data/*.ndjson.gz` (20,9 MB,
+cada archivo < 10 MB; si alguno pasara de 45 MB se parte por líneas) con
+`data/MANIFEST.json` (filas y SHA-256 de cada parte y del original).
+`unpack-data.mjs` lo restaura verificando los SHA-256; `pack-data.mjs` lo
+regenera tras un build. Es contenido derivado de las fuentes de la tabla, con su
+misma licencia y atribución (HPO, Orphanet vía HPOA, Mondo, DO, SYMP, NCIt).
 
 | Clave | Archivo | Versión declarada | Bytes | SHA-256 (16) | Licencia |
 |---|---|---|---:|---|---|

@@ -205,3 +205,15 @@ test('NCIt: signos por tipo semántico, sin los descendientes de C2991 (recorte 
   assert.equal(rows.find((r) => r.code === 'C3038').version, '24.04e');
   assert.deepEqual(rows.find((r) => r.code === 'C3038').parents, ['C53458']);
 });
+
+test('pack-data: partición por líneas en gzip válidos que reconstruyen el original', async () => {
+  const { gunzipSync } = await import('node:zlib');
+  const { splitByLines } = await import('../pack-data.mjs');
+  const text = fx('phenotype-excerpt.hpoa').repeat(40);
+  const lines = text.split('\n').filter((l) => l !== '');
+  const parts = splitByLines(text, 600);
+  assert.ok(parts.length > 1, 'con un límite chico se parte');
+  assert.ok(parts.every((p) => p.gz.length <= 600));
+  assert.equal(Buffer.concat(parts.map((p) => gunzipSync(p.gz))).toString('utf8'), lines.join('\n') + '\n');
+  assert.equal(splitByLines(text).length, 1, 'bajo el límite real queda en un archivo');
+});

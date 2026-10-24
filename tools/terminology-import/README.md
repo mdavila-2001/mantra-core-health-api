@@ -268,6 +268,7 @@ Ontology, anotaciones de enfermedades comunes de HPO), con frecuencia y evidenci
 | 0 | `symptoms/fetch-symptom-sources.mjs` | Baja las fuentes a `glossary-data-build/symptoms-sources/` + `manifest.json` (SHA-256, versión) |
 | 1 | `symptoms/build-symptoms-corpus.mjs` | NDJSON normalizado + `coverage.json` + `saturation.json`. Sin red ni base |
 | 2 | `symptoms/load-symptoms.mjs` | Términos a `terminology.*` (dry-run por defecto; `--apply`; `--glossary` opcional) |
+| — | `symptoms/pack-data.mjs` / `symptoms/unpack-data.mjs` | Corpus normalizado comprimido y versionado en `symptoms/data/` (20,9 MB) ↔ `glossary-data-build/symptoms/` |
 | 3 | `symptoms/load-disease-phenotypes.mjs` | Relaciones. **Bloqueado por el modelo**: exige `terminology.concept_relationship_evidence` (propuesta en `symptoms/proposal/`) |
 
-Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (15, con recortes reales).
+Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (16, con recortes reales).

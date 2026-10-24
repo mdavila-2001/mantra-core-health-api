@@ -95,6 +95,7 @@
 | H6.S1.M6 | `docs:links` y `docs:build --strict` | sin avisos nuevos | `node tools/docs/check-doc-links.mjs`; `mkdocs build --strict` | A MEDIAS |
 | H6.S2.M1 | PR contra `dev` | PR abierto, sin merge | mdavila-2001/mantra-core-health-api#686 | HECHO |
 | H6.S2.M2 | Rama `justin/seed-symptoms` | rama con ese nombre | `git ls-remote` | TODO |
+| H6.S2.M3 | Corpus normalizado versionado (orden del propietario, 2026-10-24) | `data/*.gz` < 50 MB c/u, restaurable idéntico | `pack-data.mjs`; `SYMPTOMS_OUT_DIR=<tmp> unpack-data.mjs` + `diff -r` → sin diferencias | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

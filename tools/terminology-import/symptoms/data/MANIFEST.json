@@ -1,0 +1,145 @@
+{
+  "generatedFrom": "build-symptoms-corpus.mjs",
+  "files": [
+    {
+      "name": "disease-equivalences.ndjson",
+      "rows": 74548,
+      "bytes": 8054931,
+      "sha256": "17487e6b2598e60ae6c7f729ff9c12faa149ca239c998d4ba01228cb77b0f8f9",
+      "parts": [
+        {
+          "file": "disease-equivalences.ndjson.gz",
+          "rows": 74548,
+          "gzBytes": 478822,
+          "gzSha256": "6cb2a983d92cfcd3326aa7e1e1a598c02e571f2d8f53575acaa18b4633b595fd"
+        }
+      ]
+    },
+    {
+      "name": "relations-doid.ndjson",
+      "rows": 2268,
+      "bytes": 1334222,
+      "sha256": "cd526fc7e4e8c52e6cdbcb2e52f351098bb3b0289be652ea710dc583ba79b1f6",
+      "parts": [
+        {
+          "file": "relations-doid.ndjson.gz",
+          "rows": 2268,
+          "gzBytes": 81451,
+          "gzSha256": "9a4495f2e67e07559fe46af250b0e5faf9b00c93500f26ac4fb9e3ef4dce9231"
+        }
+      ]
+    },
+    {
+      "name": "relations-hpo-common-disease.ndjson",
+      "rows": 132600,
+      "bytes": 137520200,
+      "sha256": "9baf955de6cf849c3811f8f912418cec6e7af5409554f4c7b865d817939f0a74",
+      "parts": [
+        {
+          "file": "relations-hpo-common-disease.ndjson.gz",
+          "rows": 132600,
+          "gzBytes": 9321029,
+          "gzSha256": "9b82ef9afef22b84ab607c64a6c5fc158a722fb066d93bbb989d45cbc782d53a"
+        }
+      ]
+    },
+    {
+      "name": "relations-hpoa.ndjson",
+      "rows": 286651,
+      "bytes": 203044441,
+      "sha256": "e855a92327da458e8ea41f7dce25126d4f4ce84ea8f9c5023ddea1b8b3bff242",
+      "parts": [
+        {
+          "file": "relations-hpoa.ndjson.gz",
+          "rows": 286651,
+          "gzBytes": 9209764,
+          "gzSha256": "94b926628d981d74f8fe52b1f851eafe4007619e54a4857899212933c6de7e39"
+        }
+      ]
+    },
+    {
+      "name": "relations-mondo.ndjson",
+      "rows": 974,
+      "bytes": 642168,
+      "sha256": "d27107d2b2aea61297e1310c30af29a52e3bd4429e925fe628a387e75c6ba876",
+      "parts": [
+        {
+          "file": "relations-mondo.ndjson.gz",
+          "rows": 974,
+          "gzBytes": 47493,
+          "gzSha256": "3aa0ad4a568c3ad922e88afa97af70a7f8715ab2f5d8433ba90d1e3eb8a55b22"
+        }
+      ]
+    },
+    {
+      "name": "terms-hpo.ndjson",
+      "rows": 19894,
+      "bytes": 19082528,
+      "sha256": "a96211945ba2fd079ba9a9f073a187c3ee296b0795b05a4200398e428babadf2",
+      "parts": [
+        {
+          "file": "terms-hpo.ndjson.gz",
+          "rows": 19894,
+          "gzBytes": 2399253,
+          "gzSha256": "80b1f35d94e09d7ee24fbd74271b6926fbf6e1a38005bbf16c4764c3a5f46e79"
+        }
+      ]
+    },
+    {
+      "name": "terms-ncit.ndjson",
+      "rows": 3988,
+      "bytes": 4609027,
+      "sha256": "4288cec9e47252064ed42a0ed577eaf75982a6ec15b8e5069c5c2e6d8f384af6",
+      "parts": [
+        {
+          "file": "terms-ncit.ndjson.gz",
+          "rows": 3988,
+          "gzBytes": 357011,
+          "gzSha256": "d2f8ef2bce35df53f2d5da6827700518901f8abab17a6ad91ece367d3204689f"
+        }
+      ]
+    },
+    {
+      "name": "terms-symp.ndjson",
+      "rows": 895,
+      "bytes": 679882,
+      "sha256": "62ba285f8645ac020552c9d2aa85499cab95d3fddc9729bb0e096f6cd4f2e743",
+      "parts": [
+        {
+          "file": "terms-symp.ndjson.gz",
+          "rows": 895,
+          "gzBytes": 60471,
+          "gzSha256": "00d0d669da60ca6f7fda2fff3ee629691d3f7b4fad617fcbd3fa26027100336f"
+        }
+      ]
+    },
+    {
+      "name": "coverage.json",
+      "rows": null,
+      "bytes": 31161,
+      "sha256": "13894ce10c8f4e700cd4dd81c7dc820135738c69e59108935f8411023c0b245e",
+      "parts": [
+        {
+          "file": "coverage.json.gz",
+          "rows": null,
+          "gzBytes": 4819,
+          "gzSha256": "c5c3eef9216d44493b1528be189b0e91f2680706dabeb363f02c7977112e00a7"
+        }
+      ]
+    },
+    {
+      "name": "saturation.json",
+      "rows": null,
+      "bytes": 1220,
+      "sha256": "bc8ddc5c62ba6ba1b4689e693a7778c28bb47b9eb529b0782a6927e0aaefbaa1",
+      "parts": [
+        {
+          "file": "saturation.json.gz",
+          "rows": null,
+          "gzBytes": 483,
+          "gzSha256": "001c72ef1883f87881c27d74200db70ea119f297f1354673c512c335bc248f47"
+        }
+      ]
+    }
+  ]
+}

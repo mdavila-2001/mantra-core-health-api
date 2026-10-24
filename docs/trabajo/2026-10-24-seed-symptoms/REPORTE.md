@@ -5,7 +5,7 @@
   - **VERIFIED** para la carga de términos: el cargador corrió contra el DDL real del módulo 03 en un Postgres 16 desechable, se consultó lo que quedó persistido y la re-corrida inserta 0 filas.
   - **TESTED** para las relaciones: sólo corrieron contra la tabla propuesta aplicada en esa base desechable, y el modelo real no las admite.
   - No es REGRESSION_VERIFIED: no se arrancó la API ni se miró el glosario en el front.
-- Avance: 29 HECHO / 36 microtareas = **80,6 %** (1 A MEDIAS, 4 BLOQUEADO, 2 TODO)
+- Avance: 30 HECHO / 37 microtareas = **81,1 %** (1 A MEDIAS, 4 BLOQUEADO, 2 TODO)
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -16,13 +16,14 @@
 | H3.S2.M2 | Términos cargados | `load-symptoms.mjs --apply --glossary` | hpo 19 894 · symp 895 · ncit 3 988 conceptos (log abajo) |
 | H3.S2.M3 | Idempotente | idem, segunda vez | todos los contadores en 0 |
 | H3.S3.M1 | Extensión opcional al glosario | idem | `glossaryMembers: 37292` (18 646 términos × 2 value sets) |
-| H4.S1.M1–M4 | Corpus de relaciones: HPOA 286 651, Mondo 974, DOID 2 268, enfermedades comunes 132 600 | build + pruebas | 49/49 pruebas |
+| H4.S1.M1–M4 | Corpus de relaciones: HPOA 286 651, Mondo 974, DOID 2 268, enfermedades comunes 132 600 | build + pruebas | 50/50 pruebas |
 | H4.S2.M1–M3 | Propuesta de tabla probada; cargador bloqueado sin ella; con ella 344 981 aristas + 372 528 evidencias, re-corrida 0 | ver log abajo | ver log abajo |
 | H4.S3.M1 | Formatos de #688: HPOA resuelve 100 % directo | `load-disease-phenotypes.mjs --check --sources hpoa` | `diseaseUnresolved: 0`, `viaMondo: 0`, 268 306 aristas |
 | H5.S1.M1–M2 | 8 pasadas; 7 y 8 aportan 0 | `evidencia/saturation.json` + doc | ver `docs/seed-research/symptoms.md` |
 | H5.S2.M1 | Cobertura: 12 625 / 23 263 enfermedades de Mondo (54,3 %) con síntomas | build | `evidencia/coverage-resumen.json` |
-| H6.S1.M1–M5 | Gates | ver Evidencia | exit 0 / 49 pass / 17 pass |
+| H6.S1.M1–M5 | Gates | ver Evidencia | exit 0 / 50 pass / 17 pass |
 | H6.S2.M1 | PR | — | #686 |
+| H6.S2.M3 | Corpus normalizado versionado: `symptoms/data/` 20,9 MB en 10 `.gz` (máx. 8,9 MB) + MANIFEST | `pack-data.mjs`; `SYMPTOMS_OUT_DIR=<tmp> unpack-data.mjs`; `diff -r` | «IDENTICO»; mismo SHA-256 en dos empaquetados (determinista) |
 
 ## A medias
 ### H6.S1.M6 — `docs:links` y `mkdocs build --strict`
@@ -46,8 +47,8 @@ Salidas completas en `evidencia/`. Recortes literales:
 
 ```
 $ node --test "tools/terminology-import/symptoms/test/*.test.mjs" "tools/terminology-import/test/*.test.mjs"
-# tests 49
-# pass 49
+# tests 50
+# pass 50
 # fail 0
 
 $ NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck → exit=0
@@ -97,6 +98,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 - `concept_maps`: el plan genera 0 mapas, porque los xrefs NCIT de HPO apuntan a enfermedades fuera del subconjunto de NCIt. El código de mapas no tuvo ninguna fila real que ejercitar.
 
 ## Desvíos del plan
+- **Corpus normalizado en git.** El brief decía «fuentes fuera de git». La sesión «Mejora de seeders médicos» transmitió una orden posterior del propietario: «que terminen su trabajo y lo lleven todo a la nube», con los datos comprimidos en `data/` y partidos en archivos de menos de 50 MB. Se aplicó así: el corpus **normalizado** se versiona comprimido (20,9 MB); los **crudos** (~510 MB) siguen fuera de git y se re-bajan con `fetch-symptom-sources.mjs` (URL, versión y SHA-256). Al probar la partición apareció un bug de recursión sin fin, que se corrigió antes de commitear.
 - **Plan escrito después de implementar.** `AGENTS.md` estaba en el repo desde el inicio y no se leyó en el discovery (se buscaron `CLAUDE.md` y `.claude/rules/`, que no existen; `.claude/` sólo tiene `settings.json`). PLAN y REPORTE se agregaron al detectarlo, antes del cierre.
 - **Rama `claude/amazing-ptolemy-sin3nw` en lugar de `justin/seed-symptoms`.** La asignó el entorno de ejecución, que prohíbe empujar a otra rama sin permiso explícito.
 - **Instalación de dependencias.** `cdn.sheetjs.com` está bloqueado. Para poder instalar, se cambió `xlsx` a `0.18.5` del registro npm **sólo localmente**, y se restauraron `package.json` y `yarn.lock` sin commitearlos. Typecheck, lint y build corrieron con esa versión.

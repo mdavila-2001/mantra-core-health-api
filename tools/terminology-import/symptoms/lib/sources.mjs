@@ -12,11 +12,14 @@
 // de la corrida, se dice eso: no se completa de memoria.
 // =============================================================================
 
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { BUILD_DIR } from '../../lib/glossary-es/common.mjs';
 
 export const SOURCES_DIR = process.env.SYMPTOMS_SOURCES_DIR ?? resolve(BUILD_DIR, 'symptoms-sources');
 export const OUT_DIR = process.env.SYMPTOMS_OUT_DIR ?? resolve(BUILD_DIR, 'symptoms');
+/** Corpus normalizado comprimido y versionado en git (pack-data.mjs / unpack-data.mjs). */
+export const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'data');
 
 const HPO_RELEASE = 'https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download';
 const MONARCH = 'https://storage.googleapis.com/data-public-monarchinitiative';
