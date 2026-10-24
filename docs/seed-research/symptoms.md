@@ -239,8 +239,7 @@ Medición en la base desechable con dos andamios:
   132 008/132 104, todo directo por código → **402 633 aristas y 403 959 filas
   de evidencia** (re-corrida 0, 33 s). Sin resolver sólo `DOID:5898` (96 filas:
   sin clase ni `alt_id` en la release vigente). Los otros 12 DOID retirados se
-  resuelven por `alt_id`. Log en
-  `docs/trabajo/2026-10-24-seed-symptoms/evidencia/integracion-seed-diseases-688.txt`.
+  resuelven por `alt_id`.
 - **Con el formato de #688** (`omim`/`orphanet`/`decipher` con los 8 478 + 4 355
   + 47 códigos de HPOA, código sin prefijo): HPOA resuelve **268 906 de 268 906**
   filas P directo por código, 0 vía Mondo, 0 sin resolver → 268 306 aristas.
@@ -271,7 +270,7 @@ pendiente). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 ## Corrida en Postgres desechable
 
 Postgres 16 local, DDL de `database/SQL/00_shared` + `03_terminology` (copia del
-modelo). Andamio (versionado en `docs/trabajo/2026-10-24-seed-symptoms/evidencia/andamio/`): los 7 conceptos internos que en un entorno
+modelo). Andamio de la corrida: los 7 conceptos internos que en un entorno
 real siembra la API (estado activo, idiomas, tipos de designación, is-a,
 `REL_SYMPTOM`, `REL_SYMPTOM_EXCLUDED`), los dos value sets del glosario y Mondo
 como sustituto de `seed-diseases`.

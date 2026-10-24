@@ -1,8 +1,7 @@
 # Cuidados de enfermería — bitácora de búsqueda, saturación y cobertura
 
 Rama `justin/seed-nursing-care` · importador en `tools/terminology-import/nursing-care/`
-· fuentes y licencias en `tools/terminology-import/nursing-care/SOURCES.md`
-· plan y reporte en [`PLAN.md`](../trabajo/2026-10-24-seed-nursing-care/PLAN.md) y [`REPORTE.md`](../trabajo/2026-10-24-seed-nursing-care/REPORTE.md).
+· fuentes y licencias en `tools/terminology-import/nursing-care/SOURCES.md`.
 
 Pedido del propietario: «que se busque completamente el VADEMÉCUM médico para… cuidados médicos de
 enfermería, con los mismos requerimientos». Esta sesión es la **dueña de enfermería**.
@@ -22,8 +21,7 @@ enfermería, con los mismos requerimientos». Esta sesión es la **dueña de enf
 
 Medido en una base PostgreSQL 16 desechable con el DDL de `database/SQL` (módulo 03):
 primera corrida 8 644 conceptos, 9 646 designaciones, 120 991 propiedades, 8 040 relaciones, 173
-membresías; **segunda corrida 0 filas** (idempotente). Evidencia literal en
-`docs/trabajo/2026-10-24-seed-nursing-care/evidencia/`.
+membresías; **segunda corrida 0 filas** (idempotente).
 
 ## Red de esta sesión
 

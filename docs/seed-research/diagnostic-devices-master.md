@@ -150,7 +150,7 @@ detiene con dos pasadas seguidas en 0.
   `coverage.json`.
 - **Taxonomía cargada** en el Postgres 16 desechable: EMDN 8 454 conceptos y
   8 431 relaciones is-a, 218 mapeos, 5 692 miembros del value set; 2.ª corrida
-  en 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada2.txt`).
+  en 0.
 - **Listados del sector**: `data/industry-directories.json` (46
   organizaciones, 552 menciones con URL). Con el corpus de `us`, 130 de 370
   empresas cruzan con un fabricante de los registros; 240 quedan como
@@ -193,7 +193,7 @@ detiene con dos pasadas seguidas en 0.
   - Tipos con al menos un modelo: 2 976 (+548).
   - Fusiones `same-registry-id`: 107 (SRN). A revisión: 233 `name-match-conflicting-ids`, porque el mismo nombre aparece con SRN distintos y no se fusiona.
   - Listados del sector: 148 empresas cruzan con un fabricante (+18).
-- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada3.txt`).
+- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0.
 - **Descartadas**: ninguna nueva.
 
 ### Pasada 4 (2026-10-24)
@@ -304,8 +304,7 @@ sirviendo para texto libre cuando el equipo no está en el catálogo).
 El importador del catálogo sale directo de `out/manufacturers.ndjson.gz` y
 `out/models-*.ndjson.gz`: cada modelo ya trae sus registros con procedencia.
 
-**Unión con la propuesta de `row`**
-(`docs/trabajo/2026-10-24-seed-dx-devices-row/REPORTE.md`). Coinciden en
+**Unión con la propuesta de `row`**. Coinciden en
 fabricantes con identificadores por esquema, modelos con tipo como FK a
 `terminology.catalog_concepts`, autorizaciones con la cita completa por fila,
 identificadores por modelo y la FK opcional `device_model_id` en

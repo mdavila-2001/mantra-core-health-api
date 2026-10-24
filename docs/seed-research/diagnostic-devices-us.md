@@ -2,9 +2,7 @@
 
 Rama `justin/seed-dx-devices-us` (espejo de `claude/compassionate-brown-tr71nn`) · importador en
 `tools/terminology-import/diagnostic-devices/us/` · fuentes y licencias en
-`tools/terminology-import/diagnostic-devices/us/SOURCES.md` · plan y reporte en
-[`PLAN.md`](../trabajo/2026-10-24-seed-dx-devices-us/PLAN.md) y
-[`REPORTE.md`](../trabajo/2026-10-24-seed-dx-devices-us/REPORTE.md).
+`tools/terminology-import/diagnostic-devices/us/SOURCES.md`.
 
 Pedido del propietario: «que investigue profundamente todos y cada uno de los equipos de
 diagnóstico con todos los posibles proveedores que lo ofrecen en el mundo (marcas)… ultra

@@ -3,7 +3,7 @@
 > Fase 13. Metodología STRIDE, verificada tabla por tabla contra el código real de este
 > repositorio. Fuente base: documento de arquitectura interno del proyecto ("Modelo de amenazas y
 > matriz de controles — STRIDE"), contrastado y ampliado con hallazgos propios de esta auditoría
-> (`docs/reports/`, `docs/governance/traceability-matrix.md`).
+> (`docs/reports/`).
 
 ## Activos críticos
 
@@ -28,7 +28,7 @@ tráfico entrante.
 | **S**poofing (suplantación) | Alguien se hace pasar por un profesional clínico | Credenciales hasheadas, MFA (`iam.mfa_factors`), API keys (`iam.api_keys`), `identity_assurance`, reglas de IP (`authz.ip_access_rules`) | Entidades confirmadas en [catálogo de entidades](../data/entity-catalog.md) |
 | **T**ampering (alteración) | Modificar un resultado de laboratorio ya registrado | Tablas `*_history` (versionado), `row_version` (bloqueo optimista, 353 usos de `PreconditionFailedException`), `audit.audit_log` WORM | [ADR-0002](../adr/ADR-0002-orm-mikroorm.md), [graphify-audit.md](../reports/graphify-audit.md) §7 |
 | **R**epudiation (negación) | "Yo no accedí a esa historia clínica" | `audit.data_access_log`, `authz.break_glass_sessions` (con justificación obligatoria) | Entidades confirmadas en código |
-| **I**nformation disclosure (fuga de PHI) | Exponer PHI a un actor sin autorización | Cifrado + `system_ops.encryption_keys`, `authz.field_permissions` (enmascaramiento), RLS por `tenant_id`, `system_ops.data_classifications` | [autorización](../api/authorization.md), [ADR-0006](../adr/ADR-0006-multi-tenancy-rls.md) — **RLS con verificación operativa pendiente, ver `SEC-001`** |
+| **I**nformation disclosure (fuga de PHI) | Exponer PHI a un actor sin autorización | Cifrado + `system_ops.encryption_keys`, `authz.field_permissions` (enmascaramiento), RLS por `tenant_id`, `system_ops.data_classifications` | [autorización](../api/authorization.md), [ADR-0006](../adr/ADR-0006-multi-tenancy-rls.md) — **la activación de RLS depende de cada entorno, ver [aislamiento por tenant](tenant-isolation.md)** |
 | **D**enial of service | Saturar el login o la API | `ThrottlerGuard` global (reconciliado — ver [arquitectura de seguridad](security-architecture.md) §"Discrepancia"), `iam.account_lockouts` | `src/app.module.ts` (`APP_GUARD` → `ThrottlerGuard`) |
 | **E**levation of privilege | Un usuario obtiene privilegios de `SUPERADMIN` | RBAC (`authz.role_permissions`), `authz.resource_scope_grants`, `authz.service_principals`, revisión de break-glass | [ADR-0005](../adr/ADR-0005-autorizacion-rbac-pdp-clinico.md) |
 

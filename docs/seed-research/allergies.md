@@ -51,7 +51,6 @@
 | Correspondencia HL7 | `src/common/seed/data/allergies/fhir-allergy-enum-codes.json` | concepto interno ↔ sistema, código y versión HL7. La lee el importador para los `concept_maps` |
 | Importador | `tools/terminology-import/allergies/` | `fetch-` (descarga) → `build-` (NDJSON y pasadas) → `load-` (Postgres) |
 | Datos normalizados | `tools/terminology-import/allergies/data/` | NDJSON comprimido (4,3 MB), informe de pasadas, manifiesto de fuentes y `SHA256SUMS`. Los crudos (~1 GB) no se suben: se rebajan con el script |
-| Plan y reporte | `docs/trabajo/2026-10-24-seed-alergias/` | `PLAN.md`, `REPORTE.md` y `evidencia/` (salidas literales) |
 | Fuentes y licencias | `tools/terminology-import/allergies/SOURCES.md` | artefacto, commit o versión, SHA-256, licencia y evidencia |
 
 Las tres líneas que tocan archivos compartidos son aditivas:
