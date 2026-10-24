@@ -36,7 +36,6 @@ import {
   isDelay,
 } from '../../../domain/booking/booking-history-reading';
 import { isPatientActor } from '../../../domain/booking/agenda-actors';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-15: listado de citas por paciente, recurso y/o ventana temporal. */
 @Injectable()
@@ -92,8 +91,6 @@ export class SearchBookingsUseCase {
     if (!filters.patientProfileId && !filters.resourceId) {
       throw new PreconditionFailedException(
         'Indique al menos patientProfileId o resourceId para listar citas',
-        {},
-        SchedulingErrorReason.SEARCH_FILTER_REQUIRED,
       );
     }
     // Una cuenta de paciente sólo lista lo suyo y lo de quienes representa. Sin
@@ -110,7 +107,6 @@ export class SearchBookingsUseCase {
           from: filters.from.toISOString(),
           to: filters.to.toISOString(),
         },
-        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 

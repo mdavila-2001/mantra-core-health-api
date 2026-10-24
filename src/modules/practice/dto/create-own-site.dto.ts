@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsNumber,
+  Matches,
   IsOptional,
   IsString,
   IsUUID,
@@ -13,6 +14,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+/** Mismo formato de contacto que acepta el registro profesional. */
+export const SITE_CONTACT_PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
 
 /**
  * Dirección de una sede propia, tal como la manda `POST /practitioners/me/sites`.
@@ -121,4 +125,12 @@ export class CreateOwnSiteDto {
   @ValidateNested()
   @Type(() => OwnSiteAddressDto)
   address?: OwnSiteAddressDto;
+
+  /** Contacto del profesional en este consultorio; independiente del teléfono general. */
+  @ApiPropertyOptional({ example: '+591 72123456', maxLength: 40 })
+  @IsOptional()
+  @IsString()
+  @Matches(SITE_CONTACT_PHONE_PATTERN)
+  @MaxLength(40)
+  contactPhone?: string;
 }

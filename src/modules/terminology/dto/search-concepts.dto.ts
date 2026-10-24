@@ -263,6 +263,36 @@ export class GlossaryGraphNodeDto {
   shortDefinition!: string;
 }
 
+/** Arista tipada conservando la dirección registrada en el catálogo. */
+export class GlossaryGraphEdgeDto {
+  @ApiProperty({ format: 'uuid' })
+  sourceConceptId!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  targetConceptId!: string;
+
+  @ApiProperty({ enum: GLOSSARY_RELATION_TYPES })
+  type!: GlossaryRelationType;
+}
+
+/** Subgrafo publicado del glosario. */
+export class GlossaryGraphDto {
+  @ApiProperty({ type: () => [GlossaryGraphNodeDto] })
+  nodes!: GlossaryGraphNodeDto[];
+
+  @ApiProperty({ type: () => [GlossaryGraphEdgeDto] })
+  edges!: GlossaryGraphEdgeDto[];
+
+  @ApiProperty()
+  count!: number;
+
+  @ApiProperty()
+  limit!: number;
+
+  @ApiProperty()
+  possiblyTruncated!: boolean;
+}
+
 /**
  * Imagen ilustrativa de un término. El tipo existe para que el contrato pueda
  * cargarla en el futuro; hoy ningún término del catálogo curado la trae (no

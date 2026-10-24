@@ -8,7 +8,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { TemplateListDto, TemplateRuleDto } from '../../../presentation/dto';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
+import { modeOfConcept } from '../../../domain/catalog/catalog-concepts';
 
 /** Lista las plantillas de un recurso. */
 @Injectable()
@@ -49,13 +49,9 @@ export class ListTemplatesUseCase {
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException(
-        'Recurso no encontrado',
-        {
-          resourceId,
-        },
-        SchedulingErrorReason.RESOURCE_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
     }
     this.access.assertActorResource(resource, actor);
 
@@ -87,6 +83,9 @@ export class ListTemplatesUseCase {
           ? {}
           : { capacityPerSlot: band.capacityPerSlot }),
         ...(band.gapMinutes == null ? {} : { gapMinutes: band.gapMinutes }),
+        ...(band.bookingModeConceptId == null
+          ? {}
+          : { bookingMode: modeOfConcept(band.bookingModeConceptId) }),
       });
       byTemplate.set(band.scheduleTemplateId, list);
     }

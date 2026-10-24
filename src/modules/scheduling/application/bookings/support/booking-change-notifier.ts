@@ -1,4 +1,9 @@
 import {
+  BOOKING_CHAT_PORT,
+  type BookingChatPort,
+} from '../../ports/booking-chat.port';
+import type { AuthenticatedUser } from '../../../../../common';
+import {
   AGENDA_NOTICE_PORT,
   type AgendaNotice,
   type AgendaNoticePort,
@@ -27,9 +32,23 @@ export class BookingChangeNotifier {
     private readonly noticeRepo: SchedulingNoticeRepository,
     @Inject(AGENDA_NOTICE_PORT)
     private readonly notices: AgendaNoticePort,
+    @Inject(BOOKING_CHAT_PORT)
+    private readonly bookingChat: BookingChatPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BookingChangeNotifier.name);
+  }
+
+  /**
+   * Deja la confirmación de una cita aceptada en el chat de la app (hilo
+   * profesional ↔ paciente). Corre después de la transacción y no lanza: ver
+   * `ports/booking-chat.port.ts`.
+   */
+  async notifyAcceptedInChat(
+    bookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.bookingChat.announceAcceptance(bookingId, actor);
   }
 
   /**

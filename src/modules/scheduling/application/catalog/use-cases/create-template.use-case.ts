@@ -13,13 +13,13 @@ import {
 import {
   DEFAULT_SLOT_CAPACITY,
   DEFAULT_SLOT_MINUTES,
+  bandMode,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-02: publica una plantilla con franjas semanales. */
 @Injectable()
@@ -52,7 +52,6 @@ export class CreateTemplateUseCase {
           {
             dayOfWeek: rule.dayOfWeek,
           },
-          SchedulingErrorReason.TEMPLATE_RULE_TIME_INVERTED,
         );
       }
 
@@ -70,13 +69,9 @@ export class CreateTemplateUseCase {
     return this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException(
-          'Recurso no encontrado',
-          {
-            resourceId,
-          },
-          SchedulingErrorReason.RESOURCE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
       }
       this.access.assertActorResource(resource, actor);
       await this.overlapGuard.assertNoOverlapWithOtherAgendas(
@@ -121,6 +116,7 @@ export class CreateTemplateUseCase {
           // como cero al generar. Escribir un cero que nadie declaró borraría
           // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
           gapMinutes: rule.gapMinutes,
+          bookingModeConceptId: bandMode(rule.bookingMode),
           actorUserId: actor.id,
         });
       }

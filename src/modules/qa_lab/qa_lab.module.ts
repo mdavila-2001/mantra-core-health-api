@@ -7,6 +7,8 @@ import {
   QaLabReadController,
 } from './controllers';
 import { QaCatalogService, QaLabReadService, QaRunsService } from './services';
+import { QaFlowsService } from './services/qa-flows.service';
+import { RouteIndexModule } from '../../observability/route-index/route-index.module';
 import { QaCatalogRepository, QaRunsRepository } from './repositories';
 
 /**
@@ -15,7 +17,10 @@ import { QaCatalogRepository, QaRunsRepository } from './repositories';
  * de evidencia a release (UC-36-01 … 12).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    RouteIndexModule,
+  ],
   controllers: [QaLabController, QaLabInternalController, QaLabReadController],
   providers: [
     QaCatalogRepository,
@@ -23,6 +28,7 @@ import { QaCatalogRepository, QaRunsRepository } from './repositories';
     QaCatalogService,
     QaRunsService,
     QaLabReadService,
+    QaFlowsService,
   ],
   // El runner del servidor (módulo 68) escribe la evidencia por estos casos de uso.
   exports: [QaRunsService],

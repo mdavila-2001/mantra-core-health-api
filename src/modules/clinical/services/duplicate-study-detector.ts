@@ -28,7 +28,8 @@ export interface DuplicateStudyMatch {
 
 /** El estudio previo, listo para viajar en un DTO de respuesta. */
 export interface PreviousStudyDescription {
-  readonly reportId: string;
+  /** `null` cuando lo que consta es una orden activa que aún no tiene informe. */
+  readonly reportId: string | null;
   readonly serviceRequestId: string | null;
   readonly studyName: string;
   readonly providerName: string;
@@ -165,6 +166,76 @@ export class DuplicateStudyDetector {
   }
 
   /**
+   * La orden ACTIVA más reciente del mismo estudio para el paciente, dentro de
+   * la ventana, que todavía no tiene informe. {@link findDuplicate} sólo ve
+   * informes: un estudio pedido hace un minuto y aún sin muestra no tiene
+   * ninguno y se podía pedir dos veces. Una orden que ya tiene informe (de
+   * cualquier estado) la cubre aquella consulta o `findPendingReport`, por eso
+   * acá se excluye. Cruza organizaciones, igual que {@link findDuplicate}.
+   *
+   * @returns La descripción (con `reportId: null`), o `null` si no hay ninguna.
+   */
+  async findActiveOrderWithoutReport(
+    em: EntityManager,
+    patientProfileId: string,
+    codeConceptId: string,
+    windowDays: number,
+    requesterTenantId: string,
+    now: Date,
+  ): Promise<PreviousStudyDescription | null> {
+    const rows = await em.getConnection().execute<
+      {
+        id: string;
+        created_at: Date;
+        custodian_tenant_id: string;
+        performer_tenant_id: string | null;
+      }[]
+    >(
+      `SELECT sr.id, sr.created_at, sr.custodian_tenant_id, sr.performer_tenant_id
+         FROM clinical.service_requests sr
+        WHERE sr.patient_profile_id = ?
+          AND sr.code_concept_id = ?
+          AND sr.status_concept_id = ?
+          AND sr.created_at >= ?
+          AND NOT EXISTS (
+            SELECT 1 FROM clinical.diagnostic_reports r
+             WHERE r.service_request_id = sr.id)
+        ORDER BY sr.created_at DESC, sr.id DESC
+        LIMIT 1`,
+      [
+        patientProfileId,
+        codeConceptId,
+        CLIN.SERVICE_REQUEST_ACTIVE,
+        this.windowStartOf(windowDays, now),
+      ],
+      'all',
+    );
+    const row = rows[0];
+    if (!row) return null;
+
+    const performedAt = new Date(row.created_at);
+    const [studyName, providerName] = await Promise.all([
+      this.designationOrDisplay(em, codeConceptId),
+      this.providerName(em, row.performer_tenant_id ?? row.custodian_tenant_id),
+    ]);
+    return {
+      reportId: null,
+      serviceRequestId: row.id,
+      studyName,
+      providerName,
+      performedAt,
+      daysAgo: Math.max(
+        0,
+        Math.floor((now.getTime() - performedAt.getTime()) / 86_400_000),
+      ),
+      resultsAvailable: false,
+      conclusionText: null,
+      reportDownloadUrl: null,
+      sameOrganization: row.custodian_tenant_id === requesterTenantId,
+    };
+  }
+
+  /**
    * Arma la descripción del estudio previo lista para un DTO de respuesta.
    *
    * @param em - Contexto de persistencia.
@@ -258,6 +329,16 @@ export class DuplicateStudyDetector {
    * "El paciente ya cuenta con este estudio…").
    */
   warningMessageFor(description: PreviousStudyDescription): string {
+    if (description.reportId === null) {
+      const cuando =
+        description.daysAgo === 0
+          ? 'hoy'
+          : `hace ${description.daysAgo} ${description.daysAgo === 1 ? 'día' : 'días'}`;
+      return (
+        `Este estudio (${description.studyName}) ya fue pedido ${cuando} ` +
+        `y la orden sigue activa, sin informe.`
+      );
+    }
     const plural = description.daysAgo === 1 ? 'día' : 'días';
     return (
       `El paciente ya cuenta con este estudio (${description.studyName}) ` +

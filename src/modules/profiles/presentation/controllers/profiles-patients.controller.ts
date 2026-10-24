@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -28,6 +29,10 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { ProfilesPatientsService } from '../../application/services';
+import {
+  CLINICAL_PATIENT_HISTORY_ACCESS_PORT,
+  type ClinicalPatientHistoryAccessPort,
+} from '../../application/ports/clinical-patient-history-access.port';
 import {
   CreatePatientDto,
   PatientProfileResponseDto,
@@ -75,7 +80,11 @@ export class ProfilesPatientsController {
    *
    * @param patientsService - Valor de patients service requerido por la operación.
    */
-  constructor(private readonly patientsService: ProfilesPatientsService) {}
+  constructor(
+    private readonly patientsService: ProfilesPatientsService,
+    @Inject(CLINICAL_PATIENT_HISTORY_ACCESS_PORT)
+    private readonly clinicalHistoryAccess: ClinicalPatientHistoryAccessPort,
+  ) {}
 
   /**
    * Resumen del propio paciente. No exige identidad verificada: verificarse es
@@ -415,13 +424,19 @@ export class ProfilesPatientsController {
    */
   @Get('patients/:profileId')
   @AccessLogged({ resourceType: 'PATIENT_PROFILE', patient: 'param:profileId' })
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'CLINICIAN', 'PRACTITIONER')
   @ApiOperation({
     summary: 'UC-05-14: ficha de filiación de un paciente (F-01)',
+    description:
+      'SECURITY_ADMIN siempre. Quien atiende (CLINICIAN, PRACTITIONER) sólo si está atendiendo a esa persona: consulta en curso, turno de hoy o relación asistencial vigente.',
   })
-  getPatient(
+  async getPatient(
     @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientDetailResponseDto> {
+    if (!actor.roles.includes('SECURITY_ADMIN')) {
+      await this.clinicalHistoryAccess.assertCanReadHistory(profileId, actor);
+    }
     return this.patientsService.getPatientById(profileId);
   }
 

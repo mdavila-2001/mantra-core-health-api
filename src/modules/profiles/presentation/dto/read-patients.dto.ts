@@ -471,11 +471,29 @@ export class OwnGuardianDto {
   })
   relationshipConceptId?: string;
 
-  @ApiProperty({ description: 'Es a quien llamar en una urgencia' })
-  isEmergencyContact!: boolean;
+  @ApiProperty({ description: 'Parentesco en palabras' })
+  relationshipDisplay!: string;
 
   @ApiProperty({ description: 'Es su representante legal' })
   isLegalGuardian!: boolean;
+
+  @ApiPropertyOptional({ description: 'Su teléfono' })
+  phone?: string;
+}
+
+/** Una persona a quien llamar ante una urgencia. */
+export class OwnEmergencyContactDto {
+  @ApiPropertyOptional({ description: 'Cómo se llama' })
+  displayName?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Parentesco (concept id)',
+  })
+  relationshipConceptId?: string;
+
+  @ApiProperty({ description: 'Parentesco en palabras' })
+  relationshipDisplay!: string;
 
   @ApiPropertyOptional({ description: 'Su teléfono' })
   phone?: string;
@@ -700,8 +718,14 @@ export class OwnPatientProfileResponseDto {
   coverages!: OwnCoverageDto[];
 
   @ApiProperty({
+    type: [OwnEmergencyContactDto],
+    description: 'Contactos de emergencia activos.',
+  })
+  emergencyContacts!: OwnEmergencyContactDto[];
+
+  @ApiProperty({
     type: [OwnGuardianDto],
-    description: 'Tutores y personas autorizadas, con su teléfono.',
+    description: 'Representantes con apoderamiento activo, con su parentesco.',
   })
   guardians!: OwnGuardianDto[];
 }

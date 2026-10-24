@@ -72,6 +72,10 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   Si un archivo no pasa la comprobación, el documento no se crea. El
   `tenantId` ajeno ya lo rechaza el interceptor global de contexto de tenant
   antes de llegar al controlador; el servicio no lo repite.
+- **Relación paciente–encuentro.** Las altas que reciben ambos UUID requieren
+  validación explícita de que el encuentro pertenece al paciente antes de
+  persistirlos. Esa validación no está completa todavía; ver la
+  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/chart.md).
 - **Lectura (`GET /charts/patients/:id/chart`).** Cada documento trae
   `files[]` — `fileId`, `contentRole` (`PRIMARY`/`ATTACHMENT`) y `ordinal` —,
   ordenados por `ordinal`, resueltos en una sola consulta por lote para todos
@@ -93,3 +97,5 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+- Ejecutar la evidencia dirigida con `corepack yarn test src/modules/chart --runInBand --silent`
+  (18 suites y 139 pruebas aprobadas durante la revisión).

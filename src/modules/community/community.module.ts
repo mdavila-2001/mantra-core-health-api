@@ -17,6 +17,8 @@ import { PersonAccountLinksRepository } from '../profiles/infrastructure/reposit
 // `ProfilesModule` importa `DirectoryModule`, que importa este módulo. La clase
 // no tiene estado —no cachea, y su propio TSDoc explica por qué— así que una
 // segunda instancia responde exactamente lo mismo que la de `profiles`.
+import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
+import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
 import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
 import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
 import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
@@ -33,6 +35,7 @@ import {
   CommunitySocialController,
   CommunityMessagingController,
   CommunityModerationController,
+  PartyRatingsController,
   CommunityReviewsController,
   PatientReviewsController,
   CommunityGroupsController,
@@ -48,7 +51,11 @@ import {
   CommunitySocialService,
   CommunityChatAutoReplyService,
   CommunityMessagingService,
+  CommunityBookingChatService,
   CommunityModerationService,
+  PartyRatingsService,
+  PartyRatingsReadService,
+  RatingPartiesService,
   CommunityReviewsService,
   CommunityGroupsService,
   CommunityGroupWallService,
@@ -86,6 +93,7 @@ import {
   BlocksRepository,
   ConversationsRepository,
   ModerationRepository,
+  PartyRatingsRepository,
   ReviewsRepository,
   PollsRepository,
   GroupsRepository,
@@ -139,6 +147,8 @@ import {
     // identifica lo que califica por su atención, no por el uuid de la
     // vitrina — que la ficha pública no publica.
     PatientReviewsController,
+    // v4.2.42 · calificación en malla médico ↔ paciente ↔ organización.
+    PartyRatingsController,
     CommunityGroupsController,
     CommunityTopicsController,
     CommunityPollsController,
@@ -162,6 +172,7 @@ import {
     ConversationsRepository,
     ModerationRepository,
     ReviewsRepository,
+    PartyRatingsRepository,
     PollsRepository,
     GroupsRepository,
     FeedRepository,
@@ -174,9 +185,8 @@ import {
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,
-    // El servicio de arriba lee el value set por el puerto de terminología de
-    // `profiles`; se provee el mismo adaptador, que sólo envuelve los
-    // repositorios de `TerminologyModule`.
+    // El servicio de arriba lee el catálogo por el puerto de terminología de
+    // `profiles`; se provee su adaptador por la misma razón que la clase.
     {
       provide: PROFILES_TERMINOLOGY_PORT,
       useClass: ProfilesTerminologyAdapter,
@@ -192,12 +202,16 @@ import {
     CommunitySocialService,
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    CommunityBookingChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
     CommunityPresenceService,
     CommunityModerationService,
     CommunityReviewsService,
+    RatingPartiesService,
+    PartyRatingsService,
+    PartyRatingsReadService,
     CommunityGroupsService,
     CommunityGroupWallService,
     CommunityGroupNotificationsService,
@@ -238,6 +252,8 @@ import {
     // sistema de chat. No hay ciclo — `community` no importa `scheduling`.
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
+    CommunityBookingChatService,
   ],
 })
 export class CommunityModule {}

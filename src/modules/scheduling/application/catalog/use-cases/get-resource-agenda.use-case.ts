@@ -7,7 +7,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { ResourceAgendaResponseDto } from '../../../presentation/dto';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** La agenda de un recurso entre dos fechas. */
 @Injectable()
@@ -49,7 +48,6 @@ export class GetResourceAgendaUseCase {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: options.from.toISOString(), to: options.to.toISOString() },
-        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
@@ -59,13 +57,9 @@ export class GetResourceAgendaUseCase {
     // existe" no es "este médico no tiene huecos".
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException(
-        'Recurso no encontrado',
-        {
-          resourceId,
-        },
-        SchedulingErrorReason.RESOURCE_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
     }
 
     // Se pide una fila de más sólo para poder declarar el recorte.

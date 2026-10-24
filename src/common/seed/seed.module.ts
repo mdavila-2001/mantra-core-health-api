@@ -52,9 +52,11 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
@@ -155,6 +157,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     LegalEntityTypesSeedService,
@@ -172,6 +175,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
@@ -185,6 +189,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     LegalEntityTypesSeedService,
@@ -202,6 +207,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,

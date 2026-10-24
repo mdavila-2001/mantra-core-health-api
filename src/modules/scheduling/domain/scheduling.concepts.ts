@@ -58,6 +58,45 @@ export const { seeds: SCHEDULING_CONCEPT_SEEDS, ids: SCHED } =
       display: 'Paid',
     },
 
+    // --- Servicios con duración dinámica (v4.2.40) ----------------------------
+    /**
+     * Cupo de consulta que un servicio pisó y que dejó de ofrecerse.
+     *
+     * Es un estado propio y no `SLOT_BLOCKED` porque el bloqueado es una decisión
+     * del profesional que **nadie reabre solo**, mientras que el retraído es un
+     * efecto de otra reserva y vuelve cuando esa reserva se cae. Si compartieran
+     * estado no habría cómo distinguir el que hay que devolver del que no.
+     */
+    SLOT_RETRACTED: {
+      code: 'SLOT_RETRACTED',
+      display: 'Slot retracted by a service booking',
+    },
+
+    // `schedule_rules.booking_mode_concept_id`: qué admite una franja. Ausente
+    // (NULL) ≡ CONSULTATIONS: es lo que toda franja era antes de este cambio.
+    RULE_MODE_CONSULTATIONS: {
+      code: 'RULE_MODE_CONSULTATIONS',
+      display: 'Schedule rule admits consultations only',
+    },
+    RULE_MODE_SERVICES: {
+      code: 'RULE_MODE_SERVICES',
+      display: 'Schedule rule admits services only',
+    },
+    RULE_MODE_MIXED: {
+      code: 'RULE_MODE_MIXED',
+      display: 'Schedule rule admits consultations and services',
+    },
+
+    // `practitioner_service_offerings.status_concept_id`.
+    OFFERING_ACTIVE: {
+      code: 'OFFERING_ACTIVE',
+      display: 'Service offering active',
+    },
+    OFFERING_INACTIVE: {
+      code: 'OFFERING_INACTIVE',
+      display: 'Service offering inactive',
+    },
+
     // --- Decisiones del motor de confirmación automática (C-11) --------------
     // decision_concept_id de scheduling.booking_confirmation_rules y resultado
     // de evaluateBookingRequest.

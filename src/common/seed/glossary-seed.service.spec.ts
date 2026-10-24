@@ -14,6 +14,7 @@ import {
   GLOSSARY_ARTICLE_SLUGS,
   glossaryArticleFor,
 } from './glossary-articles.catalog';
+import { GLOSSARY_SOURCE_REFERENCES } from './glossary-source-provenance';
 import {
   GLOSSARY_TAXONOMY,
   glossaryPreferredDesignationId,
@@ -26,6 +27,7 @@ import {
 } from './glossary-taxonomy';
 import {
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
   glossaryRelationTypeConceptId,
 } from '../../modules/terminology/glossary.constants';
 
@@ -150,14 +152,15 @@ const TOTAL_DESIGNATIONS = GLOSSARY_TERMS.reduce(
 
 /**
  * Cuántas propiedades declara el catálogo: 3 por término (slug, definición
- * clínica, resumen llano), más el artículo enciclopédico (`glossary-article`)
- * de los términos que lo tienen, y 4 más (`active_ingredients`/`dosage_form`/
- * `route`/`manufacturer`) por cada término con `drugFacts` (FND-25-02).
+ * clínica, resumen llano), fuentes editoriales cuando están curadas y 4 más
+ * (`active_ingredients`/`dosage_form`/`route`/`manufacturer`) con `drugFacts`,
+ * más el artículo enciclopédico (`glossary-article`) de los términos que lo tienen.
  */
 const TOTAL_PROPERTIES = GLOSSARY_TERMS.reduce(
   (total, term) =>
     total +
     3 +
+    (GLOSSARY_SOURCE_REFERENCES[term.slug] !== undefined ? 1 : 0) +
     (glossaryArticleFor(term.slug) !== undefined ? 1 : 0) +
     (term.drugFacts ? 4 : 0),
   0,
@@ -186,8 +189,7 @@ describe('GlossarySeedService', () => {
     expect(result.orphanRelationships).toBe(
       TOTAL_DECLARED_RELATIONS - TOTAL_RESOLVABLE_RELATIONS,
     );
-    // La única discrepancia conocida de la fuente (ver cabecera del catálogo).
-    expect(result.orphanRelationships).toBe(1);
+    expect(result.orphanRelationships).toBe(0);
   });
 
   it('todo término se siembra activo (`TERM_ACTIVE`), nunca en borrador', async () => {
@@ -215,13 +217,14 @@ describe('GlossarySeedService', () => {
     );
     // Los cuatro códigos de FND-25-02 (`active_ingredients`/`dosage_form`/
     // `route`/`manufacturer`) sólo aparecen para los términos que declaran
-    // `drugFacts` en el catálogo — no para los 64+ restantes. Lo que este
-    // test sigue fijando es que `glossary-image` nunca aparece.
+    // `drugFacts`; las fuentes editoriales sólo para términos documentados.
+    // Este test también fija que `glossary-image` nunca aparece.
     expect(propertyCodes.has('glossary-image')).toBe(false);
     const expected = new Set([
       'glossary-slug',
       'glossary-clinical-definition',
       'glossary-plain-summary',
+      'glossary-sources',
       'glossary-article',
       'active_ingredients',
       'dosage_form',
@@ -230,6 +233,30 @@ describe('GlossarySeedService', () => {
     ]);
     for (const code of propertyCodes) {
       expect(expected.has(code)).toBe(true);
+    }
+
+    const sourceProperties = g
+      .rowsOf('ConceptProperties')
+      .filter(
+        (property) =>
+          property.propertyCode === GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
+      );
+    expect(sourceProperties).toHaveLength(
+      Object.keys(GLOSSARY_SOURCE_REFERENCES).length,
+    );
+    for (const [slug, references] of Object.entries(
+      GLOSSARY_SOURCE_REFERENCES,
+    )) {
+      const property = sourceProperties.find(
+        (candidate) =>
+          candidate.id ===
+          glossaryPropertyId(slug, GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE),
+      );
+      expect(property).toMatchObject({
+        conceptId: glossaryTermConceptId(slug),
+        dataType: 'json',
+        valueJson: references,
+      });
     }
   });
 
@@ -273,7 +300,7 @@ describe('GlossarySeedService', () => {
       properties: 0,
       memberships: 0,
       relationships: 0,
-      orphanRelationships: 1,
+      orphanRelationships: 0,
       codeSystemBackfilled: 0,
       updated: 0,
       removed: 0,
@@ -291,12 +318,12 @@ describe('GlossarySeedService', () => {
     expect(idsFirst).toEqual(idsSecond);
   });
 
-  it('advierte, pero no falla, ante la relación huérfana declarada en la fuente', async () => {
+  it('no deja advertencia por la relación de control de signos vitales, que ya tiene destino', async () => {
     const g = build();
 
     await g.service.run();
 
-    expect(g.logger.warn).toHaveBeenCalledWith(
+    expect(g.logger.warn).not.toHaveBeenCalledWith(
       expect.objectContaining({
         sourceSlug: 'hipertension-arterial',
         targetSlug: 'control-de-signos-vitales',

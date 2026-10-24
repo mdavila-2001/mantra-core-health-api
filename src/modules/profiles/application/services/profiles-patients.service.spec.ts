@@ -114,6 +114,7 @@ function build() {
     findActiveGuardian: mockFn(),
     findActiveDeclaredGuardian: mockFn().mockResolvedValue(null),
     findActiveByPatient: mockFn().mockResolvedValue([]),
+    listActiveEmergencyContactsOfPatient: mockFn().mockResolvedValue([]),
     reassignPatientProfile: mockFn().mockResolvedValue(0),
   };
   const portalProxiesRepo = {
@@ -126,6 +127,7 @@ function build() {
     findActiveByProxyUser: mockFn().mockResolvedValue([]),
     findActiveByProxyUserAndPatient: mockFn().mockResolvedValue(null),
     listActiveDependentsOfUser: mockFn().mockResolvedValue([]),
+    listActiveGuardiansOfPatient: mockFn().mockResolvedValue([]),
     // Las solicitudes de dependiente las usa otro servicio; están para que el
     // doble cumpla el tipo del repositorio.
     findById: mockFn().mockResolvedValue(null),
@@ -1028,6 +1030,96 @@ describe('ProfilesPatientsService', () => {
       const res = await d.service.getOwnProfile(titular);
 
       expect(res.coverages).toEqual([]);
+      expect(res.emergencyContacts).toEqual([]);
+      expect(res.guardians).toEqual([]);
+    });
+
+    it('separa los contactos de emergencia de los representantes aceptados', async () => {
+      const d = withPatient();
+      d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
+        [
+          {
+            display_name: 'Rosa Pérez',
+            relationship_concept_id: PROF.RELATIONSHIP_MOTHER,
+            phone: '+591 70011223',
+          },
+        ],
+      );
+      d.portalProxiesRepo.listActiveGuardiansOfPatient.mockResolvedValue([
+        {
+          display_name: 'Pedro Quiroga',
+          relationship_concept_id: PROF.RELATIONSHIP_FATHER,
+          is_legal_guardian: false,
+          phone: '+591 70099887',
+        },
+      ]);
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.emergencyContacts).toEqual([
+        expect.objectContaining({
+          displayName: 'Rosa Pérez',
+          relationshipDisplay: 'Madre',
+          phone: '+591 70011223',
+        }),
+      ]);
+      expect(res.guardians).toEqual([
+        expect.objectContaining({
+          displayName: 'Pedro Quiroga',
+          relationshipDisplay: 'Padre',
+          phone: '+591 70099887',
+        }),
+      ]);
+    });
+
+    it('omite campos nulos de contactos y tutores, sin perder sus valores por defecto', async () => {
+      const d = withPatient();
+      d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
+        [
+          {
+            display_name: null,
+            relationship_concept_id: null,
+            phone: null,
+          },
+        ],
+      );
+      d.portalProxiesRepo.listActiveGuardiansOfPatient.mockResolvedValue([
+        {
+          display_name: null,
+          relationship_concept_id: null,
+          is_legal_guardian: null,
+          phone: null,
+        },
+      ]);
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.emergencyContacts).toEqual([
+        { relationshipDisplay: 'Otra relación' },
+      ]);
+      expect(res.guardians).toEqual([
+        {
+          relationshipDisplay: 'Otra relación',
+          isLegalGuardian: false,
+        },
+      ]);
+    });
+
+    it('un contacto de emergencia sin representación activa no aparece como tutor', async () => {
+      const d = withPatient();
+      d.relatedPersonsRepo.listActiveEmergencyContactsOfPatient.mockResolvedValue(
+        [
+          {
+            display_name: 'Rosa Pérez',
+            relationship_concept_id: PROF.RELATIONSHIP_MOTHER,
+            phone: '+591 70011223',
+          },
+        ],
+      );
+
+      const res = await d.service.getOwnProfile(titular);
+
+      expect(res.emergencyContacts).toHaveLength(1);
       expect(res.guardians).toEqual([]);
     });
 
@@ -2456,6 +2548,63 @@ describe('ProfilesPatientsService', () => {
       );
       // Lo que no hay no viaja vacío.
       expect(dependent).not.toHaveProperty('nationalId');
+    });
+
+    it('recompone o vacía el nombre de filas históricas sin datos opcionales', async () => {
+      const b = build();
+      b.portalProxiesRepo.listActiveDependentsOfUser.mockResolvedValue([
+        {
+          proxy_id: 'proxy-nombre-compuesto',
+          patient_profile_id: 'person-nombre-compuesto',
+          person_id: 'person-nombre-compuesto',
+          display_name: null,
+          name: 'Lucía',
+          middle_name: null,
+          last_name: 'Mamani',
+          mother_last_name: null,
+          birth_date: null,
+          relationship_concept_id: null,
+          is_legal_guardian: null,
+          national_id: null,
+        },
+        {
+          proxy_id: 'proxy-sin-nombre',
+          patient_profile_id: 'person-sin-nombre',
+          person_id: 'person-sin-nombre',
+          display_name: null,
+          name: null,
+          middle_name: null,
+          last_name: null,
+          mother_last_name: null,
+          birth_date: null,
+          relationship_concept_id: null,
+          is_legal_guardian: null,
+          national_id: null,
+        },
+      ]);
+
+      expect(await b.service.getOwnDependents(actor)).toEqual([
+        {
+          id: 'proxy-nombre-compuesto',
+          patientProfileId: 'person-nombre-compuesto',
+          personId: 'person-nombre-compuesto',
+          fullName: 'Lucía Mamani',
+          name: 'Lucía',
+          lastName: 'Mamani',
+          relationshipCode: 'OTHER',
+          relationshipDisplay: 'Otro/a',
+          isLegalGuardian: false,
+        },
+        {
+          id: 'proxy-sin-nombre',
+          patientProfileId: 'person-sin-nombre',
+          personId: 'person-sin-nombre',
+          fullName: '',
+          relationshipCode: 'OTHER',
+          relationshipDisplay: 'Otro/a',
+          isLegalGuardian: false,
+        },
+      ]);
     });
 
     it('sin dependientes devuelve una lista vacía, no un error', async () => {

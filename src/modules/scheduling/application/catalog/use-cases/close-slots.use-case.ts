@@ -21,7 +21,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Cierra cupos puntuales de una agenda. */
 @Injectable()
@@ -186,7 +185,6 @@ export class CloseSlotsUseCase {
       throw new PreconditionFailedException(
         'Eligió «Otro» como motivo: escriba cuál es',
         { exceptionType: dto.exceptionType },
-        SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
       );
     }
 
@@ -202,13 +200,9 @@ export class CloseSlotsUseCase {
     return this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException(
-          'Recurso no encontrado',
-          {
-            resourceId,
-          },
-          SchedulingErrorReason.RESOURCE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
       }
       this.access.assertActorResource(resource, actor);
 
@@ -223,7 +217,6 @@ export class CloseSlotsUseCase {
         throw new ResourceNotFoundException(
           'Ninguno de esos cupos es de esta agenda',
           { resourceId, slotIds: dto.slotIds },
-          SchedulingErrorReason.SLOTS_NOT_FOUND_FOR_RESOURCE,
         );
       }
 
@@ -240,7 +233,6 @@ export class CloseSlotsUseCase {
             // ya sabe pedir cada cita con su permiso.
             bookingIds: withPatient.map((b) => b.id),
           },
-          SchedulingErrorReason.SLOTS_HAVE_ACTIVE_BOOKINGS,
         );
       }
 

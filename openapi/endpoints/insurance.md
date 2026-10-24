@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 52 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 53 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`
-- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `InsurerPatientsController`, `InsurerReceivedClaimsController`, `PractitionerInsuranceNetworksController`, `PractitionerSettlementBatchesController`, `PriorAuthController`, `ReconciliationController`
+- **Etiquetas OpenAPI:** `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims`
+- **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `InsurerPatientsController`, `InsurerReceivedClaimsController`, `MyClaimsController`, `PractitionerInsuranceNetworksController`, `PractitionerSettlementBatchesController`, `PriorAuthController`, `ReconciliationController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -40,29 +40,30 @@ Referencia exhaustiva de 52 operación(es) del módulo `insurance`, derivada del
 27. [PUT /insurance-plans/{planId}/premium](#27-put-insurance-plans-planid-premium) — Declarar la prima de lista mensual de un plan administrable
 28. [POST /insurance-products/{productId}/plans](#28-post-insurance-products-productid-plans) — Crear un plan del carrier del tenant activo
 29. [GET /insurance/analytics/loss-ratio](#29-get-insurance-analytics-loss-ratio) — Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo
-30. [POST /insurance/patients/conversation](#30-post-insurance-patients-conversation) — Abrir o reutilizar la conversación interna con un paciente autorizado
-31. [GET /insurance/patients/options](#31-get-insurance-patients-options) — Aseguradoras disponibles en el alcance autorizado
-32. [POST /insurance/patients/search](#32-post-insurance-patients-search) — Consultar directorio de pacientes autorizado
-33. [GET /insurance/portability/certificates/{certificateId}/json](#33-get-insurance-portability-certificates-certificateid-json) — Descargar el certificado de portabilidad en JSON interoperable
-34. [GET /insurance/portability/certificates/{certificateId}/pdf](#34-get-insurance-portability-certificates-certificateid-pdf) — Descargar el certificado de portabilidad en PDF
-35. [POST /insurance/portability/export](#35-post-insurance-portability-export) — Exportar el historial de póliza y siniestralidad del titular a 1 clic
-36. [GET /insurance/received-claims](#36-get-insurance-received-claims) — Solicitudes de seguro recibidas por la aseguradora activa
-37. [POST /insurance/received-claims/{id}/decision](#37-post-insurance-received-claims-id-decision) — Dictaminar una solicitud recibida (definitivo)
-38. [POST /patient-coverages](#38-post-patient-coverages) — Registrar cobertura de paciente y dependientes
-39. [GET /patient-coverages/me](#39-get-patient-coverages-me) — Mi cobertura
-40. [GET /practitioner-settlement-batches](#40-get-practitioner-settlement-batches) — Listar los lotes de liquidación del alcance del actor
-41. [POST /practitioner-settlement-batches](#41-post-practitioner-settlement-batches) — Generar (o repetir) el lote de liquidación del período
-42. [GET /practitioner-settlement-batches/{id}](#42-get-practitioner-settlement-batches-id) — Consultar un lote de liquidación
-43. [GET /practitioners/{profileId}/insurance-networks](#43-get-practitioners-profileid-insurance-networks) — Aseguradoras con las que trabaja el profesional
-44. [POST /prior-authorization-requests](#44-post-prior-authorization-requests) — Solicitar autorización previa con items
-45. [GET /prior-authorization-requests/{id}](#45-get-prior-authorization-requests-id) — Detalle de una solicitud de aprobación (aseguradora)
-46. [POST /prior-authorization-requests/{id}/determinations](#46-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-47. [GET /prior-authorization-requests/inbox](#47-get-prior-authorization-requests-inbox) — Bandeja de solicitudes de aprobación (aseguradora)
-48. [POST /provider-networks](#48-post-provider-networks) — Alta de red de prestadores (soporte)
-49. [POST /provider-networks/{id}/memberships](#49-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-50. [GET /public/portability/verify/{manifestHash}](#50-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
-51. [POST /reconciliation-batches](#51-post-reconciliation-batches) — Abrir lote de conciliación
-52. [POST /reconciliation-batches/{id}/items](#52-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+30. [GET /insurance/my-claims](#30-get-insurance-my-claims) — Solicitudes de seguro propias, con su dictamen vigente
+31. [POST /insurance/patients/conversation](#31-post-insurance-patients-conversation) — Abrir o reutilizar la conversación interna con un paciente autorizado
+32. [GET /insurance/patients/options](#32-get-insurance-patients-options) — Aseguradoras disponibles en el alcance autorizado
+33. [POST /insurance/patients/search](#33-post-insurance-patients-search) — Consultar directorio de pacientes autorizado
+34. [GET /insurance/portability/certificates/{certificateId}/json](#34-get-insurance-portability-certificates-certificateid-json) — Descargar el certificado de portabilidad en JSON interoperable
+35. [GET /insurance/portability/certificates/{certificateId}/pdf](#35-get-insurance-portability-certificates-certificateid-pdf) — Descargar el certificado de portabilidad en PDF
+36. [POST /insurance/portability/export](#36-post-insurance-portability-export) — Exportar el historial de póliza y siniestralidad del titular a 1 clic
+37. [GET /insurance/received-claims](#37-get-insurance-received-claims) — Solicitudes de seguro recibidas por la aseguradora activa
+38. [POST /insurance/received-claims/{id}/decision](#38-post-insurance-received-claims-id-decision) — Dictaminar una solicitud recibida (definitivo)
+39. [POST /patient-coverages](#39-post-patient-coverages) — Registrar cobertura de paciente y dependientes
+40. [GET /patient-coverages/me](#40-get-patient-coverages-me) — Mi cobertura
+41. [GET /practitioner-settlement-batches](#41-get-practitioner-settlement-batches) — Listar los lotes de liquidación del alcance del actor
+42. [POST /practitioner-settlement-batches](#42-post-practitioner-settlement-batches) — Generar (o repetir) el lote de liquidación del período
+43. [GET /practitioner-settlement-batches/{id}](#43-get-practitioner-settlement-batches-id) — Consultar un lote de liquidación
+44. [GET /practitioners/{profileId}/insurance-networks](#44-get-practitioners-profileid-insurance-networks) — Aseguradoras con las que trabaja el profesional
+45. [POST /prior-authorization-requests](#45-post-prior-authorization-requests) — Solicitar autorización previa con items
+46. [GET /prior-authorization-requests/{id}](#46-get-prior-authorization-requests-id) — Detalle de una solicitud de aprobación (aseguradora)
+47. [POST /prior-authorization-requests/{id}/determinations](#47-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+48. [GET /prior-authorization-requests/inbox](#48-get-prior-authorization-requests-inbox) — Bandeja de solicitudes de aprobación (aseguradora)
+49. [POST /provider-networks](#49-post-provider-networks) — Alta de red de prestadores (soporte)
+50. [POST /provider-networks/{id}/memberships](#50-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+51. [GET /public/portability/verify/{manifestHash}](#51-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
+52. [POST /reconciliation-batches](#52-post-reconciliation-batches) — Abrir lote de conciliación
+53. [POST /reconciliation-batches/{id}/items](#53-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -73,7 +74,7 @@ Referencia exhaustiva de 52 operación(es) del módulo `insurance`, derivada del
 - **Nombre:** Generar liquidación de comisión de broker
 - **Operation ID:** `BrokerCommissionController_generate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [BrokerCommissionController.generate](../../src/modules/insurance/controllers/broker-commission.controller.ts)
+- **Implementación:** [BrokerCommissionController.generate](../../src/modules/insurance/presentation/controllers/broker-commission.controller.ts)
 
 ### Descripción de negocio
 
@@ -180,11 +181,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/services/broker-commission.service.ts |
-| 404 | `NOT_FOUND` | Acuerdo broker–aseguradora no encontrado | Excepción explícita en src/modules/insurance/services/broker-commission.service.ts |
-| 409 | `CONFLICT` | Ya existe liquidación para el periodo | Excepción explícita en src/modules/insurance/services/broker-commission.service.ts |
+| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/application/services/broker-commission.service.ts |
+| 404 | `NOT_FOUND` | Acuerdo broker–aseguradora no encontrado | Excepción explícita en src/modules/insurance/application/services/broker-commission.service.ts |
+| 409 | `CONFLICT` | Ya existe liquidación para el periodo | Excepción explícita en src/modules/insurance/application/services/broker-commission.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El acuerdo no está activo | Excepción explícita en src/modules/insurance/services/broker-commission.service.ts |
+| 422 | `PRECONDITION_FAILED` | El acuerdo no está activo | Excepción explícita en src/modules/insurance/application/services/broker-commission.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -209,7 +210,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Emitir decisión de apelación (inmutable)
 - **Operation ID:** `AppealsController_decide`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [AppealsController.decide](../../src/modules/insurance/controllers/appeals.controller.ts)
+- **Implementación:** [AppealsController.decide](../../src/modules/insurance/presentation/controllers/appeals.controller.ts)
 
 ### Descripción de negocio
 
@@ -311,9 +312,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Disputa no encontrada | Excepción explícita en src/modules/insurance/services/appeals.service.ts |
+| 404 | `NOT_FOUND` | Disputa no encontrada | Excepción explícita en src/modules/insurance/application/services/appeals.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La disputa no admite decisión en su estado actual | Excepción explícita en src/modules/insurance/services/appeals.service.ts |
+| 422 | `PRECONDITION_FAILED` | La disputa no admite decisión en su estado actual | Excepción explícita en src/modules/insurance/application/services/appeals.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -338,7 +339,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Determinar coordinación de beneficios (COB)
 - **Operation ID:** `CoverageController_determineCob`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [CoverageController.determineCob](../../src/modules/insurance/controllers/coverage.controller.ts)
+- **Implementación:** [CoverageController.determineCob](../../src/modules/insurance/presentation/controllers/coverage.controller.ts)
 
 ### Descripción de negocio
 
@@ -441,9 +442,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cobertura primaria no encontrada | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
+| 404 | `NOT_FOUND` | Cobertura primaria no encontrada | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | COB requiere al menos una cobertura secundaria | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
+| 422 | `PRECONDITION_FAILED` | COB requiere al menos una cobertura secundaria | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -468,7 +469,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Solicitar y resolver elegibilidad (270/271)
 - **Operation ID:** `CoverageController_requestEligibility`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [CoverageController.requestEligibility](../../src/modules/insurance/controllers/coverage.controller.ts)
+- **Implementación:** [CoverageController.requestEligibility](../../src/modules/insurance/presentation/controllers/coverage.controller.ts)
 
 ### Descripción de negocio
 
@@ -568,8 +569,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
-| 409 | `CONFLICT` | Solicitud de elegibilidad duplicada | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
+| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
+| 409 | `CONFLICT` | Solicitud de elegibilidad duplicada | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -595,7 +596,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Alta de grupo empleador (soporte)
 - **Operation ID:** `InsuranceBackboneController_createEmployerGroup`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createEmployerGroup](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createEmployerGroup](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -721,7 +722,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar los brokers del tenant activo
 - **Operation ID:** `InsuranceReadController_listBrokers`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceReadController.listBrokers](../../src/modules/insurance/controllers/insurance-read.controller.ts)
+- **Implementación:** [InsuranceReadController.listBrokers](../../src/modules/insurance/presentation/controllers/insurance-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -862,7 +863,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Alta de broker (soporte)
 - **Operation ID:** `InsuranceBackboneController_createBroker`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createBroker](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createBroker](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -990,7 +991,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar el perfil y las vinculaciones de un broker
 - **Operation ID:** `InsuranceReadController_getBroker`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceReadController.getBroker](../../src/modules/insurance/controllers/insurance-read.controller.ts)
+- **Implementación:** [InsuranceReadController.getBroker](../../src/modules/insurance/presentation/controllers/insurance-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -1142,7 +1143,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/services/insurance-read.service.ts |
+| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1167,7 +1168,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Alta de acuerdo broker–aseguradora (soporte)
 - **Operation ID:** `InsuranceBackboneController_createAgreement`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createAgreement](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createAgreement](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -1273,8 +1274,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1300,7 +1301,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar la cartera comercial de un broker (sin datos clínicos)
 - **Operation ID:** `InsuranceReadController_listBrokerClients`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceReadController.listBrokerClients](../../src/modules/insurance/controllers/insurance-read.controller.ts)
+- **Implementación:** [InsuranceReadController.listBrokerClients](../../src/modules/insurance/presentation/controllers/insurance-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -1413,7 +1414,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/services/insurance-read.service.ts |
+| 404 | `NOT_FOUND` | Broker no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1438,7 +1439,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Catálogo público de aseguradoras y sus planes de salud
 - **Operation ID:** `InsuranceCatalogController_listCatalog`
 - **Autenticación:** Pública
-- **Implementación:** [InsuranceCatalogController.listCatalog](../../src/modules/insurance/controllers/insurance-catalog.controller.ts)
+- **Implementación:** [InsuranceCatalogController.listCatalog](../../src/modules/insurance/presentation/controllers/insurance-catalog.controller.ts)
 
 ### Descripción de negocio
 
@@ -1557,7 +1558,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las aseguradoras del tenant activo
 - **Operation ID:** `InsuranceReadController_listCarriers`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceReadController.listCarriers](../../src/modules/insurance/controllers/insurance-read.controller.ts)
+- **Implementación:** [InsuranceReadController.listCarriers](../../src/modules/insurance/presentation/controllers/insurance-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -1708,7 +1709,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Alta de aseguradora (soporte)
 - **Operation ID:** `InsuranceBackboneController_createCarrier`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createCarrier](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createCarrier](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -1840,7 +1841,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar el catálogo y la red de una aseguradora
 - **Operation ID:** `InsuranceReadController_getCarrier`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceReadController.getCarrier](../../src/modules/insurance/controllers/insurance-read.controller.ts)
+- **Implementación:** [InsuranceReadController.getCarrier](../../src/modules/insurance/presentation/controllers/insurance-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -2112,7 +2113,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-read.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2137,7 +2138,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Configurar los canales de contacto de la aseguradora del tenant activo
 - **Operation ID:** `InsuranceBackboneController_updateContactChannels`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.updateContactChannels](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.updateContactChannels](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -2247,8 +2248,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2274,7 +2274,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Alta de producto de aseguradora (soporte)
 - **Operation ID:** `InsuranceBackboneController_createProduct`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createProduct](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createProduct](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -2376,7 +2376,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2402,7 +2402,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Listar las solicitudes de seguro presentadas (cursor)
 - **Operation ID:** `ClaimsReadController_listClaims`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsReadController.listClaims](../../src/modules/insurance/controllers/claims-read.controller.ts)
+- **Implementación:** [ClaimsReadController.listClaims](../../src/modules/insurance/presentation/controllers/claims-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -2438,7 +2438,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `BILLING_OPERATOR`, `SECURITY_ADMIN`, `BILLING`, `FINANCE`, `INSURANCE_OPERATOR`, `USER`.
+- Roles admitidos por `@Roles`: `BILLING_OPERATOR`, `SECURITY_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2556,7 +2556,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING_OPERATOR, SECURITY_ADMIN, BILLING, FINANCE, INSURANCE_OPERATOR, USER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING_OPERATOR, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2581,7 +2581,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Enviar reclamo con líneas (837)
 - **Operation ID:** `ClaimsController_submit`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsController.submit](../../src/modules/insurance/controllers/claims.controller.ts)
+- **Implementación:** [ClaimsController.submit](../../src/modules/insurance/presentation/controllers/claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -2730,24 +2730,23 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 409 | `CONFLICT` | El pedido ya tiene un reclamo activo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 409 | `CONFLICT` | Reclamo duplicado | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 409 | `CONFLICT` | La clave de idempotencia corresponde a otro reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 409 | `CONFLICT` | La clave de idempotencia requiere las mismas líneas | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 409 | `CONFLICT` | El pedido ya tiene un reclamo activo | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 409 | `CONFLICT` | Reclamo duplicado | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia corresponde a otro reclamo | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia requiere las mismas líneas | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
-| 422 | `PRECONDITION_FAILED` | Las secuencias de líneas deben ser únicas | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Los ítems vinculados requieren el pedido completo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La moneda del importe diagnóstico debe declararse | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido debe estar confirmado y sin sustituciones pendientes antes del retiro | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | El reclamo debe representar exactamente el pedido y su prestador | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Las líneas deben coincidir con las cantidades e importes del pedido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La autorización previa debe pertenecer a la misma cobertura y pedido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las secuencias de líneas deben ser únicas | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los ítems vinculados requieren el pedido completo | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda del importe diagnóstico debe declararse | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido debe estar confirmado y sin sustituciones pendientes antes del retiro | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reclamo debe representar exactamente el pedido y su prestador | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las líneas deben coincidir con las cantidades e importes del pedido | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización previa debe pertenecer a la misma cobertura y pedido | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2772,7 +2771,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar una solicitud de seguro con sus ítems y su dictamen
 - **Operation ID:** `ClaimsReadController_getClaim`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsReadController.getClaim](../../src/modules/insurance/controllers/claims-read.controller.ts)
+- **Implementación:** [ClaimsReadController.getClaim](../../src/modules/insurance/presentation/controllers/claims-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -2803,7 +2802,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `BILLING_OPERATOR`, `SECURITY_ADMIN`, `BILLING`, `FINANCE`, `INSURANCE_OPERATOR`, `USER`.
+- Roles admitidos por `@Roles`: `BILLING_OPERATOR`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `id`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3225,7 +3224,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING_OPERATOR, SECURITY_ADMIN, BILLING, FINANCE, INSURANCE_OPERATOR, USER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING_OPERATOR, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3250,7 +3249,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Adjudicar reclamo por línea (835)
 - **Operation ID:** `ClaimsController_adjudicate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsController.adjudicate](../../src/modules/insurance/controllers/claims.controller.ts)
+- **Implementación:** [ClaimsController.adjudicate](../../src/modules/insurance/presentation/controllers/claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -3383,15 +3382,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Línea de reclamo no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 404 | `NOT_FOUND` | Línea de reclamo no encontrada | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El reclamo no está en estado adjudicable | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reclamo no está en estado adjudicable | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3416,7 +3414,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Abrir disputa sobre adjudicación
 - **Operation ID:** `ClaimsController_openDispute`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsController.openDispute](../../src/modules/insurance/controllers/claims.controller.ts)
+- **Implementación:** [ClaimsController.openDispute](../../src/modules/insurance/presentation/controllers/claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -3550,7 +3548,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Publicar Explicación de Beneficios (EOB)
 - **Operation ID:** `ClaimsController_publishEob`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsController.publishEob](../../src/modules/insurance/controllers/claims.controller.ts)
+- **Implementación:** [ClaimsController.publishEob](../../src/modules/insurance/presentation/controllers/claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -3646,17 +3644,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 409 | `CONFLICT` | La EOB ya fue publicada para esta versión | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 409 | `CONFLICT` | La EOB ya fue publicada para esta versión | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No existe adjudicación in_force para publicar EOB | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | El reclamo está revertido | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no existe | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | No existe adjudicación vigente para publicar | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reclamo está revertido | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no existe | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3681,7 +3678,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar reversión de reclamo
 - **Operation ID:** `ClaimsController_reverse`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ClaimsController.reverse](../../src/modules/insurance/controllers/claims.controller.ts)
+- **Implementación:** [ClaimsController.reverse](../../src/modules/insurance/presentation/controllers/claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -3783,12 +3780,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Versión de adjudicación no encontrada | Excepción explícita en src/modules/insurance/services/claims.service.ts |
+| 404 | `NOT_FOUND` | Versión de adjudicación no encontrada | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El reclamo no está en estado reversible | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Sólo puede revertirse la versión vigente | Excepción explícita en src/modules/insurance/services/claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reclamo no está en estado reversible | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo puede revertirse la versión vigente | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3813,7 +3809,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crear una cobertura de un plan administrable
 - **Operation ID:** `InsuranceBackboneController_createBenefit`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createBenefit](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createBenefit](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -3927,9 +3923,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3955,7 +3950,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Editar importes de una cobertura
 - **Operation ID:** `InsuranceBackboneController_updateBenefit`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.updateBenefit](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.updateBenefit](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -4063,9 +4058,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Beneficio no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Beneficio no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4091,7 +4085,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Editar reglas de aprobación de una cobertura
 - **Operation ID:** `InsuranceBackboneController_updateBenefitRules`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.updateBenefitRules](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.updateBenefitRules](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -4200,9 +4194,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Beneficio no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Beneficio no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4228,7 +4221,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Declarar la prima de lista mensual de un plan administrable
 - **Operation ID:** `InsuranceBackboneController_updatePlanPremium`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.updatePlanPremium](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.updatePlanPremium](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -4328,9 +4321,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4356,7 +4348,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crear un plan del carrier del tenant activo
 - **Operation ID:** `InsuranceBackboneController_createPlan`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createPlan](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createPlan](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -4465,9 +4457,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -4493,7 +4484,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo
 - **Operation ID:** `InsuranceAnalyticsController_getLossRatioAnalytics`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceAnalyticsController.getLossRatioAnalytics](../../src/modules/insurance/controllers/insurance-analytics.controller.ts)
+- **Implementación:** [InsuranceAnalyticsController.getLossRatioAnalytics](../../src/modules/insurance/presentation/controllers/insurance-analytics.controller.ts)
 
 ### Descripción de negocio
 
@@ -4687,10 +4678,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Rol insuficiente para ver la analítica de la aseguradora | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
-| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
-| 422 | `PRECONDITION_FAILED` | startDate debe ser anterior o igual a endDate | Excepción explícita en src/modules/insurance/services/insurance-analytics.service.ts |
+| 403 | `FORBIDDEN` | Rol insuficiente para ver la analítica de la aseguradora | Excepción explícita en src/modules/insurance/application/services/insurance-analytics.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-analytics.service.ts |
+| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-analytics.service.ts |
+| 422 | `PRECONDITION_FAILED` | startDate debe ser anterior o igual a endDate | Excepción explícita en src/modules/insurance/application/services/insurance-analytics.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4708,14 +4699,200 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /insurance/patients/conversation
+## 30. GET /insurance/my-claims
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `my-insurance-claims`
+- **Nombre:** Solicitudes de seguro propias, con su dictamen vigente
+- **Operation ID:** `MyClaimsController_listMyClaims`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MyClaimsController.listMyClaims](../../src/modules/insurance/presentation/controllers/my-claims.controller.ts)
+
+### Descripción de negocio
+
+Solicitudes de seguro propias, con su dictamen vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /insurance/my-claims` en `MyClaimsController_listMyClaims`. El controlador delega en `MyClaimsService.list`. No recibe body. El tipo de retorno estático es `Promise<MyClaimListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `x-tenant-id` | header | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /insurance/my-claims HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+x-tenant-id: 00000000-0000-4000-8000-000000000001
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /insurance/my-claims HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+x-tenant-id: 00000000-0000-4000-8000-000000000001
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyClaimListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MyClaimListDto>` | No |
+| 401 | Sin sesión válida. | `Promise<MyClaimListDto>` | No |
+| 403 | El tenant seleccionado no es una membresía de la sesión. | `Promise<MyClaimListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyClaimListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyClaimListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyClaimListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "view": "PATIENT",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "claimIdentifier": "valor-ejemplo",
+      "patientName": "Nombre de ejemplo",
+      "practitioner": {
+        "displayName": "Nombre de ejemplo",
+        "specialty": "valor-ejemplo"
+      },
+      "providerName": "Nombre de ejemplo",
+      "service": {
+        "code": "CARRIER_ACTIVE",
+        "display": "Aseguradora activa"
+      },
+      "additionalServiceCount": 1,
+      "billedTotal": {
+        "amount": "1250.00",
+        "currency": {
+          "code": "CARRIER_ACTIVE",
+          "display": "Aseguradora activa"
+        }
+      },
+      "approvedTotal": {
+        "amount": "1250.00",
+        "currency": {
+          "code": "CARRIER_ACTIVE",
+          "display": "Aseguradora activa"
+        }
+      },
+      "submittedAt": "2026-07-31T12:00:00.000Z",
+      "serviceDate": "2026-07-31",
+      "insurerName": "Nombre de ejemplo",
+      "planName": "Nombre de ejemplo",
+      "status": {
+        "code": "CARRIER_ACTIVE",
+        "display": "Aseguradora activa"
+      },
+      "decision": {
+        "outcome": "APPROVED",
+        "decidedAt": "2026-07-31T12:00:00.000Z",
+        "reason": "Texto descriptivo de ejemplo"
+      }
+    }
+  ],
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `view` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `LABORATORY`, `IMAGING`, `NONE` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `items` | Sí | `array<MyClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","patientName":"Nombre de ejemplo","practitioner":{"displayName":"Nombre de ejemplo","specialty":"valor-ejemplo"},"providerName":"Nombre de ejemplo","service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"additionalServiceCount":1,"billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","serviceDate":"2026-07-31","insurerName":"Nombre de ejemplo","planName":"Nombre de ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"decision":{"outcome":"APPROVED","decidedAt":"2026-07-31T12:00:00.000Z","reason":"Texto descriptivo de ejemplo"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].practitioner` | Sí | `MyClaimPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"displayName":"Nombre de ejemplo","specialty":"valor-ejemplo"}` |
+| `items[].practitioner.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].practitioner.specialty` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].providerName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].service` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `items[].service.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `items[].service.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `items[].additionalServiceCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].billedTotal` | Sí | `MoneyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}}` |
+| `items[].billedTotal.amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1250.00` |
+| `items[].billedTotal.currency` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `items[].billedTotal.currency.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `items[].billedTotal.currency.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `items[].approvedTotal` | Sí | `MoneyDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}}` |
+| `items[].approvedTotal.amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1250.00` |
+| `items[].approvedTotal.currency` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `items[].approvedTotal.currency.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `items[].approvedTotal.currency.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `items[].submittedAt` | Sí | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].serviceDate` | Sí | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `items[].insurerName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].planName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].status` | Sí | `InsuranceConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}` |
+| `items[].status.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CARRIER_ACTIVE` |
+| `items[].status.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Aseguradora activa` |
+| `items[].decision` | Sí | `MyClaimDecisionDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"outcome":"APPROVED","decidedAt":"2026-07-31T12:00:00.000Z","reason":"Texto descriptivo de ejemplo"}` |
+| `items[].decision.outcome` | Sí | `string` | valores: `APPROVED`, `PARTIAL`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].decision.decidedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].decision.reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | X-Tenant-Id debe ser un UUID | Excepción explícita en src/modules/insurance/application/services/my-claims.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No hay acceso a las solicitudes del tenant indicado | Excepción explícita en src/modules/insurance/application/services/my-claims.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/insurance/my-claims"
+}
+```
+
+---
+
+## 31. POST /insurance/patients/conversation
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurer-patients`
 - **Nombre:** Abrir o reutilizar la conversación interna con un paciente autorizado
 - **Operation ID:** `InsurerPatientsController_openConversation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurerPatientsController.openConversation](../../src/modules/insurance/controllers/insurer-patients.controller.ts)
+- **Implementación:** [InsurerPatientsController.openConversation](../../src/modules/insurance/presentation/controllers/insurer-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -4812,17 +4989,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | ACCESS_DENIED | Excepción explícita en src/modules/insurance/services/insurer-patients.service.ts |
-| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/services/insurer-context.service.ts |
-| 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
-| 404 | `NOT_FOUND` | Paciente no disponible | Excepción explícita en src/modules/insurance/services/insurer-patients.service.ts |
+| 403 | `FORBIDDEN` | ACCESS_DENIED | Excepción explícita en src/modules/insurance/application/services/insurer-patients.service.ts |
+| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/application/services/insurer-context.service.ts |
+| 404 | `NOT_FOUND` | Paciente no disponible | Excepción explícita en src/modules/insurance/application/services/insurer-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La mensajería no está disponible para estos perfiles | Excepción explícita en src/modules/insurance/services/insurer-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | Las conversaciones grupales se crean desde el flujo de grupos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
-| 422 | `PRECONDITION_FAILED` | Los participantes de una conversación deben ser distintos | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
-| 422 | `PRECONDITION_FAILED` | Una conversación directa requiere exactamente dos participantes | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
-| 422 | `PRECONDITION_FAILED` | La persona no está disponible para iniciar una conversación | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
-| 422 | `PRECONDITION_FAILED` | No se puede iniciar una conversación entre perfiles bloqueados | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | La mensajería no está disponible para estos perfiles | Excepción explícita en src/modules/insurance/application/services/insurer-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4840,14 +5011,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /insurance/patients/options
+## 32. GET /insurance/patients/options
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurer-patients`
 - **Nombre:** Aseguradoras disponibles en el alcance autorizado
 - **Operation ID:** `InsurerPatientsController_options`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurerPatientsController.options](../../src/modules/insurance/controllers/insurer-patients.controller.ts)
+- **Implementación:** [InsurerPatientsController.options](../../src/modules/insurance/presentation/controllers/insurer-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -4930,8 +5101,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | ACCESS_DENIED | Excepción explícita en src/modules/insurance/services/insurer-patients.service.ts |
-| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/services/insurer-context.service.ts |
+| 403 | `FORBIDDEN` | ACCESS_DENIED | Excepción explícita en src/modules/insurance/application/services/insurer-patients.service.ts |
+| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/application/services/insurer-context.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4949,14 +5120,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /insurance/patients/search
+## 33. POST /insurance/patients/search
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurer-patients`
 - **Nombre:** Consultar directorio de pacientes autorizado
 - **Operation ID:** `InsurerPatientsController_listPatients`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurerPatientsController.listPatients](../../src/modules/insurance/controllers/insurer-patients.controller.ts)
+- **Implementación:** [InsurerPatientsController.listPatients](../../src/modules/insurance/presentation/controllers/insurer-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -5108,8 +5279,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | ACCESS_DENIED | Excepción explícita en src/modules/insurance/services/insurer-patients.service.ts |
-| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/services/insurer-context.service.ts |
+| 403 | `FORBIDDEN` | ACCESS_DENIED | Excepción explícita en src/modules/insurance/application/services/insurer-patients.service.ts |
+| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/application/services/insurer-context.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -5128,14 +5299,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /insurance/portability/certificates/{certificateId}/json
+## 34. GET /insurance/portability/certificates/{certificateId}/json
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability`
 - **Nombre:** Descargar el certificado de portabilidad en JSON interoperable
 - **Operation ID:** `InsurancePortabilityController_downloadJson`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurancePortabilityController.downloadJson](../../src/modules/insurance/controllers/insurance-portability.controller.ts)
+- **Implementación:** [InsurancePortabilityController.downloadJson](../../src/modules/insurance/presentation/controllers/insurance-portability.controller.ts)
 
 ### Descripción de negocio
 
@@ -5205,14 +5376,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
-| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-portability.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5230,14 +5394,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /insurance/portability/certificates/{certificateId}/pdf
+## 35. GET /insurance/portability/certificates/{certificateId}/pdf
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability`
 - **Nombre:** Descargar el certificado de portabilidad en PDF
 - **Operation ID:** `InsurancePortabilityController_downloadPdf`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurancePortabilityController.downloadPdf](../../src/modules/insurance/controllers/insurance-portability.controller.ts)
+- **Implementación:** [InsurancePortabilityController.downloadPdf](../../src/modules/insurance/presentation/controllers/insurance-portability.controller.ts)
 
 ### Descripción de negocio
 
@@ -5307,14 +5471,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
-| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-portability.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5332,14 +5489,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /insurance/portability/export
+## 36. POST /insurance/portability/export
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability`
 - **Nombre:** Exportar el historial de póliza y siniestralidad del titular a 1 clic
 - **Operation ID:** `InsurancePortabilityController_export`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurancePortabilityController.export](../../src/modules/insurance/controllers/insurance-portability.controller.ts)
+- **Implementación:** [InsurancePortabilityController.export](../../src/modules/insurance/presentation/controllers/insurance-portability.controller.ts)
 
 ### Descripción de negocio
 
@@ -5526,12 +5683,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | La aseguradora declarada no existe | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 404 | `NOT_FOUND` | La aseguradora declarada no existe | Excepción explícita en src/modules/insurance/application/services/insurance-portability.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El artefacto generado no tiene contenido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El artefacto generado excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(EXPORT_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5549,14 +5702,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /insurance/received-claims
+## 37. GET /insurance/received-claims
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurer-received-claims`
 - **Nombre:** Solicitudes de seguro recibidas por la aseguradora activa
 - **Operation ID:** `InsurerReceivedClaimsController_listReceivedClaims`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurerReceivedClaimsController.listReceivedClaims](../../src/modules/insurance/controllers/insurer-received-claims.controller.ts)
+- **Implementación:** [InsurerReceivedClaimsController.listReceivedClaims](../../src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -5764,7 +5917,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/services/insurer-context.service.ts |
+| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/application/services/insurer-context.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5782,14 +5935,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /insurance/received-claims/{id}/decision
+## 38. POST /insurance/received-claims/{id}/decision
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurer-received-claims`
 - **Nombre:** Dictaminar una solicitud recibida (definitivo)
 - **Operation ID:** `InsurerReceivedClaimsController_decideReceivedClaim`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsurerReceivedClaimsController.decideReceivedClaim](../../src/modules/insurance/controllers/insurer-received-claims.controller.ts)
+- **Implementación:** [InsurerReceivedClaimsController.decideReceivedClaim](../../src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts)
 
 ### Descripción de negocio
 
@@ -6017,12 +6170,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/services/insurer-context.service.ts |
-| 409 | `CONFLICT` | La solicitud ya tiene dictamen y no se puede cambiar | Excepción explícita en src/modules/insurance/services/insurer-received-claims.service.ts |
+| 403 | `FORBIDDEN` | accessDenied | Excepción explícita en src/modules/insurance/application/services/insurer-context.service.ts |
+| 409 | `CONFLICT` | La solicitud ya tiene dictamen y no se puede cambiar | Excepción explícita en src/modules/insurance/application/services/insurer-received-claims.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/services/insurer-received-claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/insurance/services/insurer-received-claims.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido cambió; se requiere revisar el reclamo | Excepción explícita en src/modules/insurance/application/services/insurer-received-claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | message | Excepción explícita en src/modules/insurance/application/services/insurer-received-claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6040,14 +6193,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /patient-coverages
+## 39. POST /patient-coverages
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-coverage`
 - **Nombre:** Registrar cobertura de paciente y dependientes
 - **Operation ID:** `CoverageController_enroll`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [CoverageController.enroll](../../src/modules/insurance/controllers/coverage.controller.ts)
+- **Implementación:** [CoverageController.enroll](../../src/modules/insurance/presentation/controllers/coverage.controller.ts)
 
 ### Descripción de negocio
 
@@ -6166,10 +6319,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
-| 409 | `CONFLICT` | El afiliado ya tiene cobertura en ese plan | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
+| 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
+| 409 | `CONFLICT` | El afiliado ya tiene cobertura en ese plan | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El plan no está activo | Excepción explícita en src/modules/insurance/services/coverage.service.ts |
+| 422 | `PRECONDITION_FAILED` | El plan no está activo | Excepción explícita en src/modules/insurance/application/services/coverage.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6187,14 +6340,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /patient-coverages/me
+## 40. GET /patient-coverages/me
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-coverage`
 - **Nombre:** Mi cobertura
 - **Operation ID:** `CoverageController_listMine`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [CoverageController.listMine](../../src/modules/insurance/controllers/coverage.controller.ts)
+- **Implementación:** [CoverageController.listMine](../../src/modules/insurance/presentation/controllers/coverage.controller.ts)
 
 ### Descripción de negocio
 
@@ -6300,14 +6453,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /practitioner-settlement-batches
+## 41. GET /practitioner-settlement-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
 - **Nombre:** Listar los lotes de liquidación del alcance del actor
 - **Operation ID:** `PractitionerSettlementBatchesController_list`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PractitionerSettlementBatchesController.list](../../src/modules/insurance/controllers/practitioner-settlement-batches.controller.ts)
+- **Implementación:** [PractitionerSettlementBatchesController.list](../../src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts)
 
 ### Descripción de negocio
 
@@ -6475,7 +6628,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | La organización activa no administra una aseguradora ni tiene prácticas, unidades diagnósticas o farmacias activas | Excepción explícita en src/modules/insurance/services/practitioner-settlement-batches.service.ts |
+| 403 | `FORBIDDEN` | La organización activa no administra una aseguradora ni tiene prácticas, unidades diagnósticas o farmacias activas | Excepción explícita en src/modules/insurance/application/services/practitioner-settlement-batches.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6493,14 +6646,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /practitioner-settlement-batches
+## 42. POST /practitioner-settlement-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
 - **Nombre:** Generar (o repetir) el lote de liquidación del período
 - **Operation ID:** `PractitionerSettlementBatchesController_generate`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PractitionerSettlementBatchesController.generate](../../src/modules/insurance/controllers/practitioner-settlement-batches.controller.ts)
+- **Implementación:** [PractitionerSettlementBatchesController.generate](../../src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts)
 
 ### Descripción de negocio
 
@@ -6685,7 +6838,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6704,14 +6856,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /practitioner-settlement-batches/{id}
+## 43. GET /practitioner-settlement-batches/{id}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
 - **Nombre:** Consultar un lote de liquidación
 - **Operation ID:** `PractitionerSettlementBatchesController_getById`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PractitionerSettlementBatchesController.getById](../../src/modules/insurance/controllers/practitioner-settlement-batches.controller.ts)
+- **Implementación:** [PractitionerSettlementBatchesController.getById](../../src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts)
 
 ### Descripción de negocio
 
@@ -6874,7 +7026,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6892,14 +7043,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /practitioners/{profileId}/insurance-networks
+## 44. GET /practitioners/{profileId}/insurance-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance`
 - **Nombre:** Aseguradoras con las que trabaja el profesional
 - **Operation ID:** `PractitionerInsuranceNetworksController_list`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PractitionerInsuranceNetworksController.list](../../src/modules/insurance/controllers/practitioner-insurance-networks.controller.ts)
+- **Implementación:** [PractitionerInsuranceNetworksController.list](../../src/modules/insurance/presentation/controllers/practitioner-insurance-networks.controller.ts)
 
 ### Descripción de negocio
 
@@ -7015,14 +7166,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /prior-authorization-requests
+## 45. POST /prior-authorization-requests
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
 - **Nombre:** Solicitar autorización previa con items
 - **Operation ID:** `PriorAuthController_submit`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PriorAuthController.submit](../../src/modules/insurance/controllers/prior-auth.controller.ts)
+- **Implementación:** [PriorAuthController.submit](../../src/modules/insurance/presentation/controllers/prior-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -7152,20 +7303,19 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
+| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La receta requiere su pedido de farmacia vinculado | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | La autorización debe representar un pedido confirmado del prestador | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | La receta debe pertenecer al mismo pedido | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | La moneda no coincide con la cobertura | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | La autorización debe incluir todos los productos del pedido | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | Los productos e importes deben coincidir con el pedido | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | La autorización diagnóstica requiere una oferta, cantidad uno y moneda | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La receta requiere su pedido de farmacia vinculado | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización debe representar un pedido confirmado del prestador | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La receta debe pertenecer al mismo pedido | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda no coincide con la cobertura | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización debe incluir todos los productos del pedido | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los productos e importes deben coincidir con el pedido | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La autorización diagnóstica requiere una oferta, cantidad uno y moneda | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7183,14 +7333,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /prior-authorization-requests/{id}
+## 46. GET /prior-authorization-requests/{id}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
 - **Nombre:** Detalle de una solicitud de aprobación (aseguradora)
 - **Operation ID:** `PriorAuthController_getById`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PriorAuthController.getById](../../src/modules/insurance/controllers/prior-auth.controller.ts)
+- **Implementación:** [PriorAuthController.getById](../../src/modules/insurance/presentation/controllers/prior-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -7332,7 +7482,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7350,14 +7499,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. POST /prior-authorization-requests/{id}/determinations
+## 47. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
 - **Nombre:** Emitir determinación de autorización previa
 - **Operation ID:** `PriorAuthController_determine`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PriorAuthController.determine](../../src/modules/insurance/controllers/prior-auth.controller.ts)
+- **Implementación:** [PriorAuthController.determine](../../src/modules/insurance/presentation/controllers/prior-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -7481,15 +7630,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La solicitud no admite determinación en su estado actual | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | El ítem decidido no pertenece a la solicitud | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | Cada ítem se decide una sola vez | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | La determinación debe decidir todos los ítems de la solicitud | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un ítem no aprobado no lleva cantidad ni monto aprobado | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | El monto aprobado no puede superar el solicitado | Excepción explícita en src/modules/insurance/services/prior-auth.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/services/linked-claim-order.service.ts |
+| 422 | `PRECONDITION_FAILED` | La solicitud no admite determinación en su estado actual | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | El ítem decidido no pertenece a la solicitud | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Cada ítem se decide una sola vez | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | La determinación debe decidir todos los ítems de la solicitud | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un ítem no aprobado no lleva cantidad ni monto aprobado | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | El monto aprobado no puede superar el solicitado | Excepción explícita en src/modules/insurance/application/services/prior-auth.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un reclamo sólo puede representar un pedido | Excepción explícita en src/modules/insurance/application/services/linked-claim-order.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7507,14 +7655,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /prior-authorization-requests/inbox
+## 48. GET /prior-authorization-requests/inbox
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
 - **Nombre:** Bandeja de solicitudes de aprobación (aseguradora)
 - **Operation ID:** `PriorAuthController_inbox`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PriorAuthController.inbox](../../src/modules/insurance/controllers/prior-auth.controller.ts)
+- **Implementación:** [PriorAuthController.inbox](../../src/modules/insurance/presentation/controllers/prior-auth.controller.ts)
 
 ### Descripción de negocio
 
@@ -7627,7 +7775,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7645,14 +7792,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. POST /provider-networks
+## 49. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
 - **Nombre:** Alta de red de prestadores (soporte)
 - **Operation ID:** `InsuranceBackboneController_createProviderNetwork`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.createProviderNetwork](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.createProviderNetwork](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -7757,7 +7904,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -7776,14 +7923,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /provider-networks/{id}/memberships
+## 50. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
 - **Nombre:** Alta de membresía de prestador en la red
 - **Operation ID:** `InsuranceBackboneController_addMembership`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [InsuranceBackboneController.addMembership](../../src/modules/insurance/controllers/insurance-backbone.controller.ts)
+- **Implementación:** [InsuranceBackboneController.addMembership](../../src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts)
 
 ### Descripción de negocio
 
@@ -7889,10 +8036,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Red de prestadores no encontrada | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 404 | `NOT_FOUND` | Red de prestadores no encontrada | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La red no está activa | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
-| 422 | `PRECONDITION_FAILED` | La red está fuera de vigencia | Excepción explícita en src/modules/insurance/services/insurance-backbone.service.ts |
+| 422 | `PRECONDITION_FAILED` | La red no está activa | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
+| 422 | `PRECONDITION_FAILED` | La red está fuera de vigencia | Excepción explícita en src/modules/insurance/application/services/insurance-backbone.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7910,14 +8057,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /public/portability/verify/{manifestHash}
+## 51. GET /public/portability/verify/{manifestHash}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability-public`
 - **Nombre:** Verificar la autenticidad de un certificado de portabilidad por su sello
 - **Operation ID:** `InsurancePortabilityPublicController_verify`
 - **Autenticación:** Pública
-- **Implementación:** [InsurancePortabilityPublicController.verify](../../src/modules/insurance/controllers/insurance-portability-public.controller.ts)
+- **Implementación:** [InsurancePortabilityPublicController.verify](../../src/modules/insurance/presentation/controllers/insurance-portability-public.controller.ts)
 
 ### Descripción de negocio
 
@@ -8003,7 +8150,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/services/insurance-portability.service.ts |
+| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/insurance/application/services/insurance-portability.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(PUBLIC_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8021,14 +8168,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /reconciliation-batches
+## 52. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
 - **Nombre:** Abrir lote de conciliación
 - **Operation ID:** `ReconciliationController_createBatch`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ReconciliationController.createBatch](../../src/modules/insurance/controllers/reconciliation.controller.ts)
+- **Implementación:** [ReconciliationController.createBatch](../../src/modules/insurance/presentation/controllers/reconciliation.controller.ts)
 
 ### Descripción de negocio
 
@@ -8135,7 +8282,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/services/reconciliation.service.ts |
+| 404 | `NOT_FOUND` | Aseguradora no encontrada | Excepción explícita en src/modules/insurance/application/services/reconciliation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -8154,14 +8301,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. POST /reconciliation-batches/{id}/items
+## 53. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
 - **Nombre:** Agregar ítem de conciliación al lote
 - **Operation ID:** `ReconciliationController_addItem`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ReconciliationController.addItem](../../src/modules/insurance/controllers/reconciliation.controller.ts)
+- **Implementación:** [ReconciliationController.addItem](../../src/modules/insurance/presentation/controllers/reconciliation.controller.ts)
 
 ### Descripción de negocio
 
@@ -8266,9 +8413,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lote de conciliación no encontrado | Excepción explícita en src/modules/insurance/services/reconciliation.service.ts |
-| 404 | `NOT_FOUND` | Reclamo no encontrado | Excepción explícita en src/modules/insurance/services/reconciliation.service.ts |
-| 404 | `NOT_FOUND` | Versión de adjudicación no encontrada | Excepción explícita en src/modules/insurance/services/reconciliation.service.ts |
+| 404 | `NOT_FOUND` | Lote de conciliación no encontrado | Excepción explícita en src/modules/insurance/application/services/reconciliation.service.ts |
+| 404 | `NOT_FOUND` | Reclamo no encontrado | Excepción explícita en src/modules/insurance/application/services/reconciliation.service.ts |
+| 404 | `NOT_FOUND` | Versión de adjudicación no encontrada | Excepción explícita en src/modules/insurance/application/services/reconciliation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

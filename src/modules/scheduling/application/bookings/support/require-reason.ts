@@ -1,5 +1,4 @@
 import { PreconditionFailedException } from '../../../../../common';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import {
   MIN_REASON_LENGTH,
   judgeReason,
@@ -25,13 +24,11 @@ export function requireReason(raw: string | undefined, action: string): string {
     throw new PreconditionFailedException(
       `Indique el motivo para ${action}: es obligatorio y debe explicar el cambio.`,
       { failureCode: 'REASON_REQUIRED', minLength: MIN_REASON_LENGTH },
-      SchedulingErrorReason.REASON_REQUIRED,
     );
   }
 
   throw new PreconditionFailedException(
     `El motivo para ${action} no puede ser un texto de relleno: escriba la razón real.`,
     { failureCode: 'REASON_PLACEHOLDER' },
-    SchedulingErrorReason.REASON_PLACEHOLDER,
   );
 }

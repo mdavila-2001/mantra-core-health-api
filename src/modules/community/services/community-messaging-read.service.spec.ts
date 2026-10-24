@@ -202,6 +202,19 @@ describe('CommunityMessagingReadService', () => {
       });
     });
 
+    it('rechaza un perfil ajeno antes de buscar contactos', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.searchContacts('p-ajeno', actor, 'Contacto', 10),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      expect(d.profilesRepo.searchChatContacts).not.toHaveBeenCalled();
+    });
+
     it('una consulta vacía no enumera perfiles', async () => {
       const d = build();
 

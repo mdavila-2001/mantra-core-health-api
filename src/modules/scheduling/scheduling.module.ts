@@ -8,6 +8,7 @@ import {
   SchedulingConfirmationController,
   SchedulingAgendaController,
   TenantAgendaController,
+  SchedulingServiceOfferingsController,
 } from './presentation/controllers';
 import {
   SchedulingCatalogService,
@@ -21,6 +22,9 @@ import {
   PractitionerAffiliationGateService,
   SchedulingProfessionalTimeService,
   SchedulingWalkInService,
+  SchedulingServiceOfferingsService,
+  SchedulingServiceAgendaService,
+  SchedulingServiceBookingService,
 } from './application';
 import {
   SchedulingCatalogRepository,
@@ -29,6 +33,7 @@ import {
   SchedulingAbsencesRepository,
   SchedulingAgendaRepository,
   SchedulingNoticeRepository,
+  SchedulingOfferingsRepository,
 } from './infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
@@ -74,6 +79,7 @@ import {
   BookingTransitionRecorder,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
+  ServiceSlotLifecycle,
   SlotPolicyResolver,
 } from './application/bookings/support';
 import { bookingUseCases } from './application/bookings/use-cases';
@@ -105,6 +111,8 @@ import { InsuranceReadAdapter } from './infrastructure/adapters/insurance-read.a
 import { ProfilesPatientRepresentationAdapter } from './infrastructure/adapters/profiles-patient-representation.adapter';
 import { schedulingPersistenceProviders } from './infrastructure/persistence/scheduling.persistence';
 import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
+import { BOOKING_CHAT_PORT } from './application/ports/booking-chat.port';
+import { CommunityBookingChatAdapter } from './infrastructure/adapters/community-booking-chat.adapter';
 import { MessagingAgendaNoticeAdapter } from './infrastructure/adapters/messaging-agenda-notice.adapter';
 import { SupportAdminNoticeAdapter } from './infrastructure/adapters/support-admin-notice.adapter';
 // P43 — la reconsulta puede declarar de qué formulario médico cerrado sale.
@@ -144,6 +152,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingConfirmationController,
     SchedulingAgendaController,
     TenantAgendaController,
+    SchedulingServiceOfferingsController,
   ],
   providers: [
     FormInstanceOriginValidator,
@@ -162,6 +171,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingAbsencesRepository,
     SchedulingAgendaRepository,
     SchedulingNoticeRepository,
+    SchedulingOfferingsRepository,
     AppointmentsRepository,
     // AC-3.3: mismo patrón que `AppointmentsRepository` — clase sin estado,
     // provista acá para no importar `ClinicalModule` entero sólo para abrir
@@ -174,6 +184,11 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingAgendaService,
     SchedulingTenantAgendaService,
     SchedulingWalkInService,
+    // v4.2.40 · servicios con duración dinámica: la oferta del profesional, el
+    // tiempo libre calculado y la retención del turno.
+    SchedulingServiceOfferingsService,
+    SchedulingServiceAgendaService,
+    SchedulingServiceBookingService,
     // P8 · avisos de agenda. El puerto se resuelve hoy con el adaptador de
     // mensajería; cuando P1 publique su servicio de emisión, se sustituye
     // **sólo** esta línea y ningún caso de uso cambia.
@@ -182,6 +197,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SupportAdminNoticeAdapter,
     MessagingAgendaNoticeAdapter,
     { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
+    CommunityBookingChatAdapter,
+    { provide: BOOKING_CHAT_PORT, useExisting: CommunityBookingChatAdapter },
     // Puertos hacia otros contextos (audit, profiles, clinical, insurance,
     // forms): los casos de uso dependen del token; el adaptador es el único que
     // conoce al otro módulo.
@@ -230,6 +247,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     BookingAccess,
     BookingTransitionRecorder,
     BookingChangeNotifier,
+    ServiceSlotLifecycle,
     ClinicalAppointmentSync,
     SlotPolicyResolver,
     BookingMaterializer,

@@ -255,6 +255,32 @@ export class BookingFollowUpOriginDto {
   formInstanceId?: string;
 }
 
+/** Lo que el paciente aceptó al reservar un servicio, congelado (v4.2.40). */
+export class BookingServiceDto {
+  @ApiProperty({ format: 'uuid' })
+  offeringId!: string;
+
+  @ApiProperty({ description: 'Nombre del servicio cuando se reservó' })
+  name!: string;
+
+  @ApiProperty({ description: 'Precio cuando se reservó, con dos decimales' })
+  price!: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  currencyConceptId?: string;
+
+  @ApiProperty({ description: 'Lo mínimo que podía tardar, en minutos' })
+  minDurationMinutes!: number;
+
+  @ApiProperty({ description: 'Lo que se reservó en la agenda, en minutos' })
+  maxDurationMinutes!: number;
+
+  @ApiProperty({
+    description: 'Si la reserva esperaba la aceptación del profesional',
+  })
+  requiresApproval!: boolean;
+}
+
 /** Una cita, tal como la devuelven el listado y el detalle (UC-41-15). */
 export class BookingItemDto {
   /**
@@ -477,6 +503,17 @@ export class BookingItemDto {
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   followUpBookingId?: string | null;
+
+  /**
+   * El servicio que se reservó, si la cita no es una consulta (v4.2.40).
+   *
+   * Sale de la copia congelada al reservar —nombre, precio y duración que el
+   * paciente aceptó—, no de la oferta de hoy. **Misma compuerta que `reasonText`**:
+   * el nombre de un servicio puede revelar un dato de salud. Ausente es «es una
+   * consulta» o «no te corresponde verlo».
+   */
+  @ApiPropertyOptional({ type: () => BookingServiceDto })
+  service?: BookingServiceDto;
 
   /**
    * De cuándo se movió, si la cita se reprogramó.

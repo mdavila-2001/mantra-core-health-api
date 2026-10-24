@@ -14,6 +14,7 @@ const STEPS = [
   'terminology',
   'dynamicEnums',
   'patientPortalProxy',
+  'telemetryUxHeatmap',
   'glossary',
   'boGeography',
   'legalEntityTypes',
@@ -37,6 +38,7 @@ const STEPS = [
   'people',
   'directoryNetworks',
   'practiceDefaultServices',
+  'qaFlows',
 ] as const;
 
 type Step = (typeof STEPS)[number];
@@ -77,6 +79,7 @@ function build(fail: Step[] = []) {
     double.terminology as never,
     double.dynamicEnums as never,
     double.patientPortalProxy as never,
+    double.telemetryUxHeatmap as never,
     double.glossary as never,
     double.boGeography as never,
     double.legalEntityTypes as never,
@@ -100,6 +103,7 @@ function build(fail: Step[] = []) {
     double.practiceDefaultServices as never,
     double.people as never,
     double.directoryNetworks as never,
+    double.qaFlows as never,
     logger as never,
   );
 
@@ -119,6 +123,7 @@ const CONTENT: readonly Step[] = [
   'people',
   'directoryNetworks',
   'practiceDefaultServices',
+  'qaFlows',
 ];
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */

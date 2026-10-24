@@ -5647,6 +5647,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -5785,7 +5786,7 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `isDuplicate` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `previousStudy` | Sí | `PreviousStudyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"reportId":"00000000-0000-4000-8000-000000000001","serviceRequestId":"00000000-0000-4000-8000-000000000001","studyName":"Hemograma completo","providerName":"Laboratorio Central AloVida","performedAt":"2026-07-31T12:00:00.000Z","daysAgo":1,"resultsAvailable":true,"conclusionText":"valor-ejemplo","reportDownloadUrl":"valor-ejemplo","sameOrganization":true}` |
-| `previousStudy.reportId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `previousStudy.reportId` | Sí | `string` | formato `uuid`; admite null | null cuando lo que consta es una orden activa que aún no tiene informe | `00000000-0000-4000-8000-000000000001` |
 | `previousStudy.serviceRequestId` | Sí | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `previousStudy.studyName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Hemograma completo` |
 | `previousStudy.providerName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Laboratorio Central AloVida` |

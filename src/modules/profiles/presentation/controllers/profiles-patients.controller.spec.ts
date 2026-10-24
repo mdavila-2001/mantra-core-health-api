@@ -39,12 +39,32 @@ function build() {
     getOwnDependents: mockFn(),
     registerOwnDependent: mockFn(),
     searchPatients: mockFn(),
+    getPatientById: mockFn(),
   };
-  const controller = new ProfilesPatientsController(patientsService as any);
-  return { controller, patientsService };
+  const clinicalPatientHistory = { assertCanReadHistory: mockFn() };
+  const controller = new ProfilesPatientsController(
+    patientsService as any,
+    clinicalPatientHistory as any,
+  );
+  return { controller, patientsService, clinicalPatientHistory };
 }
 
 describe('ProfilesPatientsController', () => {
+  it('delegates the clinical-history decision through its port', async () => {
+    const d = build();
+    const clinical = { id: 'med-1', roles: ['PRACTITIONER'] } as any;
+    d.patientsService.getPatientById.mockResolvedValue({ profileId: ID });
+
+    await expect(d.controller.getPatient(ID, clinical)).resolves.toEqual({
+      profileId: ID,
+    });
+
+    expect(d.clinicalPatientHistory.assertCanReadHistory).toHaveBeenCalledWith(
+      ID,
+      clinical,
+    );
+  });
+
   it('delegates registerPatient (UC-05-01)', async () => {
     const d = build();
     const dto = { patientCode: 'PC-1' };

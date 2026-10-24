@@ -45,7 +45,7 @@ function build() {
     issueRefreshToken: mockFn(() => ({ raw: 'new-refresh', hash: 'new-hash' })),
   };
   const usersRepo = { findById: mockFn() };
-  const credentialsRepo = { findActivePasswordBySubject: mockFn() };
+  const credentialsRepo = { findActivePasswordByLoginIdentifier: mockFn() };
   const sessionsRepo = {
     create: mockFn(),
     findById: mockFn(),
@@ -134,7 +134,7 @@ describe('IamAuthService', () => {
   describe('login (UC-01-04)', () => {
     it('issues tokens on valid credentials and records success', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -165,7 +165,7 @@ describe('IamAuthService', () => {
 
     it('repuebla el nombre y el tipo de cada tenant en el token (tenantNames/tenantTypes)', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -214,7 +214,7 @@ describe('IamAuthService', () => {
 
     it('un `tenant_type_concept_id` fuera del catálogo no entra en `tenantTypes`', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -260,7 +260,7 @@ describe('IamAuthService', () => {
 
     it('carries the business roles of `authz` in the token claim', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -295,7 +295,7 @@ describe('IamAuthService', () => {
     // vez de desaparecer en silencio.
     it('warns when a global role_concept_id is not declared in role-mapping.ts', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -334,7 +334,7 @@ describe('IamAuthService', () => {
     // ámbito, sin desdibujarse en `roles`.
     it('scopes a business role granted in a specific tenant, in the token claims', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -363,7 +363,7 @@ describe('IamAuthService', () => {
 
     it('still issues the token when the business roles cannot be resolved', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -396,7 +396,7 @@ describe('IamAuthService', () => {
 
     it('embeds the patient profile of the account holder as the `pid` claim', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -425,7 +425,7 @@ describe('IamAuthService', () => {
 
     it('omits the patient profile for an account that is not a patient', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -454,7 +454,7 @@ describe('IamAuthService', () => {
 
     it('embeds the practitioner profile of the account holder as the `hpid` claim', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -485,7 +485,7 @@ describe('IamAuthService', () => {
 
     it('omits the practitioner profile for an account that is not a practitioner', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -517,7 +517,7 @@ describe('IamAuthService', () => {
      */
     it('embeds both profiles when the holder is patient and practitioner', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });
@@ -550,7 +550,9 @@ describe('IamAuthService', () => {
 
     it('rejects and records a failure when there is no matching credential', async () => {
       const d = build();
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue(null);
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue(
+        null,
+      );
 
       await expect(
         d.service.login({ email: 'a@x.io', password: PASSWORD }),
@@ -570,7 +572,7 @@ describe('IamAuthService', () => {
         statusConceptId: CONCEPTS.USER_ACTIVE,
         updatedAt: new Date(),
       };
-      d.credentialsRepo.findActivePasswordBySubject.mockResolvedValue({
+      d.credentialsRepo.findActivePasswordByLoginIdentifier.mockResolvedValue({
         userId: 'u1',
         secretHash: PASSWORD_HASH,
       });

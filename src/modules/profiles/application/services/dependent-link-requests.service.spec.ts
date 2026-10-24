@@ -50,6 +50,7 @@ function build(
     sinPaciente?: string[];
     sinCuenta?: string[];
     candidatas?: unknown[];
+    personas?: Record<string, unknown>;
   } = {},
 ) {
   const tx = { flush: fn(async () => undefined), marca: 'tx' };
@@ -79,8 +80,9 @@ function build(
       persons[id] && !withoutPatient.has(id) ? { profileId: id } : null,
     ),
   };
+  const personRows = { ...persons, ...options.personas };
   const personsRepo = {
-    findById: fn(async (_em: unknown, id: string) => persons[id] ?? null),
+    findById: fn(async (_em: unknown, id: string) => personRows[id] ?? null),
   };
   const relatedPersonsRepo = {
     create: fn((_em: unknown, data: Record<string, unknown>) => ({
@@ -122,6 +124,7 @@ function build(
     service,
     tx,
     identifiersRepo,
+    accountLinksRepo,
     relatedPersonsRepo,
     portalProxiesRepo,
     notifications,
@@ -220,6 +223,27 @@ describe('DependentLinkRequestsService', () => {
       expect(c.displayName).toBe('Luis Pérez');
     });
 
+    it('mantiene la candidata aunque no tenga ninguna parte del nombre', async () => {
+      const { service } = build({
+        candidatas: [
+          candidate({
+            display_name: null,
+            name: null,
+            middle_name: null,
+            last_name: null,
+            mother_last_name: null,
+          }),
+        ],
+      });
+
+      const [candidateWithoutName] = await service.findCandidates(
+        'luis',
+        mother,
+      );
+
+      expect(candidateWithoutName.displayName).toBe('');
+    });
+
     it('con menos de tres letras no consulta nada: no es un listado del padrón', async () => {
       const { service, portalProxiesRepo } = build({
         candidatas: [candidate()],
@@ -310,6 +334,19 @@ describe('DependentLinkRequestsService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(portalProxiesRepo.create).not.toHaveBeenCalled();
       expect(notifications.emitInApp).not.toHaveBeenCalled();
+    });
+
+    it('rechaza como propio un CI que resuelve a otra persona vinculada a la misma cuenta', async () => {
+      const { service, accountLinksRepo, portalProxiesRepo } = build();
+      accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: mother.id,
+        personId: 'person-abuelo',
+      });
+
+      await expect(
+        service.request({ nationalId: '7654321' }, mother),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(portalProxiesRepo.create).not.toHaveBeenCalled();
     });
 
     it('un CI sin dueño es 404', async () => {
@@ -428,6 +465,19 @@ describe('DependentLinkRequestsService', () => {
         expect(notifications.emitInApp).not.toHaveBeenCalled();
       });
 
+      it('rechaza un perfil ajeno que resuelve a la misma cuenta autenticada', async () => {
+        const { service, accountLinksRepo, portalProxiesRepo } = build();
+        accountLinksRepo.findActiveByPerson.mockResolvedValue({
+          userId: mother.id,
+          personId: 'person-abuelo',
+        });
+
+        await expect(
+          service.request({ patientProfileId: 'person-abuelo' }, mother),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(portalProxiesRepo.create).not.toHaveBeenCalled();
+      });
+
       it('si ya la representa, 409; si ya hay una pendiente, 409 y no se duplica el aviso', async () => {
         const current = build({ vigente: { id: 'proxy-viejo' } });
         await expect(
@@ -456,6 +506,44 @@ describe('DependentLinkRequestsService', () => {
       await expect(
         service.request({ nationalId: '7654321' }, mother),
       ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('una cuenta sin vínculo activo tampoco puede pedir: 403', async () => {
+      const { service } = build({ sinCuenta: ['user-madre'] });
+
+      await expect(
+        service.request({ nationalId: '7654321' }, mother),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it.each([
+      {
+        nombre: 'compone el nombre de quien pide cuando no hay displayName',
+        person: {
+          id: 'person-madre',
+          displayName: null,
+          name: 'Ana',
+          lastName: 'Pérez',
+        },
+        esperado: 'Ana Pérez',
+      },
+      {
+        nombre: 'usa un rótulo neutro cuando la cuenta no tiene ningún nombre',
+        person: { id: 'person-madre', displayName: null },
+        esperado: 'Alguien',
+      },
+    ])('$nombre', async ({ person, esperado: expected }) => {
+      const { service, notifications } = build({
+        personas: { 'person-madre': person },
+      });
+
+      await service.request({ nationalId: '7654321' }, mother);
+
+      expect(notifications.emitInApp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bodyText: expect.stringContaining(`${expected} pide registrarse`),
+        }),
+      );
     });
   });
 
@@ -525,13 +613,17 @@ describe('DependentLinkRequestsService', () => {
         solicitud: request,
       });
 
-      const r = await service.accept(REQUEST_ID, grandparent);
+      const r = await service.accept(
+        REQUEST_ID,
+        { relationshipConceptId: PROF.RELATIONSHIP_CHILD },
+        grandparent,
+      );
 
       expect(r).toEqual({ id: REQUEST_ID, status: 'ACCEPTED' });
       expect(relatedPersonsRepo.create.mock.calls[0][1]).toMatchObject({
         patientProfileId: 'person-abuelo',
         personId: 'person-madre',
-        relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+        relationshipConceptId: PROF.RELATIONSHIP_CHILD,
         isLegalGuardian: false,
         statusConceptId: PROF.RELATED_ACTIVE,
       });
@@ -549,6 +641,18 @@ describe('DependentLinkRequestsService', () => {
       );
     });
 
+    it('mantiene compatibilidad con clientes anteriores usando Otra relación', async () => {
+      const { service, relatedPersonsRepo } = build({
+        solicitud: grandparentPending(),
+      });
+
+      await service.accept(REQUEST_ID, {}, grandparent);
+
+      expect(relatedPersonsRepo.create.mock.calls[0][1]).toMatchObject({
+        relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+      });
+    });
+
     it('una solicitud ya respondida es 409 y no se toca', async () => {
       const request = grandparentPending({
         statusConceptId: PROF.PROXY_REJECTED,
@@ -556,7 +660,7 @@ describe('DependentLinkRequestsService', () => {
       const { service, relatedPersonsRepo } = build({ solicitud: request });
 
       await expect(
-        service.accept(REQUEST_ID, grandparent),
+        service.accept(REQUEST_ID, {}, grandparent),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(relatedPersonsRepo.create).not.toHaveBeenCalled();
       expect(request.statusConceptId).toBe(PROF.PROXY_REJECTED);
@@ -569,7 +673,7 @@ describe('DependentLinkRequestsService', () => {
       });
 
       await expect(
-        service.accept(REQUEST_ID, grandparent),
+        service.accept(REQUEST_ID, {}, grandparent),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(relatedPersonsRepo.create).not.toHaveBeenCalled();
     });
@@ -581,7 +685,7 @@ describe('DependentLinkRequestsService', () => {
       });
 
       await expect(
-        service.accept(REQUEST_ID, grandparent),
+        service.accept(REQUEST_ID, {}, grandparent),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -590,9 +694,9 @@ describe('DependentLinkRequestsService', () => {
       const request = grandparentPending();
       const { service, notifications } = build({ solicitud: request });
 
-      await expect(service.accept(REQUEST_ID, mother)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.accept(REQUEST_ID, {}, mother),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(request.statusConceptId).toBe(PROF.PROXY_PENDING);
       expect(notifications.emitInApp).not.toHaveBeenCalled();
     });
@@ -603,7 +707,7 @@ describe('DependentLinkRequestsService', () => {
       });
 
       await expect(
-        service.accept(REQUEST_ID, grandparent),
+        service.accept(REQUEST_ID, {}, grandparent),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -611,7 +715,7 @@ describe('DependentLinkRequestsService', () => {
       const { service } = build({ solicitud: null });
 
       await expect(
-        service.accept(REQUEST_ID, grandparent),
+        service.accept(REQUEST_ID, {}, grandparent),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });

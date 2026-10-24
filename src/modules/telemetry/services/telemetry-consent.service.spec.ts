@@ -22,7 +22,8 @@ const actor = { id: 'user-1', roles: ['USER'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
   const disclosuresRepo = { findById: mockFn() };
   const acceptancesRepo = { findExisting: mockFn(), create: mockFn() };
   const consentsRepo = {
@@ -216,6 +217,58 @@ describe('TelemetryConsentService', () => {
       await expect(
         d.service.withdrawConsent('c1', actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('getMyStatus', () => {
+    it('sin decisiones previas es NONE', async () => {
+      const d = build();
+      d.consentsRepo.findLatest.mockResolvedValue(null);
+
+      await expect(d.service.getMyStatus('p1', actor)).resolves.toEqual({
+        status: 'NONE',
+        purposeDefinitionId: 'p1',
+      });
+    });
+
+    it('con la última decisión GRANTED devuelve el id a retirar', async () => {
+      const d = build();
+      d.consentsRepo.findLatest.mockResolvedValue({
+        id: 'c1',
+        decisionConceptId: TELE.DECISION_GRANTED,
+      });
+
+      await expect(d.service.getMyStatus('p1', actor)).resolves.toEqual({
+        status: 'GRANTED',
+        consentId: 'c1',
+        purposeDefinitionId: 'p1',
+      });
+    });
+
+    it('con la última decisión WITHDRAWN no devuelve un id', async () => {
+      const d = build();
+      d.consentsRepo.findLatest.mockResolvedValue({
+        id: 'c2',
+        decisionConceptId: TELE.DECISION_WITHDRAWN,
+      });
+
+      const res = await d.service.getMyStatus('p1', actor);
+
+      expect(res).toEqual({ status: 'WITHDRAWN', purposeDefinitionId: 'p1' });
+      expect(res).not.toHaveProperty('consentId');
+    });
+
+    it('consulta siempre por el actor autenticado, nunca por otro usuario', async () => {
+      const d = build();
+      d.consentsRepo.findLatest.mockResolvedValue(null);
+
+      await d.service.getMyStatus('p1', actor);
+
+      expect(d.consentsRepo.findLatest).toHaveBeenCalledWith(
+        expect.anything(),
+        'user-1',
+        'p1',
+      );
     });
   });
 });

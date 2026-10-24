@@ -1,0 +1,20 @@
+== tras la 1.ª corrida ==
+FLOW-1.3|t|1befcfea-44c0-563a-81cd-337ec6acc840
+FLOW-2.6|t|1befcfea-44c0-563a-81cd-337ec6acc840
+FLOW-2.7|t|1befcfea-44c0-563a-81cd-337ec6acc840
+FLOW-1.3|13
+FLOW-2.6|9
+FLOW-2.7|5
+0
+0
+27
+FLOW-1.3-buscar-api-HAPPY_PATH-01|1|200|/public/search/practitioners
+FLOW-1.3-buscar-api-EDGE-01|2|200|/public/search/practitioners?limit=0&cursor=zzz
+FLOW-1.3-ver-aseguradoras-HAPPY_PATH-01|3|200|/practitioners/00000000-0000-4000-8000-0000000000aa/insurance-networks
+FLOW-1.3-ver-aseguradoras-NEGATIVE-01|4|400|/practitioners/abc/insurance-networks
+FLOW-1.3-ver-horario-lugar-HAPPY_PATH-01|5|200|/practitioners/00000000-0000-4000-8000-0000000000aa/sites
+FLOW-1.3-ver-horario-lugar-NEGATIVE-01|6|422|/practitioners/00000000-0000-4000-8000-0000000000aa/sites
+== 2.ª corrida (SEED_QA_FLOWS=true node dist/src/seed-cli.js) ==
+{"operation":"seed.qa_flows","flows":3,"suitesCreated":0,"suitesExisting":3,"casesCreated":0,"casesExisting":27,"assertionsCreated":0,"assertionsExisting":27,"changed":{"suites":0,"cases":0,"assertions":0,"retiredCases":0}}
+paso «flujos del catálogo de QA»: inserted=0, tookMs=68; seed.summary inserted=0 failed=0
+SQL: sum(row_version) de qa_lab.test_cases = 27 (igual que tras la 1.ª), count = 27

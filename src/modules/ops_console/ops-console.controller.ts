@@ -6,9 +6,18 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsISO8601,
+  IsOptional,
+  Max,
+  Min,
+} from 'class-validator';
 import { Roles } from '../../common';
 import { OpsConsoleService } from './ops-console.service';
+import { OpsTrafficService } from './ops-traffic.service';
 
 /** Operación y gobierno: quien opera la plataforma y quien la audita. */
 export const OPS_READ_ROLES = [
@@ -29,6 +38,49 @@ export class LimitQueryDto {
   limit?: number;
 }
 
+export class TrafficWindowQueryDto {
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'Por defecto: 00:00 UTC del día de `to`',
+  })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'Por defecto: ahora',
+  })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+}
+
+export class TrafficQueryDto extends TrafficWindowQueryDto {
+  @ApiPropertyOptional({ enum: ['hour', 'day'], default: 'hour' })
+  @IsOptional()
+  @IsIn(['hour', 'day'])
+  interval?: 'hour' | 'day';
+}
+
+export class TrafficEndpointsQueryDto extends TrafficWindowQueryDto {
+  @ApiPropertyOptional({ minimum: 1, maximum: 200, default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    enum: ['requests', 'failed', 'p95'],
+    default: 'requests',
+  })
+  @IsOptional()
+  @IsIn(['requests', 'failed', 'p95'])
+  sort?: 'requests' | 'failed' | 'p95';
+}
+
 export class IncidentsQueryDto extends LimitQueryDto {
   @ApiPropertyOptional({
     description: 'Sólo incidentes vivos (abiertos, reconocidos, mitigados)',
@@ -44,7 +96,10 @@ export class IncidentsQueryDto extends LimitQueryDto {
 @ApiBearerAuth()
 @Controller('admin/ops')
 export class OpsConsoleController {
-  constructor(private readonly ops: OpsConsoleService) {}
+  constructor(
+    private readonly ops: OpsConsoleService,
+    private readonly traffic: OpsTrafficService,
+  ) {}
 
   @Get('readiness')
   @Roles(...OPS_READ_ROLES)
@@ -102,5 +157,26 @@ export class OpsConsoleController {
   })
   backups() {
     return this.ops.listBackups();
+  }
+
+  @Get('traffic')
+  @Roles(...OPS_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Tráfico HTTP de la API: solicitudes, éxito, fallos, latencia y usuarios activos',
+    description:
+      'Agregado por minuto desde la medición en proceso. Sin usuarios ni direcciones reales; `notMeasured` dice lo que no se mide.',
+  })
+  trafficOverview(@Query() query: TrafficQueryDto) {
+    return this.traffic.traffic(query);
+  }
+
+  @Get('traffic/endpoints')
+  @Roles(...OPS_READ_ROLES)
+  @ApiOperation({
+    summary: 'Endpoints tocados en la ventana, por plantilla de ruta',
+  })
+  trafficEndpoints(@Query() query: TrafficEndpointsQueryDto) {
+    return this.traffic.endpoints(query);
   }
 }

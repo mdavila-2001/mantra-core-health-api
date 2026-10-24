@@ -1,3 +1,5 @@
+import { PractitionerSignatureAssetsController } from './presentation/controllers/practitioner-signature-assets.controller';
+import { PractitionerSignatureAssetsService } from './application/services/practitioner-signature-assets.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 // Verificar una matrícula concede el rol asistencial: la autoridad sobre los
@@ -56,10 +58,12 @@ import { PROFILES_TERMINOLOGY_PORT } from './application/ports/profiles-terminol
 import { ProfilesTerminologyAdapter } from './infrastructure/adapters/profiles-terminology.adapter';
 import { AFFILIATION_ORGANIZATIONS_PORT } from './application/ports/affiliation-organizations.port';
 import { ATTACHABLE_FILES_PORT } from './application/ports/attachable-files.port';
+import { CLINICAL_PATIENT_HISTORY_ACCESS_PORT } from './application/ports/clinical-patient-history-access.port';
 import { DEPENDENT_LINK_IDENTIFIERS_PORT } from './application/ports/dependent-link-identifiers.port';
 import { DEPENDENT_LINK_NOTIFICATIONS_PORT } from './application/ports/dependent-link-notifications.port';
 import { AffiliationOrganizationsAdapter } from './infrastructure/adapters/affiliation-organizations.adapter';
 import { AttachableFilesAdapter } from './infrastructure/adapters/attachable-files.adapter';
+import { ClinicalPatientHistoryAccessAdapter } from './infrastructure/adapters/clinical-patient-history-access.adapter';
 import { DependentLinkContextAdapter } from './infrastructure/adapters/dependent-link-context.adapter';
 import { PRACTITIONER_CONTEXT_PORT } from './application/ports/practitioner-context.port';
 import { PractitionerContextAdapter } from './infrastructure/adapters/practitioner-context.adapter';
@@ -67,6 +71,8 @@ import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
+import { ClinicalPatientHistoryAdapter } from './infrastructure/adapters/clinical-patient-history.adapter';
+import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-patient-history.port';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -91,12 +97,14 @@ import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-cover
     InsuranceModule,
   ],
   controllers: [
+    PractitionerSignatureAssetsController,
     ProfilesPatientsController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
   ],
   providers: [
+    PractitionerSignatureAssetsService,
     PractitionerContextAdapter,
     {
       provide: PRACTITIONER_CONTEXT_PORT,
@@ -128,8 +136,17 @@ import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-cover
       provide: ATTACHABLE_FILES_PORT,
       useClass: AttachableFilesAdapter,
     },
+    {
+      provide: CLINICAL_PATIENT_HISTORY_ACCESS_PORT,
+      useClass: ClinicalPatientHistoryAccessAdapter,
+    },
     PersonRecordsAdapter,
     PatientCoveragesAdapter,
+    ClinicalPatientHistoryAdapter,
+    {
+      provide: CLINICAL_PATIENT_HISTORY_PORT,
+      useExisting: ClinicalPatientHistoryAdapter,
+    },
     {
       provide: PERSON_RECORDS_PORT,
       useExisting: PersonRecordsAdapter,

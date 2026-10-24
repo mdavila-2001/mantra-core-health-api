@@ -3,9 +3,11 @@ import { PinoLogger } from 'nestjs-pino';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
@@ -157,12 +159,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   opt-in por `SEED_PEOPLE_ENABLED`.
    * @param directoryNetworks - Médicos de las redes de Alianza y Nacional, con
    *   sus sedes y membresías (H3), opt-in por `SEED_DIRECTORY_NETWORKS_ENABLED`.
+   * @param qaFlows - Suites de `qa_lab` generadas desde el catálogo de flujos,
+   *   opt-in por `SEED_QA_FLOWS`.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly patientPortalProxy: PatientPortalProxySeedService,
+    private readonly telemetryUxHeatmap: TelemetryUxHeatmapSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
@@ -186,6 +191,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
+    private readonly qaFlows: QaFlowsSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
@@ -290,6 +296,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'apoderamiento de portal',
         kind: 'core',
         run: () => this.patientPortalProxy.run(),
+      },
+      // El propósito y el esquema de evento con los que el portal manda las
+      // interacciones de los mapas de calor. Es `core` porque sin el esquema
+      // cada lote de `POST /telemetry/activity-events` vuelve 404, y va acá
+      // porque sólo depende de los conceptos de telemetría del catálogo.
+      {
+        name: 'mapas de calor del portal',
+        kind: 'core',
+        run: () => this.telemetryUxHeatmap.run(),
       },
       // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
       // de conceptos. No depende de las enumeraciones dinámicas ni al revés,
@@ -480,6 +495,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'servicio por defecto de cada práctica',
         kind: 'content',
         run: () => this.practiceDefaultServices.run(),
+      },
+      // Opt-in (`SEED_QA_FLOWS=true`): sin la variable no hace nada. Va al final
+      // porque sólo necesita el catálogo de conceptos (estados, tipos de caso y
+      // métodos HTTP de `qa_lab`) y el tenant de plataforma, y no la alimenta nadie.
+      {
+        name: 'flujos del catálogo de QA',
+        kind: 'content',
+        run: () => this.qaFlows.run(),
       },
     ];
   }

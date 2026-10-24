@@ -41,13 +41,13 @@ import {
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
+import { SCHED } from '../../../domain/scheduling.concepts';
 import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 import { operatesAnyAgenda } from '../../../domain/booking/agenda-actors';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** AG-2 · La cita puntual: el doctor asigna, el paciente se entera. */
 @Injectable()
@@ -178,13 +178,9 @@ export class CreateDirectAppointmentUseCase {
       dto.resourceId,
     );
     if (!resource) {
-      throw new ResourceNotFoundException(
-        'Recurso no encontrado',
-        {
-          resourceId: dto.resourceId,
-        },
-        SchedulingErrorReason.RESOURCE_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId: dto.resourceId,
+      });
     }
 
     this.access.assertResourceInActiveTenant(resource.tenantId, actor);
@@ -218,11 +214,9 @@ export class CreateDirectAppointmentUseCase {
       dto.patientProfileId,
     ]);
     if (!names.has(dto.patientProfileId)) {
-      throw new ResourceNotFoundException(
-        'Paciente no encontrado',
-        { patientProfileId: dto.patientProfileId },
-        SchedulingErrorReason.PATIENT_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        patientProfileId: dto.patientProfileId,
+      });
     }
 
     // REGLA MADRE: nada se asigna sobre tiempo ya comprometido del
@@ -253,7 +247,6 @@ export class CreateDirectAppointmentUseCase {
           clash.resourceName ? ` en «${clash.resourceName}»` : ''
         }.`,
         { bookingId: clash.id, startAt: clash.startAt },
-        SchedulingErrorReason.PATIENT_ALREADY_BOOKED_OVERLAPPING,
       );
     }
 
@@ -270,7 +263,9 @@ export class CreateDirectAppointmentUseCase {
           CONCEPTS.SLOT_OPEN,
         );
       for (const free of freeOnes) {
-        free.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+        // Retraído y no bloqueado: al bloqueado nadie lo devuelve, y al retraído sí
+        // cuando esta cita se cancela (ver `discardOneOffSlot`).
+        free.statusConceptId = SCHED.SLOT_RETRACTED;
         touch(free, actor.id);
         retractedSlots += 1;
       }

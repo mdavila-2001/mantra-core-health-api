@@ -161,6 +161,7 @@ export class OwnSiteProvisioningService {
       practitionerProfileId: owner.practitionerProfileId,
       practiceId: practice.id,
       practiceSiteId: site.id,
+      contactPhone: dto.contactPhone,
       roleConceptId: PRAC.ROLE_ATTENDING,
       // Es su propio consultorio: no hay nadie más a quien pedirle permiso,
       // así que nace activa directo (mismo criterio que el bootstrap de

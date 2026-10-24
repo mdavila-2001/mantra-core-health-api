@@ -19,6 +19,32 @@ export interface DependentRelationship {
   readonly display: string;
 }
 
+/** Cómo se nombra directamente a una persona relacionada desde el paciente. */
+export function describeRelatedPersonRelationship(
+  relationshipConceptId: string | null,
+): string {
+  switch (relationshipConceptId) {
+    case PROF.RELATIONSHIP_GUARDIAN:
+      return 'Tutor o representante legal';
+    case PROF.RELATIONSHIP_MOTHER:
+      return 'Madre';
+    case PROF.RELATIONSHIP_FATHER:
+      return 'Padre';
+    case PROF.RELATIONSHIP_SPOUSE:
+      return 'Cónyuge o pareja';
+    case PROF.RELATIONSHIP_CHILD:
+      return 'Hijo o hija';
+    case PROF.RELATIONSHIP_SIBLING:
+      return 'Hermano o hermana';
+    case PROF.RELATIONSHIP_OTHER_RELATIVE:
+      return 'Otro familiar';
+    case PROF.RELATIONSHIP_FRIEND:
+      return 'Amistad';
+    default:
+      return 'Otra relación';
+  }
+}
+
 /**
  * Qué es el dependiente para el titular, a partir de lo que el titular declaró
  * ser para él.

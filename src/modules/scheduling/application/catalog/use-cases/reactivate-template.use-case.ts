@@ -9,7 +9,6 @@ import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { ReactivateTemplateResponseDto } from '../../../presentation/dto';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Reactiva una plantilla retirada. */
 @Injectable()
@@ -35,13 +34,9 @@ export class ReactivateTemplateUseCase {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException(
-          'Plantilla no encontrada',
-          {
-            templateId,
-          },
-          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
       }
 
       const resource = await this.catalogRepo.findResourceById(
@@ -52,7 +47,6 @@ export class ReactivateTemplateUseCase {
         throw new ResourceNotFoundException(
           'Recurso de la plantilla no encontrado',
           { resourceId: template.resourceId },
-          SchedulingErrorReason.TEMPLATE_RESOURCE_NOT_FOUND,
         );
       }
       this.access.assertActorResource(resource, actor);

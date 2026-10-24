@@ -23,6 +23,11 @@ export interface PractitionerDirectoryPort {
     refs: readonly ResourceRef[],
     tenantId: string,
   ): Promise<Map<string, ResourceSiteDto>>;
+
+  /** Prácticas activas donde el profesional tiene un rol vigente. */
+  findActivePracticeIdsForPractitioner(
+    practitionerProfileId: string,
+  ): Promise<string[]>;
 }
 
 /** Token de inyección del directorio de profesionales. */

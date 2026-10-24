@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `pharmacy`
 
-Referencia exhaustiva de 22 operación(es) del módulo `pharmacy`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 24 operación(es) del módulo `pharmacy`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `pharmacy`, `pharmacy-directory`, `pharmacy-public`
 - **Controladores:** `PharmacyController`, `PharmacyPublicController`, `PharmacyReadController`
@@ -12,27 +12,29 @@ Referencia exhaustiva de 22 operación(es) del módulo `pharmacy`, derivada del 
 ## Índice del módulo
 
 1. [POST /pharmacies](#1-post-pharmacies) — Alta de farmacia con licencia inicial
-2. [POST /pharmacies/{pharmacyId}/integration-connections](#2-post-pharmacies-pharmacyid-integration-connections) — Establecer conexión de integración externa
-3. [POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings](#3-post-pharmacies-pharmacyid-integration-connections-connid-product-mappings) — Mapear producto a código de proveedor externo
-4. [POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify](#4-post-pharmacies-pharmacyid-licenses-licenseid-verify) — Verificar licencia y aprobar farmacia
-5. [POST /pharmacies/{pharmacyId}/price-lists](#5-post-pharmacies-pharmacyid-price-lists) — Crear lista de precios (pública / por aseguradora)
-6. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close](#6-post-pharmacies-pharmacyid-price-lists-pricelistid-close) — Cerrar/expirar lista de precios
-7. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices](#7-post-pharmacies-pharmacyid-price-lists-pricelistid-prices) — Fijar/versionar precio de producto
-8. [POST /pharmacies/{pharmacyId}/products](#8-post-pharmacies-pharmacyid-products) — Publicar producto en catálogo con identificadores
-9. [DELETE /pharmacies/{pharmacyId}/products/{productId}](#9-delete-pharmacies-pharmacyid-products-productid) — Retirar (soft-delete) producto del catálogo
-10. [PATCH /pharmacies/{pharmacyId}/products/{productId}](#10-patch-pharmacies-pharmacyid-products-productid) — Editar los datos descriptivos de un producto del catálogo
-11. [POST /pharmacies/{pharmacyId}/projections](#11-post-pharmacies-pharmacyid-projections) — Proyectar catálogo y precios a read-model
-12. [POST /pharmacies/{pharmacyId}/sites](#12-post-pharmacies-pharmacyid-sites) — Registrar sede dispensadora
-13. [GET /pharmacy/catalog-products](#13-get-pharmacy-catalog-products) — Buscar en el catálogo universal de medicamentos
-14. [GET /pharmacy/pharmacies](#14-get-pharmacy-pharmacies) — Listar farmacias publicadas del tenant activo
-15. [GET /pharmacy/pharmacies/{id}](#15-get-pharmacy-pharmacies-id) — Consultar el perfil de una farmacia
-16. [GET /pharmacy/pharmacies/{id}/contacts](#16-get-pharmacy-pharmacies-id-contacts) — Representante legal y gerencias de la farmacia (sólo su personal)
-17. [GET /pharmacy/pharmacies/{id}/licenses](#17-get-pharmacy-pharmacies-id-licenses) — Licencias de la farmacia (sólo su personal)
-18. [GET /pharmacy/products](#18-get-pharmacy-products) — Buscar productos publicados por texto, medicamento o farmacia
-19. [GET /pharmacy/sites](#19-get-pharmacy-sites) — Listar sedes publicadas, sueltas
-20. [GET /pharmacy/sites/{siteId}/prices](#20-get-pharmacy-sites-siteid-prices) — Consultar los precios públicos vigentes de una sede
-21. [GET /public/medications](#21-get-public-medications) — Vitrina pública de medicamentos con disponibilidad por farmacia
-22. [GET /public/medications/{conceptId}/availability](#22-get-public-medications-conceptid-availability) — Farmacias que publican un medicamento, con precio y distancia
+2. [GET /pharmacies/{pharmacyId}/categories](#2-get-pharmacies-pharmacyid-categories) — Categorías de la farmacia (sólo su personal)
+3. [POST /pharmacies/{pharmacyId}/integration-connections](#3-post-pharmacies-pharmacyid-integration-connections) — Establecer conexión de integración externa
+4. [POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings](#4-post-pharmacies-pharmacyid-integration-connections-connid-product-mappings) — Mapear producto a código de proveedor externo
+5. [POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify](#5-post-pharmacies-pharmacyid-licenses-licenseid-verify) — Verificar licencia y aprobar farmacia
+6. [POST /pharmacies/{pharmacyId}/price-lists](#6-post-pharmacies-pharmacyid-price-lists) — Crear lista de precios (pública / por aseguradora)
+7. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close](#7-post-pharmacies-pharmacyid-price-lists-pricelistid-close) — Cerrar/expirar lista de precios
+8. [POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices](#8-post-pharmacies-pharmacyid-price-lists-pricelistid-prices) — Fijar/versionar precio de producto
+9. [POST /pharmacies/{pharmacyId}/products](#9-post-pharmacies-pharmacyid-products) — Publicar producto en catálogo con identificadores
+10. [DELETE /pharmacies/{pharmacyId}/products/{productId}](#10-delete-pharmacies-pharmacyid-products-productid) — Retirar (soft-delete) producto del catálogo
+11. [PATCH /pharmacies/{pharmacyId}/products/{productId}](#11-patch-pharmacies-pharmacyid-products-productid) — Editar los datos descriptivos de un producto del catálogo
+12. [POST /pharmacies/{pharmacyId}/projections](#12-post-pharmacies-pharmacyid-projections) — Proyectar catálogo y precios a read-model
+13. [POST /pharmacies/{pharmacyId}/sites](#13-post-pharmacies-pharmacyid-sites) — Registrar sede dispensadora
+14. [GET /pharmacy/catalog-products](#14-get-pharmacy-catalog-products) — Buscar en el catálogo universal de medicamentos
+15. [GET /pharmacy/pharmacies](#15-get-pharmacy-pharmacies) — Listar farmacias publicadas del tenant activo
+16. [GET /pharmacy/pharmacies/{id}](#16-get-pharmacy-pharmacies-id) — Consultar el perfil de una farmacia
+17. [GET /pharmacy/pharmacies/{id}/contacts](#17-get-pharmacy-pharmacies-id-contacts) — Representante legal y gerencias de la farmacia (sólo su personal)
+18. [GET /pharmacy/pharmacies/{id}/licenses](#18-get-pharmacy-pharmacies-id-licenses) — Licencias de la farmacia (sólo su personal)
+19. [GET /pharmacy/pharmacies/{id}/summary](#19-get-pharmacy-pharmacies-id-summary) — Resumen del catálogo de la farmacia (sólo su personal)
+20. [GET /pharmacy/products](#20-get-pharmacy-products) — Buscar productos publicados por texto, medicamento o farmacia
+21. [GET /pharmacy/sites](#21-get-pharmacy-sites) — Listar sedes publicadas, sueltas
+22. [GET /pharmacy/sites/{siteId}/prices](#22-get-pharmacy-sites-siteid-prices) — Consultar los precios públicos vigentes de una sede
+23. [GET /public/medications](#23-get-public-medications) — Vitrina pública de medicamentos con disponibilidad por farmacia
+24. [GET /public/medications/{conceptId}/availability](#24-get-public-medications-conceptid-availability) — Farmacias que publican un medicamento, con precio y distancia
 
 ---
 
@@ -81,7 +83,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -176,7 +178,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | Ya existe una farmacia con ese código en el tenant | Excepción explícita en src/modules/pharmacy/services/pharmacies.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -196,7 +198,117 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /pharmacies/{pharmacyId}/integration-connections
+## 2. GET /pharmacies/{pharmacyId}/categories
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy`
+- **Nombre:** Categorías de la farmacia (sólo su personal)
+- **Operation ID:** `PharmacyController_listCategories`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyController.listCategories](../../src/modules/pharmacy/controllers/pharmacy.controller.ts)
+
+### Descripción de negocio
+
+Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P47: categorías de la farmacia (el modelo todavía no las guarda: lista vacía).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /pharmacies/{pharmacyId}/categories` en `PharmacyController_listCategories`. El controlador delega en `PharmacyStaffReadService.listCategories`. No recibe body. El tipo de retorno estático es `Promise<PharmacyCategoryListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /pharmacies/00000000-0000-4000-8000-000000000001/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
+- Deben ser UUID válidos: `pharmacyId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /pharmacies/00000000-0000-4000-8000-000000000001/categories HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PharmacyCategoryListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyCategoryListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere pertenecer a la organización, o ser administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacies/{pharmacyId}/categories"
+}
+```
+
+---
+
+## 3. POST /pharmacies/{pharmacyId}/integration-connections
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -238,7 +350,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -324,7 +436,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 409 | `CONFLICT` | Ya existe una conexión para esa integración | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -346,7 +458,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings
+## 4. POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -390,7 +502,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`, `connId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -468,7 +580,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 409 | `CONFLICT` | El producto ya está mapeado en esta conexión | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
@@ -493,7 +605,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify
+## 5. POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -534,7 +646,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`, `licenseId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -600,7 +712,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacies.service.ts |
 | 404 | `NOT_FOUND` | Licencia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacies.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -622,7 +734,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /pharmacies/{pharmacyId}/price-lists
+## 6. POST /pharmacies/{pharmacyId}/price-lists
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -665,7 +777,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -751,7 +863,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 409 | `CONFLICT` | Ya existe una lista con ese código en la farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -774,7 +886,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close
+## 7. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -812,7 +924,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`, `priceListId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -865,7 +977,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Lista de precios no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 422 | `PRECONDITION_FAILED` | La lista de precios no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -885,7 +997,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices
+## 8. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -929,7 +1041,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`, `priceListId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1013,7 +1125,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Lista de precios no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1036,7 +1148,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /pharmacies/{pharmacyId}/products
+## 9. POST /pharmacies/{pharmacyId}/products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1078,7 +1190,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1191,7 +1303,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | El producto tiene más de una presentación: mande catalogPresentationCode | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 400 | `VALIDATION_FAILED` | catalogPresentationCode no es una presentación de ese producto | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 404 | `NOT_FOUND` | Producto del catálogo no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 409 | `CONFLICT` | Ya existe un producto con ese código en la farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
@@ -1216,7 +1328,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. DELETE /pharmacies/{pharmacyId}/products/{productId}
+## 10. DELETE /pharmacies/{pharmacyId}/products/{productId}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1254,7 +1366,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`, `productId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1307,7 +1419,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 422 | `PRECONDITION_FAILED` | El producto no está activo | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1327,7 +1439,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /pharmacies/{pharmacyId}/products/{productId}
+## 11. PATCH /pharmacies/{pharmacyId}/products/{productId}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1369,7 +1481,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`, `productId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1470,7 +1582,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 400 | `VALIDATION_FAILED` | ${changed.join(', ')} vienen del catálogo oficial y no se editan | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1492,7 +1604,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /pharmacies/{pharmacyId}/projections
+## 12. POST /pharmacies/{pharmacyId}/projections
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1529,7 +1641,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1608,7 +1720,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1627,7 +1739,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /pharmacies/{pharmacyId}/sites
+## 13. POST /pharmacies/{pharmacyId}/sites
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy`
@@ -1671,7 +1783,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PHARMACY_STAFF`.
 - Deben ser UUID válidos: `pharmacyId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1757,7 +1869,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-sites.service.ts |
 | 409 | `CONFLICT` | Ya existe una sede con ese código en la farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-sites.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1779,7 +1891,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /pharmacy/catalog-products
+## 14. GET /pharmacy/catalog-products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -1956,7 +2068,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /pharmacy/pharmacies
+## 15. GET /pharmacy/pharmacies
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2085,7 +2197,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /pharmacy/pharmacies/{id}
+## 16. GET /pharmacy/pharmacies/{id}
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2259,7 +2371,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /pharmacy/pharmacies/{id}/contacts
+## 17. GET /pharmacy/pharmacies/{id}/contacts
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2390,7 +2502,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /pharmacy/pharmacies/{id}/licenses
+## 18. GET /pharmacy/pharmacies/{id}/licenses
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2539,7 +2651,146 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /pharmacy/products
+## 19. GET /pharmacy/pharmacies/{id}/summary
+
+- **Módulo:** `pharmacy`
+- **Etiqueta OpenAPI:** `pharmacy-directory`
+- **Nombre:** Resumen del catálogo de la farmacia (sólo su personal)
+- **Operation ID:** `PharmacyReadController_getSummary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PharmacyReadController.getSummary](../../src/modules/pharmacy/controllers/pharmacy-read.controller.ts)
+
+### Descripción de negocio
+
+Resumen del catálogo de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: P47: los números del resumen del portal de la farmacia (sólo su personal).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /pharmacy/pharmacies/{id}/summary` en `PharmacyReadController_getSummary`. El controlador delega en `PharmacyStaffReadService.getSummary`. No recibe body. El tipo de retorno estático es `Promise<PharmacySummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /pharmacy/pharmacies/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /pharmacy/pharmacies/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PharmacySummaryDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacySummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "published": 1,
+  "drafts": 1,
+  "withdrawn": 1,
+  "outOfStock": 1,
+  "lowStock": 1,
+  "inventoryValue": "valor-ejemplo",
+  "byCategory": [
+    {
+      "category": "valor-ejemplo",
+      "count": 1
+    }
+  ],
+  "recentActivity": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "at": "valor-ejemplo",
+      "kind": "valor-ejemplo",
+      "text": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `published` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `drafts` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withdrawn` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `outOfStock` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `lowStock` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `inventoryValue` | Sí | `string` | Sin restricción adicional declarada | Valor del inventario, decimal en texto | `valor-ejemplo` |
+| `byCategory` | Sí | `array<PharmacyCategoryCountDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"category":"valor-ejemplo","count":1}]` |
+| `byCategory[].category` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `byCategory[].count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `recentActivity` | Sí | `array<PharmacyRecentActivityDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","at":"valor-ejemplo","kind":"valor-ejemplo","text":"valor-ejemplo"}]` |
+| `recentActivity[].id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `recentActivity[].at` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `recentActivity[].kind` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `recentActivity[].text` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere pertenecer a la organización, o ser administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/pharmacy/pharmacies/{id}/summary"
+}
+```
+
+---
+
+## 20. GET /pharmacy/products
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2685,7 +2936,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /pharmacy/sites
+## 21. GET /pharmacy/sites
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2819,7 +3070,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /pharmacy/sites/{siteId}/prices
+## 22. GET /pharmacy/sites/{siteId}/prices
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-directory`
@@ -2984,7 +3235,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /public/medications
+## 23. GET /public/medications
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`
@@ -3126,7 +3377,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /public/medications/{conceptId}/availability
+## 24. GET /public/medications/{conceptId}/availability
 
 - **Módulo:** `pharmacy`
 - **Etiqueta OpenAPI:** `pharmacy-public`

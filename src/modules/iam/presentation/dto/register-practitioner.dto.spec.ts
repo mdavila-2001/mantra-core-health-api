@@ -619,3 +619,36 @@ describe('RegisterPractitionerDto · dirección laboral (MED-03)', () => {
     ).toEqual(['workLatitude']);
   });
 });
+
+describe('RegisterPractitionerDto · firma y sello reales', () => {
+  it('acepta las referencias UUID precargadas', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        signatureFileId: '33333333-3333-4333-8333-333333333333',
+        sealFileId: '44444444-4444-4444-8444-444444444444',
+      }),
+    ).toEqual([]);
+  });
+
+  it.each(['signatureFileId', 'sealFileId'])(
+    'rechaza %s inválido',
+    async (field) => {
+      expect(
+        await propertiesWithError({
+          ...MINIMAL_REGISTRATION,
+          [field]: 'no-es-uuid',
+        }),
+      ).toContain(field);
+    },
+  );
+
+  it('rechaza base64 en el DTO real', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        signatureImageBase64: 'contenido',
+      }),
+    ).toContain('signatureImageBase64');
+  });
+});

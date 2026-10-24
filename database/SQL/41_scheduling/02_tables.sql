@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."schedule_rules" (
     "slot_minutes" integer,
     "capacity_per_slot" integer,
     "gap_minutes" integer,
+    "booking_mode_concept_id" uuid,
     "valid_from" date,
     "valid_to" date,
     "created_at" timestamptz NOT NULL,

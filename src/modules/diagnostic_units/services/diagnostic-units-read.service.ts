@@ -111,6 +111,21 @@ export class DiagnosticUnitsReadService {
       ),
     ]);
 
+    const addresses = await this.readRepo.findAddresses(
+      em,
+      unique(
+        practiceSites
+          .map((site) => site.addressId)
+          .filter((id): id is string => typeof id === 'string'),
+      ),
+    );
+    const addressById = new Map(addresses.map((a) => [a.id, a]));
+    const coordinate = (value: unknown): number | null => {
+      if (value === null || value === undefined) return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    };
+
     const concepts = await this.readRepo.findConcepts(
       em,
       conceptIdsOf(
@@ -156,6 +171,16 @@ export class DiagnosticUnitsReadService {
           role: concept(conceptById, site.siteRoleConceptId),
           sampleCollectionAvailable: site.sampleCollectionAvailable ?? null,
           imagingAvailable: site.imagingAvailable ?? null,
+          latitude: coordinate(
+            readable?.addressId
+              ? addressById.get(readable.addressId)?.latitude
+              : null,
+          ),
+          longitude: coordinate(
+            readable?.addressId
+              ? addressById.get(readable.addressId)?.longitude
+              : null,
+          ),
         };
       }),
       equipment: equipment.map((item) => ({

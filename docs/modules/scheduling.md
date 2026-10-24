@@ -8,8 +8,8 @@
 
 # Módulo `scheduling`
 
-**Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/scheduling/README.md)
-· 6 controllers · 11 services · 6 repositories · 17 entidades · 7 DTO
+**Fuente:** [`src/modules/scheduling/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/scheduling/README.md)
+· 7 controllers · 14 services · 7 repositories · 18 entidades · 8 DTO
 
 ---
 
@@ -87,6 +87,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 | `TenantDirectoryPort` | directory + profiles | `DirectoryTenantDirectoryAdapter` |
 | `WalkInPatientRegistryPort` | profiles + common | `ProfilesWalkInPatientAdapter` |
 | `AgendaNoticePort` | messaging | `MessagingAgendaNoticeAdapter` |
+| `BookingChatPort` | community | `CommunityBookingChatAdapter` |
 | `WaitlistReadPort` / `WaitlistWritePort` | persistencia (Postgres) | `PostgresWaitlistAdapter` |
 
 ## Rutas (leídas de los controllers)
@@ -243,4 +244,3 @@ pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día
 `horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
 `generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
 hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.
-

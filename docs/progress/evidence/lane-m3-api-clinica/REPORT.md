@@ -5,7 +5,7 @@
 >
 > - Plan: [`docs/trabajo/2026-09-26-m3-api-clinica/PLAN.md`](../../../trabajo/2026-09-26-m3-api-clinica/PLAN.md)
 > - Reporte: [`docs/trabajo/2026-09-26-m3-api-clinica/REPORTE.md`](../../../trabajo/2026-09-26-m3-api-clinica/REPORTE.md)
-> - Evidencia: [`docs/trabajo/2026-09-26-m3-api-clinica/evidencia/`](../../../trabajo/2026-09-26-m3-api-clinica/evidencia/)
+> - Evidencia: [`docs/trabajo/2026-09-26-m3-api-clinica/evidencia/`](../../../trabajo/2026-09-26-m3-api-clinica/evidencia/index.md)
 > - Decisiones registradas: [`docs/progress/DECISIONS.md`](../../DECISIONS.md) (D-B, N-09, CL-33, D-D)
 
 Peldaño alcanzado: **`TESTED`** (unitarias con `EntityManager` mockeado; sin base). Lo que le

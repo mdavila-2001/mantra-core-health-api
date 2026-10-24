@@ -74,3 +74,45 @@ describe('IamRegistrationDocumentUploadService', () => {
     ).rejects.toThrow('Solo se admiten documentos PDF');
   });
 });
+
+describe('Precarga privada de firma y sello', () => {
+  it('usa IMAGE/PHI y limita los tipos por firma binaria', async () => {
+    const d = build();
+    const file = {
+      originalname: 'firma.png',
+      mimetype: 'image/png',
+      buffer: Buffer.from('png'),
+    };
+    await d.service.uploadSignatureImage(file);
+    expect(d.fileUploadService.uploadAnonymous).toHaveBeenCalledWith(
+      file,
+      { category: FileCategory.IMAGE, sensitivity: FileSensitivity.PHI },
+      {
+        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        operation: 'iam.auth.upload-registration-signature-image',
+      },
+    );
+  });
+
+  it('rechaza más de 2 MB antes de escribir', async () => {
+    const d = build();
+    await expect(
+      d.service.uploadSignatureImage({
+        originalname: 'firma.png',
+        mimetype: 'image/png',
+        buffer: Buffer.alloc(2 * 1024 * 1024 + 1),
+      }),
+    ).rejects.toThrow('2 MB');
+    expect(d.fileUploadService.uploadAnonymous).not.toHaveBeenCalled();
+  });
+
+  it('propaga el rechazo de un formato inválido', async () => {
+    const d = build();
+    d.fileUploadService.uploadAnonymous.mockRejectedValueOnce(
+      new Error('formato inválido'),
+    );
+    await expect(d.service.uploadSignatureImage(undefined)).rejects.toThrow(
+      'formato inválido',
+    );
+  });
+});

@@ -27,6 +27,7 @@ import {
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingWaitlistService } from '../../waitlist/scheduling-waitlist.service';
+import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
 import { isPatientActor } from '../../../domain/booking/agenda-actors';
 import { requireReason } from '../support/require-reason';
 import {
@@ -35,7 +36,6 @@ import {
   isChargeableCancellation,
   isWithinCancellationWindow,
 } from '../../../domain/booking/cancellation-policy';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-09: cancela la cita y libera el cupo (también lo usa el rechazo). */
 @Injectable()
@@ -48,6 +48,7 @@ export class CancelBookingUseCase {
     @Inject(PATIENT_REPRESENTATION_PORT)
     private readonly representation: PatientRepresentationPort,
     private readonly transitions: BookingTransitionRecorder,
+    private readonly serviceSlots: ServiceSlotLifecycle,
     private readonly notifier: BookingChangeNotifier,
     private readonly waitlist: SchedulingWaitlistService,
     private readonly logger: PinoLogger,
@@ -93,13 +94,9 @@ export class CancelBookingUseCase {
         bookingId,
       );
       if (!booking) {
-        throw new ResourceNotFoundException(
-          'Cita no encontrada',
-          {
-            bookingId,
-          },
-          SchedulingErrorReason.BOOKING_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Cita no encontrada', {
+          bookingId,
+        });
       }
 
       // H3.S1.M2 (BOLA/IDOR de escritura): cancelar/rechazar no comprobaba de
@@ -114,11 +111,7 @@ export class CancelBookingUseCase {
       );
 
       if (booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED) {
-        throw new ConflictException(
-          'La cita ya está cancelada',
-          { bookingId },
-          SchedulingErrorReason.BOOKING_ALREADY_CANCELLED,
-        );
+        throw new ConflictException('La cita ya está cancelada', { bookingId });
       }
 
       // C-10: sólo se cancela desde un estado que la máquina permite cancelar
@@ -198,7 +191,6 @@ export class CancelBookingUseCase {
             cancellationWindowMinutes: windowMinutes,
             startAt: slot?.startAt.toISOString(),
           },
-          SchedulingErrorReason.CANCELLATION_WINDOW_NOT_MET,
         );
       }
 
@@ -249,7 +241,10 @@ export class CancelBookingUseCase {
           // AG-2: el cupo de una cita puntual muere con ella. Nunca estuvo
           // ofrecido —nació para esa cita— y reabrirlo dejaría un horario
           // ofertándose que nadie pidió publicar: un cupo fantasma.
-          slot.statusConceptId = CONCEPTS.SLOT_BLOCKED;
+          //
+          // Y se devuelven las consultas que retrajo: antes quedaban bloqueadas
+          // para siempre, aunque el rato que las pisaba ya estuviera libre.
+          await this.serviceSlots.discardOneOffSlot(tx, slot, actor.id);
         } else if (slot.statusConceptId !== CONCEPTS.SLOT_BLOCKED) {
           slot.statusConceptId = CONCEPTS.SLOT_OPEN;
           // Sólo el cupo que vuelve a ofrecerse: el de una cita puntual queda

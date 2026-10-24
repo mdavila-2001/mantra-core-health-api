@@ -1193,6 +1193,15 @@ export class DynamicEnumOptionItemDto {
   display!: string;
 
   /**
+   * Nombre en castellano (designación `ES` preferida del concepto), si existe.
+   *
+   * `display` es el rótulo del sistema de codificación y está en inglés
+   * («Complete blood count»); el selector prefiere éste cuando viene.
+   */
+  @ApiPropertyOptional()
+  displayEs?: string;
+
+  /**
    * Posición en la que se ofrece, empezando en cero.
    */
   @ApiPropertyOptional()

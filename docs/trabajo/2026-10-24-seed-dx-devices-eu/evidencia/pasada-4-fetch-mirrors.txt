@@ -1,0 +1,5 @@
+batirmedical-emdn: 1 archivos @ e0131762 (sha256 7972865360a3)
+zdavatz-eudamed2firstbase: 22865 archivos @ 48f93836 (sha256 ebc22a2dc938)
+dlinrt-eudamed-emdn-discovery: 1 archivos @ f096a477 (sha256 69d6e067a99d)
+longtran-eudamed-manufacturers: 1 archivos @ 44ff9f90 (sha256 a4137691826e)
+Manifiesto: /home/user/diagnostic-devices-data/eu/cache/mirrors/manifest.json

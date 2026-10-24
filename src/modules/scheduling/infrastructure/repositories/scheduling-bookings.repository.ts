@@ -103,6 +103,10 @@ export interface CreateBookingData {
    * Valor de cancellation policy snapshot mantenido por la instancia.
    */
   cancellationPolicySnapshot?: CancellationPolicySnapshot;
+  /** La oferta de servicio que se reservó (v4.2.40). Ausente ≡ consulta. */
+  practitionerServiceOfferingId?: string;
+  /** Lo que el paciente aceptó al reservar el servicio, congelado. */
+  serviceSnapshot?: unknown;
   /**
    * Valor de reason text mantenido por la instancia.
    */
@@ -300,6 +304,8 @@ export class SchedulingBookingsRepository {
         confirmedAt: data.confirmedAt,
         bookingPolicyId: data.bookingPolicyId,
         cancellationPolicySnapshot: data.cancellationPolicySnapshot,
+        practitionerServiceOfferingId: data.practitionerServiceOfferingId,
+        serviceSnapshot: data.serviceSnapshot,
         reasonText: data.reasonText,
         followUpOfBookingId: data.followUpOfBookingId,
         formInstanceId: data.formInstanceId,

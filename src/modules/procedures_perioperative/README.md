@@ -251,8 +251,7 @@ El quirófano que exige `POST /procedure-cases` se resuelve con las lecturas de
 
 ## Pruebas
 
-`yarn test --testPathPatterns=procedures_perioperative` — 79 pruebas de servicio + delegación del
-controlador.
+`corepack yarn test src/modules/procedures_perioperative --runInBand --silent` — 6 suites y 149 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). El detalle por UUID debe recibir el mismo alcance de tenant que la agenda; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/procedures_perioperative.md).
 
 ## Pendiente
 

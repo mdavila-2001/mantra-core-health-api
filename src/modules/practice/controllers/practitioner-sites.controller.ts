@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -25,6 +26,7 @@ import {
 import {
   CreateOwnSiteDto,
   SetSiteBankQrDto,
+  SetSiteContactPhoneDto,
   UpdateOwnSiteDto,
   PractitionerSiteDto,
   PractitionerSitesResponseDto,
@@ -166,6 +168,27 @@ export class PractitionerSitesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerSiteDto> {
     return this.sitesService.setSiteBankQr(actor, siteId, dto.fileId);
+  }
+
+  /** El contacto del profesional en una sede con vinculación activa. */
+  @Audited({
+    action: 'PRACTITIONER_SITE_CONTACT_PHONE_SET',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:siteId',
+  })
+  @Put('me/sites/:siteId/contact-phone')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @ApiOperation({ summary: 'Guardar o quitar mi teléfono en una sede' })
+  setSiteContactPhone(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: SetSiteContactPhoneDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerSiteDto> {
+    return this.sitesService.setSiteContactPhone(
+      actor,
+      siteId,
+      dto.contactPhone,
+    );
   }
 
   /**

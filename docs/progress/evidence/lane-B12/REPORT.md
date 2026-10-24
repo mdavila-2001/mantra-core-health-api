@@ -55,7 +55,7 @@ Ninguna.
 
 ## Evidencia
 
-En [`evidencia/`](./evidencia/). La primera línea de cada archivo es el comando, seguida de la salida literal:
+En [`evidencia/`](./evidencia/index.md). La primera línea de cada archivo es el comando, seguida de la salida literal:
 
 - `gate-typecheck.txt`, `gate-lint.txt`, `gate-regresion.txt` (`modules/public|community|pharmacy|billing|app.module.wiring`)
 - `H2.S1-antes.txt` → `H2.S1-verde.txt`, `H2.S1-http.txt`
