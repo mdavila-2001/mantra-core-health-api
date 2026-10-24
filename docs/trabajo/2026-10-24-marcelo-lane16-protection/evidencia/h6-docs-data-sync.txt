@@ -1,0 +1,3 @@
+Bóveda SALUD no encontrada en C:\Alovida\Mantra Core Health Vault\SALUD — se conserva docs/data/entity-catalog.md tal como está.
+Para regenerarlo, clone la bóveda como hermana del repositorio o apunte SALUD_VAULT a su ruta.
+exit=0

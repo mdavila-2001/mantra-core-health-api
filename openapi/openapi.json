@@ -22716,6 +22716,68 @@
         "description": "Emitir determinación de autorización previa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/insurance-claims/quote": {
+      "post": {
+        "operationId": "ClaimsController_quote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimQuoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimQuoteResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "El rol no puede cobrar a la aseguradora."
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cotizar un cobro a la aseguradora (sin guardar)",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Cotizar un cobro a la aseguradora (sin guardar). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/insurance-claims": {
       "post": {
         "operationId": "ClaimsController_submit",
@@ -22873,6 +22935,80 @@
           "insurance-claims-read"
         ],
         "description": "Listar las solicitudes de seguro presentadas (cursor). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/insurance-claims/{id}/patient-invoice": {
+      "post": {
+        "operationId": "ClaimsController_issuePatientInvoice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssuePatientInvoiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientInvoiceIssuedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "El reclamo o la línea no existen o no son de la organización activa: mismo cuerpo en los dos casos."
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Facturar al paciente su parte de un servicio reclamado",
+        "tags": [
+          "insurance-claims"
+        ],
+        "description": "Facturar al paciente su parte de un servicio reclamado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/insurance-claims/{id}/adjudications": {
@@ -23094,7 +23230,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateDisputeDto"
+                "$ref": "#/components/schemas/ClaimDisputeDto"
               }
             }
           }
@@ -103074,6 +103210,159 @@
         ],
         "additionalProperties": false
       },
+      "ClaimQuoteDto": {
+        "type": "object",
+        "properties": {
+          "insuranceCarrierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientCoverageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priorAuthorizationRequestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Aprobación previa que se piensa vincular al cobro"
+          },
+          "lines": {
+            "description": "1..N líneas. `patientResponsibilityAmount` se ignora: lo calcula el servidor.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimLineDto"
+            }
+          }
+        },
+        "required": [
+          "insuranceCarrierId",
+          "patientCoverageId",
+          "lines"
+        ],
+        "additionalProperties": false
+      },
+      "ClaimQuoteLineResultDto": {
+        "type": "object",
+        "properties": {
+          "lineSequence": {
+            "type": "number",
+            "example": 1
+          },
+          "serviceConceptId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "billedAmount": {
+            "type": "string",
+            "example": "500.00"
+          },
+          "covered": {
+            "type": "boolean",
+            "description": "El plan cubre el servicio y el reparto se pudo calcular. No implica que el cobro se pueda enviar: mire `reason`."
+          },
+          "coveragePercent": {
+            "type": "object",
+            "example": "80",
+            "nullable": true
+          },
+          "copayAmount": {
+            "type": "object",
+            "example": "50.00",
+            "nullable": true
+          },
+          "deductibleAmount": {
+            "type": "object",
+            "example": "25.00",
+            "nullable": true,
+            "description": "Informativo: el deducible todavía no se aplica al reparto (decisión del propietario)."
+          },
+          "requiresPriorAuthorization": {
+            "type": "boolean"
+          },
+          "priorAuthorizationStatus": {
+            "type": "string",
+            "enum": [
+              "NOT_REQUIRED",
+              "APPROVED",
+              "MISSING",
+              "PENDING",
+              "DENIED",
+              "EXPIRED",
+              "MISMATCH",
+              "AMOUNT_EXCEEDED"
+            ],
+            "nullable": true,
+            "description": "`null` si el servicio no tiene beneficio vigente."
+          },
+          "patientAmount": {
+            "type": "object",
+            "example": "140.00",
+            "nullable": true
+          },
+          "insurerAmount": {
+            "type": "object",
+            "example": "360.00",
+            "nullable": true
+          },
+          "reason": {
+            "type": "object",
+            "nullable": true,
+            "description": "Motivo tipificado por el que esta línea no se podría cobrar (por ejemplo `PRIOR_AUTHORIZATION_REQUIRED`)."
+          },
+          "message": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "lineSequence",
+          "billedAmount",
+          "covered",
+          "requiresPriorAuthorization"
+        ]
+      },
+      "ClaimQuoteResultDto": {
+        "type": "object",
+        "properties": {
+          "canSubmit": {
+            "type": "boolean",
+            "description": "Todas las líneas se podrían enviar hoy. Si es `false`, el botón «Enviar a la aseguradora» debe quedar deshabilitado y explicar el motivo."
+          },
+          "currencyConceptId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "totalBilledAmount": {
+            "type": "object",
+            "example": "500.00",
+            "nullable": true,
+            "description": "`null` si algún monto no es un decimal válido."
+          },
+          "totalPatientAmount": {
+            "type": "object",
+            "example": "140.00",
+            "nullable": true,
+            "description": "`null` mientras alguna línea no tenga reparto calculable."
+          },
+          "totalInsurerAmount": {
+            "type": "object",
+            "example": "360.00",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClaimQuoteLineResultDto"
+            }
+          }
+        },
+        "required": [
+          "canSubmit",
+          "lines"
+        ]
+      },
       "CreateClaimDto": {
         "type": "object",
         "properties": {
@@ -103161,6 +103450,102 @@
           "id",
           "status",
           "createdAt"
+        ]
+      },
+      "IssuePatientInvoiceDto": {
+        "type": "object",
+        "properties": {
+          "claimLineId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Línea del reclamo que se le factura al paciente"
+          },
+          "patientAmount": {
+            "type": "string",
+            "example": "140.00",
+            "description": "Confirmación del importe mostrado. Nunca se usa como monto: si difiere del cálculo del servidor, 422."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Texto de la línea de factura; por defecto lo arma el servidor."
+          }
+        },
+        "required": [
+          "claimLineId"
+        ],
+        "additionalProperties": false
+      },
+      "PatientInvoiceIssuedDto": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "example": "INV-1761300000000-1a2b3c4d"
+          },
+          "claimId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chargeKind": {
+            "type": "string",
+            "enum": [
+              "INSURED_SHARE",
+              "PRIVATE_FULL"
+            ]
+          },
+          "billedAmount": {
+            "type": "string",
+            "example": "500.00"
+          },
+          "coveragePercent": {
+            "type": "object",
+            "example": "80",
+            "nullable": true
+          },
+          "copayAmount": {
+            "type": "object",
+            "example": "50.00",
+            "nullable": true
+          },
+          "patientAmount": {
+            "type": "string",
+            "example": "140.00",
+            "description": "Lo que paga el paciente"
+          },
+          "insurerAmount": {
+            "type": "string",
+            "example": "360.00",
+            "description": "Lo que paga la aseguradora"
+          },
+          "currencyConceptId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "invoiceId",
+          "invoiceLineId",
+          "invoiceNumber",
+          "claimId",
+          "claimLineId",
+          "chargeKind",
+          "billedAmount",
+          "patientAmount",
+          "insurerAmount"
         ]
       },
       "LineAdjudicationDto": {
@@ -103288,7 +103673,7 @@
         ],
         "additionalProperties": false
       },
-      "CreateDisputeDto": {
+      "ClaimDisputeDto": {
         "type": "object",
         "properties": {
           "claimAdjudicationVersionId": {
@@ -103312,6 +103697,15 @@
             "type": "string",
             "format": "date",
             "description": "Fecha límite de presentación"
+          },
+          "objectionReason": {
+            "type": "string",
+            "enum": [
+              "AMOUNT_DIFFERS",
+              "SERVICE_NOT_RECEIVED",
+              "NOT_INFORMED"
+            ],
+            "description": "Motivo de la objeción del paciente. Por defecto, NOT_INFORMED. Lo ignora la apelación del prestador."
           }
         },
         "required": [

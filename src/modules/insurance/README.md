@@ -17,7 +17,7 @@ El módulo tiene **19 controllers, 63 rutas HTTP, 31 entidad y 27 servicios** (i
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
-Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationModule`, `TerminologyModule`, `CommonModule`, `AuditModule`, `MessagingModule`, `CommunityModule`, `BillingModule` (`insurance.module.ts`; sólo lo toca el adaptador `billing-patient-invoice.adapter.ts`, carril 16); `insurance-patient-settlement.module.ts` es un módulo aparte sin imports.
+Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationModule`, `TerminologyModule`, `CommonModule`, `AuditModule`, `MessagingModule`, `CommunityModule` (`insurance.module.ts`; además provee directo `InvoicesRepository` de `billing`, que sólo toca el adaptador `billing-patient-invoice.adapter.ts`, carril 16); `insurance-patient-settlement.module.ts` es un módulo aparte sin imports.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
@@ -325,7 +325,7 @@ transacción y nunca lanza.
 `audit_log` no guarda motivo ni importes, estos viajan en eventos del outbox con payload de ids e importes,
 nunca texto libre: `InsuranceClaimPatientInvoiceIssued`, `InsuranceClaimPatientInvoiceRejected`,
 `InsuranceClaimPatientChargeObjected` e `InsuranceClaimPatientObjectionRejected` (ver
-[catálogo de eventos](../../../docs/events/event-catalog.md)).
+[catálogo de eventos](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/events/event-catalog.md)).
 
 **Pendiente, declarado.** Persistencia de la aceptación del paciente (REQ-16-030, requiere el cambio de
 modelo); desglose en el portal del paciente (REQ-16-031); aviso a personal de la práctica y a la

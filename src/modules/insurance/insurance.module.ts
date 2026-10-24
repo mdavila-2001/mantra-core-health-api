@@ -15,9 +15,11 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // ningún ciclo con `insurance`.
 import { MessagingModule } from '../messaging/messaging.module';
 // Carril 16 — la factura al paciente se persiste con el repositorio de `billing`,
-// alcanzado sólo desde su adaptador de infraestructura. `BillingModule` importa
-// `PracticeModule` y `SurveysModule`, ninguno de los cuales importa `insurance`.
-import { BillingModule } from '../billing/billing.module';
+// alcanzado sólo desde su adaptador de infraestructura. Se provee directo (como
+// `PersonAccountLinksRepository` más abajo) y no se importa `BillingModule`: el
+// import cambiaba el orden en que Nest descubre los módulos y, con él, el de todo
+// el contrato OpenAPI. El repositorio no tiene dependencias.
+import { InvoicesRepository } from '../billing/repositories';
 import * as entities from './entities';
 import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
 import { LinkedClaimAccessService } from './application/services/linked-claim-access.service';
@@ -158,7 +160,6 @@ import {
     AuditModule,
     MessagingModule,
     CommunityModule,
-    BillingModule,
   ],
   controllers: [
     PractitionerInsuranceNetworksController,
@@ -199,6 +200,7 @@ import {
     },
     PatientOwnershipAdapter,
     { provide: PATIENT_OWNERSHIP_PORT, useExisting: PatientOwnershipAdapter },
+    InvoicesRepository,
     BillingPatientInvoiceAdapter,
     {
       provide: PATIENT_BILLING_PORT,

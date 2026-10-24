@@ -956,6 +956,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El número de factura ya existe en la práctica | Excepción explícita en src/modules/billing/services/invoices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada | Excepción explícita en src/modules/billing/services/invoices.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2167,6 +2168,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El monto del pago debe ser positivo | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 422 | `PRECONDITION_FAILED` | La suma asignada excede el monto del pago | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 422 | `PRECONDITION_FAILED` | El cobro está en pausa mientras el paciente tenga una objeción abierta | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 422 | `PRECONDITION_FAILED` | La factura no tiene saldo pendiente | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 422 | `PRECONDITION_FAILED` | La asignación excede el saldo de la factura | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3692,8 +3694,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El número de factura ya existe en la práctica | Excepción explícita en src/modules/billing/services/invoices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La consulta no tiene precio: defina el precio del servicio «${cobro.catalogName}» en el catálogo de servicios de la práctica | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada | Excepción explícita en src/modules/billing/services/invoices.service.ts |
 | 422 | `PRECONDITION_FAILED` | El monto del pago debe ser positivo | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 422 | `PRECONDITION_FAILED` | La suma asignada excede el monto del pago | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 422 | `PRECONDITION_FAILED` | El cobro está en pausa mientras el paciente tenga una objeción abierta | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 422 | `PRECONDITION_FAILED` | La factura no tiene saldo pendiente | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 422 | `PRECONDITION_FAILED` | La asignación excede el saldo de la factura | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
