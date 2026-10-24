@@ -1,0 +1,7 @@
+  console.log
+    {"catalog":374,"campos":6373,"first":{"templates":374,"specialties":37},"second":{"templates":0,"specialties":0},"ms":[1059066,467],"counts":{"templates":{"n":374},"fields":{"n":6747}}}
+      at Object.log (test/integration/zz-tmp-clinical-forms-seed.int-spec.ts:29:13)
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Ran all test suites matching test/integration/zz-tmp-clinical-forms-seed.int-spec.ts.
