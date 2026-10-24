@@ -34,7 +34,7 @@ import type {
  * desapercibidas.
  *
  * **NO** prueba la implementación real (`MessagingAgendaNoticeAdapter`): eso
- * exige el arranque de la app y sigue pendiente. Tampoco decide la semántica
+ * exige el arranque de la app y esta suite no lo hace. Tampoco decide la semántica
  * en disputa (`Q-06` durabilidad, `debounceKey` sin ventana definida): esas
  * son de Ender y de negocio, y acá sólo se documenta qué hace hoy el doble.
  */
