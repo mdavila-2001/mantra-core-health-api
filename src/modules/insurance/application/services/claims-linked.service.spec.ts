@@ -1,12 +1,14 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { ClaimsService } from './claims.service';
+import { ClaimCoveragePolicy } from './claim-coverage-policy';
 import {
   InsuranceClaims,
   InsuranceClaimLines,
   PatientCoverages,
   InsurancePlans,
   ClaimLineAdjudications,
+  InsurancePlanBenefits,
   PriorAuthorizationRequests,
 } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
@@ -101,6 +103,16 @@ function fixture() {
       },
     ],
   };
+  // 80 % con copago de 10: sobre 100, el paciente paga 10 + 90 × 20 % = 28.
+  const benefit = {
+    id: 'benefit-medicine',
+    insurancePlanId: 'plan',
+    serviceConceptId: 'medicine',
+    statusConceptId: INS.BENEFIT_ACTIVE,
+    coveragePercent: '80',
+    copayAmount: '10.00',
+    requiresPriorAuthorization: false,
+  };
   const version = {
     id: 'version',
     insuranceClaimId: 'claim',
@@ -123,7 +135,9 @@ function fixture() {
         ? [line]
         : entity === ClaimLineAdjudications
           ? [decision]
-          : [],
+          : entity === InsurancePlanBenefits
+            ? [benefit]
+            : [],
     ),
   };
   const em = {
@@ -161,35 +175,18 @@ function fixture() {
   const orders = { lockAndResolve: fn().mockResolvedValue(snapshot) };
   const coverageRepo = { findCoverage: fn().mockResolvedValue(coverage) };
   const catalog = { findPlanForCarrier: fn().mockResolvedValue(plan) };
-  // La regla de cobertura tiene su propio spec; acá devuelve la parte del
-  // paciente que trae la línea para que estas pruebas midan lo de siempre.
-  const coveragePolicy = {
-    evaluate: fn().mockImplementation(
-      async (
-        _tx: unknown,
-        claim: {
-          lines: {
-            lineSequence: number;
-            patientResponsibilityAmount?: string;
-          }[];
-        },
-      ) =>
-        claim.lines.map((line) => ({
-          lineSequence: line.lineSequence,
-          patientAmount: line.patientResponsibilityAmount,
-        })),
-    ),
-  };
+  const auditTrail = { record: fn().mockResolvedValue(undefined) };
   const service = new ClaimsService(
     em as never,
     repo as never,
     coverageRepo as never,
     catalog as never,
     {} as never,
-    { setContext: fn(), info: fn() } as never,
+    { setContext: fn(), info: fn(), error: fn() } as never,
     orders as never,
     access as never,
-    coveragePolicy as never,
+    new ClaimCoveragePolicy(),
+    auditTrail as never,
   );
   return {
     service,
@@ -251,7 +248,7 @@ describe('ClaimsService linked orders', () => {
         inventoryReservationLineId: 'portion',
         quantity: '2',
         serviceConceptId: 'medicine',
-        patientResponsibilityAmount: undefined,
+        patientResponsibilityAmount: '28.00',
       }),
     );
     expect(f.catalog.findPlanForCarrier).not.toHaveBeenCalled();
@@ -462,7 +459,13 @@ describe('ClaimsService linked orders', () => {
       {
         ...claimInput,
         inventoryReservationId: undefined,
-        lines: [{ lineSequence: 1, billedAmount: '100' }],
+        lines: [
+          {
+            lineSequence: 1,
+            serviceConceptId: 'medicine',
+            billedAmount: '100',
+          },
+        ],
       },
       { id: 'platform', roles: ['SUPERADMIN'] },
     );
@@ -567,11 +570,14 @@ describe('ClaimsService linked orders', () => {
       ),
     ).rejects.toThrow('misma cobertura y pedido');
   });
-  it('no interpreta datos de responsabilidad del prestador como deuda confirmada', async () => {
+  it('no acepta la parte del paciente que declara el prestador si no es la del plan', async () => {
     const f = fixture();
     const input = structuredClone(claimInput);
     input.lines[0].patientResponsibilityAmount = '100';
-    await expect(f.service.submitClaim(input, actor)).rejects.toThrow();
+    await expect(f.service.submitClaim(input, actor)).rejects.toThrow(
+      'no coincide con la cobertura del plan',
+    );
+    expect(f.repo.createClaim).not.toHaveBeenCalled();
   });
   it('adjudica bajo autorización de aseguradora y locks pedido → reclamo', async () => {
     const f = fixture();

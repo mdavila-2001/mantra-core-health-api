@@ -79,7 +79,7 @@ const body = {
 };
 ```
 
-Este mapeo presupone haber comprobado que los campos nullable necesarios tienen valor. `currencyConceptId` es opcional para farmacia: se resuelve del pedido y, si se declara, debe coincidir. `serviceConceptId` y `quantity` pueden omitirse en cada línea; si se declaran, deben coincidir con el pedido. `billedAmount` es obligatorio y debe ser exacto. `patientResponsibilityAmount` no adjudica un cargo en este flujo: omítalo; un valor no nulo distinto de cero se rechaza.
+Este mapeo presupone haber comprobado que los campos nullable necesarios tienen valor. `currencyConceptId` es opcional para farmacia: se resuelve del pedido y, si se declara, debe coincidir. `serviceConceptId` y `quantity` pueden omitirse en cada línea; si se declaran, deben coincidir con el pedido. `billedAmount` es obligatorio y debe ser exacto. `patientResponsibilityAmount` lo calcula el servidor con el beneficio vigente del plan (porcentaje de cobertura y copago, redondeado a centavos a favor del paciente) y es el que se guarda: omítalo. Si lo envía y no coincide con el cálculo, el alta se rechaza con 422 y `details.reason = PATIENT_SHARE_MISMATCH`. El servicio de cada línea (el medicamento del producto o el estudio de la orden) debe tener un beneficio vigente en el plan y, si éste exige aprobación previa, el reclamo debe adjuntar una aprobada o parcial, vigente y con saldo; cada rechazo es un 422 con su `details.reason`.
 
 ## Preparar un reclamo diagnóstico
 

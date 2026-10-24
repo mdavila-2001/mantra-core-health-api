@@ -1,0 +1,6 @@
+src/common/seed/glossary-articles.catalog.spec.ts
+src/common/seed/glossary-seed.service.spec.ts
+src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts
+src/modules/pharmacy_inventory/presentation/dto/pharmacy-orders.dto.ts
+src/modules/profiles/infrastructure/adapters/clinical-patient-history.adapter.ts
+✖ 17 problems (17 errors, 0 warnings)

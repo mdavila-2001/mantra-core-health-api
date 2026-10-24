@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   requireTenantId,
   ResourceNotFoundException,
@@ -15,6 +16,10 @@ import {
   INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
   type InsurancePracticeTenantLookupPort,
 } from '../ports/practice-tenant-lookup.port';
+import {
+  INSURANCE_AUDIT_TRAIL_PORT,
+  type InsuranceAuditTrailPort,
+} from '../ports/audit-trail.port';
 import {
   ClaimRepository,
   CoverageRepository,
@@ -39,7 +44,12 @@ import {
   ResourceStatusDto,
 } from '../../presentation/dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
-import { ClaimCoveragePolicy } from './claim-coverage-policy';
+import {
+  CLAIM_COVERAGE_REASON,
+  ClaimCoveragePolicy,
+  type ClaimToEvaluate,
+  type EvaluatedClaimLine,
+} from './claim-coverage-policy';
 import {
   LinkedClaimAccessService,
   assertLegacyClaimRoles,
@@ -58,6 +68,34 @@ const LINE_DECISION_CONCEPT: Record<string, string> = {
   DENIED: INS.LINE_DECISION_DENIED,
 };
 
+/**
+ * Acciones de la bitácora con que se sella cada decisión de cobertura. El
+ * rechazo lleva el motivo tipificado tras `:` (un conjunto cerrado, sin datos
+ * del paciente) porque `audit_log` no tiene columna de detalle.
+ */
+export const CLAIM_COVERAGE_AUDIT = {
+  APPLIED: 'INSURANCE_CLAIM_COVERAGE_APPLIED',
+  REJECTED: 'INSURANCE_CLAIM_COVERAGE_REJECTED',
+} as const;
+
+const COVERAGE_REASONS: ReadonlySet<string> = new Set(
+  Object.values(CLAIM_COVERAGE_REASON),
+);
+
+/** Sobre qué recurso se sella un rechazo, cuando todavía no hay reclamo. */
+interface CoverageDecisionSubject {
+  readonly entity: string;
+  readonly entityId: string;
+  readonly tenantId?: string;
+}
+
+/** Un rechazo de la política pendiente de sellar fuera de la transacción. */
+interface CoverageRejection {
+  readonly subject: CoverageDecisionSubject;
+  readonly reason: string;
+  readonly lineSequence?: unknown;
+}
+
 @Injectable()
 export class ClaimsService {
   constructor(
@@ -71,6 +109,8 @@ export class ClaimsService {
     private readonly linkedOrders: LinkedClaimOrderService,
     private readonly linkedAccess: LinkedClaimAccessService,
     private readonly coveragePolicy: ClaimCoveragePolicy,
+    @Inject(INSURANCE_AUDIT_TRAIL_PORT)
+    private readonly auditTrail: InsuranceAuditTrailPort,
   ) {
     this.logger.setContext(ClaimsService.name);
   }
@@ -78,6 +118,23 @@ export class ClaimsService {
   async submitClaim(
     dto: CreateClaimDto,
     actor: AuthenticatedUser,
+  ): Promise<CreatedClaimDto> {
+    // El rechazo de la política revierte la transacción del alta; su constancia
+    // se sella después, en una propia, para que no se pierda con el rollback.
+    const rejected: { current?: CoverageRejection } = {};
+    try {
+      return await this.createClaim(dto, actor, rejected);
+    } catch (error) {
+      if (rejected.current)
+        await this.recordCoverageRejection(actor, rejected.current);
+      throw error;
+    }
+  }
+
+  private async createClaim(
+    dto: CreateClaimDto,
+    actor: AuthenticatedUser,
+    rejected: { current?: CoverageRejection },
   ): Promise<CreatedClaimDto> {
     return this.em.transactional(async (tx) => {
       const linked = Boolean(
@@ -110,6 +167,8 @@ export class ClaimsService {
       let snapshot: LinkedOrderSnapshot | null = null;
       let lines = dto.lines;
       let currencyConceptId: string | undefined;
+      let evaluated: EvaluatedClaimLine[];
+      let tenantId: string | undefined;
       if (linked) {
         if (dto.serviceRequestId && !dto.currencyConceptId)
           throw new PreconditionFailedException(
@@ -142,6 +201,30 @@ export class ClaimsService {
         if (existing)
           throw new ConflictException('El pedido ya tiene un reclamo activo');
         await this.validatePriorAuthorization(tx, dto);
+        // Pedido de farmacia o de diagnóstico: la misma regla que el cobro
+        // directo, con el servicio y el importe que fija el pedido, no el
+        // cliente (carril 16, REQ-16-023 a 025).
+        tenantId = snapshot.providerTenantId;
+        evaluated = await this.evaluateCoverage(
+          tx,
+          {
+            planId: resolved.plan.id,
+            patientCoverageId: dto.patientCoverageId,
+            priorAuthorizationRequestId: dto.priorAuthorizationRequestId,
+            serviceRequestId: dto.serviceRequestId,
+            inventoryReservationId: dto.inventoryReservationId,
+            lines,
+            at: new Date(),
+          },
+          {
+            entity: dto.inventoryReservationId
+              ? 'inventory_reservation'
+              : 'service_request',
+            entityId: snapshot.orderId,
+            tenantId,
+          },
+          rejected,
+        );
       } else {
         const coverage = await this.coverage.findCoverage(
           tx,
@@ -168,23 +251,34 @@ export class ClaimsService {
         // plan (cobertura, copago, aprobación previa) y calcula él la parte del
         // paciente. La del cliente nunca se guarda (carril 16, REQ-16-023 a 025).
         await this.validatePriorAuthorization(tx, dto);
-        const evaluated = await this.coveragePolicy.evaluate(tx, {
-          planId: plan.id,
-          patientCoverageId: dto.patientCoverageId,
-          priorAuthorizationRequestId: dto.priorAuthorizationRequestId,
-          lines: dto.lines,
-          at: new Date(),
-        });
-        const patientShareBySequence = new Map(
-          evaluated.map((line) => [line.lineSequence, line.patientAmount]),
+        tenantId = getCurrentTenantId();
+        evaluated = await this.evaluateCoverage(
+          tx,
+          {
+            planId: plan.id,
+            patientCoverageId: dto.patientCoverageId,
+            priorAuthorizationRequestId: dto.priorAuthorizationRequestId,
+            lines: dto.lines,
+            at: new Date(),
+          },
+          {
+            entity: 'patient_coverage',
+            entityId: dto.patientCoverageId,
+            tenantId,
+          },
+          rejected,
         );
-        lines = dto.lines.map((line) => ({
-          ...line,
-          patientResponsibilityAmount: patientShareBySequence.get(
-            line.lineSequence,
-          ),
-        }));
       }
+      // Lo que se guarda es la parte del paciente que calculó el servidor.
+      const patientShareBySequence = new Map(
+        evaluated.map((line) => [line.lineSequence, line.patientAmount]),
+      );
+      lines = lines.map((line) => ({
+        ...line,
+        patientResponsibilityAmount: patientShareBySequence.get(
+          line.lineSequence,
+        ),
+      }));
       const claim = this.repo.createClaim(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,
         patientCoverageId: dto.patientCoverageId,
@@ -216,13 +310,12 @@ export class ClaimsService {
             diagnosticStudyOfferingId: line.diagnosticStudyOfferingId,
             quantity: line.quantity,
             billedAmount: line.billedAmount,
-            patientResponsibilityAmount: linked
-              ? undefined
-              : line.patientResponsibilityAmount,
+            patientResponsibilityAmount: line.patientResponsibilityAmount,
             supportingClinicalReference: line.supportingClinicalReference,
           }),
         );
       }
+      await this.recordCoverageApplied(tx, actor, claim, evaluated, tenantId);
       await tx.flush();
       return {
         id: claim.id,
@@ -289,7 +382,10 @@ export class ClaimsService {
           (line.serviceConceptId === undefined ||
             saved.serviceConceptId === line.serviceConceptId) &&
           (line.patientResponsibilityAmount === undefined ||
-            mismosDecimales(line.patientResponsibilityAmount, '0')) &&
+            mismosDecimales(
+              line.patientResponsibilityAmount,
+              saved.patientResponsibilityAmount ?? '0',
+            )) &&
           (line.supportingClinicalReference ?? null) ===
             (saved.supportingClinicalReference ?? null)
         );
@@ -337,9 +433,7 @@ export class ClaimsService {
         (line.quantity !== undefined &&
           !mismosDecimales(line.quantity, source.quantity)) ||
         (line.serviceConceptId !== undefined &&
-          line.serviceConceptId !== source.serviceConceptId) ||
-        (line.patientResponsibilityAmount !== undefined &&
-          !mismosDecimales(line.patientResponsibilityAmount, '0'))
+          line.serviceConceptId !== source.serviceConceptId)
       ) {
         throw new PreconditionFailedException(
           'Las líneas deben coincidir con las cantidades e importes del pedido',
@@ -351,6 +445,115 @@ export class ClaimsService {
         serviceConceptId: source.serviceConceptId ?? undefined,
       };
     });
+  }
+
+  /**
+   * Contrasta el cobro con el plan. Si la política lo rechaza, deja anotado el
+   * motivo para sellarlo en la bitácora una vez revertida el alta.
+   */
+  private async evaluateCoverage(
+    tx: EntityManager,
+    claim: ClaimToEvaluate,
+    subject: CoverageDecisionSubject,
+    rejected: { current?: CoverageRejection },
+  ): Promise<EvaluatedClaimLine[]> {
+    try {
+      return await this.coveragePolicy.evaluate(tx, claim);
+    } catch (error) {
+      const details =
+        error instanceof PreconditionFailedException
+          ? error.details
+          : undefined;
+      const reason = details?.reason;
+      if (typeof reason === 'string' && COVERAGE_REASONS.has(reason)) {
+        rejected.current = {
+          subject,
+          reason,
+          lineSequence: details?.lineSequence,
+        };
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Sella en la bitácora el reparto aplicado. `audit_log` guarda quién, qué
+   * reclamo y el resultado; el desglose por línea (beneficio, %, copago, parte
+   * del paciente y de la aseguradora, aprobación previa) va al log estructurado,
+   * sin datos del paciente. La parte del paciente y el importe quedan además en
+   * `insurance_claim_lines`.
+   */
+  private async recordCoverageApplied(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    claim: InsuranceClaims,
+    evaluated: readonly EvaluatedClaimLine[],
+    tenantId: string | undefined,
+  ): Promise<void> {
+    await this.auditTrail.record(tx, actor, {
+      action: CLAIM_COVERAGE_AUDIT.APPLIED,
+      entity: 'insurance_claim',
+      entityId: claim.id,
+      tenantId,
+    });
+    this.logger.info(
+      {
+        operation: 'insurance.claim.coverage',
+        outcome: 'APPLIED',
+        claimId: claim.id,
+        actorId: actor.id,
+        priorAuthorizationRequestId: claim.priorAuthorizationRequestId ?? null,
+        lines: evaluated.map((line) => ({
+          lineSequence: line.lineSequence,
+          benefitId: line.benefitId,
+          coveragePercent: line.coveragePercent,
+          copayAmount: line.copayAmount,
+          requiresPriorAuthorization: line.requiresPriorAuthorization,
+          patientAmount: line.patientAmount,
+          insurerAmount: line.insurerAmount,
+        })),
+      },
+      'Coverage applied to claim',
+    );
+  }
+
+  /**
+   * Sella el rechazo en una transacción propia: la del alta ya se revirtió. Si
+   * la bitácora falla, se registra en el log y el 422 original sigue su curso.
+   */
+  private async recordCoverageRejection(
+    actor: AuthenticatedUser,
+    rejection: CoverageRejection,
+  ): Promise<void> {
+    this.logger.info(
+      {
+        operation: 'insurance.claim.coverage',
+        outcome: 'REJECTED',
+        reason: rejection.reason,
+        lineSequence: rejection.lineSequence,
+        entity: rejection.subject.entity,
+        entityId: rejection.subject.entityId,
+        actorId: actor.id,
+      },
+      'Coverage rejected claim',
+    );
+    try {
+      await this.em.transactional(async (tx) => {
+        await this.auditTrail.record(tx, actor, {
+          action: `${CLAIM_COVERAGE_AUDIT.REJECTED}:${rejection.reason}`,
+          entity: rejection.subject.entity,
+          entityId: rejection.subject.entityId,
+          tenantId: rejection.subject.tenantId,
+          success: false,
+        });
+        await tx.flush();
+      });
+    } catch (error) {
+      this.logger.error(
+        { operation: 'insurance.claim.coverage', err: error },
+        'Could not record coverage rejection in audit trail',
+      );
+    }
   }
 
   private async validatePriorAuthorization(
