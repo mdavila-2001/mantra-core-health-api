@@ -273,4 +273,15 @@ Y en `diagnostic_units.diagnostic_equipment`: `device_model_id uuid NULL` FK →
 sirviendo para texto libre cuando el equipo no está en el catálogo).
 
 El importador del catálogo sale directo de `out/manufacturers.ndjson.gz` y
-`out/models.ndjson.gz` (cada modelo ya trae sus registros con procedencia).
+`out/models-*.ndjson.gz`: cada modelo ya trae sus registros con procedencia.
+
+**Unión con la propuesta de `row`**
+(`docs/trabajo/2026-10-24-seed-dx-devices-row/REPORTE.md`). Coinciden en
+fabricantes con identificadores por esquema, modelos con tipo como FK a
+`terminology.catalog_concepts`, autorizaciones con la cita completa por fila,
+identificadores por modelo y la FK opcional `device_model_id` en
+`diagnostic_equipment`. De `row` se suma:
+
+- `device_identifiers.issuing_agency` admite también JAN y GTIN (no solo UDI-DI).
+- `device_manufacturer_identifiers.scheme` incluye `jp-corporate-number`, `hc-company` y `cnpj`.
+- Las nomenclaturas nacionales (`jmdn`, `br:anvisa-nome-tecnico`, `gmdn-pt`, `in:cdsco-device-name`) no piden tablas nuevas: `load-taxonomy.mjs` ya las carga como `code_systems` en `terminology`.

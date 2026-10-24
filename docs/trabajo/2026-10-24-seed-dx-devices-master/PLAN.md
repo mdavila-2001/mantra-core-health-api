@@ -34,7 +34,7 @@
 ## H2 — Resolución de fabricantes
 **CA:** Dadas razones sociales verbatim de varias fuentes, cuando se resuelven, entonces se fusionan solo por id publicado o por nombre normalizado y país compatible, y lo dudoso va a revisión con su evidencia.
 **DoD:** tests `normalizeManufacturerName`, `resolveManufacturers` → pass; `out/review-manufacturers.ndjson.gz` existe.
-**Estado:** EN CURSO
+**Estado:** A MEDIAS (H2.S2.M2 bloqueado)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
@@ -47,7 +47,7 @@
 ## H3 — Consolidación de regiones y catálogo
 **CA:** Dadas las salidas de `us`, `eu` y `row` en git, cuando corre `build.mjs`, entonces cada fila válida de diagnóstico queda en un modelo con todos sus registros, y la región sin salida figura como pendiente.
 **DoD:** `node --max-old-space-size=8000 …/build.mjs` → código 0; `out/coverage.md` con la tabla de regiones.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
@@ -68,20 +68,20 @@
 ## H5 — Saturación con /loop
 **CA:** Dadas pasadas sucesivas, cuando dos seguidas aportan 0 tras deduplicar, entonces el loop se detiene y cada pasada queda registrada.
 **DoD:** `docs/seed-research/diagnostic-devices-master.md` con una sección por pasada.
-**Estado:** EN CURSO
+**Estado:** A MEDIAS (5 pasadas; la 5.ª aportó registros, el loop sigue)
 
 ## H6 — Cierre
 **CA:** Dado el trabajo, cuando se cierra, entonces hay propuesta para el repo del modelo, `SOURCES.md`, reporte de cobertura, REPORTE.md y un PR contra `dev` sin mergear.
 **DoD:** `corepack yarn typecheck` y `corepack yarn lint` → exit 0; tests → 0 fallos; PR abierto.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H6.S1.M1 | Propuesta `device_catalog` | Entidades, columnas, FK e índices escritos | sección en `docs/seed-research/…` | HECHO |
 | H6.S1.M2 | typecheck | exit 0 | `evidencia/typecheck.txt` | HECHO |
 | H6.S1.M3 | lint | exit 0 | `evidencia/lint.txt` | HECHO |
-| H6.S1.M4 | REPORTE.md | Escrito con las tres secciones | archivo existe | TODO |
-| H6.S1.M5 | PR contra `dev` | Abierto, sin mergear | URL del PR | TODO |
+| H6.S1.M4 | REPORTE.md | Escrito con las tres secciones | archivo existe | HECHO |
+| H6.S1.M5 | PR contra `dev` | Abierto, sin mergear | URL del PR | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
