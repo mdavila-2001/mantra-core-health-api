@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T03:17:39Z",
+  "generatedAt": "2026-10-24T03:31:04Z",
   "regions": [
     {
       "region": "us",
@@ -245,6 +245,13 @@
     "reviewByKind": {
       "possible-group-shared-first-word": 29
     }
+  },
+  "industry": {
+    "organizations": 46,
+    "mentions": 552,
+    "companies": 370,
+    "companiesMatchedToRegistry": 40,
+    "companiesOnlyInIndustryLists": 330
   },
   "mirrors": {
     "ej86-fda-ai": {

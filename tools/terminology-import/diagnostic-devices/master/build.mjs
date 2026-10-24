@@ -24,25 +24,46 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { rowKey, validateRow, writeNdjsonGzSharded } from './lib/exchange.mjs';
-import { derivePanelParts, ivdPanelsFrom, parsePcd, pcdNode } from './lib/fda-pcd.mjs';
+import {
+  derivePanelParts,
+  ivdPanelsFrom,
+  parsePcd,
+  pcdNode,
+} from './lib/fda-pcd.mjs';
 import { aimlRows } from './lib/own-sources.mjs';
 import { MIRRORS, mirrorFilePath, mirrorVersion } from './lib/sources.mjs';
 import { Taxonomy } from './lib/taxonomy.mjs';
 import { resolveManufacturers } from './lib/manufacturers.mjs';
 import { consolidate } from './lib/consolidate.mjs';
-import { REGIONS, locateRegion, readRegionManifest, readRegionRows } from './lib/regions.mjs';
+import {
+  REGIONS,
+  locateRegion,
+  readRegionManifest,
+  readRegionRows,
+} from './lib/regions.mjs';
 import { coverageReport } from './lib/coverage.mjs';
+import { loadIndustryDirectories, matchIndustry } from './lib/industry.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '../../../..');
 const OUT = join(HERE, 'out');
 const args = process.argv.slice(2);
-const argValue = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : null);
+const argValue = (name) =>
+  args.includes(name) ? args[args.indexOf(name) + 1] : null;
 const SKIP_REGIONS = args.includes('--skip-regions');
 
 const retrievedAtOfCache = () => {
   try {
-    return JSON.parse(readFileSync(join(dirname(mirrorFilePath('ej86-fda-ai', 'foiclass')), '..', 'manifest.json'), 'utf8')).generatedAt;
+    return JSON.parse(
+      readFileSync(
+        join(
+          dirname(mirrorFilePath('ej86-fda-ai', 'foiclass')),
+          '..',
+          'manifest.json',
+        ),
+        'utf8',
+      ),
+    ).generatedAt;
   } catch {
     throw new Error('Falta el caché: corré antes fetch-sources.mjs');
   }
@@ -52,19 +73,43 @@ const retrievedAt = retrievedAtOfCache().replace(/\.\d+Z$/, 'Z');
 // --- 1. Taxonomía FDA --------------------------------------------------------
 const taxonomy = new Taxonomy();
 const pcdFile = MIRRORS['ej86-fda-ai'].files.foiclass;
-const pcdRows = parsePcd(readFileSync(mirrorFilePath('ej86-fda-ai', 'foiclass'), 'utf8'));
+const pcdRows = parsePcd(
+  readFileSync(mirrorFilePath('ej86-fda-ai', 'foiclass'), 'utf8'),
+);
 const panelParts = derivePanelParts(pcdRows);
 const ivdPanels = ivdPanelsFrom(panelParts);
-const pcdProvenance = { source: pcdFile.source, sourceUrl: pcdFile.officialUrl, sourceVersion: mirrorVersion('ej86-fda-ai'), retrievedAt, mirror: { repo: MIRRORS['ej86-fda-ai'].repo, commit: MIRRORS['ej86-fda-ai'].commit, path: pcdFile.path, sha256: pcdFile.sha256 } };
+const pcdProvenance = {
+  source: pcdFile.source,
+  sourceUrl: pcdFile.officialUrl,
+  sourceVersion: mirrorVersion('ej86-fda-ai'),
+  retrievedAt,
+  mirror: {
+    repo: MIRRORS['ej86-fda-ai'].repo,
+    commit: MIRRORS['ej86-fda-ai'].commit,
+    path: pcdFile.path,
+    sha256: pcdFile.sha256,
+  },
+};
 for (const r of pcdRows) taxonomy.addNode(pcdNode(r, pcdProvenance, ivdPanels));
-console.log(`taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`);
+console.log(
+  `taxonomía FDA: ${pcdRows.length} product codes; paneles IVD medidos: ${[...ivdPanels].sort().join(', ')}`,
+);
 
 // --- 2. Filas ---------------------------------------------------------------
 const rows = [];
 const seen = new Set();
 const sourceStats = new Map();
 const stat = (source) => {
-  if (!sourceStats.has(source)) sourceStats.set(source, { source, region: null, read: 0, valid: 0, invalid: 0, duplicates: 0, invalidSamples: [] });
+  if (!sourceStats.has(source))
+    sourceStats.set(source, {
+      source,
+      region: null,
+      read: 0,
+      valid: 0,
+      invalid: 0,
+      duplicates: 0,
+      invalidSamples: [],
+    });
   return sourceStats.get(source);
 };
 const accept = (row, region) => {
@@ -74,7 +119,11 @@ const accept = (row, region) => {
   const errors = validateRow(row);
   if (errors.length) {
     s.invalid++;
-    if (s.invalidSamples.length < 5) s.invalidSamples.push({ sourceRecordId: row?.sourceRecordId ?? null, errors });
+    if (s.invalidSamples.length < 5)
+      s.invalidSamples.push({
+        sourceRecordId: row?.sourceRecordId ?? null,
+        errors,
+      });
     return;
   }
   const k = rowKey(row);
@@ -88,9 +137,14 @@ const accept = (row, region) => {
   rows.push(row);
 };
 
-const own = aimlRows(readFileSync(mirrorFilePath('ej86-fda-ai', 'aiml'), 'utf8'), { retrievedAt });
+const own = aimlRows(
+  readFileSync(mirrorFilePath('ej86-fda-ai', 'aiml'), 'utf8'),
+  { retrievedAt },
+);
 for (const r of own.rows) accept(r, 'master');
-console.log(`fuente propia fda-ai-enabled-devices: ${own.rows.length} filas (${own.errors.length} descartadas al leer)`);
+console.log(
+  `fuente propia fda-ai-enabled-devices: ${own.rows.length} filas (${own.errors.length} descartadas al leer)`,
+);
 
 const regionStatus = [];
 for (const region of REGIONS) {
@@ -98,7 +152,10 @@ for (const region of REGIONS) {
     regionStatus.push({ region, status: 'skipped' });
     continue;
   }
-  const loc = locateRegion(region, { repoDir: REPO, dirOverride: argValue(`--${region}-dir`) });
+  const loc = locateRegion(region, {
+    repoDir: REPO,
+    dirOverride: argValue(`--${region}-dir`),
+  });
   if (loc.kind === 'missing') {
     regionStatus.push({ region, status: 'pending', reason: loc.reason });
     console.log(`región ${region}: PENDIENTE (${loc.reason})`);
@@ -107,7 +164,10 @@ for (const region of REGIONS) {
   const manifest = readRegionManifest(loc, { repoDir: REPO });
   const files = [];
   let n = 0;
-  for (const row of readRegionRows(loc, manifest, { repoDir: REPO, onFile: (f) => files.push(f) })) {
+  for (const row of readRegionRows(loc, manifest, {
+    repoDir: REPO,
+    onFile: (f) => files.push(f),
+  })) {
     accept(row, region);
     n++;
   }
@@ -124,7 +184,9 @@ for (const region of REGIONS) {
     rowsRead: n,
     gaps: manifest.gaps ?? [],
   });
-  console.log(`región ${region}: ${n} filas desde ${loc.ref ?? loc.dir} (${files.filter((f) => !f.ok).length} archivos con sha256 distinto, descartados)`);
+  console.log(
+    `región ${region}: ${n} filas desde ${loc.ref ?? loc.dir} (${files.filter((f) => !f.ok).length} archivos con sha256 distinto, descartados)`,
+  );
 }
 
 // --- 3. Taxonomía de los registros, fabricantes y catálogo --------------------
@@ -132,7 +194,17 @@ for (const row of rows) taxonomy.addFromRow(row);
 const propagated = taxonomy.propagateByCrosswalk();
 const resolution = resolveManufacturers(rows);
 const catalog = consolidate(rows, taxonomy, resolution);
-console.log(`filas válidas ${rows.length}; de diagnóstico ${catalog.included}; fabricantes ${catalog.manufacturers.length}; modelos ${catalog.models.length}; nodos heredados por mapeo ${propagated}`);
+console.log(
+  `filas válidas ${rows.length}; de diagnóstico ${catalog.included}; fabricantes ${catalog.manufacturers.length}; modelos ${catalog.models.length}; nodos heredados por mapeo ${propagated}`,
+);
+
+const industryData = loadIndustryDirectories(
+  join(HERE, 'data', 'industry-directories.json'),
+);
+const industry = matchIndustry(industryData, resolution.entities);
+console.log(
+  `listados del sector: ${industry.stats.mentions} menciones, ${industry.stats.companies} empresas (${industry.stats.companiesMatchedToRegistry} cruzan con un registro, ${industry.stats.companiesOnlyInIndustryLists} solo en listados)`,
+);
 
 // --- 4. Salida ---------------------------------------------------------------
 mkdirSync(OUT, { recursive: true });
@@ -143,12 +215,29 @@ const files = [
   ...writeNdjsonGzSharded(OUT, 'manufacturers', catalog.manufacturers),
   ...writeNdjsonGzSharded(OUT, 'models', catalog.models),
   ...writeNdjsonGzSharded(OUT, 'review-manufacturers', resolution.review),
+  ...writeNdjsonGzSharded(OUT, 'industry-mentions', industry.mentions),
+  ...writeNdjsonGzSharded(OUT, 'industry-candidates', industry.candidates),
 ];
-const coverage = coverageReport({ taxonomy: tax, catalog, resolution, sourceStats: [...sourceStats.values()], regionStatus, panelParts, ivdPanels: [...ivdPanels].sort(), mirrors: MIRRORS });
-writeFileSync(join(OUT, 'coverage.json'), `${JSON.stringify(coverage.json, null, 2)}\n`);
+const coverage = coverageReport({
+  taxonomy: tax,
+  catalog,
+  resolution,
+  industry: industry.stats,
+  sourceStats: [...sourceStats.values()],
+  regionStatus,
+  panelParts,
+  ivdPanels: [...ivdPanels].sort(),
+  mirrors: MIRRORS,
+});
+writeFileSync(
+  join(OUT, 'coverage.json'),
+  `${JSON.stringify(coverage.json, null, 2)}\n`,
+);
 writeFileSync(join(OUT, 'coverage.md'), coverage.markdown);
 writeFileSync(
   join(OUT, 'manifest.json'),
   `${JSON.stringify({ region: 'master', formatVersion: 1, generatedAt: new Date().toISOString().replace(/\.\d+Z$/, 'Z'), regions: regionStatus.map(({ files: _f, ...r }) => r), files }, null, 2)}\n`,
 );
-console.log(`out/ → ${files.length} archivos de datos + coverage.{json,md} + manifest.json`);
+console.log(
+  `out/ → ${files.length} archivos de datos + coverage.{json,md} + manifest.json`,
+);

@@ -1,7 +1,7 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T03:17:39Z",
+  "generatedAt": "2026-10-24T03:31:04Z",
   "regions": [
     {
       "region": "us",
@@ -49,6 +49,18 @@
       "rows": 29,
       "bytes": 3108,
       "sha256": "f7166755bb3bb7bdadd0b66fda1efd870a0da21ae490660ef01a555cf5983108"
+    },
+    {
+      "path": "industry-mentions.ndjson.gz",
+      "rows": 552,
+      "bytes": 22054,
+      "sha256": "e868a8213d8eaa243085d3990e46dd604b8452c96797958d9e1cc79e76c4f8fb"
+    },
+    {
+      "path": "industry-candidates.ndjson.gz",
+      "rows": 330,
+      "bytes": 15853,
+      "sha256": "3e72dfb09895f66c0529698c588caf494f6887d012fef7db8c03811ed2ab0062"
     }
   ]
 }

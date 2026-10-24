@@ -10,7 +10,14 @@
 
 import { MIRRORS, mirrorVersion } from './sources.mjs';
 
-export const AIML_COLUMNS = Object.freeze(['Date of Final Decision', 'Submission Number', 'Device', 'Company', 'Panel (Lead)', 'Primary Product Code']);
+export const AIML_COLUMNS = Object.freeze([
+  'Date of Final Decision',
+  'Submission Number',
+  'Device',
+  'Company',
+  'Panel (Lead)',
+  'Primary Product Code',
+]);
 
 /** CSV con comillas dobles (RFC 4180): campos con coma, comillas o saltos. */
 export function parseCsv(text) {
@@ -56,10 +63,14 @@ const usDate = (s) => {
  * datos de la FDA (510(k): K…; De Novo: DEN…; PMA: P…; HDE: H…).
  */
 export function fdaSubmissionUrl(id) {
-  if (/^K\d{6}$/.test(id)) return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=${id}`;
-  if (/^DEN\d{6}$/.test(id)) return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/denovo.cfm?id=${id}`;
-  if (/^P\d{6}/.test(id)) return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpma/pma.cfm?id=${id.replace(/\/.*$/, '')}`;
-  if (/^H\d{6}/.test(id)) return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfhde/hde.cfm?id=${id}`;
+  if (/^K\d{6}$/.test(id))
+    return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=${id}`;
+  if (/^DEN\d{6}$/.test(id))
+    return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/denovo.cfm?id=${id}`;
+  if (/^P\d{6}/.test(id))
+    return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpma/pma.cfm?id=${id.replace(/\/.*$/, '')}`;
+  if (/^H\d{6}/.test(id))
+    return `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfhde/hde.cfm?id=${id}`;
   return null;
 }
 
@@ -68,7 +79,8 @@ export function aimlRows(text, { retrievedAt }) {
   const table = parseCsv(text);
   const header = table[0].map((h) => h.trim());
   const missing = AIML_COLUMNS.filter((c) => !header.includes(c));
-  if (missing.length) throw new Error(`lista IA: faltan columnas ${missing.join(', ')}`);
+  if (missing.length)
+    throw new Error(`lista IA: faltan columnas ${missing.join(', ')}`);
   const col = Object.fromEntries(header.map((h, i) => [h, i]));
   const f = MIRRORS['ej86-fda-ai'].files.aiml;
   const version = mirrorVersion('ej86-fda-ai');
@@ -83,7 +95,10 @@ export function aimlRows(text, { retrievedAt }) {
     const id = get('Submission Number');
     const company = get('Company');
     if (!id || !company) {
-      errors.push({ line: i + 1, reason: 'sin número de presentación o sin empresa' });
+      errors.push({
+        line: i + 1,
+        reason: 'sin número de presentación o sin empresa',
+      });
       continue;
     }
     const pc = get('Primary Product Code');

@@ -1,6 +1,6 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T03:17:39Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T03:31:04Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 
@@ -75,4 +75,14 @@ Generado: 2026-10-24T03:17:39Z. Se genera con `build.mjs`; no lo edite a mano.
 | Caso para revisión (no fusionado) | Casos |
 |---|---:|
 | possible-group-shared-first-word | 29 |
+
+## Listados del sector (asociaciones y ferias)
+
+| Medida | Valor |
+|---|---:|
+| Organizaciones | 46 |
+| Menciones con URL | 552 |
+| Empresas distintas | 370 |
+| … que cruzan con un fabricante de los registros | 40 |
+| … solo en listados del sector (candidatas) | 330 |
 

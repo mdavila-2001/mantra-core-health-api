@@ -58,7 +58,11 @@ export function ivdPanelsFrom(panelParts) {
   const ivd = new Set(Object.keys(IVD_PARTS));
   return new Set(
     Object.entries(panelParts)
-      .filter(([, parts]) => Object.keys(parts).length > 0 && Object.keys(parts).every((p) => ivd.has(p)))
+      .filter(
+        ([, parts]) =>
+          Object.keys(parts).length > 0 &&
+          Object.keys(parts).every((p) => ivd.has(p)),
+      )
       .map(([panel]) => panel),
   );
 }
@@ -74,11 +78,15 @@ export function parsePcd(text) {
   const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '');
   const header = lines[0].split('|').map((h) => h.trim());
   const missing = PCD_COLUMNS.filter((c) => !header.includes(c));
-  if (missing.length) throw new Error(`foiclass: faltan columnas ${missing.join(', ')}`);
+  if (missing.length)
+    throw new Error(`foiclass: faltan columnas ${missing.join(', ')}`);
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const cells = lines[i].split('|');
-    if (cells.length !== header.length) throw new Error(`foiclass:${i + 1}: ${cells.length} campos, se esperaban ${header.length}`);
+    if (cells.length !== header.length)
+      throw new Error(
+        `foiclass:${i + 1}: ${cells.length} campos, se esperaban ${header.length}`,
+      );
     rows.push(Object.fromEntries(header.map((h, j) => [h, cells[j]])));
   }
   return rows;
@@ -93,10 +101,21 @@ export function parsePcd(text) {
  */
 export function decidePcd(row, ivdPanels = new Set()) {
   const cfr = classifyRegulation(row.REGULATIONNUMBER);
-  if (cfr.diagnostic !== null) return { cfr, diagnostic: cfr.diagnostic, branch: cfr.diagnostic ? cfr.kind : null, basis: cfr.basis };
+  if (cfr.diagnostic !== null)
+    return {
+      cfr,
+      diagnostic: cfr.diagnostic,
+      branch: cfr.diagnostic ? cfr.kind : null,
+      basis: cfr.basis,
+    };
   const panel = nz(row.REVIEW_PANEL);
   if (cfr.basis === 'no-regulation' && panel && ivdPanels.has(panel)) {
-    return { cfr, diagnostic: true, branch: 'ivd', basis: 'fda-review-panel-ivd' };
+    return {
+      cfr,
+      diagnostic: true,
+      branch: 'ivd',
+      basis: 'fda-review-panel-ivd',
+    };
   }
   return { cfr, diagnostic: null, branch: null, basis: cfr.basis };
 }
@@ -104,7 +123,8 @@ export function decidePcd(row, ivdPanels = new Set()) {
 /** Fila de `foiclass` → nodo de taxonomía. `provenance` la arma el llamador. */
 export function pcdNode(row, provenance, ivdPanels = new Set()) {
   const code = nz(row.PRODUCTCODE);
-  if (!code || !/^[A-Z0-9]{3}$/.test(code)) throw new Error(`foiclass: PRODUCTCODE inválido: ${row.PRODUCTCODE}`);
+  if (!code || !/^[A-Z0-9]{3}$/.test(code))
+    throw new Error(`foiclass: PRODUCTCODE inválido: ${row.PRODUCTCODE}`);
   const decision = decidePcd(row, ivdPanels);
   const panel = nz(row.REVIEW_PANEL);
   const specialty = nz(row.MEDICALSPECIALTY);

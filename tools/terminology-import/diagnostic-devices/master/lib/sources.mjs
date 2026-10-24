@@ -12,29 +12,38 @@
 import { resolve } from 'node:path';
 import { BUILD_DIR } from '../../../lib/glossary-es/common.mjs';
 
-export const CACHE_DIR = resolve(BUILD_DIR, 'diagnostic-devices-master', 'cache');
+export const CACHE_DIR = resolve(
+  BUILD_DIR,
+  'diagnostic-devices-master',
+  'cache',
+);
 
 export const MIRRORS = Object.freeze({
   'ej86-fda-ai': {
     repo: 'https://github.com/ej86/fda-ai-medical-device-analytics.git',
     commit: '8840a03632ffdc346a8bf05a459236c913b9198c',
     commitDate: '2026-08-28T23:08:44+09:00',
-    license: 'Sin licencia declarada en el repositorio; el contenido son datos públicos de la FDA (obra del Gobierno de EE. UU., dominio público, 17 U.S.C. § 105).',
+    license:
+      'Sin licencia declarada en el repositorio; el contenido son datos públicos de la FDA (obra del Gobierno de EE. UU., dominio público, 17 U.S.C. § 105).',
     files: {
       foiclass: {
         path: 'foiclass.csv',
-        sha256: 'ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de',
+        sha256:
+          'ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de',
         source: 'fda-pcd',
         name: 'FDA Product Classification Database (foiclass)',
-        officialUrl: 'https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files',
+        officialUrl:
+          'https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files',
         rows: 7088,
       },
       aiml: {
         path: 'aiml-devices-csv.csv',
-        sha256: '4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d',
+        sha256:
+          '4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d',
         source: 'fda-ai-enabled-devices',
         name: 'FDA Artificial Intelligence-Enabled Medical Devices list',
-        officialUrl: 'https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices',
+        officialUrl:
+          'https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices',
         rows: 1524,
       },
     },
@@ -47,4 +56,5 @@ export const mirrorVersion = (mirrorKey) => {
   return `git:${m.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '')}@${m.commit.slice(0, 12)} (${m.commitDate.slice(0, 10)})`;
 };
 
-export const mirrorFilePath = (mirrorKey, fileKey) => resolve(CACHE_DIR, mirrorKey, MIRRORS[mirrorKey].files[fileKey].path);
+export const mirrorFilePath = (mirrorKey, fileKey) =>
+  resolve(CACHE_DIR, mirrorKey, MIRRORS[mirrorKey].files[fileKey].path);

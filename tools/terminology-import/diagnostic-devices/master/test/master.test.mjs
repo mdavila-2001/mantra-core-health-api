@@ -3,21 +3,45 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { FIELDS, readNdjsonGz, validateRow, writeNdjsonGzSharded } from '../lib/exchange.mjs';
+import {
+  FIELDS,
+  readNdjsonGz,
+  validateRow,
+  writeNdjsonGzSharded,
+} from '../lib/exchange.mjs';
 import { classifyRegulation } from '../lib/cfr.mjs';
-import { derivePanelParts, ivdPanelsFrom, parsePcd, pcdNode } from '../lib/fda-pcd.mjs';
+import {
+  derivePanelParts,
+  ivdPanelsFrom,
+  parsePcd,
+  pcdNode,
+} from '../lib/fda-pcd.mjs';
 import { aimlRows, fdaSubmissionUrl, parseCsv } from '../lib/own-sources.mjs';
 import { Taxonomy, emdnParent } from '../lib/taxonomy.mjs';
-import { normalizeManufacturerName, resolveManufacturers } from '../lib/manufacturers.mjs';
+import {
+  normalizeManufacturerName,
+  resolveManufacturers,
+} from '../lib/manufacturers.mjs';
 import { consolidate, labelKey } from '../lib/consolidate.mjs';
-import { locateRegion, readRegionManifest, readRegionRows } from '../lib/regions.mjs';
+import {
+  locateRegion,
+  readRegionManifest,
+  readRegionRows,
+} from '../lib/regions.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const RETRIEVED = '2026-10-24T03:00:00Z';
@@ -46,20 +70,33 @@ function pcdTaxonomy() {
 
 test('classifyRegulation: subpartes diagnósticas, de monitoreo e IVD', () => {
   assert.deepEqual(
-    (({ diagnostic, kind, subpart }) => ({ diagnostic, kind, subpart }))(classifyRegulation('892.1750')),
+    (({ diagnostic, kind, subpart }) => ({ diagnostic, kind, subpart }))(
+      classifyRegulation('892.1750'),
+    ),
     { diagnostic: true, kind: 'diagnostic', subpart: 'B' },
   );
   assert.equal(classifyRegulation('870.2340').kind, 'monitoring');
   assert.equal(classifyRegulation('880.2910').kind, 'monitoring');
   assert.equal(classifyRegulation('862.2160').kind, 'ivd');
   assert.equal(classifyRegulation('862.2160').subpart, 'C');
-  assert.equal(classifyRegulation('892.2050').subpart, 'B', 'image processing está en la subparte B (892.1000–892.2100)');
+  assert.equal(
+    classifyRegulation('892.2050').subpart,
+    'B',
+    'image processing está en la subparte B (892.1000–892.2100)',
+  );
 });
 
 test('classifyRegulation: lo no diagnóstico y lo que no se puede decidir', () => {
   assert.equal(classifyRegulation('878.4400').diagnostic, false);
-  assert.equal(classifyRegulation('878.4400').basis, 'cfr-non-diagnostic-subpart');
-  assert.equal(classifyRegulation('864.9175').diagnostic, false, 'subparte J: establecimientos de sangre');
+  assert.equal(
+    classifyRegulation('878.4400').basis,
+    'cfr-non-diagnostic-subpart',
+  );
+  assert.equal(
+    classifyRegulation('864.9175').diagnostic,
+    false,
+    'subparte J: establecimientos de sangre',
+  );
   assert.equal(classifyRegulation('864.9175').basis, 'cfr-blood-establishment');
   assert.equal(classifyRegulation('610.40').basis, 'cfr-non-device-part');
   // 878.1830 es más nueva que la tabla verificada de la subparte B (hasta 878.1820): no se asigna por cercanía.
@@ -96,7 +133,16 @@ test('parsePcd + pcdNode sobre el recorte real de foiclass', () => {
 });
 
 test('ivdPanelsFrom exige que TODOS los códigos con regulación del panel estén en 862/864/866', () => {
-  assert.deepEqual([...ivdPanelsFrom({ TX: { 862: 10 }, CH: { 862: 10, 880: 1 }, RA: { 892: 3 } })], ['TX']);
+  assert.deepEqual(
+    [
+      ...ivdPanelsFrom({
+        TX: { 862: 10 },
+        CH: { 862: 10, 880: 1 },
+        RA: { 892: 3 },
+      }),
+    ],
+    ['TX'],
+  );
 });
 
 // --- Formato de intercambio ---------------------------------------------------
@@ -105,25 +151,67 @@ test('validateRow: acepta una fila completa y rechaza lo incompleto', () => {
   assert.deepEqual(validateRow(row()), []);
   const { model: _m, ...sinModel } = row();
   assert.match(validateRow(sinModel).join(), /falta el campo model/);
-  assert.match(validateRow(row({ manufacturerName: null })).join(), /manufacturerName no puede ser null/);
-  assert.match(validateRow(row({ authorizationDate: '03/30/2026' })).join(), /YYYY-MM-DD/);
-  assert.match(validateRow(row({ retrievedAt: '2026-10-24' })).join(), /retrievedAt/);
-  assert.match(validateRow(row({ manufacturerRegistryId: '3002807468' })).join(), /prefijo/);
-  assert.match(validateRow(row({ deviceTypeSystem: 'fda-product-code' })).join(), /van juntos/);
-  assert.deepEqual(validateRow(row({ deviceTypeSystem: 'gmdn-pt', deviceTypeName: 'Haematology analyser IVD, automated' })), []);
-  assert.match(validateRow(row({ deviceTypeSystem: 'nomenclatura-rara', deviceTypeCode: 'X' })).join(), /desconocido/);
+  assert.match(
+    validateRow(row({ manufacturerName: null })).join(),
+    /manufacturerName no puede ser null/,
+  );
+  assert.match(
+    validateRow(row({ authorizationDate: '03/30/2026' })).join(),
+    /YYYY-MM-DD/,
+  );
+  assert.match(
+    validateRow(row({ retrievedAt: '2026-10-24' })).join(),
+    /retrievedAt/,
+  );
+  assert.match(
+    validateRow(row({ manufacturerRegistryId: '3002807468' })).join(),
+    /prefijo/,
+  );
+  assert.match(
+    validateRow(row({ deviceTypeSystem: 'fda-product-code' })).join(),
+    /van juntos/,
+  );
+  assert.deepEqual(
+    validateRow(
+      row({
+        deviceTypeSystem: 'gmdn-pt',
+        deviceTypeName: 'Haematology analyser IVD, automated',
+      }),
+    ),
+    [],
+  );
+  assert.match(
+    validateRow(
+      row({ deviceTypeSystem: 'nomenclatura-rara', deviceTypeCode: 'X' }),
+    ).join(),
+    /desconocido/,
+  );
 });
 
 test('writeNdjsonGzSharded parte sin cortar líneas y se relee igual', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'dx-shard-'));
   try {
-    const rows = Array.from({ length: 3000 }, (_, i) => ({ i, text: createHash('sha256').update(String(i)).digest('hex').repeat(4) }));
-    const files = writeNdjsonGzSharded(dir, 'demo', rows, { maxBytes: 64 * 1024, rawChunkBytes: 200 * 1024 });
+    const rows = Array.from({ length: 3000 }, (_, i) => ({
+      i,
+      text: createHash('sha256').update(String(i)).digest('hex').repeat(4),
+    }));
+    const files = writeNdjsonGzSharded(dir, 'demo', rows, {
+      maxBytes: 64 * 1024,
+      rawChunkBytes: 200 * 1024,
+    });
     assert.ok(files.length > 1, 'tiene que partir');
-    assert.ok(files.every((f) => /^demo-\d{4}\.ndjson\.gz$/.test(f.path) && f.bytes <= 64 * 1024));
-    assert.equal(files.reduce((n, f) => n + f.rows, 0), rows.length);
+    assert.ok(
+      files.every(
+        (f) => /^demo-\d{4}\.ndjson\.gz$/.test(f.path) && f.bytes <= 64 * 1024,
+      ),
+    );
+    assert.equal(
+      files.reduce((n, f) => n + f.rows, 0),
+      rows.length,
+    );
     const back = [];
-    for (const f of files) for await (const r of readNdjsonGz(join(dir, f.path))) back.push(r);
+    for (const f of files)
+      for await (const r of readNdjsonGz(join(dir, f.path))) back.push(r);
     assert.deepEqual(back, rows);
     // Reescribir con menos filas borra los fragmentos viejos.
     writeNdjsonGzSharded(dir, 'demo', rows.slice(0, 10));
@@ -143,7 +231,10 @@ test('parseCsv respeta comillas con comas y saltos de línea', () => {
 });
 
 test('aimlRows convierte el recorte real al formato común', () => {
-  const { rows, errors } = aimlRows(readFileSync(join(FX, 'aiml.sample.csv'), 'utf8'), { retrievedAt: RETRIEVED });
+  const { rows, errors } = aimlRows(
+    readFileSync(join(FX, 'aiml.sample.csv'), 'utf8'),
+    { retrievedAt: RETRIEVED },
+  );
   assert.equal(errors.length, 0);
   assert.equal(rows.length, 5);
   for (const r of rows) assert.deepEqual(validateRow(r), [], r.sourceRecordId);
@@ -152,10 +243,22 @@ test('aimlRows convierte el recorte real al formato común', () => {
   assert.equal(den.authorizationDate, '2023-12-12');
   assert.equal(den.deviceTypeCode, 'QZF');
   assert.equal(den.deviceTypeName, null, 'la lista no trae el nombre del tipo');
-  assert.equal(den.sourceUrl, 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/denovo.cfm?id=DEN230027');
-  assert.equal(fdaSubmissionUrl('K254207'), 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=K254207');
-  assert.equal(fdaSubmissionUrl('P940029'), 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpma/pma.cfm?id=P940029');
-  assert.equal(rows.find((r) => r.sourceRecordId === 'K253574').brandName, 'SOMATOM X.cite; SOMATOM X.ceed');
+  assert.equal(
+    den.sourceUrl,
+    'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/denovo.cfm?id=DEN230027',
+  );
+  assert.equal(
+    fdaSubmissionUrl('K254207'),
+    'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/pmn.cfm?ID=K254207',
+  );
+  assert.equal(
+    fdaSubmissionUrl('P940029'),
+    'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpma/pma.cfm?id=P940029',
+  );
+  assert.equal(
+    rows.find((r) => r.sourceRecordId === 'K253574').brandName,
+    'SOMATOM X.cite; SOMATOM X.ceed',
+  );
 });
 
 // --- Taxonomía ----------------------------------------------------------------
@@ -165,24 +268,54 @@ test('emdnParent sigue la estructura publicada del código', () => {
   assert.equal(emdnParent('W0101'), 'W01');
   assert.equal(emdnParent('W01'), 'W');
   assert.equal(emdnParent('W'), null);
-  assert.equal(emdnParent('W010'), null, 'longitud que la estructura no admite');
+  assert.equal(
+    emdnParent('W010'),
+    null,
+    'longitud que la estructura no admite',
+  );
 });
 
 test('Taxonomy: EMDN W es IVD; los ancestros estructurales no reciben nombre inventado', () => {
   const tax = new Taxonomy();
-  tax.addFromRow(row({ deviceTypeSystem: 'emdn', deviceTypeCode: 'W0101060101', deviceTypeName: 'BLOOD GLUCOSE TEST STRIPS' }));
+  tax.addFromRow(
+    row({
+      deviceTypeSystem: 'emdn',
+      deviceTypeCode: 'W0101060101',
+      deviceTypeName: 'BLOOD GLUCOSE TEST STRIPS',
+    }),
+  );
   const leaf = tax.nodes.get('emdn|W0101060101');
   assert.equal(leaf.diagnostic, true);
   assert.equal(leaf.basis, 'emdn-category-w');
   assert.equal(tax.nodes.get('emdn|W01').name, null);
   assert.equal(tax.nodes.get('emdn|W').attributes.structural, true);
-  tax.addFromRow(row({ sourceRecordId: 'z', deviceTypeSystem: 'emdn', deviceTypeCode: 'Z1201', deviceTypeName: 'X' }));
-  assert.equal(tax.nodes.get('emdn|Z1201').diagnostic, null, 'Z mezcla diagnóstico y terapia: sin criterio');
+  tax.addFromRow(
+    row({
+      sourceRecordId: 'z',
+      deviceTypeSystem: 'emdn',
+      deviceTypeCode: 'Z1201',
+      deviceTypeName: 'X',
+    }),
+  );
+  assert.equal(
+    tax.nodes.get('emdn|Z1201').diagnostic,
+    null,
+    'Z mezcla diagnóstico y terapia: sin criterio',
+  );
 });
 
 test('Taxonomy: un mapeo publicado (misma fila con dos tipos) propaga la decisión solo si es unánime', () => {
   const { tax } = pcdTaxonomy();
-  const gudid = (id, pc, gmdn) => row({ source: 'fda-gudid', sourceRecordId: id, deviceTypeSystem: 'fda-product-code', deviceTypeCode: pc, extra: { deviceTypes: [{ system: 'gmdn', code: gmdn, name: `GMDN ${gmdn}` }] } });
+  const gudid = (id, pc, gmdn) =>
+    row({
+      source: 'fda-gudid',
+      sourceRecordId: id,
+      deviceTypeSystem: 'fda-product-code',
+      deviceTypeCode: pc,
+      extra: {
+        deviceTypes: [{ system: 'gmdn', code: gmdn, name: `GMDN ${gmdn}` }],
+      },
+    });
   tax.addFromRow(gudid('1', 'JAK', '37618'));
   tax.addFromRow(gudid('2', 'JAK', '37618'));
   tax.addFromRow(gudid('3', 'JAK', '11111'));
@@ -190,11 +323,23 @@ test('Taxonomy: un mapeo publicado (misma fila con dos tipos) propaga la decisi�
   assert.equal(tax.propagateByCrosswalk(), 2);
   assert.equal(tax.nodes.get('gmdn|37618').diagnostic, true);
   assert.equal(tax.nodes.get('gmdn|37618').basis, 'crosswalk-published');
-  assert.equal(tax.crosswalks.get('gmdn|37618→fda-product-code|JAK').records, 2);
+  assert.equal(
+    tax.crosswalks.get('gmdn|37618→fda-product-code|JAK').records,
+    2,
+  );
   assert.equal(tax.nodes.get('gmdn|11111').diagnostic, null);
   assert.equal(tax.nodes.get('gmdn|11111').basis, 'crosswalk-mixed');
-  assert.equal(tax.decideRow(row({ deviceTypeSystem: 'gmdn', deviceTypeCode: '37618' })).diagnostic, true);
-  assert.equal(tax.decideRow(row({ deviceTypeSystem: 'fda-product-code', deviceTypeCode: 'GEI' })).diagnostic, false);
+  assert.equal(
+    tax.decideRow(row({ deviceTypeSystem: 'gmdn', deviceTypeCode: '37618' }))
+      .diagnostic,
+    true,
+  );
+  assert.equal(
+    tax.decideRow(
+      row({ deviceTypeSystem: 'fda-product-code', deviceTypeCode: 'GEI' }),
+    ).diagnostic,
+    false,
+  );
   assert.equal(tax.decideRow(row()).diagnostic, null);
 });
 
@@ -204,44 +349,120 @@ test('normalizeManufacturerName quita sufijos societarios y conserva el núcleo'
   const k = (s) => normalizeManufacturerName(s).key;
   assert.equal(k('Siemens Healthcare GmbH'), 'SIEMENS HEALTHCARE');
   assert.equal(k('Roche Diagnostics GmbH & Co. KG'), 'ROCHE DIAGNOSTICS');
-  assert.equal(k('Mindray Bio-Medical Electronics Co., Ltd.'), 'MINDRAY BIO MEDICAL ELECTRONICS');
+  assert.equal(
+    k('Mindray Bio-Medical Electronics Co., Ltd.'),
+    'MINDRAY BIO MEDICAL ELECTRONICS',
+  );
   assert.equal(k('Grupo Médico S.A. de C.V.'), 'GRUPO MEDICO');
   assert.equal(k('The Cooper Companies, Inc.'), 'COOPER COMPANIES');
   assert.equal(k('シスメックス株式会社'), 'シスメックス');
   assert.equal(k('Inc'), 'INC', 'nunca deja la clave vacía');
-  assert.notEqual(k('Sysmex Corporation'), k('シスメックス株式会社'), 'sin transliterar: eso exige un id publicado');
+  assert.notEqual(
+    k('Sysmex Corporation'),
+    k('シスメックス株式会社'),
+    'sin transliterar: eso exige un id publicado',
+  );
 });
 
 test('resolveManufacturers: fusiona por id publicado y por nombre+país; lo dudoso va a revisión', () => {
   const rows = [
-    row({ sourceRecordId: 'a', manufacturerName: 'Siemens Healthcare GmbH', manufacturerCountry: 'DE', manufacturerRegistryId: 'srn:DE-MF-000005678' }),
-    row({ sourceRecordId: 'b', manufacturerName: 'SIEMENS HEALTHINEERS AG', manufacturerCountry: 'DE', manufacturerRegistryId: 'srn:DE-MF-000005678' }),
-    row({ sourceRecordId: 'c', manufacturerName: 'Siemens Healthcare G.m.b.H.', manufacturerCountry: 'DE' }),
-    row({ sourceRecordId: 'd', manufacturerName: 'Acme Ltd', manufacturerCountry: 'GB', manufacturerRegistryId: 'lei:AAAAAAAAAAAAAAAAAA01' }),
-    row({ sourceRecordId: 'e', manufacturerName: 'ACME LIMITED', manufacturerCountry: 'GB', manufacturerRegistryId: 'lei:BBBBBBBBBBBBBBBBBB02' }),
-    row({ sourceRecordId: 'f', manufacturerName: 'Acme Ltd', manufacturerCountry: 'US' }),
+    row({
+      sourceRecordId: 'a',
+      manufacturerName: 'Siemens Healthcare GmbH',
+      manufacturerCountry: 'DE',
+      manufacturerRegistryId: 'srn:DE-MF-000005678',
+    }),
+    row({
+      sourceRecordId: 'b',
+      manufacturerName: 'SIEMENS HEALTHINEERS AG',
+      manufacturerCountry: 'DE',
+      manufacturerRegistryId: 'srn:DE-MF-000005678',
+    }),
+    row({
+      sourceRecordId: 'c',
+      manufacturerName: 'Siemens Healthcare G.m.b.H.',
+      manufacturerCountry: 'DE',
+    }),
+    row({
+      sourceRecordId: 'd',
+      manufacturerName: 'Acme Ltd',
+      manufacturerCountry: 'GB',
+      manufacturerRegistryId: 'lei:AAAAAAAAAAAAAAAAAA01',
+    }),
+    row({
+      sourceRecordId: 'e',
+      manufacturerName: 'ACME LIMITED',
+      manufacturerCountry: 'GB',
+      manufacturerRegistryId: 'lei:BBBBBBBBBBBBBBBBBB02',
+    }),
+    row({
+      sourceRecordId: 'f',
+      manufacturerName: 'Acme Ltd',
+      manufacturerCountry: 'US',
+    }),
   ];
   const { entities, entityOfRow, review } = resolveManufacturers(rows);
   const ent = (id) => entityOfRow.get(`test-src\u0000${id}`);
   assert.equal(ent('a'), ent('b'), 'mismo SRN');
   assert.equal(ent('a'), ent('c'), 'mismo nombre normalizado y país');
-  assert.notEqual(ent('d'), ent('e'), 'dos LEI distintos no se fusionan por nombre');
-  assert.notEqual(ent('d'), ent('f'), 'mismo nombre en otro país: no se fusiona');
+  assert.notEqual(
+    ent('d'),
+    ent('e'),
+    'dos LEI distintos no se fusionan por nombre',
+  );
+  assert.notEqual(
+    ent('d'),
+    ent('f'),
+    'mismo nombre en otro país: no se fusiona',
+  );
   assert.ok(review.some((r) => r.kind === 'name-match-conflicting-ids'));
-  assert.ok(review.some((r) => r.kind === 'same-name-different-country' && r.key === 'ACME'));
+  assert.ok(
+    review.some(
+      (r) => r.kind === 'same-name-different-country' && r.key === 'ACME',
+    ),
+  );
   const siemens = entities.find((e) => e.id === ent('a'));
   assert.equal(siemens.anchor, 'srn:DE-MF-000005678');
-  assert.deepEqual(new Set(siemens.merges.map((m) => m.rule)), new Set(['same-registry-id', 'same-name-same-country']));
+  assert.deepEqual(
+    new Set(siemens.merges.map((m) => m.rule)),
+    new Set(['same-registry-id', 'same-name-same-country']),
+  );
   // Ids estables entre corridas.
-  assert.equal(resolveManufacturers(rows).entityOfRow.get('test-src\u0000a'), ent('a'));
+  assert.equal(
+    resolveManufacturers(rows).entityOfRow.get('test-src\u0000a'),
+    ent('a'),
+  );
 });
 
 test('resolveManufacturers: grupos solo por relaciones publicadas', () => {
-  const rows = [row({ manufacturerName: 'Hija SA', manufacturerRegistryId: 'lei:CHILD0000000000000001' }), row({ sourceRecordId: 'p', manufacturerName: 'Madre AG', manufacturerRegistryId: 'lei:PARENT000000000000001' })];
-  const { entities } = resolveManufacturers(rows, { groupLinks: [{ child: 'lei:CHILD0000000000000001', parent: 'lei:PARENT000000000000001', relation: 'IS_DIRECTLY_CONSOLIDATED_BY', source: 'gleif-rr', url: 'https://example.org/rr' }] });
+  const rows = [
+    row({
+      manufacturerName: 'Hija SA',
+      manufacturerRegistryId: 'lei:CHILD0000000000000001',
+    }),
+    row({
+      sourceRecordId: 'p',
+      manufacturerName: 'Madre AG',
+      manufacturerRegistryId: 'lei:PARENT000000000000001',
+    }),
+  ];
+  const { entities } = resolveManufacturers(rows, {
+    groupLinks: [
+      {
+        child: 'lei:CHILD0000000000000001',
+        parent: 'lei:PARENT000000000000001',
+        relation: 'IS_DIRECTLY_CONSOLIDATED_BY',
+        source: 'gleif-rr',
+        url: 'https://example.org/rr',
+      },
+    ],
+  });
   const hija = entities.find((e) => e.displayName === 'Hija SA');
   assert.equal(hija.groups.length, 1);
-  assert.equal(hija.groups[0].parentEntityId, entities.find((e) => e.displayName === 'Madre AG').id);
+  assert.equal(
+    hija.groups[0].parentEntityId,
+    entities.find((e) => e.displayName === 'Madre AG').id,
+  );
   assert.equal(entities.length, 2, 'el grupo enlaza, no fusiona');
 });
 
@@ -249,14 +470,60 @@ test('resolveManufacturers: grupos solo por relaciones publicadas', () => {
 
 test('consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registro', () => {
   const { tax } = pcdTaxonomy();
-  const base = { deviceTypeSystem: 'fda-product-code', deviceTypeCode: 'JAK', manufacturerName: 'Acme Imaging Inc.', manufacturerCountry: 'US' };
+  const base = {
+    deviceTypeSystem: 'fda-product-code',
+    deviceTypeCode: 'JAK',
+    manufacturerName: 'Acme Imaging Inc.',
+    manufacturerCountry: 'US',
+  };
   const rows = [
-    row({ ...base, source: 'fda-gudid', sourceRecordId: 'g1', brandName: 'ACME CT™', model: 'X1', udiDi: '00812345000011' }),
-    row({ ...base, source: 'fda-510k', sourceRecordId: 'K000001', brandName: 'Acme  CT', model: 'x1' }),
-    row({ ...base, source: 'eudamed-udi', sourceRecordId: 'u1', brandName: 'ACME CT SCANNER', model: 'X-1', udiDi: '00812345000011', manufacturerName: 'Acme Imaging, Inc.' }),
-    row({ ...base, source: 'fda-gudid', sourceRecordId: 'g2', brandName: 'ACME CT', model: 'X2' }),
-    row({ ...base, source: 'fda-gudid', sourceRecordId: 'g3', deviceTypeCode: 'GEI', brandName: 'Bisturí', model: 'B' }),
-    row({ ...base, source: 'fda-gudid', sourceRecordId: 'g4', deviceTypeCode: 'DSQ', brandName: 'Bomba', model: 'B' }),
+    row({
+      ...base,
+      source: 'fda-gudid',
+      sourceRecordId: 'g1',
+      brandName: 'ACME CT™',
+      model: 'X1',
+      udiDi: '00812345000011',
+    }),
+    row({
+      ...base,
+      source: 'fda-510k',
+      sourceRecordId: 'K000001',
+      brandName: 'Acme  CT',
+      model: 'x1',
+    }),
+    row({
+      ...base,
+      source: 'eudamed-udi',
+      sourceRecordId: 'u1',
+      brandName: 'ACME CT SCANNER',
+      model: 'X-1',
+      udiDi: '00812345000011',
+      manufacturerName: 'Acme Imaging, Inc.',
+    }),
+    row({
+      ...base,
+      source: 'fda-gudid',
+      sourceRecordId: 'g2',
+      brandName: 'ACME CT',
+      model: 'X2',
+    }),
+    row({
+      ...base,
+      source: 'fda-gudid',
+      sourceRecordId: 'g3',
+      deviceTypeCode: 'GEI',
+      brandName: 'Bisturí',
+      model: 'B',
+    }),
+    row({
+      ...base,
+      source: 'fda-gudid',
+      sourceRecordId: 'g4',
+      deviceTypeCode: 'DSQ',
+      brandName: 'Bomba',
+      model: 'B',
+    }),
   ];
   for (const r of rows) tax.addFromRow(r);
   const resolution = resolveManufacturers(rows);
@@ -266,13 +533,20 @@ test('consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registr
   assert.equal(cat.excluded.undetermined, 1);
   assert.equal(cat.models.length, 2);
   const x1 = cat.models.find((m) => m.modelVariants.includes('X1'));
-  assert.equal(x1.registrations.length, 3, 'GUDID + 510(k) por etiqueta, EUDAMED por UDI-DI');
+  assert.equal(
+    x1.registrations.length,
+    3,
+    'GUDID + 510(k) por etiqueta, EUDAMED por UDI-DI',
+  );
   assert.deepEqual(x1.jurisdictions, ['EU', 'US']);
   assert.deepEqual(x1.deviceTypes, ['fda-product-code|JAK']);
   assert.equal(cat.manufacturers.length, 1);
   assert.equal(labelKey('Acme  CT™'), 'ACME CT');
   // Mismo resultado y mismos ids si se corre otra vez.
-  assert.deepEqual(consolidate(rows, tax, resolveManufacturers(rows)).models.map((m) => m.id), cat.models.map((m) => m.id));
+  assert.deepEqual(
+    consolidate(rows, tax, resolveManufacturers(rows)).models.map((m) => m.id),
+    cat.models.map((m) => m.id),
+  );
 });
 
 // --- Regiones -----------------------------------------------------------------------
@@ -280,23 +554,54 @@ test('consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registr
 test('regions: lee una carpeta out/ local y descarta el archivo cuyo sha256 no coincide', () => {
   const dir = mkdtempSync(join(tmpdir(), 'dx-region-'));
   try {
-    const good = gzipSync(`${JSON.stringify(row())}\n${JSON.stringify(row({ sourceRecordId: 'r2' }))}\n`);
+    const good = gzipSync(
+      `${JSON.stringify(row())}\n${JSON.stringify(row({ sourceRecordId: 'r2' }))}\n`,
+    );
     const bad = gzipSync(`${JSON.stringify(row({ sourceRecordId: 'r3' }))}\n`);
     writeFileSync(join(dir, 'test-src.ndjson.gz'), good);
     writeFileSync(join(dir, 'otro.ndjson.gz'), bad);
     const sha = (b) => createHash('sha256').update(b).digest('hex');
     writeFileSync(
       join(dir, 'manifest.json'),
-      JSON.stringify({ region: 'us', files: [{ path: 'test-src.ndjson.gz', source: 'test-src', rows: 2, sha256: sha(good) }, { path: 'otro.ndjson.gz', source: 'test-src', rows: 1, sha256: '0'.repeat(64) }] }),
+      JSON.stringify({
+        region: 'us',
+        files: [
+          {
+            path: 'test-src.ndjson.gz',
+            source: 'test-src',
+            rows: 2,
+            sha256: sha(good),
+          },
+          {
+            path: 'otro.ndjson.gz',
+            source: 'test-src',
+            rows: 1,
+            sha256: '0'.repeat(64),
+          },
+        ],
+      }),
     );
     const loc = locateRegion('us', { dirOverride: dir });
     assert.equal(loc.kind, 'dir');
     const files = [];
-    const got = [...readRegionRows(loc, readRegionManifest(loc), { onFile: (f) => files.push(f) })];
-    assert.deepEqual(got.map((r) => r.sourceRecordId), ['r1', 'r2']);
-    assert.deepEqual(files.map((f) => f.ok), [true, false]);
+    const got = [
+      ...readRegionRows(loc, readRegionManifest(loc), {
+        onFile: (f) => files.push(f),
+      }),
+    ];
+    assert.deepEqual(
+      got.map((r) => r.sourceRecordId),
+      ['r1', 'r2'],
+    );
+    assert.deepEqual(
+      files.map((f) => f.ok),
+      [true, false],
+    );
     assert.ok(statSync(join(dir, 'manifest.json')).size > 0);
-    assert.equal(locateRegion('eu', { dirOverride: join(dir, 'no-existe') }).kind, 'missing');
+    assert.equal(
+      locateRegion('eu', { dirOverride: join(dir, 'no-existe') }).kind,
+      'missing',
+    );
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

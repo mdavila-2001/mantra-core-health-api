@@ -46,7 +46,8 @@ const JURISDICTION_BY_PREFIX = [
 ];
 
 export function jurisdictionOf(source, region = null) {
-  for (const [p, j] of JURISDICTION_BY_PREFIX) if (source.startsWith(p)) return j;
+  for (const [p, j] of JURISDICTION_BY_PREFIX)
+    if (source.startsWith(p)) return j;
   return region === 'us' ? 'US' : null;
 }
 
@@ -82,8 +83,13 @@ class UF {
 
 const mostCommon = (values) => {
   const c = new Map();
-  for (const v of values) if (v !== null && v !== undefined) c.set(v, (c.get(v) ?? 0) + 1);
-  return [...c.entries()].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])))[0]?.[0] ?? null;
+  for (const v of values)
+    if (v !== null && v !== undefined) c.set(v, (c.get(v) ?? 0) + 1);
+  return (
+    [...c.entries()].sort(
+      (a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])),
+    )[0]?.[0] ?? null
+  );
 };
 
 /**
@@ -94,7 +100,12 @@ const mostCommon = (values) => {
 export function consolidate(rows, taxonomy, resolution) {
   const entityById = new Map(resolution.entities.map((e) => [e.id, e]));
   const included = [];
-  const excluded = { notDiagnostic: 0, undetermined: 0, undeterminedByType: new Map(), noType: 0 };
+  const excluded = {
+    notDiagnostic: 0,
+    undetermined: 0,
+    undeterminedByType: new Map(),
+    noType: 0,
+  };
   for (const row of rows) {
     const d = taxonomy.decideRow(row);
     if (d.diagnostic === true) included.push({ row, types: d.types });
@@ -102,7 +113,11 @@ export function consolidate(rows, taxonomy, resolution) {
     else {
       excluded.undetermined++;
       if (!d.types.length) excluded.noType++;
-      for (const t of d.types) excluded.undeterminedByType.set(t, (excluded.undeterminedByType.get(t) ?? 0) + 1);
+      for (const t of d.types)
+        excluded.undeterminedByType.set(
+          t,
+          (excluded.undeterminedByType.get(t) ?? 0) + 1,
+        );
     }
   }
 
@@ -136,7 +151,9 @@ export function consolidate(rows, taxonomy, resolution) {
     const ent = entityById.get(xs[0].entityId);
     const brand = mostCommon(xs.map((x) => x.row.brandName));
     const model = mostCommon(xs.map((x) => x.row.model));
-    const id = md5uuid(`mantra:dx-devices:model:${ent.anchor}:${labelKey(brand)}:${labelKey(model)}:${mostCommon(xs.map((x) => x.row.udiDi)) ?? ''}`);
+    const id = md5uuid(
+      `mantra:dx-devices:model:${ent.anchor}:${labelKey(brand)}:${labelKey(model)}:${mostCommon(xs.map((x) => x.row.udiDi)) ?? ''}`,
+    );
     const registrations = xs
       .map(({ row }) => ({
         source: row.source,
@@ -154,27 +171,49 @@ export function consolidate(rows, taxonomy, resolution) {
         brandName: row.brandName,
         model: row.model,
       }))
-      .sort((a, b) => a.source.localeCompare(b.source) || a.sourceRecordId.localeCompare(b.sourceRecordId));
+      .sort(
+        (a, b) =>
+          a.source.localeCompare(b.source) ||
+          a.sourceRecordId.localeCompare(b.sourceRecordId),
+      );
     models.push({
       id,
       manufacturerId: ent.id,
       manufacturerName: ent.displayName,
       brand,
-      brandVariants: [...new Set(xs.map((x) => x.row.brandName).filter(Boolean))].sort(),
+      brandVariants: [
+        ...new Set(xs.map((x) => x.row.brandName).filter(Boolean)),
+      ].sort(),
       model,
-      modelVariants: [...new Set(xs.map((x) => x.row.model).filter(Boolean))].sort(),
+      modelVariants: [
+        ...new Set(xs.map((x) => x.row.model).filter(Boolean)),
+      ].sort(),
       udiDis: [...new Set(xs.map((x) => x.row.udiDi).filter(Boolean))].sort(),
       deviceTypes: [...new Set(xs.flatMap((x) => x.types))].sort(),
-      jurisdictions: [...new Set(registrations.map((r) => r.jurisdiction).filter(Boolean))].sort(),
+      jurisdictions: [
+        ...new Set(registrations.map((r) => r.jurisdiction).filter(Boolean)),
+      ].sort(),
       registrations,
     });
   }
-  models.sort((a, b) => a.manufacturerName.localeCompare(b.manufacturerName) || String(a.brand).localeCompare(String(b.brand)) || String(a.model).localeCompare(String(b.model)) || a.id.localeCompare(b.id));
+  models.sort(
+    (a, b) =>
+      a.manufacturerName.localeCompare(b.manufacturerName) ||
+      String(a.brand).localeCompare(String(b.brand)) ||
+      String(a.model).localeCompare(String(b.model)) ||
+      a.id.localeCompare(b.id),
+  );
 
   // Fabricantes con lo que fabrican (solo los que tienen algún modelo de diagnóstico).
   const perEntity = new Map();
   for (const m of models) {
-    if (!perEntity.has(m.manufacturerId)) perEntity.set(m.manufacturerId, { models: 0, brands: new Set(), types: new Set(), jurisdictions: new Set() });
+    if (!perEntity.has(m.manufacturerId))
+      perEntity.set(m.manufacturerId, {
+        models: 0,
+        brands: new Set(),
+        types: new Set(),
+        jurisdictions: new Set(),
+      });
     const p = perEntity.get(m.manufacturerId);
     p.models++;
     if (m.brand) p.brands.add(m.brand);
@@ -185,7 +224,13 @@ export function consolidate(rows, taxonomy, resolution) {
     .filter((e) => perEntity.has(e.id))
     .map((e) => {
       const p = perEntity.get(e.id);
-      return { ...e, diagnosticModels: p.models, brands: [...p.brands].sort(), deviceTypes: [...p.types].sort(), jurisdictions: [...p.jurisdictions].sort() };
+      return {
+        ...e,
+        diagnosticModels: p.models,
+        brands: [...p.brands].sort(),
+        deviceTypes: [...p.types].sort(),
+        jurisdictions: [...p.jurisdictions].sort(),
+      };
     });
 
   return { models, manufacturers, included: included.length, excluded };

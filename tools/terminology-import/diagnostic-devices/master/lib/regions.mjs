@@ -18,9 +18,15 @@ import { parseNdjsonGzBuffer } from './exchange.mjs';
 
 export const REGIONS = Object.freeze(['us', 'eu', 'row']);
 export const REGION_BRANCH = (region) => `justin/seed-dx-devices-${region}`;
-export const REGION_OUT = (region) => `tools/terminology-import/diagnostic-devices/${region}/out`;
+export const REGION_OUT = (region) =>
+  `tools/terminology-import/diagnostic-devices/${region}/out`;
 
-const git = (args, cwd) => execFileSync('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 31 });
+const git = (args, cwd) =>
+  execFileSync('git', args, {
+    cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    maxBuffer: 1 << 31,
+  });
 const tryGit = (args, cwd) => {
   try {
     return git(args, cwd);
@@ -35,25 +41,67 @@ const tryGit = (args, cwd) => {
  * o `{ region, kind: 'missing' }`.
  */
 export function locateRegion(region, { repoDir, dirOverride } = {}) {
-  if (dirOverride) return existsSync(join(dirOverride, 'manifest.json')) ? { region, kind: 'dir', dir: dirOverride } : { region, kind: 'missing', reason: `sin manifest.json en ${dirOverride}` };
+  if (dirOverride)
+    return existsSync(join(dirOverride, 'manifest.json'))
+      ? { region, kind: 'dir', dir: dirOverride }
+      : {
+          region,
+          kind: 'missing',
+          reason: `sin manifest.json en ${dirOverride}`,
+        };
   const manifestPath = `${REGION_OUT(region)}/manifest.json`;
   const candidates = [];
   const preferred = `origin/${REGION_BRANCH(region)}`;
-  const refs = tryGit(['for-each-ref', '--format=%(refname:short)', 'refs/remotes/origin'], repoDir)?.toString().trim().split('\n').filter(Boolean) ?? [];
+  const refs =
+    tryGit(
+      ['for-each-ref', '--format=%(refname:short)', 'refs/remotes/origin'],
+      repoDir,
+    )
+      ?.toString()
+      .trim()
+      .split('\n')
+      .filter(Boolean) ?? [];
   for (const ref of refs) {
     if (ref.endsWith('/HEAD')) continue;
-    if (!tryGit(['cat-file', '-e', `${ref}:${manifestPath}`], repoDir)) continue;
-    const [commit, commitDate] = git(['log', '-1', '--format=%H %cI', ref], repoDir).toString().trim().split(' ');
+    if (!tryGit(['cat-file', '-e', `${ref}:${manifestPath}`], repoDir))
+      continue;
+    const [commit, commitDate] = git(
+      ['log', '-1', '--format=%H %cI', ref],
+      repoDir,
+    )
+      .toString()
+      .trim()
+      .split(' ');
     candidates.push({ ref, commit, commitDate, preferred: ref === preferred });
   }
-  if (!candidates.length) return { region, kind: 'missing', reason: `ninguna rama remota tiene ${manifestPath}` };
-  candidates.sort((a, b) => Number(b.preferred) - Number(a.preferred) || b.commitDate.localeCompare(a.commitDate));
-  return { region, kind: 'git', ...candidates[0], alternatives: candidates.slice(1).map((c) => c.ref) };
+  if (!candidates.length)
+    return {
+      region,
+      kind: 'missing',
+      reason: `ninguna rama remota tiene ${manifestPath}`,
+    };
+  candidates.sort(
+    (a, b) =>
+      Number(b.preferred) - Number(a.preferred) ||
+      b.commitDate.localeCompare(a.commitDate),
+  );
+  return {
+    region,
+    kind: 'git',
+    ...candidates[0],
+    alternatives: candidates.slice(1).map((c) => c.ref),
+  };
 }
 
 /** Lee el manifest de una región ya ubicada. */
 export function readRegionManifest(loc, { repoDir } = {}) {
-  const text = loc.kind === 'git' ? git(['show', `${loc.commit}:${REGION_OUT(loc.region)}/manifest.json`], repoDir).toString('utf8') : readFileSync(join(loc.dir, 'manifest.json'), 'utf8');
+  const text =
+    loc.kind === 'git'
+      ? git(
+          ['show', `${loc.commit}:${REGION_OUT(loc.region)}/manifest.json`],
+          repoDir,
+        ).toString('utf8')
+      : readFileSync(join(loc.dir, 'manifest.json'), 'utf8');
   return JSON.parse(text);
 }
 
@@ -63,7 +111,13 @@ export function readRegionManifest(loc, { repoDir } = {}) {
  */
 export function* readRegionRows(loc, manifest, { repoDir, onFile } = {}) {
   for (const f of manifest.files ?? []) {
-    const buf = loc.kind === 'git' ? git(['show', `${loc.commit}:${REGION_OUT(loc.region)}/${f.path}`], repoDir) : readFileSync(join(loc.dir, f.path));
+    const buf =
+      loc.kind === 'git'
+        ? git(
+            ['show', `${loc.commit}:${REGION_OUT(loc.region)}/${f.path}`],
+            repoDir,
+          )
+        : readFileSync(join(loc.dir, f.path));
     const sha = createHash('sha256').update(buf).digest('hex');
     const ok = !f.sha256 || f.sha256 === sha;
     onFile?.({ path: f.path, declaredRows: f.rows ?? null, sha256: sha, ok });
