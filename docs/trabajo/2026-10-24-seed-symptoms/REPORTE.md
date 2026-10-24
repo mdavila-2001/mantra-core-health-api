@@ -92,7 +92,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 ```
 
 ## No cubierto
-- No se arrancó la API: no se observó `/glossary` ni `GET /terminology/concepts` con los conceptos nuevos. El andamio de la base desechable sembró a mano los 8 conceptos internos y los 2 value sets que en un entorno real siembra la API.
+- No se arrancó la API: no se observó `/glossary` ni `GET /terminology/concepts` con los conceptos nuevos. El andamio de la base desechable (versionado en `evidencia/andamio/`) sembró a mano los 8 conceptos internos y los 2 value sets que en un entorno real siembra la API.
 - No se cargó contra el catálogo real de `seed-diseases`. Mondo se cargó desde `mondo.obo` como sustituto, y `omim`/`orphanet`/`decipher` se armaron con los códigos de HPOA en el formato que confirmó #688.
 - `fetch-symptom-sources.mjs --refresh` no se probó contra una release nueva: sólo bajada inicial y re-corrida con archivos presentes.
 - `concept_maps`: el plan genera 0 mapas, porque los xrefs NCIT de HPO apuntan a enfermedades fuera del subconjunto de NCIt. El código de mapas no tuvo ninguna fila real que ejercitar.

@@ -250,7 +250,7 @@ pendiente). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 ## Corrida en Postgres desechable
 
 Postgres 16 local, DDL de `database/SQL/00_shared` + `03_terminology` (copia del
-modelo). Andamio, **no commiteado**: los 7 conceptos internos que en un entorno
+modelo). Andamio (versionado en `docs/trabajo/2026-10-24-seed-symptoms/evidencia/andamio/`): los 7 conceptos internos que en un entorno
 real siembra la API (estado activo, idiomas, tipos de designación, is-a,
 `REL_SYMPTOM`, `REL_SYMPTOM_EXCLUDED`), los dos value sets del glosario y Mondo
 como sustituto de `seed-diseases`.
