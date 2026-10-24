@@ -168,3 +168,20 @@ test('cobertura: un par sólo cuenta como nuevo en la primera pasada que lo apor
   assert.equal(r.passes[0].newPairs, 3); // NOT no cuenta como par de tratamiento
   assert.equal(r.byPolarity.negative, 1);
 });
+
+test('data/ versionado: hashes de SHA256SUMS y afirmaciones con id único y procedencia', async () => {
+  const { createHash } = await import('node:crypto');
+  const { gunzipSync } = await import('node:zlib');
+  const DATA = join(dirname(fileURLToPath(import.meta.url)), '..', 'data');
+  const sums = readFileSync(join(DATA, 'SHA256SUMS'), 'utf8').trim().split('\n').map((l) => l.split(/\s+/));
+  for (const [hash, file] of sums) assert.equal(createHash('sha256').update(readFileSync(join(DATA, file))).digest('hex'), hash, file);
+  const parts = sums.map(([, f]) => f).filter((f) => /^drug-treatments-\d{3}\.ndjson\.gz$/.test(f));
+  const rows = parts.flatMap((f) => gunzipSync(readFileSync(join(DATA, f))).toString('utf8').trim().split('\n').map((l) => JSON.parse(l)));
+  const meta = JSON.parse(readFileSync(join(DATA, 'drug-treatments.meta.json'), 'utf8'));
+  assert.equal(rows.length, meta.assertions);
+  assert.equal(new Set(rows.map((r) => r.id)).size, rows.length);
+  for (const r of rows) {
+    assert.ok(RELATION_TYPES[r.relation.type], r.relation.type);
+    for (const k of ['recordId', 'uri', 'version', 'retrievedAt', 'commit', 'fileSha256']) assert.ok(r.source[k], `${r.id} ${k}`);
+  }
+});

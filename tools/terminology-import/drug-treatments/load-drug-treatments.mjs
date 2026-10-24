@@ -25,11 +25,13 @@
 
 import 'dotenv/config';
 import pg from 'pg';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 
 import { BUILD_DIR, ndjsonPath, nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
+import { DATA_DIR } from './export-data.mjs';
 import { linkStats, mergeTargets, resolveTargets } from './lib/link.mjs';
 import { assertionsPlan, relationshipsFor, typesPlan } from './lib/load-plan.mjs';
 import { SOURCES } from './lib/sources.mjs';
@@ -47,10 +49,20 @@ export const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
+/** Del build local si existe; si no, de las partes versionadas en `data/` (export-data.mjs). */
 export function readAssertions() {
   const path = ndjsonPath('drug-treatments');
-  if (!existsSync(path)) throw new Error(`Falta ${path}. Corré primero build-drug-treatments.mjs.`);
-  return readNdjson(path);
+  if (existsSync(path)) return readNdjson(path);
+  const parts = existsSync(DATA_DIR) ? readdirSync(DATA_DIR).filter((f) => /^drug-treatments-\d{3}\.ndjson\.gz$/.test(f)).sort() : [];
+  if (parts.length === 0) throw new Error(`Falta ${path} y no hay partes en ${DATA_DIR}. Corré build-drug-treatments.mjs.`);
+  console.log(`[load] leyendo ${parts.length} partes versionadas de ${DATA_DIR}`);
+  return parts.flatMap((f) =>
+    gunzipSync(readFileSync(join(DATA_DIR, f)))
+      .toString('utf8')
+      .split('\n')
+      .filter((l) => l.trim() !== '')
+      .map((l) => JSON.parse(l)),
+  );
 }
 
 async function insertMany(client, table, columns, tuples, casts) {

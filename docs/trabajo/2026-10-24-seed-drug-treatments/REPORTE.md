@@ -56,6 +56,7 @@ $ node --test tools/terminology-import/test/*.test.mjs tools/terminology-import/
 - typecheck y lint necesitaron `--max-old-space-size=8192` (con el heap por defecto, OOM).
 
 ## Desvíos del plan
+- Por orden del propietario (vía la sesión coordinadora), los datos normalizados se versionan comprimidos en `tools/terminology-import/drug-treatments/data/` (`export-data.mjs`, determinista, 5 partes de 0,25–0,66 MB). Los crudos siguen fuera de git, reproducibles con `fetch-sources.mjs`.
 - La rama es `justin/seed-drug-treatments` (la que pide la tarea), no la rama automática de la sesión.
 - Se agregaron pasadas 3 y 4 sólo de medición (no cargan nada) para cumplir el protocolo de saturación.
 

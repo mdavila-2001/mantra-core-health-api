@@ -9,6 +9,7 @@ Investigación, pasadas de saturación y cobertura: `docs/seed-research/drug-tre
 ```sh
 node tools/terminology-import/drug-treatments/fetch-sources.mjs          # clona en el commit fijado (~10 s)
 node tools/terminology-import/drug-treatments/build-drug-treatments.mjs  # NDJSON + cobertura, sin red (~5 s)
+node tools/terminology-import/drug-treatments/export-data.mjs            # NDJSON → data/*.ndjson.gz (versionado)
 node tools/terminology-import/drug-treatments/load-drug-treatments.mjs   # dry-run: plan y conteos, sin base
 node tools/terminology-import/drug-treatments/load-drug-treatments.mjs --apply [--targets targets.json]
 node tools/terminology-import/drug-treatments/validate-links.mjs [--targets targets.json]   # fase 2, sólo lectura
@@ -21,6 +22,9 @@ node --test tools/terminology-import/drug-treatments/test/*.test.mjs
 | build | `ndjson/drug-treatments.ndjson`, `ndjson/drug-treatments.meta.json`, `drug-treatments-coverage.json` |
 | load (dry-run) | `drug-treatments-load-plan.dry-run.json` |
 | validate-links | `drug-treatments-links.json` |
+| export (**en git**) | `drug-treatments/data/`: `drug-treatments-NNN.ndjson.gz` (< 45 MB c/u), `drug-treatments.meta.json`, `drug-treatments-coverage.json`, `manifest.json` (commit y SHA-256 de cada crudo), `SHA256SUMS` |
+
+Los datos normalizados se versionan en `data/` porque el contenedor de trabajo es efímero; el cargador los lee de ahí si no hay build local. Los crudos no se suben: `fetch-sources.mjs` los re-baja en el mismo commit y `manifest.json` permite comprobar sus SHA-256. El export es determinista (gzip con mtime 0).
 
 ## Cómo se guarda (sin DDL)
 
