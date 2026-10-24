@@ -116,20 +116,34 @@ export function rxnavIndex(bridges, index) {
 
 /**
  * Decisión final de una etiqueta con dos fuentes de código independientes.
+ * Cuando GSRS y RxNav no coinciden (típicamente porque una conserva un código
+ * ATC que la OMS reclasificó), desempata una tercera fuente oficial, también
+ * por código: los ATC 5 que la AEMPS asigna a medicamentos autorizados en CIMA
+ * (`inUse`). Si sólo uno de los dos códigos está en uso, gana ese; si no, no se
+ * enlaza.
  * @param {ReturnType<typeof linkUniiSet>} g  resultado del GSRS
  * @param {string[]} rx  ATC 5 que RxNav asigna a las mismas fracciones
+ * @param {{ inUse?: Set<string> }} [opts]
  * @returns {{ atc: string|null, rule: string }}
  */
-export function combineLinks(g, rx) {
+export function combineLinks(g, rx, { inUse = new Set() } = {}) {
   const rxUnique = rx.length === 1 ? rx[0] : null;
+  const tieBreak = (gsrsCodes, rxCode, conflictRule) => {
+    const gsrsInUse = gsrsCodes.filter((c) => inUse.has(c));
+    if (inUse.has(rxCode) && gsrsInUse.length === 0) return { atc: rxCode, rule: 'rxnav-over-gsrs:aemps-in-use' };
+    if (!inUse.has(rxCode) && gsrsInUse.length === 1 && gsrsCodes.length === 1) return { atc: gsrsInUse[0], rule: 'gsrs-over-rxnav:aemps-in-use' };
+    return { atc: null, rule: conflictRule };
+  };
   if (g.status === 'linked') {
     if (rx.length === 0) return { atc: g.atc, rule: `gsrs:${g.rule}` };
     if (rx.includes(g.atc)) return { atc: g.atc, rule: `gsrs:${g.rule}+rxnav` };
+    if (rxUnique) return tieBreak([g.atc], rxUnique, 'conflict:gsrs-vs-rxnav');
     return { atc: null, rule: 'conflict:gsrs-vs-rxnav' };
   }
   if (g.status === 'ambiguous') {
     if (rxUnique && g.candidates.includes(rxUnique)) return { atc: rxUnique, rule: 'gsrs-ambiguous+rxnav-unique' };
-    return { atc: null, rule: rx.length > 1 ? 'ambiguous:rxnav-multiple' : rxUnique ? 'conflict:rxnav-outside-gsrs-candidates' : 'ambiguous:no-rxnav' };
+    if (rxUnique) return tieBreak(g.candidates, rxUnique, 'conflict:rxnav-outside-gsrs-candidates');
+    return { atc: null, rule: rx.length > 1 ? 'ambiguous:rxnav-multiple' : 'ambiguous:no-rxnav' };
   }
   if (rxUnique) return { atc: rxUnique, rule: 'rxnav-unique' };
   return { atc: null, rule: rx.length > 1 ? `${g.status}:rxnav-multiple` : `${g.status}:no-rxnav` };

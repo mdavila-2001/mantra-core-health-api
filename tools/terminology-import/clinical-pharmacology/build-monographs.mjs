@@ -66,7 +66,7 @@ const OPENFDA_TYPES = new Set(['HUMAN PRESCRIPTION DRUG', 'HUMAN OTC DRUG']);
  * candidatos → se enlaza; GSRS sin ATC + RxNav único → se enlaza.
  * Pasada A: identidades y enlace; pasada B: texto completo de las de referencia.
  */
-async function openFdaLinked({ bridges, gsrs }) {
+async function openFdaLinked({ bridges, gsrs, inUse }) {
   const rxnavByMoieties = rxnavIndex(bridges.values(), gsrs);
   const link = {
     scanned: 0,
@@ -91,7 +91,7 @@ async function openFdaLinked({ bridges, gsrs }) {
     const g = gsrs ? linkUniiSet(id.unii, gsrs) : { status: 'none', atc: null, rule: null, moieties: [], candidates: [] };
     link.gsrs[g.status === 'linked' ? g.rule : g.status]++;
     const moietyKey = moietiesOf(id.unii, gsrs).join('+');
-    const decided = combineLinks(g, rxnavByMoieties.get(moietyKey) ?? []);
+    const decided = combineLinks(g, rxnavByMoieties.get(moietyKey) ?? [], { inUse });
     link.final[decided.rule] = (link.final[decided.rule] ?? 0) + 1;
     if (!decided.atc) {
       if (g.status === 'ambiguous') {
@@ -145,7 +145,9 @@ async function main() {
 
   const bridges = new Map([...universe.keys()].map((c) => [c, readBridge(c)]));
   const gsrs = existsSync(cpOut('gsrs-entries.ndjson')) ? buildGsrsIndex(readNdjson(cpOut('gsrs-entries.ndjson'))) : null;
-  const fda = await openFdaLinked({ bridges, gsrs });
+  // ATC 5 que la AEMPS asigna a medicamentos autorizados (desempate de conflictos GSRS/RxNav, sólo por código).
+  const inUse = new Set(byAtc.keys());
+  const fda = await openFdaLinked({ bridges, gsrs, inUse });
   console.log(`[openfda] ${fda.link.scanned} etiquetas leídas; ${fda.labels.size} de referencia en ${fda.refs.size} ATC 5`);
   for (const code of [...fda.refs.keys()].sort()) if (!universe.has(code)) universe.set(code, ['openfda-gsrs']);
 

@@ -105,3 +105,11 @@ test('GSRS + RxNav: resuelve lo que el GSRS deja ambiguo sólo si RxNav da UN AT
   assert.equal(combineLinks({ status: 'linked', atc: 'X01XX01', rule: 'unique', candidates: [] }, ['Y01YY01']).rule, 'conflict:gsrs-vs-rxnav');
   assert.equal(combineLinks({ status: 'ambiguous', atc: null, candidates: ['A'] }, ['B']).rule, 'conflict:rxnav-outside-gsrs-candidates');
 });
+
+test('desempate GSRS/RxNav por los ATC que la AEMPS usa en medicamentos autorizados', () => {
+  const g = { status: 'linked', atc: 'L01XC02', rule: 'unique', candidates: ['L01XC02'] };
+  assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01FA01']) }), { atc: 'L01FA01', rule: 'rxnav-over-gsrs:aemps-in-use' });
+  assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01XC02']) }), { atc: 'L01XC02', rule: 'gsrs-over-rxnav:aemps-in-use' });
+  assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01XC02', 'L01FA01']) }), { atc: null, rule: 'conflict:gsrs-vs-rxnav' });
+  assert.deepEqual(combineLinks(g, ['L01FA01']), { atc: null, rule: 'conflict:gsrs-vs-rxnav' }, 'sin CIMA no se desempata');
+});
