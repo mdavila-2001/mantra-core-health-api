@@ -1,1 +1,2 @@
 # NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck
+exit=0
