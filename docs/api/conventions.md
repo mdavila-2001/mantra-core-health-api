@@ -27,6 +27,17 @@ El límite de `pageSize=100` es deliberado: acota el costo de la consulta y cier
 abusiva como vector de extracción masiva de datos (comentario de diseño explícito en el código).
 El offset para el ORM se deriva como `(page - 1) * pageSize`.
 
+**Listados de una tabla con `tenant_id`:** se arman con `listTenantCollection`
+(`src/common/pagination/tenant-collection.ts`), que fija las decisiones de seguridad en un lugar:
+el tenant sale del contexto del request (`requireTenantId()`, 422 `TENANT_REQUIRED` si no hay),
+los filtros del recurso se componen con `$and` y no pueden reemplazarlo, `sortBy` se valida contra
+una allowlist (400 fuera de ella), el orden desempata por `id` y la salida pasa por un mapeo
+explícito a un DTO de fila. Una ruta que nombra el tenant (`/…/tenants/:tenantId/…`) además lo
+compara con el del contexto (`assertRouteTenant`, 403). La respuesta es `{ data, meta }`; su
+esquema OpenAPI por recurso sale de `pageResponseOf(ItemDto, 'NombrePageDto')`. El rol lo sigue
+exigiendo el `@Roles(...)` del handler, y en las lecturas por paciente
+(`/clinical/patients/:patientProfileId/…`) además `ClinicalRecordAccessGuard`.
+
 **Filtrado y ordenamiento:** no hay un mecanismo genérico de filtrado tipo `?filter[campo]=valor`;
 cada listado define sus propios query params específicos del dominio sobre `PaginationQueryDto`
 (patrón DTO por herencia/composición, verificable módulo por módulo en `docs/modules/*/endpoints.md`,

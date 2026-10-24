@@ -115,7 +115,20 @@ export type {
 
 // Paginación
 export { PaginationQueryDto } from './dto/pagination-query.dto';
-export { PageResponseDto, PageMetaDto } from './dto/page-response.dto';
+export {
+  PageResponseDto,
+  PageMetaDto,
+  pageResponseOf,
+} from './dto/page-response.dto';
+export {
+  assertRouteTenant,
+  definedFilters,
+  listTenantCollection,
+} from './pagination/tenant-collection';
+export type {
+  CollectionPageQuery,
+  TenantCollectionOptions,
+} from './pagination/tenant-collection';
 export {
   encodeKeysetCursor,
   decodeKeysetCursor,
