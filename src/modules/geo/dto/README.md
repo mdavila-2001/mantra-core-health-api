@@ -23,3 +23,7 @@ Notas:
   geometry_json) se valida en el servicio (422), no en el DTO, por ser condicional.
 - Los códigos de enum (`PERSON`/`VEHICLE`, `CIRCLE`/`POLYGON`, `ENTER`/`EXIT`,
   `CELLULAR`/`WIFI`) se mapean a concept ids en `geo.concepts.ts`.
+
+## Lecturas de colección
+
+`geo-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

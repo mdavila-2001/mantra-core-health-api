@@ -6,12 +6,14 @@ import {
   GeoTrackingSessionsController,
   GeoGeofencesController,
   GeoTripsController,
+  GeoCollectionsController,
 } from './controllers';
 import {
   GeoTrackedSubjectsService,
   GeoTrackingSessionsService,
   GeoGeofencesService,
   GeoTripsService,
+  GeoCollectionsService,
 } from './services';
 import {
   TrackedSubjectsRepository,
@@ -34,8 +36,10 @@ import {
     GeoTrackingSessionsController,
     GeoGeofencesController,
     GeoTripsController,
+    GeoCollectionsController,
   ],
   providers: [
+    GeoCollectionsService,
     // Repositorios
     TrackedSubjectsRepository,
     TrackingSessionsRepository,

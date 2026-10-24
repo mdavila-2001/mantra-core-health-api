@@ -9,3 +9,4 @@ export * from './consent-sweep.controller';
 export * from './practitioner-access-requests.controller';
 export * from './consent-me.controller';
 export * from './encounter-informed-consents.controller';
+export * from './consent-collections.controller';

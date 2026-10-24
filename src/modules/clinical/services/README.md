@@ -26,3 +26,7 @@ Estados/tipos vienen de `CLIN` (`clinical.concepts.ts`). Excepciones de dominio:
 (`transactional: jest.fn((cb) => cb(tx))`). Cubren happy path (delegación,
 flush padre-antes-de-hijo, estado resultante), not-found, conflicto/precondición y
 concurrencia. Sin acceso real a BD.
+
+## Lecturas de colección
+
+`ClinicalCollectionsService` (`clinical-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

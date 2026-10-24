@@ -17,3 +17,4 @@ export * from './code-systems-read.dto';
 export * from './import-template.dto';
 export * from './glossary-facets.dto';
 export * from './glossary-neighborhood.dto';
+export * from './terminology-collections.dto';

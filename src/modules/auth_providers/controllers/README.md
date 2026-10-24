@@ -58,3 +58,7 @@ autenticación. Ninguna ruta es `@Public()`.
 
 `auth-providers.controller.spec.ts` (12): una por caso de uso, comprobando que delega en el servicio
 correcto y que pasa el id o el código de la ruta, el cuerpo y el actor.
+
+## Lecturas de colección
+
+`AuthProvidersCollectionsController` (`auth-providers-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /auth-providers/identity-providers` (V40-03), `GET /auth-providers/identity-providers/{id}/provisioning-rules` (V40-07), `GET /auth-providers/tenant-bindings` (V40-09). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

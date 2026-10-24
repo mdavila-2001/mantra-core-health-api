@@ -9,6 +9,7 @@ import {
   TerminologyFhirController,
   TerminologyTenantCatalogController,
   TerminologyImportTemplateController,
+  TerminologyCollectionsController,
 } from './controllers';
 import {
   CodeSystemsService,
@@ -22,6 +23,7 @@ import {
   ImportTemplateService,
   IMPORT_PARSERS,
   READER_IMPORT,
+  TerminologyCollectionsService,
 } from './services';
 import {
   TerminologySourcesRepository,
@@ -53,8 +55,10 @@ import {
     TerminologyFhirController,
     TerminologyTenantCatalogController,
     TerminologyImportTemplateController,
+    TerminologyCollectionsController,
   ],
   providers: [
+    TerminologyCollectionsService,
     CodeSystemsService,
     CodeSystemVersionsService,
     ConceptsService,

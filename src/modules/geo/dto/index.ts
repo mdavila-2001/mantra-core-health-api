@@ -12,3 +12,4 @@ export * from './close-trip.dto';
 export * from './trip-response.dto';
 export * from './last-position-response.dto';
 export * from './operation-result.dto';
+export * from './geo-collections.dto';

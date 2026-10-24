@@ -1,8 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { AuthProvidersController } from './controllers';
-import { AuthProvidersConfigService, FederatedLoginService } from './services';
+import {
+  AuthProvidersController,
+  AuthProvidersCollectionsController,
+} from './controllers';
+import {
+  AuthProvidersConfigService,
+  FederatedLoginService,
+  AuthProvidersCollectionsService,
+} from './services';
 import { AuthProvidersRepository } from './repositories';
 
 /**
@@ -13,8 +20,9 @@ import { AuthProvidersRepository } from './repositories';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [AuthProvidersController],
+  controllers: [AuthProvidersController, AuthProvidersCollectionsController],
   providers: [
+    AuthProvidersCollectionsService,
     AuthProvidersRepository,
     AuthProvidersConfigService,
     FederatedLoginService,

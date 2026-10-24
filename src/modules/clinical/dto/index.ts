@@ -13,3 +13,4 @@ export * from './procedure.dto';
 export * from './immunization.dto';
 export * from './clinical-read.dto';
 export * from './prescription-verification.dto';
+export * from './clinical-collections.dto';

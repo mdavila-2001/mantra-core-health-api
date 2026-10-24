@@ -54,3 +54,7 @@ sensibles.
 (`transactional: jest.fn((cb) => cb(txMock))`). Cubren happy path, not-found y
 precondition/conflict por método, y cada operador de `$expand` (incluido el corte
 de ciclos en `is-a` y el descarte de reglas no evaluables).
+
+## Lecturas de colección
+
+`TerminologyCollectionsService` (`terminology-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

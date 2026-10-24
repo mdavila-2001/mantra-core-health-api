@@ -13,3 +13,7 @@ Todos los endpoints exigen `@Roles('SECURITY_ADMIN')`.
 
 Tests en `*.controller.spec.ts`: verifican la delegación al servicio con los
 argumentos correctos y el valor devuelto (servicio mockeado).
+
+## Lecturas de colección
+
+`GeoCollectionsController` (`geo-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /geo/tracked-subjects` (V13-01), `GET /geo/geofences` (V13-07). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

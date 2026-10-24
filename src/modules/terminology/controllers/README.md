@@ -34,3 +34,7 @@ arbitrario.
 
 `*.controller.spec.ts` — unitarias con el servicio mockeado; verifican la
 delegación con los argumentos correctos y el valor devuelto.
+
+## Lecturas de colección
+
+`TerminologyCollectionsController` (`terminology-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /terminology/tenants/{tenantId}/catalog-policies` (V03-12). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

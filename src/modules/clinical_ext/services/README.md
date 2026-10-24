@@ -19,3 +19,7 @@ columnas uuid planas) y lanza excepciones de dominio (`ResourceNotFoundException
 Specs unitarios (`*.spec.ts`) mockean repos y `EntityManager`
 (`transactional: (cb) => cb(txMock)`): happy path, not-found, conflicto y rechazos
 de regla de negocio.
+
+## Lecturas de colección
+
+`ClinicalExtCollectionsService` (`clinical-ext-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

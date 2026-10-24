@@ -28,3 +28,7 @@ y usa `em.transactional` para escrituras (con `flush` padre-antes-de-hijo) y
 
 Resolución final **deny-overrides**: cualquier deny → `DENY`; si no, algún allow → `PERMIT`;
 en ausencia de señales, `DENY` por defecto. Devuelve `cacheKey` idempotente y `ttlSeconds`.
+
+## Lecturas de colección
+
+`AuthzCollectionsService` (`authz-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

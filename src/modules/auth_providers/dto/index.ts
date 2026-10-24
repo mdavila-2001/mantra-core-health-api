@@ -33,3 +33,4 @@ export type {
   TokenEndpointAuth,
   ProvisioningEffect,
 } from './auth-providers.dto';
+export * from './auth-providers-collections.dto';

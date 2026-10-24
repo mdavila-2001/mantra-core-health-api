@@ -17,6 +17,7 @@ import {
   IdentityAssertionsController,
   IdentityWorkerController,
   IdentitySelfServiceController,
+  IdentityCollectionsController,
 } from './controllers';
 import {
   IdentityAuthoritiesService,
@@ -27,6 +28,7 @@ import {
   IdentityAssertionsService,
   IdentityVerificationEffectsService,
   IdentitySelfServiceService,
+  IdentityCollectionsService,
 } from './services';
 import {
   IdentityAuthoritiesRepository,
@@ -76,8 +78,10 @@ import {
     IdentityAssertionsController,
     IdentityWorkerController,
     IdentitySelfServiceController,
+    IdentityCollectionsController,
   ],
   providers: [
+    IdentityCollectionsService,
     // Repositorios
     IdentityAuthoritiesRepository,
     IdentityAuthorityEndpointsRepository,

@@ -14,3 +14,7 @@ enums; los response DTO exponen solo campos seguros (nunca fugan columnas intern
   `CreateImmunizationScheduleDto`, y sus responses.
 - `virtual-encounter.dto.ts` — `CreateVirtualEncounterDto`, `EndVirtualEncounterDto`, `VirtualEncounterResponseDto`.
 - `operation-result.dto.ts` — `StatusResultDto` (`{ ok }`).
+
+## Lecturas de colección
+
+`clinical-ext-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

@@ -13,6 +13,7 @@ import {
   PractitionerAccessRequestsController,
   ConsentMeController,
   EncounterInformedConsentsController,
+  ConsentCollectionsController,
 } from './controllers';
 import {
   ConsentsService,
@@ -26,6 +27,7 @@ import {
   PractitionerAccessRequestsService,
   ConsentMeService,
   EncounterInformedConsentsService,
+  ConsentCollectionsService,
 } from './services';
 import {
   ConsentsRepository,
@@ -77,8 +79,10 @@ import { PRACTITIONER_ACCESS_NOTICE_PORT } from './ports/practitioner-access-not
     PractitionerAccessRequestsController,
     ConsentMeController,
     EncounterInformedConsentsController,
+    ConsentCollectionsController,
   ],
   providers: [
+    ConsentCollectionsService,
     // Repositorios
     ConsentsRepository,
     ConsentProvisionsRepository,

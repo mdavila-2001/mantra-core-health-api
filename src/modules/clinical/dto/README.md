@@ -23,3 +23,7 @@ reciben como ISO string (`@IsDateString`) y se convierten a `Date`.
 
 Referencias cross-módulo (paciente, tenant, profesional, sede, encuentro) se
 reciben como uuid del cliente; no se resuelven aquí.
+
+## Lecturas de colección
+
+`clinical-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

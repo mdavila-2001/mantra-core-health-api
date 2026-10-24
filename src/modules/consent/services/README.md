@@ -20,3 +20,7 @@ inserts). Validan precondiciones y lanzan excepciones de dominio
 Cada transición de estado deja un evento append-only vía `ConsentEventsRepository`.
 Estados/tipos provienen de `CONS` (conceptos del módulo) o de `SEED.tenantId` /
 `CONCEPTS.*` transversales. Tests: `*.service.spec.ts` con repos/em mockeados.
+
+## Lecturas de colección
+
+`ConsentCollectionsService` (`consent-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

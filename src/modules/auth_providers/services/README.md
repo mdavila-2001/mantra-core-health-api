@@ -116,3 +116,7 @@ revocación de identidad. Nunca se loguean secretos, tokens ni claims.
   `nonce`, validación del `state` en el callback, cada motivo de rechazo, aprovisionamiento JIT,
   entrega del token de vinculación, orden y ámbito de las reglas, hash del token, caducidad de la
   solicitud, reactivación de una identidad revocada y revocación única.
+
+## Lecturas de colección
+
+`AuthProvidersCollectionsService` (`auth-providers-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

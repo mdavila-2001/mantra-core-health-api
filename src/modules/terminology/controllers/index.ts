@@ -5,3 +5,4 @@ export * from './terminology-value-sets.controller';
 export * from './terminology-fhir.controller';
 export * from './terminology-tenant-catalog.controller';
 export * from './terminology-import-template.controller';
+export * from './terminology-collections.controller';

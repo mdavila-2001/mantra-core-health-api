@@ -6,3 +6,4 @@ export * from './referrals.controller';
 export * from './care-gaps.controller';
 export * from './virtual-encounters.controller';
 export * from './prescription-favorites.controller';
+export * from './clinical-ext-collections.controller';

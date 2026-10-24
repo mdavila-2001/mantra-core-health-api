@@ -18,3 +18,7 @@ actor autenticado (guard global `JwtAuthGuard`).
 La spec nombra `POST /authz/decisions:evaluate`. En Express 5 / path-to-regexp v8
 el `:` inicia un parámetro nombrado, así que se sirve en la ruta equivalente
 `POST /authz/decisions/evaluate`.
+
+## Lecturas de colección
+
+`AuthzCollectionsController` (`authz-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /authz/clinical-access-grants` (V06-03, V06-06), `GET /authz/resource-scope-grants` (V06-10), `GET /authz/tenants/{tenantId}/access-policies` (V06-14), `GET /authz/users/{userId}/permission-grants` (V06-15). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

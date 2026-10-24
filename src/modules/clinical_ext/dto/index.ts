@@ -7,3 +7,4 @@ export * from './referral.dto';
 export * from './care-gap.dto';
 export * from './virtual-encounter.dto';
 export * from './prescription-favorite.dto';
+export * from './clinical-ext-collections.dto';

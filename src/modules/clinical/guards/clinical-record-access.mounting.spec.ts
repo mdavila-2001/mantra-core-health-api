@@ -6,6 +6,7 @@ import {
   ChartReadController,
 } from '../../chart/controllers';
 import {
+  ClinicalCollectionsController,
   ClinicalEncountersController,
   ClinicalObservationsController,
   ClinicalOrdersController,
@@ -205,7 +206,49 @@ const HANDLERS_WITHOUT_GUARD: ReadonlyArray<
   ],
 ];
 
+/**
+ * Lecturas de colección por paciente (`/clinical/patients/:patientProfileId/…`).
+ * Llevan el guard handler a handler: la ruta trae al paciente y la lectura se
+ * decide con la misma política que el historial.
+ */
+const HANDLERS_COLLECTION_READS: ReadonlyArray<
+  readonly [unknown, string, string]
+> = [
+  [
+    ClinicalCollectionsController,
+    'listDiagnosticReports',
+    'GET /clinical/patients/:patientProfileId/diagnostic-reports',
+  ],
+  [
+    ClinicalCollectionsController,
+    'listImmunizations',
+    'GET /clinical/patients/:patientProfileId/immunizations',
+  ],
+  [
+    ClinicalCollectionsController,
+    'listMedicationRecords',
+    'GET /clinical/patients/:patientProfileId/medication-records',
+  ],
+  [
+    ClinicalCollectionsController,
+    'listProcedures',
+    'GET /clinical/patients/:patientProfileId/procedures',
+  ],
+  [
+    ClinicalCollectionsController,
+    'listServiceRequests',
+    'GET /clinical/patients/:patientProfileId/service-requests',
+  ],
+];
+
 describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
+  it.each(HANDLERS_COLLECTION_READS)(
+    'protege la lectura de colección %p.%s (%s)',
+    (controller, handler, _route) => {
+      expect(guards(controller, handler)).toContain(ClinicalRecordAccessGuard);
+    },
+  );
+
   it.each(HANDLERS_PROTECTED)(
     'protege %p.%s (%s)',
     (controller, handler, _route) => {

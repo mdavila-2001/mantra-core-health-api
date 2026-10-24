@@ -18,3 +18,7 @@ Capa fina: validan parámetros (`ParseUUIDPipe`), toman el actor con
 
 `*.controller.spec.ts` — unit, mockean el servicio y verifican la delegación con
 los argumentos correctos.
+
+## Lecturas de colección
+
+`ClinicalCollectionsController` (`clinical-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /clinical/patients/{patientProfileId}/diagnostic-reports` (V08-03), `GET /clinical/patients/{patientProfileId}/immunizations` (V08-09), `GET /clinical/patients/{patientProfileId}/medication-records` (V08-10), `GET /clinical/patients/{patientProfileId}/procedures` (V08-11), `GET /clinical/patients/{patientProfileId}/service-requests` (V08-12). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

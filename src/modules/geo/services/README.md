@@ -20,3 +20,7 @@ idempotente contra el último evento del par (geofence, sujeto).
 Tests unitarios en `*.service.spec.ts`: happy path (delegación + flush + valor de
 retorno), not-found, conflict y al menos una precondición por método. Mockean
 repos y `EntityManager` (sin BD real).
+
+## Lecturas de colección
+
+`GeoCollectionsService` (`geo-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

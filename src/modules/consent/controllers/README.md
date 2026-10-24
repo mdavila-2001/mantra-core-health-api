@@ -17,3 +17,7 @@ de respuesta; no contienen lógica de negocio.
 | `ConsentSweepController` | `/consent/internal/expiration-sweep` | 11 |
 
 Test de delegación: `consent.controllers.spec.ts` (servicios mockeados).
+
+## Lecturas de colección
+
+`ConsentCollectionsController` (`consent-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /consent/consents` (V07-01), `GET /consent/hipaa-authorizations` (V07-03), `GET /consent/patient-objections` (V07-04), `GET /consent/privacy-restrictions` (V07-06), `GET /consent/processing-legal-bases` (V07-07), `GET /consent/treatment-informed-consents` (V07-08). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

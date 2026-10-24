@@ -15,3 +15,4 @@ export * from './identity-responses.dto';
 export * from './dispatchable-check.dto';
 export * from './request-verification.dto';
 export * from './case-queue.dto';
+export * from './identity-collections.dto';

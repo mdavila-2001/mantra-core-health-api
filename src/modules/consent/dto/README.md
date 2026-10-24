@@ -29,3 +29,7 @@ solo expone abstracciones legibles (p. ej. `action: 'PERMIT' | 'DENY'`).
 
 Las respuestas exponen solo campos seguros (ids y estados); nunca hashes de
 credenciales ni PHI en claro más allá de lo aportado por el cliente.
+
+## Lecturas de colección
+
+`consent-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

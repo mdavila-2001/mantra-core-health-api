@@ -28,3 +28,7 @@ de concepto.
 `TranslateConceptDto` cubre los dos caminos del mismo endpoint: con
 `targetConceptId` la llamada cura el mapeo (y entonces `equivalence` es
 obligatoria, validado en el servicio); sin él, sólo consulta.
+
+## Lecturas de colección
+
+`terminology-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

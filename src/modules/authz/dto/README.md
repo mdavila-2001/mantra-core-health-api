@@ -23,3 +23,7 @@ seguros). Los enums de dominio se exponen como códigos legibles (`ALLOW`/`DENY`
 
 Respuestas: `AuthzIdResponseDto`, `RoleResponseDto`, `AuthzStatusResultDto`,
 `CacheInvalidationResultDto`, `DecisionResponseDto` (+ `MaskedFieldDto`).
+
+## Lecturas de colección
+
+`authz-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

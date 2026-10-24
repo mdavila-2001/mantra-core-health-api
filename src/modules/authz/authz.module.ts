@@ -11,6 +11,7 @@ import {
   AuthzPdpController,
   AuthzMeController,
   AuthzAdminController,
+  AuthzCollectionsController,
 } from './controllers';
 import {
   AuthzCatalogService,
@@ -24,6 +25,7 @@ import {
   AuthzMeService,
   AuthzAdminReadService,
   AuthzAssignmentRevocationService,
+  AuthzCollectionsService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -78,8 +80,10 @@ import {
     AuthzPdpController,
     AuthzMeController,
     AuthzAdminController,
+    AuthzCollectionsController,
   ],
   providers: [
+    AuthzCollectionsService,
     // Repositorios
     PermissionCategoriesRepository,
     PermissionsRepository,

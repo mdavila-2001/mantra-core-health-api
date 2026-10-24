@@ -10,6 +10,7 @@ import {
   CareGapsController,
   VirtualEncountersController,
   PrescriptionFavoritesController,
+  ClinicalExtCollectionsController,
 } from './controllers';
 import {
   CareTeamsService,
@@ -20,6 +21,7 @@ import {
   CareGapsService,
   VirtualEncountersService,
   PrescriptionFavoritesService,
+  ClinicalExtCollectionsService,
 } from './services';
 import {
   CareTeamsRepository,
@@ -79,8 +81,10 @@ import {
     CareGapsController,
     VirtualEncountersController,
     PrescriptionFavoritesController,
+    ClinicalExtCollectionsController,
   ],
   providers: [
+    ClinicalExtCollectionsService,
     // Repositorios
     CareTeamsRepository,
     CareTeamMembersRepository,

@@ -9,3 +9,4 @@ export * from './consent-sweep.service';
 export * from './practitioner-access-requests.service';
 export * from './consent-me.service';
 export * from './encounter-informed-consents.service';
+export * from './consent-collections.service';

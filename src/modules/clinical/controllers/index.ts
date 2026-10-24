@@ -7,3 +7,4 @@ export * from './clinical-records.controller';
 export * from './clinical-read.controller';
 export * from './clinical-prescriptions.controller';
 export * from './clinical-prescriptions-public.controller';
+export * from './clinical-collections.controller';

@@ -33,6 +33,7 @@ import {
   ClinicalReadController,
   ClinicalPrescriptionsController,
   ClinicalPrescriptionsPublicController,
+  ClinicalCollectionsController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
 import {
@@ -58,6 +59,7 @@ import {
   // `InsuranceModule` para que el detalle del reclamo la use sin importar
   // este módulo entero.
   DuplicateStudyDetector,
+  ClinicalCollectionsService,
 } from './services';
 import {
   CareEpisodesRepository,
@@ -171,8 +173,10 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalReadController,
     ClinicalPrescriptionsController,
     ClinicalPrescriptionsPublicController,
+    ClinicalCollectionsController,
   ],
   providers: [
+    ClinicalCollectionsService,
     // Repositorios
     FormInstanceOriginValidator,
     PersonAccountLinksRepository,

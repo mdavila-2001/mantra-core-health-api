@@ -16,3 +16,7 @@ segmento de ruta por compatibilidad con Express 5.
 - `VirtualEncountersController` — `/virtual-encounters` (UC-18-12).
 
 Specs unitarios mockean el servicio y verifican la delegación con los args correctos.
+
+## Lecturas de colección
+
+`ClinicalExtCollectionsController` (`clinical-ext-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /cds-rules` (V18-09), `GET /order-sets` (V18-05), `GET /immunization-schedules` (V18-12). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.
