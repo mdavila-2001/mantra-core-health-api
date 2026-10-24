@@ -258,3 +258,17 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 Monografías por ATC 5 con las secciones literales de la ficha técnica de CIMA y de la etiqueta FDA
 (openFDA), cada una con su cita: `clinical-pharmacology/` (ver su `README.md` y `SOURCES.md`).
 Registro de pasadas: `docs/seed-research/clinical-pharmacology.md`.
+
+## Importadores de terminología (2026-10-24)
+
+Cada uno tiene su README con las etapas y los comandos, y su `SOURCES.md` con fuentes, hashes y
+licencias. Las pasadas de saturación y la cobertura están en `docs/seed-research/`.
+
+| Importador | Qué carga |
+|---|---|
+| [`specialty-services/`](specialty-services/README.md) | Servicios médicos relacionados con las especialidades de `VS_MEDICAL_SPECIALTY`, sólo con evidencia de la fuente (FONASA MLE 2026, CUPS, aranceles bolivianos) |
+| [`lab-tests/`](lab-tests/README.md) | Análisis médicos: laboratorio, imagenología, anatomía patológica, genética y pruebas funcionales, con muestra, sección y unidades UCUM |
+| [`allergies/`](allergies/README.md) | Alergias: sustancias, tipos, eventos adversos alérgicos y manifestaciones de la reacción |
+| [`symptoms/`](symptoms/README.md) | Síntomas, signos y fenotipos (HPO, Symptom Ontology, NCIt) y su relación publicada con enfermedades |
+| [`dictionaries/`](dictionaries/README.md) | Diccionarios generales: anatomía, embriología, histología, genética, microbiología, salud pública y más |
+| [`diseases/`](diseases/README.md) | Enfermedades (MONDO, Orphanet, DOID, NCIt, CIE-11, EFO) con jerarquía y claves cruzadas |
