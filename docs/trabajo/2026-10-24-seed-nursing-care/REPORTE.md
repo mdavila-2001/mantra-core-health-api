@@ -48,10 +48,12 @@ ninguna
 - `evidencia/typecheck.txt` — `exit=0` (con `NODE_OPTIONS=--max-old-space-size=8192`; con el heap por defecto de 2 GB `tsc` aborta por memoria en este contenedor).
 - `evidencia/lint.txt` — `exit=0` (mismo `NODE_OPTIONS`).
 - Regresión de las librerías compartidas: `node --test "tools/terminology-import/test/*.test.mjs"` → `# tests 34 · # pass 34 · # fail 0`.
+- `evidencia/docs.txt` — `docs:links`: «Sin enlaces rotos» (2 967 enlaces, 722 páginas); `docs:coverage` OK; `mkdocs build --strict`: 2 avisos ajenos a esta rama (unpkg.com bloqueado por la red; enlace preexistente en `architecture/module-layout.md`).
 
 ## No cubierto
 - La carga no se probó con la API arrancada: los 7 conceptos internos y los dos value sets del glosario se **emularon** en la base desechable con los mismos ids deterministas (`deterministicId`); los 3 códigos LOINC de la prueba de `concept_maps` son de prueba, no datos reales.
 - No se verificó cómo muestra la pantalla del glosario los 36 términos nuevos (no se levantó el front ni la API).
+- No se corrieron `yarn build` ni `yarn test` (jest completo): el cambio no toca TypeScript; se corrieron typecheck, lint, los tests dirigidos y los de `tools/terminology-import`.
 - `yarn install` en el contenedor necesitó sustituir, sólo localmente y sin commitear, el tarball de `xlsx` de `cdn.sheetjs.com` (host bloqueado) por `@e965/xlsx@0.20.3` de npm para poder correr typecheck y lint.
 
 ## Desvíos del plan

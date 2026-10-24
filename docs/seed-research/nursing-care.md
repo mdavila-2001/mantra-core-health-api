@@ -1,8 +1,8 @@
 # Cuidados de enfermería — bitácora de búsqueda, saturación y cobertura
 
 Rama `justin/seed-nursing-care` · importador en `tools/terminology-import/nursing-care/`
-· fuentes y licencias en [`SOURCES.md`](../../tools/terminology-import/nursing-care/SOURCES.md)
-· plan y reporte en [`docs/trabajo/2026-10-24-seed-nursing-care/`](../trabajo/2026-10-24-seed-nursing-care/).
+· fuentes y licencias en `tools/terminology-import/nursing-care/SOURCES.md`
+· plan y reporte en [`PLAN.md`](../trabajo/2026-10-24-seed-nursing-care/PLAN.md) y [`REPORTE.md`](../trabajo/2026-10-24-seed-nursing-care/REPORTE.md).
 
 Pedido del propietario: «que se busque completamente el VADEMÉCUM médico para… cuidados médicos de
 enfermería, con los mismos requerimientos». Esta sesión es la **dueña de enfermería**.

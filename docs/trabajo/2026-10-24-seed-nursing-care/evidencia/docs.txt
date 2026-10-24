@@ -1,0 +1,12 @@
+# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn docs:links
+  - docs/api/flujos-verificados-frontend.md
+2967 enlaces internos verificados en 722 páginas.
+Sin enlaces rotos.
+# corepack yarn docs:coverage
+Verificados: 722 páginas de docs/, 70 módulos reales.
+Cobertura documental OK: sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar, contratos presentes.
+# python -m mkdocs build --strict (venv temporal con docs/requirements.txt)
+WARNING -  MERMAID2  - Cannot check URL, no Internet access? (https://unpkg.com/mermaid@10.4.0/dist/mermaid.esm.min.mjs):
+WARNING -  Doc file 'architecture/module-layout.md' contains a link '../../src/modules/scheduling/README.md', but the target '../src/modules/scheduling/README.md' is not found among documentation files.
+Aborted with 2 warnings in strict mode!
+# Los 2 avisos son ajenos a esta rama: unpkg.com bloqueado por la red del contenedor; architecture/module-layout.md (preexistente en dev).
