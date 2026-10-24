@@ -1,0 +1,41 @@
+# Equipos de diagnóstico registrados ante FDA — bitácora de búsqueda, saturación y cobertura
+
+Rama `justin/seed-dx-devices-us` (espejo de `claude/compassionate-brown-tr71nn`) · importador en
+`tools/terminology-import/diagnostic-devices/us/` · fuentes y licencias en
+`tools/terminology-import/diagnostic-devices/us/SOURCES.md` · plan y reporte en
+[`PLAN.md`](../trabajo/2026-10-24-seed-dx-devices-us/PLAN.md) y
+[`REPORTE.md`](../trabajo/2026-10-24-seed-dx-devices-us/REPORTE.md).
+
+Pedido del propietario: «que investigue profundamente todos y cada uno de los equipos de
+diagnóstico con todos los posibles proveedores que lo ofrecen en el mundo (marcas)… ultra
+detallado… que el corpus sea abrumadoramente grande y que sea imposible encontrar más en
+internet». Esta sesión es la dueña de los registros de **EE. UU. (FDA)**.
+
+## Red de esta sesión
+
+El contenedor sólo alcanza GitHub (git y `raw.githubusercontent.com`), GitLab, Bitbucket, npm,
+PyPI (archivos), Maven Central, RubyGems, conda, S3 y GCS. Devuelven 403 en el proxy o no
+resuelven (sondeado el 2026-10-24): `accessgudid.nlm.nih.gov`, `accessgudid.awsprod.nlm.nih.gov`,
+`api.fda.gov`, `download.open.fda.gov`, `www.accessdata.fda.gov`, `www.fda.gov`, `www.ecfr.gov`,
+`www.govinfo.gov`, `www.nber.org`, `catalog.data.gov`, `healthdata.gov`, `www.datalumos.org`,
+`download.cms.gov`, `openpaymentsdata.cms.gov`, `huggingface.co`, `www.kaggle.com`, `zenodo.org`,
+`figshare.com`, `dataverse.harvard.edu`, `archive.org`, `web.archive.org`, `query.wikidata.org`,
+`api.github.com` (salvo los repos de la sesión). `pypi.org/search` responde con un desafío
+JavaScript: no se intentó pasarlo.
+
+Consecuencia: las fuentes oficiales se reemplazan por **espejos públicos fijados por commit**
+que declaran la URL oficial, la fecha de exportación y (cuando la publican) el sha256 del
+archivo oficial. No se probó ningún host alternativo de FDA (por ejemplo, el bucket de openFDA
+vía `s3.amazonaws.com`): sería el mismo origen bloqueado con otro nombre. La búsqueda web (del
+lado del servidor) se usó **sólo para descubrir fuentes y verificar criterios**; ningún dato que
+pase por un resumen de modelo se cargó.
+
+## Pasadas (protocolo de saturación)
+
+Aportes nuevos contados tras deduplicar por `source` + `sourceRecordId` (K-number, PMA +
+nombre comercial, UDI-DI); entre vías, gana la oficial. Fabricantes por razón social normalizada
+exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nunca por parecido.
+
+| # | Fecha | Fuentes | Registros nuevos | Fabricantes nuevos | Marcas nuevas | Descartadas en la pasada (motivo) |
+|---|---|---|---|---|---|---|
+| 1 | 2026-10-24 | openFDA `device/510k` export 2026-08-10, espejo `choiben314/510k-lineage@806b59cb` (`dataset/devices.csv`, 175 757 filas) | 71 760 (71 523 510(k) + 237 De Novo) | 12 453 | 68 352 | 104 000 filas fuera de alcance (implantes, quirúrgicos, terapéuticos…); npm y PyPI (sólo clientes de API, sin datos); `pypi.org/search` (desafío JS) |

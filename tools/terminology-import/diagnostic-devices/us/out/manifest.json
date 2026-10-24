@@ -1,0 +1,90 @@
+{
+ "region": "us",
+ "generatedAt": "2026-10-24T03:08:13.775Z",
+ "formatVersion": 1,
+ "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
+ "files": [
+  {
+   "path": "fda-510k-0001.ndjson.gz",
+   "source": "fda-510k",
+   "sourceVersion": "openFDA device/510k export 2026-08-10 vía espejo https://github.com/choiben314/510k-lineage@806b59cba5c8",
+   "rows": 71523,
+   "bytes": 4656936,
+   "sha256": "6924c8cc1231cc354d9f146e854c0cd5b4a0204b82b5e451759fbbf08fc1b1c8"
+  },
+  {
+   "path": "fda-denovo-0001.ndjson.gz",
+   "source": "fda-denovo",
+   "sourceVersion": "openFDA device/510k export 2026-08-10 vía espejo https://github.com/choiben314/510k-lineage@806b59cba5c8",
+   "rows": 237,
+   "bytes": 18623,
+   "sha256": "cd1d60448ac05afefb318852e8d978e8c68422109ad89b9ea114299cf2c01599"
+  }
+ ],
+ "gaps": [
+  {
+   "source": "fda-classification",
+   "url": "https://download.open.fda.gov/device/classification/",
+   "reason": "403 del proxy — host bloqueado por la red de la sesión (api.fda.gov / accessdata.fda.gov). Tipo, panel y clase se deducen de los propios registros."
+  },
+  {
+   "source": "fda-pma",
+   "url": "https://download.open.fda.gov/device/pma/",
+   "reason": "403 del proxy — host bloqueado (download.open.fda.gov / accessdata.fda.gov) y sin espejo completo verificado."
+  },
+  {
+   "source": "fda-rl",
+   "url": "https://download.open.fda.gov/device/registrationlisting/",
+   "reason": "403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento."
+  },
+  {
+   "source": "fda-gudid",
+   "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+   "reason": "403 del proxy — accessgudid.nlm.nih.gov y download.open.fda.gov bloqueados por la red de la sesión. Sin GUDID no hay UDI-DI ni modelo/versión por equipo."
+  }
+ ],
+ "inputs": [
+  {
+   "source": "mirror choiben314-510k-lineage",
+   "records": 175757,
+   "inScope": 71760
+  }
+ ],
+ "mirrors": [
+  {
+   "id": "choiben314-510k-lineage",
+   "repo": "https://github.com/choiben314/510k-lineage",
+   "commit": "806b59cba5c8f5bac9fe327f8c49c8a2f5807804",
+   "commitDate": "2026-10-13T00:30:43-04:00",
+   "files": [
+    {
+     "path": "dataset/devices.csv",
+     "bytes": 23352497,
+     "sha256": "d92ed68ae5d90d5b6458cfb54b7b805acf701f24cd459a1df55281945cc9b292"
+    },
+    {
+     "path": "data/raw/manifest.jsonl",
+     "bytes": 1688,
+     "sha256": "f6a61f5d6e3bbc9ad2231e7e4e02121a13db023b6381769da13515b17e4af211"
+    },
+    {
+     "path": "LICENSE",
+     "bytes": 1065,
+     "sha256": "1301e51647f49b4ce474150298b3552d121a61f9d2a64c1f0f245f414385dd84"
+    },
+    {
+     "path": "README.md",
+     "bytes": 3244,
+     "sha256": "7cdb3aa586ef60b5994c14385a3cd07fc7964ecc5440bfb83ab15a1e321f61c0"
+    }
+   ],
+   "upstream": {
+    "url": "https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip",
+    "exportDate": "2026-08-10",
+    "fetchedAt": "2026-08-17T20:39:37+00:00",
+    "sha256": "996cd24da0f15d1af632c5676916a3d7d351ee121dff791cdc153a5612bb25c4"
+   }
+  }
+ ],
+ "official": []
+}
