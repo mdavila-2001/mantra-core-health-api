@@ -78,6 +78,42 @@ Con el heap por defecto (2 GB) `typecheck` y `lint` mueren por falta de memoria
 en este contenedor; con 8 GB pasan. Ninguno de los dos avisos de MkDocs viene de
 los documentos nuevos.
 
+### Gates completos en una Mac local (2026-10-24, rama en `7e4268b3`)
+
+Corridos con red y con `yarn install --immutable` (exit 0: acá `cdn.sheetjs.com`
+responde). MkDocs con las versiones fijadas en `docs/requirements.txt`, las mismas
+que instala CI.
+
+```
+$ corepack yarn build                      → exit=0, 26 s; dist/src/main.js generado          (evidencia/build.txt)
+$ corepack yarn test --maxWorkers=50% --ci → 872/874 suites, 10 717/10 719 pruebas; 1 fallo   (evidencia/test-completo.txt)
+$ corepack yarn docs:build                 → exit=1, 1 aviso                                  (evidencia/docs-build.txt)
+$ corepack yarn docs:validate              → exit=1 en redocly lint: 3 errores + 1 aviso      (evidencia/docs-validate.txt)
+$ corepack yarn docs:asyncapi:validate     → exit=0, 0 errores                                (evidencia/docs-asyncapi-validate.txt)
+$ corepack yarn docs:coverage              → exit=0, 723 páginas, 70 módulos                  (evidencia/docs-coverage.txt)
+$ corepack yarn docs:links                 → exit=0, 2 965 enlaces, 0 rotos                   (evidencia/docs-links.txt)
+```
+
+Ninguno de los tres rojos viene de este PR. La rama solo cambia `src/` dentro de
+`src/common/seed/data/specialty-services/`, y `git diff origin/dev` sobre
+`openapi/`, `asyncapi/`, `docs/architecture/` y `mkdocs.yml` da vacío:
+
+- **`yarn test`:** `glossary-articles.catalog.spec.ts`. El artículo
+  `hipertension-arterial` tiene 1 892 palabras y el mínimo es 2 000. Los datos de
+  esa prueba son los mismos que en `dev`.
+- **`docs:build`:** el enlace roto de `architecture/module-layout.md` a
+  `src/modules/scheduling/README.md`, que está ahí desde `2a804f9e`
+  (2026-10-09). El aviso de Mermaid de la corrida cloud no aparece porque acá hay
+  red.
+- **`docs:validate`:** el `openapi/openapi.yaml` versionado tiene 3 operaciones
+  sin `security`:
+  - `POST /iam/auth/upload-registration-signature-image`
+  - `GET /public/profiles/o/{slug}/services`
+  - `GET /public/profiles/f/{slug}/products`
+
+  El aviso es el `example` de `SetSiteContactPhoneDto.contactPhone`. Por el `&&`
+  del script, las otras tres etapas se corrieron por separado.
+
 ## No cubierto
 
 - **La API no corrió.** Sin daemon de Docker no hubo Mongo/Redis/OpenSearch para `seed:boot`. En la base de prueba, los conceptos que siembra la API (estado activo, idioma, designación preferida, `REL_SPECIALTY`) y los 4 408 conceptos de `VS_BO_MEDICAL_PROCEDURE` se insertaron con **sus mismos ids** por un arnés (no versionado); `VS_MEDICAL_SPECIALTY` sí vino del paquete real del modelo (`03_terminology.seeds.json`, commit `eceb98f2`, sin sus 30 `concept_properties`, que el enum rechaza).

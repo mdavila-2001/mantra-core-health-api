@@ -1,0 +1,2 @@
+$ NODE_OPTIONS=--max-old-space-size=8192 corepack yarn build   # exit 0
+NODE_OPTIONS=--max-old-space-size=8192 corepack yarn build  31.22s user 2.59s system 128% cpu 26.238 total
