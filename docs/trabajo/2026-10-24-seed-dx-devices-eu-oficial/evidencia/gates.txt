@@ -1,0 +1,14 @@
+$ NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck ; echo exit $?
+src/modules/insurance/insurance-patient-settlement.module.ts(6,10): error TS2300: Duplicate identifier 'InsurancePatientAccountRepository'.
+src/modules/insurance/insurance-patient-settlement.module.ts(7,10): error TS2300: Duplicate identifier 'LinkedOrderDataRepository'.
+src/modules/insurance/insurance-patient-settlement.module.ts(9,10): error TS2300: Duplicate identifier 'LinkedOrderDataRepository'.
+src/modules/insurance/insurance-patient-settlement.module.ts(10,10): error TS2300: Duplicate identifier 'InsurancePatientAccountRepository'.
+exit 2
+# Los 4 errores están en origin/dev (9337e964) sin cambios de esta rama: git diff --stat HEAD -- src → vacío
+
+$ corepack yarn lint ; echo exit $?
+exit 0
+
+$ npx prettier --check "tools/terminology-import/diagnostic-devices/eu/**/*.mjs"
+Checking formatting...
+All matched files use Prettier code style!
