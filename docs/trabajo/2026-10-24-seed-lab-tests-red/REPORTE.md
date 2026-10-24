@@ -5,7 +5,7 @@
   (camino real: `data/` → `load-lab-tests.mjs --apply` → filas contadas con `psql`). No es
   `REGRESSION_VERIFIED`: ver «No cubierto».
 - Avance: **29 / 29 microtareas HECHO (100 %)**. H5–H8 mergeados en `dev` por
-  mdavila-2001/mantra-core-health-api#729; H9 va en mdavila-2001/mantra-core-health-api#731.
+  mdavila-2001/mantra-core-health-api#729; H9 va en mdavila-2001/mantra-core-health-api#834.
 - **Saturación alcanzada por protocolo**: las pasadas 17 y 18 dieron 0 seguidas, con CDISC (4 721) y NPU
   (25 699) cargados y cada fuente restante descartada con motivo. Catálogo final: 188 729 conceptos.
 
