@@ -37,6 +37,12 @@ import {
 import { invimaDate, invimaRows, invimaText } from '../lib/invima.mjs';
 import { whoPqRows } from '../lib/who-pq.mjs';
 import { hsaClassARows, hsaDate, hsaText, smdrRows } from '../lib/hsa.mjs';
+import { nmpaUdiRows, parseUdidXml } from '../lib/nmpa-udi.mjs';
+import { sahpraRows } from '../lib/sahpra.mjs';
+import {
+  cdscoOfficialRows,
+  parseOfficialLicence,
+} from '../lib/cdsco-official.mjs';
 import {
   splitTfdaCategory,
   tfdaDate,
@@ -553,4 +559,116 @@ test('HSA clase A: una notificación con varios dispositivos da una fila por dis
   assert.equal(rows[0].manufacturerName, 'Bionic Medizintechnik GmbH');
   assert.equal(rows[0].extra.dealer.name, 'JMS SINGAPORE PTE LTD');
   assert.equal(hsaText('NA'), null);
+});
+
+test('NMPA UDID: una fila por UDI-DI, sin contactos, sin clase ni país deducidos', () => {
+  const { header, devices } = parseUdidXml(fixture('nmpa-udi.xml'));
+  assert.equal(header.numberRecordsDatabase, '6293777');
+  assert.equal(devices.length, 4);
+  const stats = {};
+  const rows = [...nmpaUdiRows([...devices, devices[0]], CTX, stats)];
+  assert.equal(rows.length, 4);
+  assert.equal(stats.duplicates, 1);
+  for (const row of rows) assert.deepEqual(rowErrors(row), []);
+  const [ivd, tube, ma, sheath] = rows;
+  assert.equal(ivd.udiDi, '06978273730037');
+  assert.equal(ivd.sourceRecordId, '06978273730037');
+  assert.equal(ivd.deviceTypeSystem, 'cn:nmpa-classification');
+  assert.equal(ivd.deviceTypeCode, '6840-000');
+  assert.equal(ivd.deviceTypeName, null);
+  assert.equal(ivd.extra.qxlb, '体外诊断试剂');
+  assert.equal(
+    ivd.extra.genericName,
+    '钙卫蛋白测定试剂盒（胶乳增强免疫比浊法）',
+  );
+  assert.equal(ivd.manufacturerName, '湖南和锐生物科技有限公司');
+  assert.equal(ivd.authorizationId, '湘械注准20212401609');
+  assert.equal(ivd.riskClass, null);
+  assert.equal(ivd.manufacturerCountry, null);
+  assert.equal(tube.brandName, null);
+  assert.equal(
+    tube.model,
+    '血清管（CAT）促凝剂 凝胶，16x100，8ml，红盖黄环，直拔',
+  );
+  assert.equal(tube.extra.catalogNumber, '455071');
+  assert.deepEqual(tube.extra.packages[0], {
+    di: '39120017573044',
+    level: '箱',
+    quantity: '24',
+    containsDi: '29120017573047',
+  });
+  assert.equal(tube.extra.manufacturerRegistryId, undefined);
+  assert.equal(ma.extra.diSystem, 'MA码（IDcode）');
+  assert.equal(ma.extra.cplb, '设备');
+  assert.equal(sheath.extra.packages.length, 2);
+  assert.equal(sheath.extra.clinicalSizes[0].type, '直径');
+  assert.equal(sheath.extra.recordVersion.status, '新增');
+  assert.ok(!JSON.stringify(rows).includes('qylx'));
+});
+
+test('SAHPRA: una fila por línea de cada lista, con fabricante original y titular local', () => {
+  const lists = Object.entries(JSON.parse(fixture('sahpra-lists.json'))).map(
+    ([key, list]) => ({ key, sheet: list.sheet, rows: list.rows, ctx: CTX }),
+  );
+  const { rows } = sahpraRows(lists);
+  assert.equal(rows.length, 4);
+  for (const row of rows) assert.deepEqual(rowErrors(row), []);
+  const [abbott, , self] = rows;
+  assert.equal(abbott.sourceRecordId, 'molecular|1');
+  assert.equal(abbott.manufacturerName, 'Abbott Molecular Inc');
+  assert.equal(abbott.brandName, 'Abbott RealTime SARS-CoV-2  Assay');
+  assert.equal(abbott.deviceTypeName, 'Molecular Tests');
+  assert.equal(abbott.authorizationDate, '2020-03-30');
+  assert.equal(abbott.extra.applicationDate, '2020-03-25');
+  assert.equal(
+    abbott.extra.licenceHolder,
+    'Abbott Laboratories South Africa (Pty) Ltd',
+  );
+  assert.equal(abbott.authorizationId, null);
+  assert.equal(self.sourceRecordId, 'antigen-self-test|1');
+  assert.equal(self.extra.applicationDate, undefined);
+});
+
+test('CDSCO oficial: importación y fabricación, MD e IVD; sin teléfonos ni correos', () => {
+  const lists = JSON.parse(fixture('cdsco-approved.json'));
+  const ctx = {
+    ...CTX,
+    officialFiles: {
+      md: { import: 'md-i', manufacturing: 'md-m' },
+      ivd: { import: 'ivd-i', manufacturing: 'ivd-m' },
+    },
+  };
+  const { rows, stats } = cdscoOfficialRows(lists, ctx);
+  assert.equal(rows.length, 5);
+  assert.equal(stats.duplicates, 1);
+  for (const row of rows) assert.deepEqual(rowErrors(row), []);
+  const [mdImport, mdMfg, ivdImport, ivdDup, ivdMfg] = rows;
+  assert.equal(mdImport.manufacturerName, 'Facet Technologies,LLC');
+  assert.equal(mdImport.manufacturerCountry, 'US');
+  assert.equal(mdImport.authorizationId, 'IMP/MD/2018/000001');
+  assert.equal(mdImport.authorizationDate, '2018-03-16');
+  assert.equal(mdImport.riskClass, 'in:B');
+  assert.equal(mdImport.extra.cdscoCategory, 'md');
+  assert.equal(mdImport.extra.officialFile, 'md-i');
+  assert.equal(mdMfg.manufacturerName, 'GPC Medical Limited');
+  assert.equal(mdMfg.manufacturerCountry, 'IN');
+  assert.equal(mdMfg.authorizationId, '02/SCof2018');
+  assert.equal(mdMfg.authorizationDate, '2018-01-09');
+  assert.equal(mdMfg.extra.issuingAuthority, 'SLA - Uttar Pradesh');
+  assert.equal(
+    ivdImport.manufacturerName,
+    'Siemens Healthcare Diagnostics Inc.',
+  );
+  assert.equal(ivdImport.model, null);
+  assert.equal(ivdImport.extra.cdscoCategory, 'ivd');
+  assert.equal(ivdDup.extra.otherIntendedUses.length, 1);
+  assert.equal(ivdMfg.brandName, null);
+  assert.equal(ivdMfg.extra.officialFile, 'ivd-m');
+  const text = JSON.stringify(rows);
+  assert.ok(!text.includes('@'));
+  assert.ok(!/Telephone|Contact Number/.test(text));
+  assert.equal(
+    parseOfficialLicence('Licence no: X\nIssued on: 31-FEB-2020').date,
+    null,
+  );
 });

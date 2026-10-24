@@ -221,6 +221,15 @@ async function main() {
           retrieved[file.url]?.retrievedAt ??
           new Date(statSync(path).mtimeMs).toISOString(),
       };
+      if (file.md5) {
+        // El portal publica el MD5 del archivo: si no coincide, no se usa.
+        const md5 = execFileSync('md5sum', [path], { encoding: 'utf8' })
+          .split(' ')[0]
+          .toUpperCase();
+        if (md5 !== file.md5)
+          throw new Error(`${file.name}: MD5 ${md5}, se esperaba ${file.md5}`);
+        entry.md5 = md5;
+      }
       if (file.extract) {
         const extractDir = ensureDir(`${path}.d`);
         execFileSync('unzip', ['-o', '-q', path, '-d', extractDir]);

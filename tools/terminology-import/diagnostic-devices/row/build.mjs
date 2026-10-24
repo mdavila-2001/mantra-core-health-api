@@ -10,6 +10,7 @@
 // Uso: node tools/terminology-import/diagnostic-devices/row/build.mjs [--only anvisa-produtos,pmda-approvals]
 // =============================================================================
 
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
@@ -24,7 +25,7 @@ import {
   anvisaUpdateStamp,
   freezePetitionIndex,
 } from './lib/anvisa.mjs';
-import { cdscoRows } from './lib/cdsco.mjs';
+import { cdscoOfficialRows } from './lib/cdsco-official.mjs';
 import { indexMdall, mdallRows } from './lib/hc-mdall.mjs';
 import { readDelimitedRows } from './lib/lines.mjs';
 import { PartWriter } from './lib/out.mjs';
@@ -34,6 +35,8 @@ import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
 import { invimaRows } from './lib/invima.mjs';
 import { whoPqRows } from './lib/who-pq.mjs';
 import { hsaClassARows, smdrRows } from './lib/hsa.mjs';
+import { nmpaUdiRows, parseUdidXml } from './lib/nmpa-udi.mjs';
+import { sahpraRows } from './lib/sahpra.mjs';
 import { tfdaRows, tudidRows } from './lib/tfda.mjs';
 import { daenDate, daenRows } from './lib/tga-daen.mjs';
 import {
@@ -368,34 +371,42 @@ async function buildDaen() {
   };
 }
 
+const CDSCO_LISTS = [
+  ['md', 'import', 'approved-md-import.json'],
+  ['md', 'manufacturing', 'approved-md-manufacturing.json'],
+  ['ivd', 'import', 'approved-ivd-import.json'],
+  ['ivd', 'manufacturing', 'approved-ivd-manufacturing.json'],
+];
+
 async function buildCdsco() {
-  const repo = 'vishnuu-patil/india-meddevice-intelligence';
-  const path = 'Data/MD - Medical Devices.xlsx';
-  const sheetRows = readFileSync(
-    join(EXTRACTED_DIR, 'cdsco', 'md-medical-devices.jsonl'),
-    'utf8',
-  )
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
-  const ctx = {
-    sourceUrl: mirrorFileUrl(repo, path),
-    sourceVersion: '',
-    retrievedAt: retrievedAt(repo),
-    mirror: mirrorRef(repo, path),
+  const officialFiles = { md: {}, ivd: {} };
+  const lists = CDSCO_LISTS.map(([category, type, name]) => {
+    const file = officialFile('cdsco', name);
+    officialFiles[category][type] = file.citation;
+    return {
+      category,
+      records: JSON.parse(readFileSync(file.path, 'utf8')).aaData,
+      retrievedAt: file.retrievedAt,
+    };
+  });
+  const retrievedAt = lists.map((l) => l.retrievedAt).sort()[0];
+  const sourceVersion = `List of Approved Devices (cdscomdonline.gov.in), descargada ${retrievedAt.slice(0, 10)}`;
+  const { rows, stats } = cdscoOfficialRows(lists, {
+    sourceUrl: OFFICIAL.cdscoApprovedDevices,
+    sourceVersion,
+    retrievedAt,
+    officialFiles,
     officialPortal: OFFICIAL.cdsco,
-  };
-  const probe = cdscoRows(sheetRows, { ...ctx, sourceVersion: 'probe' });
-  const lastIssued = probe.rows
-    .map((r) => r.authorizationDate)
-    .filter(Boolean)
-    .sort()
-    .pop();
-  const sourceVersion = `MD - Medical Devices, licencias emitidas hasta ${lastIssued} (espejo ${short(repo)})`;
-  const { rows, skipped } = cdscoRows(sheetRows, { ...ctx, sourceVersion });
+  });
   return {
-    files: await writeSource('cdsco-import-licences', sourceVersion, rows),
-    stats: { sheetRows: sheetRows.length, rows: rows.length, ...skipped },
+    files: await writeSource('cdsco-approved-devices', sourceVersion, rows),
+    stats: {
+      lists: Object.fromEntries(
+        lists.map((l, i) => [CDSCO_LISTS[i][2], l.records.length]),
+      ),
+      rows: rows.length,
+      ...stats,
+    },
   };
 }
 
@@ -565,19 +576,143 @@ async function buildHsaClassA() {
   };
 }
 
+/** Los `<device>` de todos los XML del zip, en orden de parte (1…N). */
+function* udidDevices(zip, header) {
+  const members = execFileSync('unzip', ['-Z1', zip], { encoding: 'utf8' })
+    .split('\n')
+    .filter((n) => /^UDID_FULL_DOWNLOAD_PART\d+_Of_\d+_.*\.xml$/.test(n))
+    .sort(
+      (a, b) => Number(/PART(\d+)/.exec(a)[1]) - Number(/PART(\d+)/.exec(b)[1]),
+    );
+  header.parts = members.length;
+  header.devices = 0;
+  for (const name of members) {
+    const xml = execFileSync('unzip', ['-p', zip, name], {
+      maxBuffer: 256 * 1024 * 1024,
+    }).toString('utf8');
+    const parsed = parseUdidXml(xml);
+    header.declaredParts ??= Number(parsed.header.downloadFileTotalParts);
+    header.declaredRecords ??= Number(parsed.header.numberRecordsDatabase);
+    header.creationDate ??= parsed.header.creationDate;
+    header.devices += parsed.devices.length;
+    yield* parsed.devices;
+  }
+}
+
+async function buildNmpaUdi() {
+  const file = officialFile('nmpa-udi', 'UDID_FULL_RELEASE_20261001.zip');
+  const meta = officialRetrieved[file.url];
+  const sourceVersion = 'UDID_FULL_RELEASE_20261001';
+  const header = {};
+  const stats = {};
+  const files = await writeSource(
+    'nmpa-udi',
+    sourceVersion,
+    nmpaUdiRows(
+      udidDevices(file.path, header),
+      {
+        sourceUrl: OFFICIAL.nmpaUdi,
+        sourceVersion,
+        retrievedAt: file.retrievedAt,
+        officialFile: {
+          name: 'UDID_FULL_RELEASE_20261001.zip',
+          bytes: meta.bytes,
+          md5: meta.md5,
+          sha256: meta.sha256,
+        },
+        officialPortal: OFFICIAL.nmpaUdi,
+      },
+      stats,
+    ),
+  );
+  if (header.parts !== header.declaredParts)
+    throw new Error(
+      `nmpa-udi: ${header.parts} XML en el zip, el encabezado declara ${header.declaredParts}`,
+    );
+  return {
+    files,
+    stats: {
+      xmlParts: header.parts,
+      declaredRecords: header.declaredRecords,
+      inputDevices: header.devices,
+      creationDate: header.creationDate,
+      rows: files.reduce((n, f) => n + f.rows, 0),
+      ...stats,
+    },
+  };
+}
+
+const SAHPRA_LISTS = [
+  [
+    'antigen-self-test',
+    'List-of-authorised-COVID19-Antigen-Self-test-kits_24052023.xlsx',
+  ],
+  [
+    'antigen-professional',
+    'List-of-authorised-COVID19-Professional-Antigen-test-kits_24052023.xlsx',
+  ],
+  ['molecular', 'List-of-authorised-Molecular-Test-Kits_24052023.xlsx'],
+  ['serological', 'List-of-authorised-serological-test-kits-_31052022.xlsx'],
+];
+
+async function buildSahpra() {
+  const dir = ensureDir(join(EXTRACTED_DIR, 'sahpra'));
+  const lists = SAHPRA_LISTS.map(([key, name]) => {
+    const file = officialFile('sahpra', name);
+    const jsonl = join(dir, name.replace(/\.xlsx$/, '.jsonl'));
+    const log = execFileSync(
+      'python3',
+      ['-I', join(import.meta.dirname, 'xlsx-to-jsonl.py'), file.path, jsonl],
+      { encoding: 'utf8' },
+    );
+    const sheet = /hoja «([^»]+)»/.exec(log)?.[1] ?? null;
+    return {
+      key,
+      sheet,
+      rows: readFileSync(jsonl, 'utf8')
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => JSON.parse(line)),
+      ctx: {
+        sourceUrl: file.url,
+        sourceVersion: `${name} (Last-Modified ${file.citation.lastModified})`,
+        retrievedAt: file.retrievedAt,
+        officialFile: file.citation,
+        officialPortal: OFFICIAL.sahpraTestKits,
+      },
+    };
+  });
+  const { rows, stats } = sahpraRows(lists);
+  const files = await writeSource(
+    'sahpra-covid-ivd',
+    'SAHPRA authorised COVID-19 test kit lists (24/05/2023; serological 31/05/2022)',
+    rows,
+  );
+  return {
+    files,
+    stats: {
+      lists: Object.fromEntries(lists.map((l) => [l.key, l.rows.length - 1])),
+      rows: rows.length,
+      ...stats,
+    },
+  };
+}
+
 const BUILDERS = {
   'anvisa-produtos': buildAnvisaProdutos,
   'anvisa-produtos-modelos': buildAnvisaModelos,
   'pmda-approvals': buildPmda,
   'hc-mdall': buildMdall,
   'tga-daen': buildDaen,
-  'cdsco-import-licences': buildCdsco,
+  'cdsco-approved-devices': buildCdsco,
   'tfda-devices': buildTfda,
   'tfda-tudid': buildTfdaTudid,
   'invima-dispositivos': buildInvima,
   'who-pq-ivd': buildWhoPq,
   'hsa-smdr': buildHsaSmdr,
   'hsa-class-a': buildHsaClassA,
+  'nmpa-udi': buildNmpaUdi,
+  'sahpra-covid-ivd': buildSahpra,
 };
 
 async function main() {

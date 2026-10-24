@@ -23,13 +23,15 @@ const REGISTRY_COUNTRY = {
   'pmda-approvals': 'JP',
   'hc-mdall': 'CA',
   'tga-daen': 'AU',
-  'cdsco-import-licences': 'IN',
+  'cdsco-approved-devices': 'IN',
   'tfda-devices': 'TW',
   'tfda-tudid': 'TW',
   'invima-dispositivos': 'CO',
   'who-pq-ivd': 'WHO',
   'hsa-smdr': 'SG',
   'hsa-class-a': 'SG',
+  'nmpa-udi': 'CN',
+  'sahpra-covid-ivd': 'ZA',
 };
 
 const TOP = 25;
