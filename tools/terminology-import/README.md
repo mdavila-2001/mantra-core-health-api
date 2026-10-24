@@ -258,23 +258,3 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 Monografías por ATC 5 con las secciones literales de la ficha técnica de CIMA y de la etiqueta FDA
 (openFDA), cada una con su cita: `clinical-pharmacology/` (ver su `README.md` y `SOURCES.md`).
 Registro de pasadas: `docs/seed-research/clinical-pharmacology.md`.
-
-## Síntomas, signos y fenotipos, con su relación a enfermedades (2026-10-24)
-
-Corpus en `symptoms/` (fuentes y licencias en `symptoms/SOURCES.md`; investigación,
-pasadas de saturación, cobertura y huecos en `docs/seed-research/symptoms.md`).
-Tres sistemas de códigos: **HPO** (19 894 términos, 19 345 con nombre oficial en
-castellano), **Symptom Ontology** (895) y **NCIt** signos, síntomas y hallazgos
-clínicos (3 988, NCIt 26.02d), con su jerarquía is-a. Relaciones enfermedad → síntoma **sólo de
-anotaciones publicadas** (HPOA con OMIM/Orphanet/DECIPHER, Mondo, Disease
-Ontology, anotaciones de enfermedades comunes de HPO), con frecuencia y evidencia.
-
-| Etapa | Script | Qué hace |
-|---|---|---|
-| 0 | `symptoms/fetch-symptom-sources.mjs` | Baja las fuentes a `glossary-data-build/symptoms-sources/` + `manifest.json` (SHA-256, versión) |
-| 1 | `symptoms/build-symptoms-corpus.mjs` | NDJSON normalizado + `coverage.json` + `saturation.json`. Sin red ni base |
-| 2 | `symptoms/load-symptoms.mjs` | Términos a `terminology.*` (dry-run por defecto; `--apply`; `--glossary` opcional) |
-| — | `symptoms/pack-data.mjs` / `symptoms/unpack-data.mjs` | Corpus normalizado comprimido y versionado en `symptoms/data/` (20,9 MB) ↔ `glossary-data-build/symptoms/` |
-| 3 | `symptoms/load-disease-phenotypes.mjs` | Relaciones. **Bloqueado por el modelo**: exige `terminology.concept_relationship_evidence` (propuesta en `symptoms/proposal/`) |
-
-Pruebas: `node --test "tools/terminology-import/symptoms/test/*.test.mjs"` (16, con recortes reales).
