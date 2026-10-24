@@ -1,28 +1,32 @@
 # Fuentes — equipos de diagnóstico, registros de Europa
 
 Registro canónico en código: [`lib/sources.mjs`](lib/sources.mjs). Esta tabla lo resume con el
-estado de acceso comprobado desde la sesión del 2026-10-24.
+estado de acceso comprobado el 2026-10-24.
 
-«Términos verificados» = el texto de términos se leyó en la fuente oficial. En esta sesión
-**ningún** host oficial fue alcanzable (la política de red del entorno devuelve 403), así que
-ninguno está verificado en origen: lo que se escribe abajo es lo que se pudo confirmar por
-buscador o por documentos oficiales citados por terceros, y queda marcado como pendiente.
+«Términos verificados» = el texto de términos se leyó en la fuente oficial. Hasta la pasada 6 la
+política de red del entorno devolvía 403 para todos los hosts oficiales; en la pasada 7 (red
+abierta) se leyeron en vivo y se descargaron las fuentes con descarga automática.
 
-| Fuente | Qué aporta | Acceso | Términos | Descarga automática | Estado 2026-10-24 |
-|---|---|---|---|---|---|
-| **EMDN** (Comisión Europea) | Nomenclatura completa con jerarquía; criterio de alcance | Excel completo enlazado desde la página oficial | Accesible a todos y sin costo; reutilización con atribución (Decisión 2011/833/UE). Pendiente leer el aviso del sitio | Sí | Bloqueado (403) |
-| **EUDAMED Public API v1.0** (Data Lake DG SANTE) | Equipos por UDI-DI: EMDN, fabricante y SRN, marca, modelo/referencia, clase, estado | `GET /udi`, `/actors`, `/reference`; paginación `nextLink`; `format=json\|csv` | API pública oficial; reutilización con atribución (2011/833/UE). Pendiente leer condiciones del portal de desarrolladores | Sí | Bloqueado (403) |
-| **EUDAMED portal** (API interna de la interfaz) | Certificado, revisión, fechas y organismo notificado por Basic UDI-DI | `basicUdiData/{uuid}` documentado por openregulatory/eudamed-api (MIT) | Sin términos propios leídos | No (solo enriquecimiento puntual tras verificar términos) | Bloqueado (403) |
-| **MHRA PARD** (Reino Unido) | Fabricantes registrados, tipos GMDN, marcas | Búsqueda con «Download CSV» por resultado; sin API ni descarga completa documentadas | Posible OGL v3.0, sin confirmar para PARD | No | Bloqueado (403) |
-| **swissdamed** (Swissmedic) | Actores con SRN y mandatarios suizos; UDI-DI con EMDN | API pública de la interfaz (contrato verificado en zdavatz/swissdamed2sqlite@45cd947) | **Las condiciones del sitio de Swissmedic prohíben reproducir y extraer automáticamente sin autorización expresa**; sin confirmar si rigen para swissdamed | **No** | Bloqueado (403) y en espera de términos |
-| **BD/RDM** (Ministero della Salute, Italia) | Más de un millón de dispositivos con CND, fabricante y repertorio | CSV semanal + diccionario v2.0 | Italian Open Data License v2.0 (ficha leída por buscador) | Sí (normaliza solo tras mapear columnas) | Bloqueado (403) |
-| **CND** (Ministero della Salute, Italia) | Clasificación nacional, base de la EMDN | CSV mensual | IODL v2.0 (ficha leída por buscador) | Sí | Bloqueado (403) |
-| **NANDO** (DG GROW) | Nombre y número de los organismos notificados | Búsqueda web, sin descarga masiva | Reutilización con atribución, sin confirmar | No | Bloqueado (403) |
-| **BfArM** (Alemania) | — | Sin descarga pública de registros identificada | — | No | Hueco |
-| **AEMPS / CCPS** (España) | — | Consulta pública, sin descarga masiva | — | No | Hueco |
-| **ANSM** (Francia) | — | Sin registro nacional descargable (remite a EUDAMED) | — | No | Hueco |
+| Fuente | Qué aporta | Acceso | Términos | Verificados | Descarga automática | Estado 2026-10-24 (pasada 7) |
+|---|---|---|---|---|---|---|
+| **EMDN** (Comisión Europea) | Nomenclatura completa con jerarquía; criterio de alcance | Excel `EMDN v2026_EN` enlazado desde `webgate.ec.europa.eu/dyna2/emdn/M90` | Accesible a todos y sin costo; aviso legal de la Comisión: CC BY 4.0 (Decisión 2011/833/UE) | **Sí** (en vivo) | Sí | Descargada (v2026) |
+| **EUDAMED Public API v1.0** (Data Lake DG SANTE) | Equipos por UDI-DI: EMDN, fabricante y SRN, marca, modelo/referencia, clase, estado; actores | `GET /udi`, `/actors`, `/reference`; paginación `nextLink` con `$after`; sin clave | Aviso legal general de la Comisión (CC BY 4.0); el aviso propio de EUDAMED no se pudo leer (aplicación JavaScript) | Parcial | Sí | Descargado: `/udi` por cada código EMDN en alcance, `/actors` fabricantes, `/reference` |
+| **EUDAMED portal** (API interna de la interfaz) | Certificado, revisión, fechas y organismo notificado por Basic UDI-DI | `basicUdiData/{uuid}` documentado por openregulatory/eudamed-api (MIT) | Sin términos propios leídos | No | No (los certificados salen de la réplica firstbase por UUID) | Hueco: no se descarga en bloque. `sourceUrl` de cada UDI apunta a su ficha pública `udiDiData/{uuid}` |
+| **MHRA PARD** (Reino Unido) | Fabricantes registrados, tipos GMDN, marcas | Búsqueda con «Download CSV» por resultado; sin API ni descarga completa | Solo «© Crown Copyright», sin OGL declarada; nombres GMDN con uso comercial restringido | **Sí** (en vivo) | No | Hueco por licencia |
+| **swissdamed** (Swissmedic) | Actores con SRN y mandatarios suizos; UDI-DI con EMDN | API pública de la interfaz | **Las condiciones de Swissmedic prohíben reproducir y extraer automáticamente (scraping/data mining) sin autorización expresa**; no hay términos propios de swissdamed | **Sí** (en vivo) | **No** | Excluido hasta que Swissmedic autorice |
+| **BD/RDM** (Ministero della Salute, Italia) | ~2,4 millones de dispositivos con CND, fabricante, código de catálogo y nombre comercial | ZIP semanal `DISPO_RDM_1_<fecha>_csv.zip` + diccionario v2.0 | Italian Open Data Licence v2.0 | **Sí** (en vivo) | Sí | Descargado (corte 2026-10-19); 216 848 dispositivos en alcance |
+| **CND** (Ministero della Salute, Italia) | Clasificación nacional, base de la EMDN | CSV mensual | IODL v2.0 (ficha leída por buscador) | No | Sí | Descargado, no se carga (la EMDN es la clasificación) |
+| **NANDO** (DG GROW) | Nombre y número de los organismos notificados | Búsqueda web, sin descarga masiva | Reutilización con atribución, sin confirmar | No | No | Hueco (responde vacío sin navegador) |
+| **BfArM** (Alemania) | — | Sin descarga pública de registros identificada | — | — | No | Hueco |
+| **AEMPS / CCPS** (España) | — | Consulta pública, sin descarga masiva | — | — | No | Hueco |
+| **ANSM** (Francia) | — | Sin registro nacional descargable (remite a EUDAMED) | — | — | No | Hueco |
 
-## Réplicas públicas en git (de dónde salen los datos mientras los hosts oficiales están bloqueados)
+Minimización de datos personales: de los actores de EUDAMED solo se publican nombre, país,
+ciudad, tipo, estado y SRN de la organización (nunca PRRC, correo ni teléfono). De la BD/RDM, el
+`cod_fiscale` solo se publica si tiene 11 dígitos (persona jurídica); el de 16 caracteres es de
+una persona física y se descarta.
+
+## Réplicas públicas en git (respaldo cuando una fuente oficial no está en el caché)
 
 Fijadas por commit en [`lib/mirrors.mjs`](lib/mirrors.mjs); `fetch-mirrors.mjs` las clona y anota
 el sha256. Cada fila cita la ficha oficial en `sourceUrl` y la réplica en `extra.mirror`.
@@ -47,8 +51,8 @@ Claves (`source`): `eudamed-udi`, `eudamed-certificates`, `ec-emdn`, `mhra-pard`
 equipos).
 
 Recorte aplicado por esta región (lo pide el README común): se exportan filas con código EMDN/CND
-de la categoría W (IVD, entera) y de los 79 tipos listados en `INCLUDED_TYPE_PREFIXES`, decididos
-uno por uno contra la EMDN V2; `extra.dxScope` dice qué regla incluyó cada fila. No se exportan
+de la categoría W (IVD, entera) y de los 80 tipos listados en `INCLUDED_TYPE_PREFIXES`, decididos
+uno por uno contra la EMDN v2026; `extra.dxScope` dice qué regla incluyó cada fila. No se exportan
 las categorías A, B, D, F, H, J, K, L, M, P, S, T, X, Y ni los tipos no diagnósticos o mixtos de
 C, G, N, Q, R, U, V y Z (motivos en `lib/emdn-scope.mjs` y árbol en `out/emdn-scope-review.md`).
 
