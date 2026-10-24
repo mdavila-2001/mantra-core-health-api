@@ -95,6 +95,16 @@ export const SOURCES = {
     dir: 'medical-codes-mcp-server',
     redistributor: 'https://www.npmjs.com/package/@cyanheads/medical-codes-mcp-server',
   },
+  'cups-co': {
+    sourceCode: 'MINSALUD_CO_CUPS',
+    name: 'CUPS — Clasificación Única de Procedimientos en Salud (MinSalud Colombia, POS Pópuli)',
+    owner: 'Ministerio de Salud y Protección Social de Colombia',
+    officialUrl: 'https://www.datos.gov.co/Salud-y-Protecci-n-Social/POSPOPULI-LABORATORIO/s5f2-yivs',
+    license:
+      'Datos abiertos de MinSalud Colombia en datos.gov.co (conjuntos s5f2-yivs y 9zcz-bjue), licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0): se cita la fuente y las adaptaciones que se redistribuyan conservan la licencia.',
+    obtain: 'url',
+    dir: 'minsalud-co',
+  },
   'gtr-ncbi': {
     sourceCode: 'NCBI_GTR',
     name: 'NCBI Genetic Testing Registry (GTR)',

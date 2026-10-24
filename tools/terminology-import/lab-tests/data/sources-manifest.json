@@ -120,5 +120,44 @@
       }
     },
     "license": "Dominio público (NCBI/NLM); atribución pedida a GTR."
+  },
+  "cie10es-px": {
+    "dir": "cie10es",
+    "files": {
+      "Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx": {
+        "url": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx",
+        "bytes": 5039772,
+        "sha256": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3",
+        "lastModified": "Tue, 16 Dec 2025 09:01:37 GMT",
+        "retrievedAt": "2026-10-24T16:48:36.886Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:48:36.894Z"
+  },
+  "minsalud-co-laboratorio": {
+    "dir": "minsalud-co",
+    "files": {
+      "POSPOPULI-LABORATORIO-s5f2-yivs.csv": {
+        "url": "https://www.datos.gov.co/api/views/s5f2-yivs/rows.csv?accessType=DOWNLOAD",
+        "bytes": 1167902,
+        "sha256": "e41fda66022826c2802e5aa0c9f0848c0372bedf94c0f968b7b4966cfffe45f5",
+        "lastModified": "Thu, 27 Jul 2023 22:46:23 GMT",
+        "retrievedAt": "2026-10-24T16:50:37.923Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:50:37.924Z"
+  },
+  "minsalud-co-pbs": {
+    "dir": "minsalud-co",
+    "files": {
+      "Procedimiento-del-PBS-9zcz-bjue.csv": {
+        "url": "https://www.datos.gov.co/api/views/9zcz-bjue/rows.csv?accessType=DOWNLOAD",
+        "bytes": 5932078,
+        "sha256": "4a8ed7ff9c225a96427d884b4c683472e4c765cacc93a83f22229ebb80140636",
+        "lastModified": "Thu, 27 Jul 2023 23:19:23 GMT",
+        "retrievedAt": "2026-10-24T16:50:38.980Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:50:38.980Z"
   }
 }

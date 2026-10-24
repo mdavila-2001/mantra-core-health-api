@@ -70,6 +70,24 @@ export const TARIFF_RULES = {
     { prefix: '4B', domain: null, evidence: 'sección 4, 4B: medición de dispositivos (marcapasos, estimuladores) (7)' },
     { pattern: '^F.[0-5]', domain: 'functional', evidence: 'sección F, tipos 0–5: las 546 son «… Assessment» (habla, función motora, AVD, audición, audífono, vestibular); 6–F son tratamiento y quedan fuera' },
   ],
+  // CUPS (MinSalud Colombia, conjuntos POS Pópuli). Sólo códigos de 6 dígitos (ver cupsItems).
+  'cups-co': [
+    { prefix: '90', domain: 'laboratory', evidence: 'POSPOPULI-LABORATORIO: los 1 339 códigos son 90xxxx (laboratorio clínico)' },
+    { prefix: '911', domain: 'laboratory', evidence: 'PBS 911: anticuerpos irregulares y pruebas inmunohematológicas (64)' },
+    ...['870', '871', '872', '873'].map((prefix) => ({ prefix, domain: 'imaging', evidence: `PBS ${prefix}: radiografías` })),
+    ...['874', '875', '876', '877'].map((prefix) => ({ prefix, domain: 'imaging', evidence: `PBS ${prefix}: arteriografías, angiografías y estudios contrastados diagnósticos` })),
+    { prefix: '879', domain: 'imaging', evidence: 'PBS 879: tomografías computadas (39)' },
+    { prefix: '881', domain: 'imaging', evidence: 'PBS 881: ecografías (74)' },
+    { prefix: '882', domain: 'imaging', evidence: 'PBS 882: ecografías doppler (43)' },
+    { prefix: '883', domain: 'imaging', evidence: 'PBS 883: resonancias magnéticas (59)' },
+    { prefix: '886', domain: 'imaging', evidence: 'PBS 886: osteodensitometrías, morfometría vertebral, elastografía (5)' },
+    { prefix: '920', domain: 'imaging', evidence: 'PBS 920: gamagrafías (82)' },
+    { prefix: '921', domain: 'imaging', evidence: 'PBS 921: gamagrafías con galio, tumorales, de viabilidad (8)' },
+    { prefix: '898', domain: 'pathology', evidence: 'PBS 898: estudios de coloración, inmunohistoquímica y citometría en especímenes (68)' },
+    ...['891', '892', '894', '895', '897'].map((prefix) => ({ prefix, domain: 'functional', evidence: `PBS ${prefix}: pruebas funcionales y monitoreos diagnósticos (rinomanometría, urodinamia, pruebas de esfuerzo, Holter, monitoría fetal…)` })),
+    ...['950', '951', '952'].map((prefix) => ({ prefix, domain: 'functional', evidence: `PBS ${prefix}: pruebas diagnósticas oftalmológicas (campo visual, OCT, electrorretinograma…)` })),
+    { prefix: '954', domain: 'functional', evidence: 'PBS 954: audiometrías, impedanciometría y potenciales evocados auditivos (45)' },
+  ],
   'pami-nomenclador': [
     { prefix: '66', domain: 'laboratory', evidence: 'capítulo 66: 338 análisis clínicos' },
     { prefix: '77', domain: 'laboratory', evidence: 'códigos 77xxxx: 1305 análisis clínicos (295 con el mismo nombre que en 66; PAMI los publica como prácticas distintas)' },
@@ -99,6 +117,12 @@ export const TARIFF_EXCLUSIONS = {
     { prefix: '40813', reason: '4.08.13: radiología intervencionista terapéutica (ablación, angioplastía, stents)' },
     { prefix: '40814', reason: '4.08.14: trombectomía/trombólisis y otros procedimientos terapéuticos' },
     { prefix: '40502210', reason: 'terapia de reposición enzimática por infusión (tratamiento)' },
+  ],
+  'cups-co': [
+    { prefix: '911101', reason: 'procesamiento de la unidad de autotransfusión (no es un análisis)' },
+    { prefix: '954610', reason: 'liberación y reposicionamiento canalicular: terapia de rehabilitación vestibular' },
+    { prefix: '954903', reason: 'revisión y ajuste de dispositivo auditivo implantable (no es una prueba)' },
+    { prefix: '954904', reason: 'revisión y ajuste de dispositivo auditivo no implantable (no es una prueba)' },
   ],
   'pami-nomenclador': [
     { prefix: '187143', reason: 'drenajes y/o procedimientos similares bajo eco' },
@@ -148,7 +172,7 @@ export function tariffRecords(source, items, prov) {
       codeSystem: source,
       code: it.code,
       display: it.display ?? it.name,
-      definition: null,
+      definition: it.definition ?? null,
       lang: it.lang,
       selectable: it.selectable ?? true,
       status: it.status ?? 'active',
@@ -169,6 +193,7 @@ export function tariffRecords(source, items, prov) {
         sourceSha256: prov.sourceSha256,
         retrievedAt: prov.retrievedAt,
         license: prov.license,
+        ...(it.provenance ?? {}),
       },
     });
   }
@@ -265,4 +290,52 @@ export function pcsItems(codes, sectionNames) {
       properties: compact({ pcs_section: { value: r.code[0], meaning: sectionNames.get(r.code[0]) ?? null }, pcs_short_description: r.short_desc && r.short_desc !== r.long_desc ? r.short_desc : null }),
     };
   });
+}
+
+/**
+ * Designación oficial en castellano para ICD-10-PCS desde CIE-10-ES
+ * Procedimientos (Ministerio de Sanidad), que es su traducción oficial y usa
+ * los mismos códigos de siete caracteres. Se asigna SÓLO por igualdad exacta de
+ * código; lo que no está en CIE-10-ES queda sin designación y se cuenta.
+ * @param {Array} records registros de `icd10pcs-cms`
+ * @param {Map<string,string>} esByCode código → descripción CIE-10-ES (verbatim)
+ * @param {object} prov { edition, url, file, sha256 }
+ */
+export function addCie10esDesignations(records, esByCode, prov) {
+  let added = 0;
+  for (const r of records) {
+    const es = esByCode.get(r.code);
+    if (!es) continue;
+    added += 1;
+    r.designations = [{ lang: 'es', type: 'preferred', value: es }];
+    r.properties.designation_es_source = { source: `CIE-10-ES Procedimientos ${prov.edition} (Ministerio de Sanidad de España)`, rule: 'mismo código ICD-10-PCS', url: prov.url, file: prov.file, sha256: prov.sha256 };
+  }
+  return { added, missing: records.length - added };
+}
+
+/**
+ * CUPS de MinSalud Colombia (POS Pópuli): `POSPOPULI-LABORATORIO` + `Procedimiento del PBS`.
+ * Sólo códigos CUPS de 6 dígitos: el PBS trae además 811 códigos de 5 dígitos
+ * (p. ej. «10101») de otra codificación, que un prefijo podría confundir.
+ * `QueEs` es la explicación oficial en lenguaje llano y va como `definition`.
+ */
+export function cupsItems(labRows, pbsRows, provByDataset = {}) {
+  const clean = (v) => (v && v.trim() && v.trim() !== 'Sin dato' ? v.trim() : null);
+  const item = (r, dataset) => ({
+    ...(provByDataset[dataset] ? { provenance: provByDataset[dataset] } : {}),
+    code: r.CodigoCUPS.trim(),
+    name: r.Descripcion.trim(),
+    display: displayCase(r.Descripcion.replace(/\s+/g, ' ').trim()),
+    definition: clean(r.QueEs),
+    lang: 'es',
+    properties: compact({
+      cups_dataset: dataset,
+      cups_coverage_pbs: clean(r.CoberturaPlanBeneficiosUPC),
+      cups_coverage_detail: clean(r.DetallePlanBeneficiosUPC),
+      cups_exclusions_pbs: clean(r.ExclusionesPlanBeneficiosUPC),
+      cups_source_row_id: clean(r.CodigoLaboratorio ?? r.CodigoProcedimiento),
+    }),
+  });
+  const sixDigits = (r) => /^\d{6}$/.test((r.CodigoCUPS ?? '').trim());
+  return [...labRows.filter(sixDigits).map((r) => item(r, 'POSPOPULI-LABORATORIO')), ...pbsRows.filter(sixDigits).map((r) => item(r, 'Procedimiento del PBS'))];
 }

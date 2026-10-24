@@ -68,6 +68,7 @@ export function valueSetDefinition(code, context = {}) {
     'lab-catalog-sigtap-sus': ['Catálogo de análisis — SIGTAP grupo 02 (Brasil)', 'Procedimentos com finalidade diagnóstica de la Tabela Unificada del SUS.'],
     'lab-catalog-tuss-ans': ['Catálogo de análisis — TUSS tabla 22 (Brasil)', 'Procedimientos diagnósticos de la TUSS (ANS) incluidos por prefijo (ver tariffs.mjs).'],
     'lab-catalog-icd10pcs-cms': ['Catálogo de análisis — ICD-10-PCS (secciones diagnósticas)', 'Códigos ICD-10-PCS de imagen (B), medicina nuclear diagnóstica (C1–C6), medición y monitoreo (4) y evaluaciones (F0–F5).'],
+    'lab-catalog-cups-co': ['Catálogo de análisis — CUPS (MinSalud Colombia)', 'Análisis y procedimientos diagnósticos CUPS de POS Pópuli incluidos por prefijo (ver tariffs.mjs), con su «Qué es» oficial.'],
     'lab-catalog-gtr-ncbi': ['Catálogo de análisis — NCBI Genetic Testing Registry', 'Tests genéticos vigentes registrados por laboratorios en GTR (una oferta por laboratorio).'],
     'lab-catalog-gtr-ncbi-type-clinical': ['Catálogo de análisis — GTR, tests clínicos', 'Tests de GTR con test_type = Clinical.'],
     'lab-catalog-gtr-ncbi-type-research': ['Catálogo de análisis — GTR, tests de investigación', 'Tests de GTR con test_type = Research.'],

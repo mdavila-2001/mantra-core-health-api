@@ -36,9 +36,13 @@ import {
   parseUniversalLabOrders,
 } from './lib/loinc.mjs';
 import { GTR_CODE_SYSTEM, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv, TEST_VERSION_COLUMNS } from './lib/gtr.mjs';
+import { txToLoincInput } from './lib/loinc-tx.mjs';
+import { parseCsv } from '../lib/glossary-es/loinc-es.mjs';
 import { DOMAINS, assertRecord } from './lib/records.mjs';
 import { GAPS, SOURCES } from './lib/sources.mjs';
-import { TARIFF_EXCLUSIONS, TARIFF_RULES, fonasaItems, pamiItems, pcsItems, sigtapItems, tariffRecords, tussItems } from './lib/tariffs.mjs';
+import { TARIFF_EXCLUSIONS, TARIFF_RULES, addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pcsItems, sigtapItems, tariffRecords, tussItems } from './lib/tariffs.mjs';
+import { FULL_SHEET, PX_FILE } from '../lib/glossary-es/cie10es.mjs';
+import { createRequire } from 'node:module';
 import { UCUM_CODE_SYSTEM, ucumRecords } from './lib/ucum.mjs';
 
 const SRC = join(BUILD_DIR, 'lab-tests-sources');
@@ -69,6 +73,14 @@ function npmProv(key, file) {
   const m = manifest[key];
   if (!m) throw new Error(`Falta ${key} en ${join(SRC, 'manifest.json')}: corré fetch-lab-tests-sources.mjs.`);
   return { packageName: SOURCES[key].npm.name, packageVersion: SOURCES[key].npm.version, file: relative(BUILD_DIR, file), sha256: sha256File(file), tarballSha256: m.sha256, retrievedAt: m.retrievedAt, license: SOURCES[key].license };
+}
+
+/** Procedencia de un archivo bajado por URL directa (fetch-direct-sources.mjs). */
+function directProv(path) {
+  const entry = Object.values(manifest).find((m) => m?.files && Object.keys(m.files).some((f) => path.endsWith(f)));
+  const f = entry && Object.entries(entry.files).find(([name]) => path.endsWith(name))[1];
+  if (!f) throw new Error(`${path} no está en manifest.json: corré fetch-direct-sources.mjs.`);
+  return { file: relative(BUILD_DIR, path), sha256: f.sha256, retrievedAt: f.retrievedAt, url: f.url };
 }
 
 async function writeLayer(layer, records, meta) {
@@ -122,7 +134,7 @@ async function buildUcum() {
 async function buildLoinc() {
   const dir = join(SRC, SOURCES.loinc.dir);
   const tablePath = findFile(dir, 'Loinc.csv');
-  if (!tablePath) return { layer: 'loinc', missing: `no hay Loinc.csv bajo ${dir} (exige cuenta en loinc.org; ver SOURCES.md)` };
+  if (!tablePath) return buildLoincFromTx();
   const release = arg('--loinc-release');
   if (!release) throw new Error('Hay Loinc.csv: pasá --loinc-release <versión de la distribución, p. ej. 2.81>.');
   const read = (p) => readFileSync(p, 'utf8');
@@ -210,6 +222,26 @@ const TARIFF_LAYERS = {
       }
     },
   },
+  'cups-co': {
+    direct: true,
+    file: ['POSPOPULI-LABORATORIO-s5f2-yivs.csv'],
+    version: () => `${(manifest['minsalud-co-laboratorio']?.files?.['POSPOPULI-LABORATORIO-s5f2-yivs.csv']?.retrievedAt ?? '').slice(0, 10)} (datos.gov.co)`,
+    sourceUrl: () => SOURCES['cups-co'].officialUrl,
+    items: (dir) => {
+      const rowsOf = (f) => {
+        const [header, ...data] = parseCsv(readFileSync(join(dir, f), 'utf8'));
+        return data.map((r) => Object.fromEntries(header.map((h, i) => [h.trim(), r[i] ?? ''])));
+      };
+      const provOf = (f, url) => {
+        const p = directProv(join(dir, f));
+        return { sourceUrl: url, sourceFile: p.file, sourceSha256: p.sha256, retrievedAt: p.retrievedAt };
+      };
+      return cupsItems(rowsOf('POSPOPULI-LABORATORIO-s5f2-yivs.csv'), rowsOf('Procedimiento-del-PBS-9zcz-bjue.csv'), {
+        'POSPOPULI-LABORATORIO': provOf('POSPOPULI-LABORATORIO-s5f2-yivs.csv', 'https://www.datos.gov.co/Salud-y-Protecci-n-Social/POSPOPULI-LABORATORIO/s5f2-yivs'),
+        'Procedimiento del PBS': provOf('Procedimiento-del-PBS-9zcz-bjue.csv', 'https://www.datos.gov.co/Salud-y-Protecci-n-Social/Procedimiento-del-PBS/9zcz-bjue'),
+      });
+    },
+  },
   'pami-nomenclador': {
     file: ['dist', 'assets', 'estudios.json'],
     version: () => '2022-08-03',
@@ -227,27 +259,44 @@ function sqliteBuildMeta(path, system) {
   }
 }
 
+/** Designaciones en castellano de CIE-10-ES Procedimientos (si está descargado con fetch-direct-sources.mjs). */
+function enrichPcsWithCie10es(records) {
+  const path = join(SRC, 'cie10es', PX_FILE);
+  const m = manifest['cie10es-px']?.files?.[PX_FILE];
+  if (!existsSync(path) || !m) return { skipped: 'CIE-10-ES Procedimientos no descargado' };
+  const XLSX = createRequire(import.meta.url)('xlsx');
+  const rows = XLSX.utils.sheet_to_json(XLSX.readFile(path, { dense: true }).Sheets[FULL_SHEET], { header: 1, defval: null });
+  const [header, ...data] = rows;
+  const ci = header.indexOf('Código');
+  const di = header.indexOf('Descripción');
+  if (ci < 0 || di < 0) throw new Error(`CIE-10-ES: la hoja «${FULL_SHEET}» no tiene Código/Descripción. Cabeceras: ${header.join(', ')}`);
+  const esByCode = new Map(data.filter((r) => r[ci] && r[di]).map((r) => [String(r[ci]).trim(), String(r[di]).trim()]));
+  return { ...addCie10esDesignations(records, esByCode, { edition: '2026', url: m.url, file: relative(BUILD_DIR, path), sha256: m.sha256 }), cieCodes: esByCode.size };
+}
+
 async function buildTariff(key) {
   const def = TARIFF_LAYERS[key];
   const src = SOURCES[key];
-  const dir = join(SRC, src.dir, 'package');
+  const dir = def.direct ? join(SRC, src.dir) : join(SRC, src.dir, 'package');
   const path = join(dir, ...def.file);
-  if (!existsSync(path)) return { layer: key, missing: `paquete ${src.npm.name} no descargado` };
+  const via = src.npm ? `${src.npm.name}@${src.npm.version}` : 'descarga directa (fetch-direct-sources.mjs)';
+  if (!existsSync(path)) return { layer: key, missing: `${via}: no descargado` };
   const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
   const pkgMeta = def.sqlite ? sqliteBuildMeta(path, 'ICD10PCS') : def.meta ? read(join(dir, ...def.meta)) : null;
   const version = def.version(pkgMeta);
-  const np = npmProv(key, path);
+  const np = def.direct ? directProv(path) : npmProv(key, path);
   const { records, stats } = tariffRecords(key, def.items(dir, read), {
-    sourceName: `${src.name} — ${version} (vía ${src.npm.name}@${src.npm.version})`,
-    sourceVersion: `${version}; ${src.npm.name}@${src.npm.version}`,
+    sourceName: src.npm ? `${src.name} — ${version} (vía ${via})` : `${src.name} — ${version}`,
+    sourceVersion: src.npm ? `${version}; ${via}` : version,
     sourceUrl: def.sourceUrl(pkgMeta),
     sourceFile: np.file,
     sourceSha256: np.sha256,
     retrievedAt: np.retrievedAt,
     license: src.license,
   });
+  if (key === 'icd10pcs-cms') stats.cie10es = enrichPcsWithCie10es(records);
   await writeLayer(key, records, {
-    source: src.npm,
+    source: src.npm ?? { direct: true },
     packageMetadata: pkgMeta,
     codeSystems: [{ internalCode: key, name: src.name, canonicalUrl: def.canonicalUrl ?? `https://mantracore.health/fhir/CodeSystem/${key}`, version, sourceKey: key, records: records.length }],
     files: { [def.file.at(-1)]: { file: np.file, sha256: np.sha256 } },
@@ -256,6 +305,36 @@ async function buildTariff(key) {
     stats,
   });
   return { layer: key, records, stats };
+}
+
+/**
+ * LOINC sin distribución oficial: tx.fhir.org (fetch-loinc-txfhir.mjs) + NLM
+ * (fetch-loinc-ctss.mjs). Mismo `loincRecords`, misma capa `loinc`.
+ */
+async function buildLoincFromTx() {
+  const txPath = join(SRC, 'loinc-txfhir', 'loinc-txfhir.json');
+  const ctssPath = join(SRC, 'loinc-ctss', 'loinc-ctss-items.json');
+  const panPath = join(SRC, 'loinc-ctss', 'loinc-ctss-panels.json');
+  if (!existsSync(txPath) || !existsSync(ctssPath)) {
+    return { layer: 'loinc', missing: 'no hay Loinc.csv (exige cuenta en loinc.org) ni descarga por tx.fhir.org + NLM (fetch-loinc-txfhir.mjs, fetch-loinc-ctss.mjs)' };
+  }
+  const tx = JSON.parse(readFileSync(txPath, 'utf8'));
+  const ctss = JSON.parse(readFileSync(ctssPath, 'utf8'));
+  const pan = existsSync(panPath) ? JSON.parse(readFileSync(panPath, 'utf8')) : null;
+  const { stats: inputStats, ...input } = txToLoincInput(tx, ctss, pan);
+  const release = String(tx.codeSystemVersion ?? '').split('|').pop() || 'desconocida';
+  const files = { 'Loinc.csv': fileProv(txPath), 'loinc-ctss-items.json': fileProv(ctssPath), ...(pan ? { 'loinc-ctss-panels.json': fileProv(panPath) } : {}) };
+  const esVariant = { id: 'designaciones es-* de LOINC servidas por tx.fhir.org (nombre largo es-MX, nombre corto es-AR)', country: 'MX/AR', producer: null, file: 'tx.fhir.org ValueSet/$expand' };
+  const { records, stats } = loincRecords(input, { release, retrievedAt: tx.finishedAt, files, esVariant, license: SOURCES.loinc.license, via: 'tx.fhir.org (HL7) y NLM Clinical Table Search Service' });
+  await writeLayer('loinc', records, {
+    release,
+    via: { txfhir: tx.base, txRequests: tx.requests, txPartitions: tx.partitions, ctss: ctss.source, ctssLeaves: ctss.leaves, panels: pan ? { panelCodes: pan.panelCodes, withDefinition: pan.withDefinition, missing: pan.missing?.length ?? 0 } : null },
+    esVariant,
+    codeSystems: [{ internalCode: 'loinc', name: 'LOINC', canonicalUrl: 'http://loinc.org', version: release, sourceKey: 'loinc', records: records.length }],
+    files,
+    stats: { ...stats, input: inputStats },
+  });
+  return { layer: 'loinc', records, stats };
 }
 
 // --- Capa NCBI GTR --------------------------------------------------------------

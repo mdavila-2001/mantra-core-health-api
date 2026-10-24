@@ -19,7 +19,8 @@ import { thoRecords } from '../lab-tests/lib/hl7-tho.mjs';
 import { RELATION, buildPlan, planSummary } from '../lab-tests/lib/load-plan.mjs';
 import { loincRecords, parseLinguisticIndex, parseLinguisticVariant, parseLoincTable, parsePanels } from '../lab-tests/lib/loinc.mjs';
 import { assertRecord, conceptIdFor, propertyIdFor } from '../lab-tests/lib/records.mjs';
-import { fonasaItems, pamiItems, pcsItems, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
+import { addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pcsItems, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
+import { partsFromFullySpecifiedName } from '../lab-tests/lib/loinc-tx.mjs';
 import { ucumRecords } from '../lab-tests/lib/ucum.mjs';
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'lab-tests');
@@ -220,4 +221,49 @@ test('GTR (recorte real): sólo la versión vigente, con tipo, genes, condicione
   assert.equal(Object.keys(stats.unmappedMethodCategories).length, 1);
   assert.match(Object.keys(stats.unmappedMethodCategories)[0], /Karyotyping/);
   assert.throws(() => parseTsv('a\tb\n1\t2\n', TEST_VERSION_COLUMNS, 'x'), /Cabeceras encontradas: a, b/);
+});
+
+// --- CUPS de MinSalud Colombia (recorte real de POS Pópuli, datos.gov.co) -------
+test('CUPS (recorte real): «Qué es» oficial como definición, prefijos verificados, 5 dígitos fuera, exclusión terapéutica', () => {
+  const fx = json('cups-co.recorte.json');
+  const { records, stats } = tariffRecords('cups-co', cupsItems(fx.lab, fx.pbs, { 'Procedimiento del PBS': { sourceUrl: 'https://www.datos.gov.co/x/9zcz-bjue' } }), TPROV);
+  records.forEach(assertRecord);
+  const by = byCode(records);
+  assert.deepEqual(Object.keys(by).sort(), ['870001', '901001']); // 890201 (consulta) fuera por prefijo; 954610 terapia; 10101 tiene 5 dígitos
+  assert.equal(by['901001'].domain, 'laboratory');
+  assert.match(by['901001'].definition, /sensibilidad a los antibióticos/);
+  assert.equal(by['901001'].properties.tariff_official_name, 'ANTIBIOGRAMA (DISCO)');
+  assert.equal(by['870001'].domain, 'imaging');
+  assert.equal(by['870001'].provenance.sourceUrl, 'https://www.datos.gov.co/x/9zcz-bjue');
+  assert.equal(by['901001'].provenance.sourceUrl, TPROV.sourceUrl);
+  assert.equal(stats.excludedExplicitly[0].code, '954610');
+});
+
+test('ICD-10-PCS + CIE-10-ES: designación oficial en castellano sólo por igualdad exacta de código', () => {
+  const sections = new Map(TAR.pcs.sections.map((x) => [x.value, x.meaning]));
+  const { records } = tariffRecords('icd10pcs-cms', pcsItems(TAR.pcs.codes, sections), TPROV);
+  // Textos verbatim de Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx (hoja «ES2026 Completa + Marcadores»).
+  const es = new Map([
+    ['B00B0ZZ', 'Radiografía simple de médula espinal, con contraste, hiperosmolar'],
+    ['4A0002Z', 'Medición de conductividad, nervioso central, abordaje abierto'],
+  ]);
+  const r = addCie10esDesignations(records, es, { edition: '2026', url: 'https://example.invalid/px.xlsx', file: 'fixture', sha256: 'f'.repeat(64) });
+  assert.deepEqual(r, { added: 2, missing: records.length - 2 });
+  const b = records.find((x) => x.code === 'B00B0ZZ');
+  assert.deepEqual(b.designations, [{ lang: 'es', type: 'preferred', value: 'Radiografía simple de médula espinal, con contraste, hiperosmolar' }]);
+  assert.match(b.properties.designation_es_source.source, /CIE-10-ES Procedimientos 2026/);
+  assert.deepEqual(records.find((x) => x.code === 'F003GKZ').designations, []);
+});
+
+test('LOINC vía tx.fhir.org: el nombre corto es-AR (FSN) se corta en los seis ejes sólo si son exactamente seis', () => {
+  // Valor real de tx.fhir.org para 2345-7 (designación es-AR SHORTNAME, LOINC 2.82).
+  assert.deepEqual(partsFromFullySpecifiedName('glucosa:concentración de masa:punto en el tiempo:suero/plasma:cuantitativo:'), {
+    component: 'glucosa',
+    property: 'concentración de masa',
+    time_aspct: 'punto en el tiempo',
+    system: 'suero/plasma',
+    scale_typ: 'cuantitativo',
+  });
+  assert.equal(partsFromFullySpecifiedName('Glucose SerPl-mCnc'), null);
+  assert.equal(partsFromFullySpecifiedName('a:b:c'), null);
 });

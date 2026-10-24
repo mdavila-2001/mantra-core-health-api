@@ -1,4 +1,11 @@
 {
+  "lab-tests-cups-co": {
+    "sha256": "848e985544d738797878fe739024e810a2f79f099fa10560b21885e5779ccf9c",
+    "lines": 2158,
+    "files": [
+      "lab-tests-cups-co.ndjson.gz"
+    ]
+  },
   "lab-tests-fonasa-mle": {
     "sha256": "1e5df212c836debbf8d155a069e7cf37d5310de1498974f548af2fbe225d3c15",
     "lines": 648,
@@ -25,7 +32,7 @@
     ]
   },
   "lab-tests-icd10pcs-cms": {
-    "sha256": "47b51694efb397a705dd8cc78b745d3daaaf35df4c1a244b0a7e9f53cb9220cd",
+    "sha256": "4b0619a68feab7cc7ec4e9a23cfa8a86aacc2f07766b2aa8ab75b0097dc328c3",
     "lines": 4397,
     "files": [
       "lab-tests-icd10pcs-cms.ndjson.gz"
