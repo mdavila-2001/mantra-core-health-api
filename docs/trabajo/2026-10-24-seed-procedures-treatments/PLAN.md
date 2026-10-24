@@ -70,7 +70,7 @@
 | H5.S1.M2 | Lint | exit 0 | `corepack yarn lint` | HECHO |
 | H5.S1.M3 | Tests dirigidos | 0 fallos | `node --test tools/terminology-import/procedures-treatments/test/*.test.mjs` | HECHO |
 | H5.S1.M4 | Medición con ramas hermanas | reporte `validate-siblings.json` con ramas reales | `node …/validate-siblings.mjs --db` | BLOQUEADO |
-| H5.S1.M5 | PR contra `dev` | PR abierto, sin mergear | URL del PR | TODO |
+| H5.S1.M5 | PR contra `dev` | PR abierto, sin mergear | URL del PR | HECHO |
 | H5.S1.M6 | Respaldo del corpus normalizado en git (`data/`, gzip, partes < 45 MB) | `zcat` de cada parte reproduce byte a byte el NDJSON de `build.mjs` | `node …/snapshot.mjs` ×2 → mismos sha256; `zcat data/out/assertions.ndjson.gz \| sha256sum` = sha256 de `out/assertions.ndjson` | HECHO |
 
 ## Riesgos y bloqueos previstos

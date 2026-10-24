@@ -4,7 +4,7 @@
 - Peldaño de evidencia alcanzado: `TESTED` en el importador (tests dirigidos en verde, carga real en
   PostgreSQL 16 desechable con idempotencia medida). No `VERIFIED` de punta a punta: las relaciones no se
   cargan en el modelo vigente (falta procedencia) y la fase 2 no pudo correr (ramas hermanas ausentes).
-- Avance: 18 / 21 microtareas HECHO (85,7 %). Estado vivo: este reporte se reescribe en cada pasada del loop.
+- Avance: 19 / 21 microtareas HECHO (90,5 %). Estado vivo: este reporte se reescribe en cada pasada del loop.
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -25,6 +25,8 @@
 | Gate | `corepack yarn typecheck` | con `NODE_OPTIONS=--max-old-space-size=8192` | exit 0 |
 | H5.S1.M2 | `corepack yarn lint` | ídem | exit 0, sin hallazgos (el script cubre `{src,apps,libs,test}/**/*.ts`; los `.mjs` del importador además pasan `prettier --check`) |
 | H5.S1.M6 | Corpus normalizado respaldado en git | `node …/snapshot.mjs` ×2 + `zcat … \| sha256sum` | 8 archivos `.gz` (1,3 MB), deterministas; `assertions` descomprimido = `5661281f…` igual al de `build.mjs` |
+| H5.S1.M5 | PR borrador contra `dev`, sin mergear | `mcp__github__create_pull_request` | https://github.com/mdavila-2001/mantra-core-health-api/pull/689 |
+| Docs | `mkdocs build --strict` | venv con `docs/requirements.txt` | 0 avisos nuevos; aborta por 2 avisos que ya estaban en `dev` (mermaid sin internet, enlace de `architecture/module-layout.md`) |
 | H4 pasada 2 | OHD + evaluación de CIDO, EFO, SCDO, WHO SMART | `build.mjs` y diff por código contra la pasada 1 | +81 procedimientos, +0 relaciones; carga incremental 83 conceptos + 573 propiedades, 2.ª corrida 0 |
 
 ## A medias
@@ -41,7 +43,6 @@
 |---|---|---|
 | H5 fase 2 | BLOQUEADO | Que existan `justin/seed-diseases`, `justin/seed-medical-dictionaries`, `justin/seed-specialty-services` en `origin` |
 | Relaciones en la base | BLOQUEADO | Que el repo del modelo agregue `concept_relationship_assertions` (o equivalente) |
-| PR contra `dev` | TODO | Cierre del loop |
 
 ## Evidencia
 Ver la sección de cobertura y pruebas de carga en `docs/seed-research/procedures-treatments.md`.
