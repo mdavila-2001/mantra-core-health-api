@@ -1,8 +1,14 @@
 # Fuentes — procedimientos y tratamientos no farmacológicos
 
-Las descargas viven **fuera de git**, en `../glossary-data-build/procedures-treatments/cache/<fuente>/`
-(redefinible con `PROCEDURES_BUILD_DIR`), cada una con su `meta.json`: URL fijada por commit o tag,
-sha256, tamaño y fecha. Nada de esta tabla se copia al repositorio.
+Las descargas se hacen en `../glossary-data-build/procedures-treatments/cache/<fuente>/` (redefinible con
+`PROCEDURES_BUILD_DIR`), cada una con su `meta.json`: URL fijada por commit o tag, sha256, tamaño y fecha.
+
+**Respaldo en git** (orden del propietario, 2026-10-24: «que lo lleven todo a la nube»): `snapshot.mjs`
+copia a [`data/`](./data/) el corpus normalizado (`out/*.ndjson.gz`, `coverage.json.gz`), los `meta.json`
+de cada fuente, el último sondeo de red y los **crudos chicos** (MAxO, POET y OHD, < 10 MB, CC BY 4.0).
+Los crudos grandes (NCIt 283 MB, MONDO 53 MB, Uberon 23 MB) **no se suben**: `fetch.mjs <fuente>` los
+vuelve a bajar del mismo tag y `data/MANIFEST.json` guarda su URL y sha256 para verificarlos. gzip
+determinista: re-correr `snapshot.mjs` sobre el mismo corpus no genera cambios en git.
 
 ## Fuentes usadas (descargadas y normalizadas)
 

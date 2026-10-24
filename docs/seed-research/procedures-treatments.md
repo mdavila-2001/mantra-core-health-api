@@ -18,7 +18,11 @@ node tools/terminology-import/procedures-treatments/load.mjs              # dry-
 node tools/terminology-import/procedures-treatments/load.mjs --apply      # carga (.env DB_*)
 node tools/terminology-import/procedures-treatments/validate-siblings.mjs --db   # fase 2
 node --test tools/terminology-import/procedures-treatments/test/*.test.mjs
+node tools/terminology-import/procedures-treatments/snapshot.mjs          # respalda el corpus en data/ (git)
 ```
+
+El corpus de cada pasada queda versionado en `tools/terminology-import/procedures-treatments/data/`
+(NDJSON comprimido, `MANIFEST.json` con sha256). Para usarlo sin re-descargar: `zcat data/out/assertions.ndjson.gz`.
 
 ## Claves que deja esta sesión (para las sesiones hermanas)
 

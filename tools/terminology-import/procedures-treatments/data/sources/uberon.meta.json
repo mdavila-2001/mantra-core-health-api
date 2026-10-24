@@ -1,0 +1,18 @@
+{
+  "source": "uberon",
+  "name": "Uberon multi-species anatomy ontology",
+  "publisher": "Uberon consortium (OBO Foundry)",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+  "homepage": "https://github.com/obophenotype/uberon",
+  "retrievedAt": "2026-10-24T00:46:56.583Z",
+  "tag": "v2026-10-01",
+  "files": {
+    "uberon.obo": {
+      "url": "https://github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo",
+      "fileUrl": "https://github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo",
+      "sha256": "d4751a15d7551a8414caee2628c62bf68301d567caf54ccfa3eef383ae7cbb61",
+      "bytes": 22529133
+    }
+  }
+}

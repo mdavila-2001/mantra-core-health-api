@@ -1,0 +1,18 @@
+{
+  "source": "maxo-annotations",
+  "name": "MAxO annotations — curación POET (Monarch Initiative)",
+  "publisher": "Monarch Initiative / Medical Action Ontology team",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "homepage": "https://github.com/monarch-initiative/maxo-annotations",
+  "retrievedAt": "2026-10-24T00:46:38.190Z",
+  "commit": "42edd966faac5229ce7c35fc3848f2e6b3d45bda",
+  "files": {
+    "annotations.tsv": {
+      "url": "https://raw.githubusercontent.com/monarch-initiative/maxo-annotations/42edd966faac5229ce7c35fc3848f2e6b3d45bda/data/poet/annotations.tsv",
+      "fileUrl": "https://github.com/monarch-initiative/maxo-annotations/blob/42edd966faac5229ce7c35fc3848f2e6b3d45bda/data/poet/annotations.tsv",
+      "sha256": "92e6dcfe79e4276fa561408f8eab8e7f656b69bd4e874e4ecba61ad3edc1b75e",
+      "bytes": 78294
+    }
+  }
+}

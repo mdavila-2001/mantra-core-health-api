@@ -5,7 +5,7 @@
 - Kill-test: `grep -c '"relationType"' relations.ndjson` da 0, o una fila sin `provenance.sourceRecordId`/`provenance.uri`, o una relación de ensayo con tipo distinto de «en estudio».
 
 ## Alcance
-- IN: `tools/terminology-import/procedures-treatments/` (importador, `SOURCES.md`, tests), `docs/seed-research/procedures-treatments.md` (bitácora de pasadas y cobertura), este `PLAN.md` y su `REPORTE.md`.
+- IN: `tools/terminology-import/procedures-treatments/` (importador, `SOURCES.md`, tests, y desde la orden del propietario del 2026-10-24 también `data/` con el corpus normalizado comprimido), `docs/seed-research/procedures-treatments.md` (bitácora de pasadas y cobertura), este `PLAN.md` y su `REPORTE.md`.
 - OUT: DDL, migraciones, `synchronize` (ADR-0021); fármacos (sesión `justin/seed-drug-treatments`); recargar ICHI/ICD-10-PCS/CUPS como conceptos (los carga `justin/seed-specialty-services`; acá solo se referencian por code system + código); anatomía como conceptos (la carga `justin/seed-medical-dictionaries`); enfermedades como conceptos (`justin/seed-diseases`); cualquier archivo compartido fuera de lo declarado.
 - Ambigüedades registradas:
   1. **`concept_relationships` no guarda fuente ni evidencia** (solo origen, destino, tipo y ordinal; verificado en `database/SQL/03_terminology/02_tables.sql` y en el modelo canónico `mantra-core-health-model@eceb98f`, SALUD v4.0.10). La consigna dice «pará y reportá la propuesta». Supuesto tomado: se para **la escritura de relaciones en la base** (el cargador se niega a escribirlas mientras la tabla no tenga las columnas propuestas) y se entrega la propuesta para el modelo; el resto de la fase 1 (descubrimiento, descarga, normalización con procedencia completa, cargador listo) sigue, porque no pierde procedencia. Confirmar con Justin.
@@ -71,6 +71,7 @@
 | H5.S1.M3 | Tests dirigidos | 0 fallos | `node --test tools/terminology-import/procedures-treatments/test/*.test.mjs` | HECHO |
 | H5.S1.M4 | Medición con ramas hermanas | reporte `validate-siblings.json` con ramas reales | `node …/validate-siblings.mjs --db` | BLOQUEADO |
 | H5.S1.M5 | PR contra `dev` | PR abierto, sin mergear | URL del PR | TODO |
+| H5.S1.M6 | Respaldo del corpus normalizado en git (`data/`, gzip, partes < 45 MB) | `zcat` de cada parte reproduce byte a byte el NDJSON de `build.mjs` | `node …/snapshot.mjs` ×2 → mismos sha256; `zcat data/out/assertions.ndjson.gz \| sha256sum` = sha256 de `out/assertions.ndjson` | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

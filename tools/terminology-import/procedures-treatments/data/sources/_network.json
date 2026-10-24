@@ -1,0 +1,77 @@
+{
+  "probedAt": "2026-10-24T01:09:42.936Z",
+  "hosts": {
+    "clinicaltrials.gov": {
+      "source": "clinicaltrials-gov",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.cms.gov": {
+      "source": "icd10pcs-cms",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "icd.who.int": {
+      "source": "ichi-who",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "icdcdn.who.int": {
+      "source": "ichi-who",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "id.who.int": {
+      "source": "icd11-who",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "icdaccessmanagement.who.int": {
+      "source": "icd11-who",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.minsalud.gov.co": {
+      "source": "cups-minsalud",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "web.sispro.gov.co": {
+      "source": "cups-minsalud",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "nlmpubs.nlm.nih.gov": {
+      "source": "mesh-nlm",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "id.nlm.nih.gov": {
+      "source": "mesh-nlm",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "evs.nci.nih.gov": {
+      "source": "ncit-evs",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "eutils.ncbi.nlm.nih.gov": {
+      "source": "pubmed-europepmc",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.ebi.ac.uk": {
+      "source": "pubmed-europepmc",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "query.wikidata.org": {
+      "source": "wikidata",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.nice.org.uk": {
+      "source": "nice-ipg",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.cochranelibrary.com": {
+      "source": "cochrane",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.minsalud.gob.bo": {
+      "source": "nnac-bolivia",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    },
+    "www.sanidad.gob.es": {
+      "source": "cie10es-sanidad",
+      "status": "error: curl: (56) CONNECT tunnel failed, response 403"
+    }
+  }
+}
