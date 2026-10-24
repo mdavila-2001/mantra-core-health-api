@@ -428,6 +428,71 @@ describe('IamPatientSelfRegistrationService', () => {
       expect(d.relatedPersonsRepo.create).not.toHaveBeenCalled();
     });
 
+    /**
+     * El «+» de los contactos de emergencia: cada uno es una persona
+     * relacionada más, con su parentesco y su teléfono.
+     */
+    it('registers every additional emergency contact', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        guardianName: 'Rosa Quispe',
+        additionalEmergencyContacts: [
+          {
+            name: 'Luis Paz',
+            phone: '+59172222222',
+            relationshipConceptId: PROF.RELATIONSHIP_FATHER,
+          },
+          { name: 'Marta Rojas' },
+        ],
+      });
+
+      expect(d.relatedPersonsRepo.create).toHaveBeenCalledTimes(3);
+      expect(d.relatedPersonsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          relationshipConceptId: PROF.RELATIONSHIP_FATHER,
+          isEmergencyContact: true,
+        }),
+      );
+      expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
+          value: '+59172222222',
+        }),
+      );
+    });
+
+    /**
+     * El perfil lee y reemplaza «el teléfono» por el `rank` más bajo: el
+     * principal tiene que ir primero aunque se agreguen otros con el «+».
+     */
+    it('stores the main phone first and the additional ones after it', async () => {
+      const d = build();
+
+      await d.service.registerPatient({
+        ...dto,
+        additionalPhones: ['+59173333333', '+59174444444'],
+      });
+
+      type ContactPointData = {
+        systemConceptId: string;
+        value: string;
+        rank?: number;
+      };
+      const phones = (d.contactPointsRepo.create.mock.calls as unknown[][])
+        .map((call) => call[1] as ContactPointData)
+        .filter((data) => data.systemConceptId === CONCEPTS.CONTACT_PHONE)
+        .map(({ value, rank }) => ({ value, rank }));
+      expect(phones).toEqual([
+        { value: dto.phone, rank: 1 },
+        { value: '+59173333333', rank: 2 },
+        { value: '+59174444444', rank: 3 },
+      ]);
+    });
+
     it('records the declared private and public coverages in order', async () => {
       const d = build();
       const isPrivate = carrierPlanId(
