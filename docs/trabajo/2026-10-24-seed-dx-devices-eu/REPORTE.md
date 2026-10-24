@@ -1,6 +1,6 @@
 # Reporte — Equipos de diagnóstico y sus marcas: registros de Europa
 
-- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `claude/adoring-curie-xdkt83` (desde `dev`)
+- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `claude/adoring-curie-xdkt83` (desde `dev`) · PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/691 (sin mergear)
 - Peldaño de evidencia alcanzado: `TESTED` para el pipeline (tests dirigidos, typecheck y lint en
   verde, corrida real pegada). El corpus **no** se obtuvo: fuentes bloqueadas por la red del entorno.
 - Avance: 10 / 13 microtareas HECHO (76,9 %), 2 A MEDIAS, 1 BLOQUEADO.
