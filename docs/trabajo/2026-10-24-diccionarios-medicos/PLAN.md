@@ -35,7 +35,7 @@
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H3.S1.M1 | Docs pasada 9 + SOURCES + REPORTE | secciones escritas | `git diff --stat` | HECHO |
-| H3.S1.M2 | Commit + push + PR #713 | rama remota actualizada | `git push` exit 0 | EN CURSO |
+| H3.S1.M2 | Commit + push + PR (#713 ya estaba mergeado → PR nuevo #719) | rama remota actualizada | `git push` exit 0 | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

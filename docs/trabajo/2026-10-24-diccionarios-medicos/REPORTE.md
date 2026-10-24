@@ -1,10 +1,10 @@
 # Reporte — Nombres en castellano de Wikidata para los diccionarios médicos (pasada 9)
 
-- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `justin/dictionaries-wikidata-es` (PR #713 → `dev`)
+- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `justin/dictionaries-wikidata-es` (PR #719 → `dev`; el #713 ya estaba mergeado)
 - Peldaño de evidencia alcanzado: `VERIFIED` para la capa ES de Wikidata (importador corrido contra Wikidata
   real, carga `--apply` en Postgres 16 desechable con el DDL real, persistencia consultada, 2.ª corrida 0 filas).
   No `REGRESSION_VERIFIED`: no se corrió la suite completa del repo (sólo los tests de `dictionaries/`).
-- Avance: 10 / 12 HECHO (83 %). 1 BLOQUEADO (DeCS) y 1 EN CURSO al escribir esto (commit/push/PR).
+- Avance: 11 / 12 HECHO (92 %). 1 BLOQUEADO (DeCS).
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -18,6 +18,7 @@
 | H1.S1.M5 | Dry-run del cargador | `load-dictionaries.mjs` | `"wikidataEsLabels": { "concepts": 47342, "designations": 56215 }` |
 | H1.S1.M6 | Tests | `node --test "tools/terminology-import/dictionaries/test/*.test.mjs"` | 19/19 |
 | H1.S2.M1 | `--apply` ×2 en Postgres 16 desechable | `load-dictionaries.mjs --apply` | 1.ª 46 s: wikidata-es 47 342 conceptos, 56 215 designaciones, 47 342 propiedades; 2.ª 26 s: 0 / 0 en todas las capas |
+| H3.S1.M2 | Commit, push y PR | `git push -u origin justin/dictionaries-wikidata-es` | `9febedd6..705167d1` y `705167d1..46526133` (merge de `dev`, sin force); PR https://github.com/mdavila-2001/mantra-core-health-api/pull/719 |
 | H3.S1.M1 | Docs: pasada 9 en `medical-dictionaries.md`, `SOURCES.md`, este reporte | `git diff --stat` | ver commit |
 
 ## A medias
@@ -27,7 +28,6 @@ ninguna
 | ID | Estado | Qué lo destraba |
 |---|---|---|
 | H2.S1.M1 — DeCS | BLOQUEADO | `decs.bvsalud.org` y `api.bvsalud.org` cortan la conexión del lado del servidor (el proxy registra el túnel abierto y cerrado con 39 B recibidos); `bvsalud.org` responde 403 de su CDN (BunnyCDN); `api.bvsalud.org/decs/v2/` pide clave. No se leyó la descarga ni la licencia, así que **no se escribió `import-decs.mjs`**. Lo destraba: la descarga oficial de DeCS (o una clave de la API) y su texto de licencia. Confirmar con Justin. |
-| H3.S1.M2 — commit, push, PR #713 | EN CURSO | se actualiza tras el push |
 
 ## Evidencia
 Salidas literales en [`evidencia/`](./evidencia/).
@@ -90,6 +90,7 @@ $ node --test "tools/terminology-import/dictionaries/test/*.test.mjs"
 ## Desvíos del plan
 - Agregadas H1.S1.M7 (formato `CL_` de Wikidata) y H1.S1.M8 (`--pack` tras `--unpack` borraba `data/` y abortaba): las dos bloqueaban el pedido.
 - Node 22 no usa `HTTPS_PROXY` en `fetch` sin `NODE_USE_ENV_PROXY=1` (primera corrida: `fetch failed`); documentado en el encabezado del importador.
+- El PR #713 ya estaba mergeado en `dev` (15:57 UTC) cuando arrancó el trabajo: se mergeó `dev` en la rama (push normal, sin force) y se abrió el PR #719.
 - Para el cargador se instalaron dependencias con `corepack yarn install --immutable --mode=skip-build` (sin tocar el lockfile).
 - La semilla de conceptos internos se hizo con un script fuera del repo (un source/code system/versión `seed-test-internal` y los 13 ids de `CONCEPT` + `RELATION_TYPE`), no arrancando la API.
 
