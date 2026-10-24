@@ -98,15 +98,15 @@ export function readEml() {
 }
 
 /**
- * Registros de LactMed desde la caché (fetch-lactmed.mjs): iterador de `{ xml, retrievedAt }` (se leen de a
- * uno) y Map(id LM… → accession NBK…). null si no se bajó.
+ * Registros de un libro de NCBI desde la caché (fetch-ncbi-books.mjs): iterador de `{ xml, retrievedAt }`
+ * (se leen de a uno) y Map(id de capítulo → accession NBK…). null si no se bajó.
  */
-export function readLactmed() {
-  const dir = cpCache('lactmed', 'nxml');
+export function readNcbiBook(book, nbk) {
+  const dir = cpCache(book, 'nxml');
   if (!existsSync(dir)) return null;
   const names = readdirSync(dir).filter((n) => n.endsWith('.nxml')).sort();
-  const retrievedAt = retrievedAtOf(cpCache('lactmed', 'lactmed_NBK501922.tar.gz'));
-  const accessions = new Map(Object.entries(readJsonIfExists(cpCache('lactmed', 'accessions.json')) ?? {}));
+  const retrievedAt = retrievedAtOf(cpCache(book, `${book}_${nbk}.tar.gz`));
+  const accessions = new Map(Object.entries(readJsonIfExists(cpCache(book, 'accessions.json')) ?? {}));
   return {
     accessions,
     *records() {
@@ -114,6 +114,9 @@ export function readLactmed() {
     },
   };
 }
+
+export const readLactmed = () => readNcbiBook('lactmed', 'NBK501922');
+export const readLivertox = () => readNcbiBook('livertox', 'NBK547852');
 
 /**
  * set_id de openFDA → si la etiqueta trae UNII (`openfda.unii`). Recorre las

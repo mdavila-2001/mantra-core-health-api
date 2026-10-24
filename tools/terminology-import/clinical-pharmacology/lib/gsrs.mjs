@@ -42,12 +42,14 @@ export function gsrsEntry(r) {
     moiety: moietyRel?.related_substance?.unii ?? unii,
     atc: [...new Set(codes.filter((c) => c?.code_system === 'WHO-ATC' && isAtc5(c.code)).map((c) => c.code))].sort(),
     rxcui: [...new Set(codes.filter((c) => c?.code_system === 'RXCUI' && /^\d+$/.test(c.code ?? '')).map((c) => c.code))].sort(),
+    // Sólo el CAS PRIMARY: los demás tipos (SUPERSEDED, GENERIC (FAMILY), NON-SPECIFIC…) no identifican esta sustancia.
+    cas: [...new Set(codes.filter((c) => c?.code_system === 'CAS' && c?.type === 'PRIMARY' && /^\d{2,7}-\d{2}-\d$/.test(c.code ?? '')).map((c) => c.code))].sort(),
     name: display,
     substanceClass: r.substance_class ?? null,
   };
 }
 
-/** Índice: UNII → entrada, fracción → códigos ATC, ATC → fracciones que lo listan. */
+/** Índice: UNII → entrada, fracción → códigos ATC, ATC → fracciones que lo listan, CAS PRIMARY → UNII. */
 export function buildGsrsIndex(entries) {
   const byUnii = new Map();
   for (const e of entries) if (e && !byUnii.has(e.unii)) byUnii.set(e.unii, e);
@@ -61,7 +63,14 @@ export function buildGsrsIndex(entries) {
       moietiesByAtc.get(code).add(e.moiety);
     }
   }
-  return { byUnii, atcByMoiety, moietiesByAtc };
+  const uniiByCas = new Map();
+  for (const e of byUnii.values()) {
+    for (const cas of e.cas ?? []) {
+      if (!uniiByCas.has(cas)) uniiByCas.set(cas, new Set());
+      uniiByCas.get(cas).add(e.unii);
+    }
+  }
+  return { byUnii, atcByMoiety, moietiesByAtc, uniiByCas };
 }
 
 const serial = (code) => Number(code.slice(5, 7));
@@ -147,4 +156,13 @@ export function combineLinks(g, rx, { inUse = new Set() } = {}) {
   }
   if (rxUnique) return { atc: rxUnique, rule: 'rxnav-unique' };
   return { atc: null, rule: rx.length > 1 ? `${g.status}:rxnav-multiple` : `${g.status}:no-rxnav` };
+}
+
+/**
+ * CAS → UNII por el CAS PRIMARY del GSRS. Un CAS que el GSRS asigna a más de una sustancia, o que no
+ * conoce, no se resuelve (null): no se elige uno.
+ */
+export function uniiForCas(cas, index) {
+  const set = index?.uniiByCas?.get(cas);
+  return set && set.size === 1 ? [...set][0] : null;
 }

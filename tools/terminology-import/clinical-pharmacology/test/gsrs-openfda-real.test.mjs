@@ -207,3 +207,27 @@ test('LactMed real: identidad por UNII, secciones de lactancia literales con atr
   const sum = { result: { uids: ['1', '2'], 1: { id: 'lactmed/chapter/LM514/PMC', book: 'lactmed', rtype: 'chapter', accessionid: 'NBK501393' }, 2: { id: 'lactmed/LM514.s1/PMC', book: 'lactmed', rtype: 'section', accessionid: 'NBK501393' } } };
   assert.deepEqual([...accessionsFromSummary(sum)], [['LM514', 'NBK501393']], 'sólo capítulos');
 });
+
+// --- LiverTox real: NXML del paquete de NCBI (actualizado 2026-10-21) + sustancia GSRS real de acarbosa ------
+import { uniiForCas } from '../lib/gsrs.mjs';
+import { LIVERTOX_SOURCE, livertoxIdentity, livertoxSections } from '../lib/livertox.mjs';
+
+test('LiverTox real: CAS → UNII por el CAS PRIMARY del GSRS; sólo secciones hepáticas, literales', () => {
+  const xml = (id) => readRaw(join(HERE, 'fixtures', 'livertox', `${id}.nxml`), 'utf8');
+  const acarbose = gsrsEntry(read('gsrs-acarbose-real.json'));
+  assert.deepEqual(acarbose.cas, ['56180-94-0'], 'sólo el CAS de tipo PRIMARY');
+  const idx = buildGsrsIndex([acarbose]);
+  assert.equal(uniiForCas('56180-94-0', idx), 'T58MSI464G');
+  assert.equal(uniiForCas('00-00-0', idx), null, 'CAS desconocido: no se resuelve');
+  assert.equal(uniiForCas('56180-94-0', buildGsrsIndex([acarbose, { ...acarbose, unii: 'XXXXXXXXXX', moiety: 'XXXXXXXXXX' }])), null, 'CAS de dos sustancias: no se elige');
+
+  assert.deepEqual(livertoxIdentity(xml('Acarbose')), { id: 'Acarbose', title: 'Acarbose', updated: '2021-01-10', cas: ['56180-94-0'] });
+  const rows = livertoxSections(xml('Acarbose'), WHEN, { accession: 'NBK548181' }).map(assertSection);
+  assert.deepEqual(rows.map((r) => r.section.number), ['Hepatotoxicity', 'Mechanism of Injury', 'Outcome and Management'], 'Introduction y Background no se publican');
+  assert.ok(rows.every((r) => r.key === 'adverse_reactions' && r.source === LIVERTOX_SOURCE && r.language === 'en'));
+  assert.match(rows[0].text, /^In several large clinical trials, serum enzyme elevations above 3 times the upper limit of normal/);
+  assert.equal(rows[0].document.url, 'https://www.ncbi.nlm.nih.gov/books/NBK548181/');
+  assert.match(rows[0].license, /is copyright free/);
+  assert.match(rows[0].disclaimer, /not meant as a substitute for FDA approved product labeling/);
+  assert.deepEqual(livertoxIdentity(xml('Salicylates')).cas, [], 'ficha de clase sin CAS: no se enlaza');
+});

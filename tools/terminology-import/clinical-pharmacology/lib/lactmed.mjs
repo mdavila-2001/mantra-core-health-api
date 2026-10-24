@@ -18,13 +18,15 @@
 // respaldo, y avisar si lo redistribuido no es la versión vigente. Van en cada fila.
 // =============================================================================
 
-import { decodeEntities } from '../../lib/glossary-es/common.mjs';
 import { textSha256 } from './literal.mjs';
+import { LITARCH_FILE_LIST, bookAccessions, bookChapterUrl, bookSearchUrl, bookSummaryUrl, childSections, jatsText } from './ncbi-books.mjs';
+
+export { jatsText };
 
 export const LACTMED_SOURCE = 'nlm-lactmed';
 export const LACTMED_SOURCE_NAME = 'Drugs and Lactation Database (LactMed®) — NICHD / U.S. National Library of Medicine';
 export const LACTMED_BOOK_URL = 'https://www.ncbi.nlm.nih.gov/books/NBK501922/';
-export const LACTMED_LITARCH_LIST = 'https://ftp.ncbi.nlm.nih.gov/pub/litarch/file_list.txt';
+export const LACTMED_LITARCH_LIST = LITARCH_FILE_LIST;
 export const LACTMED_LICENSE =
   'Courtesy of the U.S. National Library of Medicine. LactMed is a registered trademark of the U.S. Department of Health and Human Services. ' +
   'Políticas de NCBI (https://www.ncbi.nlm.nih.gov/home/about/policies/, leídas el 2026-10-24): «Information that is created by or for the US government on this site is within the public domain.» ' +
@@ -34,22 +36,12 @@ export const LACTMED_DISCLAIMER =
   'Disclaimer: Information presented in this database is not meant as a substitute for professional judgment. You should consult your healthcare provider for breastfeeding advice ' +
   'related to your particular situation. The U.S. government does not warrant or assume any liability or responsibility for the accuracy or completeness of the information on this Site.';
 
-export const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
-export const lactmedSearchUrl = (start, max) => `${EUTILS}/esearch.fcgi?db=books&term=lactmed%5Bbook%5D&retstart=${start}&retmax=${max}&retmode=json`;
-export const lactmedSummaryUrl = (uids) => `${EUTILS}/esummary.fcgi?db=books&id=${uids.join(',')}&retmode=json`;
+export const lactmedSearchUrl = (start, max) => bookSearchUrl('lactmed', start, max);
+export const lactmedSummaryUrl = bookSummaryUrl;
 /** URL canónica del capítulo en Bookshelf: la de su accession NBK (E-utilities); sin ella, la del libro. */
-export const lactmedRecordUrl = (accession) => (accession ? `https://www.ncbi.nlm.nih.gov/books/${accession}/` : LACTMED_BOOK_URL);
-
-/** Respuesta de esummary (db=books) → Map(id de capítulo LM… → accession NBK…), sólo capítulos de LactMed. */
-export function accessionsFromSummary(json) {
-  const out = new Map();
-  for (const uid of json?.result?.uids ?? []) {
-    const r = json.result[uid];
-    const m = /^lactmed\/chapter\/([^/]+)\//.exec(r?.id ?? '');
-    if (m && r.book === 'lactmed' && r.rtype === 'chapter' && /^NBK\d+$/.test(r.accessionid ?? '')) out.set(m[1], r.accessionid);
-  }
-  return out;
-}
+export const lactmedRecordUrl = (accession) => (accession ? bookChapterUrl(accession) : LACTMED_BOOK_URL);
+/** Respuesta de esummary → Map(id de capítulo LM… → accession NBK…), sólo capítulos de LactMed. */
+export const accessionsFromSummary = (json) => bookAccessions(json, 'lactmed');
 
 /** Secciones de «Drug Levels and Effects» que se publican (título exacto). */
 export const LACTMED_SECTIONS = Object.freeze([
@@ -59,46 +51,6 @@ export const LACTMED_SECTIONS = Object.freeze([
   'Effects on Lactation and Breastmilk',
   'Alternate Drugs to Consider',
 ]);
-
-/** Texto plano de un fragmento JATS: etiquetas fuera, párrafos y listas como saltos de línea. */
-export function jatsText(xml) {
-  const t = decodeEntities(
-    String(xml)
-      .replace(/<title\b[^>]*>[\s\S]*?<\/title>/i, '')
-      .replace(/<list-item\b[^>]*>/gi, '\n• ')
-      .replace(/<break\s*\/?>/gi, '\n')
-      .replace(/<\/(p|list-item|list|tr|table|sec)>/gi, '\n')
-      .replace(/<[^>]+>/g, ''),
-  )
-    .replace(/[ \t\r\f\v]+/g, ' ')
-    .replace(/ *\n */g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-  return t.length ? t : null;
-}
-
-/** Hijos `<sec>` directos de un fragmento: `[{ title, xml }]`. */
-function childSections(xml) {
-  const re = /<(\/?)sec\b[^>]*>/g;
-  const out = [];
-  let depth = 0;
-  let start = -1;
-  for (let m = re.exec(xml); m !== null; m = re.exec(xml)) {
-    if (!m[1]) {
-      if (depth === 0) start = m.index;
-      depth++;
-    } else {
-      depth--;
-      if (depth === 0) {
-        const sec = xml.slice(start, m.index + m[0].length);
-        const inner = sec.slice(sec.indexOf('>') + 1, sec.lastIndexOf('</sec>'));
-        const title = /^\s*<title\b[^>]*>([\s\S]*?)<\/title>/.exec(inner)?.[1];
-        out.push({ title: title == null ? null : jatsText(title), xml: inner });
-      }
-    }
-  }
-  return out;
-}
 
 /** Identidad del registro (sin texto clínico). */
 export function lactmedIdentity(xml) {
