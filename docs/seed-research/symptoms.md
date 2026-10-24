@@ -2,7 +2,7 @@
 
 Investigación y corpus de la sesión `seed-symptoms` (2026-10-24). Importadores en
 `tools/terminology-import/symptoms/`, fuentes y licencias en
-[`SOURCES.md`](../../tools/terminology-import/symptoms/SOURCES.md).
+`tools/terminology-import/symptoms/SOURCES.md`.
 
 ## Resumen
 
@@ -53,7 +53,7 @@ Estado de la carga:
 ## Modelo: qué tiene que cambiar el repo del modelo
 
 Propuesta completa en
-[`proposal/concept_relationship_evidence.sql`](../../tools/terminology-import/symptoms/proposal/concept_relationship_evidence.sql)
+`tools/terminology-import/symptoms/proposal/concept_relationship_evidence.sql`
 (no es una migración; la API no escribe DDL, ADR-0021).
 
 1. **Tabla nueva `terminology.concept_relationship_evidence`**, 1:N con
