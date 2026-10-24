@@ -37,12 +37,14 @@ ok 17 - LIVD SARS-CoV-2 real: un kit por Testkit Name ID; UDI-DI sólo si el tip
 ok 18 - MAUDE real: una fila por product code + fabricante + marca + modelo, id = informe más antiguo
 # Subtest: retiros reales (enforcement y recall): una fila por número Z, estado verbatim
 ok 19 - retiros reales (enforcement y recall): una fila por número Z, estado verbatim
-# tests 19
+# Subtest: MAUDE aplanado como mapa de texto: sólo corta en claves conocidas
+ok 20 - MAUDE aplanado como mapa de texto: sólo corta en claves conocidas
+# tests 20
 # suites 0
-# pass 19
+# pass 20
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 204.486142
+# duration_ms 248.72982
 exit=0
