@@ -252,3 +252,18 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
+
+## Servicios por especialidad (2026-10-24)
+
+`specialty-services/`: relaciona servicios (FONASA MLE 2026, CUPS y los aranceles
+bolivianos ya sembrados) con las especialidades de `VS_MEDICAL_SPECIALTY`, sólo
+con evidencia de la fuente. Fuentes, hashes y licencias en
+[`specialty-services/SOURCES.md`](specialty-services/SOURCES.md); pasadas y
+cobertura en [`docs/seed-research/specialty-services.md`](../../docs/seed-research/specialty-services.md).
+
+```sh
+node tools/terminology-import/specialty-services/build-specialty-services.mjs --report   # fuentes → NDJSON (fuera de git)
+node tools/terminology-import/specialty-services/load-specialty-services.mjs              # dry-run
+node tools/terminology-import/specialty-services/load-specialty-services.mjs --apply      # carga (.env DB_*)
+node --test "tools/terminology-import/specialty-services/test/*.test.mjs"
+```
