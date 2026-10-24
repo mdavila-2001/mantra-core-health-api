@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `marcelo/lane16-patient-protection` (base `origin/dev`, con `dev` integrado el 2026-10-24)
 - Peldaño de evidencia alcanzado: `TESTED` para todo el alcance. Además, el flujo con servicios reales quedó `VERIFIED` contra PostgreSQL 18 desechable (reclamo, factura, doble cobro, carrera, consentimiento, objeción, pausa). **No es `REGRESSION_VERIFIED`**: la capa HTTP no se ejercitó y la suite de integración completa y la CI del PR no corrieron todavía.
-- Avance: 27 HECHO / 30 microtareas = 90,0 % (calculado). Una A MEDIAS, una DESCARTADA, una pendiente del PR (H6.S3.M1).
+- Avance: 27 HECHO / 30 microtareas = 90,0 % (calculado). Dos A MEDIAS (H2.S3.M1 y H6.S3.M1) y una DESCARTADA (H4.S2.M2).
 
 ## Completado
 
@@ -31,7 +31,7 @@
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H6.S3.M1 | EN CURSO | PR abierto contra `dev` con `mergeable` y checks pegados tras el último push |
+| H6.S3.M1 | A MEDIAS | Que el workflow `Documentación` vuelva a ejecutarse en los PR contra `dev` (ver Estado del PR) |
 | H4.S2.M2 | DESCARTADO | Reemplazado por `@PlatformTenantOptional('PATIENT')`. Lo decidí yo al descubrir el riesgo (ver Desvíos en el plan) |
 | REQ-16-030, persistencia | BLOQUEADO | PR del modelo con la tabla de aceptaciones (`.puml`, SQL, entidad); luego un adaptador real en lugar de `NoPatientChargeAcceptanceAdapter` |
 | REQ-16-031 | TODO | Lectura del desglose para el portal del paciente |
@@ -68,6 +68,26 @@ Los seis desvíos están en [PLAN.md](./PLAN.md#desvíos-del-plan). Dos más sur
 8. **`InsuranceModule` provee `InvoicesRepository` directo** en lugar de importar `BillingModule` y exportarlo. El import cambiaba el orden en que Nest descubre los módulos y con él el de todo el contrato OpenAPI (22 000 líneas de diff). Hay precedente en el mismo módulo (`PersonAccountLinksRepository`). `billing.module.ts` quedó idéntico a `dev`.
 
 Observaciones fuera de alcance, no arregladas: un enlace roto de `docs:links` en `docs/trabajo/2026-10-24-farmacologia-clinica/REPORTE.md` (`./evidencia/` sin `index.md`); aritmética con `Number()` preexistente en `invoices.service.ts` y `payments-received.service.ts`.
+
+## Estado del PR
+
+PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/722 (base `dev`, no draft). Cabeza del último push de código: `0a8474fb`.
+
+```text
+$ gh pr view 722 --json isDraft,mergeable,mergeStateStatus     (2026-10-24, justo después del último push de código)
+{"isDraft":false,"mergeStateStatus":"BLOCKED","mergeable":"MERGEABLE"}
+
+$ gh pr checks 722
+no checks reported on the 'marcelo/lane16-patient-protection' branch
+
+$ gh pr view 722 --json isDraft,mergeable,mergeStateStatus,headRefOid     (minutos después, GitHub recalculando)
+{"headRefOid":"0a8474fb728120af2a00ea537b8da2a4fdb11012","isDraft":false,"mergeStateStatus":"UNKNOWN","mergeable":"UNKNOWN"}
+```
+
+- **Sin conflictos con `dev`** tras dos integraciones (la primera abrió el PR con conflicto en artefactos generados porque `dev` avanzó; se resolvió y se regeneró todo).
+- **CI no reporta.** El workflow `Documentación` no corre en este repositorio desde 2026-10-22: no hay checks en este PR ni en el #721, y las últimas corridas de `gh run list --workflow docs.yml` son del 22 de octubre y están en `failure`. No es una falla de esta rama, pero el criterio de `pr-mergeable-gate` (checks en verde) **no se puede demostrar**: por eso la entrega es A MEDIAS y no HECHO.
+- `BLOCKED` es la protección de la rama a la espera de checks.
+- Mientras tanto la verificación local replicó los pasos de ese workflow que se pueden correr sin MongoDB, Redis, OpenSearch ni MinIO completos: typecheck, lint con cero advertencias, build, `test:cov`, guardrails, generación del contrato OpenAPI, `git diff --exit-code` de los artefactos, `docs:openapi:lint`, `docs:asyncapi:validate`, `docs:coverage`, chequeo de cambios incompatibles y el test de integración nuevo. `docs:links` falla por un enlace de otro carril (ver Desvíos).
 
 ## No cubierto
 

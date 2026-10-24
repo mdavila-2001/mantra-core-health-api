@@ -165,7 +165,7 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H6.S3.M1 | `REPORTE.md` y PR contra `dev` | mergeable, checks en verde | `gh pr view <n> --json isDraft,mergeable,mergeStateStatus` y `gh pr checks <n>` | TODO |
+| H6.S3.M1 | `REPORTE.md` y PR contra `dev` | mergeable, checks en verde | `gh pr view <n> --json isDraft,mergeable,mergeStateStatus` y `gh pr checks <n>` | A MEDIAS — PR #722 abierto contra dev; mergeable tras el último push de código, pero CI no reporta checks (ver REPORTE) |
 
 ## Desvíos del plan
 
