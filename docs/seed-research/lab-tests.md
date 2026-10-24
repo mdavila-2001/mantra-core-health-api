@@ -19,10 +19,10 @@ pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
   (componente, propiedad y método de NLM; tiempo, sistema y escala en castellano, del nombre corto
   es-AR), unidades UCUM, 1 934 paneles con sus miembros en orden y nombres oficiales es-MX/es-AR en
   79 435 términos. Lo que sólo trae el zip oficial queda pendiente (ver Huecos).
-- **Saturación: no declarada.** Con la red abierta las pasadas 10–13 aportaron conceptos; la 14
-  (re-sondeo) aportó 0; la 15 encontró una fuente candidata alcanzable (CDISC «Laboratory Test Code»,
-  2 513 términos) que no se cargó por licencia sin verificar y una duda de alcance que decide el
-  propietario. Hasta resolverla no hay dos pasadas seguidas en 0.
+- **Búsqueda cerrada por orden del propietario (2026-10-24).** Con la red abierta las pasadas 10–13
+  aportaron conceptos; la 14 (re-sondeo) aportó 0; la 15 encontró CDISC «Laboratory Test Code»
+  (2 513 términos), que queda descartado al cerrar. **No es saturación por protocolo**: no hubo dos
+  pasadas seguidas en 0 con todo lo alcanzable cargado.
 - **Rangos de referencia: ninguno**, porque ninguna fuente alcanzable los publica (NLM no trae `range`
   en ninguna unidad). No se inventan.
 
@@ -61,11 +61,11 @@ pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
 | 12 | **Cotejo de las redistribuciones contra los originales** y cambio a archivos oficiales: TUSS (ZIP `pda-049-tuss.zip` de la ANS), PAMI (`nomenclador-comun.csv` de datos.pami.org.ar), ICD-10-PCS (order files 2026 y 2027 y code tables 2027 de cms.gov), SIGTAP (FTP de DATASUS) | **5** códigos ICD-10-PCS nuevos (FY2027, vigente desde el 2026-10-01; 4 402 en total) | TUSS: el ZIP oficial tiene el **mismo SHA-256** que declara el paquete npm (`8d3bc59e…`); 5 966 códigos, 0 diferencias de nombre o vigencia. PAMI: mismos 4 739 códigos, pero el paquete npm **había cambiado la caja** de los nombres; se pasa al CSV oficial (nombre verbatim, módulo, valor en pesos de febrero 2019; licencia **CC-BY-4.0** verificada en la API del portal). ICD-10-PCS FY2026 de npm = order file 2026 de CMS (79 115 códigos, 0 diferencias); se pasa a **FY2027 oficial** con nombres de tipo oficiales (code tables XML); 5 códigos nuevos sin traducción en CIE-10-ES 2026. SIGTAP: el FTP de DATASUS sólo responde por FTP (el proxy sólo admite HTTPS): **no cotejado**. FONASA: fonasa.cl sigue en 403: **no cotejado**. RSNA Playbook: la descarga exige aceptar la licencia RadLex (no se acepta en nombre del propietario). DICOM CID 29: legible, pero no se encontró la página de licencia de NEMA: no se carga. |
 | 13 | **LOINC 2.82 sin cuenta**: tx.fhir.org (servidor de terminología de HL7: 435 clases descubiertas por exclusión, términos por `CLASS` con partición por `COMPONENT` cuando pasa de 3 000, `STATUS` y `ORDER_OBS` por filtros oficiales) + NLM Clinical Tables (112 405 términos: componente, propiedad, método, unidades, tipo de dato; 1 979 definiciones de panel pedidas, 1 747 publicadas) | **79 462** términos LOINC en el catálogo (de 109 325 de tx.fhir.org), 84 298 términos con nombre oficial en castellano (es-MX nombre largo, es-AR nombre corto), 1 934 paneles con 18 236 miembros | 29 863 términos sin dominio por clase (documentos, encuestas, adjuntos de reclamos, antecedentes, signos vitales, administración…; detalle en `excludedByClass`); `CARD.RISK` (puntajes) y `CARD.PROC` (mezcla intervenciones) sin dominio. **3 080** términos presentes en NLM pero no en tx.fhir.org: son posteriores a 2.82 (tx.fhir.org responde «Unknown code») y sin clase no se pueden clasificar. Ningún rango de referencia: NLM no publica `range` en ninguna unidad. tx.fhir.org responde 500 «not supported» ante una regex sin coincidencias (se trata como vacío) y 500 transitorios bajo carga (reintentos). |
 | 14 | Re-sondeo de lo que quedó sin acceso (18:04Z): loinc.org, fonasa.cl, datos.gob.mx, dgis.salud.gob.mx, inlasa.gob.bo, minsalud.gob.bo, sigtap.datasus.gov.br, www2/ftp2.datasus.gov.br | **0** | loinc.org 403 (servidor), fonasa.cl 403 (`awselb`), datos.gob.mx 403 (Akamai «Access Denied»), DGIS, INLASA, MinSalud Bolivia y DATASUS sin respuesta por HTTPS. gob.mx/salud responde, pero no publica un catálogo de procedimientos descargable en las páginas sondeadas. |
-| 15 | Fuentes abiertas no evaluadas aún: NCI EVS (CDISC SDTM), CMS Clinical Laboratory Fee Schedule, OHDSI Athena, Orphadata | **0 cargados; 1 candidata pendiente** | **CDISC SDTM `C65047` «Laboratory Test Code»** (`SDTM Terminology.txt` de evs.nci.nih.gov, 2 513 términos): alcanzable, pero (a) la licencia de CDISC no se verificó y (b) son códigos de *analito* para ensayos clínicos, sin muestra ni método, sin mapeo publicado a LOINC para deduplicar. Decide el propietario: no se cargan por conveniencia ni se descartan por conveniencia. CMS CLFS: usa códigos y descriptores CPT (AMA, licencia comercial). Athena: la descarga exige cuenta y licencias por vocabulario. Orphadata: no publica un catálogo de tests en sus productos libres. |
+| 15 | Fuentes abiertas no evaluadas aún: NCI EVS (CDISC SDTM), CMS Clinical Laboratory Fee Schedule, OHDSI Athena, Orphadata | **0 cargados; CDISC descartado al cerrar** | **CDISC SDTM `C65047` «Laboratory Test Code»** (`SDTM Terminology.txt` de evs.nci.nih.gov, 2 513 términos): alcanzable, pero (a) la licencia de CDISC no se verificó y (b) son códigos de *analito* para ensayos clínicos, sin muestra ni método, sin mapeo publicado a LOINC para deduplicar. Decide el propietario: no se cargan por conveniencia ni se descartan por conveniencia. CMS CLFS: usa códigos y descriptores CPT (AMA, licencia comercial). Athena: la descarga exige cuenta y licencias por vocabulario. Orphadata: no publica un catálogo de tests en sus productos libres. |
 
 **Las pasadas 7 y 8 aportaron 0 con la red cerrada; con la red abierta, la 14 aportó 0 y la 15 dejó
-una candidata pendiente de decisión.** No hay dos pasadas seguidas en 0 con todo lo alcanzable
-resuelto, así que **no se declara saturación**.
+una candidata que se descartó al cerrar.** El propietario ordenó cerrar la búsqueda el 2026-10-24.
+Queda registrado como cierre por decisión, **no como saturación por protocolo**.
 
 ## Cobertura
 
@@ -160,7 +160,7 @@ muestras con su subconjunto de 0487. Tamaño medido en Postgres 16 desechable: v
 | **LOINC, lo que sólo trae el zip oficial**: TIME/SYSTEM/SCALE en inglés, partes LP, Universal Lab Orders, Top 2000, RSNA Playbook; 3 080 términos posteriores a 2.82 (en NLM, sin clase en tx.fhir.org) | cuenta en loinc.org | Bajar el zip con una cuenta a `lab-tests-sources/loinc/` y correr `build-lab-tests.mjs --loinc-release <v>`: el parser existe y enriquece los mismos ids. |
 | RSNA RadLex Playbook por separado | licencia (click-through RadLex) | Que el propietario acepte la licencia, o el zip LOINC (trae el Playbook armonizado). |
 | DICOM CID 29 (modalidades) | licencia no verificada | Ubicar el aviso de copyright de NEMA aplicable. |
-| **CDISC «Laboratory Test Code»** (2 513) | licencia sin verificar + decisión de alcance | El propietario decide si los códigos de analito de ensayos clínicos entran; verificar los términos de uso de CDISC. |
+| **CDISC «Laboratory Test Code»** (2 513) | descartado al cerrar (orden del propietario); licencia sin verificar | Retomarlo como capa nueva, previa verificación de los términos de uso de CDISC. |
 | Cotejo de SIGTAP y FONASA con sus originales | FTP sólo por FTP; fonasa.cl 403 | Un entorno con FTP saliente, o acceso a fonasa.cl. |
 | CUPS completo (Colombia) | no hay tabla completa en datos.gov.co | Resolución de CUPS vigente de MinSalud en formato tabular. |
 | México, SUS Bolivia, INLASA | 403 / sin respuesta | Acceso a datos.gob.mx, minsalud.gob.bo, inlasa.gob.bo. |

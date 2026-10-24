@@ -29,9 +29,28 @@ y verificado por CI (`.github/workflows/docs.yml`).
 - Separar explícitamente comportamiento actual, decisión y recomendación — no mezclar "lo que es"
   con "lo que debería ser" sin decirlo.
 - Cero marcadores `TODO`/`FIXME`/`TBD` en contenido final — verificado por
-  `tools/docs/check-doc-coverage.mjs`. La palabra "pendiente" describiendo un hallazgo real
-  verificado (p. ej. "verificación pendiente") no es un marcador de esta categoría — el checker
-  distingue ambos casos explícitamente.
+  `tools/docs/check-doc-coverage.mjs`. El checker solo detecta la forma literal del marcador
+  (`TODO:`, `FIXME:`, `TBD`); la palabra "pendiente" como estado de negocio (una cita
+  `PENDIENTE`, un pago pendiente) no es un marcador.
+
+## El repo describe lo que existe
+
+La documentación y el código describen el sistema tal como es hoy. El estado del trabajo no se
+versiona (regla completa en [`AGENTS.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/AGENTS.md) §2.1):
+
+- Ni planes, ni reportes de sesión, ni tableros de estado, ni secciones «Pendiente», «Próximos
+  pasos» o «Falta», ni listas de tareas sin tildar. Tampoco carpetas como `docs/trabajo/` o
+  `docs/progress/`.
+- Un límite real del sistema se describe en presente («no valida X», «no expone Y») y, si hay
+  trabajo previsto, se enlaza el issue.
+- El plan y la evidencia de un trabajo van en la descripción del PR. Lo que quedó sin hacer, un
+  bug encontrado de paso o una decisión que depende de alguien van a un issue de GitHub en el
+  repo que corresponde, y el PR lo enlaza. Los hallazgos de seguridad llevan la etiqueta
+  `seguridad`.
+- En el código, una limitación intencional se explica en presente y sin `TODO`/`FIXME`; el
+  trabajo que falta es un issue, y el comentario puede apuntarlo (`// ver #123`).
+- Los checklists de procedimiento (la *Verificación* de la plantilla del PR, los pasos de un
+  runbook) sí van: se tildan en cada uso y no describen trabajo pendiente.
 
 ## Ver también
 

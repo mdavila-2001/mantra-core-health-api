@@ -4,8 +4,11 @@
 - Peldaño de evidencia alcanzado: **VERIFIED: carga completa e idempotencia en Postgres 16 desechable**
   (camino real: `data/` → `load-lab-tests.mjs --apply` → filas contadas con `psql`). No es
   `REGRESSION_VERIFIED`: ver «No cubierto».
-- Avance: **22 / 22 microtareas HECHO (100 %)**. El pedido de fondo
-  («hasta que no se pueda encontrar más») **no está cerrado**: la saturación no se declara (ver Pendiente).
+- Avance: **22 / 22 microtareas HECHO (100 %)**. Mergeado en `dev` por
+  mdavila-2001/mantra-core-health-api#729.
+- **Cierre (2026-10-24): el propietario ordenó cerrar el trabajo.** La búsqueda termina acá por esa
+  decisión, no porque el protocolo de saturación se haya cumplido: la pasada 14 dio 0, y la 15 dejó
+  CDISC, que queda **DESCARTADO** por esa misma orden. No se cargó nada más.
 
 ## Completado
 
@@ -33,7 +36,7 @@ ninguna
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| Saturación | BLOQUEADO | Decisión del propietario sobre **CDISC «Laboratory Test Code»** (2 513 términos, alcanzable): si entra, verificar los términos de uso de CDISC y cargarlo como capa; si no, registrarlo como descartado. Después, dos pasadas seguidas en 0. |
+| Saturación | DESCARTADO | Cerrada por orden del propietario (2026-10-24), sin dos pasadas seguidas en 0. CDISC «Laboratory Test Code» (2 513 términos) queda fuera; se puede retomar como capa nueva si alguien lo pide y verifica la licencia de CDISC. |
 | LOINC, lo que sólo trae el zip | BLOQUEADO | Cuenta en loinc.org (TIME/SYSTEM/SCALE en inglés, partes LP, Universal Lab Orders, Top 2000, Playbook, 3 080 términos posteriores a 2.82). El parser del zip existe. |
 | RSNA Playbook, DICOM CID 29 | BLOQUEADO | Licencia: aceptar RadLex (propietario) y ubicar el aviso de NEMA. |
 | Cotejo SIGTAP y FONASA | BLOQUEADO | FTP saliente (DATASUS) y acceso a fonasa.cl (403). |
@@ -126,11 +129,12 @@ Además: `evidencia/dry-run-plan.txt` (plan sin base), `fetch-loinc-txfhir.log`,
 ## Decisiones y ambigüedades
 
 1. **LOINC sin el zip oficial** (tx.fhir.org + NLM, con la licencia y el aviso de Regenstrief).
-   Supuesto: válido. Confirmar con el propietario.
+   Supuesto: válido. El propietario no lo objetó y aceptó el merge; no lo confirmó de forma explícita.
 2. **GTR** registra ofertas de laboratorio (un test por laboratorio). Supuesto: se cargan los vigentes
-   como su propio code system, dominio genética. Confirmar con el propietario.
-3. **CDISC «Laboratory Test Code»**: no se carga ni se descarta. La licencia no está verificada, y la
-   pregunta de alcance (códigos de analito para ensayos clínicos) es del propietario.
+   como su propio code system, dominio genética. Igual que el punto 1: aceptado con el merge, sin
+   confirmación explícita.
+3. **CDISC «Laboratory Test Code»**: descartado al cerrar, por orden del propietario. No se verificó su
+   licencia.
 4. **Miembros de panel sin dominio** (899 de LOINC) entran para que el panel esté completo, sin value set
    de dominio.
 5. **RSNA Playbook**: no se acepta la licencia RadLex en nombre del propietario.
