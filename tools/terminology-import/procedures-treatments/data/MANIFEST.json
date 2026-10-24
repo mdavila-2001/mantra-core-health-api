@@ -3,38 +3,45 @@
   "files": [
     {
       "path": "out/procedures.part001.ndjson.gz",
-      "bytes": 4660049,
-      "uncompressedBytes": 47327310,
-      "sha256Uncompressed": "ff75be227bedede115aba4320bf298a62c8d7cfa24c185d1f39f23f5422a4db3",
-      "rows": 71920
+      "bytes": 4667388,
+      "uncompressedBytes": 47327564,
+      "sha256Uncompressed": "42936245e3779ef16b4fe6a5cdd7c0acebfb95bdb28e10c4ec706cb4ddf34cc9",
+      "rows": 71917
     },
     {
       "path": "out/procedures.part002.ndjson.gz",
-      "bytes": 807473,
-      "uncompressedBytes": 8207736,
-      "sha256Uncompressed": "755704aed6c15502f68d68c20f7a0444c3676709c1f2b57c117f030b9bd85a53",
-      "rows": 12470
+      "bytes": 823770,
+      "uncompressedBytes": 8368542,
+      "sha256Uncompressed": "485af9119ad282cfe5260d6b01d9d05cacd52200c04f0b16eb052a523062780c",
+      "rows": 12713
     },
     {
       "path": "out/assertions.part001.ndjson.gz",
-      "bytes": 5139513,
-      "uncompressedBytes": 47472883,
-      "sha256Uncompressed": "44359d7155a679c77e277d32a8562e83ea26baa6f203a9f956f12c78b238b3d0",
-      "rows": 43946
+      "bytes": 4902817,
+      "uncompressedBytes": 47520654,
+      "sha256Uncompressed": "f943e32eef0ef60329d7e29e16841a1c65b311eed495cce1e528b2b171e36955",
+      "rows": 42027
     },
     {
       "path": "out/assertions.part002.ndjson.gz",
-      "bytes": 5142568,
-      "uncompressedBytes": 47471754,
-      "sha256Uncompressed": "a5e4cd7c3e7fa0f53813fb9d1f6e2ba7c1702654af2d81793fadebe766e5d95a",
-      "rows": 43846
+      "bytes": 4917288,
+      "uncompressedBytes": 47520035,
+      "sha256Uncompressed": "c9c90b16ea0b9e5f4131544c24c5e7359c6536df22426ef087cf358686ad24e5",
+      "rows": 41961
     },
     {
       "path": "out/assertions.part003.ndjson.gz",
-      "bytes": 4083984,
-      "uncompressedBytes": 37641389,
-      "sha256Uncompressed": "2cb0255191a0ef5b5ed8763ba7029002033a782b2358a95560379e82d899bd24",
-      "rows": 34776
+      "bytes": 4905169,
+      "uncompressedBytes": 47521344,
+      "sha256Uncompressed": "62e03993f06ae2824939e0b6f76a13f18186396827f68a645a245c63bcd2ae2c",
+      "rows": 41952
+    },
+    {
+      "path": "out/assertions.part004.ndjson.gz",
+      "bytes": 2595647,
+      "uncompressedBytes": 25078013,
+      "sha256Uncompressed": "70446365c3bc2909cd856598d49a8bbf62d33ced76e3252bb6d3ea19852e0081",
+      "rows": 22097
     },
     {
       "path": "out/maps.ndjson.gz",
@@ -45,9 +52,9 @@
     },
     {
       "path": "out/coverage.json.gz",
-      "bytes": 4012,
-      "uncompressedBytes": 13773,
-      "sha256Uncompressed": "1a09a26047e7b8c41fc060f260197a8263bb551aab43e2707c5c231a22080d2b"
+      "bytes": 4167,
+      "uncompressedBytes": 14513,
+      "sha256Uncompressed": "2429adcf3ff27d9b8329cbb31f4d6d0a40f19a9b99ceeb2ddcf8f79bbbc88853"
     },
     {
       "path": "out/load-plan.dry-run.json.gz",
@@ -118,6 +125,14 @@
       "sha256Uncompressed": "4e31c02eb8cf4ec3f3ab3cf84fd1a6e38dd7cecf4379c2b738cb6e00ca74c43a",
       "rows": 17554,
       "source": "pubmed-cochrane"
+    },
+    {
+      "path": "raw/pubmed-guidelines/records.ndjson.gz",
+      "bytes": 2040289,
+      "uncompressedBytes": 33756211,
+      "sha256Uncompressed": "42223741e1d860167681d6a8fb031333299df27c62ef223174bd27301d056b9e",
+      "rows": 42934,
+      "source": "pubmed-guidelines"
     },
     {
       "path": "raw/wikidata-p924/p924.json.gz",

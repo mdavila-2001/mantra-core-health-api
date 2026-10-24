@@ -132,6 +132,8 @@ export const PROVENANCE_SOURCE_CODE = {
   ctgov: 'NLM_CTGOV',
   'wikidata-p924': 'WIKIDATA',
   'pubmed-cochrane': 'NLM_PUBMED',
+  'pubmed-guidelines': 'NLM_PUBMED',
+  'pubmed-rct': 'NLM_PUBMED',
 };
 
 /**

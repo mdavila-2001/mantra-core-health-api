@@ -40,8 +40,10 @@
 | H6.S1.M8 | Gates | typecheck y lint exit 0, tests dirigidos en verde | `corepack yarn typecheck`, `corepack yarn lint`, `node --test …` | TODO |
 | H6.S1.M9 | PR nuevo contra `dev`, listo para revisión, sin mergear | URL del PR | `mcp__github__create_pull_request` | HECHO |
 | H6.S2.M1 | Clasificación MeSH depurada (sin métodos de investigación ni conceptos de tiempo/estrategia) | «Control Groups», «Placebos», «Randomized Controlled Trials as Topic», «Operative Time» no son procedimientos; «Biopsy», «Laparoscopy» sí | `node --test …` | HECHO |
-| H6.S2.M2 | Pasada 6: revisiones Cochrane por la indexación MeSH de NLM | `literature-indexing`, PMID en la evidencia, retractadas fuera | `fetch-pubmed-cochrane.mjs` + `build.mjs` | HECHO |
-| H6.S2.M3 | Pasadas 7+ hasta dos seguidas con 0 | dos filas consecutivas con 0 en la tabla de pasadas | tabla de pasadas | EN CURSO |
+| H6.S2.M2 | Pasada 6: revisiones Cochrane por la indexación MeSH de NLM | `literature-indexing`, PMID en la evidencia, retractadas fuera | `fetch-pubmed.mjs --subset cochrane` + `build.mjs` | HECHO |
+| H6.S2.M4 | Pasada 7: guías de práctica clínica (MEDLINE) | `literature-indexing`, PMID en la evidencia, retractadas fuera, etiqueta «no implica recomendación» | `fetch-pubmed.mjs --subset guidelines` + `build.mjs` + `node --test …` | HECHO |
+| H6.S2.M5 | Pasada 8: ensayos controlados aleatorizados publicados (MEDLINE) | `investigational` («en estudio»), PMID en la evidencia | `fetch-pubmed.mjs --subset rct` + `build.mjs` | EN CURSO |
+| H6.S2.M3 | Pasadas 9+ hasta dos seguidas con 0 | dos filas consecutivas con 0 en la tabla de pasadas | tabla de pasadas | EN CURSO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
