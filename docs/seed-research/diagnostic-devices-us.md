@@ -42,47 +42,50 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 | 2 | 2026-10-24 | FDA `foiclass.zip` crudo, espejo `ej86/fda-ai-medical-device-analytics@8840a036` (7 088 product codes) · paquete R `bjoleary/fdadata@227bdaa2` (archivos de descarga FDA `pmn*.zip`, `pma.zip`, `foiclass.zip`, «accessed 2026-10-20»: 176 466 510(k)/De Novo con dirección y país, 57 373 PMA con suplementos, 7 097 product codes) · lista FDA «AI-Enabled Medical Devices» (1 524, espejo ej86) | 3 081 (2 646 PMA + 432 510(k) + 3 De Novo) · además: nombre FDA del tipo en 3 268 de 3 270 product codes y país en 72 195 registros | 121 | 3 710 | `premarket.rda` (une `pmn` y `pma`: duplicado); país de `pma.rda` (fdadata pone `USA` a todos: no es dato de FDA, queda sólo en `extra.countryAsPublished`); 230 product codes retirados que sólo aparecen en 510(k) viejos sin clasificación publicada |
 | 3 | 2026-10-24 | AccessGUDID **Full Release XML 2025-05-01** filtrado a especialidad dental, espejo `Delapro/GUDID@9237402a` (20 zip, 812 322 registros de dispositivo) | 3 130 UDI-DI (radiología dental extraoral/intraoral, portapelículas, seguimiento mandibular, procesamiento de imagen, probadores pulpares, detectores de caries…) con modelo, DUNS, 510(k) y GMDN con código | 71 | 809 | 809 192 registros dentales fuera de alcance (implantes, prótesis, instrumental); el resto de GUDID (otros paneles) no tiene espejo público alcanzable. Se conservan tal cual los product codes que declara el etiquetador, aunque alguno sea dudoso (p. ej. un TENS declarado como `MUH`): GUDID es declaración del fabricante |
 | 4 | 2026-10-24 | Lista FDA «Nucleic Acid Based Tests» por patógeno, `double-strand/IVDmicrobialNAATregistry@6cdd1e5e` (456 filas, 255 K-numbers) · listas FDA de IA `lotterlab/fda_ai_search@adcdeda1` (1 248) y `dcxht/ValidMed@4f9c75f3` (1 430) · subconjunto openFDA de neurología `mehulseth/bci-fda-rnpv@df4f768c` (6 176) | **0** (sólo enriquecimiento: 253 510(k) moleculares con `extra.fdaNaatList`, patógenos con TaxID de NCBI y tecnología) | 0 | 0 | `K133448` y `K133883` de la lista NAAT no están en ningún archivo de descarga FDA alcanzable: sin fabricante ni product code verificable, no se crean filas; `P140011/S008` de ValidMed, ídem; listas de IA y neurología: todos sus envíos ya estaban (subconjuntos de pmn/pma) |
+| 5 | 2026-10-24 | FDA **Establishment Registration & Device Listing**, archivos planos 2024 (`Registration.txt` 46 496, `registration_listing.txt` 325 731, `Listing_PCD.txt` 316 023, `Owner_Operator.txt`), espejo `sdgoldberg/MedDev@6cbd231b` · **LIVD SARS-CoV-2** de CDC (pruebas IVD con EUA de FDA; 1 144 filas), `CDCgov/routes@e2e16eed` · extracto de la base **CLIA** de FDA (20 832 filas documento → sistema de prueba → analito, 2025-03), `unmtransinfo/cfde-biomarkers@9a121841` | 111 101 (110 614 listados de establecimiento por product code + 487 kits de prueba con EUA, 7 con UDI-DI) · además: 2 218 autorizaciones con analitos CLIA | 5 755 | 475 | GUDID `device.txt` ~2020-02 de `misterrPink1/symmetric@a43a1a58` (2 424 295 dispositivos **sin product code**: decidir el alcance exigiría cruzar por nombre, prohibido); extracto GUDID 2026-07-23 de `russellmiller49/Interventional-Pulm-Education-Project@b18a0f5b` (15 229, sin product code, mismo motivo); UDI de audífonos de `SyneticSLZ/MarketIntel@13c86b7b` (874.3300, prótesis: fuera de alcance); muestras de 100 a 1 000 filas (`mgree/ffs`, `AmitXShukla/P2P.ai`, `ikmdev/tinkar-core`); EUA COVID 2020 de `TommyJones/covid_fda_eua_tests` (59, contenidas en LIVD); `datasets.zip` de `symmetric` es MDALL de Health Canada (se pasó a la sesión ROW) |
 
 <!-- coverage:start -->
 ## Cobertura (generada por `coverage-report.mjs`)
 
 | | Cantidad |
 |---|---|
-| Registros (filas del NDJSON) | 77 971 |
+| Registros (filas del NDJSON) | 189 072 |
+| · `fda-rl` | 110 614 |
 | · `fda-510k` | 71 955 |
 | · `fda-gudid` | 3 130 |
 | · `fda-pma` | 2 646 |
+| · `cdc-livd-sars-cov-2` | 487 |
 | · `fda-denovo` | 240 |
-| UDI-DI (con modelo/versión) | 3 130 |
-| Fabricantes distintos (razón social normalizada exacta) | 12 641 |
-| Marcas distintas (fabricante + nombre comercial) | 72 119 |
-| Registros con país del fabricante | 72 195 |
+| UDI-DI (con modelo/versión) | 3 137 |
+| Fabricantes distintos (razón social normalizada exacta) | 18 396 |
+| Marcas distintas (fabricante + nombre comercial) | 72 594 |
+| Registros con país del fabricante | 182 809 |
 | Product codes vistos / incluidos / excluidos | 7 119 / 3 270 / 3 849 |
 
 ### Product codes por panel (incluidos / excluidos)
 
 | Panel | Incluidos | Excluidos | Registros de equipos |
 |---|---|---|---|
-| CH — Clinical Chemistry | 563 | 1 | 13 458 |
-| MI — Microbiology | 549 | 0 | 8 213 |
-| HE — Hematology | 405 | 23 | 4 172 |
-| IM — Immunology | 315 | 0 | 3 976 |
-| TX — Clinical Toxicology | 287 | 0 | 3 182 |
-| CV — Cardiovascular | 199 | 266 | 13 082 |
-| GU — Gastroenterology, Urology | 170 | 454 | 4 604 |
-| PA — Pathology | 154 | 0 | 624 |
-| RA — Radiology | 140 | 75 | 13 144 |
-| OP — Ophthalmic | 123 | 213 | 1 125 |
-| AN — Anesthesiology | 82 | 172 | 2 153 |
-| OB — Obstetrics/Gynecology | 81 | 196 | 1 568 |
-| NE — Neurology | 71 | 211 | 2 015 |
-| EN — Ear, Nose, Throat | 41 | 219 | 1 070 |
-| HO — General Hospital | 23 | 325 | 984 |
-| DE — Dental | 22 | 333 | 3 506 |
-| PM — Physical Medicine | 13 | 214 | 257 |
-| OR — Orthopedic | 12 | 322 | 789 |
-| SU — General, Plastic Surgery | 11 | 595 | 31 |
-| MG — Medical Genetics | 9 | 0 | 18 |
+| CH — Clinical Chemistry | 563 | 1 | 31 333 |
+| MI — Microbiology | 549 | 0 | 15 166 |
+| HE — Hematology | 405 | 23 | 9 424 |
+| IM — Immunology | 315 | 0 | 7 518 |
+| TX — Clinical Toxicology | 287 | 0 | 9 949 |
+| CV — Cardiovascular | 199 | 266 | 32 241 |
+| GU — Gastroenterology, Urology | 170 | 454 | 14 020 |
+| PA — Pathology | 154 | 0 | 3 745 |
+| RA — Radiology | 140 | 75 | 32 300 |
+| OP — Ophthalmic | 123 | 213 | 3 793 |
+| AN — Anesthesiology | 82 | 172 | 5 778 |
+| OB — Obstetrics/Gynecology | 81 | 196 | 3 854 |
+| NE — Neurology | 71 | 211 | 5 391 |
+| EN — Ear, Nose, Throat | 41 | 219 | 3 096 |
+| HO — General Hospital | 23 | 325 | 2 995 |
+| DE — Dental | 22 | 333 | 4 076 |
+| PM — Physical Medicine | 13 | 214 | 851 |
+| OR — Orthopedic | 12 | 322 | 2 576 |
+| SU — General, Plastic Surgery | 11 | 595 | 436 |
+| MG — Medical Genetics | 9 | 0 | 43 |
 | sin panel publicado | 0 | 230 | 0 |
 
 ### Criterio: subpartes de 21 CFR incluidas y excluidas
@@ -201,102 +204,101 @@ La lista completa, código por código con nombre, panel, clase, regulación, re
 
 | Product code | Nombre FDA | Registros |
 |---|---|---|
-| LLZ | System, Image Processing, Radiological | 2 442 |
-| GCJ | Laparoscope, General & Plastic Surgery | 1 431 |
-| DXN | System, Measurement, Blood-Pressure, Non-Invasive | 1 226 |
-| IYN | System, Imaging, Pulsed Doppler, Ultrasonic | 1 192 |
-| LNH | System, Nuclear Magnetic Resonance Imaging | 1 124 |
-| EHD | Unit, X-Ray, Extraoral With Timer | 1 004 |
-| MUH | System, X-Ray, Extraoral Source, Digital | 925 |
-| DQY | Catheter, Percutaneous | 896 |
-| IYO | System, Imaging, Pulsed Echo, Ultrasonic | 896 |
-| JAK | System, X-Ray, Tomography, Computed | 827 |
-| FLL | Continuous Measurement Thermometer | 798 |
-| DQX | Wire, Guide, Catheter | 769 |
-| DQA | Oximeter | 727 |
-| EGZ | Holder, Film, X-Ray | 723 |
-| DYB | Introducer, Catheter | 707 |
-| HRX | Arthroscope | 685 |
-| JJY | Multi-Analyte Controls, All Kinds (Assayed) | 673 |
-| LOM | Test, Hepatitis B (B Antigen, B Surface Antigen, Be Antigen) | 614 |
-| DPS | Electrocardiograph | 579 |
-| NBW | System, Test, Blood Glucose, Over The Counter | 512 |
-| DQO | Catheter, Intravascular, Diagnostic | 501 |
-| JJX | Single (Specified) Analyte Controls (Assayed And Unassayed) | 493 |
-| MOS | Coil, Magnetic Resonance, Specialty | 491 |
-| KPS | System, Tomography, Computed, Emission | 473 |
-| MQB | Solid State X-Ray Imager (Flat Panel/Digital Imager) | 449 |
-| JWY | Manual Antimicrobial Susceptibility Test Systems | 442 |
-| GXY | Electrode, Cutaneous | 440 |
-| DQK | Computer, Diagnostic, Programmable | 439 |
-| MHX | Monitor, Physiological, Patient(With Arrhythmia Detection Or Alarms) | 431 |
-| ITX | Transducer, Ultrasonic, Diagnostic | 415 |
-| LIT | Catheter, Angioplasty, Peripheral, Transluminal | 408 |
-| CGA | Glucose Oxidase, Glucose | 407 |
-| DSI | Detector And Alarm, Arrhythmia | 398 |
-| GKZ | Counter, Differential Cell | 381 |
-| JHI | Visual, Pregnancy Hcg, Prescription Use | 376 |
-| KIT | Media And Components, Synthetic Cell And Tissue Culture | 367 |
-| KNW | Instrument, Biopsy | 365 |
-| KPR | System, X-Ray, Stationary | 359 |
-| DRT | Monitor, Cardiac (Incl. Cardiotachometer & Rate Alarm) | 341 |
-| HET | Laparoscope, Gynecologic (And Accessories) | 338 |
+| LLZ | System, Image Processing, Radiological | 4 326 |
+| GCJ | Laparoscope, General & Plastic Surgery | 4 313 |
+| IYO | System, Imaging, Pulsed Echo, Ultrasonic | 3 875 |
+| IYN | System, Imaging, Pulsed Doppler, Ultrasonic | 3 823 |
+| ITX | Transducer, Ultrasonic, Diagnostic | 3 603 |
+| DXN | System, Measurement, Blood-Pressure, Non-Invasive | 2 841 |
+| DQY | Catheter, Percutaneous | 2 261 |
+| FLL | Continuous Measurement Thermometer | 2 228 |
+| DQX | Wire, Guide, Catheter | 2 199 |
+| DQA | Oximeter | 2 154 |
+| LNH | System, Nuclear Magnetic Resonance Imaging | 2 012 |
+| HRX | Arthroscope | 1 942 |
+| JAK | System, X-Ray, Tomography, Computed | 1 900 |
+| DYB | Introducer, Catheter | 1 841 |
+| JJX | Single (Specified) Analyte Controls (Assayed And Unassayed) | 1 647 |
+| NBW | System, Test, Blood Glucose, Over The Counter | 1 390 |
+| JJY | Multi-Analyte Controls, All Kinds (Assayed) | 1 314 |
+| MOS | Coil, Magnetic Resonance, Specialty | 1 225 |
+| DQO | Catheter, Intravascular, Diagnostic | 1 127 |
+| MQB | Solid State X-Ray Imager (Flat Panel/Digital Imager) | 1 118 |
+| MUH | System, X-Ray, Extraoral Source, Digital | 1 116 |
+| EHD | Unit, X-Ray, Extraoral With Timer | 1 106 |
+| DPS | Electrocardiograph | 1 039 |
+| JIT | Calibrator, Secondary | 1 015 |
+| MHX | Monitor, Physiological, Patient(With Arrhythmia Detection Or Alarms) | 1 001 |
+| CGA | Glucose Oxidase, Glucose | 945 |
+| DQK | Computer, Diagnostic, Programmable | 945 |
+| KNW | Instrument, Biopsy | 944 |
+| KPS | System, Tomography, Computed, Emission | 941 |
+| LON | System, Test, Automated, Antimicrobial Susceptibility, Short Incubation | 935 |
+| CCK | Analyzer, Gas, Carbon-Dioxide, Gaseous-Phase | 934 |
+| JKA | Tubes, Vials, Systems, Serum Separators, Blood Collection | 919 |
+| GXY | Electrode, Cutaneous | 911 |
+| EGZ | Holder, Film, X-Ray | 833 |
+| GKZ | Counter, Differential Cell | 824 |
+| LIT | Catheter, Angioplasty, Peripheral, Transluminal | 821 |
+| JIX | Calibrator, Multi-Analyte Mixture | 785 |
+| JAA | System, X-Ray, Fluoroscopic, Image-Intensified | 780 |
+| HET | Laparoscope, Gynecologic (And Accessories) | 771 |
+| DSI | Detector And Alarm, Arrhythmia | 744 |
 
 ### Fabricantes con más registros
 
 | Fabricante (clave normalizada) | Registros |
 |---|---|
-| ABBOTT LABORATORIES | 978 |
-| SIEMENS MEDICAL SOLUTIONS | 764 |
+| TRACEY HOLEVAS | 2 537 |
+| SIEMENS HEALTHCARE DIAGNOSTICS | 2 535 |
+| ABBOTT LABORATORIES | 1 488 |
+| BECKMAN COULTER | 1 488 |
+| ISOMEDIX OPERATIONS | 1 296 |
+| ORTHO CLINICAL DIAGNOSTICS | 1 267 |
+| KARL STORZ ENDOSCOPY AMERICA | 1 156 |
+| STERIGENICS U S | 1 115 |
+| SHAYLEE MASILUNAS | 1 096 |
+| SIEMENS MEDICAL SOLUTIONS | 1 065 |
+| BOSTON SCIENTIFIC | 1 038 |
+| AMY NELSON | 936 |
+| JAMES CLIFFORD | 841 |
+| BIOMERIEUX | 835 |
+| INSTRUMENTATION LABORATORY | 815 |
+| RANDOX LABORATORIES | 790 |
+| MASIMO | 738 |
+| STERIGENICS | 691 |
+| DIAMOND DIAGNOSTICS | 683 |
+| BECTON DICKINSON AND | 680 |
+| BIO RAD LABORATORIES | 655 |
+| SIEMENS HEALTHINEERS | 652 |
 | ROCHE DIAGNOSTICS | 644 |
-| SIEMENS HEALTHCARE DIAGNOSTICS | 493 |
-| MIDMARK | 486 |
+| DAVID LENNARZ | 606 |
+| PHILIPS MEDIZIN SYSTEME BOEBLINGEN | 575 |
+| GE MEDICAL SYSTEMS INFORMATION TECHNOLOGIES | 561 |
+| NOVA BIOMEDICAL | 545 |
+| JERRY DOANE | 531 |
+| HEALGEN SCIENTIFIC | 511 |
+| GE MEDICAL SYSTEMS | 507 |
+| MIDMARK | 503 |
+| PHILIPS ULTRASOUND | 490 |
+| HOLOGIC | 474 |
 | BD BECTON DICKINSON VACUTAINER SYSTEMS PREANALYTIC | 463 |
+| GE MEDICAL SYSTEMS ULTRASOUND AND PRIMARY CARE DIAGNOSTICS | 454 |
+| ANJA FAIR | 450 |
 | SYVA | 442 |
-| SIRONA DENTAL | 395 |
-| BOSTON SCIENTIFIC | 353 |
-| BECKMAN COULTER | 346 |
-| DADE BEHRING | 346 |
-| BOEHRINGER MANNHEIM | 338 |
-| DIAGNOSTIC PRODUCTS | 321 |
-| INSTRUMENTATION LABORATORY | 321 |
-| BIO RAD | 318 |
-| GE MEDICAL SYSTEMS | 317 |
-| ROCHE DIAGNOSTIC SYSTEMS | 295 |
-| BIOMERIEUX | 289 |
-| EM DIAGNOSTIC SYSTEMS | 288 |
-| KARL STORZ ENDOSCOPY AMERICA | 283 |
-| HELENA LABORATORIES | 282 |
-| BECKMAN INSTRUMENTS | 278 |
-| ROCHE MOLECULAR SYSTEMS | 258 |
-| MEDTRONIC MINIMED | 256 |
-| ORTHO CLINICAL DIAGNOSTICS | 256 |
-| BECTON DICKINSON AND | 255 |
-| DIASORIN | 253 |
-| E I DUPONT DE NEMOURS AND | 244 |
-| GENERAL ELECTRIC | 235 |
-| EASTMAN KODAK | 229 |
-| SIGMA CHEMICAL | 229 |
-| HEWLETT PACKARD | 217 |
-| DIRECTA | 205 |
-| HOLOGIC | 204 |
-| SCIENTIFIC | 201 |
-| C R BARD | 194 |
-| GE HEALTHCARE | 185 |
-| PHILIPS MEDICAL SYSTEMS | 181 |
-| PHILIPS MEDICAL SYSTEMS CLEVELAND | 176 |
-| ACUMEDIA MANUFACTURERS | 175 |
+| COVIDIEN | 431 |
+| HELENA LABORATORIES | 431 |
+| ROBERT PHILLIPS | 430 |
 
 ### Clase de riesgo y estado
 
-Clase: `fda:2` 62 691 · `fda:1` 13 835 · `fda:3` 1 310 · `fda:U` 131 · `sin clase` 4.
+Clase: `fda:2` 148 531 · `fda:1` 37 216 · `fda:3` 1 741 · `fda:U` 615 · `sin clase` 492 · `fda:N` 471 · `fda:f` 6.
 
-Estado (verbatim de la fuente): Substantially Equivalent 71 726 · In Commercial Distribution 2 923 · Approved 1 369 · Accepted 1 068 · De Novo Granted 240 · Not in Commercial Distribution 207 · Approved - Reclassified 123 · Approved - Withdrawn 78 · Substantially Equivalent - Kit 73 · SN 55 · Substantially Equivalent - With Limitations 44 · Substantially Equivalent - Kit with Drugs 21.
+Estado (verbatim de la fuente): sin estado 111 101 · Substantially Equivalent 71 726 · In Commercial Distribution 2 923 · Approved 1 369 · Accepted 1 068 · De Novo Granted 240 · Not in Commercial Distribution 207 · Approved - Reclassified 123 · Approved - Withdrawn 78 · Substantially Equivalent - Kit 73 · SN 55 · Substantially Equivalent - With Limitations 44.
 
 ### Huecos
 
 | Fuente | URL | Motivo |
 |---|---|---|
-| `fda-rl` | https://download.open.fda.gov/device/registrationlisting/ | 403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento. |
 | `fda-gudid` | https://accessgudid.nlm.nih.gov/download/delimited | 403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles. |
 <!-- coverage:end -->

@@ -20,7 +20,7 @@
 import { createReadStream, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
-import { FIELDS, FORMAT_VERSION, manufacturerKey, recordKey } from './lib/format.mjs';
+import { FIELDS, FORMAT_VERSION, clean, manufacturerKey, recordKey } from './lib/format.mjs';
 import { ensureDir, parseCsv, readJsonIfExists, readPipeDelimited, streamOpenFdaResults, streamXmlElements, unzipStream, writeNdjsonParts, xmlBlocks, xmlTag, zipEntries } from './lib/io.mjs';
 import {
   ProductCodeTable,
@@ -29,6 +29,8 @@ import {
   from510kLineage,
   fromAiList,
   fromGudidXml,
+  fromLivd,
+  fromRlFlat,
   fromFdadataPma,
   fromFdadataPmn,
   fromAccessGudidDelimited,
@@ -47,6 +49,7 @@ const table = new ProductCodeTable();
 const bySource = new Map(); // source → Map(recordKey → row)
 const inputs = [];
 const gaps = [];
+let rlDone = false;
 
 /** Prioridad de una vía: la oficial siempre gana; entre espejos, el más nuevo (`priority`). */
 const priority = (r) => (r.extra?.via?.kind === 'official' ? 1000 : (r.extra?.via?.priority ?? 0));
@@ -97,7 +100,8 @@ function mirrorProv(id, file, what) {
   const f = mf?.files.find((x) => x.path === file);
   return {
     sourceVersion: mirrorVersion(id, what),
-    retrievedAt: new Date(m.upstream?.fetchedAt ?? `${m.upstream?.exportDate ?? mf?.commitDate?.slice(0, 10)}T00:00:00Z`).toISOString(),
+    // Fecha de descarga declarada; si no, la fecha completa de exportación; si no, el commit del espejo (cota superior).
+    retrievedAt: new Date(m.upstream?.fetchedAt ?? (/^\d{4}-\d{2}-\d{2}$/.test(m.upstream?.exportDate ?? '') ? `${m.upstream.exportDate}T00:00:00Z` : mf?.commitDate)).toISOString(),
     via: { kind: 'mirror', repo: m.repo, commit: m.commit, file, sha256: f?.sha256 ?? null, derivedFrom: f?.derivedFrom ?? null, upstreamUrl: m.upstream?.url ?? null, upstreamSha256: m.upstream?.sha256 ?? null, priority: m.priority ?? 0 },
   };
 }
@@ -281,7 +285,7 @@ if (officialListing.length) {
     for (const row of fromOpenFdaRegistrationListing(r, table, officialProv(zip, 'openFDA device/registrationlisting'))) (add(row), kept++);
   });
   inputs.push({ source: 'openfda device/registrationlisting', records: n, inScope: kept });
-} else gaps.push({ source: 'fda-rl', url: 'https://download.open.fda.gov/device/registrationlisting/', reason: '403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento.' });
+}
 
 const gudidZip = existsSync(officialPath('accessgudid')) ? readdirSync(officialPath('accessgudid')).filter((f) => /Delimited_Full_Release_\d{8}\.zip$/.test(f)).sort().pop() : null;
 if (officialUdi.length) {
@@ -339,6 +343,86 @@ if (officialUdi.length) {
   gaps.push({ source: 'fda-gudid', url: 'https://accessgudid.nlm.nih.gov/download/delimited', reason: '403 del proxy — accessgudid.nlm.nih.gov y download.open.fda.gov bloqueados por la red de la sesión. Sin GUDID no hay UDI-DI ni modelo/versión por equipo.' });
 }
 
+// --- 2c. Registration & Listing: archivos planos de FDA 2024 (espejo sdgoldberg/MedDev) ---
+const rlDir = mirrorFile('sdgoldberg-meddev', 'project/data/Registration.txt') ? join(MIRRORS_DIR, 'sdgoldberg-meddev', 'project/data') : null;
+if (rlDir && !officialListing.length) {
+  const prov = mirrorProv('sdgoldberg-meddev', 'project/data/registration_listing.txt', 'FDA Establishment Registration & Device Listing (archivos planos)');
+  const load = async (f) => {
+    const rows = [];
+    await readPipeDelimited(createReadStream(join(rlDir, f), { encoding: 'latin1' }), (r) => rows.push(r));
+    return rows;
+  };
+  const regs = new Map((await load('Registration.txt')).map((r) => [r.REG_KEY, r]));
+  const owners = new Map((await load('Owner_Operator.txt')).map((r) => [r.REG_KEY, r]));
+  const pcdByKey = new Map();
+  for (const r of await load('Listing_PCD.txt')) pcdByKey.set(r.key_val, [...(pcdByKey.get(r.key_val) ?? []), r]);
+  const estab = new Map();
+  for (const r of await load('listing_estabtypes.txt')) estab.set(r.REGISTRATION_LISTING_ID, [...(estab.get(r.REGISTRATION_LISTING_ID) ?? []), r.ESTABLISHMENT_TYPE_ID]);
+  const links = await load('registration_listing.txt');
+  let kept = 0;
+  let orphan = 0;
+  for (const link of links) {
+    const reg = regs.get(link.REG_KEY);
+    if (!reg) {
+      orphan++;
+      continue;
+    }
+    for (const pcd of pcdByKey.get(link.KEY_VAL) ?? []) {
+      const row = fromRlFlat({ reg, link, pcd, owner: owners.get(link.REG_KEY), estabTypes: [...new Set(estab.get(link.REGISTRATION_LISTING_ID) ?? [])].sort() }, table, prov);
+      if (row) (add(row), kept++);
+    }
+  }
+  rlDone = true;
+  inputs.push({ source: 'mirror sdgoldberg-meddev (R&L 2024)', version: prov.sourceVersion, records: links.length, registrations: regs.size, listingsWithProductCode: pcdByKey.size, inScope: kept, linksWithoutRegistration: orphan });
+}
+
+if (!rlDone) gaps.push({ source: 'fda-rl', url: 'https://download.open.fda.gov/device/registrationlisting/', reason: '403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento.' });
+
+// --- 2d. LIVD SARS-CoV-2 de CDC (pruebas IVD con EUA de FDA) ----------------------
+const livd = mirrorFile('cdcgov-routes-livd', 'ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv');
+if (livd) {
+  const m = MIRRORS.find((x) => x.id === 'cdcgov-routes-livd');
+  const prov = {
+    ...mirrorProv(m.id, 'ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv', 'CDC LIVD SARS-CoV-2'),
+    fileUrl: `https://github.com/CDCgov/routes/blob/${m.commit}/ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv`,
+  };
+  const rows = parseCsv(readFileSync(livd, 'utf8').replace(/^\uFEFF/, ''));
+  const out = fromLivd(rows, prov);
+  out.forEach(add);
+  inputs.push({ source: 'mirror cdcgov-routes LIVD SARS-CoV-2', version: prov.sourceVersion, records: rows.length, testKits: out.length });
+}
+
+// --- 3a. Enriquecimiento: base CLIA de FDA (analitos por documento / K-number) ------
+const cliaFiles = ['output/clia_doc2test2analyte_chem.tsv', 'output/clia_doc2test2analyte_gp.tsv'].map((f) => mirrorFile('unmtransinfo-cfde-biomarkers', f)).filter(Boolean);
+if (cliaFiles.length) {
+  const prov = mirrorProv('unmtransinfo-cfde-biomarkers', 'output/clia_doc2test2analyte_chem.tsv', 'FDA CLIA database (analitos)');
+  const byDoc = new Map();
+  let n = 0;
+  for (const f of cliaFiles) {
+    const [head, ...lines] = readFileSync(f, 'utf8').split('\n').filter(Boolean);
+    const cols = head.split('\t');
+    for (const line of lines) {
+      const r = Object.fromEntries(line.split('\t').map((v, i) => [cols[i], v]));
+      n++;
+      const doc = clean(r.DOCUMENT_NUMBER)?.toUpperCase();
+      if (!doc) continue;
+      const e = byDoc.get(doc) ?? new Map();
+      e.set(`${r.TEST_SYSTEM_ID}|${r.ANALYTE_ID}`, { testSystemId: r.TEST_SYSTEM_ID, analyteId: r.ANALYTE_ID, analyte: r.ANALYTE_NAME, dateEffective: r.DATE_EFFECTIVE });
+      byDoc.set(doc, e);
+    }
+  }
+  const index = new Map();
+  for (const src of ['fda-510k', 'fda-denovo', 'fda-pma']) for (const row of bySource.get(src)?.values() ?? []) if (row.authorizationId) index.set(row.authorizationId, [...(index.get(row.authorizationId) ?? []), row]);
+  let matched = 0;
+  for (const [doc, e] of byDoc) {
+    const rows = index.get(doc);
+    if (!rows) continue;
+    for (const row of rows) row.extra = { ...row.extra, fdaCliaAnalytes: { items: [...e.values()].sort((a, b) => `${a.testSystemId}|${a.analyteId}`.localeCompare(`${b.testSystemId}|${b.analyteId}`)), via: prov.via } };
+    matched++;
+  }
+  inputs.push({ source: 'mirror unmtransinfo-cfde-biomarkers (CLIA)', version: prov.sourceVersion, records: n, documents: byDoc.size, enrichedAuthorizations: matched });
+}
+
 // --- 3b. Enriquecimiento: lista FDA de pruebas de ácidos nucleicos (patógenos por K-number) ---
 const naat = mirrorFile('double-strand-naat-registry', 'FDA510kPathogens_NAAT.csv');
 if (naat) {
@@ -385,7 +469,7 @@ for (const f of readdirSync(OUT_DIR).filter((x) => /^fda-[a-z0-9-]+-\d{4}\.ndjso
     if (r.udiDi) previous.udiDi.add(r.udiDi);
   }
 }
-const SOURCES = ['fda-510k', 'fda-denovo', 'fda-pma', 'fda-rl', 'fda-gudid'];
+const SOURCES = ['fda-510k', 'fda-denovo', 'fda-pma', 'fda-rl', 'fda-gudid', 'cdc-livd-sars-cov-2'];
 const parts = [];
 for (const source of SOURCES) {
   const rows = [...(bySource.get(source)?.values() ?? [])].sort((a, b) => a.sourceRecordId.localeCompare(b.sourceRecordId));

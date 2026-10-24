@@ -275,7 +275,7 @@ export function fromOpenFdaRegistrationListing(r, table, prov) {
           {
             source: 'fda-rl',
             sourceRecordId: `${regNo}|${pc}|${name ?? ''}`,
-            sourceUrl: OFFICIAL_RECORD_URL.REGISTRATION(regNo ?? ''),
+            sourceUrl: OFFICIAL_RECORD_URL.LISTING(r.key_val ?? '', pc),
             sourceVersion: prov.sourceVersion,
             retrievedAt: prov.retrievedAt,
             ...typeFields(table, pc),
@@ -689,4 +689,120 @@ export function fromGudidXml(xml, table, prov, { xmlTag, xmlBlocks }) {
       via: prov.via,
     },
   );
+}
+
+// --- Archivos planos de Registration & Listing (espejo sdgoldberg/MedDev, 2024) ---
+
+/**
+ * Una fila por (registro del establecimiento, listado, product code). Los
+ * archivos planos no traen nombres propietarios: `brandName` queda `null`.
+ * `listing` = fila de `registration_listing.txt` ya unida con
+ * `Registration.txt`, `Listing_PCD.txt`, `Owner_Operator.txt` y los tipos de
+ * establecimiento.
+ */
+export function fromRlFlat({ reg, link, pcd, owner, estabTypes }, table, prov) {
+  const pc = clean(pcd.PRODUCT_CODE)?.toUpperCase();
+  if (!pc || !table.scope(pc).include) return null;
+  const regNo = clean(reg.REGISTRATION_NUMBER);
+  const fei = clean(reg.FEI_NUMBER);
+  const country = clean(reg.ISO_COUNTRY_CODE)?.toUpperCase();
+  const sub = clean(link.PREMARKET_SUBMISSION_NUMBER)?.toUpperCase() ?? null;
+  return makeRecord(
+    {
+      source: 'fda-rl',
+      sourceRecordId: `${regNo ?? `regkey:${reg.REG_KEY}`}|${link.KEY_VAL}|${pc}`,
+      sourceUrl: OFFICIAL_RECORD_URL.LISTING(link.KEY_VAL, pc),
+      sourceVersion: prov.sourceVersion,
+      retrievedAt: prov.retrievedAt,
+      ...typeFields(table, pc),
+      manufacturerName: verbatim(reg.NAME),
+      manufacturerCountry: country && /^[A-Z]{2}$/.test(country) ? country : null,
+      manufacturerRegistryId: regNo ? `fda-reg:${regNo}` : fei ? `fei:${fei}` : null,
+      brandName: null,
+      model: null,
+      udiDi: null,
+      riskClass: fdaRiskClass(table.get(pc)?.deviceClass),
+      authorizationId: sub && authorizationKind(sub) ? sub : null,
+      authorizationDate: null,
+      status: null,
+    },
+    {
+      recordLevel: 'listing',
+      ...scopeExtra(table, pc),
+      manufacturerIds: [regNo ? `fda-reg:${regNo}` : null, fei ? `fei:${fei}` : null].filter(Boolean),
+      listingKeyVal: clean(link.KEY_VAL),
+      listingCreatedDate: isoDate(pcd.CREATED_DATE),
+      exempt: clean(pcd.EXEMPT),
+      premarketSubmissionAsPublished: sub,
+      registrationExpiryYear: clean(reg.REG_EXPIRY_DATE_YEAR),
+      regStatusId: clean(reg.REG_STATUS_ID),
+      establishmentTypeIds: estabTypes,
+      ownerOperator: owner ? { name: verbatim(owner.FIRM_NAME), number: clean(owner.OWNER_OPERATOR_NUMBER) } : null,
+      address: [reg.ADDRESS_LINE_1, reg.ADDRESS_LINE_2, reg.CITY, reg.STATE_ID, reg.ZIP_CODE ?? reg.POSTAL_CODE].map(verbatim).filter(Boolean).join(', ') || null,
+      via: prov.via,
+    },
+  );
+}
+
+// --- LIVD SARS-CoV-2 (CDC, pruebas con EUA de FDA) ----------------------------------
+
+/**
+ * Filas de la tabla LIVD agrupadas por `Testkit Name ID` (un kit = una fila).
+ * LIVD no publica product code ni número de EUA: `deviceTypeCode` y
+ * `authorizationId` quedan `null`; los equipos (instrumentos) y los LOINC van
+ * en `extra`.
+ */
+export function fromLivd(rows, prov) {
+  const groups = new Map();
+  for (const r of rows) {
+    const id = verbatim(r['Testkit Name ID']);
+    if (!id) continue;
+    const g = groups.get(id) ?? [];
+    g.push(r);
+    groups.set(id, g);
+  }
+  return [...groups.entries()].map(([id, g]) => {
+    const r = g[0];
+    const uniq = (k) => [...new Set(g.map((x) => verbatim(x[k])).filter(Boolean))].sort();
+    return makeRecord(
+      {
+        source: 'cdc-livd-sars-cov-2',
+        sourceRecordId: id,
+        sourceUrl: prov.fileUrl,
+        sourceVersion: prov.sourceVersion,
+        retrievedAt: prov.retrievedAt,
+        deviceTypeCode: null,
+        deviceTypeSystem: null,
+        deviceTypeName: null,
+        manufacturerName: verbatim(r.Manufacturer),
+        manufacturerCountry: null,
+        manufacturerRegistryId: null,
+        brandName: verbatim(r.Model),
+        model: null,
+        // LIVD: `Testkit Name ID Type` = DIT → el id es la UDI-DI del kit.
+        udiDi: clean(r['Testkit Name ID Type']) === 'DIT' ? id : null,
+        riskClass: null,
+        authorizationId: null,
+        authorizationDate: null,
+        status: null,
+      },
+      {
+        recordLevel: 'authorization',
+        authorizationType: 'FDA EUA (según LIVD de CDC)',
+        testType: uniq('Test Type'),
+        authorizedSettings: uniq('Authorized Settings'),
+        cliaComplexity: uniq('CLIAComplexity'),
+        euaAttributes: uniq('All EUA Attributes'),
+        testkitIdType: clean(r['Testkit Name ID Type']),
+        equipment: [...new Map(g.filter((x) => verbatim(x['Equipment UID'])).map((x) => [x['Equipment UID'], { uid: verbatim(x['Equipment UID']), type: clean(x['Equipment UID Type']) }])).values()].sort((a, b) => a.uid.localeCompare(b.uid)),
+        testPerformedLoinc: uniq('Test Performed LOINC Code'),
+        analytes: uniq('Vendor Analyte Name'),
+        fdaRef: uniq('fda_ref'),
+        isOtc: uniq('is_otc'),
+        isHome: uniq('is_home'),
+        livdRows: g.length,
+        via: prov.via,
+      },
+    );
+  });
 }

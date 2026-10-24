@@ -18,7 +18,9 @@ import {
   fromFdadataPma,
   fromFdadataPmn,
   fromGudidXml,
+  fromLivd,
   fromOpenFdaUdi,
+  fromRlFlat,
   regulationFromNumber,
 } from '../lib/normalize.mjs';
 import { classifyScope, panelCode, parseRegulation } from '../lib/scope.mjs';
@@ -280,4 +282,34 @@ test('cargador: plan determinista, sin product codes sin nombre', async () => {
   assert.equal(props.registry_record_count, 2);
   assert.equal(props.manufacturer_count, 1, 'misma razón social normalizada');
   assert.deepEqual(props.registry_records_by_source, { 'fda-510k': 1, 'fda-pma': 1 });
+});
+
+test('Registration & Listing (archivos planos reales 2024): una fila por registro, listado y product code', () => {
+  const t = new ProductCodeTable();
+  t.addClassification({ product_code: 'IGF', device_name: 'Solution, Formalin-Alcohol-Acetic Acid', medical_specialty: 'PA', device_class: '1', regulation_number: '864.4010' });
+  const { reg, link, pcd, owner } = JSON.parse(fixture('rl-flat.sample.json'));
+  const r = fromRlFlat({ reg, link, pcd: pcd[0], owner, estabTypes: ['1'] }, t, PROV);
+  assert.deepEqual(validateRecord(r), []);
+  assert.equal(r.source, 'fda-rl');
+  assert.equal(r.sourceRecordId, `${reg.REGISTRATION_NUMBER}|1017221179|IGF`);
+  assert.equal(r.sourceUrl, 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm?lid=1017221179&lpcd=IGF');
+  assert.equal(r.manufacturerCountry, 'US');
+  assert.equal(r.manufacturerRegistryId, `fda-reg:${reg.REGISTRATION_NUMBER}`);
+  assert.equal(r.brandName, null, 'los archivos planos no traen nombres propietarios');
+  assert.equal(r.extra.ownerOperator.name, 'Diversified Chemical Products, Inc.');
+  assert.equal(fromRlFlat({ reg, link, pcd: { ...pcd[0], PRODUCT_CODE: 'HRS' }, owner, estabTypes: [] }, t, PROV), null);
+});
+
+test('LIVD SARS-CoV-2 real: un kit por Testkit Name ID; UDI-DI sólo si el tipo es DIT', () => {
+  const rows = parseCsv(fixture('livd.sample.csv'));
+  const out = fromLivd(rows, { ...PROV, fileUrl: 'https://github.com/CDCgov/routes/blob/x/LIVD.csv' });
+  assert.equal(out.length, 2);
+  for (const r of out) assert.deepEqual(validateRecord(r), []);
+  const lucira = out.find((r) => r.sourceRecordId === '00810055970001');
+  assert.equal(lucira.udiDi, '00810055970001');
+  assert.equal(lucira.manufacturerName, 'Lucira Health, Inc.');
+  const kit = out.find((r) => r.sourceRecordId !== '00810055970001');
+  assert.equal(kit.udiDi, null);
+  assert.equal(kit.extra.livdRows, rows.filter((x) => x['Testkit Name ID'] === kit.sourceRecordId).length);
+  assert.ok(kit.extra.equipment.length >= 1);
 });

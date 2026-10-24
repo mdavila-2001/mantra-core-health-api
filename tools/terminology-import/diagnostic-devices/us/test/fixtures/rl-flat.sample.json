@@ -1,0 +1,40 @@
+{
+ "reg": {
+  "REG_KEY": "193097",
+  "REGISTRATION_NUMBER": "1000071265",
+  "FEI_NUMBER": "1000071265",
+  "REG_STATUS_ID": "1",
+  "INITIAL_IMPORTER_FLAG": "N",
+  "REG_EXPIRY_DATE_YEAR": "2024",
+  "ADDRESS_TYPE_ID": "F",
+  "NAME": "DIVERSIFIED CHEMICAL PRODUCTS, INC",
+  "ADDRESS_LINE_1": "60 GERMAY DR",
+  "ADDRESS_LINE_2": "",
+  "CITY": "Wilmington",
+  "STATE_ID": "DE",
+  "ISO_COUNTRY_CODE": "US",
+  "ZIP_CODE": "19804",
+  "POSTAL_CODE": ""
+ },
+ "link": {
+  "REGISTRATION_LISTING_ID": "489231",
+  "REG_KEY": "193097",
+  "KEY_VAL": "1017221179",
+  "PREMARKET_SUBMISSION_NUMBER": ""
+ },
+ "pcd": [
+  {
+   "key_val": "1017221179",
+   "PRODUCT_CODE": "IGF",
+   "CREATED_DATE": "04/05/2016",
+   "OWNER_OPERATOR_NUMBER": "10051571",
+   "EXEMPT": ""
+  }
+ ],
+ "owner": {
+  "REG_KEY": "193097",
+  "CONTACT_ID": "20555258",
+  "FIRM_NAME": "Diversified Chemical Products, Inc.",
+  "OWNER_OPERATOR_NUMBER": "10051571"
+ }
+}

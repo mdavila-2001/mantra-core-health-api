@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T03:27:50.039Z",
+ "generatedAt": "2026-10-24T03:49:57.207Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -9,8 +9,8 @@
    "source": "fda-510k",
    "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
    "rows": 71955,
-   "bytes": 8959097,
-   "sha256": "0059523eea3d581ac0b47cc35366d51e6aef53f04f751ddc47393f64d48c70f4"
+   "bytes": 9288571,
+   "sha256": "54eef7ecdeae23246b77759bb276de6301ce9192f3fd7d3da9494de38cecfa6e"
   },
   {
    "path": "fda-denovo-0001.ndjson.gz",
@@ -25,8 +25,16 @@
    "source": "fda-pma",
    "sourceVersion": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
    "rows": 2646,
-   "bytes": 140067,
-   "sha256": "b122a819acee64bcde9513a1ff402e2acdeead146b70419c11d1c88d943aa616"
+   "bytes": 142148,
+   "sha256": "4837c5fe2cfd7ca0cf5f941fa7ba85805245c6ee98e4e49563fc02e15ff04b4b"
+  },
+  {
+   "path": "fda-rl-0001.ndjson.gz",
+   "source": "fda-rl",
+   "sourceVersion": "FDA Establishment Registration & Device Listing (archivos planos) 2024 vía espejo https://github.com/sdgoldberg/MedDev@6cbd231bb5d0",
+   "rows": 110614,
+   "bytes": 6794582,
+   "sha256": "c05510a1f297de17d7bc3bbdac7ab3ec9cb561ad46a55a8322426523a6df84b3"
   },
   {
    "path": "fda-gudid-0001.ndjson.gz",
@@ -35,14 +43,17 @@
    "rows": 3130,
    "bytes": 309765,
    "sha256": "0ac976b2d0aa6f31f06b19a0526ad4079e49369a27c6205b7417f18769c2cf3d"
+  },
+  {
+   "path": "cdc-livd-sars-cov-2-0001.ndjson.gz",
+   "source": "cdc-livd-sars-cov-2",
+   "sourceVersion": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
+   "rows": 487,
+   "bytes": 37306,
+   "sha256": "ff3342e932d2b6a632c27907de22e812828ac9350546bc4382c0b33d31ee2d15"
   }
  ],
  "gaps": [
-  {
-   "source": "fda-rl",
-   "url": "https://download.open.fda.gov/device/registrationlisting/",
-   "reason": "403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento."
-  },
   {
    "source": "fda-gudid",
    "url": "https://accessgudid.nlm.nih.gov/download/delimited",
@@ -89,6 +100,28 @@
    "version": "AccessGUDID Full Release XML 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
    "records": 812322,
    "inScope": 3130
+  },
+  {
+   "source": "mirror sdgoldberg-meddev (R&L 2024)",
+   "version": "FDA Establishment Registration & Device Listing (archivos planos) 2024 vía espejo https://github.com/sdgoldberg/MedDev@6cbd231bb5d0",
+   "records": 325731,
+   "registrations": 30252,
+   "listingsWithProductCode": 257718,
+   "inScope": 110741,
+   "linksWithoutRegistration": 0
+  },
+  {
+   "source": "mirror cdcgov-routes LIVD SARS-CoV-2",
+   "version": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
+   "records": 1144,
+   "testKits": 487
+  },
+  {
+   "source": "mirror unmtransinfo-cfde-biomarkers (CLIA)",
+   "version": "FDA CLIA database (analitos) 2025-03 vía espejo https://github.com/unmtransinfo/cfde-biomarkers@9a121841fd61",
+   "records": 20832,
+   "documents": 4046,
+   "enrichedAuthorizations": 2218
   },
   {
    "source": "mirror double-strand-naat-registry",
@@ -167,6 +200,24 @@
     "url": "https://www.accessdata.fda.gov/premarket/ftparea/",
     "exportDate": "2026-10-20",
     "note": "«accessed 2026-10-20» según man/pmn.Rd, man/pma.Rd y man/product_codes.Rd"
+   }
+  },
+  {
+   "id": "cdcgov-routes-livd",
+   "repo": "https://github.com/CDCgov/routes",
+   "commit": "e2e16eedfc7d232d9889eb4726f4c675b37e0df6",
+   "commitDate": "2025-12-16T08:26:18-05:00",
+   "files": [
+    {
+     "path": "ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv",
+     "bytes": 1181871,
+     "sha256": "b45a38a98d771912d89c066c3c4cd94deffaf113338dd91c2858b5bf35afc47f"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.cdc.gov/csels/dls/livd-codes.html",
+    "exportDate": null,
+    "note": "LIVD SARS-CoV-2 (CDC), mapeo de pruebas EUA de FDA a LOINC"
    }
   },
   {
@@ -370,6 +421,77 @@
     "url": "https://www.accessdata.fda.gov/premarket/ftparea/foiclass.zip",
     "exportDate": null,
     "note": "foiclass.txt crudo (delimitado por `|` aunque se llame .csv); fecha de corte = commit del espejo"
+   }
+  },
+  {
+   "id": "sdgoldberg-meddev",
+   "repo": "https://github.com/sdgoldberg/MedDev",
+   "commit": "6cbd231bb5d0778ff2fd7d165ba5d8f0f613f55e",
+   "commitDate": "2025-05-30T00:02:45-04:00",
+   "files": [
+    {
+     "path": "project/data/Registration.txt",
+     "bytes": 5456832,
+     "sha256": "bc5bc22b2d03ff8aa189e22ec2b03d90ff6a29094c8aa4725f068cb793cfcca7"
+    },
+    {
+     "path": "project/data/registration_listing.txt",
+     "bytes": 9563432,
+     "sha256": "0786bcf2bca02e11d8ae88ba4e1a271553d55e400256478539a5e30a2e15e10d"
+    },
+    {
+     "path": "project/data/Listing_PCD.txt",
+     "bytes": 11221027,
+     "sha256": "7512fb0c92b4ef8d5b31e3fda3bf2d42d5a942b531c570d4c2133b57f9d70854"
+    },
+    {
+     "path": "project/data/Owner_Operator.txt",
+     "bytes": 1481735,
+     "sha256": "a7d3059731090c558fb03dd751605208d3baeddd1e61313d3dd663fdbc01c0b2"
+    },
+    {
+     "path": "project/data/listing_estabtypes.txt",
+     "bytes": 6184527,
+     "sha256": "78d4539a0143987815ff3d7da039653f8b3e716e0e6950282723d0b2ff62ad25"
+    },
+    {
+     "path": "README.md",
+     "bytes": 2766,
+     "sha256": "d2c71833efb5dc13b190428a85101faf689b2d28f0bb88b35e028d6c73c96060"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.fda.gov/medical-devices/device-registration-and-listing/establishment-registration-and-medical-device-listing-files-download",
+    "exportDate": "2024",
+    "note": "Instantánea 2024: todas las filas de Registration.txt traen REG_EXPIRY_DATE_YEAR=2024 (commit 2025-05-30). No incluye el archivo de nombres propietarios."
+   }
+  },
+  {
+   "id": "unmtransinfo-cfde-biomarkers",
+   "repo": "https://github.com/unmtransinfo/cfde-biomarkers",
+   "commit": "9a121841fd616d2c129faf46c9a1b1df546fb2e3",
+   "commitDate": "2026-10-21T14:39:34-06:00",
+   "files": [
+    {
+     "path": "output/clia_doc2test2analyte_chem.tsv",
+     "bytes": 694330,
+     "sha256": "52bd1ae0c42ba803d5aaeaf9aa6211368dd877dff8cc444e31f917d3113b57fa"
+    },
+    {
+     "path": "output/clia_doc2test2analyte_gp.tsv",
+     "bytes": 299631,
+     "sha256": "486ce4e53564cbc43856e9a58f2cfd79e92c8058e31ac89dc63d07ec768ec1ee"
+    },
+    {
+     "path": "README.md",
+     "bytes": 1400,
+     "sha256": "0567ed8c420797086be2a08949a06f4e96f53e8e36d7123e7017df2d73747d94"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfClia/Search.cfm",
+    "exportDate": "2025-03",
+    "note": "sólo enriquece: analitos por K-number"
    }
   }
  ],

@@ -39,7 +39,9 @@ for (const m of MIRRORS) {
   const head = existsSync(join(dir, '.git')) ? (() => { try { return git(dir, 'rev-parse', 'HEAD'); } catch { return null; } })() : null;
   if (head !== m.commit) {
     console.log(`[${m.id}] git fetch --depth 1 ${m.repo} ${m.commit}`);
-    git(dir, 'fetch', '-q', '--depth', '1', 'origin', m.commit);
+    // Sólo los archivos usados (clon parcial + sparse checkout): algunos repos pesan GB.
+    git(dir, 'sparse-checkout', 'set', '--no-cone', ...m.files.map((f) => `/${f}`));
+    git(dir, 'fetch', '-q', '--depth', '1', '--filter=blob:none', 'origin', m.commit);
     git(dir, 'checkout', '-q', '--detach', 'FETCH_HEAD');
   }
   const got = git(dir, 'rev-parse', 'HEAD');

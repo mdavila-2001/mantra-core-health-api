@@ -12,7 +12,8 @@ export const OFFICIAL_RECORD_URL = Object.freeze({
   HDE: (id) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfhde/hde.cfm?id=${encodeURIComponent(id)}`,
   GUDID: (di) => `https://accessgudid.nlm.nih.gov/devices/${encodeURIComponent(di)}`,
   PRODUCT_CODE: (pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=${encodeURIComponent(pc)}`,
-  REGISTRATION: (reg) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm?lid=&rid=${encodeURIComponent(reg)}`,
+  /** Ficha pública de un listado (`lid` = KEY_VAL del listado, `lpcd` = product code). */
+  LISTING: (keyVal, pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm?lid=${encodeURIComponent(keyVal)}&lpcd=${encodeURIComponent(pc)}`,
 });
 
 /** Tipo de autorización a partir del número FDA. */
@@ -114,6 +115,38 @@ export const MIRRORS = Object.freeze([
     files: ['FDA510kPathogens_NAAT.csv', 'LICENSE'],
     license: 'GPL-3.0 (double-strand). Contenido: la lista FDA «Nucleic Acid Based Tests» (dominio público) reordenada por patógeno con TaxID de NCBI.',
     upstream: { url: 'https://www.fda.gov/medical-devices/in-vitro-diagnostics/nucleic-acid-based-tests', exportDate: null, note: 'sólo enriquece: patógenos y tecnología por K-number' },
+    enrichOnly: true,
+    priority: 0,
+  },
+  {
+    id: 'sdgoldberg-meddev',
+    repo: 'https://github.com/sdgoldberg/MedDev',
+    commit: '6cbd231bb5d0778ff2fd7d165ba5d8f0f613f55e',
+    files: ['project/data/Registration.txt', 'project/data/registration_listing.txt', 'project/data/Listing_PCD.txt', 'project/data/Owner_Operator.txt', 'project/data/listing_estabtypes.txt', 'README.md'],
+    license: 'Sin licencia declarada en el repo; los .txt son los archivos planos de FDA «Establishment Registration and Medical Device Listing Files» (dominio público), sin transformar.',
+    upstream: {
+      url: 'https://www.fda.gov/medical-devices/device-registration-and-listing/establishment-registration-and-medical-device-listing-files-download',
+      exportDate: '2024',
+      note: 'Instantánea 2024: todas las filas de Registration.txt traen REG_EXPIRY_DATE_YEAR=2024 (commit 2025-05-30). No incluye el archivo de nombres propietarios.',
+    },
+    priority: 10,
+  },
+  {
+    id: 'cdcgov-routes-livd',
+    repo: 'https://github.com/CDCgov/routes',
+    commit: 'e2e16eedfc7d232d9889eb4726f4c675b37e0df6',
+    files: ['ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv'],
+    license: 'Apache-2.0 (CDC). Contenido: tabla LIVD de CDC para pruebas IVD de SARS-CoV-2 con autorización de uso de emergencia (EUA) de FDA (obra del gobierno de EE. UU., dominio público).',
+    upstream: { url: 'https://www.cdc.gov/csels/dls/livd-codes.html', exportDate: null, note: 'LIVD SARS-CoV-2 (CDC), mapeo de pruebas EUA de FDA a LOINC' },
+    priority: 10,
+  },
+  {
+    id: 'unmtransinfo-cfde-biomarkers',
+    repo: 'https://github.com/unmtransinfo/cfde-biomarkers',
+    commit: '9a121841fd616d2c129faf46c9a1b1df546fb2e3',
+    files: ['output/clia_doc2test2analyte_chem.tsv', 'output/clia_doc2test2analyte_gp.tsv', 'README.md'],
+    license: 'Licencia Creative Commons en el repo. Contenido: extracto de la base CLIA de FDA (dominio público): documento (K-number) → sistema de prueba → analito.',
+    upstream: { url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfClia/Search.cfm', exportDate: '2025-03', note: 'sólo enriquece: analitos por K-number' },
     enrichOnly: true,
     priority: 0,
   },
