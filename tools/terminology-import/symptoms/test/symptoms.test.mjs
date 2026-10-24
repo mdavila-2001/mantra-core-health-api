@@ -183,3 +183,13 @@ test('plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia 
   assert.equal(withoutExcluded.stats.negatedSkipped, 1);
   assert.ok(withoutExcluded.relationships.every((r) => r[3] === REL.SYMPTOM));
 });
+
+test('sistemas de enfermedad por defecto = formatos confirmados por seed-diseases (#688)', async () => {
+  const { DEFAULT_DISEASE_SYSTEMS: D } = await import('../lib/relations-plan.mjs');
+  assert.deepEqual([D.OMIM.internalCodes, D.OMIM.codes('616331')], [['omim'], ['616331']]);
+  assert.deepEqual([D.ORPHA.internalCodes, D.ORPHA.codes('558')], [['orphanet'], ['558']]);
+  assert.deepEqual([D.DECIPHER.internalCodes, D.DECIPHER.codes('16')], [['decipher'], ['16']]);
+  assert.deepEqual(D.MONDO.codes('0007739'), ['MONDO:0007739']);
+  assert.deepEqual(D.DOID.codes('9351'), ['DOID:9351']);
+  assert.deepEqual([D.MESH.internalCodes, D.MESH.codes('D003920')], [['mesh'], ['D003920']]);
+});

@@ -21,17 +21,19 @@ export const REL = {
 };
 
 /**
- * Dónde buscar cada prefijo de enfermedad: `internal_code` candidatos y formas
- * del código. Se puede reemplazar con `--disease-systems <json>` cuando la
- * sesión hermana fije los suyos.
+ * Dónde buscar cada prefijo de enfermedad: `internal_code` y forma exacta del
+ * código, tal como los carga la sesión hermana `seed-diseases`
+ * (mdavila-2001/mantra-core-health-api#688, docs/seed-research/diseases.md §3):
+ * OMIM, Orphanet, DECIPHER y MeSH sin prefijo; MONDO y DOID con prefijo.
+ * Se puede reemplazar con `--disease-systems <json>`.
  */
 export const DEFAULT_DISEASE_SYSTEMS = {
-  OMIM: { internalCodes: ['omim'], codes: (id) => [id, `OMIM:${id}`] },
-  ORPHA: { internalCodes: ['orphanet', 'ordo', 'orpha'], codes: (id) => [id, `ORPHA:${id}`, `Orphanet:${id}`] },
-  DECIPHER: { internalCodes: ['decipher'], codes: (id) => [id, `DECIPHER:${id}`] },
-  MONDO: { internalCodes: ['mondo'], codes: (id) => [`MONDO:${id}`, id] },
-  DOID: { internalCodes: ['doid'], codes: (id) => [`DOID:${id}`, id] },
-  MESH: { internalCodes: ['mesh', 'mesh-descriptors'], codes: (id) => [id, `MESH:${id}`] },
+  OMIM: { internalCodes: ['omim'], codes: (id) => [id] },
+  ORPHA: { internalCodes: ['orphanet'], codes: (id) => [id] },
+  DECIPHER: { internalCodes: ['decipher'], codes: (id) => [id] },
+  MONDO: { internalCodes: ['mondo'], codes: (id) => [`MONDO:${id}`] },
+  DOID: { internalCodes: ['doid'], codes: (id) => [`DOID:${id}`] },
+  MESH: { internalCodes: ['mesh'], codes: (id) => [id] },
 };
 
 /** JSON `{ "OMIM": { "internalCodes": ["omim"], "codeFormat": "local" | "curie" } }` → config. */

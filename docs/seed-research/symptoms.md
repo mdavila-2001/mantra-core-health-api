@@ -29,9 +29,10 @@ Estado de la carga:
   guardar fuente, frecuencia ni evidencia por arista (§ Modelo). El cargador
   existe y se probó contra la tabla propuesta aplicada **sólo en la base
   desechable**; contra el modelo actual aborta sin escribir (código de salida 2).
-- **Enlace con `seed-diseases`: pendiente de sus códigos.** La rama
-  `justin/seed-diseases` todavía no existe en el remoto; el cargador resuelve
-  por código y está listo para sus `internal_code` (§ Dependencia).
+- **Enlace con `seed-diseases`: formatos confirmados.** La sesión hermana
+  (mdavila-2001/mantra-core-health-api#688) confirmó sus `internal_code` y el
+  formato de cada código; el cargador los usa por defecto y, con ese formato,
+  resuelve el 100 % de las filas de HPOA directo por código (§ Dependencia).
 
 ## Paso 0: discovery
 
@@ -202,10 +203,12 @@ Medido contra las 23 263 enfermedades humanas de Mondo (descendientes de
 
 Las relaciones se enlazan **por código**, en este orden:
 
-1. El código tal como lo publica la fuente, en los sistemas que cargue
-   `seed-diseases`: por defecto `omim` (`619340` o `OMIM:619340`), `orphanet`/
-   `ordo` (`558`, `ORPHA:558`), `decipher`, `mondo` (`MONDO:0007947`), `doid`
-   (`DOID:13550`), `mesh`/`mesh-descriptors` (`D049291`). Se reemplaza con
+1. El código tal como lo publica la fuente, en el sistema que lo cita. Formatos
+   confirmados por `seed-diseases` (#688, `docs/seed-research/diseases.md` §3):
+   `omim` → `616331` (sin prefijo), `orphanet` → `558`, `decipher` → `16`,
+   `mesh` → `D003920`, `mondo` → `MONDO:0007739` y `doid` → `DOID:9351` (con
+   prefijo). Es también lo que recomendó esa sesión: colgar la arista del
+   concepto del sistema que cita la anotación. Se reemplaza con
    `--disease-systems <json>` sin tocar código.
 2. Si no está, el MONDO id que Mondo declara `equivalentTo` (74 548
    equivalencias en `disease-equivalences.ndjson`); la evidencia lo anota en
@@ -213,12 +216,20 @@ Las relaciones se enlazan **por código**, en este orden:
 3. Si tampoco, la fila no se carga y se cuenta por prefijo
    (`--check` lo muestra sin escribir).
 
-Medición con Mondo real cargado como andamio en la base desechable (ningún otro
-sistema de enfermedades): HPOA resuelve 267 254 de 268 906 filas P (1 652 de 121
-códigos sin equivalencia en Mondo), Mondo 815/815, DOID 2 248/2 268 y
-enfermedades comunes 102 242 de 132 277 (30 035 filas de 898 códigos DOID/MeSH
-sin equivalencia en Mondo: entran si `seed-diseases` carga `doid` y `mesh`). Se le pidió a la sesión hermana que
-confirme sus `internal_code` y formato de código.
+Medición en la base desechable con dos andamios:
+
+- **Con el formato de #688** (`omim`/`orphanet`/`decipher` con los 8 478 + 4 355
+  + 47 códigos de HPOA, código sin prefijo): HPOA resuelve **268 906 de 268 906**
+  filas P directo por código, 0 vía Mondo, 0 sin resolver → 268 306 aristas.
+- **Sólo con Mondo** (sin otros sistemas): HPOA 267 254 de 268 906 (1 652 filas
+  de 121 códigos sin equivalencia en Mondo), Mondo 815/815, DOID 2 248/2 268 y
+  enfermedades comunes 102 242 de 132 277 (30 035 filas de 898 códigos DOID/MeSH
+  sin equivalencia en Mondo: entran directo porque `seed-diseases` carga `doid` y
+  `mesh`).
+
+CIE-11 capítulo 21 y CIE-10 capítulo R: los carga `seed-diseases` (MMS 2026-01
+completa; CIE-10 sólo como claves `icd10-who` sin título por la licencia OMS
+pendiente). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 
 ## Glosario: extensión, no duplicado
 
@@ -256,7 +267,7 @@ corrida y sistema (es el registro de cada corrida, no dato).
 | Fuente | Qué aportaría | Por qué no está |
 |---|---|---|
 | Orphadata `en_product4.xml` / `es_product4.xml` | fenotipos de enfermedades raras directo de Orphanet (y nombres ES de Orphanet) | 403 del proxy de red. Su contenido llega vía HPOA (filas `ORPHA:`, 116 661) |
-| CIE-11 capítulo 21 (ES) | síntomas, signos y hallazgos clínicos de la OMS | `icd.who.int` / `icdcdn.who.int` bloqueados; la API de la OMS exige cuenta. Además la carga sesión hermana `seed-diseases` |
+| CIE-11 capítulo 21 en castellano | nombres ES oficiales de síntomas, signos y hallazgos (OMS/OPS) | La MMS 2026-01 en inglés **ya la carga `seed-diseases`** (47 bloques + 1 241 categorías del cap. 21). La versión ES: `icd.who.int` / `icdcdn.who.int` bloqueados; la API de la OMS exige cuenta |
 | CIE-10 capítulo R | signos y síntomas | **Ya está** en el glosario (CIE-10-ES) y en `icd10cm`; no se duplica |
 | MeSH C23 y DeCS (BIREME) | descriptores de signos y síntomas, en castellano (DeCS) | `nlm.nih.gov` bloqueado; DeCS exige solicitar licencia y token a BIREME/OPS |
 | Wikidata P3841 | cruce HPO ↔ fichas `wikidata-sintoma` del glosario | `query.wikidata.org` bloqueado |
