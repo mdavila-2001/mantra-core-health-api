@@ -12,6 +12,7 @@ import {
 import { ChartTemplatesRepository } from '../repositories';
 import { CHART } from '../chart.concepts';
 import { FORMS } from '../../forms/forms.concepts';
+import { choiceOptionsOf } from '../../forms/entities/dynamic_field_definitions.types';
 import {
   AssignmentResponseDto,
   AssignTemplateDto,
@@ -268,7 +269,7 @@ export class ChartTemplatesService {
           name: field.name,
           dataType: input.dataType,
           valueSetId: field.valueSetId,
-          options: field.options,
+          options: choiceOptionsOf(field.options),
           multiple: field.multiple,
           allowOther: field.allowOther,
           description: field.description,
@@ -390,7 +391,7 @@ export class ChartTemplatesService {
         name: field.name,
         dataType: field.dataType as ChartTemplateFieldDto['dataType'],
         valueSetId: field.valueSetId,
-        options: field.options,
+        options: choiceOptionsOf(field.options),
         multiple: field.multiple,
         allowOther: field.allowOther,
         description: field.description,

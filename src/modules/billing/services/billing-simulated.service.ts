@@ -809,8 +809,9 @@ export class BillingSimulatedService {
         `INSERT INTO billing.siat_simulated_invoices
            (id, invoice_id, encounter_id, practice_id, patient_profile_id, issuer_nit, invoice_number,
             cuf, cufd, issued_at_text, cabecera, detalle, xml, hash_archivo, compressed_bytes,
-            status, status_at_reception, siat_response, events, created_by_user_id, updated_by_user_id)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?,?,?,?,?,?::jsonb,?::jsonb,?,?)`,
+            status, status_at_reception, siat_response, events, created_by_user_id, updated_by_user_id,
+            created_at, updated_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?,?,?,?,?,?::jsonb,?::jsonb,?,?,now(),now())`,
         [
           nuevoId,
           cobro.receivableId,
@@ -1009,8 +1010,8 @@ export class BillingSimulatedService {
     const at = new Date();
     await this.q(
       this.em,
-      `INSERT INTO billing.siat_simulated_outbox (id, siat_invoice_id, to_email, attachments, queued_at, created_by_user_id)
-       VALUES (?,?,?,?::jsonb,?,?)`,
+      `INSERT INTO billing.siat_simulated_outbox (id, siat_invoice_id, to_email, attachments, status, queued_at, created_by_user_id)
+       VALUES (?,?,?,?::jsonb,'NOT_SENT_SIMULATED',?,?)`,
       [outboxId, row.id, dto.to, JSON.stringify(attachments), at, user.id],
     );
     const events = [

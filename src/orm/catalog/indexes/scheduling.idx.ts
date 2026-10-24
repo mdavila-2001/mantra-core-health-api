@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `scheduling`.
- * 118 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 120 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingIndexes: readonly IndexTuple[] = [
@@ -18,6 +18,8 @@ export const schedulingIndexes: readonly IndexTuple[] = [
   ['appointment_bookings', 'ix_appointment_bookings_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_booking_policy_id', ['booking_policy_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_practitioner_service_offering_id', ['practitioner_service_offering_id'], false, 'btree'],
+  ['appointment_bookings', 'ix_appointment_bookings_follow_up_of_booking_id', ['follow_up_of_booking_id'], false, 'btree'],
+  ['appointment_bookings', 'ix_appointment_bookings_form_instance_id', ['form_instance_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['appointment_bookings', 'ix_appointment_bookings_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],

@@ -67,8 +67,7 @@ export class Branches {
   /** Enlace de mapa tal como lo pegó la persona (http/https). */
   @Property({
     fieldName: 'location_url',
-    columnType: 'varchar',
-    length: 2000,
+    columnType: 'varchar(2000)',
     nullable: true,
   })
   locationUrl?: string;

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 1/2).
- * 180 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 182 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes1: readonly IndexTuple[] = [
@@ -16,6 +16,7 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['allergy_intolerances', 'ix_allergy_intolerances_clinical_status_concept_id', ['clinical_status_concept_id'], false, 'btree'],
   ['allergy_intolerances', 'ix_allergy_intolerances_verification_status_concept_id', ['verification_status_concept_id'], false, 'btree'],
   ['allergy_intolerances', 'ix_allergy_intolerances_recorded_by_user_id', ['recorded_by_user_id'], false, 'btree'],
+  ['allergy_intolerances', 'ix_allergy_intolerances_encounter_id', ['encounter_id'], false, 'btree'],
   ['allergy_intolerances', 'ix_allergy_intolerances_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['allergy_intolerances', 'ix_allergy_intolerances_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['allergy_intolerances', 'ix_allergy_intolerances_custodian_tenant_id_updated_at', ['custodian_tenant_id', 'updated_at desc'], false, 'btree'],
@@ -146,6 +147,7 @@ export const clinicalIndexes1: readonly IndexTuple[] = [
   ['medication_requests', 'ix_medication_requests_route_concept_id', ['route_concept_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_unit_concept_id', ['unit_concept_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_indication_condition_id', ['indication_condition_id'], false, 'btree'],
+  ['medication_requests', 'ix_medication_requests_form_instance_id', ['form_instance_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['medication_requests', 'ix_medication_requests_custodian_tenant_id_status_concept_id', ['custodian_tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],

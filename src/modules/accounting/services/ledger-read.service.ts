@@ -9,7 +9,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { Practices } from '../../practice/entities';
-import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  PracticeTenantLookupService,
+  practiceAccessScope,
+} from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
 import { toBigIntCents, toText, amountInBase } from './money';
@@ -92,13 +95,9 @@ export class LedgerReadService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    if (
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('ACCOUNTING_APPROVER')
-    ) {
-      return;
-    }
-    if (!actor.roles.includes('PRACTITIONER')) {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
+    // sólo se traduce a los errores 422 propios de contabilidad.
+    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
       return;
     }
     if (!actor.practitionerProfileId) {
