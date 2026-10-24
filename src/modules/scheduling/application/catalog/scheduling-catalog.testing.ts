@@ -79,6 +79,7 @@ export function createCatalogService(d: CatalogServiceDoubles) {
       em,
       catalogRepo,
       professionalTime,
+      access,
       blockedBookings,
       logger,
     ),

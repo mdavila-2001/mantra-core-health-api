@@ -10,6 +10,7 @@ import {
   blockCancellationReason,
   type CancelledByBlock,
 } from '../support/blocked-bookings-canceller';
+import { CatalogAccess } from '../support/catalog-access';
 import {
   CreateExceptionDto,
   ExceptionResponseDto,
@@ -32,6 +33,7 @@ export class CreateExceptionUseCase {
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly professionalTime: SchedulingProfessionalTimeService,
+    private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
   ) {
@@ -104,6 +106,11 @@ export class CreateExceptionUseCase {
           resourceId,
         });
       }
+      // Antes de mirar una sola cita: la vista previa trae nombres de
+      // pacientes, y sólo quien administra esta agenda puede verlos. Cerrar
+      // cupos (`CloseSlotsUseCase`) ya lo exigía; bloquear no, y hasta hoy no
+      // devolvía nada que lo hiciera grave.
+      this.access.assertActorResource(resource, actor);
 
       const isAvailable = dto.isAvailable ?? false;
 
