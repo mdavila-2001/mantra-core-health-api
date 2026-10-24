@@ -1,0 +1,52 @@
+$ node --test "tools/terminology-import/test/*.test.mjs"
+ok 1 - deterministicId replica exacta de src/common/constants/concepts.ts
+ok 2 - md5uuid equivale a md5(key)::uuid de Postgres
+ok 3 - slugify y htmlToText
+ok 4 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
+ok 5 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
+ok 6 - taxonomías: ATC, capítulos y grupos MedlinePlus
+ok 7 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
+ok 8 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
+ok 9 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
+ok 10 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
+ok 11 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
+ok 12 - plan de carga: membresías a los value sets del glosario con los ids del backend
+ok 13 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
+ok 14 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
+ok 15 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
+ok 16 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
+ok 17 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
+ok 18 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
+ok 19 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
+ok 20 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
+ok 21 - HL7 THO v2-0487 (recorte real): verbatim, deprecado no seleccionable, procedencia completa
+ok 22 - UCUM (recortes reales): une ucum-lhc y ucum-common por código, sin inventar nombres
+ok 23 - LOINC (CSV SINTÉTICO): dominios, exclusiones, miembros de panel, variante ES
+ok 24 - LOINC: cabeceras ausentes abortan mostrando las reales
+ok 25 - LOINC: ids y property_code idénticos a import-loinc.mjs (enriquece, no duplica)
+ok 26 - dominios: reglas por CLASS/CLASSTYPE; lo no reconocido queda sin dominio
+ok 27 - plan de carga: relaciones dentro del plan, value sets y conteos deterministas
+ok 28 - FONASA MLE (recorte real): prefijos homogéneos, exclusión terapéutica explícita, nombre oficial verbatim
+ok 29 - SIGTAP (recorte real): sólo grupo 02, categoría con nombres oficiales, genética gana a laboratorio
+ok 30 - TUSS (recorte real): 4.03 laboratorio; 4.08.13 y 40502210 excluidos; consultas fuera
+ok 31 - PAMI (recorte real): código rellenado a 6 dígitos; 77621 es capítulo 07, no laboratorio
+ok 32 - ICD-10-PCS (recorte real): B imagen, C1 imagen, C7 terapia fuera, 4A y F0 evaluaciones funcionales
+ok 33 - CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
+ok 34 - CIMA: revocado o suspendido no es seleccionable
+ok 35 - CIMA: lo que la fuente no declara queda en null
+ok 36 - ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
+ok 37 - ANVISA: una fila sin nº de registro no tiene identidad y se descarta
+ok 38 - INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
+ok 39 - INVIMA: la muestra médica no entra como presentación vendible
+ok 40 - ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
+ok 41 - ATC: sólo nivel 5 exacto
+ok 42 - CSV: comillas, comillas escapadas, saltos de línea y BOM
+ok 43 - plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
+ok 44 - plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
+ok 45 - propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
+ok 46 - plan de carga: un code system sin definición falla en voz alta
+# tests 46
+# pass 46
+# fail 0
+# skipped 0
+# todo 0

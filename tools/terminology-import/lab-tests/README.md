@@ -12,10 +12,17 @@ tablas existentes del módulo 03 y no escribe DDL (ADR-0021). Fuentes y licencia
 node tools/terminology-import/lab-tests/fetch-lab-tests-sources.mjs   # baja las fuentes npm (≈255 MB, fuera de git)
 node tools/terminology-import/lab-tests/build-lab-tests.mjs           # NDJSON + cobertura, sin red (≈10 s)
 #   con LOINC descargado a mano:  … build-lab-tests.mjs --loinc-release 2.81 [--es-variant <ID>]
+node tools/terminology-import/lab-tests/pack-lab-tests-data.mjs      # copia los NDJSON comprimidos a data/ (versionado)
 node tools/terminology-import/lab-tests/load-lab-tests.mjs            # dry-run: plan y conteos, sin base
 node tools/terminology-import/lab-tests/load-lab-tests.mjs --apply    # carga real (.env DB_*; la API debe haber arrancado una vez)
 node --test "tools/terminology-import/test/*.test.mjs"                # incluye lab-tests.test.mjs
 ```
+
+**`data/` está versionado** (1,4 MB): los NDJSON normalizados en gzip (partidos por debajo de 45 MB
+si hiciera falta), sus `.meta.json`, el reporte de cobertura, el manifiesto de fuentes (spec npm,
+SHA-256, integridad) y `checksums.json`. Si no hay build local, `load-lab-tests.mjs` carga desde
+`data/` y verifica el SHA-256. Así el corpus se carga sin volver a descargar las fuentes crudas
+(≈255 MB), que no se versionan: se reproducen con `fetch-lab-tests-sources.mjs`.
 
 En Node 22, `build-lab-tests.mjs` usa `node:sqlite` (ICD-10-PCS) y avisa que es experimental.
 El cargador arma el plan completo en memoria y lo inserta en **una sola transacción**: con LOINC

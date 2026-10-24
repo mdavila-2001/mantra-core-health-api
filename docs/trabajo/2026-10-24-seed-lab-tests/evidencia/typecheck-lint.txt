@@ -1,0 +1,5 @@
+$ corepack yarn typecheck
+exit=0
+
+$ corepack yarn lint
+exit=0

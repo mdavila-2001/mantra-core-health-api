@@ -1,6 +1,7 @@
 # Fuentes del catálogo de análisis médicos
 
-Las descargas viven **fuera de git**, en `<GLOSSARY_BUILD_DIR>/lab-tests-sources/<dir>/`
+Los datos **normalizados** sí están en git, comprimidos en [`data/`](data/) (ver README).
+Las descargas crudas viven **fuera de git**, en `<GLOSSARY_BUILD_DIR>/lab-tests-sources/<dir>/`
 (por omisión `../glossary-data-build/`, hermana del repo). `fetch-lab-tests-sources.mjs`
 baja las que llegan por npm (con `npm pack`, que verifica el `dist.integrity` del registro)
 y anota spec, SHA-256 del tarball, integridad y fecha en `lab-tests-sources/manifest.json`.

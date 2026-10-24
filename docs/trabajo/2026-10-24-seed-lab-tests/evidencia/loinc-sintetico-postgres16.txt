@@ -1,0 +1,27 @@
+# Ruta LOINC con los CSV SINTÉTICOS de lab-tests.test.mjs (códigos 0000-0…), base desechable lab_tests_synthetic
+$ build-lab-tests.mjs --loinc-release 0.00-sintetico
+[build] lab-tests-loinc: 4 registros
+[build] hl7-tho: SIN DATOS — paquete hl7.terminology.r4 no descargado
+[build] ucum: SIN DATOS — paquete @lhncbc/ucum-lhc no descargado
+[build] fonasa-mle: SIN DATOS — paquete @mariohealthbits/fonasa-mle-open no descargado
+[build] sigtap-sus: SIN DATOS — paquete @br-health-kit/sigtap no descargado
+[build] tuss-ans: SIN DATOS — paquete @br-health-kit/tuss no descargado
+[build] icd10pcs-cms: SIN DATOS — paquete @cyanheads/medical-codes-mcp-server no descargado
+[build] pami-nomenclador: SIN DATOS — paquete nomenclador-salud-js no descargado
+$ load-lab-tests.mjs --apply --layers loinc   # corrida 1
+"result":{"sources":1,"codeSystems":1,"versions":1,"concepts":4,"properties":91,"designations":2,"relationships":2,"valueSets":8,"valueSetVersions":8,"valueSetMembers":11,"batches":1},"segundos":0
+$ load-lab-tests.mjs --apply --layers loinc   # corrida 2
+"result":{"sources":0,"codeSystems":0,"versions":0,"concepts":0,"properties":0,"designations":0,"relationships":0,"valueSets":0,"valueSetVersions":0,"valueSetMembers":0,"batches":1},"segundos":0
+$ psql: designaciones, relaciones part-of y value sets
+0001-0 | Componente sintético ES
+0001-0 | Comp sint ES
+0001-0 part-of 0000-0 #1
+0002-0 part-of 0000-0 #2
+lab-catalog-domain-imaging 1
+lab-catalog-domain-laboratory 2
+lab-catalog-loinc-class-chem 1
+lab-catalog-loinc-class-panel-chem 1
+lab-catalog-loinc-class-rad 1
+lab-catalog-loinc-class-survey-sint 1
+lab-catalog-loinc-orderable 3
+lab-catalog-loinc-panels 1

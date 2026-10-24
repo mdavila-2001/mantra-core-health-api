@@ -25,11 +25,14 @@ import 'dotenv/config';
 import pg from 'pg';
 import { createReadStream, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 import { createInterface } from 'node:readline';
+import { gunzipSync } from 'node:zlib';
 
 import { BUILD_DIR, nowIso, writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { PREREQUISITE_CONCEPTS, buildPlan, planSummary } from './lib/load-plan.mjs';
+import { DATA_DIR } from './pack-lab-tests-data.mjs';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
@@ -44,13 +47,28 @@ const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
+/**
+ * Una capa: primero el build local (`<GLOSSARY_BUILD_DIR>/ndjson/`); si no está,
+ * la copia versionada y comprimida de `data/` (pack-lab-tests-data.mjs), cuyo
+ * SHA-256 sin comprimir se verifica contra `data/checksums.json`.
+ */
 async function readLayer(layer) {
   const path = join(BUILD_DIR, 'ndjson', `lab-tests-${layer}.ndjson`);
-  if (!existsSync(path)) return null;
-  const meta = JSON.parse(readFileSync(path.replace(/\.ndjson$/, '.meta.json'), 'utf8'));
-  const records = [];
-  for await (const line of createInterface({ input: createReadStream(path), crlfDelay: Infinity })) if (line.trim()) records.push(JSON.parse(line));
-  return { layer, meta, records };
+  if (existsSync(path)) {
+    const meta = JSON.parse(readFileSync(path.replace(/\.ndjson$/, '.meta.json'), 'utf8'));
+    const records = [];
+    for await (const line of createInterface({ input: createReadStream(path), crlfDelay: Infinity })) if (line.trim()) records.push(JSON.parse(line));
+    return { layer, meta, records, from: path };
+  }
+  const base = `lab-tests-${layer}`;
+  const sums = existsSync(join(DATA_DIR, 'checksums.json')) ? JSON.parse(readFileSync(join(DATA_DIR, 'checksums.json'), 'utf8')) : {};
+  if (!sums[base]) return null;
+  const raw = Buffer.concat(sums[base].files.map((f) => gunzipSync(readFileSync(join(DATA_DIR, f)))));
+  const sha = createHash('sha256').update(raw).digest('hex');
+  if (sha !== sums[base].sha256) throw new Error(`${base}: el SHA-256 de data/ no coincide con checksums.json (${sha})`);
+  const meta = JSON.parse(readFileSync(join(DATA_DIR, `${base}.meta.json`), 'utf8'));
+  const records = raw.toString('utf8').split('\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+  return { layer, meta, records, from: `data/${sums[base].files.join(', ')}` };
 }
 
 async function insertMany(client, table, columns, tuples, casts, audit = true) {
@@ -152,10 +170,10 @@ async function main() {
   const t0 = Date.now();
   console.log(`=== Catálogo de análisis → terminology.* ${APPLY ? '(APPLY)' : '(DRY-RUN, sin base)'} ===`);
   const layers = (await Promise.all(LAYERS.map(readLayer))).filter(Boolean);
-  if (!layers.length) throw new Error('No hay capas lab-tests-*.ndjson: corré build-lab-tests.mjs.');
+  if (!layers.length) throw new Error('No hay capas lab-tests-*.ndjson ni copia en data/: corré build-lab-tests.mjs.');
   const plan = buildPlan(layers);
   for (const cs of plan.codeSystems) cs.checksum = md5uuid(layers.flatMap((l) => l.records.filter((x) => x.codeSystem === cs.internalCode).map((x) => x.id)).join('|'));
-  const summary = { layers: layers.map((l) => `${l.layer} (${l.records.length})`), ...planSummary(plan) };
+  const summary = { layers: layers.map((l) => `${l.layer} (${l.records.length}) ← ${l.from}`), ...planSummary(plan) };
   console.log(JSON.stringify(summary, null, 2));
   if (!APPLY) {
     writeJson(join(BUILD_DIR, 'lab-tests-load-plan.dry-run.json'), { generatedAt: nowIso(), summary }, true);
