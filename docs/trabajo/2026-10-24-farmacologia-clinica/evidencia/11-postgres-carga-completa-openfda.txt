@@ -1,0 +1,116 @@
+$ load-clinical-pharmacology (corrida 1, corpus openFDA+GSRS completo)
+=== Farmacología clínica → terminology.*  ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 1033,
+  "concepts": 1696,
+  "designations": 969,
+  "properties": 24137,
+  "relationships": 1682,
+  "uniqueIds": 28484
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 1696,
+    "designations": 969,
+    "relationships": 1682,
+    "prunedProperties": 0,
+    "properties": 24137,
+    "vademecumMaps": 199,
+    "vademecumMapsPlanned": 199
+  },
+  "segundos": 9
+}
+$ load-clinical-pharmacology (corrida 2, corpus openFDA+GSRS completo)
+=== Farmacología clínica → terminology.*  ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 1033,
+  "concepts": 1696,
+  "designations": 969,
+  "properties": 24137,
+  "relationships": 1682,
+  "uniqueIds": 28484
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 0,
+    "properties": 0,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 199
+  },
+  "segundos": 4
+}
+$ filas y tamaño en la base
+               property_code                | count | pg_size_pretty 
+--------------------------------------------+-------+----------------
+ pharmacology_section_pregnancy_lactation   |  2398 | 7505 kB
+ pharmacology_section_warnings              |  1713 | 7943 kB
+ pharmacology_atc_level                     |  1696 | 28 kB
+ pharmacology_section_indications           |  1407 | 2662 kB
+ pharmacology_section_posology              |  1406 | 4944 kB
+ pharmacology_section_composition           |  1254 | 2730 kB
+ pharmacology_section_adverse_reactions     |  1254 | 7940 kB
+ pharmacology_section_contraindications     |  1250 | 2110 kB
+ pharmacology_section_clinical_pharmacology |  1243 | 6524 kB
+ pharmacology_section_overdose              |  1056 | 2165 kB
+ pharmacology_atc_path                      |  1033 | 391 kB
+ pharmacology_section_coverage              |  1033 | 243 kB
+ pharmacology_section_interactions          |   995 | 3043 kB
+ pharmacology_name_source                   |   969 | 16 kB
+ pharmacology_section_pharmacokinetics      |   907 | 4011 kB
+ pharmacology_section_pharmaceutical_form   |   891 | 1464 kB
+ pharmacology_section_preclinical_safety    |   884 | 2052 kB
+ pharmacology_section_mechanism_of_action   |   871 | 1634 kB
+ pharmacology_section_pharmacodynamics      |   703 | 1560 kB
+ pharmacology_fda_pharm_classes             |   553 | 340 kB
+ pharmacology_section_boxed_warning         |   447 | 996 kB
+ pharmacology_section_excipients            |   156 | 239 kB
+ pharmacology_section_pharmacogenomics      |    18 | 36 kB
+(23 rows)
+
+conceptos|1696
+concept_maps|199
+relaciones|1682
+designaciones|969
+71 MB
+$ load tras agregar el aviso de openFDA a cada sección (mismas etiquetas)
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 18853,
+    "properties": 18853,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 199
+  },
+  "segundos": 9
+}
+$ load otra vez
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 0,
+    "properties": 0,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 199
+  },
+  "segundos": 4
+}
+$ propiedades sin aviso de openFDA
+0
+146 MB|24137

@@ -37,6 +37,7 @@ export const PROPERTY_PREFIX = 'pharmacology_';
 
 export const REL_IS_A = deterministicId('terminology:relationship:is-a');
 export const EQUIV_EQUIVALENT = deterministicId('terminology:equivalence:equivalent');
+export const LANG_EN = deterministicId('terminology:language:en');
 
 export const SOURCE = {
   code: 'MANTRA_CLINICAL_PHARMACOLOGY',
@@ -80,8 +81,8 @@ function prop(conceptCode, code, dataType, value, discriminator = sha(value)) {
   return { id: md5uuid(`mantra:${CODE_SYSTEM}:property:${conceptCode}:${code}:${discriminator}`), conceptId: conceptId(conceptCode), code, dataType, value };
 }
 
-/** Clave estable de una sección: fuente, documento, versión, número y huella del texto. */
-export const sectionDiscriminator = (s) => `${s.source}:${s.document.id}:${s.document.version ?? s.document.effectiveDate ?? ''}:${s.section.number}:${s.textSha256.slice(0, 16)}`;
+/** Clave estable de una sección: fuente, documento, versión, número y huella de TODO el valor (texto y procedencia). */
+export const sectionDiscriminator = (s) => `${s.source}:${s.document.id}:${s.document.version ?? s.document.effectiveDate ?? ''}:${s.section.number}:${sha(s)}`;
 
 /** Propiedades de una monografía (ATC 5). Lo que no hay no genera fila. */
 export function monographProperties(m) {
@@ -110,7 +111,7 @@ export function planFor(monographs, version = CODE_SYSTEM_VERSION) {
   for (const m of monographs) {
     for (const n of m.atcPath) {
       const prev = nodes.get(n.code);
-      if (!prev || (!prev.name && n.name)) nodes.set(n.code, { ...n, display: n.level === 5 ? (m.display ?? n.name) : n.name });
+      if (!prev || (!prev.name && n.name)) nodes.set(n.code, { ...n, display: n.level === 5 ? (m.display ?? n.name) : n.name, language: n.level === 5 ? (m.displayLanguage ?? 'es') : 'es' });
     }
   }
   const concepts = [];
@@ -121,7 +122,7 @@ export function planFor(monographs, version = CODE_SYSTEM_VERSION) {
     const id = conceptId(n.code);
     const leaf = n.level === 5;
     concepts.push([id, base.version.id, n.code, n.display ?? n.code, null, !leaf, leaf, CONCEPT.TERM_ACTIVE]);
-    if (n.display) designations.push([md5uuid(`mantra:${CODE_SYSTEM}:designation:${n.code}:es:${n.display}`), id, CONCEPT.LANG_ES, CONCEPT.DESIG_PREFERRED, n.display, true]);
+    if (n.display) designations.push([md5uuid(`mantra:${CODE_SYSTEM}:designation:${n.code}:${n.language}:${n.display}`), id, n.language === 'en' ? LANG_EN : CONCEPT.LANG_ES, CONCEPT.DESIG_PREFERRED, n.display, true]);
     if (!leaf) {
       properties.push(prop(n.code, PROPERTY.ATC_LEVEL, 'integer', n.level, String(n.level)));
       if (n.nameSource) properties.push(prop(n.code, PROPERTY.NAME_SOURCE, 'string', n.nameSource));
