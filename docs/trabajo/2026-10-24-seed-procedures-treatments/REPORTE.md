@@ -4,7 +4,7 @@
 - Peldaño de evidencia alcanzado: `TESTED` en el importador (tests dirigidos en verde, carga real en
   PostgreSQL 16 desechable con idempotencia medida). No `VERIFIED` de punta a punta: las relaciones no se
   cargan en el modelo vigente (falta procedencia) y la fase 2 no pudo correr (ramas hermanas ausentes).
-- Avance: 19 / 21 microtareas HECHO (90,5 %). Estado vivo: este reporte se reescribe en cada pasada del loop.
+- Avance: 20 / 21 microtareas HECHO (95,2 %). Lo único abierto es la medición con las ramas hermanas (BLOQUEADO).
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -27,16 +27,11 @@
 | H5.S1.M6 | Corpus normalizado respaldado en git | `node …/snapshot.mjs` ×2 + `zcat … \| sha256sum` | 8 archivos `.gz` (1,3 MB), deterministas; `assertions` descomprimido = `5661281f…` igual al de `build.mjs` |
 | H5.S1.M5 | PR borrador contra `dev`, sin mergear | `mcp__github__create_pull_request` | https://github.com/mdavila-2001/mantra-core-health-api/pull/689 |
 | Docs | `mkdocs build --strict` | venv con `docs/requirements.txt` | 0 avisos nuevos; aborta por 2 avisos que ya estaban en `dev` (mermaid sin internet, enlace de `architecture/module-layout.md`) |
+| H4.S1.M2 | Saturación: pasadas 3 y 4 con 0 | barrido del registro OBO Foundry (OGMS, ONS, ONE) y DOID/HPO/MONDO; diff por código | 0 procedimientos y 0 relaciones nuevas en ambas |
 | H4 pasada 2 | OHD + evaluación de CIDO, EFO, SCDO, WHO SMART | `build.mjs` y diff por código contra la pasada 1 | +81 procedimientos, +0 relaciones; carga incremental 83 conceptos + 573 propiedades, 2.ª corrida 0 |
 
 ## A medias
-### H4 — Saturación
-- Qué anda: pasadas 1 y 2 registradas (la 2 aportó 81 procedimientos y 0 relaciones); fuentes alcanzables descargadas con commit/tag y sha256.
-- Qué no anda: las fuentes grandes (ClinicalTrials.gov, ICD-10-PCS, ICHI, CUPS, MeSH, NCIt oficial) están
-  bloqueadas por la red del entorno.
-- Qué falta exactamente: pasadas siguientes con fuentes independientes alcanzables, hasta dos pasadas con 0;
-  y, si se habilitan los hosts, un normalizador por fuente nueva.
-- Dónde quedó: `docs/seed-research/procedures-treatments.md`, tabla «Pasadas».
+ninguna
 
 ## Pendiente
 | ID | Estado | Qué lo destraba |
@@ -59,6 +54,7 @@ Ver la sección de cobertura y pruebas de carga en `docs/seed-research/procedure
   permite la consigna («mapeos entre ejes anatómicos solo si están publicados»).
 
 ## Riesgos residuales
+- La saturación vale solo para lo que este entorno alcanza (GitHub, npm, PyPI). ClinicalTrials.gov, ICD-10-PCS, ICHI, CUPS, MeSH y NCIt oficial siguen bloqueados por la red: el corpus de procedimiento → enfermedad para enfermedades comunes depende de ellos.
 - Las sesiones hermanas pueden elegir otro `internal_code` o grafía; `validate-siblings.mjs` admite `--alias`
   y prueba ambas grafías.
 - Corpus procedimiento → enfermedad sesgado a enfermedades raras (foco de POET).

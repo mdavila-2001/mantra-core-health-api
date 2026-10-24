@@ -52,12 +52,12 @@
 ## H4 — Saturación
 **CA:** Dada la bitácora, cuando se cierran las pasadas, entonces hay dos pasadas seguidas con 0 aportes nuevos (por código) o cada fuente restante figura como hueco con su motivo.
 **DoD:** tabla de pasadas en `docs/seed-research/procedures-treatments.md`.
-**Estado:** EN CURSO
+**Estado:** HECHO (saturación relativa a las fuentes alcanzables; ver huecos de red)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H4.S1.M1 | Pasada 1 (fuentes alcanzables) | fila en la tabla de pasadas | `grep -n '^| 1 |' docs/seed-research/procedures-treatments.md` | HECHO |
-| H4.S1.M2 | Pasadas hasta dos seguidas con 0 | dos filas consecutivas con 0 | tabla de pasadas | EN CURSO |
+| H4.S1.M2 | Pasadas hasta dos seguidas con 0 | dos filas consecutivas con 0 | tabla de pasadas | HECHO |
 
 ## H5 — Validación con ramas hermanas y entrega
 **CA:** Dadas las ramas hermanas (si existen), cuando se mergean en una rama local de validación, entonces se mide cuántas relaciones resuelven contra sus claves; si no existen, queda marcado pendiente con el script listo.

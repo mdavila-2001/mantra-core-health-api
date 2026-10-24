@@ -41,6 +41,10 @@ derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontol
 | WHO SMART Guidelines (`WorldHealthOrganization/smart-anc`, `smart-hiv`, `smart-immunizations`…) | Usan ~25 códigos ICHI con su nombre oficial, pero dentro de lógica de decisión (PlanDefinition/CQL): extraer «procedimiento para la condición X» exigiría interpretar la lógica, no leer una relación publicada. Sin la clasificación ICHI (bloqueada) tampoco dan el eje Target. (pasada 2) |
 | Espejos de terceros de fuentes oficiales (GitHub/PyPI de particulares) | No son el editor: procedencia no verificable. |
 | WebFetch como transporte de datos | Pasa el contenido por un modelo antes de devolverlo: no garantiza fidelidad. Solo se usa para descubrir y leer licencias. |
+| OGMS, ONS, ONE (OBO Foundry, git HEAD 2026-10-24) | Sin procedimientos clínicos con relación a enfermedad o anatomía (dietas de diseño de estudios; fermentación de alimentos). Pasada 3. |
+| Disease Ontology `releases/2026-09-30` (CC0) | Solo `is_a` y `has material basis in`: no relaciona tratamientos. Pasada 4. |
+| HPO `releases/2026-09-01` | 0 relaciones hacia MAxO o procedimientos. Pasada 4. |
+| Relaciones propias de MONDO | 7 `therapeutic uses` (fármaco → CHEBI) y 3 `NCIT:R163` ya presentes por NCIt. Pasada 4. |
 
 ## Fuentes bloqueadas por la red del entorno (huecos)
 

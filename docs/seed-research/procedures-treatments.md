@@ -116,8 +116,16 @@ tipo + sujeto + objeto). Una pasada aporta 0 cuando ninguna fuente nueva agrega 
 |---|---|---|---|---|---|
 | 1 | 2026-10-24 | MAxO 2026-01-15, MAxO/POET git `42edd966`, NCIt OBO 24.04e, MONDO 2026-10-06 y Uberon 2026-10-01 (estas dos solo para equivalencias) | 1 907 (MAxO 1 576 · NCIt 331) | 703 (250 / 453), de 746 afirmaciones | AutoMAxO (generado por modelo); anotaciones diagnósticas HPO (no es enfermedad); R172 (fármacos); SNOMED (licencia); las 13 fuentes de la tabla de hosts (red) |
 | 2 | 2026-10-24 | OHD 2026-10-01 (git `9cbaa1a1`); evaluadas sin aporte: CIDO, EFO 3.95.0, WHO SMART Guidelines (ANC, HIV, inmunizaciones, FP, STI, RA, BDS, SMBP) | 81 (OHD, odontológicos) | 0 (0 / 0) | SCDO (licencia GPL-3.0: decide el propietario); CDT dentro de OHD (copyright ADA); CIDO/EFO (sin relaciones de procedimiento); WHO SMART (lógica de decisión, no relación publicada); ramas hermanas aún ausentes; red sin cambios |
+| 3 | 2026-10-24 | Barrido completo del registro OBO Foundry (267 ontologías, `OBOFoundry.github.io`): candidatas médicas no evaluadas antes — OGMS (git HEAD), ONS (git HEAD), ONE (git HEAD) | 0 | 0 (0 / 0) | OGMS: sin términos de procedimiento; ONS: 121 clases de dieta de diseño de estudios (evaluación dietaria, dieta del estudio) y 2 procesos de fermentación de alimentos con entrada «leche»: no son procedimientos clínicos; ONE: solo «study intervention»/«intervention design»; ECTO, CDNO, FoodOn, OMRSE, DRON, RBO y las de plantas no son procedimientos clínicos (o son fármacos); ramas hermanas aún ausentes; red sin cambios |
+| 4 | 2026-10-24 | Disease Ontology `releases/2026-09-30` (CC0), relaciones propias de MONDO 2026-10-06, HPO `releases/2026-09-01` | 0 | 0 (0 / 0) | DOID: solo `is_a` y `has material basis in`; HPO: 0 relaciones hacia MAxO; MONDO: usa `MAXO:0000864 therapeutic uses` 7 veces (fármaco → CHEBI, de `seed-drug-treatments`) y `NCIT:R163` 3 veces (C15290, C15330, C52005: ya estaban en el corpus por NCIt) |
 
-## Cobertura (acumulada a la pasada 2)
+**Saturación (2026-10-24):** las pasadas 3 y 4 aportaron 0 cada una, así que el protocolo da por saturadas
+las fuentes **alcanzables desde este entorno** (GitHub, npm y PyPI). No es una saturación de «internet»: las
+fuentes grandes de la tabla de hosts siguen bloqueadas por la red y son los huecos que más rinden si se
+habilitan (ClinicalTrials.gov sobre todo). Con un host habilitado, el protocolo se reabre: `fetch.mjs --probe`
+lo detecta y hace falta un normalizador para esa fuente.
+
+## Cobertura (acumulada a la pasada 4)
 
 - **Procedimientos:** 1 988. MAxO 1 576 (diagnósticos 841, terapéuticos u otros 430, quirúrgicos 292,
   evitación 13); NCIt 331; OHD 81 (odontológicos, sin relaciones: se cargan como catálogo, 81 conceptos y
