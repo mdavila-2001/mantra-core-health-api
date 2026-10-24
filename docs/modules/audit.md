@@ -9,7 +9,7 @@
 # Módulo `audit`
 
 **Fuente:** [`src/modules/audit/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/audit/README.md)
-· 4 controllers · 6 services · 7 repositories · 131 entidades · 9 DTO
+· 5 controllers · 7 services · 8 repositories · 131 entidades · 10 DTO
 
 ---
 

@@ -10,6 +10,7 @@ import {
   AuthzCareRelationshipsController,
   AuthzPdpController,
   AuthzMeController,
+  AuthzAdminController,
 } from './controllers';
 import {
   AuthzCatalogService,
@@ -21,6 +22,8 @@ import {
   AuthzPdpService,
   AuthzEffectiveRolesService,
   AuthzMeService,
+  AuthzAdminReadService,
+  AuthzAssignmentRevocationService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -37,6 +40,7 @@ import {
   FieldPermissionsRepository,
   ResourceScopeGrantsRepository,
   AuthzServicePrincipalsRepository,
+  AuthzAdminReadRepository,
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
@@ -73,6 +77,7 @@ import {
     AuthzCareRelationshipsController,
     AuthzPdpController,
     AuthzMeController,
+    AuthzAdminController,
   ],
   providers: [
     // Repositorios
@@ -90,6 +95,7 @@ import {
     FieldPermissionsRepository,
     ResourceScopeGrantsRepository,
     AuthzServicePrincipalsRepository,
+    AuthzAdminReadRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
     DataAccessLogRepository,
     PersonAccountLinksRepository,
@@ -106,6 +112,8 @@ import {
     AuthzPdpService,
     AuthzEffectiveRolesService,
     AuthzMeService,
+    AuthzAdminReadService,
+    AuthzAssignmentRevocationService,
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume

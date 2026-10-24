@@ -71,6 +71,67 @@ export const GITHUB_SOURCES = {
 };
 
 /**
+ * Fuentes oficiales descargadas desde el sitio del editor (alcanzables desde el
+ * 2026-10-24 16:29 UTC, cuando el entorno pasó a red completa).
+ */
+export const OFFICIAL_URL_SOURCES = {
+  mesh: {
+    name: 'Medical Subject Headings (MeSH) 2026 — descriptores',
+    publisher: 'U.S. National Library of Medicine',
+    license:
+      'Términos de uso de MeSH (NLM): sin cargo, con atribución y versión identificada; no implica respaldo de NLM',
+    licenseUrl:
+      'https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html',
+    homepage: 'https://www.nlm.nih.gov/mesh/',
+    kind: 'url',
+    files: {
+      'desc2026.xml.gz':
+        'https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz',
+    },
+  },
+  icd10pcs: {
+    name: 'ICD-10-PCS FY2027 — tablas oficiales e índice (CMS)',
+    publisher: 'Centers for Medicare & Medicaid Services (CMS)',
+    license: 'Dominio público (obra del gobierno de EE. UU.)',
+    licenseUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+    homepage: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+    kind: 'url',
+    files: {
+      'icd10pcs-tables-index-2027.zip':
+        'https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip',
+      'icd10pcs-order-2027.zip':
+        'https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip',
+    },
+  },
+  'ncit-evs': {
+    name: 'NCI Thesaurus — edición oficial (OWL)',
+    publisher: 'National Cancer Institute — Enterprise Vocabulary Services',
+    license: 'CC BY 4.0 (términos de uso de NCI Thesaurus)',
+    licenseUrl:
+      'https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm',
+    homepage: 'https://ncit.nci.nih.gov/',
+    kind: 'url',
+    files: {
+      'Thesaurus.OWL.zip':
+        'https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/Thesaurus.OWL.zip',
+    },
+  },
+};
+
+export const SPARQL_SOURCES = {
+  'wikidata-p924': {
+    name: 'Wikidata — P924 «possible treatment» con referencia (fuente colaborativa)',
+    publisher: 'Comunidad de Wikidata / Wikimedia Foundation',
+    license: 'CC0 1.0',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+    homepage: 'https://www.wikidata.org/',
+    kind: 'sparql',
+    endpoint: 'https://query.wikidata.org/sparql',
+    file: 'p924.json',
+  },
+};
+
+/**
  * Fuentes candidatas que este entorno NO alcanza (la política de red responde
  * 403 al CONNECT). Se registran con el host exacto para que se pueda permitir
  * y re-correr `fetch.mjs`. Ninguna se reemplaza con un espejo de terceros.

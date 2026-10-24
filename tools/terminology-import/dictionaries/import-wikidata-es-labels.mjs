@@ -8,8 +8,8 @@
 // Verificación que aborta: cada propiedad usada se contrasta con su etiqueta
 // inglesa en Wikidata (`assertEntityLabels`, la misma del glosario ES).
 //
-// NO CORRIDO todavía en la nube: la sesión que lo escribió (2026-10-24) no tenía
-// salida a query.wikidata.org ni a www.wikidata.org (403 de la política de red).
+// Corrido el 2026-10-24 (pasada 9): 49 615 filas. Node necesita NODE_USE_ENV_PROXY=1
+// detrás del proxy de la nube (fetch no lee HTTPS_PROXY por sí solo).
 // Uso: node tools/terminology-import/dictionaries/import-wikidata-es-labels.mjs [--props P1554,P7963]
 // Necesita el corpus (build-dictionaries.mjs o pack-dictionaries-data.mjs --unpack) para los taxones.
 // =============================================================================

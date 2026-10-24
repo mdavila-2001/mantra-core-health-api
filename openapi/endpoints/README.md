@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1512 de 1512 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1523 de 1523 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -48,9 +48,9 @@ Esta referencia documenta **1512 de 1512 operaciones HTTP** registradas en `open
 | [ads](ads.md) | 18 | `ads` | 1 |
 | [app](app.md) | 6 | `app` | 2 |
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
-| [audit](audit.md) | 11 | `audit`, `audit-compliance`, `audit-moderation`, `audit-privacy` | 4 |
+| [audit](audit.md) | 13 | `audit`, `audit-compliance`, `audit-moderation`, `audit-privacy` | 5 |
 | [auth_providers](auth-providers.md) | 12 | `auth-providers` | 1 |
-| [authz](authz.md) | 27 | `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles` | 8 |
+| [authz](authz.md) | 32 | `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles` | 9 |
 | [automation](automation.md) | 17 | `automation` | 2 |
 | [billing](billing.md) | 34 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated` | 5 |
 | [chart](chart.md) | 23 | `chart-care-plans`, `chart-documents`, `chart-encounters`, `chart-me`, `chart-notes`, `chart-read`, `chart-templates` | 7 |
@@ -62,7 +62,7 @@ Esta referencia documenta **1512 de 1512 operaciones HTTP** registradas en `open
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
-| [data_catalog](data-catalog.md) | 31 | `admin-catalog`, `admin-portal` | 2 |
+| [data_catalog](data-catalog.md) | 37 | `admin-catalog`, `admin-portal`, `data-catalog-internal` | 3 |
 | [delegated_access](delegated-access.md) | 12 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 31 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens` | 7 |
@@ -77,7 +77,7 @@ Esta referencia documenta **1512 de 1512 operaciones HTTP** registradas en `open
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 35 | `iam-auth`, `iam-users` | 3 |
 | [identity_assurance](identity-assurance.md) | 28 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 55 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 18 |
+| [insurance](insurance.md) | 53 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 18 |
 | [insurance-campaigns](insurance-campaigns.md) | 16 | `insurance-campaigns` | 0 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
@@ -123,4 +123,4 @@ Esta referencia documenta **1512 de 1512 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1512 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1523 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
