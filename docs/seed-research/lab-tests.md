@@ -193,5 +193,5 @@ Todo entró en las tablas existentes. Mejoras posibles en el modelo:
     relaciones, 313 value sets, 511 404 membresías: igual al plan del dry-run;
   - corrida 2 (138 s): **0 filas nuevas** (sólo los 15 registros de lote, que son auditoría);
   - schema `terminology` después de cargar: **1 193 MB** (tablas + índices).
-- Salidas literales en `docs/trabajo/2026-10-24-seed-lab-tests-red/evidencia/`.
+- Salidas literales en [el historial de git](https://github.com/mdavila-2001/mantra-core-health-api/tree/79a7e4865ae3a5e94c3fb1304c90e19d61e1fdaa/docs/trabajo/2026-10-24-seed-lab-tests-red/evidencia).
 - `node --test "tools/terminology-import/test/*.test.mjs"`: 54/54.

@@ -6,14 +6,11 @@ con clase ATC (5 niveles), mecanismo, farmacocinética, indicaciones, posología
 advertencias, interacciones, reacciones adversas con frecuencia, embarazo y lactancia, sobredosis,
 formas y vías; todo lo clínico **literal** de una fuente oficial y citado.
 
-## Estado (2026-10-24 18:15 UTC): NO saturado — pasadas 6 y 7 en curso
+## Estado: no saturado
 
 Cinco pasadas con fuentes nuevas, todas con aporte distinto de 0. La regla de cierre («dos pasadas
-seguidas con 0 nuevos») **no se cumple todavía**:
-
-- **Pasada 6, DailyMed:** descarga de identidades SPL en curso, 17 729 candidatas.
-- **Pasada 7, CIMA exhaustiva:** todas las fichas de todos los titulares, 22 506 fichas, descarga
-  en curso.
+seguidas con 0 nuevos») no se cumple. Las pasadas 6 (DailyMed, 17 729 identidades SPL candidatas) y
+7 (CIMA exhaustiva, 22 506 fichas de todos los titulares) no están medidas: ver #824.
 
 Hosts:
 
@@ -35,8 +32,8 @@ Deduplicación siempre por código, nunca por nombre:
 - **CIMA:** número de registro.
 
 Cada pasada se mide contra la anterior armada con el **mismo código**, con flags `--no-cima`,
-`--no-ema`, `--no-eml` y `--no-dailymed`. Evidencia literal en
-`docs/trabajo/2026-10-24-farmacologia-clinica/evidencia/`.
+`--no-ema`, `--no-eml` y `--no-dailymed`. La evidencia literal (numerada en la última columna) está
+en [el historial de git](https://github.com/mdavila-2001/mantra-core-health-api/tree/79a7e4865ae3a5e94c3fb1304c90e19d61e1fdaa/docs/trabajo/2026-10-24-farmacologia-clinica/evidencia).
 
 | # | Hora (UTC) | Fuentes | ATC 5 nuevos con monografía | Secciones nuevas | Evidencia |
 |---|---|---|---:|---:|---|
@@ -46,8 +43,8 @@ Cada pasada se mide contra la anterior armada con el **mismo código**, con flag
 | 3 | 17:15 | **CIMA** (AEMPS): fichas técnicas por sección, en castellano, una de referencia por (principios, vía); maestra ATC (7 358 códigos, nombres de los 5 niveles) | **+1 432** (neto) | **+46 100** | 17 |
 | 4 | 17:21 | **EMA**, informe «Medicines output»: indicación de cada medicamento de autorización centralizada, por el ATC que asigna la EMA | **+59** | **+1 401** | 18 |
 | 5 | 17:48 | **OMS eEML**: indicación (con código CIE-11) y formulaciones de cada recomendación vigente, por el ATC que asigna la OMS | **+88** | **+1 568** | 19–21 |
-| 6 | en curso | **DailyMed (NLM)**: UNII del SPL para etiquetas que openFDA trae sin bloque armonizado; puntero (sin texto) para las que sólo están en DailyMed | — | — | — |
-| 7 | en curso | **CIMA exhaustiva** (`--granularity product`): todas las fichas, sin repetir texto ya publicado para el ATC | — | — | — |
+| 6 | sin medir (#824) | **DailyMed (NLM)**: UNII del SPL para etiquetas que openFDA trae sin bloque armonizado; puntero (sin texto) para las que sólo están en DailyMed | — | — | — |
+| 7 | sin medir (#824) | **CIMA exhaustiva** (`--granularity product`): todas las fichas, sin repetir texto ya publicado para el ATC | — | — | — |
 
 Re-medición: con el dedupe por huella dentro de cada ATC (`fc68517a`), la pasada 4 queda en
 2 621 monografías y **67 499** secciones, 1 107 menos que las 68 606 originales. Son textos de
@@ -193,8 +190,8 @@ el cruce no se midió. Con la base cargada lo mide `validate-links.mjs` (`produc
 ## Carga y enlaces verificados
 
 En un Postgres 16 desechable, con el DDL de `database/SQL/00_shared` y `03_terminology` tal cual
-(sin la API, sin DDL nuevo, nunca una base viva). Evidencia en
-`docs/trabajo/2026-10-24-farmacologia-clinica/evidencia/21`.
+(sin la API, sin DDL nuevo, nunca una base viva). Evidencia: archivo 21 de
+[la evidencia en el historial de git](https://github.com/mdavila-2001/mantra-core-health-api/tree/79a7e4865ae3a5e94c3fb1304c90e19d61e1fdaa/docs/trabajo/2026-10-24-farmacologia-clinica/evidencia).
 
 | Corrida | Conceptos | Designaciones | IS_A | Propiedades | `concept_maps` → vademecum | Borradas | Tiempo |
 |---|---:|---:|---:|---:|---:|---:|---:|

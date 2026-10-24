@@ -136,8 +136,9 @@ tipo + sujeto + objeto). Una pasada aporta 0 cuando ninguna fuente nueva agrega 
 | 7 | 2026-10-24 | Guías de práctica clínica en MEDLINE (PubMed E-utilities, tipos de publicación `Guideline`/`Practice Guideline`: 44 031 en la búsqueda, 42 934 artículos de revista descargados, 47 particiones por fecha de alta) | 240 (MeSH) | 25 469 (25 469 / 0); 19 404 de ellas unen un par procedimiento–condición que ninguna otra fuente tenía | 1 097 registros de Bookshelf (`PubmedBookArticle`: libros, sin indexación MeSH de artículo); 30 guías retractadas; guías sin intervención no farmacológica o sin condición con calificador terapéutico (29 737, retractadas incluidas) |
 
 **Saturación:** las pasadas 3 y 4 aportaron 0 cada una con la red restringida (saturación de lo alcanzable
-entonces). Al abrirse la red, el protocolo se reabrió: la pasada 5 sumó las fuentes grandes. Las pasadas
-siguientes se registran arriba hasta volver a tener dos seguidas con 0.
+entonces). Al abrirse la red, el protocolo se reabrió: la pasada 5 sumó las fuentes grandes, y desde
+entonces no hubo dos pasadas seguidas con 0. Las pasadas 8 a 10 (subconjuntos de MEDLINE) no se corrieron:
+ver #825.
 
 ## Cobertura (acumulada a la pasada 7)
 
