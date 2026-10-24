@@ -248,6 +248,21 @@ detiene con dos pasadas seguidas en 0.
 - **Taxonomía cargada**: +11 371 conceptos y la 2.ª corrida da 0 (`evidencia/load-postgres16-pasada5.txt`).
 - **Descartadas**: `syonin-history` (maestro de reembolsos del MHLW con códigos JAN). Lo descartó ROW: es una extracción de PDF hecha por un tercero, sin validar contra los PDF oficiales.
 
+### Pasada 6 (2026-10-24)
+
+- **Regiones**:
+  - `us` @`db3b648b`: 205 487 filas. `fda-maude` pasó de 1 336 a 2 727 (reportes MAUDE de dispositivos con IA).
+  - `eu` y `row`: sin cambios desde la pasada 5. `row` está cerrada (PR #693).
+- **Fuentes nuevas propias**: ninguna.
+- **Nuevos tras deduplicar** (contra la pasada 5):
+  - Registros: +1 396 (251 547).
+  - Fabricantes: +51 (19 992).
+  - Marcas: +817.
+  - Modelos: +1 266 (166 461).
+  - Modelos en 2 jurisdicciones: +6 (285).
+  - Taxonomía: sin cambios (33 616 nodos, 218 mapeos). No hizo falta recargar.
+- **Descartadas**: ninguna.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

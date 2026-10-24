@@ -1,18 +1,19 @@
 {
-  "generatedAt": "2026-10-24T04:35:01Z",
+  "generatedAt": "2026-10-24T05:28:57Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
-      "commitDate": "2026-10-24T04:13:39+00:00",
+      "commit": "db3b648b46e66758908e9661807149e5d70e5614",
+      "commitDate": "2026-10-24T05:03:03+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/compassionate-brown-tr71nn"
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/dev"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
-      "rowsRead": 204096,
+      "manifestGeneratedAt": "2026-10-24T04:53:10.803Z",
+      "rowsRead": 205487,
       "gaps": [
         {
           "source": "fda-gudid",
@@ -29,7 +30,11 @@
       "commitDate": "2026-10-24T03:59:33+00:00",
       "dir": null,
       "alternatives": [
-        "origin/claude/adoring-curie-xdkt83-test"
+        "origin/justin/practice-ownership-report",
+        "origin/claude/adoring-curie-xdkt83-test",
+        "origin/dev",
+        "origin/justin/fix-dev-red-gates",
+        "origin/test"
       ],
       "manifestGeneratedAt": "2026-10-24T03:48:44Z",
       "rowsRead": 716,
@@ -98,7 +103,11 @@
       "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
       "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
-      "alternatives": [],
+      "alternatives": [
+        "origin/justin/practice-ownership-report",
+        "origin/dev",
+        "origin/justin/fix-dev-red-gates"
+      ],
       "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
       "rowsRead": 3534775,
       "gaps": [
@@ -270,11 +279,11 @@
     {
       "source": "fda-maude",
       "region": "us",
-      "read": 1336,
-      "valid": 1336,
+      "read": 2727,
+      "valid": 2727,
       "invalid": 0,
       "duplicates": 0,
-      "diagnostic": 1104,
+      "diagnostic": 2494,
       "attachedBySameModel": 5,
       "invalidSamples": []
     },
@@ -352,7 +361,7 @@
       "invalid": 0,
       "duplicates": 0,
       "diagnostic": 47732,
-      "attachedBySameModel": 40,
+      "attachedBySameModel": 46,
       "invalidSamples": []
     },
     {
@@ -586,13 +595,13 @@
     }
   },
   "catalog": {
-    "rowsIncluded": 250151,
+    "rowsIncluded": 251547,
     "rowsNotDiagnostic": 2624,
-    "rowsAttachedBySameModel": 349,
-    "rowsUndetermined": 3488336,
-    "rowsWithoutType": 2286266,
+    "rowsAttachedBySameModel": 355,
+    "rowsUndetermined": 3488331,
+    "rowsWithoutType": 2286260,
     "undeterminedTopTypes": {
-      "(sin tipo)": 2286266,
+      "(sin tipo)": 2286260,
       "br:anvisa-nome-tecnico|name:INSTRUMENTOS CIRÚRGICOS": 130916,
       "br:anvisa-nome-tecnico|name:BROCAS CIRURGICAS": 74940,
       "br:anvisa-nome-tecnico|name:SISTEMAS DE FIXAÇÃO ORTOPÉDICOS E DISPOSITIVOS ASSOCIADOS": 39811,
@@ -643,34 +652,34 @@
       "br:anvisa-nome-tecnico|name:LIMAS PARA ODONTOLOGIA": 4216,
       "br:anvisa-nome-tecnico|name:FIXADORES EXTERNOS": 4179
     },
-    "manufacturers": 19941,
-    "brands": 80165,
-    "models": 165195,
-    "registrations": 250151,
+    "manufacturers": 19992,
+    "brands": 80982,
+    "models": 166461,
+    "registrations": 251547,
     "modelsByJurisdictionCount": {
-      "1": 164909,
-      "2": 279,
+      "1": 166169,
+      "2": 285,
       "3": 7
     },
     "modelsByJurisdiction": {
-      "US": 120536,
-      "CA": 43839,
+      "US": 121802,
+      "CA": 43845,
       "EU": 434,
       "AU": 405,
       "BR": 238,
       "IN": 36
     },
     "manufacturersByCountry": {
-      "US": 13687,
+      "US": 13688,
       "CN": 1283,
-      "(sin país)": 768,
+      "(sin país)": 816,
       "CA": 525,
       "DE": 450,
       "GB": 328,
       "IL": 300,
       "KR": 281,
       "TW": 256,
-      "JP": 219,
+      "JP": 220,
       "FR": 202,
       "IT": 155,
       "NL": 123,
@@ -681,7 +690,7 @@
       "IN": 89,
       "DK": 80,
       "MX": 76,
-      "BE": 58,
+      "BE": 59,
       "ES": 58,
       "FI": 56,
       "HK": 51,
@@ -757,17 +766,17 @@
     }
   },
   "manufacturers": {
-    "entitiesAll": 63337,
+    "entitiesAll": 63383,
     "mergesByRule": {
       "same-name-same-country": 10722,
-      "same-name-unique-country": 1602,
-      "same-name-no-country": 1003,
+      "same-name-unique-country": 1614,
+      "same-name-no-country": 1144,
       "same-registry-id": 109
     },
     "reviewByKind": {
-      "possible-group-shared-first-word": 7667,
+      "possible-group-shared-first-word": 7669,
       "same-name-different-country": 1244,
-      "same-name-ambiguous-country": 414,
+      "same-name-ambiguous-country": 415,
       "name-match-conflicting-ids": 233
     }
   },
@@ -775,8 +784,8 @@
     "organizations": 46,
     "mentions": 552,
     "companies": 370,
-    "companiesMatchedToRegistry": 192,
-    "companiesOnlyInIndustryLists": 178
+    "companiesMatchedToRegistry": 193,
+    "companiesOnlyInIndustryLists": 177
   },
   "emdnCopies": {
     "rowsA": 8453,
