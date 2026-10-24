@@ -4,7 +4,7 @@
   (base `justin/p0-claim-coverage-validation`, apilado sobre #671)
 - Peldaño de evidencia alcanzado: **TESTED**. Los tests dirigidos al cambio pasan; no se ejercitó
   el camino real contra Postgres ni HTTP.
-- Avance: 12 HECHO / 15 microtareas = **80 %** (3 BLOQUEADO: H2.S1.M5, H3.M2, H3.M4)
+- Avance: 12 HECHO / 15 microtareas = **80 %** (2 BLOQUEADO: H3.M2, H3.M4 · 1 DESCARTADO: H2.S1.M5)
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -16,21 +16,12 @@
 | H3.M3 | Lint de los 8 archivos tocados | `npx eslint --max-warnings=0 <archivos>` | salida 0 |
 
 ## A medias
-### H2 — Bitácora de cada decisión
-- Qué anda: cada aceptación y cada rechazo dejan una fila en `audit_log` con el actor, el recurso, el
-  resultado y, en los rechazos, el motivo tipificado (en `action`). El desglose por línea va al log
-  estructurado.
-- Qué no anda: el desglose (beneficio, %, copago, montos del paciente y de la aseguradora, id de la
-  autorización) **no** queda sellado en la cadena WORM.
-- Qué falta exactamente: una columna de detalle en `audit.audit_log` que entre en el hash (por
-  ejemplo `details jsonb`), o columnas de reparto en `insurance_claim_lines`. Es DDL: se decide en
-  el modelo (ADR-0021).
-- Dónde quedó: rama `claude/great-gates-p368ua`, `claims.service.ts` (`recordCoverageApplied`).
+ninguna
 
 ## Pendiente
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H2.S1.M5 | BLOQUEADO | DDL de detalle en `audit_log` o columnas de reparto en `insurance_claim_lines` (decisión de modelo) |
+| H2.S1.M5 | DESCARTADO | Justin decidió el 2026-10-23 dejar el desglose fuera de `audit_log` (sin DDL). Si algún día se quiere sellar, hace falta una columna de detalle en `audit_log` o columnas de reparto en `insurance_claim_lines` |
 | H3.M2 | BLOQUEADO | La base ya falla el lint completo (17 errores de prettier en `src/common/seed/glossary-*.spec.ts`, `pharmacy_inventory/.../pharmacy-orders.*`, `profiles/.../clinical-patient-history.adapter.ts`); fuera de alcance |
 | H3.M4 | BLOQUEADO | Un entorno con Postgres para los int-specs |
 | (fuera de plan) | TODO | Limitar el `patientAmount` de la adjudicación vinculada a la parte informada (decisión del 2026-10-23: la diferencia la absorbe la práctica) |
@@ -73,8 +64,9 @@ Archivos: [evidencia/test-insurance.txt](./evidencia/test-insurance.txt),
 
 ## Decisiones y ambigüedades
 - Motivo del rechazo en `action` (`INSURANCE_CLAIM_COVERAGE_REJECTED:<reason>`), porque
-  `audit_log` no tiene columna de detalle. A confirmar con Justin.
+  `audit_log` no tiene columna de detalle; el desglose va al log estructurado. **Confirmado por Justin
+  el 2026-10-23: queda así.**
 - El rechazo se sella en una transacción aparte. Si no, el rollback del alta lo borraría.
 - La parte del paciente declarada se juzga igual que en el cobro directo (debe coincidir con el
-  plan). A confirmar con Justin.
+  plan), también un `0`. **Confirmado por Justin el 2026-10-23.**
 - Sin PHI en la bitácora ni en los logs: solo ids opacos, montos y conceptos del plan.

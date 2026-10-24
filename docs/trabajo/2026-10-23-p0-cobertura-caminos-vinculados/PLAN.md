@@ -23,10 +23,10 @@
 - Ambigüedades registradas:
   1. `audit_log` no tiene columna de detalle. Supuesto: el motivo del rechazo va codificado en
      `action` (`INSURANCE_CLAIM_COVERAGE_REJECTED:<reason>`, conjunto cerrado) y el desglose al log
-     estructurado. Confirmar con Justin si hace falta sellarlo en la cadena WORM (requiere DDL).
+     estructurado. **Confirmado por Justin el 2026-10-23: queda así, sin DDL.**
   2. La guía permitía declarar `patientResponsibilityAmount = 0` en los reclamos vinculados.
      Supuesto: misma semántica que el cobro directo, así que un `0` que no coincide con el plan se
-     rechaza. Confirmar con Justin.
+     rechaza. **Confirmado por Justin el 2026-10-23.**
   3. Sobre qué recurso se sella un rechazo, si todavía no hay reclamo. Supuesto: el pedido
      (`inventory_reservation` / `service_request`) o, en el cobro directo, `patient_coverage`.
 
@@ -48,7 +48,7 @@ acepta solo si el plan lo cubre y la parte del paciente que se guarda es la que 
 **CA:** Dado un alta de reclamo, cuando la política acepta o rechaza, entonces `audit_log` recibe
 una fila con quién, qué recurso, el resultado y, si fue rechazo, el motivo, sin datos del paciente.
 **DoD:** specs con aserciones sobre el puerto de auditoría en verde.
-**Estado:** A MEDIAS (el desglose no queda en la cadena WORM; ver ambigüedad 1)
+**Estado:** HECHO (el desglose queda fuera de la cadena WORM por decisión de Justin; ver ambigüedad 1)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
@@ -56,7 +56,7 @@ una fila con quién, qué recurso, el resultado y, si fue rechazo, el motivo, si
 | H2.S1.M2 | Sellar el rechazo en una transacción propia, después del rollback | `record` recibe una segunda transacción con `success: false` | idem | HECHO |
 | H2.S1.M3 | Que una falla de la bitácora no oculte el 422 | El 422 llega igual y se loguea el error | idem | HECHO |
 | H2.S1.M4 | Desglose (%, copago, montos, autorización) al log estructurado, sin PHI | `logger.info` recibe el desglose por línea | idem | HECHO |
-| H2.S1.M5 | Desglose sellado en `audit_log` | Fila WORM con el desglose | requiere DDL | BLOQUEADO |
+| H2.S1.M5 | Desglose sellado en `audit_log` | Fila WORM con el desglose | requiere DDL | DESCARTADO (Justin: queda así) |
 | H2.S2.M1 | Bitácora también en el cobro directo | Spec del cobro directo con aserciones de bitácora | `jest claims-coverage-wiring` → pasa | HECHO |
 
 ## H3 — Gates
@@ -71,5 +71,5 @@ una fila con quién, qué recurso, el resultado y, si fue rechazo, el motivo, si
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
 | Productos de farmacia sin `medicationConceptId` | Pasan a dar 422 `CLAIM_LINE_SERVICE_REQUIRED` | Es la regla P0; queda documentado en el PR |
-| Clientes que mandan `patientResponsibilityAmount: 0` | Pasan a dar 422 `PATIENT_SHARE_MISMATCH` | Guía actualizada; confirmar con Justin |
+| Clientes que mandan `patientResponsibilityAmount: 0` | Pasan a dar 422 `PATIENT_SHARE_MISMATCH` | Guía actualizada; confirmado por Justin |
 | Sin Postgres en la nube | El lock y la transacción aparte no se ejercitan contra la base | Int-spec pendiente |
