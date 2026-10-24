@@ -1,0 +1,32 @@
+// TEMPORAL — no se versiona. Mide siembra e idempotencia del catálogo de fichas.
+import { MikroORM } from '@mikro-orm/postgresql';
+import buildConfig from '../../src/orm/config/orm.config';
+import { TerminologySeedService } from '../../src/common/seed/terminology-seed.service';
+import { ClinicalFormsSeedService } from '../../src/common/seed/clinical-forms-seed.service';
+import { ValueSetsRepository } from '../../src/modules/terminology/repositories/value-sets.repository';
+import { STANDARD_FORMS } from '../../src/common/seed/data/clinical-forms/catalog';
+
+describe('ClinicalFormsSeedService contra Postgres desechable', () => {
+  let orm: MikroORM;
+  const logger = { setContext: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined, debug: () => undefined };
+  beforeAll(async () => { orm = await MikroORM.init(buildConfig); });
+  afterAll(async () => { await orm.close(true); });
+
+  it('siembra y es idempotente', async () => {
+    await new TerminologySeedService(orm, logger as never).run();
+    const svc = new ClinicalFormsSeedService(orm, logger as never, new ValueSetsRepository());
+    const t0 = Date.now();
+    const first = await svc.run();
+    const t1 = Date.now();
+    const second = await svc.run();
+    const t2 = Date.now();
+    const conn = orm.em.fork().getConnection();
+    const q = async (sql: string) => (await conn.execute(sql))[0];
+    const counts = {
+      templates: await q('select count(*)::int n from chart.specialty_chart_templates'),
+      fields: await q('select count(*)::int n from forms.dynamic_field_definitions'),
+    };
+    console.log(JSON.stringify({ catalog: STANDARD_FORMS.length, campos: STANDARD_FORMS.reduce((a, f) => a + f.fields.length, 0), first, second, ms: [t1 - t0, t2 - t1], counts }));
+    expect(second.templates).toBe(0);
+  }, 3_600_000);
+});

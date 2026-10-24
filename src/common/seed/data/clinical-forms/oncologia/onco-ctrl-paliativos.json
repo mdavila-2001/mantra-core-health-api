@@ -2,14 +2,14 @@
   "code": "ONCO_CTRL_PALIATIVOS",
   "name": "Control de cuidados paliativos",
   "specialty": { "code": "ONCOLOGIA", "display": "Oncología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "ECOG Performance Status Scale",
     "organization": "ECOG-ACRIN Cancer Research Group",
     "url": "https://ecog-acrin.org/resources/ecog-performance-status/",
     "license": "De uso libre, citando la fuente",
     "retrievedAt": "2026-10-02",
-    "note": "Intensidad de síntomas, dolor por la escala de la OMS y estado funcional."
+    "note": "Intensidad de síntomas, dolor por la escala de la OMS y estado funcional. Ampliación internacional (2026-10-24): escala de Karnofsky desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -81,6 +81,27 @@
       "dataType": "string",
       "required": true,
       "options": ["0", "1", "2", "3", "4"]
+    },
+    {
+      "section": "Evaluación: enfermedad avanzada",
+      "code": "karnofsky",
+      "name": "Estado funcional de Karnofsky",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "100 — Normal; sin quejas; sin evidencia de enfermedad",
+        "90 — Capaz de realizar su actividad normal; signos o síntomas menores de enfermedad",
+        "80 — Actividad normal con esfuerzo; algunos signos o síntomas de enfermedad",
+        "70 — Se vale por sí mismo; incapaz de realizar su actividad normal o trabajo activo",
+        "60 — Requiere asistencia ocasional, pero puede atender la mayoría de sus necesidades",
+        "50 — Requiere asistencia considerable y atención médica frecuente",
+        "40 — Incapacitado; requiere cuidados y asistencia especiales",
+        "30 — Gravemente incapacitado; está indicada la internación aunque la muerte no es inminente",
+        "20 — Muy enfermo; internación necesaria; tratamiento de soporte activo necesario",
+        "10 — Moribundo; procesos fatales que progresan rápidamente",
+        "0 — Fallecido"
+      ],
+      "description": "Fuente: escala de Karnofsky (Karnofsky DA, Burchenal JH. 1949), según el arquetipo openEHR openEHR-EHR-OBSERVATION.karnofsky_performance_status_scale.v1 (rev. 1.0.2, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: enfermedad avanzada",

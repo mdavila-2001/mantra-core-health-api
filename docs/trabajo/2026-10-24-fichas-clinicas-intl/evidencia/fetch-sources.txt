@@ -1,0 +1,18 @@
+>>> ckm-mirror @ c3fdc43
+>>> smart-dak-pnc @ 1c490e4
+>>> smart-hiv @ b1e7735
+>>> smart-fp @ b69bbec
+>>> smart-anc @ 301a6b8
+>>> smart-immunizations @ bd7fa72
+>>> sha256 verificados
+21 arquetipos · espejo c3fdc43dcf0eb7ef0cfe60f548fcdebc24c70094 2026-10-20T15:31:41+02:00
+/usr/local/lib/python3.13/dist-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Data Validation extension is not supported and will be removed
+  warn(msg)
+/usr/local/lib/python3.13/dist-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Data Validation extension is not supported and will be removed
+  warn(msg)
+{'PNC': 24, 'HIV': 14, 'FP': 5, 'ANC': 1, 'IMMZ': 8}
+374 fichas ({"SPECIFIC":334,"BASE":36,"GENERAL":4}) · 6373 campos · 0 desactualizadas
+
+real	1m44.055s
+user	0m26.445s
+sys	0m40.047s

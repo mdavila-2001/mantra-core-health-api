@@ -260,6 +260,42 @@ export const FUENTES = {
     url: 'https://www.aao.org/education/preferred-practice-pattern',
     license: CATEGORIAS,
   },
+  CKM_MAYO: {
+    sourceTitle:
+      'Mayo score (openEHR-EHR-OBSERVATION.mayo_score.v1), International Clinical Knowledge Manager',
+    organization: 'openEHR Foundation',
+    url: 'https://ckm.openehr.org/ckm/',
+    sourceVersion:
+      'rev. 1.0.0 (publicado); espejo github.com/openEHR/CKM-mirror',
+    license:
+      'Arquetipo CC BY-SA 4.0; el puntaje (Schroeder KW et al., NEJM 1987) se usa como categorías clínicas',
+  },
+  OMS_DAK_HIV: {
+    sourceTitle:
+      'WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary',
+    organization: 'Organización Mundial de la Salud (OMS)',
+    url: 'https://github.com/WorldHealthOrganization/smart-hiv',
+    sourceVersion: 'HIV_DAK_2023-Web_Annex_A.Data_dictionary_231117_CLEAN.xlsx',
+    license: LIBRE_OMS,
+  },
+  OMS_DAK_IMMZ: {
+    sourceTitle:
+      'Digital adaptation kit for immunizations: core data dictionary (SMART Guidelines)',
+    organization: 'Organización Mundial de la Salud (OMS)',
+    url: 'https://github.com/WorldHealthOrganization/smart-immunizations',
+    sourceVersion: 'input/L2/IMMZ DAK_core data dictionary.xlsx',
+    license: LIBRE_OMS,
+  },
+  CKM_GLEASON: {
+    sourceTitle:
+      'Gleason score (openEHR-EHR-CLUSTER.gleason_score.v0), International Clinical Knowledge Manager',
+    organization: 'openEHR Foundation / Clinical Models UK',
+    url: 'https://ckm.openehr.org/ckm/',
+    sourceVersion:
+      'rev. 0.0.1-alpha (en desarrollo); espejo github.com/openEHR/CKM-mirror',
+    license:
+      'Arquetipo CC BY-SA 3.0; la gradación (Gleason; grupos ISUP, Epstein 2016) se usa como categorías clínicas',
+  },
   ACR_BIRADS: {
     sourceTitle: 'Breast Imaging Reporting and Data System (BI-RADS)',
     organization: 'American College of Radiology (ACR)',

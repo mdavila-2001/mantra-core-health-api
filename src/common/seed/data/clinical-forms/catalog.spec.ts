@@ -324,3 +324,74 @@ describe('fichas de las NNAC de Bolivia', () => {
     }
   });
 });
+
+/**
+ * La ampliación con estándares internacionales (2026-10-24,
+ * `tools/clinical-forms/mejoras-intl.mjs`): campos tomados del CKM de openEHR
+ * y de las Digital Adaptation Kits de la OMS. Estas pruebas fijan las reglas de
+ * procedencia que el generador ya aplica al escribirlos.
+ */
+describe('ampliación internacional del catálogo', () => {
+  const fromCkm = fields.filter(({ field }) =>
+    /según el arquetipo openEHR/.test(field.description ?? ''),
+  );
+  const fromDak = fields.filter(({ field }) =>
+    /Digital adaptation kit|Digital Adaptation Kit/i.test(
+      field.description ?? '',
+    ),
+  );
+
+  it('cada campo de una escala del CKM cita la publicación, el arquetipo y su licencia', () => {
+    expect(fromCkm.length).toBeGreaterThan(100);
+    for (const { form, field } of fromCkm) {
+      expect({ campo: `${form.code}.${field.code}`, ok: true }).toEqual({
+        campo: `${form.code}.${field.code}`,
+        ok:
+          /Fuente: .+\((.+\d{4}|el arquetipo no trae referencia bibliográfica)/.test(
+            field.description ?? '',
+          ) && /CC BY-SA [34]\.0/.test(field.description ?? ''),
+      });
+    }
+  });
+
+  it('la traducción propia se marca como no oficial, y la del CKM se nombra', () => {
+    for (const { field } of fromCkm) {
+      expect(field.description).toMatch(
+        /Traducción propia del inglés|traducción al castellano \(es(-[A-Z]{2})?\) del CKM|Texto del CKM con una corrección propia/,
+      );
+    }
+  });
+
+  it('todo campo de una DAK de la OMS lleva el descargo que exige su licencia', () => {
+    expect(fromDak.length).toBeGreaterThan(40);
+    for (const { field } of fromDak) {
+      expect(field.description).toMatch(/CC BY-NC-SA 3\.0 IGO/);
+      expect(field.description).toMatch(
+        /Esta adaptación no fue creada por la Organización Mundial de la Salud/,
+      );
+    }
+  });
+
+  it('no se cuela ningún código ni value set de SNOMED CT', () => {
+    const snomed = fields
+      .filter(({ field }) =>
+        /snomed\.info|\bSCTID\b|\b\d{6,18}\s*\|/i.test(
+          `${field.name} ${(field.options ?? []).join(' ')} ${field.description ?? ''}`,
+        ),
+      )
+      .map(({ form, field }) => `${form.code}.${field.code}`);
+    expect(snomed).toEqual([]);
+  });
+
+  it('las fichas nuevas existen, una por condición', () => {
+    const codes = new Set(STANDARD_FORMS.map((f) => f.code));
+    for (const code of [
+      'GASTRO_CTRL_COLITIS_ULCEROSA',
+      'INFECTO_CTRL_ITS',
+      'ENFER_CTRL_VACUNACION',
+      'PATOL_INFORME_BIOPSIA_PROSTATA',
+    ])
+      expect(codes.has(code)).toBe(true);
+    expect(STANDARD_FORMS).toHaveLength(374);
+  });
+});
