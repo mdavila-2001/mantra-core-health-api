@@ -163,3 +163,18 @@ Los huecos están en `out/manifest.json` → `gaps`: dependen de la red hacia lo
 portales oficiales. Los normalizadores ya leen esos formatos (ANVISA, MDALL,
 PMDA, CDSCO); para las demás autoridades no hay normalizador, porque no se
 escribe sin el archivo real.
+
+## Pasada 5 — red completa: ANVISA oficial (2026-10-24)
+
+Con la red del entorno en Full, ANVISA se baja de `dados.anvisa.gov.br/dados/`
+(`fetch-official.mjs`) y reemplaza a los dos espejos de la pasada 1.
+
+| Fuente | Archivo oficial | Filas antes (espejo) | Filas ahora |
+|---|---|--:|--:|
+| `anvisa-produtos` | `TA_PRODUTO_SAUDE_SITE.csv` (`Last-Modified` 2026-10-13) | 93 770 | 100 681 |
+| `anvisa-produtos-modelos` | `TA_PRODUTO_SAUDE_MODELO.csv` (`Last-Modified` 2025-12-29) | 1 027 762 | 3 274 089 |
+
+Nuevo: marca de diagnóstico publicada por ANVISA (`extra.anvisaPetitions`), a
+partir de las peticiones por número de proceso. 86 213 de 100 681 registros
+cruzan; 18 968 tienen área de diagnóstico in vitro. Los asuntos primarios
+separan MATERIAL (44 922), IVD (13 744) y EQUIPAMENTO (11 306).

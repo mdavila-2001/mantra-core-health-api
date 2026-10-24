@@ -28,14 +28,14 @@ normalizadores leen el mismo formato).
 
 ## Fuentes
 
-| `source`                  | Autoridad (país)   | Archivo oficial                                                                 | Espejo (commit)                                                                                                                                                                | Corte del dato                 |     Filas |
-| ------------------------- | ------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | --------: |
-| `anvisa-produtos`         | ANVISA (BR)        | Produtos para saúde, datos abiertos (`dados.anvisa.gov.br/dados/`)              | [victoracioly/g.stec](https://github.com/victoracioly/g.stec) `8a4c6ca3` · `dispositivos_medicos_anvisa/data/dispositivos_raw.csv` (sha256 `65be2169…`)                        | 2025-06-17                     |    93 770 |
-| `anvisa-produtos-modelos` | ANVISA (BR)        | Produtos para saúde con modelos (`DS_MODELO_PRODUTO_MEDICO`)                    | [adnanioricce/DHsys](https://github.com/adnanioricce/DHsys) `81800583` · `src/Tools/Helper/Csvs/Produtos/{0..32}_produto_saude_modelo.csv` (árbol `91d42c7a…`)                 | 2020-12-25                     | 1 027 762 |
-| `pmda-approvals`          | PMDA (JP)          | 医療機器の承認品目一覧 y 認証品目リスト (Excel por año fiscal)                  | [zoefcuk/pmda-medical-devices](https://github.com/zoefcuk/pmda-medical-devices) `d829883b` · `index.html`, JSON embebido (sha256 `3e14d600…`)                                  | trámites hasta 2026            |    35 298 |
-| `hc-mdall`                | Health Canada (CA) | MDALL, API pública (licencias, compañías, identificadores)                      | [misterrPink1/symmetric](https://github.com/misterrPink1/symmetric) `a43a1a58` · `datasets.zip` (sha256 `e2a3f451…`)                                                           | 2020-02-07 (`last_refresh_dt`) | 2 333 236 |
-| `tga-daen`                | TGA (AU)           | DAEN, notificaciones de eventos adversos de dispositivos                        | [tobinsouth/MedicalDeviceNLP](https://github.com/tobinsouth/MedicalDeviceNLP) `868d2e2a` · `data/medical_device_summaries/*.csv` + `data/list_of_reports/*.pickle`             | reportes hasta 2021            |    18 917 |
-| `cdsco-import-licences`   | CDSCO (IN)         | «MD - Medical Devices», licencias de importación IMP/MD de la autoridad central | [vishnuu-patil/india-meddevice-intelligence](https://github.com/vishnuu-patil/india-meddevice-intelligence) `62e88588` · `Data/MD - Medical Devices.xlsx` (sha256 `df214403…`) | licencias hasta 2026-10-01     |    25 792 |
+| `source`                  | Autoridad (país)   | Archivo oficial                                                                 | Espejo (commit)                                                                                                                                                                | Corte del dato                                                |     Filas |
+| ------------------------- | ------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- | --------: |
+| `anvisa-produtos`         | ANVISA (BR)        | `TA_PRODUTO_SAUDE_SITE.csv`, datos abiertos                                     | — (descarga oficial, `fetch-official.mjs`)                                                                                                                                     | `Last-Modified` 2026-10-13 (`DT_ATUALIZACAO_DADO` 2026-10-12) |   100 681 |
+| `anvisa-produtos-modelos` | ANVISA (BR)        | `TA_PRODUTO_SAUDE_MODELO.csv`, datos abiertos                                   | — (descarga oficial)                                                                                                                                                           | `Last-Modified` 2025-12-29                                    | 3 274 089 |
+| `pmda-approvals`          | PMDA (JP)          | 医療機器の承認品目一覧 y 認証品目リスト (Excel por año fiscal)                  | [zoefcuk/pmda-medical-devices](https://github.com/zoefcuk/pmda-medical-devices) `d829883b` · `index.html`, JSON embebido (sha256 `3e14d600…`)                                  | trámites hasta 2026                                           |    35 298 |
+| `hc-mdall`                | Health Canada (CA) | MDALL, API pública (licencias, compañías, identificadores)                      | [misterrPink1/symmetric](https://github.com/misterrPink1/symmetric) `a43a1a58` · `datasets.zip` (sha256 `e2a3f451…`)                                                           | 2020-02-07 (`last_refresh_dt`)                                | 2 333 236 |
+| `tga-daen`                | TGA (AU)           | DAEN, notificaciones de eventos adversos de dispositivos                        | [tobinsouth/MedicalDeviceNLP](https://github.com/tobinsouth/MedicalDeviceNLP) `868d2e2a` · `data/medical_device_summaries/*.csv` + `data/list_of_reports/*.pickle`             | reportes hasta 2021                                           |    18 917 |
+| `cdsco-import-licences`   | CDSCO (IN)         | «MD - Medical Devices», licencias de importación IMP/MD de la autoridad central | [vishnuu-patil/india-meddevice-intelligence](https://github.com/vishnuu-patil/india-meddevice-intelligence) `62e88588` · `Data/MD - Medical Devices.xlsx` (sha256 `df214403…`) | licencias hasta 2026-10-01                                    |    25 792 |
 
 Conteos exactos y por archivo: `out/manifest.json`. Cobertura: `COVERAGE.md`.
 
@@ -55,6 +55,20 @@ eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
 ## Qué se toma de cada fuente
 
 ### `anvisa-produtos` y `anvisa-produtos-modelos` (Brasil)
+
+- Desde la pasada 5 salen de los archivos oficiales de `dados.anvisa.gov.br/dados/`
+  (windows-1252), con URL, `Last-Modified`, bytes y sha256 en `extra.officialFile`.
+  Los espejos de la pasada 1 dejaron de usarse.
+- **Marca de diagnóstico publicada por ANVISA**: `extra.anvisaPetitions` lleva las
+  áreas de interés (`DESC_AREA_INTERESSE`: «Dispositivos Médicos para Diagnóstico
+  in Vitro», «Produtos para diagnóstico de uso in vitro», «Dispositivos Médicos»,
+  «Produtos para Saúde (Correlatos)») y los asuntos de las peticiones primarias
+  (`DESC_ASSUNTO_PETICAO`: «IVD - Registro de produto», «EQUIPAMENTO - …»,
+  «MATERIAL - …») de los archivos `CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV`,
+  `CICLO_ANALISE_PETICOES_PRODUTO_SAUDE(CORRELATOS).CSV` y
+  `CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV`, unidos por número de proceso exacto
+  (los modelos toman el proceso de su registro en `TA_PRODUTO_SAUDE_SITE.csv`).
+  Cruza el 86 % de los registros; el resto queda sin marca.
 
 - Clasificación del registro: **nombre técnico** ANVISA (`NOME_TECNICO`, sin
   código publicado) → `deviceTypeSystem: br:anvisa-nome-tecnico`; clase de

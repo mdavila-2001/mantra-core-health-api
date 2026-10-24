@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // =============================================================================
-// Equipos de diagnóstico · ROW · etapa 1: espejos → `out/` (formato común).
+// Equipos de diagnóstico · ROW · etapa 1: descargas → `out/` (formato común).
 //
-// Lee lo que `fetch-mirrors.mjs` dejó en `$DX_DEVICES_BUILD_DIR` (sin red) y
+// Lee lo que `fetch-official.mjs` (portales oficiales) y `fetch-mirrors.mjs`
+// (espejos fijados) dejaron en `$DX_DEVICES_BUILD_DIR` (sin red) y
 // escribe `out/<source>[-NNNN].ndjson.gz` + `out/manifest.json`. Re-ejecutable:
 // la misma entrada produce los mismos archivos y los mismos sha256.
 //
@@ -11,17 +12,18 @@
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { TextDecoder } from 'node:util';
 
 import { parseCsv } from '../../lib/medicine-catalog/common.mjs';
 import {
+  addPetitionLine,
   anvisaModelosRows,
   anvisaProdutosRows,
   anvisaUpdateStamp,
-  splitSemicolonCsv,
+  freezePetitionIndex,
 } from './lib/anvisa.mjs';
 import { cdscoRows } from './lib/cdsco.mjs';
 import { indexMdall, mdallRows } from './lib/hc-mdall.mjs';
+import { readDelimitedRows } from './lib/lines.mjs';
 import { PartWriter } from './lib/out.mjs';
 import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
 import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
@@ -30,6 +32,7 @@ import {
   GAPS,
   MIRRORS,
   OFFICIAL,
+  OFFICIAL_DOWNLOADS,
   mirrorFileUrl,
   mirrorRef,
 } from './sources.mjs';
@@ -37,6 +40,10 @@ import {
 const MIRRORS_DIR = join(BUILD_DIR, 'mirrors');
 const EXTRACTED_DIR = join(BUILD_DIR, 'extracted');
 const MANIFEST_PATH = join(OUT_DIR, 'manifest.json');
+const OFFICIAL_DIR = join(BUILD_DIR, 'official');
+const officialRetrieved = existsSync(join(OFFICIAL_DIR, 'retrieved.json'))
+  ? readJson(join(OFFICIAL_DIR, 'retrieved.json'))
+  : {};
 
 const args = process.argv.slice(2);
 const onlyIndex = args.indexOf('--only');
@@ -60,60 +67,133 @@ async function writeSource(source, sourceVersion, rows) {
   return writer.finish();
 }
 
+/** Archivo oficial ya descargado por `fetch-official.mjs`: ruta local y cita. */
+function officialFile(group, name) {
+  const spec = OFFICIAL_DOWNLOADS[group].find((f) => f.name === name);
+  const meta = officialRetrieved[spec.url];
+  if (meta === undefined)
+    throw new Error(`${name}: falta correr fetch-official.mjs --only ${group}`);
+  return {
+    path: join(OFFICIAL_DIR, meta.path),
+    url: spec.url,
+    retrievedAt: meta.retrievedAt,
+    citation: {
+      url: spec.url,
+      lastModified: meta.lastModified,
+      bytes: meta.bytes,
+      sha256: meta.sha256,
+    },
+  };
+}
+
+const ANVISA_ENCODING = 'windows-1252';
+const ANVISA_PETITION_FILES = [
+  'CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV',
+  'CICLO_ANALISE_PETICOES_PRODUTO_SAUDE(CORRELATOS).CSV',
+  'CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV',
+];
+
+let anvisaPetitionCache = null;
+/** Índice proceso → áreas de interés y asuntos, de los tres archivos de peticiones. */
+async function anvisaPetitions() {
+  if (anvisaPetitionCache !== null) return anvisaPetitionCache;
+  const index = new Map();
+  const stats = {};
+  for (const name of ANVISA_PETITION_FILES) {
+    const file = officialFile('anvisa', name);
+    const fileStats = {};
+    for await (const line of readDelimitedRows(file.path, {
+      encoding: ANVISA_ENCODING,
+      strict: false,
+      stats: fileStats,
+    }))
+      addPetitionLine(index, line);
+    stats[name] = {
+      badLines: fileStats.badLines,
+      sha256: file.citation.sha256,
+    };
+  }
+  anvisaPetitionCache = { index: freezePetitionIndex(index), stats };
+  return anvisaPetitionCache;
+}
+
+async function readAnvisaLines(file) {
+  const lines = [];
+  for await (const line of readDelimitedRows(file.path, {
+    encoding: ANVISA_ENCODING,
+  }))
+    lines.push(line);
+  return lines;
+}
+
+const lastStamp = (lines) =>
+  lines.reduce((max, l) => {
+    const stamp = anvisaUpdateStamp(l.DT_ATUALIZACAO_DADO);
+    return stamp !== null && (max === null || stamp > max) ? stamp : max;
+  }, null);
+
 async function buildAnvisaProdutos() {
-  const repo = 'victoracioly/g.stec';
-  const path = 'dispositivos_medicos_anvisa/data/dispositivos_raw.csv';
-  const lines = splitSemicolonCsv(
-    new TextDecoder('latin1').decode(readFileSync(mirrorPath(repo, path))),
-  );
-  const stamp = lines
-    .map((l) => anvisaUpdateStamp(l.DT_ATUALIZACAO_DADO))
-    .filter(Boolean)
-    .sort()
-    .pop();
-  const sourceVersion = `DT_ATUALIZACAO_DADO ${stamp} (espejo ${short(repo)})`;
+  const file = officialFile('anvisa', 'TA_PRODUTO_SAUDE_SITE.csv');
+  const lines = await readAnvisaLines(file);
+  const petitions = await anvisaPetitions();
+  const sourceVersion = `TA_PRODUTO_SAUDE_SITE.csv Last-Modified ${file.citation.lastModified} (DT_ATUALIZACAO_DADO ${lastStamp(lines)})`;
   const rows = anvisaProdutosRows(lines, {
-    sourceUrl: mirrorFileUrl(repo, path),
+    sourceUrl: file.url,
     sourceVersion,
-    retrievedAt: retrievedAt(repo),
-    mirror: mirrorRef(repo, path),
+    retrievedAt: file.retrievedAt,
+    officialFile: file.citation,
     officialPortal: OFFICIAL.anvisa,
+    petitionsByProcess: petitions.index,
   });
   return {
     files: await writeSource('anvisa-produtos', sourceVersion, rows),
-    stats: { inputLines: lines.length, rows: rows.length },
+    stats: {
+      inputLines: lines.length,
+      rows: rows.length,
+      rowsWithPetitions: rows.filter((r) => r.extra.anvisaPetitions).length,
+      petitionFiles: petitions.stats,
+    },
   };
 }
 
 async function buildAnvisaModelos() {
-  const repo = 'adnanioricce/DHsys';
-  const dir = 'src/Tools/Helper/Csvs/Produtos';
-  const names = readdirSync(mirrorPath(repo, dir))
-    .filter((n) => /^\d+_produto_saude_modelo\.csv$/.test(n))
-    .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
-  const lines = names.flatMap((n) =>
-    splitSemicolonCsv(readFileSync(mirrorPath(repo, dir, n), 'utf8')),
-  );
-  const stamp = lines
-    .map((l) => anvisaUpdateStamp(l.DT_ATUALIZACAO_DADO))
-    .filter(Boolean)
-    .sort()
-    .pop();
-  const sourceVersion = `DT_ATUALIZACAO_DADO ${stamp} (espejo ${short(repo)})`;
-  const rows = anvisaModelosRows(lines, {
-    sourceUrl: mirrorFileUrl(repo, dir),
+  const site = officialFile('anvisa', 'TA_PRODUTO_SAUDE_SITE.csv');
+  const processByRegistro = new Map();
+  for await (const line of readDelimitedRows(site.path, {
+    encoding: ANVISA_ENCODING,
+  }))
+    if (line.NUMERO_PROCESSO.trim() !== '')
+      processByRegistro.set(
+        line.NUMERO_REGISTRO_CADASTRO.trim(),
+        line.NUMERO_PROCESSO.trim(),
+      );
+  const file = officialFile('anvisa', 'TA_PRODUTO_SAUDE_MODELO.csv');
+  const lines = await readAnvisaLines(file);
+  const petitions = await anvisaPetitions();
+  const sourceVersion = `TA_PRODUTO_SAUDE_MODELO.csv Last-Modified ${file.citation.lastModified} (DT_ATUALIZACAO_DADO ${lastStamp(lines)})`;
+  const stats = { inputLines: lines.length, rowsWithPetitions: 0 };
+  function* counted() {
+    for (const row of anvisaModelosRows(lines, {
+      sourceUrl: file.url,
+      sourceVersion,
+      retrievedAt: file.retrievedAt,
+      officialFile: file.citation,
+      officialPortal: OFFICIAL.anvisa,
+      petitionsByProcess: petitions.index,
+      processByRegistro,
+    })) {
+      if (row.extra.anvisaPetitions) stats.rowsWithPetitions += 1;
+      yield row;
+    }
+  }
+  const files = await writeSource(
+    'anvisa-produtos-modelos',
     sourceVersion,
-    retrievedAt: retrievedAt(repo),
-    mirror: mirrorRef(repo, dir),
-    officialPortal: OFFICIAL.anvisa,
-  });
+    counted(),
+  );
   return {
-    files: await writeSource('anvisa-produtos-modelos', sourceVersion, rows),
-    stats: {
-      inputFiles: names.length,
-      inputLines: lines.length,
-      rows: rows.length,
-    },
+    files,
+    stats: { ...stats, rows: files.reduce((n, f) => n + f.rows, 0) },
   };
 }
 

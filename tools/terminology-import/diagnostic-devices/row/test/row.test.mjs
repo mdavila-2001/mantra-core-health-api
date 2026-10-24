@@ -6,18 +6,21 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 
 import { parseCsv } from '../../../lib/medicine-catalog/common.mjs';
 import {
+  addPetitionLine,
   anvisaModelosRows,
   anvisaProdutosRows,
   anvisaUpdateStamp,
+  freezePetitionIndex,
   splitSemicolonCsv,
 } from '../lib/anvisa.mjs';
+import { readDelimitedRows } from '../lib/lines.mjs';
 import { cdscoRows, expandShowMore, parseCdscoLicence } from '../lib/cdsco.mjs';
 import { indexMdall, mdallRows } from '../lib/hc-mdall.mjs';
 import { PartWriter } from '../lib/out.mjs';
@@ -304,4 +307,72 @@ test('CDSCO: licencia y artefacto de la página', () => {
   assert.equal(parseCdscoLicence('IMP/MD/2018/000005'), null);
   assert.equal(expandShowMore('A, B... Show MoreA, B, C Show Less'), 'A, B, C');
   assert.equal(expandShowMore('sin botón'), 'sin botón');
+});
+
+test('lectura por streaming: windows-1252 decodifica el guion largo y los acentos', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'dx-row-cp1252-'));
+  try {
+    const path = join(dir, 'x.csv');
+    // «IVD – Notificação» en windows-1252: 0x96 es «–», 0xE7 «ç», 0xE3 «ã».
+    writeFileSync(
+      path,
+      Buffer.from([
+        0x41, 0x3b, 0x42, 0x0d, 0x0a, 0x49, 0x56, 0x44, 0x20, 0x96, 0x20, 0x4e,
+        0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0xe7, 0xe3, 0x6f, 0x3b, 0x31,
+        0x0a,
+      ]),
+    );
+    const rows = [];
+    for await (const r of readDelimitedRows(path, { encoding: 'windows-1252' }))
+      rows.push(r);
+    assert.deepEqual(rows, [{ A: 'IVD – Notificação', B: '1' }]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('ANVISA: las áreas y asuntos de las peticiones se unen por número de proceso exacto', async () => {
+  const index = new Map();
+  for await (const line of readDelimitedRows(
+    new URL('anvisa-peticoes.csv', FIXTURES),
+    { strict: false },
+  ))
+    addPetitionLine(index, line);
+  const petitionsByProcess = freezePetitionIndex(index);
+  assert.deepEqual(petitionsByProcess.get('25351077398202075'), {
+    areas: ['Dispositivos Médicos para Diagnóstico in Vitro'],
+    primarySubjects: ['IVD – Notificação de produto Classe I'],
+  });
+  const rows = anvisaProdutosRows(
+    splitSemicolonCsv(fixture('anvisa-produtos.csv')),
+    { ...CTX, petitionsByProcess },
+  );
+  const protal = rows.find((r) => r.sourceRecordId === '10246810016');
+  assert.deepEqual(
+    protal.extra.anvisaPetitions,
+    {
+      areas: ['Dispositivos Médicos para Diagnóstico in Vitro'],
+      primarySubjects: [],
+    },
+    'solo peticiones secundarias (revalidación): sin asunto primario',
+  );
+  const preserv = rows.find((r) => r.sourceRecordId === '10163770014');
+  assert.equal(
+    preserv.extra.anvisaPetitions,
+    undefined,
+    'proceso sin peticiones publicadas: sin marca',
+  );
+  const [modelo] = anvisaModelosRows(
+    splitSemicolonCsv(fixture('anvisa-produtos-modelos.csv')),
+    {
+      ...CTX,
+      petitionsByProcess,
+      processByRegistro: new Map([['10246810001', '250000000659575']]),
+    },
+  );
+  assert.equal(modelo.extra.processNumber, '250000000659575');
+  assert.equal(modelo.extra.processNumberFrom, 'TA_PRODUTO_SAUDE_SITE');
+  assert.deepEqual(modelo.extra.anvisaPetitions.areas, [
+    'Dispositivos Médicos para Diagnóstico in Vitro',
+  ]);
 });

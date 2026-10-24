@@ -1,23 +1,55 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T04:19:46.367Z",
+  "generatedAt": "2026-10-24T16:46:58.152Z",
   "formatVersion": 1,
   "files": [
     {
       "path": "anvisa-produtos.ndjson.gz",
       "source": "anvisa-produtos",
-      "sourceVersion": "DT_ATUALIZACAO_DADO 2025-06-17T19:00:01 (espejo victoracioly/g.stec@8a4c6ca3)",
-      "rows": 93770,
-      "bytes": 9014019,
-      "sha256": "c4095b2b2b50f5e2a861d21d863e0f89db7b3cc5b8a06fc31f38e7957c89e053"
+      "sourceVersion": "TA_PRODUTO_SAUDE_SITE.csv Last-Modified 2026-10-13T19:09:34.000Z (DT_ATUALIZACAO_DADO 2026-10-12T19:00:00)",
+      "rows": 100681,
+      "bytes": 10196268,
+      "sha256": "dc8151661e13e473ebd71e2e84c5961fea37fc6fa65949e33978e8ac9b82ab9a"
     },
     {
-      "path": "anvisa-produtos-modelos.ndjson.gz",
+      "path": "anvisa-produtos-modelos-0001.ndjson.gz",
       "source": "anvisa-produtos-modelos",
-      "sourceVersion": "DT_ATUALIZACAO_DADO 2020-12-25T04:00:01 (espejo adnanioricce/DHsys@81800583)",
-      "rows": 1027762,
-      "bytes": 44748647,
-      "sha256": "59510f491dd710027c44a3a41c7fded94b07471d4baa9b13a106a57bc3ddc6e9"
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 463042,
+      "bytes": 47162300,
+      "sha256": "dfa856129b7dbe218b7f6c7b8a9aa7ccb12d7ad08e650d110fdb3dc776ea962f"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0002.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 715790,
+      "bytes": 47106503,
+      "sha256": "747e85c407a21f20d0145353db19cfdf1717aae08a5c2b897987745eadde4f73"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0003.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 786563,
+      "bytes": 47093422,
+      "sha256": "02bbc0679b853f82314d7010425e92679ef25fa48c5a2e6f39ceb92bc073a30d"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0004.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 737968,
+      "bytes": 47069859,
+      "sha256": "fda091e208ecb4fc76d1a601bd5a207058da68f6da5367db0943927baf07611c"
+    },
+    {
+      "path": "anvisa-produtos-modelos-0005.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "TA_PRODUTO_SAUDE_MODELO.csv Last-Modified 2025-12-29T09:12:24.000Z (DT_ATUALIZACAO_DADO 2025-12-29T04:00:01)",
+      "rows": 570726,
+      "bytes": 44976055,
+      "sha256": "33b90d10e6f4520cdf0402de26fc97c7dc1614894e496c1e571488999fd44177"
     },
     {
       "path": "pmda-approvals.ndjson.gz",
@@ -62,13 +94,28 @@
   ],
   "stats": {
     "anvisa-produtos": {
-      "inputLines": 108492,
-      "rows": 93770
+      "inputLines": 116008,
+      "rows": 100681,
+      "rowsWithPetitions": 86213,
+      "petitionFiles": {
+        "CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV": {
+          "badLines": 0,
+          "sha256": "715e6e054e1ece89780ea72adf49205542b1ddffe7634e655eff86f067baf630"
+        },
+        "CICLO_ANALISE_PETICOES_PRODUTO_SAUDE(CORRELATOS).CSV": {
+          "badLines": 272,
+          "sha256": "8fd85da5482572019470484e0415b99e4ab79a376411ae03d6bfa27d94be27bc"
+        },
+        "CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV": {
+          "badLines": 124,
+          "sha256": "69099d265325d7f8aab377ae7e83d58b4f2ca5d92709e1ab3e60ddc7ff4eef21"
+        }
+      }
     },
     "anvisa-produtos-modelos": {
-      "inputFiles": 33,
-      "inputLines": 1242830,
-      "rows": 1027762
+      "inputLines": 3731281,
+      "rowsWithPetitions": 3100893,
+      "rows": 3274089
     },
     "pmda-approvals": {
       "inputRows": 36116,
@@ -99,11 +146,6 @@
     }
   },
   "gaps": [
-    {
-      "source": "anvisa-produtos",
-      "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
-      "url": "https://dados.anvisa.gov.br/dados/"
-    },
     {
       "source": "hc-mdall",
       "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",

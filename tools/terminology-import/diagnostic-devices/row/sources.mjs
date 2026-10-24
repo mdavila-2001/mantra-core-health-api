@@ -15,28 +15,6 @@
 /** @typedef {{ path: string, kind: 'sha256'|'tree', hash: string }} Pin */
 
 export const MIRRORS = Object.freeze({
-  'victoracioly/g.stec': {
-    url: 'https://github.com/victoracioly/g.stec',
-    commit: '8a4c6ca3602431ec47cd8e64685a4778156c37cf',
-    pins: [
-      {
-        path: 'dispositivos_medicos_anvisa/data/dispositivos_raw.csv',
-        kind: 'sha256',
-        hash: '65be2169f13f137b37ecf84fe7009d24506f187c81016adc633b6e8f56b37f04',
-      },
-    ],
-  },
-  'adnanioricce/DHsys': {
-    url: 'https://github.com/adnanioricce/DHsys',
-    commit: '818005835f952dfc23aa91612181488b5e28d270',
-    pins: [
-      {
-        path: 'src/Tools/Helper/Csvs/Produtos',
-        kind: 'tree',
-        hash: '91d42c7acd81cd36847cac8c6a073bdb2c793782',
-      },
-    ],
-  },
   'zoefcuk/pmda-medical-devices': {
     url: 'https://github.com/zoefcuk/pmda-medical-devices',
     commit: 'd829883b5ba75980b28b33f75c9797758aca042e',
@@ -122,14 +100,39 @@ export const OFFICIAL = Object.freeze({
   cdsco: 'https://cdscomdonline.gov.in/',
 });
 
+/**
+ * Descargas oficiales que hace `fetch-official.mjs`, por grupo. Cada archivo
+ * queda en `$DX_DEVICES_BUILD_DIR/official/<grupo>/<name>` y su URL,
+ * `Last-Modified`, tamaño y sha256 en `official/retrieved.json`.
+ */
+const ANVISA_DADOS = 'https://dados.anvisa.gov.br/dados/';
+export const OFFICIAL_DOWNLOADS = Object.freeze({
+  anvisa: [
+    {
+      name: 'TA_PRODUTO_SAUDE_SITE.csv',
+      url: `${ANVISA_DADOS}TA_PRODUTO_SAUDE_SITE.csv`,
+    },
+    {
+      name: 'TA_PRODUTO_SAUDE_MODELO.csv',
+      url: `${ANVISA_DADOS}TA_PRODUTO_SAUDE_MODELO.csv`,
+    },
+    {
+      name: 'CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV',
+      url: `${ANVISA_DADOS}CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV`,
+    },
+    {
+      name: 'CICLO_ANALISE_PETICOES_PRODUTO_SAUDE(CORRELATOS).CSV',
+      url: `${ANVISA_DADOS}CICLO_ANALISE_PETICOES_PRODUTO_SAUDE%28CORRELATOS%29.CSV`,
+    },
+    {
+      name: 'CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV',
+      url: `${ANVISA_DADOS}CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV`,
+    },
+  ],
+});
+
 /** Fuentes buscadas que NO se pudieron obtener: van a `manifest.gaps`. */
 export const GAPS = Object.freeze([
-  {
-    source: 'anvisa-produtos',
-    reason:
-      '403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17',
-    url: OFFICIAL.anvisa,
-  },
   {
     source: 'hc-mdall',
     reason:
