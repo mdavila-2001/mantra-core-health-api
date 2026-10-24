@@ -41,7 +41,7 @@ test('openFDA: fecha efectiva literal e identidad de la etiqueta', () => {
   assert.equal(id.productType, 'HUMAN PRESCRIPTION DRUG');
 });
 
-test('openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; Rx antes que OTC', () => {
+test('openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; Rx antes que OTC dentro de cada vía', () => {
   const ids = [
     labelIdentity(label()),
     labelIdentity(label({ id: 'b', set_id: 'set-b', effective_time: '20240101' })),
@@ -57,7 +57,9 @@ test('openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; 
   assert.equal(refs[1].group.candidates, 2, 'la combinación de dos UNII no cuenta como candidata');
   const otcOnly = referenceLabels([ids[4]], ['TESTUNII01']);
   assert.equal(otcOnly[0].identity.setId, 'set-e');
-  assert.match(otcOnly[0].criterion, /no hay de prescripción/);
+  assert.match(otcOnly[0].criterion, /esa vía no tiene de prescripción/);
+  const mixed = referenceLabels([ids[3], labelIdentity(label({ id: 'f', set_id: 'set-f', openfda: { product_type: ['HUMAN OTC DRUG'], unii: ['TESTUNII01'], route: ['TOPICAL'] } }))], ['TESTUNII01']);
+  assert.deepEqual(mixed.map((r) => [r.group.routes, r.identity.setId, r.group.productType]), [['INTRAVENOUS', 'set-d', 'HUMAN PRESCRIPTION DRUG'], ['TOPICAL', 'set-f', 'HUMAN OTC DRUG']], 'una Rx de otra vía no borra la OTC de esta vía');
 });
 
 test('openFDA: una fila por campo, en inglés, sin unir campos distintos; campos no mapeados se ignoran', () => {
@@ -73,6 +75,7 @@ test('openFDA: una fila por campo, en inglés, sin unir campos distintos; campos
   assert.equal(ind.document.effectiveDate, '2025-01-15');
   assert.match(ind.citation, /set_id set-a, versión 7 \(effective_time 2025-01-15\), campo «indications_and_usage»/);
   assert.match(ind.license, /CC0/);
+  assert.match(ind.disclaimer, /^Do not rely on openFDA to make decisions regarding medical care/);
   assert.deepEqual(rows[4].tables[0].rows[0].map((c) => c.text), ['SYNTHETIC term', 'SYNTHETIC frequency']);
 });
 

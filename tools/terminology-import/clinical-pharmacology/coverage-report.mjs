@@ -84,6 +84,7 @@ export function coverage({ monographs, meta, universe, liname, products }) {
     generatedAt: new Date().toISOString(),
     universe: { atc5: universe.size, byOrigin: [...universe.values()].flat().reduce((a, o) => ({ ...a, [o]: (a[o] ?? 0) + 1 }), {}) },
     monographs: monographs.length,
+    displaySource: monographs.reduce((a, m) => ({ ...a, [m.displaySource ?? 'código']: (a[m.displaySource ?? 'código'] ?? 0) + 1 }), {}),
     atcLevels: Object.fromEntries(Object.entries(levels).map(([l, s]) => [`level${l}`, { codes: s.size, withOfficialName: namedLevels[l] }])),
     languages: monographs.flatMap((m) => m.sections).reduce((a, s) => ({ ...a, [s.language]: (a[s.language] ?? 0) + 1 }), {}),
     sources,
@@ -102,7 +103,8 @@ export function coverage({ monographs, meta, universe, liname, products }) {
 function markdown(c) {
   const lines = [`# Cobertura · farmacología clínica (${c.generatedAt.slice(0, 10)})`, ''];
   lines.push(`Universo ATC 5: **${c.universe.atc5}** (${Object.entries(c.universe.byOrigin).map(([k, v]) => `${k} ${v}`).join(', ')}). Monografías: **${c.monographs}**.`, '');
-  lines.push('| Nivel ATC | Códigos | Con nombre oficial |', '|---|---:|---:|');
+  lines.push(`Nombre mostrado por fuente: ${Object.entries(c.displaySource).map(([k, v]) => `${k} ${v}`).join(', ')}.`, '');
+  lines.push('| Nivel ATC | Códigos | Con nombre ATC oficial (AEMPS) |', '|---|---:|---:|');
   for (const [l, v] of Object.entries(c.atcLevels)) lines.push(`| ${l.replace('level', '')} | ${v.codes} | ${v.withOfficialName} |`);
   lines.push('');
   for (const [src, s] of Object.entries(c.sources)) {
@@ -123,6 +125,16 @@ function main() {
   const monographs = existsSync(MONOGRAPHS_NDJSON()) ? readNdjson(MONOGRAPHS_NDJSON()) : [];
   const meta = readJsonIfExists(MONOGRAPHS_META());
   const { universe, liname } = readAllInputs();
+  // El universo medido incluye lo que el armado agregó (ATC 5 enlazados por openFDA/GSRS) y todo ATC 5 que el GSRS conoce.
+  for (const m of monographs) if (!universe.has(m.code)) universe.set(m.code, m.universeOrigin ?? ['monografia']);
+  if (existsSync(cpOut('gsrs-entries.ndjson'))) {
+    for (const e of readNdjson(cpOut('gsrs-entries.ndjson'))) {
+      for (const code of e.atc) {
+        if (!universe.has(code)) universe.set(code, ['fda-gsrs']);
+        else if (!universe.get(code).includes('fda-gsrs')) universe.set(code, [...universe.get(code), 'fda-gsrs'].sort());
+      }
+    }
+  }
   const c = coverage({ monographs, meta, universe, liname, products: productAtc5() });
   writeJson(COVERAGE_JSON(), c, true);
   writeFileSync(cpOut('coverage.md'), markdown(c));

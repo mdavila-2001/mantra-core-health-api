@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-10-24T15:22:37.886Z",
+  "monographConcepts": 1033,
+  "vademecum": {
+    "atc5": 483,
+    "withMonograph": 199,
+    "withMap": 199,
+    "withoutMonograph": [
+      "A01AA01",
+      "A01AB11",
+      "A02AD01",
+      "A02BB01",
+      "A03AX13",
+      "A03BA01",
+      "A03BB01",
+      "A03FA03",
+      "A06AB02",
+      "A06AC07",
+      "A06AD04",
+      "A06AG06",
+      "A06AX01",
+      "A07AA02",
+      "A09AA02",
+      "A10AB01",
+      "A10AC01",
+      "A10BA02",
+      "A11AA03",
+      "A11CA01",
+      "… (284)"
+    ]
+  },
+  "productCatalog": {},
+  "relationshipsTouchingAtc5": {},
+  "rxnorm": {
+    "rxcuis": 0,
+    "presentInRxnormCodeSystems": 0
+  }
+}
