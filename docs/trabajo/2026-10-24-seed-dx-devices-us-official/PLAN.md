@@ -14,17 +14,17 @@
 
 ## H1 — Descarga oficial
 **CA:** Dado acceso a los hosts, cuando corre el descargador, entonces quedan los zips oficiales con su sha256 en `official/manifest.json`.
-**DoD:** `fetch-official.mjs --gudid-delimited` exit 0 + manifiesto. **Estado:** TODO
+**DoD:** `fetch-official.mjs --gudid-delimited` exit 0 + manifiesto. **Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H1.S1.M1 | Bajar openFDA classification, 510k, pma, registrationlisting, udi | 57 archivos en el manifiesto | `jq '.files|length' official/manifest.json` | HECHO |
 | H1.S1.M2 | Bajar AccessGUDID Delimited Full Release | zip en `official/accessgudid/` con sha256 | `jq` del manifiesto | HECHO |
-| H1.S2.M1 | Bajar espejos (MAUDE, retiros, LIVD, CLIA, NAAT…) | `mirrors-manifest.json` con todos OK | `fetch-mirrors.mjs` exit 0 | EN CURSO |
+| H1.S2.M1 | Bajar espejos (MAUDE, retiros, LIVD, CLIA, NAAT…) | `mirrors-manifest.json` con todos OK | `fetch-mirrors.mjs` exit 0 | HECHO |
 
 ## H2 — Normalizadores contra archivos reales
 **CA:** Dado cada archivo oficial real, cuando lo procesa su normalizador, entonces produce filas válidas del formato común sin campos inventados.
-**DoD:** `node --test "tools/terminology-import/diagnostic-devices/us/test/*.test.mjs"` en verde con fixtures de filas reales. **Estado:** TODO
+**DoD:** `node --test "tools/terminology-import/diagnostic-devices/us/test/*.test.mjs"` en verde con fixtures de filas reales. **Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
@@ -33,20 +33,20 @@
 | H2.S1.M3 | `fromOpenFdaRegistrationListing` coincide | test con fila real | `node --test` | HECHO |
 | H2.S1.M4 | `fromOpenFdaUdi` coincide | test con fila real | `node --test` | HECHO |
 | H2.S1.M5 | `fromAccessGudidDelimited` coincide con las cabeceras reales | test con filas reales | `node --test` | HECHO |
-| H2.S1.M6 | Clasificación oficial de openFDA usada por `build.mjs` | product codes desde oficial | `manifest.json` de `out/` | TODO |
+| H2.S1.M6 | Clasificación oficial de openFDA usada por `build.mjs` | product codes desde oficial | `manifest.json` de `out/` | HECHO |
 
 ## H3 — Build, cobertura, carga y entrega
 **CA:** Dado los crudos, cuando corre `build.mjs`, entonces cada parte `.ndjson.gz` < 50 MB, las oficiales ganan sobre espejos y la pasada 11 queda documentada.
-**DoD:** comandos abajo. **Estado:** TODO
+**DoD:** comandos abajo. **Estado:** A MEDIAS (gates bloqueados)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Build completo | exit 0, partes < 50 MB | `build.mjs` + `ls -l out` | TODO |
-| H3.S1.M2 | Cobertura y pasada 11 en la bitácora | fila 11 en la tabla | `coverage-report.mjs` | TODO |
-| H3.S1.M3 | `SOURCES.md` actualizado | fuentes oficiales «usado» | lectura del diff | TODO |
-| H3.S1.M4 | Cargador dry-run | exit 0 con conteos | `load-dx-device-types-us.mjs` | TODO |
-| H3.S2.M1 | Gates: typecheck, lint, docs:links | exit 0 | `corepack yarn …` | TODO |
-| H3.S2.M2 | Commit, push y PR contra `dev` (listo, sin merge) | URL del PR | MCP GitHub | TODO |
+| H3.S1.M1 | Build completo | exit 0, partes < 50 MB | `build.mjs` + `ls -l out` | HECHO |
+| H3.S1.M2 | Cobertura y pasada 11 en la bitácora | fila 11 en la tabla | `coverage-report.mjs` | HECHO |
+| H3.S1.M3 | `SOURCES.md` actualizado | fuentes oficiales «usado» | lectura del diff | HECHO |
+| H3.S1.M4 | Cargador dry-run | exit 0 con conteos | `load-dx-device-types-us.mjs` | BLOQUEADO |
+| H3.S2.M1 | Gates: typecheck, lint, docs:links | exit 0 | `corepack yarn …` | BLOQUEADO |
+| H3.S2.M2 | Commit, push y PR contra `dev` (listo, sin merge) | URL del PR | MCP GitHub | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
