@@ -1,5 +1,5 @@
 {
-  "packedAt": "2026-10-24T02:51:47.634Z",
+  "packedAt": "2026-10-24T16:38:49.132Z",
   "note": "gzip de los archivos de glossary-data-build/dictionaries/ndjson; restaurar con --unpack",
   "files": [
     {
@@ -1043,6 +1043,30 @@
         {
           "name": "uberon.ndjson.gz",
           "bytes": 1740920
+        }
+      ]
+    },
+    {
+      "name": "wikidata-es-labels.meta.json",
+      "bytes": 382,
+      "sha256": "3ea3e1b7930862104fed1138195ffe4cc4e0b677a80d7296e8c678eff71204d9",
+      "gzBytes": 247,
+      "parts": [
+        {
+          "name": "wikidata-es-labels.meta.json.gz",
+          "bytes": 247
+        }
+      ]
+    },
+    {
+      "name": "wikidata-es-labels.ndjson",
+      "bytes": 10230521,
+      "sha256": "625ea320ec23f8641976ad887831ff89c0626074939c3634a0926e865392ec36",
+      "gzBytes": 720363,
+      "parts": [
+        {
+          "name": "wikidata-es-labels.ndjson.gz",
+          "bytes": 720363
         }
       ]
     },

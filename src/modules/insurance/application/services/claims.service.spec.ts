@@ -223,6 +223,34 @@ describe('ClaimsService.openDispute', () => {
         .invocationCallOrder[0];
       expect(orderLock).toBeLessThan(searchOrder);
     });
+
+    it('sólo reconoce como existente una apelación del prestador, no la objeción de un paciente (carril 16)', async () => {
+      const r = repo();
+
+      await withTenant(() => serviceWith(r).openDispute(CLAIM, dto, actor));
+
+      // Una objeción del paciente no lleva versión disputada: sin el filtro por
+      // tipo, la apelación del prestador la tomaría por «la disputa existente»
+      // y devolvería la ajena en vez de abrir la propia.
+      expect(r.findOpenDispute).toHaveBeenCalledWith(
+        expect.anything(),
+        CLAIM,
+        VERSION,
+        INS.DISPUTE_OPEN,
+        INS.DISPUTE_TYPE_APPEAL,
+      );
+    });
+
+    it('la disputa que abre el prestador sigue siendo una apelación por pago insuficiente', async () => {
+      const r = repo();
+
+      await withTenant(() => serviceWith(r).openDispute(CLAIM, dto, actor));
+
+      expect(r.createDispute.mock.calls[0][1]).toMatchObject({
+        disputeTypeConceptId: INS.DISPUTE_TYPE_APPEAL,
+        disputeReasonConceptId: INS.DISPUTE_REASON_UNDERPAID,
+      });
+    });
   });
 });
 

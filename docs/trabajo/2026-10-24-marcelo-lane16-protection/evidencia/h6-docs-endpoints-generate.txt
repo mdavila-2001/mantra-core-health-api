@@ -1,0 +1,2 @@
+Documentación generada: 1512 endpoints, 72 módulos, 73 archivos Markdown.
+exit=0

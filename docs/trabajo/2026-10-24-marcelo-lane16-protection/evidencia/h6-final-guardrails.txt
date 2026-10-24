@@ -1,0 +1,36 @@
+== Guardrails ALOVIDA ==
+
+[UNSCOPED_MUTATION] 30 hallazgo(s):
+  src/modules/billing/controllers/billing-simulated.controller.ts:66 — @Post mutante sin @Roles ni @Public: 'charges/:chargeId/payment'
+  src/modules/billing/controllers/billing-simulated.controller.ts:82 — @Post mutante sin @Roles ni @Public: 'charges/:chargeId/instances/:instanceId/payments'
+  src/modules/billing/controllers/billing-simulated.controller.ts:106 — @Post mutante sin @Roles ni @Public: 'charges/:chargeId/invoices'
+  src/modules/billing/controllers/billing-simulated.controller.ts:135 — @Post mutante sin @Roles ni @Public: 'invoices/:invoiceId/annulment'
+  src/modules/billing/controllers/billing-simulated.controller.ts:151 — @Post mutante sin @Roles ni @Public: 'invoices/:invoiceId/annulment-reversal'
+  src/modules/billing/controllers/billing-simulated.controller.ts:166 — @Post mutante sin @Roles ni @Public: 'invoices/:invoiceId/email'
+  src/modules/clinical/controllers/clinical-medical-aspects.controller.ts:58 — @Put mutante sin @Roles ni @Public: 
+  src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:62 — @Post mutante sin @Roles ni @Public: 
+  src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:78 — @Delete mutante sin @Roles ni @Public: ':id'
+  src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:80 — @Post mutante sin @Roles ni @Public: 'work-orders'
+  src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:96 — @Post mutante sin @Roles ni @Public: 'analyzer-runs'
+  src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:114 — @Post mutante sin @Roles ni @Public: 'analyzer-runs/:id/messages'
+  src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:133 — @Post mutante sin @Roles ni @Public: 'results/:observationId/verifications'
+  src/modules/diagnostics/controllers/diagnostics-reception.controller.ts:43 — @Post mutante sin @Roles ni @Public: 'service-requests/inbox'
+  src/modules/directory/controllers/organization-logo.controller.ts:32 — @Put mutante sin @Roles ni @Public: 
+  src/modules/iam/presentation/controllers/iam-account-security.controller.ts:44 — @Post mutante sin @Roles ni @Public: 'auth/change-password'
+  src/modules/iam/presentation/controllers/iam-account-security.controller.ts:66 — @Post mutante sin @Roles ni @Public: 'me/sessions/:id/revoke'
+  src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:57 — @Post mutante sin @Roles ni @Public: 'export'
+  src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:31 — @Post mutante sin @Roles ni @Public: 'search'
+  src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:66 — @Post mutante sin @Roles ni @Public: 'conversation'
+  src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:95 — @Post mutante sin @Roles ni @Public: ':id/decision'
+  src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:49 — @Post mutante sin @Roles ni @Public: ':noticeId/read'
+  src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:39 — @Put mutante sin @Roles ni @Public: 
+  src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:78 — @Post mutante sin @Roles ni @Public: 'patients/me/dependent-requests'
+  src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:164 — @Post mutante sin @Roles ni @Public: 'patients/me/dependent-requests/:id/accept'
+  src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:191 — @Post mutante sin @Roles ni @Public: 'patients/me/dependent-requests/:id/reject'
+  src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:78 — @Post mutante sin @Roles ni @Public: ':tenantId/practitioner-requests/:affiliationId/approve'
+  src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:95 — @Post mutante sin @Roles ni @Public: ':tenantId/practitioner-requests/:affiliationId/reject'
+  src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:123 — @Post mutante sin @Roles ni @Public: ':tenantId/practitioner-requests/:affiliationId/revoke'
+  src/modules/surveys/controllers/surveys-patient.controller.ts:61 — @Post mutante sin @Roles ni @Public: ':id/responses'
+
+Total: 30 (bloqueantes: 0, informativos: 30)
+exit=0

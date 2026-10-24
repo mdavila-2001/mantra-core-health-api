@@ -73,6 +73,17 @@ export class InvoicesService {
       },
       'Issuing invoice from encounter',
     );
+    // Carril 16, REQ-16-029: una factura que declara un reclamo a la
+    // aseguradora (`claimId`) sería el cobro del precio completo de un
+    // servicio que ya se reclamó. Los servicios con seguro se le facturan al
+    // paciente desde la solicitud de seguro, con su parte calculada.
+    if (dto.claimId) {
+      throw new PreconditionFailedException(
+        'Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada',
+        { claimId: dto.claimId },
+        BillingErrorReason.INVOICE_LINE_SERVICE_ALREADY_CLAIMED,
+      );
+    }
     return this.em.transactional(async (tx) => {
       const invoiceNumber = dto.invoiceNumber ?? this.generateNumber('INV');
       const clash = await this.invoicesRepo.findByNumber(

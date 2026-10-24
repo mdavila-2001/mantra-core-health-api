@@ -114,8 +114,12 @@ fuentes antes de afirmar que no existen más términos.
 HPO las publicó (Groza et al. 2015, PMC4572507) para 3 647 enfermedades comunes
 (2 601 DOID, 1 046 MeSH). El 99,5 % tiene evidencia `ITM`: la **fuente** las
 extrajo por minería de texto de resúmenes de PubMed (BioLark) y cita los PMID.
-No las generó esta sesión. Se cargan con su código `ITM`, para que quien las use
-pueda filtrarlas. Dos ajustes de formato, ambos comprobados contra la release:
+No las generó esta sesión. **El propietario decidió cargarlas (2026-10-24)**: van
+en la carga de relaciones por defecto, con su código `ITM`, para que quien las use
+pueda filtrarlas por `evidence_code`. Como son de 2015, 10 059 filas de evidencia
+caen en 309 DOID que la release vigente de DO ya marca como obsoletos (sólo 2 con
+`replaced_by`): se cargan como vienen, sin reasignarlas. Dos ajustes de formato,
+ambos comprobados contra la release:
 
 - Escriben el DOID con ceros a la izquierda (`DOID:0013550`) donde DO publica
   `DOID:13550`. Se normaliza **sólo** si el id tal cual no existe en
@@ -255,17 +259,18 @@ OMS). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 
 ## Glosario: extensión, no duplicado
 
-- `load-symptoms.mjs --glossary` agrega al glosario los 18 646 fenotipos de HPO
+- **Activado por defecto (decisión del propietario, 2026-10-24).** `load-symptoms.mjs --apply` agrega al glosario los 18 646 fenotipos de HPO
   (HP:0000118) con nombre oficial en castellano: membresía en
   `glossary-all-terms` + `glossary-category-signs-symptoms` y propiedades
   `glossary-slug` (`hpo-hp-0001250`), `glossary-external-ids`,
   `glossary-provenance`. Es el **mismo concepto** del sistema `hpo`, no una copia.
+  `--no-glossary` lo apaga.
 - **Riesgo de duplicado visible:** las fichas `wikidata-sintoma-*` del glosario
   (destinos de Wikidata P780) no declaran su id HPO, así que hoy no se puede saber
   por código cuáles son el mismo síntoma que un término HPO. El cruce existe en
   Wikidata (P3841 *Human Phenotype Ontology ID*), pero `query.wikidata.org` está
-  bloqueado en este entorno. Por eso `--glossary` **no es el comportamiento por
-  defecto**: es decisión del propietario activarlo antes o después de traer P3841.
+  bloqueado en este entorno. El propietario lo activó **aceptando ese riesgo**;
+  se resuelve cuando se traiga P3841 (dedupe por código).
 
 ## Corrida en Postgres desechable
 
@@ -277,7 +282,7 @@ como sustituto de `seed-diseases`.
 
 | Paso | Filas nuevas | Tiempo | Re-corrida |
 |---|---|---:|---|
-| `load-symptoms.mjs --apply --glossary` | 24 777 conceptos · 70 747 designaciones · 367 171 propiedades · 29 428 is-a · 37 292 membresías | 19 s | 0 filas, 13 s |
+| `load-symptoms.mjs --apply` (glosario incluido) | 24 777 conceptos · 70 747 designaciones · 367 171 propiedades · 29 428 is-a · 37 292 membresías | 19 s | 0 filas, 13 s |
 | `load-disease-phenotypes.mjs --apply` sin la tabla propuesta | 0 (aborta, salida 2) | 5 s | — |
 | idem con la tabla propuesta aplicada en la base desechable | 345 258 aristas · 372 928 evidencias (andamio Mondo) | 52 s | 0 filas, 31 s |
 | idem con el catálogo real de #688 (57f23f9c) | 402 633 aristas · 403 959 evidencias | 59 s | 0 filas, 33 s |
@@ -312,7 +317,7 @@ node tools/terminology-import/symptoms/fetch-symptom-sources.mjs        # o desd
 node tools/terminology-import/symptoms/build-symptoms-corpus.mjs        # ~25 s, sin red ni base
 node tools/terminology-import/symptoms/pack-data.mjs                    # regenera data/ para commitear
 node tools/terminology-import/symptoms/load-symptoms.mjs                # dry-run: plan y conteos
-node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos (.env DB_*); --glossary opcional
+node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos + glosario (.env DB_*); --no-glossary para no tocar el glosario
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs      # dry-run del plan de relaciones
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --check   # modelo + resolución, sin escribir
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # exige la tabla en el modelo

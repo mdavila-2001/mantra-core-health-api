@@ -1,0 +1,17 @@
+{
+  "source": "pubmed-cochrane",
+  "name": "Revisiones Cochrane en MEDLINE/PubMed (metadatos e indexación MeSH de NLM)",
+  "publisher": "U.S. National Library of Medicine (indexación MeSH); Cochrane (revisiones)",
+  "license": "Metadatos bibliográficos e indexación MeSH de MEDLINE (NLM); no se copia texto de las revisiones",
+  "licenseUrl": "https://www.nlm.nih.gov/databases/download/terms_and_conditions.html",
+  "homepage": "https://pubmed.ncbi.nlm.nih.gov/",
+  "query": "\"Cochrane Database Syst Rev\"[Journal]",
+  "partitions": [
+    "\"1900\"[PDAT] : \"2012\"[PDAT]",
+    "\"2013\"[PDAT] : \"2018\"[PDAT]",
+    "\"2019\"[PDAT] : \"3000\"[PDAT]"
+  ],
+  "esearchCount": 17554,
+  "records": 17554,
+  "retrievedAt": "2026-10-24T17:17:01.227Z"
+}

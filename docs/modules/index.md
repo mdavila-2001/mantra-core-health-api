@@ -7,13 +7,13 @@
 
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
-| [`insurance`](insurance.md) | 19 | 24 | 14 | 31 | 20 |
+| [`insurance`](insurance.md) | 19 | 27 | 14 | 31 | 23 |
 | [`community`](community.md) | 14 | 33 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`consent`](consent.md) | 11 | 11 | 9 | 10 | 16 |
 | [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
+| [`authz`](authz.md) | 9 | 11 | 15 | 15 | 21 |
 | [`clinical`](clinical.md) | 9 | 17 | 15 | 23 | 15 |
-| [`authz`](authz.md) | 8 | 9 | 14 | 15 | 20 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 8 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 11 | 10 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
@@ -25,15 +25,16 @@
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 17 |
 | [`practice`](practice.md) | 6 | 11 | 12 | 11 | 17 |
+| [`audit`](audit.md) | 5 | 7 | 8 | 131 | 10 |
 | [`billing`](billing.md) | 5 | 13 | 10 | 24 | 14 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 8 | 12 | 10 | 13 |
 | [`profiles`](profiles.md) | 5 | 11 | 14 | 19 | 30 |
-| [`audit`](audit.md) | 4 | 6 | 7 | 131 | 9 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
 | [`telemetry`](telemetry.md) | 4 | 5 | 15 | 14 | 12 |
+| [`data_catalog`](data_catalog.md) | 3 | 6 | 2 | 8 | 4 |
 | [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
 | [`iam`](iam.md) | 3 | 15 | 13 | 14 | 24 |
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 2 |
@@ -47,7 +48,6 @@
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 5 | 3 | 20 | 1 |
-| [`data_catalog`](data_catalog.md) | 2 | 4 | 2 | 8 | 4 |
 | [`graph_intelligence`](graph_intelligence.md) | 2 | 3 | 2 | 13 | 1 |
 | [`health_data`](health_data.md) | 2 | 5 | 7 | 34 | 1 |
 | [`integration_contracts`](integration_contracts.md) | 2 | 4 | 9 | 9 | 13 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **275** | **421** | **414** | **1265** | **518** |
+| **Total** | **278** | **429** | **416** | **1265** | **523** |

@@ -110,4 +110,17 @@ export enum BillingErrorReason {
 
   /** Ya existe una corrida de dunning con ese número para el tenant. */
   DUNNING_RUN_NUMBER_ALREADY_EXISTS = 'DUNNING_RUN_NUMBER_ALREADY_EXISTS',
+
+  /**
+   * Un servicio con seguro no se factura al paciente por esta vía: se emite
+   * desde la solicitud de seguro con la parte calculada por el servidor
+   * (carril 16, REQ-16-029).
+   */
+  INVOICE_LINE_SERVICE_ALREADY_CLAIMED = 'INVOICE_LINE_SERVICE_ALREADY_CLAIMED',
+
+  /**
+   * La factura tiene una objeción abierta del paciente: el cobro queda en
+   * pausa hasta que se resuelva (carril 16, REQ-16-032).
+   */
+  PAYMENT_RECEIVED_INVOICE_ON_HOLD = 'PAYMENT_RECEIVED_INVOICE_ON_HOLD',
 }

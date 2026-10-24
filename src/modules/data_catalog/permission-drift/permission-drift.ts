@@ -1,0 +1,165 @@
+/**
+ * Deriva de permisos: lo que las rutas **exigen** (`@Roles(...)`) contra lo que existe para
+ * asignarse (los roles que la API siembra desde sus `*.roles.ts` y los que ya están en
+ * `authz.roles`).
+ *
+ * Es lógica pura, sin Nest ni base: la usa el servicio de la consola
+ * (`GET /admin/catalog/permission-drift`) y puede usarla un script de CI con las mismas entradas.
+ * Tres hallazgos:
+ * - **usedNotSeeded**: una ruta exige un rol que nadie siembra. Mientras no exista en
+ *   `authz.roles`, sólo `SUPERADMIN` (por comodín) puede ejercer esa ruta.
+ * - **seededNotUsed**: un rol sembrado que ninguna ruta exige: se asigna y no autoriza nada.
+ * - **routesWithoutRoles**: rutas autenticadas que no declaran `@Roles` ni son públicas: las pasa
+ *   cualquier sesión.
+ */
+
+/** Lo que la deriva necesita saber de una ruta. */
+export interface DriftRoute {
+  method: string;
+  template: string;
+  controller: string;
+  handler: string;
+  roles: readonly string[] | null;
+  isPublic: boolean;
+}
+
+export interface DriftInput {
+  routes: readonly DriftRoute[];
+  /** Códigos que la API siembra en `authz.roles` (`SYSTEM_ROLE_SEED`, de los `*.roles.ts`). */
+  seededRoleCodes: readonly string[];
+  /** Códigos que no se siembran en `authz.roles` pero existen: roles globales de `iam` y `SYSTEM`. */
+  platformRoleCodes: readonly string[];
+  /** Códigos presentes hoy en `authz.roles`; `null` si no se consultó la base. */
+  databaseRoleCodes: readonly string[] | null;
+}
+
+export interface RouteRef {
+  method: string;
+  template: string;
+  controller: string;
+  handler: string;
+}
+
+export interface UsedNotSeeded {
+  role: string;
+  /** Cuántas rutas lo exigen. */
+  routeCount: number;
+  /** `true`/`false` si hay fila en `authz.roles`; `null` si no se consultó la base. */
+  inDatabase: boolean | null;
+  /** Hasta {@link SAMPLE_SIZE} rutas que lo exigen. */
+  sample: RouteRef[];
+}
+
+export interface PermissionDriftReport {
+  routes: {
+    total: number;
+    public: number;
+    withRoles: number;
+    /** Autenticadas sin `@Roles`: las pasa cualquier sesión. */
+    withoutRoles: number;
+  };
+  usedNotSeeded: UsedNotSeeded[];
+  seededNotUsed: string[];
+  routesWithoutRoles: RouteRef[];
+}
+
+/** Cuántas rutas de ejemplo trae cada rol usado sin sembrar. */
+export const SAMPLE_SIZE = 5;
+
+const refOf = (r: DriftRoute): RouteRef => ({
+  method: r.method,
+  template: r.template,
+  controller: r.controller,
+  handler: r.handler,
+});
+
+const porRuta = (a: RouteRef, b: RouteRef): number =>
+  a.template.localeCompare(b.template) || a.method.localeCompare(b.method);
+
+/** Calcula la deriva. Determinista: listas ordenadas, mismas entradas, mismo informe. */
+export function computePermissionDrift(
+  input: DriftInput,
+): PermissionDriftReport {
+  const sembrados = new Set(input.seededRoleCodes);
+  const deSistema = new Set(input.platformRoleCodes);
+  const enBase = input.databaseRoleCodes
+    ? new Set(input.databaseRoleCodes)
+    : null;
+
+  const porRol = new Map<string, DriftRoute[]>();
+  const sinRoles: RouteRef[] = [];
+  let publicas = 0;
+  let conRoles = 0;
+  for (const ruta of input.routes) {
+    if (ruta.isPublic) {
+      publicas += 1;
+      continue;
+    }
+    if (!ruta.roles?.length) {
+      sinRoles.push(refOf(ruta));
+      continue;
+    }
+    conRoles += 1;
+    for (const rol of new Set(ruta.roles))
+      porRol.set(rol, [...(porRol.get(rol) ?? []), ruta]);
+  }
+
+  const usadosSinSembrar: UsedNotSeeded[] = [...porRol]
+    .filter(([rol]) => !sembrados.has(rol) && !deSistema.has(rol))
+    .map(([rol, rutas]) => ({
+      role: rol,
+      routeCount: rutas.length,
+      inDatabase: enBase ? enBase.has(rol) : null,
+      sample: rutas.map(refOf).sort(porRuta).slice(0, SAMPLE_SIZE),
+    }))
+    .sort(
+      (a, b) => b.routeCount - a.routeCount || a.role.localeCompare(b.role),
+    );
+
+  const sembradosSinUso = [...sembrados]
+    .filter((rol) => !porRol.has(rol))
+    .sort();
+
+  return {
+    routes: {
+      total: input.routes.length,
+      public: publicas,
+      withRoles: conRoles,
+      withoutRoles: sinRoles.length,
+    },
+    usedNotSeeded: usadosSinSembrar,
+    seededNotUsed: sembradosSinUso,
+    routesWithoutRoles: sinRoles.sort(porRuta),
+  };
+}
+
+/** Clave `VERBO /plantilla` de una ruta, la que usa una lista de excepciones aceptadas. */
+export const routeKey = (r: RouteRef): string => `${r.method} ${r.template}`;
+
+export interface DriftAllowlist {
+  /** Roles usados sin sembrar que se aceptan por ahora. */
+  roles?: readonly string[];
+  /** Rutas sin `@Roles` que se aceptan por ahora (`VERBO /plantilla`). */
+  routes?: readonly string[];
+}
+
+/**
+ * Lo que un gate de CI debería rechazar: deriva que no figura en la lista de excepciones. Vacío
+ * significa que no hay deriva nueva. Los sembrados sin uso no bloquean: un rol puede existir antes
+ * de la ruta que lo exige.
+ */
+export function blockingDrift(
+  report: PermissionDriftReport,
+  allow: DriftAllowlist = {},
+): string[] {
+  const rolesOk = new Set(allow.roles ?? []);
+  const rutasOk = new Set(allow.routes ?? []);
+  return [
+    ...report.usedNotSeeded
+      .filter((u) => !rolesOk.has(u.role))
+      .map((u) => `rol usado sin sembrar: ${u.role} (${u.routeCount} rutas)`),
+    ...report.routesWithoutRoles
+      .filter((r) => !rutasOk.has(routeKey(r)))
+      .map((r) => `ruta sin @Roles ni @Public: ${routeKey(r)}`),
+  ];
+}

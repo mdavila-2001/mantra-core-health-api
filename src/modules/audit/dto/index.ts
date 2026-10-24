@@ -7,3 +7,4 @@ export * from './dsar.dto';
 export * from './operations.dto';
 export * from './moderation.dto';
 export * from './third-party-access.dto';
+export * from './audit-query.dto';
