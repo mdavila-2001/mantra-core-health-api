@@ -125,12 +125,24 @@ function readPagedDirs(root) {
       });
       continue;
     }
-    for (const page of readJson(join(dir, '_complete.json')).pages) {
+    // Sin URL y fecha del manifiesto no hay procedencia: la carpeta se salta
+    // como hueco (fetch.mjs la vuelve a pedir si se borra), nunca se rellena.
+    const pages = readJson(join(dir, '_complete.json')).pages;
+    if (pages.some((page) => !fileMeta.has(page))) {
+      gaps.push({
+        source: 'eudamed-udi',
+        url: dir,
+        reason:
+          'páginas sin URL ni fecha en el manifiesto del caché (borrar la carpeta y volver a correr fetch.mjs)',
+      });
+      continue;
+    }
+    for (const page of pages) {
       const meta = fileMeta.get(page);
       out.push({
         rows: parsePage(readPageFile(page)).rows,
-        sourceUrl: meta?.url ?? page,
-        retrievedAt: meta?.retrievedAt ?? nowIso(),
+        sourceUrl: meta.url,
+        retrievedAt: meta.retrievedAt,
       });
     }
   }

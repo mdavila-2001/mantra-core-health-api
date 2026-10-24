@@ -1229,3 +1229,25 @@ test('BD/RDM: lectura en streaming por lotes, con BOM, `;` final y comillas mult
     ],
   );
 });
+
+test('makeDeviceRecord: un correo en un campo descriptivo no se publica; «Easy@Home» sí', () => {
+  const r = makeDeviceRecord({
+    ...PROV,
+    model: 'SINTETICO B.V. Calle 1, Ciudad. E-mail:persona@example.invalid',
+    brandName: 'Easy@Home SINTETICO',
+    extra: { reference: 'contacto: persona@example.invalid', deviceName: 'X' },
+  });
+  assert.equal(r.model, null);
+  assert.equal(r.brandName, 'Easy@Home SINTETICO');
+  assert.equal(r.extra.reference, undefined);
+  assert.deepEqual(r.extra.redactedFields, ['model', 'extra.reference']);
+  assert.ok(!JSON.stringify(r).includes('persona@'));
+  assert.throws(
+    () =>
+      makeDeviceRecord({
+        ...PROV,
+        manufacturerName: 'persona@example.invalid',
+      }),
+    /contiene un correo/,
+  );
+});

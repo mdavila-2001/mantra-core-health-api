@@ -209,15 +209,43 @@ function compactExtra(extra = {}) {
   );
 }
 
+// Un correo dentro de un campo descriptivo es dato de contacto, no del equipo
+// (p. ej. un fabricante que cargó en «modelo» la dirección y el correo de su
+// representante). No se publica: el campo va en null y su NOMBRE (nunca el
+// contenido) queda en extra.redactedFields. «Easy@Home» no es correo: exige
+// dominio con punto.
+export const EMAIL_RE =
+  /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/;
+
 export function makeDeviceRecord(input) {
   const r = {};
   for (const f of DEVICE_FIELDS) r[f] = clean(input[f]);
+  const redacted = [];
+  for (const f of DEVICE_FIELDS)
+    if (
+      !NOT_NULL.includes(f) &&
+      typeof r[f] === 'string' &&
+      EMAIL_RE.test(r[f])
+    ) {
+      r[f] = null;
+      redacted.push(f);
+    }
+  const extra = { ...(input.extra ?? {}) };
+  for (const [k, v] of Object.entries(extra))
+    if (typeof v === 'string' && EMAIL_RE.test(v)) {
+      extra[k] = null;
+      redacted.push(`extra.${k}`);
+    }
+  if (redacted.length) extra.redactedFields = redacted;
   const fail = (msg) => {
     throw new RowError(
       `${msg} (${r.source ?? '¿fuente?'}:${r.sourceRecordId ?? '¿id?'})`,
     );
   };
   for (const f of NOT_NULL) if (!r[f]) fail(`${f} no puede ser null`);
+  for (const f of NOT_NULL)
+    if (EMAIL_RE.test(r[f]) && f !== 'sourceUrl')
+      fail(`${f} contiene un correo electrónico`);
   if (!SOURCE_RE.test(r.source)) fail(`source inválido: ${r.source}`);
   if (!/^https?:\/\//.test(r.sourceUrl)) fail(`sourceUrl no es http(s)`);
   if (!ISO_DATETIME_RE.test(r.retrievedAt))
@@ -237,7 +265,7 @@ export function makeDeviceRecord(input) {
     fail(`deviceTypeSystem desconocido: ${r.deviceTypeSystem}`);
   if ((r.deviceTypeCode === null) !== (r.deviceTypeSystem === null))
     fail('deviceTypeCode y deviceTypeSystem van juntos');
-  r.extra = compactExtra(input.extra);
+  r.extra = compactExtra(extra);
   return r;
 }
 
