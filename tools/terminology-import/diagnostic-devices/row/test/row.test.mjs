@@ -32,6 +32,12 @@ import {
   rowErrors,
   textOrNull,
 } from '../lib/row.mjs';
+import {
+  splitTfdaCategory,
+  tfdaDate,
+  tfdaRows,
+  tudidRows,
+} from '../lib/tfda.mjs';
 import { daenDate, daenRows } from '../lib/tga-daen.mjs';
 
 const FIXTURES = new URL('./fixtures/', import.meta.url);
@@ -375,4 +381,65 @@ test('ANVISA: las áreas y asuntos de las peticiones se unen por número de proc
   assert.deepEqual(modelo.extra.anvisaPetitions.areas, [
     'Dispositivos Médicos para Diagnóstico in Vitro',
   ]);
+});
+
+test('TFDA: una fila por licencia, clasificación con código, clase y fabricantes adicionales', () => {
+  const { rows, stats } = tfdaRows(parseCsv(fixture('tfda-68.csv')), CTX);
+  assert.equal(stats.withoutManufacturer, 0);
+  assert.equal(
+    rows.length,
+    2,
+    'la licencia con dos líneas (dos fabricantes) queda en una fila',
+  );
+  const stent = rows.find(
+    (r) => r.sourceRecordId === '衛部醫器陸輸字第001888號',
+  );
+  assert.equal(stent.deviceTypeSystem, 'tw:tfda-classification');
+  assert.equal(stent.deviceTypeCode, 'E.9999');
+  assert.equal(stent.manufacturerCountry, 'CN');
+  assert.equal(stent.riskClass, 'tw:2');
+  assert.equal(stent.authorizationDate, '2026-02-25');
+  assert.equal(stent.extra.otherManufacturers.length, 1);
+  const lh = rows.find(
+    (r) => r.sourceRecordId === '衛部醫器陸輸壹字第002718號',
+  );
+  assert.equal(lh.deviceTypeCode, 'A.1485');
+  assert.equal(lh.deviceTypeName, '黃體激素試驗系統');
+  assert.deepEqual(lh.extra.deviceTypes, [
+    { system: 'tw:tfda-category', code: 'A', name: '臨床化學及臨床毒理學' },
+  ]);
+  assert.equal(lh.brandName, '“以樂” 排卵快速檢測試紙 (未滅菌)');
+  assert.equal(lh.extra.holder.taxId, '24355038');
+  assert.deepEqual(splitTfdaCategory('J.2910 臨床電子體溫計'), {
+    code: 'J.2910',
+    name: '臨床電子體溫計',
+  });
+  assert.equal(tfdaDate('2031/02/25'), '2031-02-25');
+});
+
+test('TUDID: una fila por UDI-DI y modelo; fabricante y clase de la licencia; licencia desconocida no sale', () => {
+  const { rows: licences } = tfdaRows(parseCsv(fixture('tfda-68.csv')), CTX);
+  const byLicence = new Map(licences.map((r) => [r.authorizationId, r]));
+  const { rows, stats } = tudidRows(
+    parseCsv(fixture('tfda-tudid-197.csv')),
+    byLicence,
+    CTX,
+  );
+  assert.equal(rows.length, 2);
+  assert.equal(stats.withoutLicence, 1);
+  const [first] = rows;
+  assert.equal(first.source, 'tfda-tudid');
+  assert.equal(first.udiDi, '06938370136019');
+  assert.equal(first.model, 'LT-FIS-20G8F035B');
+  assert.equal(
+    first.sourceRecordId,
+    '06938370136019|LT-FIS-20G8F035B|衛部醫器陸輸字第001888號',
+  );
+  assert.equal(
+    first.manufacturerName,
+    byLicence.get('衛部醫器陸輸字第001888號').manufacturerName,
+  );
+  assert.equal(first.riskClass, 'tw:2');
+  assert.equal(first.extra.udiIssuingAgency, 'GS1');
+  assert.equal(first.extra.licenceFrom, 'tfda-devices');
 });

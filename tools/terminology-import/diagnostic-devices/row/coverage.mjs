@@ -24,6 +24,8 @@ const REGISTRY_COUNTRY = {
   'hc-mdall': 'CA',
   'tga-daen': 'AU',
   'cdsco-import-licences': 'IN',
+  'tfda-devices': 'TW',
+  'tfda-tudid': 'TW',
 };
 
 const TOP = 25;

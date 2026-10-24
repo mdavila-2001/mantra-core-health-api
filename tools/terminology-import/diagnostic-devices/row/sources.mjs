@@ -98,6 +98,8 @@ export const OFFICIAL = Object.freeze({
     'https://health-products.canada.ca/api/documentation/mdall-documentation-en.html',
   tgaDaen: 'https://apps.tga.gov.au/Prod/devices/daen-entry.aspx',
   cdsco: 'https://cdscomdonline.gov.in/',
+  tfda: 'https://data.gov.tw/dataset/9576',
+  tfdaTudid: 'https://data.gov.tw/dataset/151955',
 });
 
 /**
@@ -107,6 +109,26 @@ export const OFFICIAL = Object.freeze({
  */
 const ANVISA_DADOS = 'https://dados.anvisa.gov.br/dados/';
 export const OFFICIAL_DOWNLOADS = Object.freeze({
+  tfda: [
+    {
+      name: 'export68-csv.zip',
+      url: 'https://data.fda.gov.tw/data/opendata/export/68/csv',
+      extract: true,
+    },
+    {
+      name: 'dataset-9576.json',
+      url: 'https://data.gov.tw/api/v2/rest/dataset/9576',
+    },
+    {
+      name: 'export197-csv.zip',
+      url: 'https://data.fda.gov.tw/data/opendata/export/197/csv',
+      extract: true,
+    },
+    {
+      name: 'dataset-151955.json',
+      url: 'https://data.gov.tw/api/v2/rest/dataset/151955',
+    },
+  ],
   anvisa: [
     {
       name: 'TA_PRODUTO_SAUDE_SITE.csv',
@@ -154,12 +176,6 @@ export const GAPS = Object.freeze([
     source: 'mfds-devices',
     reason: '403 del proxy (www.data.go.kr, emedi.mfds.go.kr)',
     url: 'https://www.data.go.kr/',
-  },
-  {
-    source: 'tfda-devices',
-    reason:
-      '403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión',
-    url: 'https://data.gov.tw/dataset/9576',
   },
   {
     source: 'cdsco-devices',

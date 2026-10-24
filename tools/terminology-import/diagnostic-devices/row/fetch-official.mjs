@@ -80,6 +80,11 @@ async function main() {
           retrieved[file.url]?.retrievedAt ??
           new Date(statSync(path).mtimeMs).toISOString(),
       };
+      if (file.extract) {
+        const extractDir = ensureDir(`${path}.d`);
+        execFileSync('unzip', ['-o', '-q', path, '-d', extractDir]);
+        entry.extractedTo = join(group, `${file.name}.d`);
+      }
       retrieved[file.url] = entry;
       console.log(
         `${group}  ${file.name}  ${entry.bytes} B  ${entry.lastModified}  ${entry.sha256.slice(0, 12)}…`,

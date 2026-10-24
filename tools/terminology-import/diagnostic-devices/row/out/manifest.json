@@ -1,6 +1,6 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T16:46:58.152Z",
+  "generatedAt": "2026-10-24T17:00:10.967Z",
   "formatVersion": 1,
   "files": [
     {
@@ -90,6 +90,22 @@
       "rows": 25792,
       "bytes": 7372002,
       "sha256": "40ebea47f5563f8b35cdb30f652c24d31ed66dc9c549085a293256f0357a19d1"
+    },
+    {
+      "path": "tfda-devices.ndjson.gz",
+      "source": "tfda-devices",
+      "sourceVersion": "醫療器材許可證資料集 (data.gov.tw 9576) modifiedDate 2026-10-15 15:22:40, 68_2.csv",
+      "rows": 93430,
+      "bytes": 20131134,
+      "sha256": "3435cbb24d3bca03d96b206234870e7461975241995adc9408e80c749ddd6945"
+    },
+    {
+      "path": "tfda-tudid.ndjson.gz",
+      "source": "tfda-tudid",
+      "sourceVersion": "醫療器材單一識別碼(TUDID)資料集 (data.gov.tw 151955) modifiedDate 2026-10-12 14:51:19, 197_2.csv",
+      "rows": 688258,
+      "bytes": 22298119,
+      "sha256": "86e9ee6af3951fb76222f5976760094ab2c062be2a29c4593fc4b62df66dd473"
     }
   ],
   "stats": {
@@ -143,6 +159,18 @@
       "rows": 25792,
       "badLicence": 0,
       "withoutManufacturer": 0
+    },
+    "tfda-devices": {
+      "inputLines": 104891,
+      "rows": 93430,
+      "licences": 93430,
+      "withoutManufacturer": 0
+    },
+    "tfda-tudid": {
+      "inputLines": 688299,
+      "rows": 688258,
+      "withoutLicence": 41,
+      "duplicates": 0
     }
   },
   "gaps": [
@@ -165,11 +193,6 @@
       "source": "mfds-devices",
       "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
       "url": "https://www.data.go.kr/"
-    },
-    {
-      "source": "tfda-devices",
-      "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
-      "url": "https://data.gov.tw/dataset/9576"
     },
     {
       "source": "cdsco-devices",

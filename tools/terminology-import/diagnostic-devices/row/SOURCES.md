@@ -36,18 +36,21 @@ normalizadores leen el mismo formato).
 | `hc-mdall`                | Health Canada (CA) | MDALL, API pública (licencias, compañías, identificadores)                      | [misterrPink1/symmetric](https://github.com/misterrPink1/symmetric) `a43a1a58` · `datasets.zip` (sha256 `e2a3f451…`)                                                           | 2020-02-07 (`last_refresh_dt`)                                | 2 333 236 |
 | `tga-daen`                | TGA (AU)           | DAEN, notificaciones de eventos adversos de dispositivos                        | [tobinsouth/MedicalDeviceNLP](https://github.com/tobinsouth/MedicalDeviceNLP) `868d2e2a` · `data/medical_device_summaries/*.csv` + `data/list_of_reports/*.pickle`             | reportes hasta 2021                                           |    18 917 |
 | `cdsco-import-licences`   | CDSCO (IN)         | «MD - Medical Devices», licencias de importación IMP/MD de la autoridad central | [vishnuu-patil/india-meddevice-intelligence](https://github.com/vishnuu-patil/india-meddevice-intelligence) `62e88588` · `Data/MD - Medical Devices.xlsx` (sha256 `df214403…`) | licencias hasta 2026-10-01                                    |    25 792 |
+| `tfda-devices`            | TFDA (TW)          | 醫療器材許可證資料集, data.gov.tw 9576 (export 68)                              | — (descarga oficial)                                                                                                                                                           | `modifiedDate` 2026-10-15                                     |    93 430 |
+| `tfda-tudid`              | TFDA (TW)          | 醫療器材單一識別碼 (TUDID), data.gov.tw 151955 (export 197)                     | — (descarga oficial)                                                                                                                                                           | `modifiedDate` 2026-10-12                                     |   688 258 |
 
 Conteos exactos y por archivo: `out/manifest.json`. Cobertura: `COVERAGE.md`.
 
 ## Licencias y términos de uso
 
-| Fuente        | Datos (autoridad)                                                                                                                                                                        | Espejo                                                                                                   |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| ANVISA        | Datos abiertos del Poder Ejecutivo federal de Brasil (Decreto nº 8.777/2016). La licencia exacta del conjunto no se pudo leer desde la nube: **por verificar** en la ficha del conjunto. | g.stec: sin licencia publicada. DHsys: MIT (cubre el código del repo; los CSV son datos de ANVISA).      |
-| PMDA          | Listados públicos de PMDA. Los términos de reutilización del sitio de PMDA no se pudieron leer desde la nube: **por verificar**.                                                         | Sin licencia publicada; el propio espejo se declara «参考用» (de referencia) y remite al Excel oficial.  |
-| Health Canada | MDALL figura en el Portal de Gobierno Abierto de Canadá (Open Government Licence – Canada según el portal; **por verificar** la ficha).                                                  | Sin licencia publicada.                                                                                  |
-| TGA           | Contenido de la TGA, con el aviso de DAEN de que una notificación no prueba que el dispositivo causó el evento. Términos de reutilización **por verificar**.                             | Sin licencia publicada.                                                                                  |
-| CDSCO         | Lista pública de CDSCO. Términos de reutilización **por verificar**.                                                                                                                     | El repo declara que los archivos de datos conservan la licencia de su fuente original; el código es MIT. |
+| Fuente        | Datos (autoridad)                                                                                                                                                                            | Espejo                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| ANVISA        | Datos abiertos del Poder Ejecutivo federal de Brasil (Decreto nº 8.777/2016). La licencia exacta del conjunto no se pudo leer desde la nube: **por verificar** en la ficha del conjunto.     | g.stec: sin licencia publicada. DHsys: MIT (cubre el código del repo; los CSV son datos de ANVISA).      |
+| PMDA          | Listados públicos de PMDA. Los términos de reutilización del sitio de PMDA no se pudieron leer desde la nube: **por verificar**.                                                             | Sin licencia publicada; el propio espejo se declara «参考用» (de referencia) y remite al Excel oficial.  |
+| Health Canada | MDALL figura en el Portal de Gobierno Abierto de Canadá (Open Government Licence – Canada según el portal; **por verificar** la ficha).                                                      | Sin licencia publicada.                                                                                  |
+| TGA           | Contenido de la TGA, con el aviso de DAEN de que una notificación no prueba que el dispositivo causó el evento. Términos de reutilización **por verificar**.                                 | Sin licencia publicada.                                                                                  |
+| CDSCO         | Lista pública de CDSCO. Términos de reutilización **por verificar**.                                                                                                                         | El repo declara que los archivos de datos conservan la licencia de su fuente original; el código es MIT. |
+| TFDA          | 政府資料開放授權條款 — 第1版 (Open Government Data License, Taiwán; `license: 1` en la ficha de data.gov.tw), compatible con CC BY 4.0: exige citar al proveedor (衛生福利部食品藥物管理署). | —                                                                                                        |
 
 Ninguna fuente se usó para algo distinto de catalogar dispositivos. No se
 eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
@@ -130,6 +133,20 @@ eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
   resuelto al texto completo; «NIL» es vacío. Puede listar varios modelos en
   un solo texto: no se parte para no cortar descripciones con comas.
 - Faltan las licencias de fabricación nacional y las de autoridades estatales (hueco).
+
+### `tfda-devices` y `tfda-tudid` (Taiwán)
+
+- `tfda-devices`: una fila por licencia (許可證字號); las líneas repetidas por
+  fabricante quedan en `extra.otherManufacturers`. Clasificación del 醫療器材分類
+  分級管理辦法: 醫器次類別一 → `tw:tfda-classification` con código (p. ej.
+  `A.1485` 黃體激素試驗系統) y las categorías principales (p. ej. `A`
+  臨床化學及臨床毒理學, `B` 血液學、病理學及基因學, `C` 免疫學及微生物學, que son
+  las de diagnóstico in vitro) en `extra.deviceTypes`. Clase 1–3 → `tw:1`…`tw:3`.
+  País del fabricante tal cual (ya viene en ISO alfa-2). Registro QMS/QSD de la
+  planta → `tw-tfda-qms:`. Nombres en chino tal cual; el inglés en `extra.englishName`.
+- `tfda-tudid`: una fila por UDI-DI + modelo (型號) + licencia. El TUDID no
+  publica fabricante ni clase: se toman de la licencia por número exacto
+  (`extra.licenceFrom: tfda-devices`); 41 DI con licencia desconocida no salen.
 
 ## Filtro «diagnóstico»
 

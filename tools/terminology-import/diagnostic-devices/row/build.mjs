@@ -27,6 +27,7 @@ import { readDelimitedRows } from './lib/lines.mjs';
 import { PartWriter } from './lib/out.mjs';
 import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
 import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
+import { tfdaRows, tudidRows } from './lib/tfda.mjs';
 import { daenDate, daenRows } from './lib/tga-daen.mjs';
 import {
   GAPS,
@@ -341,6 +342,60 @@ async function buildCdsco() {
   };
 }
 
+let tfdaCache = null;
+async function tfdaLicences() {
+  if (tfdaCache !== null) return tfdaCache;
+  const file = officialFile('tfda', 'export68-csv.zip');
+  const dir = `${file.path}.d`;
+  const [csvName] = readdirSync(dir).filter((n) => n.endsWith('.csv'));
+  const lines = parseCsv(readFileSync(join(dir, csvName), 'utf8'));
+  const meta = officialFile('tfda', 'dataset-9576.json');
+  const modified = JSON.parse(readFileSync(meta.path, 'utf8')).result
+    .modifiedDate;
+  const sourceVersion = `醫療器材許可證資料集 (data.gov.tw 9576) modifiedDate ${modified}, ${csvName}`;
+  const { rows, stats } = tfdaRows(lines, {
+    sourceUrl: file.url,
+    sourceVersion,
+    retrievedAt: file.retrievedAt,
+    officialFile: { ...file.citation, csv: csvName, datasetModified: modified },
+    officialPortal: OFFICIAL.tfda,
+  });
+  tfdaCache = { rows, stats, sourceVersion, inputLines: lines.length };
+  return tfdaCache;
+}
+
+async function buildTfdaTudid() {
+  const licences = await tfdaLicences();
+  const byLicence = new Map(licences.rows.map((r) => [r.authorizationId, r]));
+  const file = officialFile('tfda', 'export197-csv.zip');
+  const dir = `${file.path}.d`;
+  const [csvName] = readdirSync(dir).filter((n) => n.endsWith('.csv'));
+  const lines = parseCsv(readFileSync(join(dir, csvName), 'utf8'));
+  const meta = officialFile('tfda', 'dataset-151955.json');
+  const modified = JSON.parse(readFileSync(meta.path, 'utf8')).result
+    .modifiedDate;
+  const sourceVersion = `醫療器材單一識別碼(TUDID)資料集 (data.gov.tw 151955) modifiedDate ${modified}, ${csvName}`;
+  const { rows, stats } = tudidRows(lines, byLicence, {
+    sourceUrl: file.url,
+    sourceVersion,
+    retrievedAt: file.retrievedAt,
+    officialFile: { ...file.citation, csv: csvName, datasetModified: modified },
+    officialPortal: OFFICIAL.tfdaTudid,
+  });
+  return {
+    files: await writeSource('tfda-tudid', sourceVersion, rows),
+    stats: { inputLines: lines.length, rows: rows.length, ...stats },
+  };
+}
+
+async function buildTfda() {
+  const { rows, stats, sourceVersion, inputLines } = await tfdaLicences();
+  return {
+    files: await writeSource('tfda-devices', sourceVersion, rows),
+    stats: { inputLines, rows: rows.length, ...stats },
+  };
+}
+
 const BUILDERS = {
   'anvisa-produtos': buildAnvisaProdutos,
   'anvisa-produtos-modelos': buildAnvisaModelos,
@@ -348,6 +403,8 @@ const BUILDERS = {
   'hc-mdall': buildMdall,
   'tga-daen': buildDaen,
   'cdsco-import-licences': buildCdsco,
+  'tfda-devices': buildTfda,
+  'tfda-tudid': buildTfdaTudid,
 };
 
 async function main() {

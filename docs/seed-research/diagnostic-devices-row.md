@@ -178,3 +178,13 @@ Nuevo: marca de diagnóstico publicada por ANVISA (`extra.anvisaPetitions`), a
 partir de las peticiones por número de proceso. 86 213 de 100 681 registros
 cruzan; 18 968 tienen área de diagnóstico in vitro. Los asuntos primarios
 separan MATERIAL (44 922), IVD (13 744) y EQUIPAMENTO (11 306).
+
+## Pasada 6 — Taiwán TFDA y TUDID (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas | Notas |
+|---|---|--:|---|
+| `tfda-devices` | data.fda.gov.tw export 68 (data.gov.tw 9576, `modifiedDate` 2026-10-15) | 93 430 | una fila por licencia; 104 891 líneas, 11 289 licencias con más de un fabricante |
+| `tfda-tudid` | data.fda.gov.tw export 197 (data.gov.tw 151955, `modifiedDate` 2026-10-12) | 688 258 | UDI-DI con modelo; fabricante y clase por licencia exacta; 41 sin licencia conocida |
+
+Licencia: 政府資料開放授權條款 — 第1版. Era hueco hasta la pasada 4 (la copia
+estaba en una release de GitHub que no se pudo bajar).
