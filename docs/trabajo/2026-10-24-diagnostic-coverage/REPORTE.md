@@ -1,24 +1,26 @@
 # Reporte — Buscador de centros por cobertura de estudios
 
-- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `itzan/diagnostic-coverage-dev`
-- Peldaño de evidencia alcanzado: `VERIFIED`. Faltan el PR y la entrega a `test` para `REGRESSION_VERIFIED`.
-- Avance: 16 / 16 microtareas HECHO (100 %). PR a `dev`: #841.
+- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `itzan/diagnostic-coverage-dev`,
+  `itzan/diagnostic-coverage-test`
+- Peldaño de evidencia alcanzado: `VERIFIED` en `dev` (fusionado) y en `test`.
+- Avance: 16 / 16 microtareas HECHO (100 %). PR a `dev`: #841 (fusionado). Entrega a `test`: ver
+  [Entrega a `test`](#entrega-a-test).
 
 ## Completado
 
-| ID | Qué se logró | Comando | Resultado |
-|---|---|---|---|
-| H1.S1.M1–M2 | `studyConceptIds` (uuids separados por coma, sin repetidos, de 1 a 50); `lat`/`lng` en rango WGS84 | `corepack yarn test src/modules/diagnostic_units/dto` | verde |
-| H1.S1.M3 | `lat` sin `lng` → 400 | spec del servicio + `evidencia/origen-a-medias.json` | `400 VALIDATION_FAILED` |
-| H1.S2.M1 | `findOfferedConcepts`: ofertas activas por `study_concept_id`, agrupadas por centro | `corepack yarn test src/modules/diagnostic_units/repositories` | verde |
-| H1.S3.M1 | `straightLineKm` y `coordinateOf` en `src/common/geo/` | `corepack yarn test src/common/geo` | 5/5 |
-| H1.S3.M2–M5 | Sede principal, faltantes, orden, página, vacío sin consultas | `corepack yarn test src/modules/diagnostic_units/services/diagnostic-units-search` | 21/21 (9 nuevos) |
-| H1.S4.M1 | El controller deriva a cobertura solo con `studyConceptIds` | `corepack yarn test src/modules/diagnostic_units/controllers` | verde |
-| H1.S4.M2 | `openapi/`, endpoints, módulos, catálogo de datos y Postman regenerados | `yarn docs:openapi:generate`, `docs:endpoints:generate`, `docs:modules:sync`, `docs:data:sync`, `postman:generate` | exit 0 en los cinco |
-| H1.S4.M3 | Sin cambios incompatibles | `node tools/openapi/check-breaking.mjs --base <openapi.json de dev> --head openapi/openapi.json --exceptions tools/openapi/breaking-changes-exceptions.json` | `Sin cambios incompatibles no aprobados en el contrato OpenAPI.` |
-| H2.S1.M1 | Cobertura real contra la base: completos, faltantes, orden por distancia | `GET /diagnostic-units/search?studyConceptIds=…&kind=IMAGING&lat=…&lng=…` | `evidencia/cobertura-*.json` |
-| H2.S1.M2 | El buscador sin el parámetro no cambió de forma | `GET /diagnostic-units/search?kind=IMAGING` | `evidencia/sin-cobertura.json`, sin campos de cobertura |
-| H3.S1.M1 | Suite unitaria completa | `corepack yarn test --silent` | `Tests: 1 skipped, 11119 passed, 11120 total` |
+| ID          | Qué se logró                                                                                       | Comando                                                                                                                                                      | Resultado                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| H1.S1.M1–M2 | `studyConceptIds` (uuids separados por coma, sin repetidos, de 1 a 50); `lat`/`lng` en rango WGS84 | `corepack yarn test src/modules/diagnostic_units/dto`                                                                                                        | verde                                                            |
+| H1.S1.M3    | `lat` sin `lng` → 400                                                                              | spec del servicio + `evidencia/origen-a-medias.json`                                                                                                         | `400 VALIDATION_FAILED`                                          |
+| H1.S2.M1    | `findOfferedConcepts`: ofertas activas por `study_concept_id`, agrupadas por centro                | `corepack yarn test src/modules/diagnostic_units/repositories`                                                                                               | verde                                                            |
+| H1.S3.M1    | `straightLineKm` y `coordinateOf` en `src/common/geo/`                                             | `corepack yarn test src/common/geo`                                                                                                                          | 5/5                                                              |
+| H1.S3.M2–M5 | Sede principal, faltantes, orden, página, vacío sin consultas                                      | `corepack yarn test src/modules/diagnostic_units/services/diagnostic-units-search`                                                                           | 21/21 (9 nuevos)                                                 |
+| H1.S4.M1    | El controller deriva a cobertura solo con `studyConceptIds`                                        | `corepack yarn test src/modules/diagnostic_units/controllers`                                                                                                | verde                                                            |
+| H1.S4.M2    | `openapi/`, endpoints, módulos, catálogo de datos y Postman regenerados                            | `yarn docs:openapi:generate`, `docs:endpoints:generate`, `docs:modules:sync`, `docs:data:sync`, `postman:generate`                                           | exit 0 en los cinco                                              |
+| H1.S4.M3    | Sin cambios incompatibles                                                                          | `node tools/openapi/check-breaking.mjs --base <openapi.json de dev> --head openapi/openapi.json --exceptions tools/openapi/breaking-changes-exceptions.json` | `Sin cambios incompatibles no aprobados en el contrato OpenAPI.` |
+| H2.S1.M1    | Cobertura real contra la base: completos, faltantes, orden por distancia                           | `GET /diagnostic-units/search?studyConceptIds=…&kind=IMAGING&lat=…&lng=…`                                                                                    | `evidencia/cobertura-*.json`                                     |
+| H2.S1.M2    | El buscador sin el parámetro no cambió de forma                                                    | `GET /diagnostic-units/search?kind=IMAGING`                                                                                                                  | `evidencia/sin-cobertura.json`, sin campos de cobertura          |
+| H3.S1.M1    | Suite unitaria completa                                                                            | `corepack yarn test --silent`                                                                                                                                | `Tests: 1 skipped, 11119 passed, 11120 total`                    |
 
 ## A medias
 
@@ -26,10 +28,10 @@ ninguna
 
 ## Pendiente
 
-| ID | Estado | Qué lo destraba |
-|---|---|---|
-| H3.S1.M2 | HECHO | PR #841 a `dev`, mergeable |
-| — | TODO | La misma entrega a `test` (`itzan/diagnostic-coverage-test`): el código de `diagnostic_units/`, `pharmacy_inventory/` y `common/http/` es idéntico entre `dev` y `test` |
+| ID       | Estado | Qué lo destraba                                              |
+| -------- | ------ | ------------------------------------------------------------ |
+| H3.S1.M2 | HECHO  | PR #841 a `dev`, fusionado                                   |
+| —        | HECHO  | La misma entrega a `test` (`itzan/diagnostic-coverage-test`) |
 
 ## Evidencia
 
@@ -108,6 +110,60 @@ ejemplo `Av. Beni 320, Equipetrol Norte, Santa Cruz de la Sierra, SCZ-EQP-320`, 
   `openapi/endpoints/scheduling.md`. `dev` trae cambios de `scheduling` en el controller y el DTO sin
   esos índices regenerados. Sin ellos, el paso «artefactos generados al día» del workflow de
   documentación fallaría en este PR por algo ajeno. No se tocó código de `scheduling`.
+
+## Entrega a `test`
+
+Rama `itzan/diagnostic-coverage-test` desde `test` (`771f99f0`), con los commits de #841 por
+cherry-pick sin conflictos. El commit de índices de `scheduling` no viaja: en `test` esos índices no
+están desactualizados.
+
+```
+$ corepack yarn test src/modules/diagnostic_units src/common/geo
+Tests:       117 passed, 117 total
+
+$ corepack yarn build / typecheck / eslint --max-warnings=0 <archivos tocados>   → exit 0
+
+$ node tools/openapi/check-breaking.mjs --base <openapi.json de test> --head openapi/openapi.json --exceptions …
+Sin cambios incompatibles no aprobados en el contrato OpenAPI.
+
+$ corepack yarn test --silent
+Tests:       4 failed, 1 skipped, 10665 passed, 10670 total
+```
+
+Los 4 rojos fallan igual sobre `test` sin este cambio:
+
+- `audit-trail-coverage.spec.ts` (2): las rutas de onboarding que mutan no declaran `@Audited` ni
+  `@NotAudited`.
+- `error-traceability.http.spec.ts`: espera la ruta del archivo con `/`.
+- `glossary-articles.catalog.spec.ts`: un artículo no llega a las 2.000 palabras.
+
+Respuestas reales de la API compilada desde esta rama (`evidencia/test/`):
+
+```
+# Los dos estudios, origen en Santa Cruz
+Centro de Imagenología Equipetrol  complete=true  missing=[]  distanceKm=1.1
+Centro Diagnóstico Cochabamba      complete=true  missing=[]  distanceKm=318.5
+# Más un concepto que nadie ofrece: los dos complete=false con ese concepto en missing
+# Origen en Cochabamba: Cochabamba 0.5, Equipetrol 317.8
+# Solo el concepto que nadie ofrece: {"total":0,"items":[]}
+# lat sin lng: 400 VALIDATION_FAILED
+# kind=IMAGING sin studyConceptIds: total 2, sin campos de cobertura
+```
+
+### Hallazgos ajenos en `test` (no tocados)
+
+1. `yarn docs:openapi:lint` sobre el contrato de `test` da 3 errores «Every operation should have
+   security defined»:
+   - `POST /iam/auth/upload-registration-signature-image`;
+   - `GET /public/profiles/o/{slug}/services`;
+   - `GET /public/profiles/f/{slug}/products`.
+2. El contrato de `test` no trae rutas que ya están en su código:
+   - `/iam/onboarding-drafts/{formType}/{draftId}` (GET, PUT y DELETE);
+   - `POST /telemetry/onboarding-events`;
+   - `/admin/analytics/onboarding/funnel` y `/heatmap`.
+
+   Regenerarlo las agrega, junto con 4 errores de lint más del mismo tipo. No se regeneran acá para
+   no mezclar contrato ajeno con este cambio.
 
 ## Riesgos residuales
 
