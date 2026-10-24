@@ -77218,7 +77218,7 @@
         ]
       },
       "delete": {
-        "description": "La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.",
+        "description": "La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Por omisión las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds. Con ?affectedBookings=cancel se cancelan con el motivo «cambio de horario» y se avisa a cada paciente (cancelledBookings).",
         "operationId": "SchedulingController_retireTemplate",
         "parameters": [
           {
@@ -77227,6 +77227,19 @@
             "in": "path",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "affectedBookings",
+            "required": false,
+            "in": "query",
+            "description": "cancel: cancela las citas vivas del horario y avisa a cada paciente. keep o ausente: las conserva, como siempre.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cancel",
+                "keep"
+              ]
             }
           }
         ],
@@ -77265,6 +77278,54 @@
           }
         ],
         "summary": "Retirar una plantilla de agenda y soltar sus cupos libres",
+        "tags": [
+          "scheduling"
+        ]
+      }
+    },
+    "/scheduling/templates/{id}/live-bookings": {
+      "get": {
+        "description": "Las citas confirmadas o pendientes que un retiro con affectedBookings=cancel cancelaría, y las de pacientes ya recibidos, que lo frenan. Sólo para quien administra la agenda.",
+        "operationId": "SchedulingController_listTemplateLiveBookings",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las citas vivas de una plantilla antes de retirarla",
         "tags": [
           "scheduling"
         ]
