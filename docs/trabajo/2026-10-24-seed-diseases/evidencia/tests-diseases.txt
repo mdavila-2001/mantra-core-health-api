@@ -1,0 +1,95 @@
+TAP version 13
+# Subtest: readObo conserva nombre, definición con referencias, sinónimos y anotaciones de xref/is_a
+ok 1 - readObo conserva nombre, definición con referencias, sinónimos y anotaciones de xref/is_a
+  ---
+  duration_ms: 109.49288
+  type: 'test'
+  ...
+# Subtest: normalizeCurie: prefijos de cada fuente al sistema del catálogo; SNOMED y MedDRA no se mapean
+ok 2 - normalizeCurie: prefijos de cada fuente al sistema del catálogo; SNOMED y MedDRA no se mapean
+  ---
+  duration_ms: 0.819397
+  type: 'test'
+  ...
+# Subtest: MONDO: sólo enfermedad humana; animales no humanos y «disease characteristic» quedan fuera
+ok 3 - MONDO: sólo enfermedad humana; animales no humanos y «disease characteristic» quedan fuera
+  ---
+  duration_ms: 43.625946
+  type: 'test'
+  ...
+# Subtest: DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED descartado
+ok 4 - DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED descartado
+  ---
+  duration_ms: 7.814292
+  type: 'test'
+  ...
+# Subtest: NCIt: sólo el subárbol Disease or Disorder (C2991); hallazgos y fármacos fuera
+ok 5 - NCIt: sólo el subárbol Disease or Disorder (C2991); hallazgos y fármacos fuera
+  ---
+  duration_ms: 52.302133
+  type: 'test'
+  ...
+# Subtest: Orphanet: nombre, sinónimos y definición en castellano; equivalencias tal como las declara Orphanet
+ok 6 - Orphanet: nombre, sinónimos y definición en castellano; equivalencias tal como las declara Orphanet
+  ---
+  duration_ms: 14.299328
+  type: 'test'
+  ...
+# Subtest: claves cruzadas: un concepto por código citado, con el código como display; destinos ausentes = no resueltos
+ok 7 - claves cruzadas: un concepto por código citado, con el código como display; destinos ausentes = no resueltos
+  ---
+  duration_ms: 7.967992
+  type: 'test'
+  ...
+# Subtest: plan: ids deterministas y únicos, vigentes antes que obsoletos, conceptos internos de la API
+ok 8 - plan: ids deterministas y únicos, vigentes antes que obsoletos, conceptos internos de la API
+  ---
+  duration_ms: 6.548997
+  type: 'test'
+  ...
+# Subtest: tabulación simple CIE-11: filas residuales sin URI de Fundación y notas de codificación multilínea
+ok 9 - tabulación simple CIE-11: filas residuales sin URI de Fundación y notas de codificación multilínea
+  ---
+  duration_ms: 96.018585
+  type: 'test'
+  ...
+# Subtest: buildIcd11Mms: jerarquía capítulo → bloque → categoría y correspondencia OMS 11→10
+ok 10 - buildIcd11Mms: jerarquía capítulo → bloque → categoría y correspondencia OMS 11→10
+  ---
+  duration_ms: 3.241825
+  type: 'test'
+  ...
+# Subtest: OMS 10→11: un destino por código CIE-10; los destinos poscoordinados no se reducen
+ok 11 - OMS 10→11: un destino por código CIE-10; los destinos poscoordinados no se reducen
+  ---
+  duration_ms: 0.829167
+  type: 'test'
+  ...
+# Subtest: citas: anotaciones HPO (OMIM, ORPHA, DECIPHER) y diagnósticos de phenopacket-store
+ok 12 - citas: anotaciones HPO (OMIM, ORPHA, DECIPHER) y diagnósticos de phenopacket-store
+  ---
+  duration_ms: 48.130793
+  type: 'test'
+  ...
+# Subtest: resolveXrefs: citas → claves con `citedBy`; un ORPHA citado que no existe queda sin resolver
+ok 13 - resolveXrefs: citas → claves con `citedBy`; un ORPHA citado que no existe queda sin resolver
+  ---
+  duration_ms: 0.820526
+  type: 'test'
+  ...
+# Subtest: saturación: deduplica por equivalencia o xref publicados; «más amplio/estrecho» no deduplica
+ok 14 - saturación: deduplica por equivalencia o xref publicados; «más amplio/estrecho» no deduplica
+  ---
+  duration_ms: 1.871618
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1016.643192
+exit 0
