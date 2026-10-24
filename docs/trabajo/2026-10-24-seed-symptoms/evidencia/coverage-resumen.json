@@ -1,0 +1,287 @@
+{
+ "diseases": {
+  "universe": {
+   "root": "MONDO:0700096",
+   "mondoHumanDiseases": 23263
+  },
+  "withPhenotypes": 12631,
+  "withoutPhenotypes": 10632,
+  "coveragePct": 54.3,
+  "bySourceCombination": {
+   "hpoa": 9288,
+   "doid+hpoa": 203,
+   "doid+hpo-common-disease+hpoa": 77,
+   "hpo-common-disease+hpoa+mondo": 65,
+   "hpo-common-disease+hpoa": 575,
+   "hpoa+mondo": 139,
+   "doid+hpo-common-disease+hpoa+mondo": 38,
+   "doid+hpoa+mondo": 16,
+   "mondo": 86,
+   "doid+mondo": 34,
+   "doid+hpo-common-disease+mondo": 77,
+   "hpo-common-disease+mondo": 91,
+   "doid": 207,
+   "doid+hpo-common-disease": 209,
+   "hpo-common-disease": 1526
+  },
+  "annotatedCodesWithoutMondoEquivalence": {
+   "OMIM": 87,
+   "DECIPHER": 1,
+   "ORPHA": 33,
+   "DOID": 350,
+   "MESH": 540
+  }
+ },
+ "phenotypes": {
+  "hpoPhenotypicAbnormalityTerms": 19178,
+  "hpoTermsWithAtLeastOneDisease": 11867
+ },
+ "relations": {
+  "hpoa": {
+   "rows": 286651,
+   "positive": 285918,
+   "negated": 733,
+   "diseases": 12880,
+   "diseasesByPrefix": {
+    "OMIM": 8478,
+    "DECIPHER": 47,
+    "ORPHA": 4355
+   },
+   "phenotypes": 11658,
+   "byAspect": {
+    "P": 268906,
+    "C": 8559,
+    "I": 8978,
+    "M": 77,
+    "H": 131
+   },
+   "byEvidence": {
+    "PCS": 119333,
+    "TAS": 137011,
+    "IEA": 30307
+   },
+   "byFrequencyKind": {
+    "ratio": 103704,
+    "(vacío)": 63396,
+    "hpo-term": 119446,
+    "percent": 105
+   }
+  },
+  "mondo": {
+   "rows": 974,
+   "positive": 974,
+   "negated": 0,
+   "diseases": 700,
+   "diseasesByPrefix": {
+    "MONDO": 700
+   },
+   "phenotypes": 413,
+   "byAspect": {
+    "not-phenotype:HP:0012823": 148,
+    "P": 814,
+    "not-phenotype:HP:0000005": 10,
+    "not-phenotype:HP:0032443": 1,
+    "non-human-disease": 1
+   },
+   "byEvidence": {
+    "(vacío)": 691,
+    "source=\"MONDO:Wikidata\"": 129,
+    "source=\"PMID:27695855\"": 1,
+    "source=\"Wikipedia:Keratomalacia\"": 1,
+    "source=\"DOID:11750\"": 2,
+    "source=\"Wikipedia:Dysentery\"": 1,
+    "source=\"Orphanet:861\"": 1,
+    "source=\"NCIT:C34845\"": 3,
+    "source=\"https://www.ncbi.nlm.nih.gov/books/NBK431070/\"": 1,
+    "source=\"MONDO:Wikidata\", source=\"https://www.ncbi.nlm.nih.gov/books/NBK431070/\"": 1,
+    "source=\"DOID:2354\"": 1,
+    "source=\"https://github.com/monarch-initiative/mondo/issues/1766\"": 11,
+    "source=\"Orphanet:1798\"": 1,
+    "source=\"Orphanet:1328\"": 1,
+    "source=\"Orphanet:2097\"": 1,
+    "source=\"https://orcid.org/0000-0002-2825-0621\"": 1,
+    "source=\"Orphanet:2790\"": 1,
+    "source=\"Orphanet:443098\"": 1,
+    "source=\"Orphanet:2658\"": 1,
+    "source=\"Orphanet:33001\"": 1,
+    "source=\"Orphanet:174\"": 1,
+    "source=\"OMIM:156550\"": 1,
+    "source=\"Orphanet:485\"": 2,
+    "source=\"Orphanet:2710\"": 1,
+    "source=\"Orphanet:1562\"": 1,
+    "source=\"OMIM:608358\"": 1,
+    "source=\"Orphanet:85191\"": 1,
+    "source=\"Orphanet:3352\"": 1,
+    "source=\"https://github.com/monarch-initiative/mondo/issues/824\"": 3,
+    "source=\"Orphanet:64\"": 2,
+    "source=\"MONDO:0028737\", source=\"https://github.com/monarch-initiative/mondo/issues/2717\", source=\"https://orcid.org/0000-0001-5208-3432\"": 1,
+    "source=\"https://github.com/monarch-initiative/mondo/issues/1175\"": 4,
+    "source=\"Orphanet:1802\"": 1,
+    "source=\"Orphanet:2801\"": 1,
+    "source=\"Orphanet:3416\"": 1,
+    "source=\"Orphanet:417\"": 1,
+    "source=\"Orphanet:1493\"": 1,
+    "source=\"Orphanet:634\"": 2,
+    "source=\"Orphanet:2772\"": 1,
+    "source=\"Orphanet:2324\"": 1,
+    "source=\"Orphanet:3005\"": 1,
+    "source=\"Orphanet:85184\"": 1,
+    "source=\"OMIM:300755\"": 1,
+    "source=\"Orphanet:391327\"": 1,
+    "source=\"Orphanet:565\"": 2,
+    "source=\"PMID:22634989\"": 5,
+    "source=\"Orphanet:79106\"": 1,
+    "source=\"Orphanet:2786\"": 1,
+    "source=\"Orphanet:166277\"": 1,
+    "source=\"Orphanet:85188\"": 1,
+    "source=\"Orphanet:1606\"": 2,
+    "source=\"Orphanet:50811\"": 1,
+    "source=\"Orphanet:75325\"": 1,
+    "source=\"Orphanet:168796\"": 1,
+    "source=\"Orphanet:85186\"": 1,
+    "source=\"Orphanet:314667\"": 1,
+    "source=\"https://www.clinicalgenome.org/affiliation/40049/\"": 2,
+    "source=\"OMIM:614892\"": 1,
+    "source=\"Orphanet:438117\"": 1,
+    "source=\"Orphanet:457378\"": 1,
+    "source=\"Orphanet:1775\"": 4,
+    "source=\"Orphanet:2050\"": 1,
+    "source=\"Orphanet:230857\"": 1,
+    "source=\"https://orcid.org/0000-0001-5208-3432\"": 3,
+    "source=\"Orphanet:248095\"": 1,
+    "source=\"Orphanet:2771\"": 1,
+    "source=\"Orphanet:2779\"": 1,
+    "source=\"Orphanet:2781\"": 1,
+    "source=\"Orphanet:2787\"": 1,
+    "source=\"Orphanet:289098\"": 1,
+    "source=\"Orphanet:314029\"": 1,
+    "source=\"Orphanet:3152\"": 1,
+    "source=\"Orphanet:319195\"": 1,
+    "source=\"Orphanet:324364\"": 1,
+    "source=\"PMID:28798906\"": 1,
+    "source=\"Orphanet:3380\"": 1,
+    "source=\"Orphanet:3440\"": 2,
+    "source=\"Orphanet:391330\"": 1,
+    "source=\"Orphanet:405\"": 1,
+    "source=\"Orphanet:436\"": 1,
+    "source=\"doi:10.1038/ncomms6360\"": 2,
+    "source=\"PMID:23801135\"": 5,
+    "source=\"Orphanet:666\"": 1,
+    "source=\"Orphanet:73224\"": 1,
+    "source=\"Orphanet:73230\"": 1,
+    "source=\"Orphanet:79263\"": 1,
+    "source=\"Orphanet:85193\"": 1,
+    "source=\"Orphanet:90350\"": 1,
+    "source=\"Orphanet:93443\"": 1,
+    "source=\"MESH:C535991\"": 1,
+    "source=\"MESH:C538206\"": 1,
+    "source=\"Wikipedia:Alice_in_Wonderland_syndrome\"": 1,
+    "source=\"Orphanet:557003\"": 1,
+    "source=\"Orphanet:498481\"": 1,
+    "source=\"Orphanet:536532\"": 1,
+    "source=\"PMID:32215896\", source=\"PMID:32237238\", source=\"PMID:32240279\", source=\"doi:10.1101/2020.03.25.009084\", source=\"https://github.com/monarch-initiative/mondo/issues/1373\"": 1,
+    "source=\"PMID:32237238\", source=\"https://github.com/monarch-initiative/mondo/issues/1373\"": 1,
+    "source=\"https://clinicalgenome.org/affiliation/40006/\"": 9,
+    "source=\"https://github.com/monarch-initiative/mondo/issues/1637\", source=\"https://orcid.org/0000-0001-7090-9648\"": 1,
+    "source=\"PMID:32511692\", source=\"PMID:32529358\", source=\"PMID:32630212\"": 1,
+    "source=\"PMID:33031361\", source=\"https://github.com/monarch-initiative/mondo/issues/2896\"": 1,
+    "source=\"https://clinicalgenome.org/affiliation/40005/\"": 1,
+    "source=\"Orphanet:699734\"": 1,
+    "source=\"Orphanet:699761\"": 1,
+    "source=\"Orphanet:699802\"": 1,
+    "source=\"Orphanet:700467\"": 1,
+    "source=\"Orphanet:700484\"": 1,
+    "source=\"Orphanet:700492\"": 1,
+    "source=\"NCIT:C61283\"": 1
+   },
+   "byFrequencyKind": {
+    "(vacío)": 974
+   }
+  },
+  "doid": {
+   "rows": 2268,
+   "positive": 2268,
+   "negated": 0,
+   "diseases": 873,
+   "diseasesByPrefix": {
+    "DOID": 873
+   },
+   "phenotypes": 305,
+   "byAspect": {
+    "(vacío)": 2262,
+    "non-human-disease": 6
+   },
+   "byEvidence": {
+    "(vacío)": 2268
+   },
+   "byFrequencyKind": {
+    "(vacío)": 2268
+   }
+  },
+  "hpo-common-disease": {
+   "rows": 132600,
+   "positive": 132600,
+   "negated": 0,
+   "diseases": 3642,
+   "diseasesByPrefix": {
+    "DOID": 2596,
+    "MESH": 1046
+   },
+   "phenotypes": 4524,
+   "byAspect": {
+    "P": 132104,
+    "not-phenotype:HP:0012823": 157,
+    "not-phenotype:HP:0032443": 165,
+    "non-human-disease": 174
+   },
+   "byEvidence": {
+    "IEA": 527,
+    "ITM": 131986,
+    "TAS": 87
+   },
+   "byFrequencyKind": {
+    "(vacío)": 132600
+   }
+  }
+ },
+ "nonHumanDiseaseRows": {
+  "mondo": 1,
+  "doid": 6,
+  "hpoa": 0,
+  "hpo-common-disease": 174
+ },
+ "terms": {
+  "hpo": {
+   "terms": 19894,
+   "withSpanishName": 19345,
+   "withDefinition": 17432,
+   "synonymsEn": 26260,
+   "isAEdges": 24436,
+   "version": "2026-09-01",
+   "bySubontology": {
+    "(vacío)": 1,
+    "HP:0000118": 19178,
+    "HP:0000005": 41,
+    "HP:0012823": 356,
+    "HP:0032443": 208,
+    "HP:0020228": 94,
+    "HP:0032223": 9,
+    "HP:0040279": 7
+   }
+  },
+  "symp": {
+   "terms": 895,
+   "withSpanishName": 0,
+   "withDefinition": 424,
+   "synonymsEn": 247,
+   "isAEdges": 898
+  },
+  "ncit": {
+   "terms": 3988,
+   "withSpanishName": 0,
+   "withDefinition": 3979,
+   "synonymsEn": 3694,
+   "isAEdges": 4094
+  }
+ }
+}

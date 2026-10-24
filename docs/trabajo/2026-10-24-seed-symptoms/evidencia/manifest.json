@@ -1,0 +1,105 @@
+{
+  "generatedAt": "2026-10-24T02:15:12.311Z",
+  "dir": "<GLOSSARY_BUILD_DIR>/symptoms-sources",
+  "files": [
+    {
+      "key": "hpo-json",
+      "file": "hpo/hp.json",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp.json",
+      "owner": "Human Phenotype Ontology Consortium / Monarch Initiative",
+      "license": "HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)",
+      "bytes": 21915519,
+      "sha256": "a7b3a012e7b4007a35a7cf8da35f2373b54cc16907f80d13d62470d31f833501",
+      "retrievedAt": "2026-10-24T00:34:56.809Z",
+      "declaredVersion": "2026-09-01"
+    },
+    {
+      "key": "hpo-es",
+      "file": "hpo/hp-es.babelon.tsv",
+      "url": "https://raw.githubusercontent.com/obophenotype/hpo-translations/main/babelon/hp-es.babelon.tsv",
+      "owner": "HPO Translation Project (hpo-translations)",
+      "license": "HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)",
+      "bytes": 2116349,
+      "sha256": "00972e33775a0340ad7b45620f0ff1d2794766c45beb937a165ee86e6f16ed9a",
+      "retrievedAt": "2026-10-24T00:34:59.673Z",
+      "declaredVersion": null
+    },
+    {
+      "key": "hpoa",
+      "file": "hpo/phenotype.hpoa",
+      "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/phenotype.hpoa",
+      "owner": "Human Phenotype Ontology Consortium (anotaciones de OMIM, Orphanet y DECIPHER)",
+      "license": "HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)",
+      "bytes": 35816037,
+      "sha256": "e89aa39c8f97bf5a52c5d160f9250a603681d630ade8ec2679d84ac5aece1f72",
+      "retrievedAt": "2026-10-24T00:34:58.353Z",
+      "declaredVersion": "2026-09-02"
+    },
+    {
+      "key": "symp",
+      "file": "symp/symp.obo",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/SymptomOntology/main/src/ontology/symp.obo",
+      "owner": "Symptom Ontology — Disease Ontology project (University of Maryland School of Medicine)",
+      "license": "CC0 1.0 (declarada en el encabezado: terms:license https://creativecommons.org/publicdomain/zero/1.0/)",
+      "bytes": 231641,
+      "sha256": "09ac08ff1595e671826c6a4b8a5141f4609bea7f71e8393a1fea997bceabcc2b",
+      "retrievedAt": "2026-10-24T00:35:00.069Z",
+      "declaredVersion": "releases/2026-07-30/symp.obo"
+    },
+    {
+      "key": "doid-owl",
+      "file": "doid/doid.owl",
+      "url": "https://raw.githubusercontent.com/DiseaseOntology/HumanDiseaseOntology/main/src/ontology/doid.owl",
+      "owner": "Human Disease Ontology (University of Maryland School of Medicine)",
+      "license": "CC0 1.0 (declarada en el encabezado del OWL)",
+      "bytes": 28804846,
+      "sha256": "7b80ccc70f5d84e7bf3dd93fd2a2f3883506076e35f592bd750490708bb5ab1f",
+      "retrievedAt": "2026-10-24T00:36:23.673Z",
+      "declaredVersion": "2026-09-30"
+    },
+    {
+      "key": "mondo",
+      "file": "mondo/mondo.obo",
+      "url": "https://github.com/monarch-initiative/mondo/releases/latest/download/mondo.obo",
+      "owner": "Mondo Disease Ontology — Monarch Initiative",
+      "license": "CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/, declarada en el encabezado)",
+      "bytes": 53320617,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "retrievedAt": "2026-10-24T00:35:02.685Z",
+      "declaredVersion": "releases/2026-10-06"
+    },
+    {
+      "key": "ncit",
+      "file": "ncit/ncit.obo",
+      "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
+      "owner": "NCI Thesaurus (National Cancer Institute, EVS) — edición OBO (ncit-obo-org)",
+      "license": "CC BY 4.0 según los términos de uso de NCI EVS (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm, registrados en docs/terminology-expansion/SOURCE-REGISTER.md): atribuir a NCI con la versión y no presentar un derivado como la edición oficial; el .obo no la declara — reconfirmar",
+      "bytes": 248162694,
+      "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
+      "retrievedAt": "2026-10-24T02:08:29.185Z",
+      "declaredVersion": "releases/2026-03-19"
+    },
+    {
+      "key": "hpo-common-disease",
+      "file": "monarch/common_disease_annot.tar.gz",
+      "url": "https://storage.googleapis.com/data-public-monarchinitiative/hpo/common_disease_annot.tar.gz",
+      "owner": "HPO / Monarch Initiative — anotaciones de enfermedades comunes (Groza et al. 2015, AJHG, PMC4572507)",
+      "license": "HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)",
+      "bytes": 6724219,
+      "sha256": "4c871573d57199cd944cac991ecdbbe60272420376a4064db92f39691afc93d2",
+      "retrievedAt": "2026-10-24T00:36:42.885Z",
+      "declaredVersion": null
+    },
+    {
+      "key": "monarch-hpoa-edges",
+      "file": "monarch/hpoa_disease_to_phenotype_edges.tsv",
+      "url": "https://storage.googleapis.com/data-public-monarchinitiative/monarch-kg/latest/transform_output/hpoa_disease_to_phenotype_edges.tsv",
+      "owner": "Monarch Initiative KG (transformación de phenotype.hpoa)",
+      "license": "derivado de phenotype.hpoa (licencia de HPO); sólo se usa para medir saturación, no se carga",
+      "bytes": 73917456,
+      "sha256": "ea89c38c162ab7d3b5c8cedf5f4978781df9028fd2bd2fb9c51f16f12e94a104",
+      "retrievedAt": "2026-10-24T00:45:41.293Z",
+      "declaredVersion": null
+    }
+  ]
+}

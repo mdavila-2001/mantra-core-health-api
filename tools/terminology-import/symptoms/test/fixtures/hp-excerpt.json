@@ -1,0 +1,461 @@
+{
+ "graphs": [
+  {
+   "id": "http://purl.obolibrary.org/obo/hp.json",
+   "meta": {
+    "version": "http://purl.obolibrary.org/obo/hp/releases/2026-09-01/hp.json",
+    "basicPropertyValues": [
+     {
+      "pred": "http://purl.org/dc/terms/license",
+      "val": "https://hpo.jax.org/app/license"
+     },
+     {
+      "pred": "http://www.w3.org/2002/07/owl#versionInfo",
+      "val": "2026-09-01"
+     }
+    ]
+   },
+   "nodes": [
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000001",
+     "lbl": "All",
+     "type": "CLASS",
+     "meta": {
+      "comments": [
+       "Root of all terms in the Human Phenotype Ontology."
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000118",
+     "lbl": "Phenotypic abnormality",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A phenotypic abnormality.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-0736-9199"
+       ]
+      },
+      "comments": [
+       "This is the root of the phenotypic abnormality subontology of the HPO."
+      ],
+      "synonyms": [
+       {
+        "pred": "hasExactSynonym",
+        "val": "Organ abnormality"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000707",
+     "lbl": "Abnormality of the nervous system",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "An abnormality of the nervous system.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-0736-9199"
+       ]
+      },
+      "comments": [
+       "The nervous system comprises the neuraxis (brain, spinal cord, and ventricles), the autonomic nervous system, the enteric nervous system, and the peripheral nervous system."
+      ],
+      "synonyms": [
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasBroadSynonym",
+        "val": "Brain and/or spinal cord issue"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Abnormality of the nervous system"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Neurologic abnormalities"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Neurological abnormality"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0001333"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0006987"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0001250",
+     "lbl": "Seizure",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A seizure is an intermittent abnormality of nervous system physiology characterized by a transient occurrence of signs and/or symptoms due to abnormal excessive or synchronous neuronal activity in the brain.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-0736-9199",
+        "PMID:15816939"
+       ]
+      },
+      "comments": [
+       "A type of electrographic seizure has been proposed in neonates which does not have a clinical correlate, it is electrographic only. The term epilepsy is not used to describe recurrent febrile seizures. Epilepsy presumably reflects an abnormally reduced seizure threshold."
+      ],
+      "synonyms": [
+       {
+        "pred": "hasExactSynonym",
+        "val": "Epileptic seizure"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#plural_form",
+        "pred": "hasExactSynonym",
+        "val": "Seizures"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasRelatedSynonym",
+        "val": "Epilepsy"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0001275"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0001303"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002125"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002182"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002279"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002306"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002348"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002391"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002417"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002430"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002431"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002432"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002434"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002437"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002466"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002479"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0002794"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0006997"
+       },
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0010520"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0001871",
+     "lbl": "Abnormality of blood and blood-forming tissues",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "An abnormality of the hematopoietic system.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-0736-9199"
+       ]
+      },
+      "comments": [
+       "The hematopoietic system comprises the organs that are involved in the production of blood, primarily the bone marrow, spleen, tonsils, and lymph nodes."
+      ],
+      "synonyms": [
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Abnormality of blood and blood-forming tissues"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#uk_spelling",
+        "pred": "hasExactSynonym",
+        "val": "Abnormality of the haematopoietic system"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "Abnormality of the hematopoietic system"
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#uk_spelling",
+        "pred": "hasExactSynonym",
+        "val": "Haematological abnormality"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "Hematological abnormality"
+       },
+       {
+        "pred": "hasRelatedSynonym",
+        "val": "Hematologic disease"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://www.geneontology.org/formats/oboInOwl#hasAlternativeId",
+        "val": "HP:0003135"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0001945",
+     "lbl": "Fever",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "Body temperature elevated above the normal range.",
+       "xrefs": [
+        "https://orcid.org/0009-0006-4530-3154",
+        "PMID:9759682"
+       ]
+      },
+      "comments": [
+       "Fever has been defined as a state of elevated core temperature, which is often, but not necessarily, part of the defensive responses of multicellular organisms (host) to the invasion of live (microorganisms) or inanimate matter recognized as pathogenic or alien by the host. The febrile response (of which fever is a component) is a complex physiologic reaction to disease, involving a cytokine-mediated rise in core temperature, generation of acute phase reactants, and activation of numerous physiologic, endocrinologic, and immunologic systems. The rise in temperature during fever is to be distinguished from that occurring during episodes of hyperthermia. Unlike fever, hyperthermia involves an unregulated rise in body temperature in which pyrogenic cytokines are not directly involved and against which standard antipyretics are ineffective. It represents a failure of thermoregulatory homeostasis, in which there is uncontrolled heat production, inadequate heat dissipation, or defective hypothalamic thermoregulation."
+      ],
+      "synonyms": [
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Fever"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "Hyperthermia"
+       },
+       {
+        "pred": "hasExactSynonym",
+        "val": "Pyrexia"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0007269",
+     "lbl": "Spinal muscular atrophy",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "Muscular weakness and atrophy related to loss of the motor neurons of the spinal cord and brainstem.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-0736-9199"
+       ]
+      },
+      "synonyms": [
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Spinal muscle degeneration",
+        "xrefs": [
+         "https://orcid.org/0000-0001-5208-3432"
+        ]
+       },
+       {
+        "synonymType": "http://purl.obolibrary.org/obo/hp#layperson",
+        "pred": "hasExactSynonym",
+        "val": "Spinal muscle wasting",
+        "xrefs": [
+         "https://orcid.org/0000-0001-5208-3432"
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0012638",
+     "lbl": "Abnormal nervous system physiology",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "A functional anomaly of the nervous system.",
+       "xrefs": [
+        "https://orcid.org/0000-0002-0736-9199"
+       ]
+      },
+      "synonyms": [
+       {
+        "pred": "hasExactSynonym",
+        "val": "Abnormality of nervous system physiology"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.org/dc/terms/creator",
+        "val": "https://orcid.org/0000-0002-0736-9199"
+       },
+       {
+        "pred": "http://purl.org/dc/terms/date",
+        "val": "2014-01-19T08:02:46Z"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0040279",
+     "lbl": "Frequency",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "Class to represent frequency of phenotypic abnormalities within a patient cohort."
+      },
+      "comments": [
+       "Aligned with Orphanet"
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.org/dc/terms/creator",
+        "val": "https://orcid.org/0000-0002-5316-1399"
+       },
+       {
+        "pred": "http://purl.org/dc/terms/date",
+        "val": "2016-12-01T11:44:56Z"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0040281",
+     "lbl": "Very frequent",
+     "type": "CLASS",
+     "meta": {
+      "definition": {
+       "val": "Present in 80% to 99% of the cases."
+      },
+      "synonyms": [
+       {
+        "pred": "hasExactSynonym",
+        "val": "Very frequent (99-80%)"
+       }
+      ],
+      "xrefs": [
+       {
+        "val": "ORPHA:453311"
+       }
+      ],
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.org/dc/terms/creator",
+        "val": "https://orcid.org/0000-0002-5316-1399"
+       },
+       {
+        "pred": "http://purl.org/dc/terms/date",
+        "val": "2016-12-01T11:44:56Z"
+       }
+      ]
+     }
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000057",
+     "lbl": "obsolete Clitoromegaly",
+     "type": "CLASS",
+     "meta": {
+      "basicPropertyValues": [
+       {
+        "pred": "http://purl.obolibrary.org/obo/IAO_0100001",
+        "val": "HP:0008665"
+       }
+      ],
+      "deprecated": true
+     }
+    }
+   ],
+   "edges": [
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0000118",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0000001"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0000707",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0000118"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0001250",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0012638"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0001871",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0000118"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0012638",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0000707"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0040279",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0000001"
+    },
+    {
+     "sub": "http://purl.obolibrary.org/obo/HP_0040281",
+     "pred": "is_a",
+     "obj": "http://purl.obolibrary.org/obo/HP_0040279"
+    }
+   ]
+  }
+ ]
+}

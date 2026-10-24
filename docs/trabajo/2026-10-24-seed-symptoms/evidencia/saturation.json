@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-10-24T03:19:51.691Z",
+  "passes": [
+    {
+      "pass": 1,
+      "sources": [
+        "HPO hp.json",
+        "HPO hp-es.babelon.tsv",
+        "phenotype.hpoa"
+      ],
+      "newTerms": 19894,
+      "newRelations": 248404
+    },
+    {
+      "pass": 2,
+      "sources": [
+        "Symptom Ontology",
+        "Human Disease Ontology (RO:0002452)"
+      ],
+      "newTerms": 895,
+      "newRelations": 2262
+    },
+    {
+      "pass": 3,
+      "sources": [
+        "NCI Thesaurus (signos y síntomas)",
+        "Mondo disease_has_feature"
+      ],
+      "newTerms": 1093,
+      "overlapsByPublishedXref": 20,
+      "newRelations": 588
+    },
+    {
+      "pass": 4,
+      "sources": [
+        "HPO common disease annotations (Groza 2015)"
+      ],
+      "newTerms": 0,
+      "newRelations": 124301
+    },
+    {
+      "pass": 5,
+      "sources": [
+        "Monarch KG hpoa_disease_to_phenotype_edges.tsv"
+      ],
+      "newTerms": 0,
+      "read": 268906,
+      "newRelations": 0
+    },
+    {
+      "pass": 6,
+      "sources": [
+        "NCI Thesaurus — hallazgos clínicos por sitio o sistema (C36278, tipo semántico Finding)"
+      ],
+      "newTerms": 2868,
+      "newRelations": 0
+    }
+  ]
+}

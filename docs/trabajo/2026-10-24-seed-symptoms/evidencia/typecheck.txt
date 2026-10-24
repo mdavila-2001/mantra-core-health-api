@@ -1,0 +1,2 @@
+$ NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck   # tsc --noEmit: sin salida si pasa
+exit=0
