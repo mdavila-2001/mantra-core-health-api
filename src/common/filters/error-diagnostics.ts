@@ -78,7 +78,9 @@ export function describeForDiagnostics(
 
 /**
  * Los marcos del stack que caen dentro de `src/` —en desarrollo— o de
- * `dist/src/` —el build—, sin la ruta absoluta del disco.
+ * `dist/src/` —el build—, sin la ruta absoluta del disco y siempre con `/`:
+ * en Windows el stack trae `src\common\...` y el diagnóstico tiene que
+ * leerse igual en cualquier máquina.
  *
  * Los de `node_modules` se descartan: que el error pasó por Express o por
  * MikroORM no le dice a nadie qué línea propia hay que mirar.
@@ -91,6 +93,7 @@ function whereOf(stack: string | undefined): { where?: string[] } {
     .filter((line) => !line.includes('node_modules'))
     .map((line) => /(?:^|[\\/])((?:dist[\\/])?src[\\/][^\s)]+)/.exec(line)?.[1])
     .filter((frame): frame is string => frame !== undefined)
+    .map((frame) => frame.replace(/\\/g, '/'))
     .slice(0, MAX_FRAMES);
   return frames.length > 0 ? { where: frames } : {};
 }
