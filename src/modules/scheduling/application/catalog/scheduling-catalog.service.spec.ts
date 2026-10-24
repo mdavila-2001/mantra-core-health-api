@@ -2882,6 +2882,26 @@ describe('SchedulingCatalogService', () => {
           expect(d.catalogRepo.createException).not.toHaveBeenCalled();
         });
 
+        it('la agenda de OTRO profesional: prohibido antes de mirar una sola cita', async () => {
+          // La vista previa trae nombres de pacientes. Sólo quien administra
+          // la agenda puede verlos; a cualquier otro se le cierra la puerta
+          // antes de describir o cancelar nada.
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+
+          await expect(
+            d.service.createException(RESOURCE, dto, {
+              id: 'user-otro',
+              roles: ['PRACTITIONER'],
+              practitionerProfileId: 'hp-otro',
+              tenantIds: [TENANT],
+            } as never),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(d.catalogRepo.findBookingsOfSlots).not.toHaveBeenCalled();
+          expect(d.noticeRepo.findDisplayNameForProfile).not.toHaveBeenCalled();
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+        });
+
         it('una cita confirmada en OTRA sede sigue frenando (AG-3), aunque se confirme', async () => {
           const d = buildCatalog();
           withBookedRange(d, { cancellable: [confirmed] });
