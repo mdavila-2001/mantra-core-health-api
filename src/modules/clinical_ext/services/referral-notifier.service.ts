@@ -129,7 +129,12 @@ export class ReferralNotifier {
       return true;
     } catch (error: unknown) {
       this.logger.warn(
-        { operation: 'clinical_ext.referral.notice', referralId, error },
+        {
+          operation: 'clinical_ext.referral.notice',
+          referralId,
+          // Sólo el tipo: el error completo puede arrastrar datos de la persona.
+          errorName: error instanceof Error ? error.name : 'unknown',
+        },
         'No se pudo avisar de la derivación; queda registrada igual',
       );
       return false;
