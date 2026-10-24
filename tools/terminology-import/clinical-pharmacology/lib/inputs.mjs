@@ -1,7 +1,8 @@
 // Lectura de lo YA descargado (sin red): productos de CIMA, maestra ATC, LINAME
 // y vademécum, y el universo de ATC 5 que se busca en las demás fuentes.
 
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
 import { readNdjson } from '../../lib/glossary-es/common.mjs';
@@ -70,4 +71,14 @@ export function readBridge(atc, dir = cpCache('rxnav', atc)) {
     r[slot][m[2]] = readJsonIfExists(join(dir, name));
   }
   return { ...atcBridge(atc, r), source: 'nlm-rxnav', retrievedAt: retrievedAtOf(join(dir, 'by-atc.json')), license: RXNAV_LICENSE };
+}
+
+/** Informe de medicamentos de la EMA desde la caché (fetch-ema.mjs). `null` si no se bajó. */
+export function readEma() {
+  const path = cpCache('ema', 'medicines-output-medicines-report_en.xlsx');
+  if (!existsSync(path)) return null;
+  const XLSX = createRequire(import.meta.url)('xlsx');
+  const wb = XLSX.read(readFileSync(path), { type: 'buffer' });
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null });
+  return { rows, retrievedAt: statSync(path).mtime.toISOString() };
 }

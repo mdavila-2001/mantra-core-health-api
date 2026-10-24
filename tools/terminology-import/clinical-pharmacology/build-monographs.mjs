@@ -19,7 +19,8 @@ import { readNdjson, writeJson, writeNdjson } from '../lib/glossary-es/common.mj
 import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from './lib/cima.mjs';
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex } from './lib/gsrs.mjs';
-import { readAllInputs, readBridge } from './lib/inputs.mjs';
+import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
+import { readAllInputs, readBridge, readEma } from './lib/inputs.mjs';
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
@@ -29,6 +30,8 @@ const { opt, has } = parseArgs();
 const GRANULARITY = opt('--granularity', 'route');
 /** `--no-cima`: arma sin CIMA (para medir por separado lo que aporta cada fuente en el registro de pasadas). */
 const NO_CIMA = has('--no-cima');
+/** `--no-ema`: arma sin el informe de la EMA (medición por pasada). */
+const NO_EMA = has('--no-ema');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -151,6 +154,32 @@ async function main() {
   console.log(`[openfda] ${fda.link.scanned} etiquetas leídas; ${fda.labels.size} de referencia en ${fda.refs.size} ATC 5`);
   for (const code of [...fda.refs.keys()].sort()) if (!universe.has(code)) universe.set(code, ['openfda-gsrs']);
 
+  // EMA: indicación literal de cada medicamento autorizado, por el ATC 5 que asigna la propia EMA.
+  const emaRaw = NO_EMA ? null : readEma();
+  const emaByAtc = new Map();
+  const emaStats = { records: 0, humanAuthorised: 0, withoutAtc5: 0, withoutIndication: 0 };
+  if (emaRaw) {
+    const records = emaRecords(emaRaw.rows);
+    emaStats.records = records.length;
+    for (const r of records.filter(isHumanAuthorised)) {
+      emaStats.humanAuthorised++;
+      if (r.atc5.length === 0) {
+        emaStats.withoutAtc5++;
+        continue;
+      }
+      const sec = emaIndicationSection(r, emaRaw.retrievedAt);
+      if (!sec) {
+        emaStats.withoutIndication++;
+        continue;
+      }
+      for (const code of r.atc5) {
+        if (!emaByAtc.has(code)) emaByAtc.set(code, []);
+        emaByAtc.get(code).push(sec);
+        if (!universe.has(code)) universe.set(code, ['ema']);
+      }
+    }
+  }
+
   const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
@@ -193,6 +222,7 @@ async function main() {
       const pc = openFdaPharmClasses(hit.label, hit.retrievedAt);
       if (pc) fdaPharmClasses.push(pc);
     }
+    for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     if (cimaProducts.length === 0 && sections.length === 0) {
       stats.skippedWithoutData++;
       continue;
@@ -206,7 +236,8 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
-    sources: NO_CIMA ? 'sin CIMA (--no-cima)' : 'todas',
+    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', 'openFDA', 'GSRS', 'RxNav'].join(', '),
+    ema: emaStats,
     universe: universe.size,
     monographs: out.length,
     sections: out.reduce((n, m) => n + m.sections.length, 0),

@@ -113,3 +113,28 @@ test('desempate GSRS/RxNav por los ATC que la AEMPS usa en medicamentos autoriza
   assert.deepEqual(combineLinks(g, ['L01FA01'], { inUse: new Set(['L01XC02', 'L01FA01']) }), { atc: null, rule: 'conflict:gsrs-vs-rxnav' });
   assert.deepEqual(combineLinks(g, ['L01FA01']), { atc: null, rule: 'conflict:gsrs-vs-rxnav' }, 'sin CIMA no se desempata');
 });
+
+// --- EMA real: informe «Medicines output» generado el 24/10/2026 18:10 (filas recortadas) ---------
+import { emaDate, emaIndicationSection, emaRecords, isHumanAuthorised, reportGeneratedAt } from '../lib/ema.mjs';
+
+test('EMA real: sólo uso humano autorizado, ATC 5 asignado por la EMA, indicación literal citando a la EMA', () => {
+  const rows = read('ema-medicines-real.json');
+  assert.equal(reportGeneratedAt(rows), '2026-10-24T18:10');
+  const recs = emaRecords(rows);
+  assert.deepEqual(recs.map((r) => [r.productNumber, isHumanAuthorised(r), r.atc5]), [
+    ['EMEA/H/C/003737', true, ['J02AC03']],
+    ['EMEA/H/C/005333', true, []],
+    ['EMEA/H/C/000088', true, ['A10AB04', 'A10AD04']],
+    ['EMEA/H/C/004136', false, ['J06BB21']],
+    ['EMEA/V/C/006713', false, []],
+  ]);
+  const s = assertSection(emaIndicationSection(recs[0], WHEN));
+  assert.equal(s.source, 'ema-epar');
+  assert.equal(s.language, 'en');
+  assert.equal(s.text, String(rows[2][rows[1].indexOf('Therapeutic indication')]).trim(), 'literal');
+  assert.equal(s.document.id, 'EMEA/H/C/003737');
+  assert.equal(s.document.effectiveDate, '2026-10-23');
+  assert.match(s.license, /provided that EMA is always acknowledged as the source/);
+  assert.match(s.citation, /^European Medicines Agency \(EMA\)\. Voriconazole Hikma/);
+  assert.equal(emaDate('2026-10-23'), null, 'otra forma de fecha: no se adivina');
+});
