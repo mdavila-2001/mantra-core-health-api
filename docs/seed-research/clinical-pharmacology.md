@@ -137,7 +137,8 @@ el cruce no se midió. Con la base cargada lo mide `validate-links.mjs` (`produc
 ## Carga y enlaces verificados
 
 En un Postgres 16 desechable, con el DDL de `database/SQL/00_shared` y `03_terminology` tal cual
-(sin la API, sin DDL nuevo). La salida de `validate-links.mjs` y el plan en seco quedan en
+(sin la API, sin DDL nuevo). Evidencia en `docs/trabajo/2026-10-24-farmacologia-clinica/evidencia/11`
+y `12`. La salida de `validate-links.mjs` y el plan en seco quedan además en
 `tools/terminology-import/clinical-pharmacology/data/` (`validate-links.json.gz`, `load-plan.dry-run.json.gz`).
 
 | Corrida | Conceptos | Designaciones | IS_A | Propiedades | `concept_maps` → vademecum | Borradas | Tiempo |
