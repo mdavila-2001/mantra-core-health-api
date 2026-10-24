@@ -59,8 +59,7 @@ export function readAllInputs() {
 }
 
 /** Puente RxNav de un ATC desde la caché (sin red). `null` si ese ATC nunca se consultó. */
-export function readBridge(atc) {
-  const dir = cpCache('rxnav', atc);
+export function readBridge(atc, dir = cpCache('rxnav', atc)) {
   const byAtc = readJsonIfExists(join(dir, 'by-atc.json'));
   if (byAtc === undefined) return null;
   const r = { byAtc, properties: {}, relatedIn: {}, unii: {} };

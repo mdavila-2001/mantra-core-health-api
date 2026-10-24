@@ -77,3 +77,31 @@ test('lector en streaming: objetos completos aunque el corte caiga dentro de str
     assert.equal(sp.state, 'done');
   }
 });
+
+// --- RxNav real (2026-10-24): ATC 5 → RxCUI → UNII, combinado con el GSRS -----------------
+import { combineLinks, moietiesOf, rxnavIndex } from '../lib/gsrs.mjs';
+import { readBridge } from '../lib/inputs.mjs';
+
+const RXNAV_ATC = ['N02BE01', 'J01CA04', 'J01CR02', 'C09AA02', 'C09BA02', 'N01BB02', 'D04AB01', 'C01BB01', 'N02AJ13'];
+const bridges = RXNAV_ATC.map((atc) => readBridge(atc, join(HERE, 'fixtures', 'rxnav-real', atc)));
+const gsrsFull = buildGsrsIndex(read('gsrs-entries-real.json'));
+
+test('RxNav real: el ATC 5 de una combinación no tiene ingrediente; un MIN se abre en sus IN', () => {
+  const by = Object.fromEntries(bridges.map((b) => [b.atc, b]));
+  assert.deepEqual(by.J01CA04.unii, ['804826J2HU']);
+  assert.equal(by.J01CR02.complete, false, 'amoxicilina + clavulánico: RxNav no la mapea a ingredientes');
+  assert.deepEqual(by.N02AJ13.ingredients, ['161', '10689']);
+  assert.deepEqual(by.N02AJ13.unii, ['362O9ITL9D', '39J1LGJ30J']);
+  assert.equal(by.N01BB02.rxcuis[0].rxcui, '6387');
+});
+
+test('GSRS + RxNav: resuelve lo que el GSRS deja ambiguo sólo si RxNav da UN ATC dentro de sus candidatos', () => {
+  const rx = rxnavIndex(bridges, gsrsFull);
+  const decide = (uniis) => combineLinks(linkUniiSet(uniis, gsrsFull), rx.get(moietiesOf(uniis, gsrsFull).join('+')) ?? []);
+  assert.deepEqual(decide(['804826J2HU']), { atc: 'J01CA04', rule: 'gsrs-ambiguous+rxnav-unique' }, 'amoxicilina');
+  assert.deepEqual(decide(['9O25354EPJ']), { atc: 'C09AA02', rule: 'gsrs-ambiguous+rxnav-unique' }, 'enalapril maleato → fracción enalaprilat');
+  assert.deepEqual(decide(['V13007Z41A']), { atc: null, rule: 'ambiguous:rxnav-multiple' }, 'lidocaína: tres ATC por vía/uso, sigue sin enlazar');
+  assert.deepEqual(decide(['362O9ITL9D', '9N7R477WCK']), { atc: 'N02AJ13', rule: 'gsrs:unique+rxnav' });
+  assert.equal(combineLinks({ status: 'linked', atc: 'X01XX01', rule: 'unique', candidates: [] }, ['Y01YY01']).rule, 'conflict:gsrs-vs-rxnav');
+  assert.equal(combineLinks({ status: 'ambiguous', atc: null, candidates: ['A'] }, ['B']).rule, 'conflict:rxnav-outside-gsrs-candidates');
+});
