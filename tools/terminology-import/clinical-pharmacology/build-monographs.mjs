@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { readNdjson, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from './lib/cima.mjs';
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
-import { buildGsrsIndex, gsrsDisplayFor, linkUniiSet } from './lib/gsrs.mjs';
+import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex } from './lib/gsrs.mjs';
 import { readAllInputs, readBridge } from './lib/inputs.mjs';
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
@@ -54,22 +54,28 @@ async function* openFdaLabels() {
 const OPENFDA_TYPES = new Set(['HUMAN PRESCRIPTION DRUG', 'HUMAN OTC DRUG']);
 
 /**
- * Etiquetas de openFDA enlazadas a un ATC 5 SÓLO por código: por el GSRS
- * (fracción activa + WHO-ATC, `lib/gsrs.mjs#linkUniiSet`) y/o por el puente
- * RxNav (conjunto exacto de UNII). Pasada A: identidades y enlace; pasada B:
- * texto completo sólo de las etiquetas de referencia.
+ * Etiquetas de openFDA enlazadas a un ATC 5 SÓLO por código.
+ *   1. GSRS (fracción activa + WHO-ATC, `lib/gsrs.mjs#linkUniiSet`).
+ *   2. RxNav: ATC 5 → ingrediente(s) → UNII, normalizado a fracción activa con el
+ *      GSRS. Sólo cuenta si ese conjunto de fracciones tiene UN único ATC 5 en
+ *      RxNav (un ingrediente con varios ATC por vía o uso sigue ambiguo).
+ * Reglas de combinación (`lib/gsrs.mjs#combineLinks`): GSRS enlazado + RxNav
+ * distinto → conflicto, no se enlaza; GSRS ambiguo + RxNav único dentro de los
+ * candidatos → se enlaza; GSRS sin ATC + RxNav único → se enlaza.
+ * Pasada A: identidades y enlace; pasada B: texto completo de las de referencia.
  */
 async function openFdaLinked({ bridges, gsrs }) {
-  const rxnavByKey = new Map();
-  for (const b of bridges.values()) {
-    if (!b?.complete) continue;
-    const key = b.unii.join('+');
-    if (!rxnavByKey.has(key)) rxnavByKey.set(key, []);
-    rxnavByKey.get(key).push(b.atc);
-  }
-  const link = { scanned: 0, humanRxOrOtc: 0, withoutUnii: 0, gsrs: { unique: 0, 'who-atc-50-series': 0, ambiguous: 0, none: 0, 'unknown-unii': 0 }, rxnav: 0 };
+  const rxnavByMoieties = rxnavIndex(bridges.values(), gsrs);
+  const link = {
+    scanned: 0,
+    humanRxOrOtc: 0,
+    withoutUnii: 0,
+    gsrs: { unique: 0, 'who-atc-50-series': 0, ambiguous: 0, none: 0, 'unknown-unii': 0 },
+    final: {},
+    rxnavBridges: { atc5: [...bridges.values()].filter((b) => b?.complete).length, moietySets: rxnavByMoieties.size },
+  };
   const groups = new Map(); // atc → Map(uniiKey → { ids, rules:Set })
-  const ambiguous = new Map(); // fracciones→candidatos → etiquetas
+  const ambiguous = new Map(); // fracciones→candidatos → etiquetas (las que siguen sin enlazar)
   for await (const { label } of openFdaLabels()) {
     link.scanned++;
     const id = labelIdentity(label);
@@ -80,30 +86,25 @@ async function openFdaLinked({ bridges, gsrs }) {
       continue;
     }
     const key = id.unii.join('+');
-    const targets = new Map();
-    if (gsrs) {
-      const r = linkUniiSet(id.unii, gsrs);
-      if (r.status === 'linked') {
-        link.gsrs[r.rule]++;
-        targets.set(r.atc, `gsrs:${r.rule}`);
-      } else {
-        link.gsrs[r.status]++;
-        if (r.status === 'ambiguous') {
-          const k = `${r.moieties.join('+')}→${r.candidates.join(',')}`;
-          ambiguous.set(k, (ambiguous.get(k) ?? 0) + 1);
-        }
+    const g = gsrs ? linkUniiSet(id.unii, gsrs) : { status: 'none', atc: null, rule: null, moieties: [], candidates: [] };
+    link.gsrs[g.status === 'linked' ? g.rule : g.status]++;
+    const moietyKey = moietiesOf(id.unii, gsrs).join('+');
+    const decided = combineLinks(g, rxnavByMoieties.get(moietyKey) ?? []);
+    link.final[decided.rule] = (link.final[decided.rule] ?? 0) + 1;
+    if (!decided.atc) {
+      if (g.status === 'ambiguous') {
+        const k = `${g.moieties.join('+')}→${g.candidates.join(',')}`;
+        ambiguous.set(k, (ambiguous.get(k) ?? 0) + 1);
       }
+      continue;
     }
-    for (const atc of rxnavByKey.get(key) ?? []) {
-      link.rxnav++;
-      targets.set(atc, targets.has(atc) ? `${targets.get(atc)}+rxnav` : 'rxnav:exact-unii');
-    }
+    const targets = new Map([[decided.atc, decided.rule]]);
     for (const [atc, rule] of targets) {
       if (!groups.has(atc)) groups.set(atc, new Map());
-      const g = groups.get(atc);
-      if (!g.has(key)) g.set(key, { ids: [], rules: new Set() });
-      g.get(key).ids.push(id);
-      g.get(key).rules.add(rule);
+      const byKey = groups.get(atc);
+      if (!byKey.has(key)) byKey.set(key, { ids: [], rules: new Set() });
+      byKey.get(key).ids.push(id);
+      byKey.get(key).rules.add(rule);
     }
   }
   const refs = new Map();

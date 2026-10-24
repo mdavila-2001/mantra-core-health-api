@@ -30,8 +30,12 @@ export const sectionPublicUrl = (nregistro, section) =>
   `https://cima.aemps.es/cima/dochtml/ft/${encodeURIComponent(nregistro)}/${encodeURIComponent(section)}/FichaTecnica.html`;
 /** Notas de seguridad de la AEMPS asociadas a un medicamento. */
 export const safetyNotesUrl = (nregistro) => `${CIMA_REST}/notas/${encodeURIComponent(nregistro)}`;
-/** Maestra de códigos ATC de CIMA (nombres en castellano de la AEMPS), paginada. */
-export const atcMasterUrl = (page) => `${CIMA_REST}/maestras?maestra=7&pagina=${page}`;
+/**
+ * Maestra de códigos ATC de CIMA (nombres en castellano de la AEMPS), paginada.
+ * Observado el 2026-10-24: sin el parámetro `codigo` la API responde vacío; con
+ * cualquier valor devuelve la maestra completa (7 358 códigos), sin filtrar.
+ */
+export const atcMasterUrl = (page) => `${CIMA_REST}/maestras?maestra=7&codigo=A&pagina=${page}`;
 
 const ATC5 = /^[A-Z]\d{2}[A-Z]{2}\d{2}$/;
 export const isAtc5 = (code) => typeof code === 'string' && ATC5.test(code);

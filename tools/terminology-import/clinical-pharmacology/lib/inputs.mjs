@@ -1,12 +1,15 @@
 // Lectura de lo YA descargado (sin red): productos de CIMA, maestra ATC, LINAME
 // y vademécum, y el universo de ATC 5 que se busca en las demás fuentes.
 
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { readNdjson } from '../../lib/glossary-es/common.mjs';
 
 import { atcMasterRows, cimaProduct, groupByAtc5, isAtc5 } from './cima.mjs';
 import { listJson, readJsonIfExists, retrievedAtOf } from './cli.mjs';
 import { loadLiname, loadVademecumAtc } from './liname.mjs';
-import { CIMA_SHARED_CACHE, cpCache } from './paths.mjs';
+import { CIMA_SHARED_CACHE, cpCache, cpOut } from './paths.mjs';
 import { RXNAV_LICENSE, atcBridge } from './rxnorm.mjs';
 
 /** Productos de CIMA desde la caché compartida (listado + detalle). Vacío si nunca se bajó. */
@@ -23,8 +26,8 @@ export function readAtcMaster() {
   return listJson(dir).flatMap((name) => atcMasterRows(readJsonIfExists(join(dir, name))));
 }
 
-/** Universo de ATC 5: CIMA (productos y maestra) ∪ LINAME ∪ vademecum. Con el origen de cada código. */
-export function atcUniverse({ products, master, liname, vademecum }) {
+/** Universo de ATC 5: CIMA (productos y maestra) ∪ LINAME ∪ vademecum ∪ GSRS. Con el origen de cada código. */
+export function atcUniverse({ products, master, liname, vademecum, gsrsAtc = new Set() }) {
   const origin = new Map();
   const add = (code, src) => {
     if (!isAtc5(code)) return;
@@ -35,7 +38,15 @@ export function atcUniverse({ products, master, liname, vademecum }) {
   for (const r of master) add(r.code, 'cima-maestra-atc');
   for (const code of liname.keys()) add(code, 'liname-bo');
   for (const code of vademecum.keys()) add(code, 'vademecum');
+  for (const code of gsrsAtc) add(code, 'fda-gsrs');
   return new Map([...origin.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([c, s]) => [c, [...s].sort()]));
+}
+
+/** ATC 5 que lista el GSRS (out/gsrs-entries.ndjson de fetch-gsrs.mjs); vacío si no se bajó. */
+export function readGsrsAtc() {
+  const path = cpOut('gsrs-entries.ndjson');
+  if (!existsSync(path)) return new Set();
+  return new Set(readNdjson(path).flatMap((e) => e.atc));
 }
 
 export function readAllInputs() {
@@ -43,7 +54,8 @@ export function readAllInputs() {
   const master = readAtcMaster();
   const liname = loadLiname();
   const vademecum = loadVademecumAtc();
-  return { rows, products, master, liname, vademecum, universe: atcUniverse({ products, master, liname, vademecum }) };
+  const gsrsAtc = readGsrsAtc();
+  return { rows, products, master, liname, vademecum, gsrsAtc, universe: atcUniverse({ products, master, liname, vademecum, gsrsAtc }) };
 }
 
 /** Puente RxNav de un ATC desde la caché (sin red). `null` si ese ATC nunca se consultó. */

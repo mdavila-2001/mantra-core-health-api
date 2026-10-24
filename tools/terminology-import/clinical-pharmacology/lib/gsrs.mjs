@@ -93,3 +93,44 @@ export function gsrsDisplayFor(code, index) {
   const e = index.byUnii.get(moieties[0]);
   return e?.name ? { display: e.name, source: GSRS_SOURCE, unii: e.unii, language: 'en' } : null;
 }
+
+/** Fracciones activas de un conjunto de UNII (el propio UNII si el GSRS no lo conoce), ordenadas y sin repetir. */
+export function moietiesOf(uniis, index) {
+  return [...new Set(uniis.map((u) => index?.byUnii.get(u)?.moiety ?? u))].sort();
+}
+
+/**
+ * Puentes RxNav completos → Map(fracciones activas → ATC 5 que RxNav asigna a
+ * ese conjunto). Un conjunto con más de un ATC 5 queda con todos: no decide.
+ */
+export function rxnavIndex(bridges, index) {
+  const out = new Map();
+  for (const b of bridges) {
+    if (!b?.complete) continue;
+    const key = moietiesOf(b.unii, index).join('+');
+    if (!out.has(key)) out.set(key, new Set());
+    out.get(key).add(b.atc);
+  }
+  return new Map([...out.entries()].map(([k, v]) => [k, [...v].sort()]));
+}
+
+/**
+ * Decisión final de una etiqueta con dos fuentes de código independientes.
+ * @param {ReturnType<typeof linkUniiSet>} g  resultado del GSRS
+ * @param {string[]} rx  ATC 5 que RxNav asigna a las mismas fracciones
+ * @returns {{ atc: string|null, rule: string }}
+ */
+export function combineLinks(g, rx) {
+  const rxUnique = rx.length === 1 ? rx[0] : null;
+  if (g.status === 'linked') {
+    if (rx.length === 0) return { atc: g.atc, rule: `gsrs:${g.rule}` };
+    if (rx.includes(g.atc)) return { atc: g.atc, rule: `gsrs:${g.rule}+rxnav` };
+    return { atc: null, rule: 'conflict:gsrs-vs-rxnav' };
+  }
+  if (g.status === 'ambiguous') {
+    if (rxUnique && g.candidates.includes(rxUnique)) return { atc: rxUnique, rule: 'gsrs-ambiguous+rxnav-unique' };
+    return { atc: null, rule: rx.length > 1 ? 'ambiguous:rxnav-multiple' : rxUnique ? 'conflict:rxnav-outside-gsrs-candidates' : 'ambiguous:no-rxnav' };
+  }
+  if (rxUnique) return { atc: rxUnique, rule: 'rxnav-unique' };
+  return { atc: null, rule: rx.length > 1 ? `${g.status}:rxnav-multiple` : `${g.status}:no-rxnav` };
+}
