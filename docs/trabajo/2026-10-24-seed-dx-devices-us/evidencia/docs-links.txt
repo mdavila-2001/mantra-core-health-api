@@ -1,0 +1,10 @@
+  - docs/trabajo/2026-10-21-sesiones-bitacora-mapas-de-calor/PLAN.md
+  - docs/trabajo/2026-10-23-db-vendor-sync/REPORTE.md
+
+2970 enlaces internos verificados en 723 páginas.
+Sin enlaces rotos.
+exit=0
+
+Verificados: 723 páginas de docs/, 70 módulos reales.
+Cobertura documental OK: sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar, contratos presentes.
+exit=0

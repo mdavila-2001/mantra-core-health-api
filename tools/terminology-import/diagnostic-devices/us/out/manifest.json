@@ -1,0 +1,653 @@
+{
+ "region": "us",
+ "generatedAt": "2026-10-24T04:53:10.803Z",
+ "formatVersion": 1,
+ "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
+ "files": [
+  {
+   "path": "fda-510k-0001.ndjson.gz",
+   "source": "fda-510k",
+   "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "rows": 71955,
+   "bytes": 9288571,
+   "sha256": "54eef7ecdeae23246b77759bb276de6301ce9192f3fd7d3da9494de38cecfa6e"
+  },
+  {
+   "path": "fda-denovo-0001.ndjson.gz",
+   "source": "fda-denovo",
+   "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "rows": 240,
+   "bytes": 38433,
+   "sha256": "4b2322701b084dca4bc4dd643cad3cbed7d9a194ba15c52e4acb0fa209515cd3"
+  },
+  {
+   "path": "fda-pma-0001.ndjson.gz",
+   "source": "fda-pma",
+   "sourceVersion": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "rows": 2646,
+   "bytes": 142148,
+   "sha256": "4837c5fe2cfd7ca0cf5f941fa7ba85805245c6ee98e4e49563fc02e15ff04b4b"
+  },
+  {
+   "path": "fda-rl-0001.ndjson.gz",
+   "source": "fda-rl",
+   "sourceVersion": "FDA Establishment Registration & Device Listing (archivos planos) 2024 vía espejo https://github.com/sdgoldberg/MedDev@6cbd231bb5d0",
+   "rows": 110614,
+   "bytes": 6794582,
+   "sha256": "c05510a1f297de17d7bc3bbdac7ab3ec9cb561ad46a55a8322426523a6df84b3"
+  },
+  {
+   "path": "fda-gudid-0001.ndjson.gz",
+   "source": "fda-gudid",
+   "sourceVersion": "AccessGUDID Full Release XML (filtro dental) 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
+   "rows": 3130,
+   "bytes": 309765,
+   "sha256": "0ac976b2d0aa6f31f06b19a0526ad4079e49369a27c6205b7417f18769c2cf3d"
+  },
+  {
+   "path": "fda-maude-0001.ndjson.gz",
+   "source": "fda-maude",
+   "sourceVersion": "openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04 corte 2026-05-28 vía espejo https://github.com/hayden-farquhar/MAUDE-AI-Devices@355566d7211b + openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
+   "rows": 2727,
+   "bytes": 218233,
+   "sha256": "c5fbf75445f317f4adabd4d7fdb1f7b41958bc52c003af3849af2c908ee63c14"
+  },
+  {
+   "path": "fda-recall-0001.ndjson.gz",
+   "source": "fda-recall",
+   "sourceVersion": "openFDA device/enforcement + recall corte 2026-10-05 vía espejo https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics@3e485d48c4f9 + openFDA device/recall (FRN, MKJ, CBK, MHX, DQA) 2026-10-07 vía espejo https://github.com/hxlvvm/RecallTrace@ffe8177d7906",
+   "rows": 13692,
+   "bytes": 5844436,
+   "sha256": "4f10fc9151468ba180e62fcfac2627733d426dee3d530a7c07260eebfef27f79"
+  },
+  {
+   "path": "cdc-livd-sars-cov-2-0001.ndjson.gz",
+   "source": "cdc-livd-sars-cov-2",
+   "sourceVersion": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
+   "rows": 483,
+   "bytes": 37026,
+   "sha256": "f631f790d54709d20c8d80cd43da67a817337506f76a65f4c6f527318ac64230"
+  }
+ ],
+ "gaps": [
+  {
+   "source": "fda-gudid",
+   "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+   "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
+  }
+ ],
+ "inputs": [
+  {
+   "source": "mirror ej86-fda-ai-medical-device-analytics foiclass.csv",
+   "version": "FDA foiclass.zip corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff",
+   "records": 7088
+  },
+  {
+   "source": "mirror bjoleary-fdadata product_codes",
+   "version": "FDA foiclass.zip 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "records": 7097,
+   "addedCodes": 9
+  },
+  {
+   "source": "mirror choiben314-510k-lineage",
+   "records": 175757,
+   "inScope": 71894
+  },
+  {
+   "source": "mirror bjoleary-fdadata pmn",
+   "version": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "records": 176466,
+   "inScope": 72195
+  },
+  {
+   "source": "mirror bjoleary-fdadata pma",
+   "version": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "records": 57373,
+   "inScope": 2646
+  },
+  {
+   "source": "mirror ej86 aiml-devices-csv",
+   "version": "FDA AI-Enabled Medical Devices list corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff",
+   "records": 1524,
+   "inScope": 1429
+  },
+  {
+   "source": "mirror delapro-gudid (dental)",
+   "version": "AccessGUDID Full Release XML 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
+   "records": 812322,
+   "inScope": 3130
+  },
+  {
+   "source": "mirror sdgoldberg-meddev (R&L 2024)",
+   "version": "FDA Establishment Registration & Device Listing (archivos planos) 2024 vía espejo https://github.com/sdgoldberg/MedDev@6cbd231bb5d0",
+   "records": 325731,
+   "registrations": 30252,
+   "listingsWithProductCode": 257718,
+   "inScope": 110741,
+   "linksWithoutRegistration": 0
+  },
+  {
+   "source": "mirror cdcgov-routes LIVD SARS-CoV-2",
+   "version": "CDC LIVD SARS-CoV-2 corte 2025-12-16 vía espejo https://github.com/CDCgov/routes@e2e16eedfc7d",
+   "records": 1144,
+   "testKits": 483,
+   "rowsDiscardedWithoutManufacturer": [
+    "10811877011290",
+    "Cue COVID-19 Test for Home and Over The Counter (OTC) Use (Proctored)_Cue Health Inc.",
+    "Cue COVID-19 Test_Cue Health Inc.",
+    "TaqPath COVID-19 RNase P Combo Kit 2.0_Thermo Fisher Scientific Inc.",
+    "Test_Home_Device",
+    "Test_OTC_Device",
+    "Test_Unproctored_Device"
+   ]
+  },
+  {
+   "source": "mirror tonystathoulis-maude",
+   "version": "openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
+   "records": 62533,
+   "inScopeCombinations": 1336
+  },
+  {
+   "source": "mirror hayden-farquhar-maude-ai",
+   "version": "openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04 corte 2026-05-28 vía espejo https://github.com/hayden-farquhar/MAUDE-AI-Devices@355566d7211b",
+   "records": 21923,
+   "newCombinations": 1391,
+   "mergedIntoExisting": 0
+  },
+  {
+   "source": "mirror hxlvvm-recalltrace",
+   "version": "openFDA device/recall (FRN, MKJ, CBK, MHX, DQA) 2026-10-07 vía espejo https://github.com/hxlvvm/RecallTrace@ffe8177d7906",
+   "records": 1794,
+   "inScope": 414
+  },
+  {
+   "source": "mirror sarath-fda-device-recalls",
+   "version": "openFDA device/enforcement + recall corte 2026-10-05 vía espejo https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics@3e485d48c4f9",
+   "records": 40057,
+   "inScope": 13578
+  },
+  {
+   "source": "mirror unmtransinfo-cfde-biomarkers (CLIA)",
+   "version": "FDA CLIA database (analitos) 2025-03 vía espejo https://github.com/unmtransinfo/cfde-biomarkers@9a121841fd61",
+   "records": 20832,
+   "documents": 4046,
+   "enrichedAuthorizations": 2218
+  },
+  {
+   "source": "mirror double-strand-naat-registry",
+   "version": "FDA Nucleic Acid Based Tests list corte 2026-10-19 vía espejo https://github.com/double-strand/IVDmicrobialNAATregistry@6cdd1e5ed9eb",
+   "records": 456,
+   "submissions": 255,
+   "enriched": 253,
+   "unmatched": [
+    "K133448",
+    "K133883"
+   ]
+  }
+ ],
+ "mirrors": [
+  {
+   "id": "bjoleary-fdadata",
+   "repo": "https://github.com/bjoleary/fdadata",
+   "commit": "227bdaa24aec8565e333cc67689ff2c63ce5cea7",
+   "commitDate": "2026-10-20T17:14:47+00:00",
+   "files": [
+    {
+     "path": "data/pmn.rda",
+     "bytes": 5623336,
+     "sha256": "0c0d51b11daf4fdd01153b210fb8a6205ec0447440d26baefe6f6468af048f5e"
+    },
+    {
+     "path": "data/pma.rda",
+     "bytes": 2450032,
+     "sha256": "09ffff0382b3d2c0678e600f01883cf59a3d18595b10728159b3c25a51ae6f12"
+    },
+    {
+     "path": "data/product_codes.rda",
+     "bytes": 334164,
+     "sha256": "4423c192af7a282af72270f0e732e83a58504e083b6c9d588a7356b228f3894b"
+    },
+    {
+     "path": "LICENSE.md",
+     "bytes": 1074,
+     "sha256": "245a3975c09f2f002470685ab538a5f8ebb1d275329e22363b09f8008eda1a26"
+    },
+    {
+     "path": "man/pmn.Rd",
+     "bytes": 2196,
+     "sha256": "62c093ab76e3fb97af710dd8c651e6d71e6494b888984533b57f532fecc1fee8"
+    },
+    {
+     "path": "man/pma.Rd",
+     "bytes": 2213,
+     "sha256": "89c7976d8627ee52d9d74ffcface4b760c6012fb69ca3d42fee975b4eba1427d"
+    },
+    {
+     "path": "man/product_codes.Rd",
+     "bytes": 1621,
+     "sha256": "8e94b17a4c7a408fa43073dbdc9d82fdfc9ac343fe2717304237e87afe8fcf7c"
+    },
+    {
+     "path": ".converted/pmn.ndjson",
+     "derivedFrom": "data/pmn.rda",
+     "bytes": 113875635,
+     "sha256": "f076fecce009e360057fa2159c4003a4c2a7d4f200c5820bd5e2aa8796c57726"
+    },
+    {
+     "path": ".converted/pma.ndjson",
+     "derivedFrom": "data/pma.rda",
+     "bytes": 52781251,
+     "sha256": "06916d482415760aac2bc7169ce7a3cd61c136dab83b7c0cd4596e2b73142f09"
+    },
+    {
+     "path": ".converted/product_codes.ndjson",
+     "derivedFrom": "data/product_codes.rda",
+     "bytes": 5889238,
+     "sha256": "fbac74d72d3198db61b7c89acdedf3705128ee6cc6c599383fda685105e0b133"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.accessdata.fda.gov/premarket/ftparea/",
+    "exportDate": "2026-10-20",
+    "note": "«accessed 2026-10-20» según man/pmn.Rd, man/pma.Rd y man/product_codes.Rd"
+   }
+  },
+  {
+   "id": "cdcgov-routes-livd",
+   "repo": "https://github.com/CDCgov/routes",
+   "commit": "e2e16eedfc7d232d9889eb4726f4c675b37e0df6",
+   "commitDate": "2025-12-16T08:26:18-05:00",
+   "files": [
+    {
+     "path": "ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv",
+     "bytes": 1181871,
+     "sha256": "b45a38a98d771912d89c066c3c4cd94deffaf113338dd91c2858b5bf35afc47f"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.cdc.gov/csels/dls/livd-codes.html",
+    "exportDate": null,
+    "note": "LIVD SARS-CoV-2 (CDC), mapeo de pruebas EUA de FDA a LOINC"
+   }
+  },
+  {
+   "id": "choiben314-510k-lineage",
+   "repo": "https://github.com/choiben314/510k-lineage",
+   "commit": "806b59cba5c8f5bac9fe327f8c49c8a2f5807804",
+   "commitDate": "2026-10-13T00:30:43-04:00",
+   "files": [
+    {
+     "path": "dataset/devices.csv",
+     "bytes": 23352497,
+     "sha256": "d92ed68ae5d90d5b6458cfb54b7b805acf701f24cd459a1df55281945cc9b292"
+    },
+    {
+     "path": "data/raw/manifest.jsonl",
+     "bytes": 1688,
+     "sha256": "f6a61f5d6e3bbc9ad2231e7e4e02121a13db023b6381769da13515b17e4af211"
+    },
+    {
+     "path": "LICENSE",
+     "bytes": 1065,
+     "sha256": "1301e51647f49b4ce474150298b3552d121a61f9d2a64c1f0f245f414385dd84"
+    },
+    {
+     "path": "README.md",
+     "bytes": 3244,
+     "sha256": "7cdb3aa586ef60b5994c14385a3cd07fc7964ecc5440bfb83ab15a1e321f61c0"
+    }
+   ],
+   "upstream": {
+    "url": "https://download.open.fda.gov/device/510k/device-510k-0001-of-0001.json.zip",
+    "exportDate": "2026-08-10",
+    "fetchedAt": "2026-08-17T20:39:37+00:00",
+    "sha256": "996cd24da0f15d1af632c5676916a3d7d351ee121dff791cdc153a5612bb25c4"
+   }
+  },
+  {
+   "id": "delapro-gudid",
+   "repo": "https://github.com/Delapro/GUDID",
+   "commit": "9237402a49a6a6ad2fff2be9bb284be6eba96d09",
+   "commitDate": "2026-10-20T14:24:51+02:00",
+   "files": [
+    {
+     "path": "LICENSE",
+     "bytes": 1061,
+     "sha256": "7f2435753534eb358b4cb36703bb066a159fc47088564347207febe47da2f949"
+    },
+    {
+     "path": "DownloadGUDIDAndExpand.PS1",
+     "bytes": 4263,
+     "sha256": "246e5c09e91802ebe9f25eaadd38e8d6d0fdc0a92966895fa0d701929f31154b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml.zip",
+     "bytes": 5533225,
+     "sha256": "2e49629a7166c5c35926fe0beb30f4cfb2b731fb9d1fc5dc7be1deef56231a6b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml1.zip",
+     "bytes": 15448974,
+     "sha256": "5c1834f9d53a001917955d3d90f6cda9e851ee1b9b13e303ce67f97d10748d45"
+    },
+    {
+     "path": "Dental-xml/Dental-xml2.zip",
+     "bytes": 2435432,
+     "sha256": "3fd9d33b349d1f11eaf81c0aff4253ee4a9ce3f007638ebc08c5db8579701196"
+    },
+    {
+     "path": "Dental-xml/Dental-xml3.zip",
+     "bytes": 843001,
+     "sha256": "acedbb0e3cd18902ba00e9f1c4b6ac89249e04f44980d5af8397ce5c8c43774b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml4.zip",
+     "bytes": 847524,
+     "sha256": "7a147b0d7a4381ef1a427aa4da973404dece25024f80ac677d37cda3bcd06a17"
+    },
+    {
+     "path": "Dental-xml/Dental-xml5.zip",
+     "bytes": 950425,
+     "sha256": "b8be5e98d09bb196fbaf9193abdff397ea7b3b85ed3ef43695131c07b2fde72d"
+    },
+    {
+     "path": "Dental-xml/Dental-xml6.zip",
+     "bytes": 173055,
+     "sha256": "b5b89a53c564cbed296bd168e9c1d54b73492f888f90b34d1f378e406af56889"
+    },
+    {
+     "path": "Dental-xml/Dental-xml7.zip",
+     "bytes": 6490165,
+     "sha256": "4b0e0bea18ef89e4dee7ba4dfbe2b70701aa13824dfeadda894235d9fa7e2610"
+    },
+    {
+     "path": "Dental-xml/Dental-xml8.zip",
+     "bytes": 6588148,
+     "sha256": "519cc30b3759585a6cb21f4404e9ce326463eb27dab6eec0d7077d2610c47c13"
+    },
+    {
+     "path": "Dental-xml/Dental-xml9.zip",
+     "bytes": 6179959,
+     "sha256": "8a55da47e7bc512389daa9f9f1aab293a14e69c2b9f18a6e4899948b22d0c148"
+    },
+    {
+     "path": "Dental-xml/Dental-xml10.zip",
+     "bytes": 2958714,
+     "sha256": "e1de141afe7ea63fe174f646e54573f591bed4ee9e491509b9a067a03c9f182a"
+    },
+    {
+     "path": "Dental-xml/Dental-xml11.zip",
+     "bytes": 893090,
+     "sha256": "1774a829157aedb51a418173f0baa1f926a07ebd2c73bab2a1d8c189d9bad8e9"
+    },
+    {
+     "path": "Dental-xml/Dental-xml12.zip",
+     "bytes": 2000245,
+     "sha256": "a6c8671bb8d266dffcb25711f5957f0025f9c1a5306e1b0e77717acaf1f30817"
+    },
+    {
+     "path": "Dental-xml/Dental-xml13.zip",
+     "bytes": 1003244,
+     "sha256": "d43304e37bf5fbefc40b4d160e1c872341bea0b1b700478fdbbfbd8ca7cc8ff3"
+    },
+    {
+     "path": "Dental-xml/Dental-xml14.zip",
+     "bytes": 3387031,
+     "sha256": "cbb3fe9c05abd7d9a3af7e317e8ba99e8eb75d095e66516e8cb455bbf0b5c4a4"
+    },
+    {
+     "path": "Dental-xml/Dental-xml15.zip",
+     "bytes": 1895976,
+     "sha256": "26d3d5381bf1a2dfb56356cfc3a2ceb9e360372aa12af707b282b186d61d1a3b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml16.zip",
+     "bytes": 1792291,
+     "sha256": "15dd3cc077f285f6e9a4eddc90ce84f51c313aa2e715fe1656a26b006519972b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml17.zip",
+     "bytes": 1806585,
+     "sha256": "060067c6fb8ea7a7c6895fb065f8815780581fcbc1789197e48699bcf480fd15"
+    },
+    {
+     "path": "Dental-xml/Dental-xml18.zip",
+     "bytes": 2918497,
+     "sha256": "35c93113eabefcf27263781c48e765627a95fddb484aff4fb2c85621e41e34f5"
+    },
+    {
+     "path": "Dental-xml/Dental-xml19.zip",
+     "bytes": 301439,
+     "sha256": "9c3edbbff25f6155670e77b4bebe19d2899e77904bd64ab26991cba8f5d69954"
+    }
+   ],
+   "upstream": {
+    "url": "https://accessgudid.nlm.nih.gov/release_files/download/gudid_full_release_20250501.zip",
+    "exportDate": "2025-05-01",
+    "note": "Partes FULLDownload_PartN_Of_192_2025-05-01-dental.xml; filtro en DownloadGUDIDAndExpand.PS1 (medicalspecialty -eq DE)"
+   }
+  },
+  {
+   "id": "double-strand-naat-registry",
+   "repo": "https://github.com/double-strand/IVDmicrobialNAATregistry",
+   "commit": "6cdd1e5ed9ebf875069d7028b3b9481ff185a386",
+   "commitDate": "2026-10-19T23:31:31-04:00",
+   "files": [
+    {
+     "path": "FDA510kPathogens_NAAT.csv",
+     "bytes": 90664,
+     "sha256": "b1cfcc5091518abc375538d2520c23061710675aa34c2cd8f009b110b481b644"
+    },
+    {
+     "path": "LICENSE",
+     "bytes": 35149,
+     "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.fda.gov/medical-devices/in-vitro-diagnostics/nucleic-acid-based-tests",
+    "exportDate": null,
+    "note": "sólo enriquece: patógenos y tecnología por K-number"
+   }
+  },
+  {
+   "id": "ej86-fda-ai-medical-device-analytics",
+   "repo": "https://github.com/ej86/fda-ai-medical-device-analytics",
+   "commit": "8840a03632ffdc346a8bf05a459236c913b9198c",
+   "commitDate": "2026-08-28T23:08:44+09:00",
+   "files": [
+    {
+     "path": "foiclass.csv",
+     "bytes": 2150676,
+     "sha256": "ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de"
+    },
+    {
+     "path": "aiml-devices-csv.csv",
+     "bytes": 132922,
+     "sha256": "4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.accessdata.fda.gov/premarket/ftparea/foiclass.zip",
+    "exportDate": null,
+    "note": "foiclass.txt crudo (delimitado por `|` aunque se llame .csv); fecha de corte = commit del espejo"
+   }
+  },
+  {
+   "id": "hayden-farquhar-maude-ai",
+   "repo": "https://github.com/hayden-farquhar/MAUDE-AI-Devices",
+   "commit": "355566d7211b08d0fba048c38c898c470e4a9a32",
+   "commitDate": "2026-05-28T08:19:14+10:00",
+   "files": [
+    {
+     "path": "data/processed/linked_reports.parquet",
+     "bytes": 9955222,
+     "sha256": "3579600b72fd8683a649dac0d0011266b941df807c8f2354a5abbdb182fe4444"
+    },
+    {
+     "path": "LICENSE",
+     "bytes": 1407,
+     "sha256": "3ac17956e156f6e0762860d0c1949675f3ec96f2ef285755079d4955035e1f7c"
+    },
+    {
+     "path": "README.md",
+     "bytes": 8642,
+     "sha256": "92df69c7a22f4ddcf0338cd1654e3b46f40c0970358e732bb6d08ac16fac3d0b"
+    },
+    {
+     "path": ".converted/linked_reports.ndjson",
+     "derivedFrom": "data/processed/linked_reports.parquet",
+     "bytes": 7962418,
+     "sha256": "a82476bc1d84a85e2f30466715a24e2f67b4e95ee4d692e22a05c048735fb431"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/event.json",
+    "exportDate": null,
+    "note": "informes recibidos 2020-01-01 a 2026-04-30; las columnas matched_* son un cruce del autor y NO se usan"
+   }
+  },
+  {
+   "id": "hxlvvm-recalltrace",
+   "repo": "https://github.com/hxlvvm/RecallTrace",
+   "commit": "ffe8177d7906fbfac991fdc520c55a3d551c5ba0",
+   "commitDate": "2026-10-07T17:50:35+02:00",
+   "files": [
+    {
+     "path": "data/snapshot/recalls.jsonl.gz",
+     "bytes": 21365011,
+     "sha256": "22567184bb982bdfa2771d6beddec4115334770e1d52f7fddd2d71513f49d2f8"
+    },
+    {
+     "path": "data/snapshot/MANIFEST.json",
+     "bytes": 767,
+     "sha256": "4b776f39bf7a1eb70b7904c704cf3308280ff0db87bc0b29a7f96f46715f6fc1"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/recall.json",
+    "exportDate": "2026-10-07",
+    "note": "product_code FRN, MKJ, CBK, MHX, DQA"
+   }
+  },
+  {
+   "id": "sarath-fda-device-recalls",
+   "repo": "https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics",
+   "commit": "3e485d48c4f9ff490d0ce31d5f152acb323a2c9e",
+   "commitDate": "2026-10-05T23:10:56+02:00",
+   "files": [
+    {
+     "path": "fda_device_recalls.xlsm",
+     "bytes": 25618201,
+     "sha256": "ee6752129f6d726177a357f38f61780402f0212a4f39f7a14e1fd048ad902552"
+    },
+    {
+     "path": ".converted/recalls.ndjson",
+     "derivedFrom": "fda_device_recalls.xlsm",
+     "bytes": 61232629,
+     "sha256": "ad63cd8e8e12dfdaa700656823c0ea883be818220d8bde23f839255baa5a4d50"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/enforcement.json",
+    "exportDate": null,
+    "note": "report_date 2012-06-20 a 2026-09-23"
+   }
+  },
+  {
+   "id": "sdgoldberg-meddev",
+   "repo": "https://github.com/sdgoldberg/MedDev",
+   "commit": "6cbd231bb5d0778ff2fd7d165ba5d8f0f613f55e",
+   "commitDate": "2025-05-30T00:02:45-04:00",
+   "files": [
+    {
+     "path": "project/data/Registration.txt",
+     "bytes": 5456832,
+     "sha256": "bc5bc22b2d03ff8aa189e22ec2b03d90ff6a29094c8aa4725f068cb793cfcca7"
+    },
+    {
+     "path": "project/data/registration_listing.txt",
+     "bytes": 9563432,
+     "sha256": "0786bcf2bca02e11d8ae88ba4e1a271553d55e400256478539a5e30a2e15e10d"
+    },
+    {
+     "path": "project/data/Listing_PCD.txt",
+     "bytes": 11221027,
+     "sha256": "7512fb0c92b4ef8d5b31e3fda3bf2d42d5a942b531c570d4c2133b57f9d70854"
+    },
+    {
+     "path": "project/data/Owner_Operator.txt",
+     "bytes": 1481735,
+     "sha256": "a7d3059731090c558fb03dd751605208d3baeddd1e61313d3dd663fdbc01c0b2"
+    },
+    {
+     "path": "project/data/listing_estabtypes.txt",
+     "bytes": 6184527,
+     "sha256": "78d4539a0143987815ff3d7da039653f8b3e716e0e6950282723d0b2ff62ad25"
+    },
+    {
+     "path": "README.md",
+     "bytes": 2766,
+     "sha256": "d2c71833efb5dc13b190428a85101faf689b2d28f0bb88b35e028d6c73c96060"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.fda.gov/medical-devices/device-registration-and-listing/establishment-registration-and-medical-device-listing-files-download",
+    "exportDate": "2024",
+    "note": "Instantánea 2024: todas las filas de Registration.txt traen REG_EXPIRY_DATE_YEAR=2024 (commit 2025-05-30). No incluye el archivo de nombres propietarios."
+   }
+  },
+  {
+   "id": "tonystathoulis-maude",
+   "repo": "https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence",
+   "commit": "d20a9fa8bd5a027c4068c2de1fa289ed2d6e5893",
+   "commitDate": "2026-10-19T13:04:19+03:00",
+   "files": [
+    {
+     "path": "medical device safety intelligence/data/processed/maude_devices.csv",
+     "bytes": 7584575,
+     "sha256": "25e5e98e30c9bfadc348b3263fed5363ba315faf293a423b11506782118ac3dd"
+    },
+    {
+     "path": "medical device safety intelligence/data/processed/maude_reports.csv",
+     "bytes": 7624594,
+     "sha256": "a8bd7826163ef40023539fa32f585f764e36b85e75d731f1cc1739de379474fe"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/event.json",
+    "exportDate": null,
+    "note": "Eventos recibidos 2026-09-01 a 2026-10-13, todos los paneles; marcas con «¿» donde el original tenía ® o ™ (daño de codificación del espejo, se conserva verbatim)"
+   }
+  },
+  {
+   "id": "unmtransinfo-cfde-biomarkers",
+   "repo": "https://github.com/unmtransinfo/cfde-biomarkers",
+   "commit": "9a121841fd616d2c129faf46c9a1b1df546fb2e3",
+   "commitDate": "2026-10-21T14:39:34-06:00",
+   "files": [
+    {
+     "path": "output/clia_doc2test2analyte_chem.tsv",
+     "bytes": 694330,
+     "sha256": "52bd1ae0c42ba803d5aaeaf9aa6211368dd877dff8cc444e31f917d3113b57fa"
+    },
+    {
+     "path": "output/clia_doc2test2analyte_gp.tsv",
+     "bytes": 299631,
+     "sha256": "486ce4e53564cbc43856e9a58f2cfd79e92c8058e31ac89dc63d07ec768ec1ee"
+    },
+    {
+     "path": "README.md",
+     "bytes": 1400,
+     "sha256": "0567ed8c420797086be2a08949a06f4e96f53e8e36d7123e7017df2d73747d94"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfClia/Search.cfm",
+    "exportDate": "2025-03",
+    "note": "sólo enriquece: analitos por K-number"
+   }
+  }
+ ],
+ "official": []
+}
