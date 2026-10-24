@@ -15,12 +15,12 @@
 
 import { clean, makeDeviceRecord } from '../common.mjs';
 
-export const SOURCE = 'SWISSDAMED';
+export const SOURCE = 'swissmedic-swissdamed';
 export const LIST_URL = 'https://swissdamed.ch/public/udi/basic-udis';
 export const detailsUrl = (id) =>
   `https://swissdamed.ch/public/udi/udi-dis/${encodeURIComponent(id)}/details`;
 
-/** Nombre comercial: el de inglés si existe; si no, el primero publicado. Todos quedan en extensions. */
+/** Nombre comercial: el de inglés si existe; si no, el primero publicado. Todos quedan en extra. */
 export function pickTradeName(tradeNames) {
   const list = (Array.isArray(tradeNames) ? tradeNames : [])
     .map((t) => ({
@@ -53,10 +53,12 @@ export function normalizeBasicUdi(item, ctx) {
         source: SOURCE,
         sourceRecordId: String(u.id),
         sourceUrl: detailsUrl(u.id),
-        sourceVersion: clean(u.lastModifiedAt),
+        sourceVersion: clean(u.lastModifiedAt)
+          ? `lastModifiedAt=${clean(u.lastModifiedAt)}`
+          : 'swissdamed-public-api',
         retrievedAt: ctx.retrievedAt,
         deviceTypeCode: noms[0]?.code ?? null,
-        deviceTypeSystem: noms[0] ? 'EMDN' : null,
+        deviceTypeSystem: noms[0] ? 'emdn' : null,
         deviceTypeName: noms[0]?.term ?? null,
         manufacturerName: item.companyName,
         manufacturerCountry: null,
@@ -64,15 +66,22 @@ export function normalizeBasicUdi(item, ctx) {
         brandName,
         model: null,
         udiDi: u.udiDiCode,
-        riskClass: item.riskClass,
+        riskClass: clean(item.riskClass)
+          ? `swissdamed:${clean(item.riskClass)}`
+          : null,
         authorizationId: null,
         authorizationDate: null,
         status: clean(detail?.udiDi?.marketStatus) ?? clean(u.marketStatus),
-        extensions: {
+        extra: {
           basicUdiDi: clean(item.basicUdiDiCode),
           deviceName: clean(item.deviceName),
           legislation: clean(item.deviceType),
-          emdnCodes: noms.length > 1 ? noms.map((n) => n.code) : null,
+          deviceTypes:
+            noms.length > 1
+              ? noms
+                  .slice(1)
+                  .map((n) => ({ system: 'emdn', code: n.code, name: n.term }))
+              : null,
           tradeNames: all.length > 1 ? all : null,
         },
       });

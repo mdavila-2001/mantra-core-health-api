@@ -1,0 +1,65 @@
+{
+  "region": "eu",
+  "generatedAt": "2026-10-24T03:31:17Z",
+  "formatVersion": 1,
+  "files": [],
+  "classifications": [],
+  "scope": "Exporta filas con EMDN/CND en alcance (categoría W entera y tipos listados) y, marcadas en extra.dxScope = \"pendiente-revision:<letra>\", las de categorías C, G, N, Q, R, U, V y Z para que master las clasifique. No exporta categorías excluidas (ver lib/emdn-scope.mjs).",
+  "gaps": [
+    {
+      "source": "ec-emdn",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+      "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+    },
+    {
+      "source": "eudamed-udi",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+      "url": "https://developer.datalake.sante.service.ec.europa.eu/"
+    },
+    {
+      "source": "eudamed-certificates",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+      "url": "https://ec.europa.eu/tools/eudamed/"
+    },
+    {
+      "source": "mhra-pard",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
+      "url": "https://pard.mhra.gov.uk/"
+    },
+    {
+      "source": "swissmedic-swissdamed",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+      "url": "https://swissdamed.ch/"
+    },
+    {
+      "source": "it-salute-bdrdm",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+      "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
+    },
+    {
+      "source": "it-salute-cnd",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z)",
+      "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/"
+    },
+    {
+      "source": "ec-nando",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+      "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+    },
+    {
+      "source": "de-bfarm",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+      "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+    },
+    {
+      "source": "es-aemps-ccps",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+      "url": "https://www.aemps.gob.es/"
+    },
+    {
+      "source": "fr-ansm",
+      "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:30:47.327Z) · sin descarga automática: No aplica.",
+      "url": "https://ansm.sante.fr/"
+    }
+  ]
+}

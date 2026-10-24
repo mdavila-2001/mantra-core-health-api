@@ -22,6 +22,18 @@ buscador o por documentos oficiales citados por terceros, y queda marcado como p
 | **AEMPS / CCPS** (España) | — | Consulta pública, sin descarga masiva | — | No | Hueco |
 | **ANSM** (Francia) | — | Sin registro nacional descargable (remite a EUDAMED) | — | No | Hueco |
 
+## Claves de fuente en el formato común y recorte
+
+Claves (`source`): `eudamed-udi`, `eudamed-certificates`, `ec-emdn`, `mhra-pard`,
+`swissmedic-swissdamed`, `it-salute-bdrdm`, `it-salute-cnd`, `ec-nando`, `de-bfarm`,
+`es-aemps-ccps`, `fr-ansm`.
+
+Recorte aplicado por esta región (lo pide el README común): se exportan filas con código EMDN/CND
+de la categoría W (IVD, entera) y de tipos listados en `INCLUDED_TYPE_PREFIXES`, más las filas de
+las categorías C, G, N, Q, R, U, V y Z marcadas `extra.dxScope = "pendiente-revision:<letra>"`
+para que `master` las clasifique. No se piden ni exportan las categorías A, B, D, F, H, J, K, L,
+M, P, S, T, X, Y (motivos en `lib/emdn-scope.mjs`).
+
 ## Documentación de terceros usada para fijar contratos (no para datos)
 
 | Recurso | Licencia | Para qué |

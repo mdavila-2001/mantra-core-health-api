@@ -9,8 +9,8 @@
 | ID | Qué se logró | Comando | Resultado |
 |---|---|---|---|
 | H1.S1.M1 | Discovery del modelo | `grep -rliE "gmdn\|emdn\|udi_di\|manufacturer" src/` | Solo `diagnostic_equipment` (instancia con `manufacturer`/`model` libres); sin catálogo. Detalle en `docs/seed-research/diagnostic-devices-eu.md` |
-| H1.S1.M2 | Formato común | `test -f tools/terminology-import/diagnostic-devices/README.md` | Presente (no existía en ninguna rama hermana al crearlo) |
-| H2.S1.M1 | `probe.mjs` | `node …/eu/probe.mjs` | `out/probe/probe-20261024T0311.json`, 0/11 alcanzables |
+| H1.S1.M2 | Salida conforme al formato común de `master` (manifest, claves de fuente, `srn:`, `extra`, clases con esquema) | test `makeDeviceRecord: aplica las reglas del formato común` | verde; README propio retirado para no pisar el de `master` |
+| H2.S1.M1 | `probe.mjs` | `node …/eu/probe.mjs` | pasadas 1 y 2: `out/probe/probe-20261024T0311.json` y `probe-20261024T0330.json`, 0/11 alcanzables en ambas |
 | H2.S1.M2 | Adaptador EUDAMED Data Lake | test `Data Lake: …` (3 casos) | verde |
 | H2.S1.M3 | Adaptador EMDN | test `EMDN: …` (4 casos) | verde |
 | H2.S1.M4 | Adaptador swissdamed | test `swissdamed: …` | verde (fuente desactivada por términos) |
@@ -71,7 +71,8 @@ exit 0
 - `readFirstSheet` (lectura del Excel de la EMDN) no se probó con un archivo real.
 
 ## Desvíos del plan
-- Ninguno en alcance. Se agregó `lib/load-plan.mjs` para poder probar el plan de carga sin base.
+- Se agregó `lib/load-plan.mjs` para poder probar el plan de carga sin base.
+- La sesión `master` publicó el formato común antes que esta: se retiró el README propio y la salida se adaptó al suyo (pasada 2). Las categorías EMDN en revisión ahora se exportan marcadas en `extra.dxScope` para que `master` decida.
 
 ## Riesgos residuales
 - Cuando se habilite la red, el formato real del Excel de la EMDN o del CSV italiano puede diferir:

@@ -1,0 +1,11 @@
+{
+  "devicesExported": 0,
+  "devicesInScope": 0,
+  "devicesPendingReview": 0,
+  "distinctManufacturers": 0,
+  "distinctBrands": 0,
+  "rejectedRows": 0,
+  "emdnConcepts": 0,
+  "gaps": 13,
+  "files": 0
+}

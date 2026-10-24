@@ -10,6 +10,7 @@
 
 export const SOURCES = {
   EMDN: {
+    exchangeSource: 'ec-emdn',
     name: 'European Medical Device Nomenclature (EMDN)',
     owner: 'Comisión Europea, DG SANTE',
     officialUrl:
@@ -25,6 +26,7 @@ export const SOURCES = {
     autoFetch: true,
   },
   EUDAMED_DATALAKE: {
+    exchangeSource: 'eudamed-udi',
     name: 'EUDAMED Public API v1.0 (Data Lake de DG SANTE)',
     owner: 'Comisión Europea, DG SANTE',
     officialUrl: 'https://developer.datalake.sante.service.ec.europa.eu/',
@@ -39,6 +41,7 @@ export const SOURCES = {
     autoFetch: true,
   },
   EUDAMED_PORTAL: {
+    exchangeSource: 'eudamed-certificates',
     name: 'EUDAMED, módulos públicos del portal (API interna de la interfaz)',
     owner: 'Comisión Europea, DG SANTE',
     officialUrl: 'https://ec.europa.eu/tools/eudamed/',
@@ -53,6 +56,7 @@ export const SOURCES = {
     autoFetch: false,
   },
   MHRA_PARD: {
+    exchangeSource: 'mhra-pard',
     name: 'MHRA Public Access Registration Database (PARD)',
     owner: 'Medicines and Healthcare products Regulatory Agency (Reino Unido)',
     officialUrl: 'https://pard.mhra.gov.uk/',
@@ -66,6 +70,7 @@ export const SOURCES = {
     autoFetch: false,
   },
   SWISSDAMED: {
+    exchangeSource: 'swissmedic-swissdamed',
     name: 'swissdamed (Swissmedic): módulos públicos de actores y UDI',
     owner: 'Swissmedic',
     officialUrl: 'https://swissdamed.ch/',
@@ -79,6 +84,7 @@ export const SOURCES = {
     autoFetch: false,
   },
   IT_BDRDM: {
+    exchangeSource: 'it-salute-bdrdm',
     name: 'Italia — Banca dati e Repertorio dei dispositivi medici (BD/RDM)',
     owner: 'Ministero della Salute',
     officialUrl:
@@ -93,6 +99,7 @@ export const SOURCES = {
     autoFetch: true,
   },
   IT_CND: {
+    exchangeSource: 'it-salute-cnd',
     name: 'Italia — Classificazione Nazionale dei Dispositivi medici (CND)',
     owner: 'Ministero della Salute',
     officialUrl:
@@ -108,6 +115,7 @@ export const SOURCES = {
     autoFetch: true,
   },
   NANDO: {
+    exchangeSource: 'ec-nando',
     name: 'NANDO — organismos notificados (MDR/IVDR)',
     owner: 'Comisión Europea, DG GROW',
     officialUrl:
@@ -123,6 +131,7 @@ export const SOURCES = {
     autoFetch: false,
   },
   DE_BFARM: {
+    exchangeSource: 'de-bfarm',
     name: 'Alemania — BfArM, información de productos sanitarios (DMIDS heredado)',
     owner: 'Bundesinstitut für Arzneimittel und Medizinprodukte',
     officialUrl: 'https://www.bfarm.de/EN/Medical-devices/_node.html',
@@ -133,6 +142,7 @@ export const SOURCES = {
     autoFetch: false,
   },
   ES_AEMPS: {
+    exchangeSource: 'es-aemps-ccps',
     name: 'España — AEMPS, comunicaciones de comercialización (CCPS)',
     owner: 'Agencia Española de Medicamentos y Productos Sanitarios',
     officialUrl: 'https://www.aemps.gob.es/',
@@ -143,6 +153,7 @@ export const SOURCES = {
     autoFetch: false,
   },
   FR_ANSM: {
+    exchangeSource: 'fr-ansm',
     name: 'Francia — ANSM',
     owner:
       'Agence nationale de sécurité du médicament et des produits de santé',

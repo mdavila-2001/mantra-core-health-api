@@ -8,7 +8,7 @@
   del NDJSON sin `source`/`sourceRecordId`/`sourceUrl`/`retrievedAt`.
 
 ## Alcance
-- IN: `tools/terminology-import/diagnostic-devices/README.md` (formato común, si no existe),
+- IN: (formato común: lo escribe la sesión `master`; si no existiera, esta sesión lo propondría),
   `tools/terminology-import/diagnostic-devices/eu/**`, `docs/seed-research/diagnostic-devices-eu.md`,
   esta carpeta de trabajo.
 - OUT: entidades, migraciones, DDL, `src/**` (ADR-0021), carpetas de las sesiones hermanas,
@@ -27,12 +27,12 @@
 ## H1 — Discovery y formato común
 **CA:** Dado el repo en `dev`, cuando se busca dónde guardar tipo/fabricante/marca/modelo,
 entonces queda escrito qué existe y qué falta, y el formato común está documentado.
-**DoD:** `grep` de discovery pegado en el reporte; README del formato presente. **Estado:** HECHO
+**DoD:** `grep` de discovery pegado en el reporte; salida conforme al README común de `master`. **Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H1.S1.M1 | Discovery del modelo | Entidades y tablas citadas con ruta | `grep -rliE "gmdn\|emdn\|manufacturer" src/` | HECHO |
-| H1.S1.M2 | README del formato común | Campos obligatorios listados | `test -f tools/terminology-import/diagnostic-devices/README.md` | HECHO |
+| H1.S1.M2 | Salida conforme al formato común de `master` | Filas validan las reglas del README común (no nulos, `srn:`, esquemas) | test `makeDeviceRecord: aplica las reglas del formato común` | HECHO |
 
 ## H2 — Pipeline EU (sondeo, descarga, normalización, carga)
 **CA:** Dado el pipeline, cuando una fuente es alcanzable se descarga con manifiesto (URL, versión,

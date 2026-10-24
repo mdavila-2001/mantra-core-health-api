@@ -13,9 +13,9 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { clean, makeDeviceRecord } from '../common.mjs';
+import { clean, isoDate, makeDeviceRecord } from '../common.mjs';
 
-export const SOURCE = 'IT_BDRDM';
+export const SOURCE = 'it-salute-bdrdm';
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 export function loadColumnMap(path = join(HERE, 'it-bdrdm.columns.json')) {
@@ -55,7 +55,7 @@ export function normalizeBdrdmRow(row, map, ctx) {
     sourceVersion: ctx.sourceVersion,
     retrievedAt: ctx.retrievedAt,
     deviceTypeCode: get('cndCode'),
-    deviceTypeSystem: get('cndCode') ? 'CND' : null,
+    deviceTypeSystem: get('cndCode') ? 'cnd' : null,
     deviceTypeName: get('cndName'),
     manufacturerName: get('manufacturerName'),
     manufacturerCountry: get('manufacturerCountry'),
@@ -63,11 +63,12 @@ export function normalizeBdrdmRow(row, map, ctx) {
     brandName: get('brandName'),
     model: get('model'),
     udiDi: get('udiDi'),
-    riskClass: get('riskClass'),
+    riskClass: get('riskClass') ? `it-bdrdm:${get('riskClass')}` : null,
     authorizationId: null,
-    authorizationDate: get('registrationDate'),
+    authorizationDate: isoDate(get('registrationDate')),
     status: get('status'),
-    extensions: {
+    extra: {
+      registrationDateRaw: get('registrationDate'),
       recordType: get('recordType'),
       repertorio: get('repertorio'),
       endOfMarketingDate: get('endOfMarketingDate'),

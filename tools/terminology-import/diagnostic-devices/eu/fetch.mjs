@@ -9,7 +9,7 @@
 //   node …/fetch.mjs --only=EMDN,EUDAMED_DATALAKE --max-codes=20
 //
 // Orden: EMDN → EUDAMED /reference → EUDAMED /udi por cada código EMDN en
-// alcance → EUDAMED /actors por cada SRN de fabricante visto → Italia.
+// alcance o en revisión → EUDAMED /actors por cada SRN de fabricante visto → Italia.
 // =============================================================================
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -246,7 +246,15 @@ async function main() {
           'sin EMDN descargada no hay lista de códigos en alcance para consultar /udi',
         );
       else {
-        fetchUdiByCodes(emdn.filter((c) => c.scope.inScope).map((c) => c.code));
+        fetchUdiByCodes(
+          emdn
+            .filter(
+              (c) =>
+                c.scope.inScope ||
+                c.scope.rule.startsWith('pendiente-revision'),
+            )
+            .map((c) => c.code),
+        );
         fetchActorsForSeenSrns();
       }
     }

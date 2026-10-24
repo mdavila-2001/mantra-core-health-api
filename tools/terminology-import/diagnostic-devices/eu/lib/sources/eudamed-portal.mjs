@@ -11,7 +11,7 @@
 // duplicada y con uuids repetidos: por eso se deduplica por número + revisión.
 // =============================================================================
 
-import { clean } from '../common.mjs';
+import { clean, isoDate } from '../common.mjs';
 
 export const PORTAL_BASE = 'https://ec.europa.eu/tools/eudamed/api';
 
@@ -34,9 +34,9 @@ export function extractCertificates(basicUdiData) {
       certificateRevision: clean(c.certificateRevision),
       certificateType: clean(c.certificateType?.code),
       status: clean(c.status?.code),
-      issueDate: clean(c.issueDate),
-      startingValidityDate: clean(c.startingValidityDate),
-      expiryDate: clean(c.certificateExpiry),
+      issueDate: isoDate(c.issueDate),
+      startingValidityDate: isoDate(c.startingValidityDate),
+      expiryDate: isoDate(c.certificateExpiry),
       notifiedBodySrn: clean(c.notifiedBody?.srn),
       notifiedBodyName: clean(c.notifiedBody?.name),
       notifiedBodyCountry: clean(c.notifiedBody?.countryIso2Code),
@@ -48,7 +48,7 @@ export function extractCertificates(basicUdiData) {
 /**
  * Completa un registro común con el certificado: authorizationId toma el
  * primer certificado (orden de la fuente) y la lista completa queda en
- * extensions.certificates. No cambia ningún otro campo.
+ * extra.certificates. No cambia ningún otro campo.
  */
 export function enrichWithCertificates(record, basicUdiData, certSourceUrl) {
   const certs = extractCertificates(basicUdiData);
@@ -57,8 +57,8 @@ export function enrichWithCertificates(record, basicUdiData, certSourceUrl) {
     ...record,
     authorizationId: certs[0].certificateNumber,
     authorizationDate: certs[0].issueDate ?? certs[0].startingValidityDate,
-    extensions: {
-      ...record.extensions,
+    extra: {
+      ...record.extra,
       certificates: certs,
       certificatesSourceUrl: certSourceUrl,
     },

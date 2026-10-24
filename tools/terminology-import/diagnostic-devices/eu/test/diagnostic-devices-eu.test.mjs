@@ -1,5 +1,5 @@
 // Tests del importador de equipos de diagnóstico de Europa.
-//   node --test tools/terminology-import/diagnostic-devices/eu/test/
+//   node --test "tools/terminology-import/diagnostic-devices/eu/test/*.test.mjs"
 //
 // TODOS los datos de estas pruebas son SINTÉTICOS: nombres «SINTETICO …»,
 // SRN y UDI-DI de relleno. Solo la FORMA (nombres de campo, sobres de
@@ -15,7 +15,9 @@ import { test } from 'node:test';
 import { buildCorpus, scopeOf } from '../lib/build-corpus.mjs';
 import {
   DEVICE_FIELDS,
+  RowError,
   dedupe,
+  isoDate,
   makeDeviceRecord,
   parseCsv,
   readNdjsonGzParts,
@@ -40,9 +42,9 @@ import {
   buildReferenceIndex,
   buildUrl,
   countryFromSrn,
-  normalizeActorRow,
   normalizeUdiRow,
   parsePage,
+  riskClassWithScheme,
 } from '../lib/sources/eudamed-datalake.mjs';
 import {
   enrichWithCertificates,
@@ -56,101 +58,93 @@ import { normalizeBasicUdi } from '../lib/sources/swissdamed.mjs';
 
 const T = '2026-10-24T00:00:00.000Z';
 const PROV = {
-  source: 'TEST',
+  source: 'test-sintetico',
   sourceRecordId: 'r1',
   sourceUrl: 'https://example.invalid/r1',
+  sourceVersion: 'test',
   retrievedAt: T,
+  manufacturerName: 'SINTETICO SA',
 };
 
-// --- formato común -----------------------------------------------------------
+// --- formato común (../README.md, definido por la sesión master) ------------
 
-test('makeDeviceRecord: todos los campos presentes, vacíos → null, id estable', () => {
+test('makeDeviceRecord: todos los campos presentes, vacíos → null, extra compacto', () => {
   const r = makeDeviceRecord({
     ...PROV,
     brandName: '  SINTETICO   Marca ',
     model: '',
+    extra: { a: null, b: 'x' },
   });
   for (const f of DEVICE_FIELDS) assert.ok(f in r, f);
   assert.equal(r.brandName, 'SINTETICO Marca');
   assert.equal(r.model, null);
-  assert.equal(r.id, makeDeviceRecord({ ...PROV }).id);
+  assert.deepEqual(r.extra, { b: 'x' });
+  assert.equal('id' in r, false);
 });
 
-test('makeDeviceRecord: sin procedencia o con país no ISO falla', () => {
-  assert.throws(
-    () => makeDeviceRecord({ ...PROV, sourceUrl: '' }),
-    /procedencia \(sourceUrl\)/,
+test('makeDeviceRecord: aplica las reglas del formato común', () => {
+  const bad = (patch, re) =>
+    assert.throws(
+      () => makeDeviceRecord({ ...PROV, ...patch }),
+      (e) => e instanceof RowError && re.test(e.message),
+    );
+  bad({ sourceUrl: '' }, /sourceUrl no puede ser null/);
+  bad({ sourceVersion: null }, /sourceVersion no puede ser null/);
+  bad({ manufacturerName: ' ' }, /manufacturerName no puede ser null/);
+  bad({ source: 'EUDAMED' }, /source inválido/);
+  bad({ retrievedAt: '2026-10-24' }, /retrievedAt/);
+  bad({ manufacturerCountry: 'Italia' }, /ISO alfa-2/);
+  bad({ manufacturerRegistryId: 'DE-MF-000000001' }, /prefijo de esquema/);
+  bad(
+    { deviceTypeCode: 'W01', deviceTypeSystem: 'EMDN' },
+    /deviceTypeSystem desconocido/,
   );
-  assert.throws(
-    () => makeDeviceRecord({ ...PROV, retrievedAt: null }),
-    /retrievedAt/,
-  );
-  assert.throws(
-    () => makeDeviceRecord({ ...PROV, manufacturerCountry: 'Italia' }),
-    /ISO/,
-  );
+  bad({ deviceTypeCode: 'W01' }, /van juntos/);
+  bad({ authorizationDate: '24/10/2026' }, /YYYY-MM-DD/);
+  assert.equal(isoDate('2026-01-02T10:00:00Z'), '2026-01-02');
+  assert.equal(isoDate('02/01/2026'), null);
 });
 
-test('dedupe: exacto por UDI-DI y por fabricante+modelo, nunca difuso', () => {
-  const a = makeDeviceRecord({
-    ...PROV,
-    sourceRecordId: 'a',
-    udiDi: '000SINTETICO1',
-  });
-  const b = makeDeviceRecord({
-    ...PROV,
-    sourceRecordId: 'b',
-    udiDi: '000sintetico1',
-  });
-  const c = makeDeviceRecord({
-    ...PROV,
-    sourceRecordId: 'c',
-    manufacturerName: 'SINTETICO SA',
-    model: 'X 1',
-  });
-  const d = makeDeviceRecord({
-    ...PROV,
-    sourceRecordId: 'd',
-    manufacturerName: 'sintetico  sa',
-    model: 'x 1',
-  });
-  const e = makeDeviceRecord({
-    ...PROV,
-    sourceRecordId: 'e',
-    manufacturerName: 'SINTETICO SA',
-    model: 'X-1',
-  });
-  const { kept, duplicates } = dedupe([a, b, c, d, e]);
+test('dedupe: exacto por fila, UDI-DI y fabricante+modelo; nunca difuso', () => {
+  const mk = (id, p) => makeDeviceRecord({ ...PROV, sourceRecordId: id, ...p });
+  const { kept, duplicates } = dedupe([
+    mk('a', { udiDi: '000SINTETICO1' }),
+    mk('b', { udiDi: '000sintetico1' }),
+    mk('c', { model: 'X 1' }),
+    mk('d', { manufacturerName: 'sintetico  sa', model: 'x 1' }),
+    mk('e', { model: 'X-1' }),
+    mk('e', { model: 'otro' }),
+  ]);
   assert.deepEqual(
     kept.map((k) => k.sourceRecordId),
     ['a', 'c', 'e'],
   );
   assert.deepEqual(
-    duplicates.map((x) => x.key.split(':')[0]),
-    ['udi', 'mf+model'],
+    duplicates.map((x) => x.key),
+    ['udi', 'mf+model', 'row'],
   );
 });
 
-test('writeNdjsonGzParts: orden determinista, partes chicas, borra partes viejas', () => {
+test('writeNdjsonGzParts: <base>-0001…, orden determinista, sha256, borra partes viejas', () => {
   const dir = mkdtempSync(join(tmpdir(), 'dx-eu-'));
   const rows = Array.from({ length: 50 }, (_, i) =>
     makeDeviceRecord({
       ...PROV,
-      sourceRecordId: `r${i}`,
+      sourceRecordId: `r${String(i).padStart(2, '0')}`,
       brandName: 'SINTETICO '.repeat(20),
     }),
   );
-  const parts = writeNdjsonGzParts('devices-eu', rows, { dir, maxBytes: 600 });
+  const parts = writeNdjsonGzParts('eudamed-udi', rows, { dir, maxBytes: 600 });
   assert.ok(parts.length > 1);
-  const back = readNdjsonGzParts('devices-eu', { dir });
+  assert.match(parts[0].path, /^eudamed-udi-0001\.ndjson\.gz$/);
+  assert.match(parts[0].sha256, /^[0-9a-f]{64}$/);
+  const back = readNdjsonGzParts('eudamed-udi', { dir });
   assert.equal(back.length, 50);
-  assert.deepEqual(
-    back.map((r) => r.id),
-    [...back.map((r) => r.id)].sort(),
-  );
-  writeNdjsonGzParts('devices-eu', rows.slice(0, 1), { dir, maxBytes: 600 });
-  assert.equal(readdirSync(dir).length, 1);
-  writeNdjsonGzParts('devices-eu', [], { dir });
+  const ids = back.map((r) => r.sourceRecordId);
+  assert.deepEqual(ids, [...ids].sort());
+  writeNdjsonGzParts('eudamed-udi', rows.slice(0, 1), { dir, maxBytes: 600 });
+  assert.deepEqual(readdirSync(dir), ['eudamed-udi-0001.ndjson.gz']);
+  writeNdjsonGzParts('eudamed-udi', [], { dir });
   assert.equal(readdirSync(dir).length, 0);
 });
 
@@ -209,18 +203,22 @@ test('EMDN: nivel y padre salen de la estructura del código', () => {
 });
 
 test('EMDN: parsea jerarquía, deduce terminal si falta y marca el alcance', () => {
-  const rows = [
-    emdnRow('W', 'SINTETICO categoria', 1, 'N'),
-    emdnRow('W01', 'SINTETICO grupo', 2, 'N'),
-    emdnRow('W0101', 'SINTETICO tipo', 3, 'Y'),
-    emdnRow('Z', 'SINTETICO equipos', 1, 'N'),
-    emdnRow('Z11', 'SINTETICO imagen', 2, 'Y'),
-    emdnRow('L', 'SINTETICO instrumental', 1, 'Y'),
-  ];
-  const c = parseEmdnRows(EMDN_HEADER, rows, EMDN_PROV);
+  const c = parseEmdnRows(
+    EMDN_HEADER,
+    [
+      emdnRow('W', 'SINTETICO categoria', 1, 'N'),
+      emdnRow('W01', 'SINTETICO grupo', 2, 'N'),
+      emdnRow('W0101', 'SINTETICO tipo', 3, 'Y'),
+      emdnRow('Z', 'SINTETICO equipos', 1, 'N'),
+      emdnRow('Z11', 'SINTETICO imagen', 2, 'Y'),
+      emdnRow('L', 'SINTETICO instrumental', 1, 'Y'),
+    ],
+    EMDN_PROV,
+  );
   const by = new Map(c.map((x) => [x.code, x]));
   assert.equal(by.get('W0101').parentCode, 'W01');
   assert.equal(by.get('W0101').terminal, true);
+  assert.equal(by.get('W0101').source, 'ec-emdn');
   assert.equal(
     by.get('W0101').sourceUrl,
     'https://webgate.ec.europa.eu/dyna2/emdn/W0101',
@@ -369,42 +367,64 @@ test('Data Lake: sobre {value,nextLink} validado y nextLink sin cambiar la consu
   );
 });
 
-test('Data Lake: fila /udi → registro común con decodificación y país por SRN', () => {
-  const r = normalizeUdiRow(UDI_ROW, {
+test('Data Lake: fila /udi → formato común (srn:, decodificación, país por actor o SRN)', () => {
+  const ctx = {
     reference: buildReferenceIndex(REFERENCE_ROWS),
     emdnByCode: new Map([['W0101', { display: 'SINTETICO tipo' }]]),
     sourceUrl: 'https://h.invalid/eudamed/udi?NOMENCLATURE_CODE=W0101',
     retrievedAt: T,
-  });
-  assert.equal(r.source, 'EUDAMED');
+  };
+  const r = normalizeUdiRow(UDI_ROW, ctx);
+  assert.equal(r.source, 'eudamed-udi');
   assert.equal(r.sourceRecordId, UDI_ROW.UUID);
-  assert.equal(r.sourceVersion, '3');
+  assert.equal(r.sourceVersion, 'eudamed-public-api-v1.0;record-version=3');
   assert.equal(r.udiDi, '00000000000017');
+  assert.equal(r.deviceTypeSystem, 'emdn');
   assert.equal(r.deviceTypeName, 'SINTETICO tipo');
+  assert.equal(r.manufacturerRegistryId, 'srn:DE-MF-000000001');
   assert.equal(r.manufacturerCountry, 'DE');
+  assert.equal(r.extra.manufacturerCountrySource, 'prefijo-SRN');
   assert.equal(r.model, 'REF-SINT-1');
-  assert.equal(r.extensions.modelSource, 'REFERENCE');
-  assert.equal(r.riskClass, 'SINTETICO Class C');
+  assert.equal(r.extra.modelSource, 'REFERENCE');
+  assert.equal(r.riskClass, 'eudamed:SINTETICO Class C');
   assert.equal(r.status, 'SINTETICO On the market');
-  assert.equal(r.extensions.legislation, 'APPLICABLE_LEGISLATION_ID:99');
-  assert.equal(countryFromSrn('XX-ZZ-1'), null);
-});
-
-test('Data Lake: fila /actors → fabricante', () => {
-  const m = normalizeActorRow(
+  assert.equal(r.extra.legislation, 'APPLICABLE_LEGISLATION_ID:99');
+  const withActor = normalizeUdiRow(
+    { ...UDI_ROW, NOMENCLATURE_CODE: 'W0101 W0102' },
     {
-      ACTOR_ID: 'DE-MF-000000001',
-      NAME: 'SINTETICO GmbH',
-      ACTOR_TYPE: 'Manufacturer',
-      ACT_COUNTRY_ISO2_CODE: 'de',
-    },
-    {
-      sourceUrl: 'https://h.invalid/eudamed/actors?ACTOR_ID=DE-MF-000000001',
-      retrievedAt: T,
+      ...ctx,
+      actorsBySrn: new Map([
+        ['DE-MF-000000001', { ACT_COUNTRY_ISO2_CODE: 'at', NAME: 'SINTETICO' }],
+      ]),
     },
   );
-  assert.equal(m.manufacturerCountry, 'DE');
-  assert.equal(m.actorRole, 'Manufacturer');
+  assert.equal(withActor.manufacturerCountry, 'AT');
+  assert.deepEqual(withActor.extra.deviceTypes, [
+    { system: 'emdn', code: 'W0102', name: null },
+  ]);
+  assert.equal(countryFromSrn('XX-ZZ-1'), null);
+  assert.throws(
+    () => normalizeUdiRow({ ...UDI_ROW, MF_NAME: null }, ctx),
+    RowError,
+  );
+});
+
+test('Data Lake: clase con esquema solo si legislación y etiqueta encajan exactamente', () => {
+  assert.equal(
+    riskClassWithScheme('Class IIa', 'Regulation (EU) 2017/745 (MDR)'),
+    'eu-mdr:IIa',
+  );
+  assert.equal(riskClassWithScheme('C', 'IVDR'), 'eu-ivdr:C');
+  assert.equal(
+    riskClassWithScheme('Class III', 'Directive 93/42/EEC'),
+    'eu-mdd:III',
+  );
+  assert.equal(
+    riskClassWithScheme('List A, Annex II', 'IVDD'),
+    'eudamed:List A, Annex II',
+  );
+  assert.equal(riskClassWithScheme('Class IIa', null), 'eudamed:Class IIa');
+  assert.equal(riskClassWithScheme(null, 'MDR'), null);
 });
 
 // --- EUDAMED portal (certificados) ---------------------------------------------
@@ -413,7 +433,7 @@ test('portal: certificados deduplicados por número+revisión y enriquecimiento'
   const cert = {
     certificateNumber: 'SINT-0001',
     certificateRevision: '1',
-    issueDate: '2025-01-02',
+    issueDate: '2025-01-02T00:00:00',
     certificateExpiry: '2030-01-01',
     notifiedBody: { srn: '0000', name: 'SINTETICO NB', countryIso2Code: 'DE' },
   };
@@ -427,13 +447,13 @@ test('portal: certificados deduplicados por número+revisión y enriquecimiento'
   );
   assert.equal(e.authorizationId, 'SINT-0001');
   assert.equal(e.authorizationDate, '2025-01-02');
-  assert.equal(e.extensions.certificates[0].notifiedBodyName, 'SINTETICO NB');
+  assert.equal(e.extra.certificates[0].notifiedBodyName, 'SINTETICO NB');
   assert.equal(enrichWithCertificates(base, {}, 'x'), base);
 });
 
 // --- swissdamed ----------------------------------------------------------------
 
-test('swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés', () => {
+test('swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés; desactivado', () => {
   const item = {
     basicUdiDiCode: 'SINTBASIC',
     companyName: 'SINTETICO AG',
@@ -469,13 +489,15 @@ test('swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés', (
     detailsById: details,
   });
   assert.equal(rest.length, 0);
+  assert.equal(r.source, 'swissmedic-swissdamed');
   assert.equal(r.brandName, 'SINTETICO en');
   assert.equal(r.deviceTypeCode, 'W0101');
+  assert.equal(r.riskClass, 'swissdamed:CLASS_C');
   assert.equal(
     r.sourceUrl,
     'https://swissdamed.ch/public/udi/udi-dis/11/details',
   );
-  assert.equal(r.extensions.tradeNames.length, 2);
+  assert.equal(r.extra.tradeNames.length, 2);
   assert.equal(SOURCES.SWISSDAMED.autoFetch, false);
 });
 
@@ -494,13 +516,14 @@ test('BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real', (
       recordType: 't',
       cndCode: 'cnd',
       manufacturerName: 'fab',
+      registrationDate: 'd',
       brandName: null,
     },
   };
-  assert.throws(() => assertColumnMap(map, ['n', 't', 'cnd']), /fab/);
-  assertColumnMap(map, ['n', 't', 'cnd', 'fab']);
+  assert.throws(() => assertColumnMap(map, ['n', 't', 'cnd', 'd']), /fab/);
+  assertColumnMap(map, ['n', 't', 'cnd', 'fab', 'd']);
   const r = normalizeBdrdmRow(
-    { n: '9', t: '1', cnd: 'W0101', fab: 'SINTETICO SpA' },
+    { n: '9', t: '1', cnd: 'W0101', fab: 'SINTETICO SpA', d: '2020-05-06' },
     map,
     {
       sourceUrl: 'https://example.invalid/bdrdm.csv',
@@ -508,14 +531,16 @@ test('BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real', (
       retrievedAt: T,
     },
   );
+  assert.equal(r.source, 'it-salute-bdrdm');
   assert.equal(r.sourceRecordId, '1:9');
-  assert.equal(r.deviceTypeSystem, 'CND');
+  assert.equal(r.deviceTypeSystem, 'cnd');
+  assert.equal(r.authorizationDate, '2020-05-06');
   assert.equal(r.brandName, null);
 });
 
 // --- ensamblado y cobertura ----------------------------------------------------
 
-test('buildCorpus: filtra por alcance, deduplica y solo trae fabricantes de equipos en alcance', () => {
+test('buildCorpus: exporta alcance y revisión, excluye el resto, deduplica y rechaza sin fabricante', () => {
   const emdnConcepts = parseEmdnRows(
     EMDN_HEADER,
     [
@@ -524,6 +549,7 @@ test('buildCorpus: filtra por alcance, deduplica y solo trae fabricantes de equi
       emdnRow('W0101', 'SINTETICO tipo', 3, 'Y'),
       emdnRow('W0102', 'SINTETICO tipo 2', 3, 'Y'),
       emdnRow('L', 'SINTETICO', 1, 'Y'),
+      emdnRow('Z', 'SINTETICO', 1, 'Y'),
     ],
     EMDN_PROV,
   );
@@ -532,7 +558,7 @@ test('buildCorpus: filtra por alcance, deduplica y solo trae fabricantes de equi
     sourceUrl: 'https://h.invalid/udi',
     retrievedAt: T,
   });
-  const { devices, manufacturers, coverage } = buildCorpus({
+  const { devices, coverage } = buildCorpus({
     emdnConcepts,
     referenceRows: REFERENCE_ROWS,
     udiPages: [
@@ -546,32 +572,41 @@ test('buildCorpus: filtra por alcance, deduplica y solo trae fabricantes de equi
           NOMENCLATURE_CODE: 'L',
           MF_SRN: 'IT-MF-000000002',
         },
+        {
+          ...UDI_ROW,
+          UUID: 'z',
+          PRIMARY_DI: '3',
+          REFERENCE: 'REF-SINT-Z',
+          NOMENCLATURE_CODE: 'Z',
+        },
+        { ...UDI_ROW, UUID: 'sin-fabricante', PRIMARY_DI: '4', MF_NAME: null },
       ]),
     ],
-    actorPages: [
-      page([
-        {
-          ACTOR_ID: 'DE-MF-000000001',
-          NAME: 'SINTETICO GmbH',
-          ACT_COUNTRY_ISO2_CODE: 'DE',
-        },
-        {
-          ACTOR_ID: 'IT-MF-000000002',
-          NAME: 'SINTETICO SpA',
-          ACT_COUNTRY_ISO2_CODE: 'IT',
-        },
-      ]),
+    actorRows: [
+      {
+        ACTOR_ID: 'DE-MF-000000001',
+        NAME: 'SINTETICO GmbH',
+        ACT_COUNTRY_ISO2_CODE: 'DE',
+      },
     ],
-    gaps: [{ source: 'TEST', reason: 'SINTETICO' }],
+    gaps: [{ source: 'test', reason: 'SINTETICO' }],
   });
-  assert.equal(devices.length, 1);
-  assert.equal(devices[0].extensions.scopeRule, 'categoria-incluida:W');
   assert.deepEqual(
-    manufacturers.map((m) => m.manufacturerRegistryId),
-    ['DE-MF-000000001'],
+    devices.map((d) => [d.sourceRecordId, d.extra.dxScope]),
+    [
+      [UDI_ROW.UUID, 'categoria-incluida:W'],
+      ['z', 'pendiente-revision:Z'],
+    ],
   );
-  assert.equal(coverage.totalRead, 3);
+  assert.equal(
+    devices[0].extra.manufacturerCountrySource,
+    'eudamed-actors:ACT_COUNTRY_ISO2_CODE',
+  );
+  assert.equal(coverage.totalRead, 5);
+  assert.equal(coverage.rejectedRows, 1);
   assert.equal(coverage.duplicatesDropped, 1);
+  assert.equal(coverage.devicesInScope, 1);
+  assert.equal(coverage.devicesPendingReview, 1);
   assert.deepEqual(coverage.excludedByRule, { 'categoria-excluida:L': 1 });
   assert.equal(coverage.distinctBrands, 1);
   assert.equal(coverage.emdn.inScopeTerminalWithoutDevices, 1);

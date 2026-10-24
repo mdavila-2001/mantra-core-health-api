@@ -25,7 +25,14 @@
 
 import 'dotenv/config';
 import pg from 'pg';
-import { md5uuid, nowIso, readNdjsonGzParts } from './lib/common.mjs';
+import {
+  md5uuid,
+  nowIso,
+  outDir,
+  readJson,
+  readNdjsonGzParts,
+} from './lib/common.mjs';
+import { existsSync } from 'node:fs';
 import {
   conceptProperties,
   conceptRowId,
@@ -119,8 +126,11 @@ async function ensureCodeSystem(client, version) {
 }
 
 async function main() {
-  const concepts = readNdjsonGzParts('emdn');
-  const devices = readNdjsonGzParts('devices-eu');
+  const concepts = readNdjsonGzParts('ec-emdn', { dir: outDir('emdn') });
+  const manifest = existsSync(outDir('manifest.json'))
+    ? readJson(outDir('manifest.json'))
+    : { files: [] };
+  const deviceRows = manifest.files.reduce((n, f) => n + f.rows, 0);
   const versions = [...new Set(concepts.map((c) => c.sourceVersion))];
   const summary = {
     mode: APPLY ? 'APPLY' : 'DRY-RUN',
@@ -130,7 +140,7 @@ async function main() {
       (n, c) => n + conceptProperties(c).length,
       0,
     ),
-    devicesNotLoaded: devices.length,
+    devicesNotLoaded: deviceRows,
     devicesNotLoadedReason:
       'el modelo no tiene tabla de catálogo de equipos (fabricante/marca/modelo/UDI-DI); ver propuesta en docs/seed-research/diagnostic-devices-eu.md',
   };
