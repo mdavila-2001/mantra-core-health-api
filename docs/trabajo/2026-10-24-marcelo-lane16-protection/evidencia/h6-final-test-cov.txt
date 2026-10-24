@@ -1,0 +1,12 @@
+All files                                                                |   75.93 |    69.92 |   62.18 |   76.89 |                                                                                                                                                                       
+Statements   : 75.93% ( 44372/58437 )
+Branches     : 69.92% ( 23531/33650 )
+Functions    : 62.18% ( 9383/15089 )
+Lines        : 76.89% ( 42690/55520 )
+================================================================================
+Test Suites: 1 skipped, 884 passed, 884 of 885 total
+Tests:       1 skipped, 10912 passed, 10913 total
+Snapshots:   0 total
+Time:        1229.557 s
+Ran all test suites.
+exit=0

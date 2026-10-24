@@ -138,7 +138,7 @@
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H5.S1.M1 | Decoradores y baseline | 2 entradas menos | `yarn test src/common/audit-trail/audit-trail-coverage.spec.ts` | HECHO |
-| H5.S1.M2 | 4 eventos en asyncapi y catálogo | validan | `yarn docs:asyncapi:validate` | TODO |
+| H5.S1.M2 | 4 eventos en asyncapi y catálogo | validan | `yarn docs:asyncapi:validate` | HECHO — sección `insurance` en el catálogo de eventos; `docs:asyncapi:validate` exit 0 (el AsyncAPI declara el sobre, no cada evento) |
 
 ## H6 — Integración, gates y entrega
 **CA:** Dado Postgres real, cuando corre el flujo completo, entonces pasan cotización, envío, factura, doble cobro, paralelo, discrepancia, aprobación previa, objeción, pausa e IDOR.
@@ -157,8 +157,8 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H6.S2.M1 | Typecheck, lint, build, test, guardrails | verdes | `yarn typecheck && yarn lint --max-warnings=0 && yarn build && yarn test && yarn alovida:guardrails` | TODO |
-| H6.S2.M2 | Regenerar OpenAPI, endpoints, módulos, data, Postman | sin diff | `git diff --exit-code -- openapi docs/modules docs/data docs/postman` | TODO |
+| H6.S2.M1 | Typecheck, lint, build, test, guardrails | verdes | `yarn typecheck && yarn lint --max-warnings=0 && yarn build && yarn test && yarn alovida:guardrails` | HECHO — typecheck, lint con cero advertencias, build, `test:cov` (884 suites, 10 912 pruebas, umbrales cumplidos) y guardrails en verde tras integrar dev |
+| H6.S2.M2 | Regenerar OpenAPI, endpoints, módulos, data, Postman | sin diff | `git diff --exit-code -- openapi docs/modules docs/data docs/postman` | HECHO — regenerado desde el código final; `git diff --exit-code` sobre openapi, docs/modules, docs/data y docs/postman sale 0 |
 
 ### H6.S3 — Entrega
 **CA:** PR mergeable con evidencia. **DoD:** salida de `gh`. **Estado:** TODO
