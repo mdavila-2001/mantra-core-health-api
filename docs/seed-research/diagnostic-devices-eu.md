@@ -182,6 +182,24 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
   de Swissmedic); los mapeos GMDN↔EMDN de `lisadonlon/GMDNEMDN`, `Kilanopi` y `cl-tud` (son
   automáticos por similitud de texto, no oficiales; aviso de `master`).
 
+### Pasada 5 — 2026-10-24 · búsqueda de más réplicas
+
+- Fuentes buscadas (buscador web): copias en git de EUDAMED (`udiDiData`, Basic UDI-DI,
+  certificados), de la BD/RDM y la CND italianas, de MHRA PARD, y repos de `zdavatz`.
+- Resultado: solo los repos ya usados o descartados, servicios pagos de Apify y catálogos que
+  enlazan a la fuente oficial (`italia/awesome-italian-public-datasets`). **Nuevos: 0 · 0 · 0**.
+
+### Pasada 6 — 2026-10-24 · búsqueda de más réplicas (cierre)
+
+- Fuentes buscadas: catálogos CSV con código EMDN y UDI-DI; volcados completos del listado de
+  EUDAMED; la EMDN en castellano y el CodeSystem EMDN de la ANS francesa
+  (`interop.esante.gouv.fr`, CC BY 4.0: 403 en el proxy y el recurso publicado no trae los
+  códigos).
+- Resultado: nada nuevo (`bruhngl0/eudamed-explorer` es un explorador, sin datos). **Nuevos:
+  0 · 0 · 0**.
+- Dos pasadas seguidas en 0 con todo lo alcanzable agotado: **loop detenido**. No es saturación
+  de EUDAMED: el resto exige los hosts oficiales.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 El modelo no tiene catálogo de equipos. Propuesta concreta (a decidir y escribir en el repo del
