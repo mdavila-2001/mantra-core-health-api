@@ -213,3 +213,13 @@ test('registro: cada fuente tiene prefijo → code system (las aristas y xrefs e
     for (const f of s.files) assert.ok(!/\/(master|main)\//.test(f.url), `${s.id}: URL a una rama, no a una versión fija`);
   }
 });
+
+test('Wikidata ES: la consulta de taxones va acotada a los ids del corpus', async () => {
+  const { labelsSparql, wikidataValue, RESTRICT_TO_CORPUS } = await import('../lib/wikidata-es.mjs');
+  assert.equal(RESTRICT_TO_CORPUS.P685, 'ncbitaxon-medical');
+  assert.equal(wikidataValue('NCBITaxon:1313'), '1313');
+  const q = labelsSparql('P685', ['1313', '9606']);
+  assert.match(q, /VALUES \?id \{ "1313" "9606" \}/);
+  assert.match(q, /\?item wdt:P685 \?id/);
+  assert.doesNotMatch(labelsSparql('P1554'), /VALUES/);
+});

@@ -25,13 +25,25 @@ export const ID_PROPERTIES = {
 
 export const expectedLabels = () => Object.fromEntries(Object.entries(ID_PROPERTIES).map(([p, s]) => [p, s.label]));
 
-export function labelsSparql(prop) {
-  return `SELECT ?item ?id ?esLabel ?esDesc ?alias WHERE {
+/**
+ * Consulta SPARQL de una propiedad. Con `values`, sólo esos identificadores
+ * (NCBI Taxonomy: Wikidata tiene millones de taxones y la consulta completa
+ * excede el límite de 60 s del servicio; se piden sólo los del corpus).
+ */
+export function labelsSparql(prop, values = null) {
+  const only = values?.length ? `\n  VALUES ?id { ${values.map((v) => JSON.stringify(String(v))).join(' ')} }` : '';
+  return `SELECT ?item ?id ?esLabel ?esDesc ?alias WHERE {${only}
   ?item wdt:${prop} ?id ; rdfs:label ?esLabel FILTER(LANG(?esLabel) = "es")
   OPTIONAL { ?item schema:description ?esDesc FILTER(LANG(?esDesc) = "es") }
   OPTIONAL { ?item skos:altLabel ?alias FILTER(LANG(?alias) = "es") }
 }`;
 }
+
+/** Propiedades que se consultan sólo por los ids del corpus, en lotes. */
+export const RESTRICT_TO_CORPUS = { P685: 'ncbitaxon-medical' };
+
+/** Código del corpus → valor del identificador en Wikidata (NCBITaxon:1313 → 1313). */
+export const wikidataValue = (code) => String(code).replace(/^[A-Za-z]+:/, '');
 
 /** Valor del identificador en Wikidata → código del corpus (UBERON 0000948 → UBERON:0000948; FMA 7088 → FMA:7088). */
 export function corpusCode(prop, raw) {
