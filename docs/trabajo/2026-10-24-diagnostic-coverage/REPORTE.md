@@ -3,7 +3,7 @@
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `itzan/diagnostic-coverage-dev`,
   `itzan/diagnostic-coverage-test`
 - Peldaño de evidencia alcanzado: `VERIFIED` en `dev` (fusionado) y en `test`.
-- Avance: 16 / 16 microtareas HECHO (100 %). PR a `dev`: #841 (fusionado). Entrega a `test`: ver
+- Avance: 16 / 16 microtareas HECHO (100 %). PR a `dev`: #841 (fusionado). PR a `test`: #843. Ver
   [Entrega a `test`](#entrega-a-test).
 
 ## Completado
