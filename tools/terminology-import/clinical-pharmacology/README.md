@@ -5,9 +5,15 @@ CIMA en castellano; etiqueta SPL de la FDA en inglés), cada una con su document
 fecha y cita. Fuentes, licencias y encaje en el modelo: **`SOURCES.md`**. Registro de pasadas:
 `docs/seed-research/clinical-pharmacology.md`.
 
-Descargas y salidas fuera de git, en `glossary-data-build/` (`GLOSSARY_BUILD_DIR`); las propias en
+Descargas crudas fuera de git, en `glossary-data-build/` (`GLOSSARY_BUILD_DIR`); las propias en
 `glossary-data-build/clinical-pharmacology/` (`CLINICAL_PHARMACOLOGY_DIR`). El listado y detalle de
-CIMA se comparten con `import-cima.mjs` (no se bajan dos veces).
+CIMA se comparten con `import-cima.mjs` (no se bajan dos veces). Los crudos se reproducen con los
+fetchers, que dejan URL, fecha y (openFDA) sha256 en su `fetch.meta.json`.
+
+**Lo normalizado sí se versiona** (orden del propietario, 2026-10-24: el contenedor de la nube se
+pierde al cerrar la sesión): `pack-data.mjs` lo copia comprimido a `data/`, en partes de menos de
+45 MB, con `data/MANIFEST.json` (sha256, bytes y filas por archivo). Hacer push después de cada
+pasada. Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson`.
 
 ```sh
 D=tools/terminology-import/clinical-pharmacology
@@ -21,6 +27,7 @@ node $D/coverage-report.mjs                   # out/coverage.json + coverage.md
 node $D/load-clinical-pharmacology.mjs --dry-run
 node $D/load-clinical-pharmacology.mjs        # .env DB_*; idempotente; --no-prune para no retirar filas superadas
 node $D/validate-links.mjs                    # enlaces por código con vademecum, productos y relaciones de otras sesiones
+node $D/pack-data.mjs                         # lo normalizado → data/*.gz (< 45 MB por parte) + data/MANIFEST.json
 node --test $D/test/*.test.mjs
 ```
 

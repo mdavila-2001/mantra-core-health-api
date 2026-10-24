@@ -101,3 +101,14 @@ test('RxNav: un MIN se resuelve a sus IN; si a un ingrediente le falta UNII, el 
   assert.deepEqual(partial.unii, []);
   assert.equal(partial.complete, false);
 });
+
+test('pack-data: parte el NDJSON en trozos gzip bajo el tope sin perder ni reordenar filas', async () => {
+  const { gunzipSync } = await import('node:zlib');
+  const { splitNdjson } = await import('../pack-data.mjs');
+  const rows = Array.from({ length: 300 }, (_, i) => JSON.stringify({ i, pad: `${i}`.repeat(50) + Math.random().toString(36) }));
+  const parts = splitNdjson(rows.join('\n') + '\n', 2048);
+  assert.ok(parts.length > 1);
+  for (const p of parts) assert.ok(p.gz.length <= 2048 || p.rows === 1);
+  const back = parts.flatMap((p) => gunzipSync(p.gz).toString('utf8').split('\n').filter(Boolean));
+  assert.deepEqual(back, rows);
+});
