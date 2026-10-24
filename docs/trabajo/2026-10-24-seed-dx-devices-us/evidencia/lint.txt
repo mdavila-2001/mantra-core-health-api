@@ -1,2 +1,2 @@
-# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn lint
+# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn lint   (estado final)
 exit=0
