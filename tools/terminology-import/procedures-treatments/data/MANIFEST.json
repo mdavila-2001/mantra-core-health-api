@@ -3,45 +3,66 @@
   "files": [
     {
       "path": "out/procedures.part001.ndjson.gz",
-      "bytes": 4667388,
-      "uncompressedBytes": 47327564,
-      "sha256Uncompressed": "42936245e3779ef16b4fe6a5cdd7c0acebfb95bdb28e10c4ec706cb4ddf34cc9",
-      "rows": 71917
+      "bytes": 4670522,
+      "uncompressedBytes": 47327872,
+      "sha256Uncompressed": "ce6df19444b67d3c7247798f1369bed6aa8290a2caf685be4b9679163835d0ac",
+      "rows": 71910
     },
     {
       "path": "out/procedures.part002.ndjson.gz",
-      "bytes": 823770,
-      "uncompressedBytes": 8368542,
-      "sha256Uncompressed": "485af9119ad282cfe5260d6b01d9d05cacd52200c04f0b16eb052a523062780c",
-      "rows": 12713
+      "bytes": 844533,
+      "uncompressedBytes": 8572617,
+      "sha256Uncompressed": "2ab540b5f1c929c4036888e842550866b89597c0c2178a8048f9b4636950aaf5",
+      "rows": 13023
     },
     {
       "path": "out/assertions.part001.ndjson.gz",
-      "bytes": 4902817,
-      "uncompressedBytes": 47520654,
-      "sha256Uncompressed": "f943e32eef0ef60329d7e29e16841a1c65b311eed495cce1e528b2b171e36955",
-      "rows": 42027
+      "bytes": 4996526,
+      "uncompressedBytes": 47493314,
+      "sha256Uncompressed": "d9ce70c3bf8d0d6792c3a19e6a4e27a1131dfd2508dea751941b7781234cad59",
+      "rows": 38580
     },
     {
       "path": "out/assertions.part002.ndjson.gz",
-      "bytes": 4917288,
-      "uncompressedBytes": 47520035,
-      "sha256Uncompressed": "c9c90b16ea0b9e5f4131544c24c5e7359c6536df22426ef087cf358686ad24e5",
-      "rows": 41961
+      "bytes": 5032821,
+      "uncompressedBytes": 47493318,
+      "sha256Uncompressed": "4d1864e17abb6872a15630ffe45da6dce92796eb20b4add1493c5f39e592943b",
+      "rows": 38510
     },
     {
       "path": "out/assertions.part003.ndjson.gz",
-      "bytes": 4905169,
-      "uncompressedBytes": 47521344,
-      "sha256Uncompressed": "62e03993f06ae2824939e0b6f76a13f18186396827f68a645a245c63bcd2ae2c",
-      "rows": 41952
+      "bytes": 5042309,
+      "uncompressedBytes": 47492458,
+      "sha256Uncompressed": "401340d56d3dbdf5f90803d0c51589905fa0eb6504352edfc4588d30433dd5bc",
+      "rows": 38499
     },
     {
       "path": "out/assertions.part004.ndjson.gz",
-      "bytes": 2595647,
-      "uncompressedBytes": 25078013,
-      "sha256Uncompressed": "70446365c3bc2909cd856598d49a8bbf62d33ced76e3252bb6d3ea19852e0081",
-      "rows": 22097
+      "bytes": 5008107,
+      "uncompressedBytes": 47492366,
+      "sha256Uncompressed": "a00fc177fd47f2724f89a0d585ab500d88bca0e8a28f6053c5225501c57845cd",
+      "rows": 38509
+    },
+    {
+      "path": "out/assertions.part005.ndjson.gz",
+      "bytes": 5005589,
+      "uncompressedBytes": 47494223,
+      "sha256Uncompressed": "e8e1d5139db527699bfd36ca62193ae04173c6f97628cb12d6af484ad00f1427",
+      "rows": 38545
+    },
+    {
+      "path": "out/assertions.part006.ndjson.gz",
+      "bytes": 4993540,
+      "uncompressedBytes": 47494272,
+      "sha256Uncompressed": "4f97e68f76067075c1b2f2ca977a08512abade5b92d8b324803a5288fd8a93b5",
+      "rows": 38560
+    },
+    {
+      "path": "out/assertions.part007.ndjson.gz",
+      "bytes": 4706147,
+      "uncompressedBytes": 44752541,
+      "sha256Uncompressed": "df9a4d5f4fdb11f361e59f664ea7214e3b42490fb1cde1d40926855ce0be9e46",
+      "rows": 36299
     },
     {
       "path": "out/maps.ndjson.gz",
@@ -52,9 +73,9 @@
     },
     {
       "path": "out/coverage.json.gz",
-      "bytes": 4167,
-      "uncompressedBytes": 14513,
-      "sha256Uncompressed": "2429adcf3ff27d9b8329cbb31f4d6d0a40f19a9b99ceeb2ddcf8f79bbbc88853"
+      "bytes": 4267,
+      "uncompressedBytes": 15260,
+      "sha256Uncompressed": "0f6bf67657df278d813215925812fee8584cc8c1cd6dca45fa75cf11cb64bdc9"
     },
     {
       "path": "out/load-plan.dry-run.json.gz",
@@ -183,6 +204,15 @@
       "sha256": "e90ebb7e55f49cf2c43f14bbf9edc8969f0c327897547086187ed877998d5d1a",
       "url": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo",
       "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs ncit-obo"
+    },
+    {
+      "source": "pubmed-rct",
+      "file": "pages/*.json.gz",
+      "bytes": 51219980,
+      "records": 673366,
+      "query": "Randomized Controlled Trial[pt]",
+      "retrievedAt": "2026-10-24T17:52:28.314Z",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch-pubmed.mjs --subset rct (PubMed agrega registros a diario: otra fecha da otro corpus)"
     },
     {
       "source": "uberon",

@@ -134,32 +134,33 @@ tipo + sujeto + objeto). Una pasada aporta 0 cuando ninguna fuente nueva agrega 
 | 5 | 2026-10-24 (red abierta) | NCIt oficial 26.09d (EVS); ICD-10-PCS FY2027 (CMS: tablas + archivo de orden); MeSH 2026 (NLM); ClinicalTrials.gov API 2.0.5, datos 2026-10-23 (464 253 estudios intervencionales); Wikidata P924 (consulta del 2026-10-24) | 80 539 (PCS 79 169 · MeSH 1 355 · NCIt 15) | 113 313 (34 128 / 79 185): ClinicalTrials.gov 34 083 «en estudio», Wikidata 45, PCS 79 169, NCIt oficial 16. **Cifras corregidas en la pasada 6**: la primera versión contaba como procedimientos descriptores MeSH de métodos de investigación (E05: «Control Groups», «Surveys and Questionnaires»…) y conceptos de tiempo/estrategia, y daba 41 094 relaciones de ClinicalTrials.gov | ICHI e ICD-11 (exigen cuenta); Cochrane (sitio 403); NNAC Bolivia (no responde); CUPS completo (sin relaciones, de `seed-specialty-services`); NICE (sin códigos reutilizables); CIE-10-ES (solo nombres); Wikidata sin referencia real (48) o farmacológica (77) |
 | 6 | 2026-10-24 | Revisiones Cochrane en MEDLINE (PubMed E-utilities, 17 554 registros, indexación MeSH de NLM) | 171 (MeSH) | 8 075 (8 075 / 0); 5 610 de ellas unen un par procedimiento–condición que ninguna otra fuente tenía | MRCOC (NLM lo retiró: archivado en Archive-It); 13 revisiones retractadas; revisiones sin intervención no farmacológica o sin condición con calificador terapéutico (11 668) |
 | 7 | 2026-10-24 | Guías de práctica clínica en MEDLINE (PubMed E-utilities, tipos de publicación `Guideline`/`Practice Guideline`: 44 031 en la búsqueda, 42 934 artículos de revista descargados, 47 particiones por fecha de alta) | 240 (MeSH) | 25 469 (25 469 / 0); 19 404 de ellas unen un par procedimiento–condición que ninguna otra fuente tenía | 1 097 registros de Bookshelf (`PubmedBookArticle`: libros, sin indexación MeSH de artículo); 30 guías retractadas; guías sin intervención no farmacológica o sin condición con calificador terapéutico (29 737, retractadas incluidas) |
+| 8 | 2026-10-24 | Ensayos controlados aleatorizados publicados en MEDLINE (PubMed E-utilities, tipo de publicación `Randomized Controlled Trial`: 673 366 registros, 403 particiones por fecha de alta) | 303 (MeSH) | 119 465 (119 465 / 0), siempre «en estudio»; 92 173 de ellas unen un par procedimiento–condición que ninguna otra fuente tenía | 1 330 ensayos retractados; ensayos sin intervención no farmacológica o sin condición con calificador terapéutico (465 015, retractados incluidos); registros de ensayos en texto libre (ISRCTN, ICTRP y otros: sin códigos); EU CTR/CTIS (solo medicamentos; CTIS 403); registros que no responden (ANZCTR, CTRI, jRCT, IRCT, ReBEC, neerlandés, RPCEC) |
 
 **Saturación:** las pasadas 3 y 4 aportaron 0 cada una con la red restringida (saturación de lo alcanzable
 entonces). Al abrirse la red, el protocolo se reabrió: la pasada 5 sumó las fuentes grandes. Las pasadas
 siguientes se registran arriba hasta volver a tener dos seguidas con 0.
 
-## Cobertura (acumulada a la pasada 7)
+## Cobertura (acumulada a la pasada 8)
 
-- **Procedimientos:** 82 938. ICD-10-PCS 79 169 (Medical and Surgical 68 493, Imaging 2 982, Radiation
+- **Procedimientos:** 83 241. ICD-10-PCS 79 169 (Medical and Surgical 68 493, Imaging 2 982, Radiation
   Therapy 2 057, Physical Rehabilitation 1 411, Administration 1 277, Placement 861, otras 2 088);
-  MAxO 1 576; MeSH 1 766 (quirúrgicos 503, diagnósticos 466, terapéuticos u otros 381, dispositivos 255,
-  odontológicos 95, conductuales 66); NCIt 346; OHD 81.
-- **Procedimiento → enfermedad:** 67 922 relaciones únicas (67 965 afirmaciones), 1 869 procedimientos,
-  3 436 enfermedades (3 262 MeSH de condición, 174 MONDO). Por tipo: `ctgov:investigational` 34 083
-  (siempre «en estudio»), `pubmed-cochrane:co-indexed` 8 075 («evaluados en revisiones Cochrane», no
+  MAxO 1 576; MeSH 2 069 (diagnósticos 601, quirúrgicos 548, terapéuticos u otros 423, dispositivos 297,
+  odontológicos 122, conductuales 78); NCIt 346; OHD 81.
+- **Procedimiento → enfermedad:** 187 387 relaciones únicas (187 430 afirmaciones), 2 172 procedimientos,
+  4 016 enfermedades (3 842 MeSH de condición, 174 MONDO). Por tipo: `pubmed-rct:co-indexed` 119 465 (ensayos aleatorizados publicados,
+  siempre «en estudio»), `ctgov:investigational` 34 083 (siempre «en estudio»), `pubmed-cochrane:co-indexed` 8 075 («evaluados en revisiones Cochrane», no
   implica eficacia), `pubmed-guideline:co-indexed` 25 469 («tratados en guías de práctica clínica», no
   implica recomendación), `maxo-poet:TREATS` 266, `maxo-poet:PREVENTS` 25, `maxo-poet:NO_OBSERVED_BENEFIT` 2,
   `wikidata:P924` 45. De los 464 253 estudios intervencionales, 50 726 tienen algún MeSH de intervención
   no farmacológica y 40 539 forman al menos un par con una condición; de 17 554 revisiones Cochrane,
-  5 886 aportan un par; de 42 934 guías, 13 197.
+  5 886 aportan un par; de 42 934 guías, 13 197; de 673 366 ensayos aleatorizados, 208 351.
 - **Procedimiento → sitio anatómico:** 79 638 relaciones, 79 530 procedimientos. ICD-10-PCS 79 169 por el
   eje 4 del propio código (`Body Part` 72 749, `Body System / Region` 2 688, `Treatment Site` 2 057,
   `Body Region` 1 141, `Body System` 534); NCIt (OBO + oficial) 454 relaciones a 180 sitios NCIt, de los
   cuales 175 tienen un único Uberon publicado; MAxO 15 a UBERON. CMS no publica un mapeo de los valores
   PCS a Uberon/FMA/TA2: los 1 692 valores quedan en su propio code system (hueco de mapeo, no se inventa).
 - **Excluido por farmacológico:** 354 términos MAxO, 145 filas POET, los descriptores MeSH de D, E02.319,
-  E02.095.465, E02.183.750, E05.478.550 y E05.478.610, el calificador «drug therapy» en Cochrane y en las guías, y 77
+  E02.095.465, E02.183.750, E05.478.550 y E05.478.610, el calificador «drug therapy» en Cochrane, las guías y los ensayos, y 77
   declaraciones de Wikidata.
 
 ## Validación con las ramas hermanas (fase 2)
@@ -177,6 +178,8 @@ merge local de validación. Claves usadas: las de sus `data/` en git (`diseases/
 | Pasada 6, proc → sitio | 79 638 | 79 624 | 440 | 14 | 5 sitios NCIt sin Uberon |
 | Pasada 7, proc → enfermedad | 67 922 | 52 913 (77,9 %) | — | 15 009 | 754 MeSH de condición que `seed-diseases` no cargó (p. ej. «Surgical Wound Infection», «Nausea», «Cough») |
 | Pasada 7, proc → sitio | 79 638 | 79 624 | 440 | 14 | 5 sitios NCIt sin Uberon |
+| Pasada 8, proc → enfermedad | 187 387 | 135 369 (72,2 %) | — | 52 018 | 890 MeSH de condición que `seed-diseases` no cargó |
+| Pasada 8, proc → sitio | 79 638 | 79 624 | 440 | 14 | 5 sitios NCIt sin Uberon |
 
 Carga verificada en PostgreSQL 16 desechable (DDL canónico del módulo 03 + la tabla propuesta, con las
 claves reales de `mondo`, `mesh` y `uberon` de las hermanas), corpus de la pasada 6: 84 414 conceptos,
@@ -187,7 +190,7 @@ segunda corrida, 0 filas nuevas. Con el DDL canónico sin la tabla: los mismos c
 
 1. **Relaciones en la base:** el modelo no tiene dónde guardar su procedencia (propuesta arriba; misma
    necesidad que `seed-drug-treatments`).
-2. **754 MeSH de condición sin concepto** (15 009 relaciones de ClinicalTrials.gov, Cochrane y guías): son descriptores del
+2. **890 MeSH de condición sin concepto** (52 018 relaciones de ClinicalTrials.gov y MEDLINE): son descriptores del
    árbol C que `seed-diseases` no cargó (muchos son hallazgos/síntomas del C23). Se cargan si esa sesión
    (o la de síntomas) los incorpora; esta sesión no crea enfermedades.
 3. **ICHI e ICD-11:** exigen cuenta (no se crean). **NNAC Bolivia:** el sitio no responde. (El sitio de
