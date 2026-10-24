@@ -151,7 +151,7 @@ async function main() {
   console.log(`[openfda] ${fda.link.scanned} etiquetas leídas; ${fda.labels.size} de referencia en ${fda.refs.size} ATC 5`);
   for (const code of [...fda.refs.keys()].sort()) if (!universe.has(code)) universe.set(code, ['openfda-gsrs']);
 
-  const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
+  const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
     const cimaProducts = byAtc.get(code) ?? [];
@@ -165,8 +165,12 @@ async function main() {
         continue;
       }
       for (const s of cimaSections(read.doc, ref, read.retrievedAt)) {
-        if (hasVersion(s)) sections.push(assertSection(s));
-        else stats.cimaSectionsWithoutVersion++;
+        if (!hasVersion(s)) {
+          stats.cimaSectionsWithoutVersion++;
+          continue;
+        }
+        if (s.document.versionUnpublished) stats.cimaSectionsVersionUnpublished++;
+        sections.push(assertSection(s));
       }
       if (existsSync(notesPath(nreg))) safetyNotes.push(...cimaSafetyNotes(readJsonIfExists(notesPath(nreg)), ref.product, retrievedAtOf(notesPath(nreg))));
     }

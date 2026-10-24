@@ -138,6 +138,9 @@ export function cimaSections(response, ref, retrievedAt) {
   const p = ref.product;
   const revision = parseRevisionDate(response);
   const version = p.fichaTecnicaDate ?? null;
+  // Medicamentos de autorización centralizada (EU/1/…): CIMA no publica la fecha de la ficha y su
+  // sección 10 sólo remite a la EMA. El texto es igualmente el oficial; se publica marcado.
+  const versionUnpublished = !version && !revision;
   const out = [];
   for (const [number, key] of Object.entries(CIMA_SECTIONS)) {
     const item = items.get(number);
@@ -157,6 +160,9 @@ export function cimaSections(response, ref, retrievedAt) {
         holder: p.holder ?? null,
         version,
         revisionDateInText: revision?.value ?? null,
+        ...(versionUnpublished
+          ? { versionUnpublished: true, versionNote: 'CIMA no publica la fecha de esta ficha técnica y su sección 10 no trae fecha de revisión; se cita la fecha de consulta.' }
+          : {}),
         url: p.fichaTecnicaUrl,
         pageUrl: cimaDetailPageUrl(p.nregistro),
       },
@@ -166,7 +172,7 @@ export function cimaSections(response, ref, retrievedAt) {
       license: CIMA_LICENSE,
       citation:
         `AEMPS. CIMA. Ficha técnica de ${p.name} (nº reg. ${p.nregistro}), sección ${number}` +
-        `${item.titulo ? ` «${item.titulo}»` : ''}${version ? `, versión del ${version.slice(0, 10)}` : ''}` +
+        `${item.titulo ? ` «${item.titulo}»` : ''}${version ? `, versión del ${version.slice(0, 10)}` : revision ? `, revisión del texto ${revision.value}` : ', sin fecha de versión publicada por CIMA'}` +
         `. ${sectionPublicUrl(p.nregistro, number)} (consultado el ${retrievedAt.slice(0, 10)}).`,
       selection: { criterion: ref.criterion, group: ref.group },
     });

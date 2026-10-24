@@ -102,5 +102,9 @@ export function assertSection(s) {
   return s;
 }
 
-/** Versión y fecha son parte de la cita: sin ninguna de las dos la sección no se publica (se cuenta como hueco). */
-export const hasVersion = (s) => Boolean(s.document?.version || s.document?.revisionDateInText || s.document?.effectiveDate);
+/**
+ * Versión y fecha son parte de la cita: sin ninguna de las dos la sección no se publica. Excepción
+ * explícita: la fuente declara no publicar versión (`versionUnpublished`); entonces vale la fecha de consulta.
+ */
+export const hasVersion = (s) =>
+  Boolean(s.document?.version || s.document?.revisionDateInText || s.document?.effectiveDate || (s.document?.versionUnpublished && s.retrievedAt));
