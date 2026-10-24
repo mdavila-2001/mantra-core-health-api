@@ -6,3 +6,4 @@ export * from './authz-clinical.controller';
 export * from './authz-care-relationships.controller';
 export * from './authz-pdp.controller';
 export * from './authz-me.controller';
+export * from './authz-admin.controller';

@@ -7,3 +7,5 @@ export * from './authz-care-relationships.service';
 export * from './authz-pdp.service';
 export * from './authz-effective-roles.service';
 export * from './authz-me.service';
+export * from './authz-admin-read.service';
+export * from './authz-assignment-revocation.service';
