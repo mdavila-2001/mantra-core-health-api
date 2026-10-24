@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-10-24T17:57:09.723Z",
+  "builtAt": "2026-10-24T19:09:07.681Z",
   "totals": {
     "loinc": 79462,
     "hl7-tho": 479,
@@ -10,20 +10,72 @@
     "icd10pcs-cms": 4402,
     "cups-co": 2158,
     "pami-nomenclador": 3034,
-    "gtr-ncbi": 63919
+    "gtr-ncbi": 63919,
+    "cdisc-sdtm": 4721,
+    "npu-ifcc": 25699
   },
   "byDomain": {
-    "laboratory": 69154,
+    "laboratory": 99028,
     "imaging": 13275,
-    "pathology": 1119,
-    "genetics": 67362,
-    "functional": 4871
+    "pathology": 1373,
+    "genetics": 67382,
+    "functional": 5143
   },
   "byCategory": {
     "(sin categoría):ucum": {
       "display": null,
       "domain": null,
       "count": 129
+    },
+    "cdisc-sdtm-codelist:C111106": {
+      "display": "Respiratory Test Code",
+      "domain": "functional",
+      "count": 141
+    },
+    "cdisc-sdtm-codelist:C120523": {
+      "display": "Holter ECG Test Code",
+      "domain": "functional",
+      "count": 16
+    },
+    "cdisc-sdtm-codelist:C120525": {
+      "display": "Immunogenicity Specimen Assessments Test Code",
+      "domain": "laboratory",
+      "count": 100
+    },
+    "cdisc-sdtm-codelist:C120527": {
+      "display": "Microbiology Test Code",
+      "domain": "laboratory",
+      "count": 562
+    },
+    "cdisc-sdtm-codelist:C128688": {
+      "display": "Microbiology Susceptibility Test Code",
+      "domain": "laboratory",
+      "count": 18
+    },
+    "cdisc-sdtm-codelist:C132263": {
+      "display": "SDTM Microscopic Findings Test Code",
+      "domain": "pathology",
+      "count": 254
+    },
+    "cdisc-sdtm-codelist:C181173": {
+      "display": "Cell Phenotyping Test Code",
+      "domain": "laboratory",
+      "count": 982
+    },
+    "cdisc-sdtm-codelist:C181178": {
+      "display": "Genomic Findings Test Code",
+      "domain": "genetics",
+      "count": 20
+    },
+    "cdisc-sdtm-codelist:C65047": {
+      "display": "Laboratory Test Code",
+      "domain": "laboratory",
+      "count": 2513
+    },
+    "cdisc-sdtm-codelist:C71153": {
+      "display": "ECG Test Code",
+      "domain": "functional",
+      "count": 115
     },
     "cups-co:870": {
       "display": "Prefijo 870",
@@ -1120,6 +1172,56 @@
       "domain": null,
       "count": 2
     },
+    "npu-specialty:ALL": {
+      "display": "ALL",
+      "domain": "laboratory",
+      "count": 3408
+    },
+    "npu-specialty:CLC": {
+      "display": "CLC",
+      "domain": "laboratory",
+      "count": 5589
+    },
+    "npu-specialty:CLP": {
+      "display": "CLP",
+      "domain": "laboratory",
+      "count": 3200
+    },
+    "npu-specialty:FUN": {
+      "display": "FUN",
+      "domain": "laboratory",
+      "count": 1
+    },
+    "npu-specialty:IMM": {
+      "display": "IMM",
+      "domain": "laboratory",
+      "count": 3374
+    },
+    "npu-specialty:MBG": {
+      "display": "MBG",
+      "domain": "laboratory",
+      "count": 2562
+    },
+    "npu-specialty:MIC": {
+      "display": "MIC",
+      "domain": "laboratory",
+      "count": 6402
+    },
+    "npu-specialty:RAF": {
+      "display": "RAF",
+      "domain": "laboratory",
+      "count": 143
+    },
+    "npu-specialty:TAH": {
+      "display": "TAH",
+      "domain": "laboratory",
+      "count": 534
+    },
+    "npu-specialty:TOX": {
+      "display": "TOX",
+      "domain": "laboratory",
+      "count": 486
+    },
     "pami-nomenclador:15": {
       "display": "Prefijo 15",
       "domain": "pathology",
@@ -1531,7 +1633,9 @@
     "icd10pcs-cms": 4402,
     "cups-co": 2158,
     "pami-nomenclador": 3034,
-    "gtr-ncbi": 63919
+    "gtr-ncbi": 63919,
+    "cdisc-sdtm": 4721,
+    "npu-ifcc": 25699
   },
   "loinc": {
     "present": true,
@@ -16272,6 +16376,30 @@
       "source": "CPT (AMA)",
       "url": "https://www.ama-assn.org/practice-management/cpt",
       "reason": "Propiedad de la AMA, licencia comercial.",
+      "status": "licencia"
+    },
+    {
+      "source": "MBS — Medicare Benefits Schedule (Australia), grupos de patología e imagen",
+      "url": "https://www.mbsonline.gov.au/internet/mbsonline/publishing.nsf/Content/copyright",
+      "reason": "El XML se descarga, pero el copyright del Commonwealth sólo permite uso personal no comercial y prohíbe redistribuir sin permiso escrito. Se borró la copia.",
+      "status": "licencia"
+    },
+    {
+      "source": "JLAC10 / JLAC11 (Japanese Society of Laboratory Medicine)",
+      "url": "https://www.jslm.org/committees/code/index.html",
+      "reason": "Las tablas se descargan, pero la JSLM exige solicitar permiso de reproducción (転載許諾申請); no hay licencia abierta publicada.",
+      "status": "licencia"
+    },
+    {
+      "source": "Nomenclatura INAMI (Bélgica), NABM y CCAM (Francia)",
+      "url": "https://www.inami.fgov.be/fr/nomenclature",
+      "reason": "INAMI publica la nomenclatura sólo en PDF/Word («tous droits réservés») y NomenSoft responde 403; ameli.fr responde 403 y data.gouv.fr no tiene conjunto NABM.",
+      "status": "sin-acceso"
+    },
+    {
+      "source": "WHO Essential In Vitro Diagnostics List, ICHI (OMS), NICIP (NHS), CPMS (Perú)",
+      "url": "https://www.who.int/publications/i/item/9789240081093",
+      "reason": "EDL: informe PDF de categorías, no códigos, con licencia no comercial de la OMS (IRIS 403). ICHI: versión beta, sólo por API con registro. NICIP: TRUD exige cuenta. CPMS: basado en CPT (AMA).",
       "status": "licencia"
     },
     {

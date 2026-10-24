@@ -1,0 +1,62 @@
+# Carga completa desde data/ (GLOSSARY_BUILD_DIR vacío) en Postgres 16 desechable, base nueva, DDL de database/SQL/03_terminology
+# commit de código: e7ea1fd4 + capa cdisc-sdtm
+
+$ psql conteos antes de cargar
+catalog_concepts (incluye 6 prerrequisitos)|6
+concept_properties|0
+concept_designations|0
+concept_relationships|0
+value_sets|0
+value_set_members|0
+catalog_import_batches|0
+schema terminology (tablas+índices)|1288 kB
+
+$ node tools/terminology-import/lab-tests/load-lab-tests.mjs --apply   # corrida 1
+=== Filas NUEVAS (0 en la segunda corrida = idempotente; `batches` es el registro de auditoría) ===
+{
+  "result": {
+    "sources": 11,
+    "codeSystems": 16,
+    "versions": 16,
+    "concepts": 163030,
+    "properties": 3968702,
+    "designations": 114065,
+    "relationships": 18236,
+    "valueSets": 324,
+    "valueSetVersions": 324,
+    "valueSetMembers": 525567,
+    "batches": 16
+  },
+  "segundos": 288
+}
+exit=0
+
+$ node tools/terminology-import/lab-tests/load-lab-tests.mjs --apply   # corrida 2
+=== Filas NUEVAS (0 en la segunda corrida = idempotente; `batches` es el registro de auditoría) ===
+{
+  "result": {
+    "sources": 0,
+    "codeSystems": 0,
+    "versions": 0,
+    "concepts": 0,
+    "properties": 0,
+    "designations": 0,
+    "relationships": 0,
+    "valueSets": 0,
+    "valueSetVersions": 0,
+    "valueSetMembers": 0,
+    "batches": 15
+  },
+  "segundos": 152
+}
+exit=0
+
+$ psql conteos después
+catalog_concepts (incluye 6 prerrequisitos)|163036
+concept_properties|3968702
+concept_designations|114065
+concept_relationships|18236
+value_sets|324
+value_set_members|525567
+catalog_import_batches|31
+schema terminology (tablas+índices)|1221 MB

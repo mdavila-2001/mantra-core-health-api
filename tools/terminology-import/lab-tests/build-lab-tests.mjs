@@ -37,6 +37,8 @@ import {
 } from './lib/loinc.mjs';
 import { GTR_CODE_SYSTEM, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv, TEST_VERSION_COLUMNS } from './lib/gtr.mjs';
 import { txToLoincInput } from './lib/loinc-tx.mjs';
+import { CDISC_CODE_SYSTEM, cdiscRecords, parseCdiscTerminology } from './lib/cdisc.mjs';
+import { NPU_CODE_SYSTEM, npuObjects, npuRecords } from './lib/npu.mjs';
 import { parseCsv } from '../lib/glossary-es/loinc-es.mjs';
 import { DOMAINS, assertRecord } from './lib/records.mjs';
 import { GAPS, SOURCES } from './lib/sources.mjs';
@@ -378,6 +380,50 @@ async function buildGtr() {
   return { layer: GTR_CODE_SYSTEM, records, stats };
 }
 
+// --- Capa CDISC SDTM (NCI EVS) -----------------------------------------------------
+async function buildCdisc() {
+  const file = join(SRC, SOURCES['cdisc-sdtm'].dir, 'SDTM Terminology.txt');
+  if (!existsSync(file)) return { layer: CDISC_CODE_SYSTEM, missing: 'SDTM Terminology.txt no descargado (fetch-direct-sources.mjs --only nci-cdisc-sdtm)' };
+  const f = manifest['nci-cdisc-sdtm']?.files?.['SDTM Terminology.txt'];
+  if (!f) throw new Error('Falta nci-cdisc-sdtm en manifest.json: corré fetch-direct-sources.mjs.');
+  const published = f.lastModified ? new Date(f.lastModified).toISOString().slice(0, 10) : null;
+  const { records, stats } = cdiscRecords(parseCdiscTerminology(readFileSync(file, 'utf8')), {
+    sourceVersion: `SDTM Terminology.txt${published ? ` publicado ${published}` : ''}, sha256 ${f.sha256.slice(0, 12)} (NCI EVS)`,
+    sourceFile: relative(BUILD_DIR, file),
+    sourceSha256: f.sha256,
+    retrievedAt: f.retrievedAt,
+  });
+  await writeLayer(CDISC_CODE_SYSTEM, records, {
+    source: { url: f.url, lastModified: f.lastModified },
+    codeSystems: [{ internalCode: CDISC_CODE_SYSTEM, name: SOURCES['cdisc-sdtm'].name, canonicalUrl: 'https://evs.nci.nih.gov/ftp1/CDISC/SDTM/', version: published ?? f.retrievedAt.slice(0, 10), sourceKey: 'cdisc-sdtm', records: records.length }],
+    files: { 'SDTM Terminology.txt': { file: relative(BUILD_DIR, file), sha256: f.sha256, url: f.url } },
+    stats,
+  });
+  return { layer: CDISC_CODE_SYSTEM, records, stats };
+}
+
+// --- Capa NPU (IFCC-IUPAC) -----------------------------------------------------------
+async function buildNpu() {
+  const file = join(SRC, SOURCES['npu-ifcc'].dir, 'npu-codes-latest.csv');
+  if (!existsSync(file)) return { layer: NPU_CODE_SYSTEM, missing: 'npu-codes-latest.csv no descargado (fetch-direct-sources.mjs --only ifcc-npu)' };
+  const f = manifest['ifcc-npu']?.files?.['npu-codes-latest.csv'];
+  if (!f) throw new Error('Falta ifcc-npu en manifest.json: corré fetch-direct-sources.mjs.');
+  const published = f.lastModified ? new Date(f.lastModified).toISOString().slice(0, 10) : null;
+  const { records, stats } = npuRecords(npuObjects(parseCsv(readFileSync(file, 'utf8').replace(/^\uFEFF/, ''))), {
+    sourceVersion: `npu-codes-latest.csv${published ? ` publicado ${published}` : ''}, sha256 ${f.sha256.slice(0, 12)} (IFCC)`,
+    sourceFile: relative(BUILD_DIR, file),
+    sourceSha256: f.sha256,
+    retrievedAt: f.retrievedAt,
+  });
+  await writeLayer(NPU_CODE_SYSTEM, records, {
+    source: { url: f.url, lastModified: f.lastModified },
+    codeSystems: [{ internalCode: NPU_CODE_SYSTEM, name: SOURCES['npu-ifcc'].name, canonicalUrl: 'urn:oid:1.2.208.176', version: published ?? f.retrievedAt.slice(0, 10), sourceKey: 'npu-ifcc', records: records.length }],
+    files: { 'npu-codes-latest.csv': { file: relative(BUILD_DIR, file), sha256: f.sha256, url: f.url } },
+    stats,
+  });
+  return { layer: NPU_CODE_SYSTEM, records, stats };
+}
+
 function coverage(results) {
   const byDomain = Object.fromEntries(Object.keys(DOMAINS).map((d) => [d, 0]));
   const byCategory = {};
@@ -424,6 +470,8 @@ async function main() {
   const results = [await buildLoinc(), await buildTho(), await buildUcum()];
   for (const key of Object.keys(TARIFF_LAYERS)) results.push(await buildTariff(key));
   results.push(await buildGtr());
+  results.push(await buildCdisc());
+  results.push(await buildNpu());
   for (const r of results) if (r.missing) console.log(`[build] ${r.layer}: SIN DATOS — ${r.missing}`);
   const cov = coverage(results);
   writeJson(join(OUT, 'lab-tests-coverage.json'), cov, true);

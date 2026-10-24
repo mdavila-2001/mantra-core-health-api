@@ -72,6 +72,8 @@ export function valueSetDefinition(code, context = {}) {
     'lab-catalog-gtr-ncbi': ['Catálogo de análisis — NCBI Genetic Testing Registry', 'Tests genéticos vigentes registrados por laboratorios en GTR (una oferta por laboratorio).'],
     'lab-catalog-gtr-ncbi-type-clinical': ['Catálogo de análisis — GTR, tests clínicos', 'Tests de GTR con test_type = Clinical.'],
     'lab-catalog-gtr-ncbi-type-research': ['Catálogo de análisis — GTR, tests de investigación', 'Tests de GTR con test_type = Research.'],
+    'lab-catalog-cdisc-sdtm': ['Catálogo de análisis — CDISC SDTM (NCI EVS)', 'Términos de las codelists «Test Code» de CDISC SDTM cuyo dominio es una prueba diagnóstica (ver cdisc.mjs).'],
+    'lab-catalog-npu-ifcc': ['Catálogo de análisis — NPU Terminology (IFCC-IUPAC)', 'Códigos NPU activos de la versión vigente: resultados de laboratorio clínico con sistema, componente, tipo de propiedad, procedimiento y unidad.'],
     'lab-catalog-pami-nomenclador': ['Catálogo de análisis — Nomenclador PAMI (Argentina)', 'Prácticas diagnósticas del nomenclador de PAMI incluidas por prefijo (ver tariffs.mjs).'],
   };
   if (fixed[code]) return { name: fixed[code][0], description: fixed[code][1] };
