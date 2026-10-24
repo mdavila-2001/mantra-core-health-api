@@ -94818,6 +94818,24 @@
         },
         "additionalProperties": false
       },
+      "DiagnosticUnitBranchDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200,
+            "example": "Sucursal Equipetrol"
+          },
+          "address": {
+            "$ref": "#/components/schemas/OwnSiteAddressDto"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
       "DiagnosticUnitProfileDto": {
         "type": "object",
         "properties": {
@@ -94852,6 +94870,13 @@
           },
           "primarySite": {
             "$ref": "#/components/schemas/DiagnosticUnitPrimarySiteDto"
+          },
+          "branches": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticUnitBranchDto"
+            }
           }
         },
         "additionalProperties": false
