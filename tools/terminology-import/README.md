@@ -252,3 +252,13 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
+
+## Catálogo de alergias (2026-10-24)
+
+Sustancias, tipos de alergia, eventos adversos alérgicos y manifestaciones de la
+reacción: 55 503 conceptos de HL7 FHIR/THO, VSAC (RxNorm, NDF-RT, CVX), PHIN VADS,
+HPO (con castellano oficial), Disease Ontology, Mondo, ChEBI (vía ECTO), OAE,
+FoodOn y Open Food Facts. Importador en [`allergies/`](allergies/README.md);
+fuentes y licencias en [`allergies/SOURCES.md`](allergies/SOURCES.md); pasadas
+de saturación y cobertura en
+[`docs/seed-research/allergies.md`](../../docs/seed-research/allergies.md).
