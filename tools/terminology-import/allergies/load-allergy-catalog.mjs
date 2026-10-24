@@ -24,13 +24,16 @@
 // Uso:
 //   node tools/terminology-import/allergies/load-allergy-catalog.mjs --dry-run   # sin base
 //   node tools/terminology-import/allergies/load-allergy-catalog.mjs             # carga real (.env DB_*)
+//   node tools/terminology-import/allergies/load-allergy-catalog.mjs --from-repo # usa data/allergy-catalog.ndjson.gz
 // =============================================================================
 
 import 'dotenv/config';
 import pg from 'pg';
 import { createReadStream, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline';
+import { fileURLToPath } from 'node:url';
+import { createGunzip } from 'node:zlib';
 
 import { BUILD_DIR, nowIso, writeJson } from '../lib/glossary-es/common.mjs';
 import { md5uuid } from '../lib/glossary-es/load-plan.mjs';
@@ -38,6 +41,8 @@ import { INTERNAL, buildPlan } from './lib/load-plan.mjs';
 import { NDJSON_DIR } from './lib/sources.mjs';
 
 const DRY_RUN = process.argv.includes('--dry-run');
+const FROM_REPO = process.argv.includes('--from-repo');
+const REPO_DATA = join(dirname(fileURLToPath(import.meta.url)), 'data', 'allergy-catalog.ndjson.gz');
 const BATCH = 1000;
 
 const DB_CONFIG = {
@@ -48,11 +53,23 @@ const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
+/**
+ * NDJSON a cargar: el que acaba de escribir build-allergy-catalog.mjs en
+ * `glossary-data-build/ndjson/` o, si no está (p. ej. en un clon limpio), la
+ * copia comprimida versionada en `allergies/data/allergy-catalog.ndjson.gz`.
+ */
+function catalogSource() {
+  const built = join(NDJSON_DIR, 'allergy-catalog.ndjson');
+  if (!FROM_REPO && existsSync(built)) return { path: built, input: () => createReadStream(built) };
+  if (existsSync(REPO_DATA)) return { path: REPO_DATA, input: () => createReadStream(REPO_DATA).pipe(createGunzip()) };
+  throw new Error(`Falta ${built} y ${REPO_DATA}. Corré primero build-allergy-catalog.mjs.`);
+}
+
 async function readRecords() {
-  const path = join(NDJSON_DIR, 'allergy-catalog.ndjson');
-  if (!existsSync(path)) throw new Error(`Falta ${path}. Corré primero build-allergy-catalog.mjs.`);
+  const source = catalogSource();
+  console.log(`Leyendo ${source.path}`);
   const records = [];
-  for await (const line of createInterface({ input: createReadStream(path), crlfDelay: Infinity })) {
+  for await (const line of createInterface({ input: source.input(), crlfDelay: Infinity })) {
     if (line.trim() !== '') records.push(JSON.parse(line));
   }
   return records;

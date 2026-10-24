@@ -50,6 +50,8 @@
 | Castellano | `src/common/seed/data/allergies/allergy-designations.es.ts` | nombre y definición de las 20 opciones (traducción del proyecto) |
 | Correspondencia HL7 | `src/common/seed/data/allergies/fhir-allergy-enum-codes.json` | concepto interno ↔ sistema, código y versión HL7. La lee el importador para los `concept_maps` |
 | Importador | `tools/terminology-import/allergies/` | `fetch-` (descarga) → `build-` (NDJSON y pasadas) → `load-` (Postgres) |
+| Datos normalizados | `tools/terminology-import/allergies/data/` | NDJSON comprimido (4,3 MB), informe de pasadas, manifiesto de fuentes y `SHA256SUMS`. Los crudos (~1 GB) no se suben: se rebajan con el script |
+| Plan y reporte | `docs/trabajo/2026-10-24-seed-alergias/` | `PLAN.md`, `REPORTE.md` y `evidencia/` (salidas literales) |
 | Fuentes y licencias | `tools/terminology-import/allergies/SOURCES.md` | artefacto, commit o versión, SHA-256, licencia y evidencia |
 
 Las tres líneas que tocan archivos compartidos son aditivas:
@@ -250,5 +252,6 @@ node tools/terminology-import/allergies/fetch-allergy-sources.mjs     # red: npm
 node tools/terminology-import/allergies/build-allergy-catalog.mjs     # sin red: NDJSON + informe de pasadas (~1 min)
 node tools/terminology-import/allergies/load-allergy-catalog.mjs --dry-run
 node tools/terminology-import/allergies/load-allergy-catalog.mjs      # .env DB_*; exige que la API haya sembrado terminology
+node tools/terminology-import/allergies/load-allergy-catalog.mjs --from-repo  # sin descargar: usa allergies/data/allergy-catalog.ndjson.gz
 node --test "tools/terminology-import/allergies/test/*.test.mjs"      # 12 pruebas con extractos reales
 ```

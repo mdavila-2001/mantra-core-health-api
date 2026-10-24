@@ -18,6 +18,16 @@ quedan **fuera de git**, en `glossary-data-build/` (se redefine con
 | 1 | `build-allergy-catalog.mjs` | no | `ndjson/allergy-catalog.ndjson` + `allergy-catalog.meta.json` (pasadas, descartes, totales) |
 | 2 | `load-allergy-catalog.mjs [--dry-run]` | base (`.env` DB_*) | filas nuevas por tabla; la segunda corrida inserta 0 |
 
+**Datos versionados** (`data/`, para que nada dependa del contenedor): el NDJSON
+normalizado va comprimido (`allergy-catalog.ndjson.gz`, 4,3 MB; 67 MB sin
+comprimir), con su informe (`allergy-catalog.meta.json`), el manifiesto de la
+descarga (`allergy-sources.manifest.json`) y `SHA256SUMS`. El cargador lo usa
+cuando no existe `glossary-data-build/ndjson/allergy-catalog.ndjson`, o con
+`--from-repo`. Los crudos (~1 GB) **no** se suben: se vuelven a bajar con
+`fetch-allergy-sources.mjs`, que guarda URL, versión o commit y SHA-256 de cada
+uno. Reconstruir con `build-allergy-catalog.mjs` da el mismo SHA-256 del NDJSON
+(`d0124219…c0da8ee`).
+
 ## Reglas
 
 - **Nada se redacta, se traduce ni se infiere.** El castellano sólo aparece
