@@ -45,6 +45,8 @@ const JURISDICTION_BY_PREFIX = [
   ['medsafe-', 'NZ'],
   ['sahpra-', 'ZA'],
   ['roszdravnadzor-', 'RU'],
+  // Precalificación de la OMS: no es un país; queda como su propia jurisdicción.
+  ['who-', 'WHO'],
 ];
 
 export function jurisdictionOf(source, region = null) {

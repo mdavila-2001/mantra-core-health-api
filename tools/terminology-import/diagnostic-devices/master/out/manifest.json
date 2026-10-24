@@ -1,7 +1,7 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T18:56:49Z",
+  "generatedAt": "2026-10-24T20:12:38Z",
   "regions": [
     {
       "region": "us",
@@ -11,10 +11,10 @@
       "commitDate": "2026-10-24T14:00:48+00:00",
       "dir": null,
       "alternatives": [
+        "origin/claude/inspiring-planck-xhpf4w",
         "origin/justin/seed-dx-devices-master-p10",
         "origin/claude/adoring-curie-xdkt83",
         "origin/master",
-        "origin/claude/inspiring-planck-xhpf4w",
         "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
         "origin/justin/seed-clinical-pharmacology",
@@ -47,9 +47,9 @@
       "commitDate": "2026-10-24T18:01:37+00:00",
       "dir": null,
       "alternatives": [
+        "origin/claude/inspiring-planck-xhpf4w",
         "origin/justin/seed-dx-devices-master-p10",
         "origin/master",
-        "origin/claude/inspiring-planck-xhpf4w",
         "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
         "origin/justin/seed-clinical-pharmacology",
@@ -117,8 +117,8 @@
       "region": "row",
       "status": "consolidated",
       "ref": "origin/claude/inspiring-planck-xhpf4w",
-      "commit": "fef932d6f0bfc93dc0902f15b4ac2b90063a679a",
-      "commitDate": "2026-10-24T17:14:57+00:00",
+      "commit": "24cbabb54cbb33bbce3580b21eb2dd4a81f69398",
+      "commitDate": "2026-10-24T19:00:53+00:00",
       "dir": null,
       "alternatives": [
         "origin/justin/seed-dx-devices-master-p10",
@@ -143,92 +143,77 @@
         "origin/justin/fix-dev-red-gates",
         "origin/leonardo/carril-03-alta-paciente-dev"
       ],
-      "manifestGeneratedAt": "2026-10-24T17:12:06.410Z",
-      "rowsRead": 6569701,
+      "manifestGeneratedAt": "2026-10-24T18:30:58.088Z",
+      "rowsRead": 14239561,
       "gaps": [
         {
           "source": "hc-mdall",
-          "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
-          "url": "https://health-products.canada.ca/mdall-limh/"
+          "reason": "503 en toda la API (health-products.canada.ca/api/medical-devices/…) al 2026-10-24; solo hay espejo de 2020-02-07",
+          "url": "https://health-products.canada.ca/api/documentation/mdall-documentation-en.html"
         },
         {
           "source": "tga-artg",
-          "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+          "reason": "www.tga.gov.au no responde desde la nube (conexión cortada) al 2026-10-24; el ARTG completo no tiene espejo; solo hay DAEN parcial",
           "url": "https://www.tga.gov.au/resources/artg"
         },
         {
-          "source": "nmpa-udi",
-          "reason": "403 del proxy (udi.nmpa.gov.cn)",
-          "url": "https://udi.nmpa.gov.cn/"
-        },
-        {
           "source": "mfds-devices",
-          "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
-          "url": "https://www.data.go.kr/"
-        },
-        {
-          "source": "cdsco-devices",
-          "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
-          "url": "https://cdsco.gov.in/"
-        },
-        {
-          "source": "hsa-smdr",
-          "reason": "403 del proxy (data.gov.sg)",
-          "url": "https://data.gov.sg/"
+          "reason": "emedi.mfds.go.kr, udiportal.mfds.go.kr y www.data.go.kr no responden desde la nube (conexión cortada) al 2026-10-24",
+          "url": "https://udiportal.mfds.go.kr/"
         },
         {
           "source": "amar-devices",
-          "reason": "403 del proxy (data.gov.il)",
+          "reason": "data.gov.il no publica un conjunto de AMAR; el registro solo se consulta en gov.il",
           "url": "https://data.gov.il/"
         },
         {
           "source": "sfda-mdma",
-          "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+          "reason": "medicaldevice.sfda.gov.sa no responde desde la nube al 2026-10-24 (antes, 502)",
           "url": "https://medicaldevice.sfda.gov.sa/"
         },
         {
           "source": "thai-fda-devices",
-          "reason": "403 del proxy (open.fda.moph.go.th)",
+          "reason": "open.fda.moph.go.th no responde desde la nube al 2026-10-24 (antes, 502)",
           "url": "https://open.fda.moph.go.th/"
         },
         {
-          "source": "mda-medcast",
-          "reason": "403 del proxy (portal.mda.gov.my)",
-          "url": "https://portal.mda.gov.my/"
-        },
-        {
-          "source": "invima-dispositivos",
-          "reason": "403 del proxy (www.datos.gov.co)",
-          "url": "https://www.datos.gov.co/"
+          "source": "mda-mdar",
+          "reason": "MDA publica el registro como buscador (mdar.mda.gov.my, «carian», exige un texto de búsqueda); el listado trae nombre, número de registro, establecimiento local y vigencia, pero no fabricante ni marca, que están en una ficha por registro",
+          "url": "https://mdar.mda.gov.my/"
         },
         {
           "source": "cofepris-dispositivos",
-          "reason": "403 del proxy (datos.gob.mx)",
-          "url": "https://datos.gob.mx/"
+          "reason": "solo visor de consulta (registros.cofepris.gob.mx); datos.gob.mx no tiene conjuntos de dispositivos médicos (búsqueda CKAN, 0 resultados)",
+          "url": "https://registros.cofepris.gob.mx/"
         },
         {
           "source": "anmat-productos-medicos",
-          "reason": "403 del proxy (datos.gob.ar)",
+          "reason": "datos.gob.ar no tiene conjuntos de productos médicos de ANMAT (búsqueda CKAN «anmat»: solo vademécum y alimentos)",
           "url": "https://datos.gob.ar/"
         },
         {
           "source": "digemid-dispositivos",
-          "reason": "403 del proxy (www.datosabiertos.gob.pe)",
-          "url": "https://www.datosabiertos.gob.pe/"
+          "reason": "403 del propio servidor (www.digemid.minsa.gob.pe) al 2026-10-24",
+          "url": "https://www.digemid.minsa.gob.pe/"
+        },
+        {
+          "source": "isp-dispositivos",
+          "reason": "www.ispch.gob.cl no responde desde la nube al 2026-10-24",
+          "url": "https://www.ispch.gob.cl/"
         },
         {
           "source": "agemed-dispositivos",
-          "reason": "403 del proxy (www.agemed.gob.bo)",
+          "reason": "el portal de AGEMED solo publica circulares y comunicados en PDF; sin listado de dispositivos registrados",
           "url": "https://www.agemed.gob.bo/"
         },
         {
-          "source": "who-pq-ivd",
-          "reason": "403 del proxy (extranet.who.int)",
-          "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
+          "source": "sahpra-devices",
+          "reason": "SAHPRA no publica un registro general de dispositivos descargable; solo las listas de kits de COVID-19 (cargadas) y licencias de establecimientos",
+          "url": "https://www.sahpra.org.za/medical-devices/"
         },
         {
           "source": "unicef-supply",
-          "reason": "403 del proxy (supply.unicef.org)",
+          "reason": "403 del propio servidor (supply.unicef.org → supplyhub.unicef.org) al 2026-10-24",
           "url": "https://supply.unicef.org/"
         }
       ]
@@ -237,9 +222,9 @@
   "files": [
     {
       "path": "taxonomy-nodes.ndjson.gz",
-      "rows": 39573,
-      "bytes": 2105572,
-      "sha256": "f5ba89c980fbc1b07b4ffcc0e6e1625b2146ca361e087d8f153276b85af37f65"
+      "rows": 106607,
+      "bytes": 8269530,
+      "sha256": "8b7cc34a7f0418d3bdeaa5e7aaa951bf98c08a67cbf6a299fb475fa9d07071b6"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -249,57 +234,63 @@
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 24716,
-      "bytes": 7672418,
-      "sha256": "169668f8330763002fa2c62de7717f301c5787d7614f4aa7e3a3ad15bba12f4a"
+      "rows": 27736,
+      "bytes": 9745655,
+      "sha256": "74b06148f0b0cd2e32b3a4b4a7254332d7297b6769f150a3cfc0dfd7456577ca"
     },
     {
       "path": "models-0001.ndjson.gz",
-      "rows": 148942,
-      "bytes": 11627637,
-      "sha256": "1c7228c72879c8966ae04a753406d5694837cd22ceefc3b502ad247da2598550"
+      "rows": 140055,
+      "bytes": 11436309,
+      "sha256": "aa428b5f85feef62d6f8dcab8b3fcc15f06d6e3a5aae5dc85534e5d0fba15f52"
     },
     {
       "path": "models-0002.ndjson.gz",
-      "rows": 141820,
-      "bytes": 11822949,
-      "sha256": "478999012508f5fbe0f888c84dee1009187200b6cde65b96608329fc5d480540"
+      "rows": 137748,
+      "bytes": 11654703,
+      "sha256": "2e9cb0dd47f263a3fab345c13d9aa27260e1d8121b1fc0dab816b6967c0983a2"
     },
     {
       "path": "models-0003.ndjson.gz",
-      "rows": 143417,
-      "bytes": 11363438,
-      "sha256": "168dca6c04bcc97af2b84ce021003992bfb394203eb9773dfe785a9ec2d41cc0"
+      "rows": 134249,
+      "bytes": 11101250,
+      "sha256": "064e309af0f5a1ca3bb2689f975bbac77e357f757e2973361b7693c6df504da3"
     },
     {
       "path": "models-0004.ndjson.gz",
-      "rows": 138435,
-      "bytes": 11975670,
-      "sha256": "d5a58c1c2caed304c07e5de3e36b6b39751f1e06d5fa09b1c3d2b34bacf175e8"
+      "rows": 133606,
+      "bytes": 11879077,
+      "sha256": "82448c88dae87078a3a91482f89ddbbacb6619808ba1c8b03b4d0ed8ae0de314"
     },
     {
       "path": "models-0005.ndjson.gz",
-      "rows": 11971,
-      "bytes": 1068571,
-      "sha256": "21df5b1189933022c4e8e5a02b4d721339b0e38eb81d1951ac09fb2474fb544a"
+      "rows": 118518,
+      "bytes": 10641463,
+      "sha256": "e43a58bc4bab3496f3d82d8477224861e88f8babbe9ace5fa733612daf0fd1b4"
+    },
+    {
+      "path": "models-0006.ndjson.gz",
+      "rows": 64956,
+      "bytes": 5900410,
+      "sha256": "8fc2464678d4c15098b52bcfaf07ca978ac6db7b98443956c80a989114b22eb5"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
-      "rows": 10643,
-      "bytes": 1245594,
-      "sha256": "aac7cb574bc6cced6630f0c80f00e7ea0b1c46563d0f4c0fb31a87e1e3a62749"
+      "rows": 12993,
+      "bytes": 1609464,
+      "sha256": "0687485f5da669d2caa13625578a64d189356779a9d2019787e4ac11f563e2b2"
     },
     {
       "path": "industry-mentions.ndjson.gz",
       "rows": 552,
-      "bytes": 27363,
-      "sha256": "e66a1d2cd8c2a0ce26a934268f72753acee3cddedc394970b2c51139c9b9b560"
+      "bytes": 27708,
+      "sha256": "d731bc1303884c6aae62c5a394ce5fa1cfd48e6c3833353fcd60081e06c063ff"
     },
     {
       "path": "industry-candidates.ndjson.gz",
-      "rows": 156,
-      "bytes": 9272,
-      "sha256": "156db351ba33658d955faa98d088231646c063f04af8fb8901af13a740ed8af8"
+      "rows": 149,
+      "bytes": 8361,
+      "sha256": "79fd644edfe5b974d575824c978f5a2da481300ae2a595d8de403281504197bf"
     }
   ]
 }
