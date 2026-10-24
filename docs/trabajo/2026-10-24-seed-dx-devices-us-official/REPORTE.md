@@ -19,7 +19,7 @@
 | H3.S1.M1 | Build completo; partes < 50 MB (máx. 12,7 MB); `gaps: []`; 0 filas sin procedencia | `node --max-old-space-size=8192 …/build.mjs` | `exit=0`, 15:01:46 → 15:13:06 (`evidencia/build.txt`, `evidencia/provenance.txt`) |
 | H3.S1.M2 | Cobertura y pasada 11 en `docs/seed-research/diagnostic-devices-us.md` | `node …/coverage-report.mjs` | `exit=0` (`evidencia/coverage-report.txt`) |
 | H3.S1.M3 | `SOURCES.md`: las fuentes oficiales pasan a «usado (oficial)» | diff | ver commit |
-| H3.S2.M2 | PR contra `dev` (listo, sin merge), con los gates declarados como no corridos por decisión de Justin | MCP GitHub | ver link en el PR |
+| H3.S2.M2 | PR contra `dev` (listo, sin merge), con los gates declarados como no corridos por decisión de Justin | MCP GitHub | https://github.com/mdavila-2001/mantra-core-health-api/pull/709 |
 
 ## A medias
 Ninguna.
