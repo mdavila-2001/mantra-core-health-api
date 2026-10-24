@@ -111,6 +111,20 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `frontend_page_views`,
 - Las lecturas públicas seleccionan `slug`, `display_name`, `city` y
   `specialty`, con filtros parametrizados y máximo de 50 registros.
 - `available_actions_json` es sugerencia de UI; el write debe revalidarla.
+- Aislamiento de la proyección: el ejecutor sólo sirve una vista acotada por
+  tenant y/o por paciente por su contrato, y lo aplica con un `WHERE tenant_id = ?`
+  / `patient_profile_id = ?` parametrizado. Sin ninguno de los dos responde
+  `422 READ_MODEL_PROJECTION_UNAVAILABLE`. `row_level_security_required` de la
+  definición no cuenta como aislamiento: la consulta corre por la conexión del
+  pool, fuera de la transacción del request que fija `app.current_tenant_id`; el
+  rol de la API puede saltarse RLS; y PostgreSQL no aplica RLS a una vista ni a
+  una vista materializada (el parche `2026-08-05_tenant_rls.sql` sólo cubre
+  `BASE TABLE`). Una vista de tenant necesita por tanto la columna `tenant_id`.
+- Permisos de vista (`AuthzViewPermissionGate`): una excepción de usuario con
+  `tenant_id` sólo vale en ese tenant y sin `tenant_id` es global (sin tenant
+  activo, sólo las globales). Los roles, directos y padres, deben estar activos y
+  ser globales o del tenant activo; la herencia se corta en el primer padre que no
+  lo cumple.
 
 ## Conceptos, permisos, logs, tests
 

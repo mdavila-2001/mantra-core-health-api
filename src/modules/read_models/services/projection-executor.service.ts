@@ -100,8 +100,12 @@ interface CursorPayload {
  *   vacía que se lea como «no hay datos».
  * - Esquema, objeto y columnas pasan por {@link SAFE_IDENTIFIER}; los valores
  *   siempre van como parámetros.
- * - Debe haber política de aislamiento: acotada por tenant/paciente por el
- *   contrato, o `row_level_security_required` en la definición. Sin ninguna, `422`.
+ * - Debe haber aislamiento explícito: el contrato acota por tenant y/o por
+ *   paciente y el ejecutor lo aplica como `WHERE` parametrizado. Sin ninguno,
+ *   `422`. `row_level_security_required` de la definición no sustituye ese
+ *   filtro: la consulta no corre dentro de la transacción del request (que es
+ *   la que fija `app.current_tenant_id`) y RLS no existe sobre vistas ni
+ *   materializadas.
  * - Límite efectivo `min(pedido ?? default, maximum_page_size)`.
  * - El orden termina siempre en columnas estables (`stable_cursor_columns_json` y
  *   el desempate de la opción de orden): sin orden total no hay página estable.
@@ -165,13 +169,12 @@ export class ProjectionExecutor {
         'La proyección exige paciente y no hay paciente autorizado',
       );
     }
-    if (
-      !request.tenantScoped &&
-      !request.patientScoped &&
-      definition.rowLevelSecurityRequired !== true
-    ) {
+    // `row_level_security_required` no es aislamiento: la consulta corre por la
+    // conexión del pool, sin la transacción que fija `app.current_tenant_id`, con
+    // el rol de la API, y RLS no aplica a una vista ni a una materializada.
+    if (!request.tenantScoped && !request.patientScoped) {
       throw this.unavailable(
-        'La definición no declara una política de aislamiento',
+        'La proyección no está acotada por tenant ni por paciente',
       );
     }
 

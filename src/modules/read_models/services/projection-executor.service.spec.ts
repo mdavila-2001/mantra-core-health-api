@@ -62,7 +62,8 @@ const sort = (overrides: Record<string, unknown> = {}): any => ({
 });
 
 /**
- * Petición base: una MV materializada con dos campos y un orden.
+ * Petición base: una MV materializada con dos campos y un orden, acotada por
+ * tenant (el aislamiento explícito que el ejecutor exige).
  *
  * @param overrides - Campos a pisar.
  * @returns La petición.
@@ -74,7 +75,8 @@ function request(overrides: Record<string, unknown> = {}): any {
     fields: [field('id'), field('name', { filterable: true })],
     sortOptions: [sort()],
     filters: [{ filterCode: 'name', sourceColumn: 'name' }],
-    tenantScoped: false,
+    tenantScoped: true,
+    tenantId: TENANT,
     patientScoped: false,
     requestedFilters: {},
     refreshedAt: REFRESHED,
@@ -116,9 +118,9 @@ describe('ProjectionExecutor (RM-02)', () => {
     expect(page.nextCursor).toBeNull();
     const [sql, params] = d.connection.execute.mock.calls[0];
     expect(sql).toBe(
-      'SELECT "id", "name" FROM "read_models"."mv_accounts" ORDER BY "name" ASC NULLS LAST, "id" ASC LIMIT ? OFFSET ?',
+      'SELECT "id", "name" FROM "read_models"."mv_accounts" WHERE "tenant_id" = ? ORDER BY "name" ASC NULLS LAST, "id" ASC LIMIT ? OFFSET ?',
     );
-    expect(params).toEqual([3, 0]);
+    expect(params).toEqual([TENANT, 3, 0]);
   });
 
   it('Límite: el tamaño pedido se recorta al máximo de la definición y hay cursor si sobra una fila', async () => {
@@ -132,7 +134,7 @@ describe('ProjectionExecutor (RM-02)', () => {
 
     const page = await d.executor.execute(request({ requestedLimit: 999 }));
 
-    expect(d.connection.execute.mock.calls[0][1]).toEqual([4, 0]);
+    expect(d.connection.execute.mock.calls[0][1]).toEqual([TENANT, 4, 0]);
     expect(page.rows).toHaveLength(3);
     expect(page.nextCursor).toEqual(expect.stringContaining('.'));
   });
@@ -152,7 +154,7 @@ describe('ProjectionExecutor (RM-02)', () => {
       request({ requestedLimit: 2, cursor: first.nextCursor }),
     );
 
-    expect(d.connection.execute.mock.calls[1][1]).toEqual([3, 2]);
+    expect(d.connection.execute.mock.calls[1][1]).toEqual([TENANT, 3, 2]);
     expect(last).toEqual({ rows: [], nextCursor: null });
   });
 
@@ -241,9 +243,9 @@ describe('ProjectionExecutor (RM-02)', () => {
       );
 
       const [sql, params] = d.connection.execute.mock.calls[0];
-      expect(sql).toContain('WHERE "name" = ?');
+      expect(sql).toContain('WHERE "tenant_id" = ? AND "name" = ?');
       expect(sql).not.toContain('DROP');
-      expect(params[0]).toBe("x'; DROP TABLE y; --");
+      expect(params[1]).toBe("x'; DROP TABLE y; --");
     });
 
     it.each([
@@ -280,8 +282,20 @@ describe('ProjectionExecutor (RM-02)', () => {
       ],
       ['MV que nunca se materializó', { materialized: false }],
       [
-        'sin política de aislamiento',
-        { definition: definition({ rowLevelSecurityRequired: false }) },
+        'sin acotar por tenant ni por paciente y sin RLS declarada',
+        {
+          definition: definition({ rowLevelSecurityRequired: false }),
+          tenantScoped: false,
+        },
+      ],
+      [
+        'RLS declarada pero sin acotar por tenant ni por paciente (la bandera no aísla, aunque haya tenant activo)',
+        {
+          definition: definition({ rowLevelSecurityRequired: true }),
+          tenantScoped: false,
+          patientScoped: false,
+          tenantId: TENANT,
+        },
       ],
       [
         'sin orden estable',
@@ -290,7 +304,7 @@ describe('ProjectionExecutor (RM-02)', () => {
           sortOptions: [sort()],
         },
       ],
-      ['acotada por tenant sin tenant', { tenantScoped: true }],
+      ['acotada por tenant sin tenant', { tenantId: undefined }],
       ['acotada por paciente sin paciente', { patientScoped: true }],
     ])('%s', async (_name, overrides) => {
       const d = build();

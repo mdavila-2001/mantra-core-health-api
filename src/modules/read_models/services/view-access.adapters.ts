@@ -34,6 +34,20 @@ function withinWindow(
 }
 
 /**
+ * Filtro de ámbito de tenant de una fila de `authz` con `tenant_id` nulable: sólo
+ * valen las globales (columna nula) y las del tenant activo. Es la misma regla
+ * que `roleAuthorizesInTenant` aplica a los roles del token; sin tenant activo,
+ * sólo las globales.
+ */
+function inTenantOrGlobal(tenantId: string | undefined): {
+  $or: { tenantId: string | null }[];
+} {
+  return {
+    $or: [{ tenantId: null }, ...(tenantId ? [{ tenantId }] : [])],
+  };
+}
+
+/**
  * Permisos por rol y por excepción de usuario, con deny-overrides.
  *
  * Es el subconjunto del PDP de `authz` que necesita una vista (permiso por
@@ -41,6 +55,11 @@ function withinWindow(
  * asignación acotada a otro tenant no cuenta), con la herencia de roles padre;
  * `role_permissions` y `user_permission_grants` vigentes. Un `DENY` en cualquier
  * eslabón gana sobre cualquier `ALLOW`.
+ *
+ * Los roles (directos y padres) deben estar activos y ser globales o del tenant
+ * activo; la herencia se corta en el primer padre que no lo cumple. Una
+ * excepción de usuario con `tenant_id` sólo vale en ese tenant; sin `tenant_id`
+ * es global.
  */
 @Injectable()
 export class AuthzViewPermissionGate extends ViewPermissionGate {
@@ -85,6 +104,7 @@ export class AuthzViewPermissionGate extends ViewPermissionGate {
       const direct = await em.find(Roles, {
         code: { $in: codes },
         stateConceptId: CONCEPTS.STATE_ACTIVE,
+        ...inTenantOrGlobal(tenantId),
       });
       const roleIds = new Set(direct.map((r) => r.id));
       // Herencia: los permisos del rol padre también cuentan.
@@ -94,7 +114,11 @@ export class AuthzViewPermissionGate extends ViewPermissionGate {
           .map((r) => r.parentRoleId)
           .filter((id): id is string => !!id && !roleIds.has(id));
         if (parentIds.length === 0) break;
-        frontier = await em.find(Roles, { id: { $in: parentIds } });
+        frontier = await em.find(Roles, {
+          id: { $in: parentIds },
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          ...inTenantOrGlobal(tenantId),
+        });
         for (const role of frontier) roleIds.add(role.id);
       }
 
@@ -116,6 +140,7 @@ export class AuthzViewPermissionGate extends ViewPermissionGate {
       userId: user.id,
       permissionId,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
+      ...inTenantOrGlobal(tenantId),
     });
     for (const grant of grants) {
       if (!withinWindow(grant.validFrom, grant.validTo, now)) continue;
