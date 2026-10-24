@@ -1,6 +1,6 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T17:21:08.356Z",
+  "generatedAt": "2026-10-24T17:25:08.933Z",
   "formatVersion": 1,
   "files": [
     {
@@ -114,6 +114,14 @@
       "rows": 71434,
       "bytes": 12923050,
       "sha256": "3c143da6196bcb19cb562359a850ce0aad7d8d1723d7fe502a59c3a71f80e8a2"
+    },
+    {
+      "path": "who-pq-ivd.ndjson.gz",
+      "source": "who-pq-ivd",
+      "sourceVersion": "WHO list of prequalified IVDs, export 2026-10-24",
+      "rows": 435,
+      "bytes": 13731,
+      "sha256": "c2939c84dcc0a6b152dd64fc969e34c871e85c59e156ff0691a06028445781e9"
     }
   ],
   "nomenclatures": [
@@ -243,6 +251,11 @@
           "sha256": "69f6b93060217e175d5c2da958284ece545f3bb7d38ddf527dc8d85fcaf5cdc0"
         }
       ]
+    },
+    "who-pq-ivd": {
+      "inputLines": 435,
+      "rows": 435,
+      "duplicates": 0
     }
   },
   "gaps": [
@@ -315,11 +328,6 @@
       "source": "agemed-dispositivos",
       "reason": "403 del proxy (www.agemed.gob.bo)",
       "url": "https://www.agemed.gob.bo/"
-    },
-    {
-      "source": "who-pq-ivd",
-      "reason": "403 del proxy (extranet.who.int)",
-      "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
     },
     {
       "source": "unicef-supply",

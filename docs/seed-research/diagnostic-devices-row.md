@@ -207,3 +207,9 @@ masiva: se recorre por clase y por lotes, con pausa.
 
 La descarga directa del CSV completo se cortaba a los 32 MB (curl 18); se baja
 paginada por la API Socrata, ordenada por `:id`. Licencia CC BY-SA 4.0.
+
+## Pasada 9 — OMS precalificación IVD (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas |
+|---|---|--:|
+| `who-pq-ivd` | export CSV de la lista de IVD precalificados (125 productos, 40 fabricantes) | 435 |

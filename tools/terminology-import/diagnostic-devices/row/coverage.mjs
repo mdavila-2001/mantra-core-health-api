@@ -27,6 +27,7 @@ const REGISTRY_COUNTRY = {
   'tfda-devices': 'TW',
   'tfda-tudid': 'TW',
   'invima-dispositivos': 'CO',
+  'who-pq-ivd': 'WHO',
 };
 
 const TOP = 25;

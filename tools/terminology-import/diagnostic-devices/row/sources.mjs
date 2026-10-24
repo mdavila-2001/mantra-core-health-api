@@ -99,6 +99,8 @@ export const OFFICIAL = Object.freeze({
   tgaDaen: 'https://apps.tga.gov.au/Prod/devices/daen-entry.aspx',
   cdsco: 'https://cdscomdonline.gov.in/',
   tfda: 'https://data.gov.tw/dataset/9576',
+  whoPq:
+    'https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics',
   tfdaTudid: 'https://data.gov.tw/dataset/151955',
 });
 
@@ -109,6 +111,12 @@ export const OFFICIAL = Object.freeze({
  */
 const ANVISA_DADOS = 'https://dados.anvisa.gov.br/dados/';
 export const OFFICIAL_DOWNLOADS = Object.freeze({
+  'who-pq': [
+    {
+      name: 'who-pq-ivd.csv',
+      url: 'https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics/export?page&_format=csv',
+    },
+  ],
   invima: [
     {
       name: 'y4qt-w6tk',
@@ -237,11 +245,6 @@ export const GAPS = Object.freeze([
     source: 'agemed-dispositivos',
     reason: '403 del proxy (www.agemed.gob.bo)',
     url: 'https://www.agemed.gob.bo/',
-  },
-  {
-    source: 'who-pq-ivd',
-    reason: '403 del proxy (extranet.who.int)',
-    url: 'https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics',
   },
   {
     source: 'unicef-supply',

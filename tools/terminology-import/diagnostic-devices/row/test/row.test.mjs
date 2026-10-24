@@ -35,6 +35,7 @@ import {
   textOrNull,
 } from '../lib/row.mjs';
 import { invimaDate, invimaRows, invimaText } from '../lib/invima.mjs';
+import { whoPqRows } from '../lib/who-pq.mjs';
 import {
   splitTfdaCategory,
   tfdaDate,
@@ -506,4 +507,18 @@ test('INVIMA: grupo y nivel de riesgo propios, fabricante por rol y titular si n
   assert.equal(fromHolder[0].manufacturerName, fromHolder[0].extra.holder.name);
   assert.equal(invimaDate('07/18/2029 12:00:00 AM'), '2029-07-18');
   assert.equal(invimaText('null'), null);
+});
+
+test('OMS PQ: una fila por código de producto, formato de ensayo y patógeno', () => {
+  const { rows } = whoPqRows(parseCsv(fixture('who-pq-ivd.csv')), CTX);
+  assert.equal(rows.length, 3);
+  const [first] = rows;
+  assert.equal(first.sourceRecordId, '13641-013-00|7D3442SET');
+  assert.equal(first.brandName, 'Determine Syphilis Advanced');
+  assert.equal(first.model, '7D3442SET');
+  assert.equal(first.deviceTypeSystem, 'who:assay-format');
+  assert.equal(first.deviceTypeName, 'Immunochromatographic (lateral flow)');
+  assert.equal(first.extra.target, 'Syphilis');
+  assert.equal(first.extra.inVitroDiagnostic, true);
+  assert.equal(first.authorizationDate, null, 'la lista solo publica el año');
 });

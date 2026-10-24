@@ -32,6 +32,7 @@ import { parseJmdnPage } from './lib/jmdn.mjs';
 import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
 import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
 import { invimaRows } from './lib/invima.mjs';
+import { whoPqRows } from './lib/who-pq.mjs';
 import { tfdaRows, tudidRows } from './lib/tfda.mjs';
 import { daenDate, daenRows } from './lib/tga-daen.mjs';
 import {
@@ -481,6 +482,23 @@ async function buildInvima() {
   };
 }
 
+async function buildWhoPq() {
+  const file = officialFile('who-pq', 'who-pq-ivd.csv');
+  const lines = parseCsv(readFileSync(file.path, 'utf8'));
+  const sourceVersion = `WHO list of prequalified IVDs, export ${file.retrievedAt.slice(0, 10)}`;
+  const { rows, duplicates } = whoPqRows(lines, {
+    sourceUrl: OFFICIAL.whoPq,
+    sourceVersion,
+    retrievedAt: file.retrievedAt,
+    officialFile: file.citation,
+    officialPortal: OFFICIAL.whoPq,
+  });
+  return {
+    files: await writeSource('who-pq-ivd', sourceVersion, rows),
+    stats: { inputLines: lines.length, rows: rows.length, duplicates },
+  };
+}
+
 const BUILDERS = {
   'anvisa-produtos': buildAnvisaProdutos,
   'anvisa-produtos-modelos': buildAnvisaModelos,
@@ -491,6 +509,7 @@ const BUILDERS = {
   'tfda-devices': buildTfda,
   'tfda-tudid': buildTfdaTudid,
   'invima-dispositivos': buildInvima,
+  'who-pq-ivd': buildWhoPq,
 };
 
 async function main() {
