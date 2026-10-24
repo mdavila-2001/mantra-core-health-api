@@ -11,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ClinicalAccessGrants } from '../../authz/entities';
+import { Files } from '../../common/entities/files.entity';
 import { Consents } from '../../consent/entities';
 import { CONS } from '../../consent/consent.concepts';
 import { CohortDefinitions } from '../../lakehouse/entities';
@@ -127,6 +128,19 @@ export class DataReleaseService {
       if (dto.outputManifestFileId) {
         await this.assertVersionsInTenant(tx, tenantId, dto.sourceVersionIds);
       }
+      // El consentimiento y los manifiestos son UUID que aporta el cliente: se
+      // guardan en la corrida y en su procedencia, así que tienen que ser del
+      // tenant activo (404 uniforme, sin dejar corrida).
+      if (dto.consentDirectiveId) {
+        await this.assertConsentInTenant(
+          tx,
+          tenantId,
+          dto.consentDirectiveId,
+          undefined,
+        );
+      }
+      await this.assertFileInTenant(tx, tenantId, dto.inputManifestFileId);
+      await this.assertFileInTenant(tx, tenantId, dto.outputManifestFileId);
 
       const statusConceptId =
         dto.outcome === 'COMPLETED'
@@ -598,6 +612,27 @@ export class DataReleaseService {
         HealthDataErrorReason.CONSENT_NOT_AVAILABLE,
       );
     }
+  }
+
+  /**
+   * Un archivo citado (manifiesto de entrada o de salida) debe ser del tenant.
+   *
+   * @param tx - Transacción activa.
+   * @param tenantId - Tenant activo.
+   * @param fileId - Archivo citado; si no se cita ninguno, no hace nada.
+   * @throws ResourceNotFoundException uniforme si no existe o es ajeno.
+   */
+  private async assertFileInTenant(
+    tx: EntityManager,
+    tenantId: string,
+    fileId: string | undefined,
+  ): Promise<void> {
+    if (!fileId) return;
+    const file = await tx.findOne(Files, { id: fileId });
+    assertResourceInTenant(file, file?.tenantId, tenantId, {
+      message: 'Archivo no encontrado',
+      reason: HealthDataErrorReason.FILE_NOT_AVAILABLE,
+    });
   }
 
   /**

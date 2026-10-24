@@ -16,6 +16,7 @@ import {
   runWithTenant,
 } from '../../../common';
 import { ClinicalAccessGrants } from '../../authz/entities';
+import { Files } from '../../common/entities/files.entity';
 import { Consents } from '../../consent/entities';
 import { CONS } from '../../consent/consent.concepts';
 import { CohortDefinitions } from '../../lakehouse/entities';
@@ -34,6 +35,7 @@ const MANIFEST_FILE = '99999999-9999-9999-9999-999999999999';
 const OTHER_TENANT = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const COHORT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const CONSENT = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+const INPUT_FILE = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 
 /**
  * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
@@ -100,22 +102,34 @@ function grant(overrides: Record<string, unknown> = {}): any {
  */
 function build() {
   // Filas que ven las consultas directas de la política (accesos, consent, cohorte).
-  const db: { grants: any[]; consent: any; cohort: any } = {
+  const db: {
+    grants: any[];
+    consent: any;
+    cohort: any;
+    files: Record<string, any>;
+  } = {
     grants: [grant()],
     consent: null,
     cohort: null,
+    // Archivos de `common.files` por id: los manifiestos son del tenant.
+    files: {
+      [MANIFEST_FILE]: { id: MANIFEST_FILE, tenantId: TENANT },
+      [INPUT_FILE]: { id: INPUT_FILE, tenantId: TENANT },
+    },
   };
   const tx = {
     flush: mockFn(),
     find: mockFn(async (entity: unknown) =>
       entity === ClinicalAccessGrants ? db.grants : [],
     ),
-    findOne: mockFn(async (entity: unknown) =>
+    findOne: mockFn(async (entity: unknown, where?: any) =>
       entity === Consents
         ? db.consent
         : entity === CohortDefinitions
           ? db.cohort
-          : null,
+          : entity === Files
+            ? (db.files[where?.id] ?? null)
+            : null,
     ),
   };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
@@ -293,6 +307,127 @@ describe('DataReleaseService', () => {
       await expect(
         d.service.recordDeidRun(dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    describe('referencias del cliente dentro del tenant', () => {
+      const withRefs = (extra: Record<string, unknown>): any => ({
+        ...dto,
+        ...extra,
+      });
+      const usableConsent = (overrides: Record<string, unknown> = {}) => ({
+        id: CONSENT,
+        tenantId: TENANT,
+        statusConceptId: CONS.CONSENT_ACTIVE,
+        patientProfileId: PATIENT,
+        ...overrides,
+      });
+
+      it('un consentimiento de otro tenant responde como inexistente y no crea corrida', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+        d.db.consent = usableConsent({ tenantId: OTHER_TENANT });
+
+        await expectNotAvailable(
+          d.service.recordDeidRun(
+            withRefs({ consentDirectiveId: CONSENT }),
+            actor,
+          ),
+          HealthDataErrorReason.CONSENT_NOT_AVAILABLE,
+        );
+        expect(d.releaseRepo.createDeidRun).not.toHaveBeenCalled();
+        expect(d.provenanceRepo.createProvenanceRecord).not.toHaveBeenCalled();
+      });
+
+      it('un consentimiento inexistente responde igual que uno ajeno', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+        d.db.consent = null;
+
+        await expectNotAvailable(
+          d.service.recordDeidRun(
+            withRefs({ consentDirectiveId: CONSENT }),
+            actor,
+          ),
+          HealthDataErrorReason.CONSENT_NOT_AVAILABLE,
+        );
+      });
+
+      it('un consentimiento del tenant se guarda en la corrida y en la procedencia', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+        d.db.consent = usableConsent();
+
+        await d.service.recordDeidRun(
+          withRefs({ consentDirectiveId: CONSENT }),
+          actor,
+        );
+
+        expect(d.releaseRepo.createDeidRun).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ consentDirectiveId: CONSENT }),
+        );
+      });
+
+      it('un manifiesto de salida de otro tenant responde como inexistente y no deja corrida ni linaje', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+        d.db.files[MANIFEST_FILE] = {
+          id: MANIFEST_FILE,
+          tenantId: OTHER_TENANT,
+        };
+
+        await expectNotAvailable(
+          d.service.recordDeidRun(dto, actor),
+          HealthDataErrorReason.FILE_NOT_AVAILABLE,
+        );
+        expect(d.releaseRepo.createDeidRun).not.toHaveBeenCalled();
+        expect(d.provenanceRepo.createProvenanceTarget).not.toHaveBeenCalled();
+        expect(d.provenanceRepo.createLineageEdge).not.toHaveBeenCalled();
+      });
+
+      it('un manifiesto de entrada de otro tenant responde como inexistente', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+        d.db.files[INPUT_FILE] = { id: INPUT_FILE, tenantId: OTHER_TENANT };
+
+        await expectNotAvailable(
+          d.service.recordDeidRun(
+            withRefs({ inputManifestFileId: INPUT_FILE }),
+            actor,
+          ),
+          HealthDataErrorReason.FILE_NOT_AVAILABLE,
+        );
+        expect(d.releaseRepo.createDeidRun).not.toHaveBeenCalled();
+      });
+
+      it('un archivo inexistente responde igual que uno ajeno', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+        delete d.db.files[MANIFEST_FILE];
+
+        await expectNotAvailable(
+          d.service.recordDeidRun(dto, actor),
+          HealthDataErrorReason.FILE_NOT_AVAILABLE,
+        );
+      });
+
+      it('manifiestos del tenant se aceptan', async () => {
+        const d = build();
+        d.releaseRepo.findDeidProfileById.mockResolvedValue(activeProfile());
+
+        await d.service.recordDeidRun(
+          withRefs({ inputManifestFileId: INPUT_FILE }),
+          actor,
+        );
+
+        expect(d.releaseRepo.createDeidRun).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            inputManifestFileId: INPUT_FILE,
+            outputManifestFileId: MANIFEST_FILE,
+          }),
+        );
+      });
     });
   });
 

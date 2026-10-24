@@ -96,6 +96,7 @@ function node(id: string, overrides: any = {}) {
     nodeId: id,
     tenantId: TENANT_ID,
     nodeType: 'person',
+    sourceEntityId: `source-${id}`,
     displayLabelRedacted: `N-${id.slice(0, 4)}`,
     lifecycleState: 'active',
     ...overrides,
@@ -125,6 +126,8 @@ function build() {
     findNodesByIds: mockFn(async (_tx: any, ids: string[]) =>
       ids.map((id) => node(id)),
     ),
+    // Por defecto ningún nodo es de un paciente.
+    findPatientProfileIds: mockFn(async () => []),
   };
   const outbox = {
     publishDomainEvent: mockFn(async () => ({ duplicate: false })),
@@ -586,6 +589,180 @@ describe('GraphTraversalService', () => {
       expect(d.analyticsRepo.findCachedPath).not.toHaveBeenCalled();
       expect(d.analyticsRepo.createCachedPath).not.toHaveBeenCalled();
       expect(d.projectionRepo.findActiveEdgesFrom).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('consentimiento derivado del nodo (no del cliente)', () => {
+    const PATIENT_A = '88888888-8888-8888-8888-888888888888';
+    const PATIENT_B = '77777777-7777-7777-7777-777777777777';
+    const deny = () =>
+      new DomainException(
+        HttpStatus.FORBIDDEN,
+        ErrorCode.FORBIDDEN,
+        'denegado',
+        undefined,
+        'GRAPH_CONSENT_REQUIRED',
+      );
+
+    /** Hace que los nodos cuyo `source_entity_id` esté en `patients` sean de paciente. */
+    function patientsAre(d: ReturnType<typeof build>, ...patients: string[]) {
+      d.projectionRepo.findPatientProfileIds.mockImplementation(
+        async (_tx: any, ids: string[]) =>
+          ids.filter((id) => patients.includes(id)),
+      );
+    }
+
+    it('traverse sobre el nodo de un paciente sin declarar patientProfileId consulta la compuerta con ese paciente', async () => {
+      const d = build();
+      d.projectionRepo.findNodeById.mockResolvedValue(
+        node(NODE_A, { sourceEntityId: PATIENT_A }),
+      );
+      patientsAre(d, PATIENT_A);
+
+      await d.service.traverse(TRAVERSE_DTO, actor);
+
+      expect(d.consentGate.assertAllowed).toHaveBeenCalledTimes(1);
+      expect(d.consentGate.assertAllowed).toHaveBeenCalledWith(d.tx, {
+        tenantId: TENANT_ID,
+        patientProfileId: PATIENT_A,
+        purposeOfUse: 'FRAUD_INVESTIGATION',
+        actorId: actor.id,
+      });
+    });
+
+    it('traverse sobre el nodo de un paciente sin consentimiento se deniega aunque el cliente omita el paciente', async () => {
+      const d = build();
+      d.projectionRepo.findNodeById.mockResolvedValue(
+        node(NODE_A, { sourceEntityId: PATIENT_A }),
+      );
+      patientsAre(d, PATIENT_A);
+      d.consentGate.assertAllowed.mockRejectedValue(deny());
+
+      await expect(
+        d.service.traverse(TRAVERSE_DTO, actor),
+      ).rejects.toMatchObject({ reason: 'GRAPH_CONSENT_REQUIRED' });
+      expect(d.projectionRepo.findActiveEdgesFrom).not.toHaveBeenCalled();
+    });
+
+    it('findPath sobre el nodo de un paciente sin consentimiento no lee ni escribe la caché', async () => {
+      const d = build();
+      d.projectionRepo.findNodeById.mockResolvedValue(
+        node(NODE_A, { sourceEntityId: PATIENT_A }),
+      );
+      patientsAre(d, PATIENT_A);
+      d.consentGate.assertAllowed.mockRejectedValue(deny());
+
+      await expect(
+        d.service.findPath({ ...TRAVERSE_DTO, endNodeId: NODE_B }, actor),
+      ).rejects.toMatchObject({ reason: 'GRAPH_CONSENT_REQUIRED' });
+      expect(d.analyticsRepo.findCachedPath).not.toHaveBeenCalled();
+      expect(d.analyticsRepo.createCachedPath).not.toHaveBeenCalled();
+    });
+
+    it('declarar a un paciente que consiente no autoriza el nodo de otro paciente', async () => {
+      const d = build();
+      d.projectionRepo.findNodeById.mockResolvedValue(
+        node(NODE_A, { sourceEntityId: PATIENT_B }),
+      );
+      patientsAre(d, PATIENT_B);
+
+      await expect(
+        d.service.traverse(
+          { ...TRAVERSE_DTO, patientProfileId: PATIENT_A },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.projectionRepo.findActiveEdgesFrom).not.toHaveBeenCalled();
+    });
+
+    it('con el mismo paciente declarado y en el nodo, la compuerta corre una sola vez', async () => {
+      const d = build();
+      d.projectionRepo.findNodeById.mockResolvedValue(
+        node(NODE_A, { sourceEntityId: PATIENT_A }),
+      );
+      patientsAre(d, PATIENT_A);
+
+      await d.service.traverse(
+        { ...TRAVERSE_DTO, patientProfileId: PATIENT_A },
+        actor,
+      );
+
+      expect(d.consentGate.assertAllowed).toHaveBeenCalledTimes(1);
+    });
+
+    it('poda el nodo visitado de un paciente sin consentimiento y conserva el del que consiente', async () => {
+      const d = build();
+      patientsAre(d, PATIENT_A, PATIENT_B);
+      d.projectionRepo.findActiveEdgesFrom.mockResolvedValueOnce([
+        {
+          edgeId: 'e1',
+          fromNodeId: NODE_A,
+          toNodeId: NODE_B,
+          relationshipType: 'referred',
+        },
+        {
+          edgeId: 'e2',
+          fromNodeId: NODE_A,
+          toNodeId: NODE_C,
+          relationshipType: 'referred',
+        },
+      ]);
+      d.projectionRepo.findNodesByIds.mockResolvedValue([
+        node(NODE_B, { sourceEntityId: PATIENT_A }),
+        node(NODE_C, { sourceEntityId: PATIENT_B }),
+      ]);
+      d.consentGate.assertAllowed.mockImplementation(
+        async (_tx: any, q: any) => {
+          if (q.patientProfileId === PATIENT_A) throw deny();
+        },
+      );
+
+      const result = await d.service.traverse(TRAVERSE_DTO, actor);
+
+      expect(result.nodes.map((n) => n.nodeId)).toEqual([NODE_A, NODE_C]);
+    });
+
+    it('un fallo que no es de consentimiento no se traga como poda', async () => {
+      const d = build();
+      patientsAre(d, PATIENT_A);
+      d.projectionRepo.findActiveEdgesFrom.mockResolvedValueOnce([
+        {
+          edgeId: 'e1',
+          fromNodeId: NODE_A,
+          toNodeId: NODE_B,
+          relationshipType: 'referred',
+        },
+      ]);
+      d.projectionRepo.findNodesByIds.mockResolvedValue([
+        node(NODE_B, { sourceEntityId: PATIENT_A }),
+      ]);
+      d.consentGate.assertAllowed.mockRejectedValue(new Error('db caída'));
+
+      await expect(d.service.traverse(TRAVERSE_DTO, actor)).rejects.toThrow(
+        'db caída',
+      );
+    });
+
+    it('no sirve de la caché una ruta que pasa por un paciente cuyo consentimiento ya no rige', async () => {
+      const d = build();
+      patientsAre(d, PATIENT_B);
+      d.analyticsRepo.findCachedPath.mockResolvedValue({
+        pathNodes: [NODE_A, NODE_B],
+        pathEdges: ['e1'],
+        expiresAt: new Date(Date.now() + 60_000),
+      });
+      d.projectionRepo.findNodesByIds.mockResolvedValue([
+        node(NODE_B, { sourceEntityId: PATIENT_B }),
+      ]);
+      d.consentGate.assertAllowed.mockRejectedValue(deny());
+
+      const result = await d.service.findPath(
+        { ...TRAVERSE_DTO, endNodeId: NODE_B },
+        actor,
+      );
+
+      expect(result.fromCache).toBe(false);
+      expect(d.projectionRepo.findActiveEdgesFrom).toHaveBeenCalled();
     });
   });
 });
