@@ -210,42 +210,66 @@ export function fromOpenFda510k(r, table, prov) {
  * openFDA `device/pma`: una fila por (PMA, nombre comercial). El original y
  * los suplementos que cambian el nombre comercial (nuevos modelos) quedan
  * como filas distintas; los demás suplementos se cuentan en `extra`.
+ * Misma agrupación y `sourceRecordId` (`P…[/S…]`) que `fromFdadataPma`, para
+ * que el mismo registro por las dos vías se fusione en vez de duplicarse; los
+ * suplementos sin product code heredan el del PMA original (como allí).
  */
 export function fromOpenFdaPma(results, table, prov) {
-  const groups = new Map();
+  const parentCode = new Map();
   for (const r of results) {
     const pma = clean(r.pma_number)?.toUpperCase();
-    if (!pma || !table.scope(r.product_code).include) continue;
-    const trade = clean(r.trade_name) ?? clean(r.generic_name) ?? '';
+    if (pma && clean(r.product_code) && !parentCode.has(pma)) parentCode.set(pma, clean(r.product_code).toUpperCase());
+  }
+  const groups = new Map();
+  for (const raw of results) {
+    const pma = clean(raw.pma_number)?.toUpperCase();
+    if (!pma) continue;
+    const inherited = !clean(raw.product_code) && parentCode.has(pma);
+    const r = inherited ? { ...raw, product_code: parentCode.get(pma), __inherited: true } : raw;
+    if (!table.scope(r.product_code).include) continue;
+    const trade = verbatim(r.trade_name) ?? verbatim(r.generic_name) ?? '';
     const key = `${pma}|${trade.toUpperCase()}`;
-    const g = groups.get(key) ?? { first: r, supplements: 0 };
-    if (clean(r.supplement_number)) g.supplements++;
-    if (isoDate(r.decision_date) && (!isoDate(g.first.decision_date) || isoDate(r.decision_date) < isoDate(g.first.decision_date))) g.first = r;
+    const g = groups.get(key) ?? { first: null, supplements: 0 };
+    const sup = clean(r.supplement_number);
+    if (sup) g.supplements++;
+    const d = isoDate(r.decision_date) ?? '9999-12-31';
+    const firstD = g.first ? (isoDate(g.first.decision_date) ?? '9999-12-31') : null;
+    if (!g.first || d < firstD || (d === firstD && !sup)) g.first = r;
     groups.set(key, g);
   }
-  return [...groups.entries()].map(([key, { first: r, supplements }]) => {
+  return [...groups.values()].map(({ first: r, supplements }) => {
     const pma = clean(r.pma_number).toUpperCase();
     const sup = clean(r.supplement_number);
+    const pc = clean(r.product_code).toUpperCase();
     return makeRecord(
       {
         source: 'fda-pma',
-        sourceRecordId: `${pma}${sup ? `/${sup}` : ''}|${key.split('|')[1]}`,
+        sourceRecordId: `${pma}${sup ? `/${sup}` : ''}`,
         sourceUrl: OFFICIAL_RECORD_URL.PMA(pma),
         sourceVersion: prov.sourceVersion,
         retrievedAt: prov.retrievedAt,
-        ...typeFields(table, r.product_code),
+        ...typeFields(table, pc),
         manufacturerName: verbatim(r.applicant),
         manufacturerCountry: null,
         manufacturerRegistryId: null,
         brandName: verbatim(r.trade_name),
         model: null,
         udiDi: null,
-        riskClass: fdaRiskClass(r.openfda?.device_class),
+        riskClass: fdaRiskClass(r.openfda?.device_class) ?? fdaRiskClass(table.get(pc)?.deviceClass),
         authorizationId: pma,
         authorizationDate: isoDate(r.decision_date),
         status: verbatim(r.decision_code),
       },
-      { recordLevel: 'authorization', ...scopeExtra(table, r.product_code), genericName: clean(r.generic_name), supplementNumber: sup, supplementsSameName: supplements, decisionCode: clean(r.decision_code), via: prov.via },
+      {
+        recordLevel: 'authorization',
+        ...scopeExtra(table, pc),
+        genericName: clean(r.generic_name),
+        supplementNumber: sup,
+        supplementsSameName: supplements,
+        decisionCode: clean(r.decision_code),
+        productCodeFromParentPma: r.__inherited === true,
+        via: prov.via,
+      },
     );
   });
 }
@@ -257,32 +281,39 @@ const ISO2 = /^[A-Z]{2}$/;
 /**
  * openFDA `device/registrationlisting`: una fila por (establecimiento,
  * product code, nombre propietario). Es la fuente de marcas por fabricante y
- * de país del establecimiento.
+ * de país del establecimiento. Cada resultado es un listado: `proprietary_name`,
+ * `k_number` y `pma_number` van a nivel del listado (valen para todos sus
+ * `products`). Sin `registration_number` se usa el FEI; sin ninguno de los dos
+ * (registros con `status_code` 5), el número de owner/operator.
  */
 export function fromOpenFdaRegistrationListing(r, table, prov) {
   const reg = r.registration ?? {};
-  const regNo = clean(reg.registration_number) ?? clean(reg.fei_number);
+  const regNumber = clean(reg.registration_number);
+  const fei = clean(reg.fei_number);
+  const owner = clean(reg.owner_operator?.owner_operator_number);
+  const [idField, regNo] = regNumber ? ['registration_number', regNumber] : fei ? ['fei_number', fei] : ['owner_operator.owner_operator_number', owner];
+  if (!regNo) return [];
+  const names = (r.proprietary_name ?? []).map(clean).filter(Boolean);
+  const auth = clean(r.k_number) ?? clean(r.pma_number) ?? null;
   const out = [];
   for (const p of r.products ?? []) {
     const pc = clean(p.product_code)?.toUpperCase();
     if (!pc) continue;
     if (!table.scope(pc).include) continue;
-    const names = (p.proprietary_name ?? []).map(clean).filter(Boolean);
-    const auth = clean(p.k_number) ?? clean(p.pma_number) ?? null;
     for (const name of names.length ? names : [null]) {
       const country = clean(reg.iso_country_code)?.toUpperCase();
       out.push(
         makeRecord(
           {
             source: 'fda-rl',
-            sourceRecordId: `${regNo}|${pc}|${name ?? ''}`,
-            sourceUrl: OFFICIAL_RECORD_URL.LISTING(r.key_val ?? '', pc),
+            sourceRecordId: `${regNumber || fei ? '' : 'oo:'}${regNo}|${pc}|${name ?? ''}`,
+            sourceUrl: OFFICIAL_RECORD_URL.LISTING_OPENFDA(idField, regNo, pc),
             sourceVersion: prov.sourceVersion,
             retrievedAt: prov.retrievedAt,
             ...typeFields(table, pc),
             manufacturerName: verbatim(reg.owner_operator?.firm_name) ?? clean(reg.name),
             manufacturerCountry: country && ISO2.test(country) ? country : null,
-            manufacturerRegistryId: regNo ? `fda-reg:${regNo}` : null,
+            manufacturerRegistryId: regNumber ? `fda-reg:${regNumber}` : fei ? `fei:${fei}` : null,
             brandName: name,
             model: null,
             udiDi: null,
@@ -291,7 +322,7 @@ export function fromOpenFdaRegistrationListing(r, table, prov) {
             authorizationDate: null,
             status: null,
           },
-          { recordLevel: 'listing', ...scopeExtra(table, pc), establishmentName: clean(reg.name), establishmentTypes: r.establishment_type ?? [], ownerOperatorNumber: clean(reg.owner_operator?.owner_operator_number), via: prov.via },
+          { recordLevel: 'listing', ...scopeExtra(table, pc), establishmentName: clean(reg.name), establishmentTypes: r.establishment_type ?? [], manufacturerIds: [regNumber ? `fda-reg:${regNumber}` : null, fei ? `fei:${fei}` : null].filter(Boolean), registrationExpiryYear: clean(reg.reg_expiry_date_year), regStatusCode: clean(reg.status_code), ownerOperatorNumber: owner, via: prov.via },
         ),
       );
     }
