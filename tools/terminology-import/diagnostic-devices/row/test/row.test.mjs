@@ -42,6 +42,7 @@ import { sahpraRows } from '../lib/sahpra.mjs';
 import {
   cdscoOfficialRows,
   parseOfficialLicence,
+  withoutContacts,
 } from '../lib/cdsco-official.mjs';
 import {
   splitTfdaCategory,
@@ -670,5 +671,11 @@ test('CDSCO oficial: importación y fabricación, MD e IVD; sin teléfonos ni co
   assert.equal(
     parseOfficialLicence('Licence no: X\nIssued on: 31-FEB-2020').date,
     null,
+  );
+  assert.equal(
+    withoutContacts(
+      'M/s. Manik Medicaids ,105, MP Mall ,110034 ,India( manikmedicaids@yahoo.com ) Delhi Pincode: 110034 email: x@y.in',
+    ),
+    'M/s. Manik Medicaids ,105, MP Mall ,110034 ,India Delhi Pincode: 110034',
   );
 });

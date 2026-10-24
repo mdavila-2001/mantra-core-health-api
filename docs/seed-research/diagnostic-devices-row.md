@@ -222,3 +222,27 @@ paginada por la API Socrata, ordenada por `:id`. Licencia CC BY-SA 4.0.
 | `hsa-class-a` | data.gov.sg, Class A Medical Devices (Apr 2026, CSV) | 1 127 525 |
 
 Licencia: Singapore Open Data Licence.
+
+## Pasada 11 — China NMPA, India CDSCO oficial, Sudáfrica SAHPRA (2026-10-24)
+
+| Fuente | Archivo oficial | Filas | Notas |
+|---|---|--:|---|
+| `nmpa-udi` | `UDID_FULL_RELEASE_20261001.zip` de udi.nmpa.gov.cn (MD5 publicado `ED0CD3AF…`, verificado) | 6 294 994 | 1259 XML; 249 577 UDI-DI de 体外诊断试剂 (`extra.qxlb`); 6 sin registrante no salen |
+| `cdsco-approved-devices` | «List of Approved Devices» de cdscomdonline.gov.in, cuatro listas (MD/IVD × importación/fabricación) | 180 124 | reemplaza al espejo `cdsco-import-licences` (25 792); 74 428 filas IVD; 1998 copias juntadas |
+| `sahpra-covid-ivd` | cuatro listas xlsx de kits de COVID-19 autorizados | 283 | sin número de autorización ni clase en la fuente |
+
+- El encabezado de los XML de NMPA declara 6 293 777 registros; los 1259 XML
+  traen 6 295 000 `<device>` con UDI-DI únicos. Se cargan los que vienen; la
+  diferencia queda anotada en `manifest.stats.nmpa-udi`.
+- NMPA: significado de cada etiqueta según el «数据共享API 标准文档 V2.1».
+  `contactList` (correo y teléfono de contacto) no se copia.
+- CDSCO: con la red Full el portal responde (antes 403 del proxy); cubre las
+  licencias de fabricación nacional y de autoridades estatales que faltaban.
+- Huecos revisados uno por uno (motivo al día en `manifest.gaps`): Health Canada
+  sigue en 503; TGA, MFDS, SFDA, Thai FDA e ISP no responden desde la nube;
+  DIGEMID y UNICEF dan 403 desde su propio servidor; MDA solo tiene buscador sin
+  fabricante en el listado; COFEPRIS solo visor; datos.gob.mx y datos.gob.ar no
+  tienen conjuntos de dispositivos; AGEMED y SAHPRA no publican registros
+  descargables.
+
+Total del manifiesto: 14 239 561 filas en 26 archivos.

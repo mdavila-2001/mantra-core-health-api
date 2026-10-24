@@ -18,7 +18,9 @@
 //   no hay legal), con país por la tabla cerrada `CDSCO_COUNTRY_ISO`. En
 //   fabricación, el licenciatario (primera línea de `address`); país `IN` solo
 //   si la dirección trae el «Pincode» de seis dígitos que escribe la fuente.
-// - Teléfonos y correos de las direcciones no se copian.
+// - No se copian los campos de contacto («email:», «Contact Number:» y el
+//   «Telephone No.»/«E-Mail» de los sitios) ni los correos escritos dentro de
+//   la dirección. Un teléfono tecleado dentro de la dirección queda verbatim.
 // =============================================================================
 
 import { CDSCO_COUNTRY_ISO } from './cdsco.mjs';
@@ -54,8 +56,18 @@ export function parseOfficialLicence(text) {
 }
 
 /** Quita «email: …» y «Contact Number: …» de una dirección de licenciatario. */
-function withoutContacts(text) {
-  return textOrNull(String(text ?? '').split(/\s*email:/i)[0]);
+export function withoutContacts(text) {
+  return withoutEmails(String(text ?? '').split(/\s*email:/i)[0]);
+}
+
+/** Quita los correos que las empresas escriben dentro de una dirección. */
+export function withoutEmails(text) {
+  return textOrNull(
+    String(text ?? '').replace(
+      /\s*\(?\s*[\w.+-]+@[\w-]+(?:\.[\w-]+)+\s*\)?/g,
+      '',
+    ),
+  );
 }
 
 /**
@@ -80,7 +92,7 @@ export function parseOfficialSites(text) {
     return {
       role: mark[1].toLowerCase(),
       name: textOrNull(m?.[1]),
-      address: textOrNull(m?.[2]),
+      address: withoutEmails(m?.[2]),
       countryName,
       country:
         countryName === null ? null : (CDSCO_COUNTRY_ISO[countryName] ?? null),

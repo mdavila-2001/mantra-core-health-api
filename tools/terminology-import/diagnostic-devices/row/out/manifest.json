@@ -1,6 +1,6 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T17:47:17.307Z",
+  "generatedAt": "2026-10-24T18:30:58.088Z",
   "formatVersion": 1,
   "files": [
     {
@@ -84,12 +84,12 @@
       "sha256": "f6ae0b982f8bb1bac614136c7255242f40c4250f168f3ec6f5e63c9e55ac6e84"
     },
     {
-      "path": "cdsco-import-licences.ndjson.gz",
-      "source": "cdsco-import-licences",
-      "sourceVersion": "MD - Medical Devices, licencias emitidas hasta 2026-10-01 (espejo vishnuu-patil/india-meddevice-intelligence@62e88588)",
-      "rows": 25792,
-      "bytes": 7372002,
-      "sha256": "40ebea47f5563f8b35cdb30f652c24d31ed66dc9c549085a293256f0357a19d1"
+      "path": "cdsco-approved-devices.ndjson.gz",
+      "source": "cdsco-approved-devices",
+      "sourceVersion": "List of Approved Devices (cdscomdonline.gov.in), descargada 2026-10-24",
+      "rows": 180124,
+      "bytes": 30675627,
+      "sha256": "65d4e06755c06bd6f4c570562c4979b4b4f801fc105b1514699aa98c94ea85a9"
     },
     {
       "path": "tfda-devices.ndjson.gz",
@@ -146,6 +146,70 @@
       "rows": 119478,
       "bytes": 5265695,
       "sha256": "af604185b4b9e7dd72744d110486768e55554ed9ce21b4bf110042f2fc68d3a1"
+    },
+    {
+      "path": "nmpa-udi-0001.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 1001802,
+      "bytes": 47181804,
+      "sha256": "ee697835974d8ccef99866e82af58dfbdb9ff64cc4b4e112c448e8f9c16a115b"
+    },
+    {
+      "path": "nmpa-udi-0002.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 1193399,
+      "bytes": 47179810,
+      "sha256": "5fd96eaeaa619c27667304d51f7eaaa1d3ebdf5ac3446711470911990f878bfc"
+    },
+    {
+      "path": "nmpa-udi-0003.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 1152033,
+      "bytes": 47067290,
+      "sha256": "b87ca75236b89714a1e223c9ebcfe9715ad884a35bd458ef0c5f0ea5c0f3b0bc"
+    },
+    {
+      "path": "nmpa-udi-0004.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 957356,
+      "bytes": 47085549,
+      "sha256": "cf12e08d2c4bd3ed469e7bd52e6117927dfb536b2523417cd753ea19fb81a6fc"
+    },
+    {
+      "path": "nmpa-udi-0005.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 945551,
+      "bytes": 47113109,
+      "sha256": "d3642fa304f5075c7144aedd445c8ae405f93047039d71e359db500693a080fd"
+    },
+    {
+      "path": "nmpa-udi-0006.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 966668,
+      "bytes": 47165056,
+      "sha256": "24a042996cc5a9d143808f4065d4e276b5b344d6e901e4afb97e92bed2cba418"
+    },
+    {
+      "path": "nmpa-udi-0007.ndjson.gz",
+      "source": "nmpa-udi",
+      "sourceVersion": "UDID_FULL_RELEASE_20261001",
+      "rows": 78185,
+      "bytes": 3741454,
+      "sha256": "4161834b3406f581dc5172ebca7a2e350cbe20e87753b0f635c27583e94734ad"
+    },
+    {
+      "path": "sahpra-covid-ivd.ndjson.gz",
+      "source": "sahpra-covid-ivd",
+      "sourceVersion": "SAHPRA authorised COVID-19 test kit lists (24/05/2023; serological 31/05/2022)",
+      "rows": 283,
+      "bytes": 14524,
+      "sha256": "044fcd840e1ac7ec04bbf64213cf2c053d05d67c47b0cbee9b3b319bd0b015f6"
     }
   ],
   "nomenclatures": [
@@ -204,9 +268,16 @@
       "rows": 18917,
       "withoutManufacturer": 1
     },
-    "cdsco-import-licences": {
-      "sheetRows": 25794,
-      "rows": 25792,
+    "cdsco-approved-devices": {
+      "lists": {
+        "approved-md-import.json": 25963,
+        "approved-md-manufacturing.json": 81476,
+        "approved-ivd-import.json": 45772,
+        "approved-ivd-manufacturing.json": 28911
+      },
+      "rows": 180124,
+      "inputRecords": 182122,
+      "duplicates": 1998,
       "badLicence": 0,
       "withoutManufacturer": 0
     },
@@ -293,77 +364,98 @@
       "rows": 1127525,
       "withoutOwner": 54,
       "duplicates": 0
+    },
+    "nmpa-udi": {
+      "xmlParts": 1259,
+      "declaredRecords": 6293777,
+      "inputDevices": 6295000,
+      "creationDate": "2026-10-01 00:30:05",
+      "rows": 6294994,
+      "withoutDi": 0,
+      "withoutRegistrant": 6,
+      "duplicates": 0
+    },
+    "sahpra-covid-ivd": {
+      "lists": {
+        "antigen-self-test": 10,
+        "antigen-professional": 85,
+        "molecular": 132,
+        "serological": 56
+      },
+      "rows": 283,
+      "duplicates": 0,
+      "withoutManufacturer": 0
     }
   },
   "gaps": [
     {
       "source": "hc-mdall",
-      "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
-      "url": "https://health-products.canada.ca/mdall-limh/"
+      "reason": "503 en toda la API (health-products.canada.ca/api/medical-devices/…) al 2026-10-24; solo hay espejo de 2020-02-07",
+      "url": "https://health-products.canada.ca/api/documentation/mdall-documentation-en.html"
     },
     {
       "source": "tga-artg",
-      "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+      "reason": "www.tga.gov.au no responde desde la nube (conexión cortada) al 2026-10-24; el ARTG completo no tiene espejo; solo hay DAEN parcial",
       "url": "https://www.tga.gov.au/resources/artg"
     },
     {
-      "source": "nmpa-udi",
-      "reason": "403 del proxy (udi.nmpa.gov.cn)",
-      "url": "https://udi.nmpa.gov.cn/"
-    },
-    {
       "source": "mfds-devices",
-      "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
-      "url": "https://www.data.go.kr/"
-    },
-    {
-      "source": "cdsco-devices",
-      "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
-      "url": "https://cdsco.gov.in/"
+      "reason": "emedi.mfds.go.kr, udiportal.mfds.go.kr y www.data.go.kr no responden desde la nube (conexión cortada) al 2026-10-24",
+      "url": "https://udiportal.mfds.go.kr/"
     },
     {
       "source": "amar-devices",
-      "reason": "403 del proxy (data.gov.il)",
+      "reason": "data.gov.il no publica un conjunto de AMAR; el registro solo se consulta en gov.il",
       "url": "https://data.gov.il/"
     },
     {
       "source": "sfda-mdma",
-      "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+      "reason": "medicaldevice.sfda.gov.sa no responde desde la nube al 2026-10-24 (antes, 502)",
       "url": "https://medicaldevice.sfda.gov.sa/"
     },
     {
       "source": "thai-fda-devices",
-      "reason": "403 del proxy (open.fda.moph.go.th)",
+      "reason": "open.fda.moph.go.th no responde desde la nube al 2026-10-24 (antes, 502)",
       "url": "https://open.fda.moph.go.th/"
     },
     {
-      "source": "mda-medcast",
-      "reason": "403 del proxy (portal.mda.gov.my)",
-      "url": "https://portal.mda.gov.my/"
+      "source": "mda-mdar",
+      "reason": "MDA publica el registro como buscador (mdar.mda.gov.my, «carian», exige un texto de búsqueda); el listado trae nombre, número de registro, establecimiento local y vigencia, pero no fabricante ni marca, que están en una ficha por registro",
+      "url": "https://mdar.mda.gov.my/"
     },
     {
       "source": "cofepris-dispositivos",
-      "reason": "403 del proxy (datos.gob.mx)",
-      "url": "https://datos.gob.mx/"
+      "reason": "solo visor de consulta (registros.cofepris.gob.mx); datos.gob.mx no tiene conjuntos de dispositivos médicos (búsqueda CKAN, 0 resultados)",
+      "url": "https://registros.cofepris.gob.mx/"
     },
     {
       "source": "anmat-productos-medicos",
-      "reason": "403 del proxy (datos.gob.ar)",
+      "reason": "datos.gob.ar no tiene conjuntos de productos médicos de ANMAT (búsqueda CKAN «anmat»: solo vademécum y alimentos)",
       "url": "https://datos.gob.ar/"
     },
     {
       "source": "digemid-dispositivos",
-      "reason": "403 del proxy (www.datosabiertos.gob.pe)",
-      "url": "https://www.datosabiertos.gob.pe/"
+      "reason": "403 del propio servidor (www.digemid.minsa.gob.pe) al 2026-10-24",
+      "url": "https://www.digemid.minsa.gob.pe/"
+    },
+    {
+      "source": "isp-dispositivos",
+      "reason": "www.ispch.gob.cl no responde desde la nube al 2026-10-24",
+      "url": "https://www.ispch.gob.cl/"
     },
     {
       "source": "agemed-dispositivos",
-      "reason": "403 del proxy (www.agemed.gob.bo)",
+      "reason": "el portal de AGEMED solo publica circulares y comunicados en PDF; sin listado de dispositivos registrados",
       "url": "https://www.agemed.gob.bo/"
     },
     {
+      "source": "sahpra-devices",
+      "reason": "SAHPRA no publica un registro general de dispositivos descargable; solo las listas de kits de COVID-19 (cargadas) y licencias de establecimientos",
+      "url": "https://www.sahpra.org.za/medical-devices/"
+    },
+    {
       "source": "unicef-supply",
-      "reason": "403 del proxy (supply.unicef.org)",
+      "reason": "403 del propio servidor (supply.unicef.org → supplyhub.unicef.org) al 2026-10-24",
       "url": "https://supply.unicef.org/"
     }
   ]
