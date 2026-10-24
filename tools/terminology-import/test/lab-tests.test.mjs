@@ -14,6 +14,9 @@ import { fileURLToPath } from 'node:url';
 
 import { md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { loincDomain } from '../lab-tests/lib/domains.mjs';
+import { CDISC_CODE_SYSTEM, cdiscRecords, parseCdiscTerminology } from '../lab-tests/lib/cdisc.mjs';
+import { NPU_CODE_SYSTEM, npuObjects, npuRecords } from '../lab-tests/lib/npu.mjs';
+import { parseCsv } from '../lib/glossary-es/loinc-es.mjs';
 import { TEST_VERSION_COLUMNS, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv } from '../lab-tests/lib/gtr.mjs';
 import { thoRecords } from '../lab-tests/lib/hl7-tho.mjs';
 import { RELATION, buildPlan, planSummary, relationshipTuples } from '../lab-tests/lib/load-plan.mjs';
@@ -332,4 +335,45 @@ test('LOINC vía tx.fhir.org + NLM (recorte real, LOINC 2.82): clase, ORDER_OBS,
   assert.ok(panel.valueSets.includes('lab-catalog-loinc-panels'));
   assert.ok(panel.properties.loinc_panel_members.some((m) => m.loinc === '2345-7'));
   assert.ok(glu.relations.some((x) => x.type === 'part-of' && x.targetCode === '24323-8'));
+});
+
+test('CDISC SDTM (recorte real de NCI EVS): concepto por término de codelist, nombre del par «Test Name», dominio por codelist', () => {
+  const rows = parseCdiscTerminology(readFileSync(join(FIX, 'cdisc-sdtm.recorte.txt'), 'utf8'));
+  const prov = { sourceVersion: 'recorte', sourceFile: 'fixture', sourceSha256: 'f'.repeat(64), retrievedAt: '2026-10-24T00:00:00.000Z' };
+  const { records, stats } = cdiscRecords(rows, prov);
+  records.forEach(assertRecord);
+  const a1ag = records.find((r) => r.code === 'C65047.C100429');
+  assert.equal(a1ag.display, 'Alpha-1 Acid Glycoprotein');
+  assert.equal(a1ag.properties.cdisc_submission_value, 'A1AGLP');
+  assert.equal(a1ag.domain, 'laboratory');
+  assert.equal(a1ag.id, conceptIdFor(CDISC_CODE_SYSTEM, 'C65047.C100429'));
+  assert.ok(a1ag.valueSets.includes('lab-catalog-cdisc-sdtm-cat-c65047'));
+  // El mismo C-code en Laboratory y Microscopic Findings: dos conceptos, cada uno con el dominio de su codelist.
+  const both = records.filter((r) => r.properties.cdisc_nci_code === 'C106539');
+  assert.deepEqual(both.map((r) => [r.code, r.domain]).sort(), [['C132263.C106539', 'pathology'], ['C65047.C106539', 'laboratory']]);
+  assert.equal(records.find((r) => r.properties.cdisc_codelist_code === 'C111106').domain, 'functional');
+  // Cardiovascular Test Code (mezcla mediciones con hallazgos de examen) queda fuera y contada.
+  assert.ok(!records.some((r) => r.properties.cdisc_codelist_code === 'C101847'));
+  assert.equal(stats.excludedCodelists['C101847 Cardiovascular Test Code'], 2);
+  assert.equal(stats.withoutTestName, 0);
+  assert.throws(() => parseCdiscTerminology('Code\tOtra\n'), /cabecera inesperada/);
+});
+
+test('NPU (recorte real de IFCC, una fila por especialidad): texto verbatim, partes oficiales, laboratorio', () => {
+  const items = npuObjects(parseCsv(readFileSync(join(FIX, 'npu.recorte.csv'), 'utf8')));
+  const prov = { sourceVersion: 'recorte', sourceFile: 'fixture', sourceSha256: 'f'.repeat(64), retrievedAt: '2026-10-24T00:00:00.000Z' };
+  const { records, stats } = npuRecords(items, prov);
+  records.forEach(assertRecord);
+  assert.equal(stats.included, 10);
+  const ghb = records.find((r) => r.code === 'NPU02425');
+  assert.equal(ghb.display, 'U—Gamma-Hydroxybutyrate; subst.c. = ? mmol/L');
+  assert.equal(ghb.definition, 'Urine—Gamma-Hydroxybutyrate; substance concentration = ? millimole per litre');
+  assert.equal(ghb.properties.npu_system, 'Urine');
+  assert.equal(ghb.properties.npu_kind_of_property, 'substance concentration');
+  assert.equal(ghb.properties.npu_unit, 'millimole per litre');
+  assert.equal(ghb.properties.npu_effective_to, undefined);
+  assert.equal(ghb.id, conceptIdFor(NPU_CODE_SYSTEM, 'NPU02425'));
+  assert.deepEqual(ghb.category, { scheme: 'npu-specialty', code: 'CLP', display: 'CLP' });
+  assert.ok(records.every((r) => r.domain === 'laboratory' && r.designations.length === 0));
+  assert.throws(() => npuObjects([['otra']]), /cabecera inesperada/);
 });

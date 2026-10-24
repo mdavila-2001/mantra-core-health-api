@@ -25,8 +25,17 @@ Verificado el 2026-10-24. Las licencias se leyeron en la fuente: portal, `packag
 | **TUSS, tabla 22** (`tuss-ans`) | `@br-health-kit/tuss@1.0.0` (npm) | Dados abertos da ANS, redistribuidos sin modificación; paquete MIT | **Cotejado**: el ZIP oficial `pda-049-tuss.zip` de la ANS tiene el mismo SHA-256 que declara el paquete y 0 diferencias en 5 966 códigos | 2 211 de 5 966 |
 | **SIGTAP, grupo 02** (`sigtap-sus`) | `@br-health-kit/sigtap@1.0.0` (npm; competencia 2026.08) | Dados públicos do Ministério da Saúde (DATASUS); paquete MIT | **No cotejado**: DATASUS publica sólo por FTP y el proxy del entorno sólo admite HTTPS | 1 108 |
 | **FONASA, arancel MLE 2026** (`fonasa-mle`) | `@mariohealthbits/fonasa-mle-open@1.0.0` (npm) | Arancel público de FONASA; paquete MIT | **No cotejado**: fonasa.cl responde 403 | 648 de 2 515 |
+| **NPU Terminology, versión internacional** (`npu-ifcc`) | IFCC, `npu-codes-latest.csv` (enlazado desde npu-terminology.org/npu-database; `fetch-direct-sources.mjs --only ifcc-npu`) | NPU License & Terms of Use (2023-05-17): uso sin cargo, comercial o no comercial, para identificar observaciones clínicas; prohibido modificar o traducir; se cita como propiedad de IFCC e IUPAC y www.labterm.dk | Fuente primaria | 25 699 (todos los activos de la versión vigente) |
+| **CDISC SDTM Controlled Terminology** (`cdisc-sdtm`) | NCI EVS, `SDTM Terminology.txt` (publicado 2026-09-25; `fetch-direct-sources.mjs --only nci-cdisc-sdtm`) | Distribuida como parte del NCI Thesaurus (lo declara cdisc.org): **CC BY 4.0** (términos de uso de NCIt) | Fuente primaria | 4 721, de 10 codelists «Test Code» diagnósticas |
 | **HL7 Terminology**: tablas v2 0487, 0371, 0488, 0493, 0074 y `observation-category` | `hl7.terminology.r4@7.0.1` (npm, paquete oficial de HL7) | CC0-1.0 | Fuente primaria (paquete publicado por HL7) | 479 |
 | **UCUM** (`ucum`) | `@lhncbc/ucum-lhc@8.0.1` (NLM-LHNCBC) + `ValueSet-ucum-common` de THO | UCUM: https://ucum.org/license; código LHC tipo BSD | **No cotejado**: ucum.org no expone `ucum-essence.xml` por URL directa | 888 |
+
+CDISC: entran las codelists Laboratory (LB), Microbiology (MB), Microbiology Susceptibility (MS),
+Cell Phenotyping (CP), Immunogenicity Specimen Assessments (IS), Genomic Findings (GF), Microscopic
+Findings (MI), ECG, Holter ECG y Respiratory (RE). Quedan fuera las de hallazgos de examen,
+cuestionarios, signos vitales y las mezclas (Cardiovascular, Ophthalmic Exam, Nervous System…), contadas
+en `excludedCodelists` del meta. El concepto es `<codelist>.<C-code>`, porque un mismo C-code puede estar
+en dos codelists con dominios distintos.
 
 Qué entra de cada arancel y por qué: `lib/tariffs.mjs` (`TARIFF_RULES` y `TARIFF_EXCLUSIONS`,
 cada regla con la evidencia que la justifica). Para LOINC, `lib/domains.mjs`, con reglas

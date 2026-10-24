@@ -11,7 +11,7 @@ tablas existentes del módulo 03 y no escribe DDL (ADR-0021). Fuentes y licencia
 ```sh
 # 1. Descargas crudas (fuera de git, en $GLOSSARY_BUILD_DIR/lab-tests-sources/; con red)
 node tools/terminology-import/lab-tests/fetch-lab-tests-sources.mjs                    # paquetes npm (THO, UCUM, FONASA, SIGTAP, TUSS)
-NODE_USE_ENV_PROXY=1 node tools/terminology-import/lab-tests/fetch-direct-sources.mjs  # CMS ICD-10-PCS 2027, CIE-10-ES, CUPS, PAMI
+NODE_USE_ENV_PROXY=1 node tools/terminology-import/lab-tests/fetch-direct-sources.mjs  # CMS ICD-10-PCS 2027, CIE-10-ES, CUPS, PAMI, CDISC (NCI EVS), NPU (IFCC)
 NODE_USE_ENV_PROXY=1 node tools/terminology-import/lab-tests/fetch-gtr.mjs             # NCBI GTR (FTP por HTTPS)
 NODE_USE_ENV_PROXY=1 node tools/terminology-import/lab-tests/fetch-loinc-txfhir.mjs    # LOINC 2.82 desde tx.fhir.org (horas; caché en disco)
 NODE_USE_ENV_PROXY=1 node tools/terminology-import/lab-tests/fetch-loinc-ctss.mjs      # ejes y unidades desde NLM CTSS
@@ -25,7 +25,7 @@ node tools/terminology-import/lab-tests/load-lab-tests.mjs --apply    # carga re
 node --test "tools/terminology-import/test/*.test.mjs"                # incluye lab-tests.test.mjs
 ```
 
-**`data/` está versionado** (31 MB): los NDJSON normalizados en gzip (partidos por debajo de 45 MB
+**`data/` está versionado** (34 MB): los NDJSON normalizados en gzip (partidos por debajo de 45 MB
 si hiciera falta), sus `.meta.json`, el reporte de cobertura, el manifiesto de fuentes (spec npm,
 SHA-256, integridad) y `checksums.json`. Si no hay build local, `load-lab-tests.mjs` carga desde
 `data/` y verifica el SHA-256. Así el corpus se carga sin volver a descargar las fuentes crudas
@@ -33,7 +33,7 @@ que no se versionan: se reproducen con los scripts `fetch-*.mjs`.
 
 `build-lab-tests.mjs` usa el comando `unzip` del sistema para leer los ZIP oficiales de CMS.
 El cargador arma el plan completo en memoria y lo inserta en **una sola transacción**: con LOINC
-(≈160 000 conceptos y ≈3,9 millones de propiedades) conviene `NODE_OPTIONS=--max-old-space-size=12288`.
+(≈190 000 conceptos y ≈4,6 millones de propiedades) conviene `NODE_OPTIONS=--max-old-space-size=12288`.
 Si Node no ve el proxy, `NODE_USE_ENV_PROXY=1` (no hace falta para `npm pack`).
 
 ## Qué escribe en cada tabla

@@ -84,6 +84,24 @@ declarado; y una carga completa desde `data/` es idempotente con el conteo exact
 | H8.S4.M2 | Carga completa desde `data/`, 2 corridas, base nueva | corrida 1 = plan (18 236 relaciones); corrida 2 = 0 | `evidencia/carga-completa-desde-data-postgres16.txt` | HECHO |
 | H8.S5.M1 | Merge de `dev` sin regresiones | typecheck, lint y tests verdes tras el merge | `corepack yarn typecheck`, `corepack yarn lint`, `node --test` | HECHO |
 
+## H9 — Terminar la saturación (pedido del propietario: «que de una vez se termine»)
+**CA:** Dado que la pasada 15 dejó CDISC pendiente, cuando se cargan las fuentes alcanzables con
+licencia verificada y se sigue buscando, entonces hay dos pasadas seguidas sin conceptos nuevos y cada
+fuente no cargada tiene su motivo escrito.
+**DoD:** capas `cdisc-sdtm` y `npu-ifcc` con test sobre recorte real; pasadas 17 y 18 en 0 registradas;
+carga completa desde `data/` en base nueva, corrida 1 = dry-run y corrida 2 = 0; tests, typecheck y lint verdes.
+**Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H9.S1.M1 | Licencia de CDISC verificada en la fuente | Texto de cdisc.org + términos de NCIt citados | lectura de las dos páginas | HECHO |
+| H9.S1.M2 | Capa `cdisc-sdtm` (10 codelists diagnósticas) | 4 721 = suma de las 10 codelists | test «CDISC SDTM» + `build-lab-tests.mjs` → `cdisc-sdtm: 4721` | HECHO |
+| H9.S2.M1 | Licencia de NPU verificada en la fuente | PDF «NPU License & Terms of Use» leído | lectura del PDF | HECHO |
+| H9.S2.M2 | Capa `npu-ifcc` | 25 699 activos de la versión vigente | test «NPU» + `build-lab-tests.mjs` → `npu-ifcc: 25699` | HECHO |
+| H9.S3.M1 | Pasadas 16–18 registradas con motivo por fuente | 17 y 18 en 0 | lectura de `docs/seed-research/lab-tests.md` | HECHO |
+| H9.S4.M1 | Carga completa final, 2 corridas, base nueva | corrida 1 = dry-run (188 729 conceptos); corrida 2 = 0 | `evidencia/carga-completa-final-postgres16.txt` | HECHO |
+| H9.S4.M2 | Regresión | tests, typecheck y lint verdes | `node --test`, `corepack yarn typecheck`, `corepack yarn lint` | HECHO |
+
 ## Riesgos y bloqueos previstos
 
 | Riesgo | Impacto | Mitigación |
