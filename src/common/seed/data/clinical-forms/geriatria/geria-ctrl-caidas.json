@@ -118,7 +118,7 @@
         "1 — Insegura con o sin ayudas",
         "0 — Imposible"
       ],
-      "description": "Más «caídas previas» (1 punto si hubo alguna). Suma de 3 o más: riesgo alto de caídas. Fuente: índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28), según el arquetipo openEHR openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Más «caídas previas» (1 punto si hubo alguna). Fuente: índice de riesgo de caídas de Downton (Downton JH, Andrews K. Aging (Milano). 1991;3:219-28), según el arquetipo openEHR openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: caídas",

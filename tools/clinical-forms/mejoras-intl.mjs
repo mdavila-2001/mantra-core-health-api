@@ -125,8 +125,7 @@ const HAS_BLED = factores(
       at0012: '8 o más unidades por semana',
     },
     ninguno: 'Ninguno',
-    extra:
-      'Cada factor suma 1 punto (0 a 9). La guía ESC 2024 desaconseja usar el puntaje para negar la anticoagulación: sirve para corregir los factores modificables.',
+    extra: 'Cada factor suma 1 punto (0 a 9).',
   },
 );
 
@@ -422,7 +421,7 @@ const CHARLSON = [
     nombre: 'Charlson — enfermedad hepática',
     fuente: CHARLSON_FUENTE,
     extra:
-      'Leve: hepatitis crónica o cirrosis sin hipertensión portal. Moderada a grave: cirrosis con hipertensión portal, con o sin sangrado variceal. (Definición traducida de la descripción inglesa del arquetipo: la traducción al castellano del CKM dice «ni hepatitis crónica», que invierte el criterio.)',
+      'Leve: hepatitis crónica o cirrosis sin hipertensión portal. Moderada a grave: cirrosis con hipertensión portal, con o sin sangrado variceal. (Traducción propia de la descripción inglesa del arquetipo, «cirrhosis without portal hypertension or chronic hepatitis»; la traducción al castellano del CKM la lee como «ni hepatitis crónica» y no se usa.)',
   }),
   escala(CHARLSON_ID, 'at0033', 'charlson_diabetes', {
     nombre: 'Charlson — diabetes mellitus',
@@ -487,7 +486,7 @@ const KARNOFSKY = escala(
 );
 
 const NIHSS_FUENTE =
-  'NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público)';
+  'NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público)';
 const MOTOR_BRAZO = (a) => ({
   [a[0]]: 'Sin caída; mantiene 90° (o 45°) los 10 segundos completos',
   [a[1]]:
@@ -1448,7 +1447,7 @@ const ANC_PELIGRO = [
       'ANC.B5.DE62': 'Alteraciones visuales',
     },
     extra:
-      'Se verifica antes de cada contacto: cualquier signo de peligro indica atención o referencia de urgencia.',
+      'Se verifica antes de cada contacto: si hay algún signo de peligro, referencia urgente al hospital; si no, se sigue con el contacto habitual.',
   }),
 ];
 
@@ -1678,10 +1677,10 @@ ESPECIFICAS_INTL.push({
           },
         }),
         i('immz_numero_de_dosis', 'Número de dosis', {
-          ayuda: `Elemento IMMZ.D.DE.124 «Dose number» de la ${citaDak(IMMZ)}.`,
+          ayuda: `Elemento IMMZ.D.DE.124 «Dose number» de la ${citaDak(IMMZ)} Traducción propia del inglés, no oficial. ${DESCARGO_OMS}`,
         }),
         s('immz_lote', 'Lote de la vacuna', {
-          ayuda: `Elemento IMMZ.D.DE.24 «Vaccine batch number» de la ${citaDak(IMMZ)}.`,
+          ayuda: `Elemento IMMZ.D.DE.24 «Vaccine batch number» de la ${citaDak(IMMZ)} Traducción propia del inglés, no oficial. ${DESCARGO_OMS}`,
         }),
         dak(IMMZ, 'IMMZ.D.DE.161', 'immz_contraindicaciones', {
           nombre: 'Posibles contraindicaciones o precauciones presentes',
@@ -1710,7 +1709,7 @@ ESPECIFICAS_INTL.push({
             'IMMZ.D.DE.199': 'Toma antibióticos',
           },
           extra:
-            'Cuál de estas condiciones contraindica cada vacuna lo define la ficha técnica y la norma del programa nacional.',
+            'Situaciones o condiciones en las que se aconseja evitar o diferir una vacuna determinada.',
         }),
         dak(IMMZ, 'IMMZ.D.DE.1', 'immz_estado', {
           nombre: 'Estado de la vacunación',
@@ -1745,7 +1744,7 @@ ESPECIFICAS_INTL.push({
           'immz_esavi',
           'Evento supuestamente atribuible a la vacunación (ESAVI)',
           {
-            ayuda: `Elementos IMMZ.D.DE.95, DE.107 y DE.115 de la ${citaDak(IMMZ)}.`,
+            ayuda: `Elementos IMMZ.D.DE.95, DE.107 y DE.115 de la ${citaDak(IMMZ)} Traducción propia del inglés, no oficial. ${DESCARGO_OMS}`,
           },
         ),
         ...si('immz_esavi', true, [
@@ -2019,8 +2018,7 @@ const DOWNTON = [
       at0026: 'Insegura con o sin ayudas',
       at0027: 'Imposible',
     },
-    extra:
-      'Más «caídas previas» (1 punto si hubo alguna). Suma de 3 o más: riesgo alto de caídas.',
+    extra: 'Más «caídas previas» (1 punto si hubo alguna).',
   }),
 ];
 
@@ -2084,7 +2082,7 @@ const PADSS = [
     ...(code === 'padss_signos_vitales'
       ? {
           extra:
-            'Para el alta domiciliaria de cirugía ambulatoria; la suma va de 0 a 10 (alta con 9 o más según los autores).',
+            'Para el alta domiciliaria de cirugía ambulatoria; la suma va de 0 a 10.',
         }
       : {}),
   }),
@@ -2227,7 +2225,8 @@ const REFLEJOS = [
   ['izquierdo', 'derecho'].map((lado) =>
     escala(REFLEJOS_ID, 'at0013', `reflejo_${code}_${lado}`, {
       nombre: `Reflejo ${nombre.replace(/^./, (c) => c.toLowerCase())} — ${lado}`,
-      fuente: 'graduación de los reflejos de estiramiento muscular',
+      fuente:
+        'graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica)',
       traduccion: REFLEJO_RESPUESTA,
       ...(code === 'bicipital' && lado === 'izquierdo'
         ? {
@@ -2298,7 +2297,7 @@ const NRS = [
     fuente: NRS_FUENTE,
     traduccion: { at0028: 'No', at0029: 'Sí' },
     extra:
-      'Puntaje total (0 a 7) de 3 o más: riesgo nutricional; indicar soporte.',
+      'Puntaje total de 0 a 7: estado nutricional + gravedad de la enfermedad + edad.',
   }),
 ];
 

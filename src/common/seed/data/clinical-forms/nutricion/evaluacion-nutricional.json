@@ -227,7 +227,7 @@
       "dataType": "string",
       "required": false,
       "options": ["0 — No", "1 — Sí"],
-      "description": "Puntaje total (0 a 7) de 3 o más: riesgo nutricional; indicar soporte. Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Puntaje total de 0 a 7: estado nutricional + gravedad de la enfermedad + edad. Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Hábitos",

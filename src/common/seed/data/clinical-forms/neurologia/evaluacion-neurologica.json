@@ -184,7 +184,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Los sitios y la graduación (0, ±, 1+ a 5+) son los del arquetipo; la notación numérica es la que el propio arquetipo menciona en cada respuesta. Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Los sitios y la graduación (0, ±, 1+ a 5+) son los del arquetipo; la notación numérica es la que el propio arquetipo menciona en cada respuesta. Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -201,7 +201,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -218,7 +218,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -235,7 +235,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -252,7 +252,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -269,7 +269,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -286,7 +286,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -303,7 +303,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -320,7 +320,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",
@@ -337,7 +337,7 @@
         "4+ — Clonus agotable",
         "5+ — Clonus inagotable"
       ],
-      "description": "Fuente: graduación de los reflejos de estiramiento muscular, según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: graduación de los reflejos de estiramiento muscular (el arquetipo no trae referencia bibliográfica), según el arquetipo openEHR openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0 (rev. 0.0.2-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen neurológico",

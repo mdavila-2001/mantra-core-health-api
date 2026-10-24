@@ -110,7 +110,7 @@
         "1 — PA y pulso con variación del 20 al 40 % del basal",
         "2 — PA y pulso con variación < 20 % del basal"
       ],
-      "description": "Para el alta domiciliaria de cirugía ambulatoria; la suma va de 0 a 10 (alta con 9 o más según los autores). Fuente: puntaje PADSS de alta posanestésica (Marshall SI, Chung F. Anesth Analg. 1999;88:508-17), según el arquetipo openEHR openEHR-EHR-OBSERVATION.padss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Para el alta domiciliaria de cirugía ambulatoria; la suma va de 0 a 10. Fuente: puntaje PADSS de alta posanestésica (Marshall SI, Chung F. Anesth Analg. 1999;88:508-17), según el arquetipo openEHR openEHR-EHR-OBSERVATION.padss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: recuperación posanestésica",

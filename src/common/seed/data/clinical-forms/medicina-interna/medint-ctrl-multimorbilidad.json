@@ -140,7 +140,7 @@
       "dataType": "string",
       "required": false,
       "options": ["0 — Ninguna", "1 — Leve", "3 — Moderada a severa"],
-      "description": "Leve: hepatitis crónica o cirrosis sin hipertensión portal. Moderada a grave: cirrosis con hipertensión portal, con o sin sangrado variceal. (Definición traducida de la descripción inglesa del arquetipo: la traducción al castellano del CKM dice «ni hepatitis crónica», que invierte el criterio.) Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+      "description": "Leve: hepatitis crónica o cirrosis sin hipertensión portal. Moderada a grave: cirrosis con hipertensión portal, con o sin sangrado variceal. (Traducción propia de la descripción inglesa del arquetipo, «cirrhosis without portal hypertension or chronic hepatitis»; la traducción al castellano del CKM la lee como «ni hepatitis crónica» y no se usa.) Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
     },
     {
       "section": "Evaluación: multimorbilidad",

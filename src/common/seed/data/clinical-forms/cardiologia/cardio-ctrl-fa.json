@@ -141,7 +141,7 @@
         "Ninguno"
       ],
       "multiple": true,
-      "description": "Cada factor suma 1 punto (0 a 9). La guía ESC 2024 desaconseja usar el puntaje para negar la anticoagulación: sirve para corregir los factores modificables. Fuente: escala HAS-BLED (Pisters R et al. Chest. 2010;138(5):1093-100; Lip GY et al. J Am Coll Cardiol. 2011;57(2):173-80), según el arquetipo openEHR openEHR-EHR-OBSERVATION.has_bled.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Cada factor suma 1 punto (0 a 9). Fuente: escala HAS-BLED (Pisters R et al. Chest. 2010;138(5):1093-100; Lip GY et al. J Am Coll Cardiol. 2011;57(2):173-80), según el arquetipo openEHR openEHR-EHR-OBSERVATION.has_bled.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: fibrilación auricular",

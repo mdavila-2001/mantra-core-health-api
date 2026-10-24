@@ -69,7 +69,7 @@
         "2 — No alerta; requiere estímulos repetidos para atender, u obnubilado y requiere estímulos fuertes o dolorosos para moverse",
         "3 — Responde sólo con reflejos motores o autonómicos, o sin respuesta, flácido y arrefléxico"
       ],
-      "description": "El texto del valor 2 está truncado en el arquetipo; se completó con la redacción de la escala del NINDS («para moverse»). Los ítems «NE» no suman al total. Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "El texto del valor 2 está truncado en el arquetipo; se completó con la redacción de la escala del NINDS («para moverse»). Los ítems «NE» no suman al total. Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -82,7 +82,7 @@
         "1 — Responde una pregunta correctamente",
         "2 — No responde ninguna correctamente"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -95,7 +95,7 @@
         "1 — Realiza una tarea correctamente",
         "2 — No realiza ninguna correctamente"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -108,7 +108,7 @@
         "1 — Parálisis parcial de la mirada en uno o ambos ojos, sin desviación forzada ni paresia total",
         "2 — Desviación forzada o paresia total de la mirada que no se vence con la maniobra oculocefálica"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -122,7 +122,7 @@
         "2 — Hemianopsia completa",
         "3 — Hemianopsia bilateral (ceguera, incluida la cortical)"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -136,7 +136,7 @@
         "2 — Paresia parcial (parálisis total o casi total de la parte inferior de la cara)",
         "3 — Parálisis completa de uno o ambos lados (sin movimiento en la parte superior e inferior de la cara)"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -152,7 +152,7 @@
         "4 — Sin movimiento",
         "NE — No evaluable: amputación o anquilosis"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -168,7 +168,7 @@
         "4 — Sin movimiento",
         "NE — No evaluable: amputación o anquilosis"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -184,7 +184,7 @@
         "4 — Sin movimiento",
         "NE — No evaluable: amputación o anquilosis"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -200,7 +200,7 @@
         "4 — Sin movimiento",
         "NE — No evaluable: amputación o anquilosis"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -214,7 +214,7 @@
         "2 — Presente en dos miembros",
         "NE — No evaluable: amputación o anquilosis (explicar en observaciones)"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -227,7 +227,7 @@
         "1 — Pérdida leve a moderada: siente el pinchazo menos agudo o romo del lado afectado, o no siente el dolor superficial pero sí que lo tocan",
         "2 — Pérdida grave o total: no se da cuenta de que lo tocan en la cara, el brazo y la pierna"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -241,7 +241,7 @@
         "2 — Afasia grave: comunicación fragmentaria; el examinador no puede identificar el material presentado por la respuesta del paciente",
         "3 — Mutismo o afasia global; sin lenguaje útil ni comprensión auditiva"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -255,7 +255,7 @@
         "2 — Grave: el habla es ininteligible, sin relación o desproporcionada con una disfasia, o mutismo/anartria",
         "NE — No evaluable: intubado u otra barrera física"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",
@@ -268,7 +268,7 @@
         "1 — Inatención visual, táctil, auditiva, espacial o personal, o extinción a la estimulación bilateral simultánea en una modalidad sensorial",
         "2 — Hemiinatención profunda o extinción en más de una modalidad; no reconoce su propia mano o se orienta sólo hacia un lado del espacio"
       ],
-      "description": "Fuente: NIH Stroke Scale (National Institute of Neurological Disorders and Stroke, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+      "description": "Fuente: NIH Stroke Scale (Brott T et al. Stroke. 1989;20:864-70; NINDS, dominio público), según el arquetipo openEHR openEHR-EHR-OBSERVATION.nihss.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: accidente cerebrovascular agudo",

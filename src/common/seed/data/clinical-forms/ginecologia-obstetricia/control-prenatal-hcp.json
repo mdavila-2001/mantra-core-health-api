@@ -246,7 +246,7 @@
         "Alteraciones visuales"
       ],
       "multiple": true,
-      "description": "Se verifica antes de cada contacto: cualquier signo de peligro indica atención o referencia de urgencia. Fuente: elemento ANC.B5.DE48 «Danger signs» de la WHO Digital Adaptation Kit for antenatal care: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-anc, commit 301a6b8). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+      "description": "Se verifica antes de cada contacto: si hay algún signo de peligro, referencia urgente al hospital; si no, se sigue con el contacto habitual. Fuente: elemento ANC.B5.DE48 «Danger signs» de la WHO Digital Adaptation Kit for antenatal care: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-anc, commit 301a6b8). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
     },
     {
       "section": "Signos de alarma",
