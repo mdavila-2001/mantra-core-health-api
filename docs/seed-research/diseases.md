@@ -376,7 +376,7 @@ Tablas generadas por `coverage-report.mjs` (`glossary-data-build/diseases-covera
 | MONDO | CC BY 4.0 | Cargada, con atribución en `terminology_sources.license` |
 | Orphanet | CC BY 4.0 | Cargada |
 | DOID | CC0 1.0 | Cargada |
-| NCI Thesaurus | CC BY 4.0 | Cargada (subárbol C2991) |
+| NCI Thesaurus | CC BY 4.0 según los términos de uso de NCI EVS (revisados en `docs/terminology-expansion/SOURCE-REGISTER.md`; el `.obo` no declara licencia y la página de EVS no fue accesible desde esta red: **reconfirmar**) | Cargada (subárbol C2991), nombrada como subconjunto y no como la edición oficial |
 | CIE-11 MMS y tablas de correspondencia | CC BY-ND 3.0 IGO (OMS) | Cargada **sin modificar** (títulos verbatim; sin traducción ni agregados). Los títulos en castellano no están accesibles |
 | EFO | Apache-2.0 | Cargada (clases propias) |
 | Anotaciones HPO | Licencia HPO (uso libre con atribución) | Sólo identificadores |

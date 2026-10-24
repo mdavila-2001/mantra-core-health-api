@@ -31,7 +31,10 @@ export const ORPHANET_CLASSIFICATIONS = [
 export const LICENSES = {
   MONDO: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — Mondo Disease Ontology, Monarch Initiative',
   DOID: 'CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/) — Human Disease Ontology',
-  NCIT: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) — NCI Thesaurus, National Cancer Institute (EVS)',
+  // El .obo no declara licencia. Fuente: términos de uso de NCI EVS
+  // (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm), revisados en
+  // docs/terminology-expansion/SOURCE-REGISTER.md; esa página no es accesible desde esta red.
+  NCIT: 'CC BY 4.0 según los términos de uso de NCI EVS (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm) — National Cancer Institute; subconjunto de la NCIt OBO Edition, no es la edición oficial de NCI',
   ORPHANET: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode) — Orphanet (c) INSERM',
   ICD11: 'CC BY-ND 3.0 IGO (https://icd.who.int/en/docs/icd11-license.pdf) — © Organización Mundial de la Salud; se redistribuye sin modificar',
   HPO: 'Licencia propia de HPO (LICENSE.md del repo remite a https://hpo.jax.org/app/license): uso libre con atribución y versión',

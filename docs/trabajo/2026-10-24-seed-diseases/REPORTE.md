@@ -102,6 +102,7 @@ Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidenci
 - Claves `umls` (32 150 conceptos, ~96 000 filas): hoy ninguna consulta de producto las lee; si no se van a usar, conviene omitirlas con `--systems`.
 - `ncit-disease` (esta sesión) y `ncit` (`seed-symptoms`) son code systems distintos: si `seed-symptoms` carga el subárbol C2991, habrá duplicados (avisado a esa sesión).
 - `concept_properties` es la tabla más pesada (158 MB).
+- Licencia de NCIt: el `.obo` no la declara. CC BY 4.0 sale de los términos de uso de NCI EVS citados en `docs/terminology-expansion/SOURCE-REGISTER.md`, y esa página no fue accesible desde esta red. Hay que reconfirmarla. El code system se nombra como subconjunto de la NCIt OBO Edition, no como la edición oficial.
 
 ## Decisiones y ambigüedades
 

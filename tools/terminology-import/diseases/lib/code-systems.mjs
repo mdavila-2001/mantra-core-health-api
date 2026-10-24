@@ -47,7 +47,8 @@ export const SYSTEMS = {
     uri: (code) => `http://purl.obolibrary.org/obo/${code.replace(':', '_')}`,
   },
   'ncit-disease': {
-    name: 'NCI Thesaurus — Disease or Disorder (C2991)',
+    // No se llama «NCI Thesaurus» a secas: es un subconjunto, no la edición oficial (términos de uso de NCI EVS).
+    name: 'Subconjunto C2991 «Disease or Disorder» de la NCIt OBO Edition',
     sourceCode: 'NCI_NCIT',
     owner: 'National Cancer Institute — Enterprise Vocabulary Services',
     officialUrl: 'https://evs.nci.nih.gov/',
