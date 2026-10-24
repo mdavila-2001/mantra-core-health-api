@@ -32,7 +32,7 @@
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H1.S2.M4 | BLOQUEADO | Postgres disponible (CI con base o entorno local) |
+| H1.S2.M4 | BLOQUEADO | (1) Arreglar en `dev` el arranque roto por `choiceOptionsOf` (ver Riesgos residuales); (2) correrlo con el stack del compose (Postgres con TimescaleDB/pgvector, Mongo, Redis, OpenSearch) |
 | Merge de #678 | HECHO | Aprobado por PabloArauzCaballero y mergeado el 2026-10-24 |
 
 ## Evidencia
@@ -57,7 +57,7 @@ Tests:       2 failed, 1 skipped, 10703 passed, 10706 total
 
 ## No cubierto
 
-- `test/integration/practice-ownership.int-spec.ts`: escrito y compila (entra en `tsc`), pero **no se corrió**.
+- `test/integration/practice-ownership.int-spec.ts`: escrito y compila (entra en `tsc`), pero **no llegó a pasar**. El 2026-10-24 se intentó sobre Postgres 16 local, sin Docker. Sin parche, el arranque cae por `choiceOptionsOf`. Con un parche local temporal de `forms` (no commiteado), el arranque no termina en 180 s porque faltan Mongo, Redis y OpenSearch. Ver `evidencia/int-spec-intento-postgres-local.txt`.
 - `yarn build`, `yarn docs:validate` y `yarn docs:build` no se corrieron (MkDocs no está en el contenedor).
 - El flujo en el front («Mis organizaciones → Organización médica») no se observó.
 
@@ -68,6 +68,8 @@ Tests:       2 failed, 1 skipped, 10703 passed, 10706 total
 - Un `prettier --write` sobre directorios enteros reformateó varios README de tablas; se revirtieron a `dev` antes del push.
 
 ## Riesgos residuales
+
+- **`dev` no arranca (2026-10-24, encontrado al intentar el int-spec; ajeno a este trabajo).** Desde `7f2aa3d8` («chore(db): database/ vuelve a ser una copia exacta del modelo»), `src/modules/forms/entities/index.ts` exporta la función `choiceOptionsOf`. `forms.module.ts` registra `MikroOrmModule.forFeature(Object.values(entities))`, y la función entra como si fuera una entidad. Resultado: `MetadataError: Metadata for entity choiceOptionsOf not found` al compilar el `AppModule`. Se reprodujo con la app compilada (`yarn build` da 0 y luego `generate-openapi.mjs` falla) y en el arnés de integración: `admin-listados.int-spec.ts`, que ya existía, falla 7/7 con el mismo error. **Bloquea todos los int-specs y, con toda probabilidad, el arranque del despliegue.** No se arregló aquí porque está fuera de alcance (§1.3). Arreglo propuesto, de una línea: filtrar `forFeature` a las clases de entidad, o sacar `choiceOptionsOf` del barrel `entities/index.ts` e importarla desde `dynamic_field_definitions.types.ts`. Evidencia: `evidencia/int-spec-intento-postgres-local.txt`.
 
 - `xlsx-parser.spec.ts` falla **solo en este entorno**: `cdn.sheetjs.com` está bloqueado y se instaló `xlsx@0.18.5` de npm en local, en vez de 0.20.3. `package.json` y `yarn.lock` no se tocaron en el PR. Hay que confirmarlo en CI o en local con la dependencia real.
 - `glossary-articles.catalog.spec.ts` (hipertensión, menos de 2000 palabras): fallo preexistente conocido.
