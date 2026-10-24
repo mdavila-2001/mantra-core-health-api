@@ -227,6 +227,27 @@ detiene con dos pasadas seguidas en 0.
 - **Taxonomía cargada**: +6 620 conceptos de las nomenclaturas nacionales. La 2.ª corrida da 0 (`evidencia/load-postgres16-pasada4.txt`).
 - **Descartadas**: ninguna nueva.
 
+### Pasada 5 (2026-10-24)
+
+- **Regiones**:
+  - `us`: 204 096 filas; sumó `fda-maude` (1 336) y `fda-recall` (13 692).
+  - `eu`: sin cambios (716).
+  - `row`: 3 534 775 filas; sumó `cdsco-import-licences` (India, 25 792). ROW dio la región por saturada y abrió su PR: mdavila-2001/mantra-core-health-api#693.
+- **Criterios nuevos** (publicados, con cita en `lib/taxonomy.mjs`):
+  - **Alcance de la fuente**: el LIVD de los CDC «maps all SARS-CoV-2 diagnostic tests that have received FDA Emergency Use Authorizations». Sus 483 kits entran como diagnóstico aunque no traigan product code (lo pidió `us`, que no quiso deducir uno).
+  - **Tipo de licencia IVD**: en MDALL, la licencia «Test Kit» es un tipo de solicitud de IVDD según la guía de Health Canada «Application type for IVDDs». Entran 47 732 registros. No se pudo verificar que SOR/98-282 art. 1 defina «test kit»: el criterio cita la guía, no el reglamento.
+  - **Descartado como criterio**: la clase de riesgo de CDSCO (`in:A`…`in:D`). India usa las mismas cuatro clases para dispositivos y para IVD, así que la clase no distingue.
+- **Nuevos tras deduplicar** (contra la pasada 4):
+  - Registros: **+62 636** (250 151).
+  - Modelos: **+47 567** (165 195).
+  - Fabricantes: **+921** (19 941).
+  - Marcas: +8 357 (80 165).
+  - Modelos en 2 jurisdicciones: 279 (+40). En 3 jurisdicciones: **7** (antes, 0).
+  - Jurisdicciones: US 120 536, **CA 43 839**, EU 434, AU 405, BR 238, **IN 36**.
+  - Nodos: +11 371 nombres de dispositivo de CDSCO, sin decisión.
+- **Taxonomía cargada**: +11 371 conceptos y la 2.ª corrida da 0 (`evidencia/load-postgres16-pasada5.txt`).
+- **Descartadas**: `syonin-history` (maestro de reembolsos del MHLW con códigos JAN). Lo descartó ROW: es una extracción de PDF hecha por un tercero, sin validar contra los PDF oficiales.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

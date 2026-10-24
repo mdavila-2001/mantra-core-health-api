@@ -1,0 +1,105 @@
+# load-taxonomy.mjs pasada 5, 2026-10-24
+=== Taxonomía de equipos de diagnóstico → terminology.*  ===
+mapeos publicados: 218; miembros del value set diagnostic-equipment-types: 5693
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "br:anvisa-nome-tecnico": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "emdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "fda-product-code": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "gmdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "gmdn-pt": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "in:cdsco-device-name": {
+      "concepts": 11371,
+      "designations": 11966,
+      "properties": 22742,
+      "relationships": 0
+    },
+    "jmdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "maps": 0,
+    "valueSetMembers": 0
+  },
+  "segundos": 7
+}
+## 2.ª corrida
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "br:anvisa-nome-tecnico": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "emdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "fda-product-code": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "gmdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "gmdn-pt": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "in:cdsco-device-name": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "jmdn": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "maps": 0,
+    "valueSetMembers": 0
+  },
+  "segundos": 6
+}

@@ -382,9 +382,10 @@ const slim = (row) => {
 };
 let notDiagnosticRows = 0;
 for await (const row of validRows()) {
-  const d = taxonomy.decideRow(row).diagnostic;
+  const decision = taxonomy.decideRow(row);
+  const d = decision.diagnostic;
   if (d === true) {
-    keep.push(slim(row));
+    keep.push({ ...slim(row), _decision: decision });
     for (const k of modelKeys(row)) dxKeys.add(k);
   } else if (d === false) notDiagnosticRows++;
 }
@@ -396,7 +397,8 @@ for await (const row of validRows()) {
   const d = taxonomy.decideRow(row);
   if (d.diagnostic !== null) continue;
   undeterminedSeen++;
-  if (modelKeys(row).some((k) => dxKeys.has(k))) keep.push(slim(row));
+  if (modelKeys(row).some((k) => dxKeys.has(k)))
+    keep.push({ ...slim(row), _decision: d });
   else {
     if (!d.types.length) undeterminedNoType++;
     // Sin nodo en la taxonomía: se cuenta por nomenclatura declarada.

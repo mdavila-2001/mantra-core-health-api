@@ -1,14 +1,14 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T04:26:10Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T04:35:01Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 
 | Región | Estado | Rama / carpeta | Commit | Filas leídas |
 |---|---|---|---|---:|
-| us | consolidada | origin/justin/seed-dx-devices-us | 3bea44dc2af8 | 189068 |
+| us | consolidada | origin/justin/seed-dx-devices-us | dc28f18c0b52 | 204096 |
 | eu | consolidada | origin/claude/adoring-curie-xdkt83 | 2e7f6e46f8db | 716 |
-| row | consolidada | origin/claude/inspiring-planck-xhpf4w | 4ab304c1a74e | 3508983 |
+| row | consolidada | origin/claude/inspiring-planck-xhpf4w | 33e67ca12cc5 | 3534775 |
 
 ## Fuentes
 
@@ -20,6 +20,8 @@ Generado: 2026-10-24T04:26:10Z. Se genera con `build.mjs`; no lo edite a mano.
 | fda-pma | us | 2646 | 2646 | 0 | 0 |
 | fda-rl | us | 110614 | 110614 | 0 | 0 |
 | fda-gudid | us | 3130 | 3130 | 0 | 0 |
+| fda-maude | us | 1336 | 1336 | 0 | 0 |
+| fda-recall | us | 13692 | 13692 | 0 | 0 |
 | cdc-livd-sars-cov-2 | us | 483 | 483 | 0 | 0 |
 | eudamed-udi | eu | 716 | 716 | 0 | 0 |
 | anvisa-produtos | row | 93770 | 93770 | 0 | 0 |
@@ -27,17 +29,19 @@ Generado: 2026-10-24T04:26:10Z. Se genera con `build.mjs`; no lo edite a mano.
 | pmda-approvals | row | 35298 | 35298 | 0 | 0 |
 | hc-mdall | row | 2333236 | 2333236 | 0 | 0 |
 | tga-daen | row | 18917 | 18917 | 0 | 0 |
+| cdsco-import-licences | row | 25792 | 25792 | 0 | 0 |
 
 ## Taxonomía
 
 | Medida | Valor |
 |---|---:|
-| Nodos | 22.245 |
+| Nodos | 33.616 |
 | Mapeos publicados | 218 |
-| Tipos de diagnóstico con al menos un modelo | 3.022 |
+| Tipos de diagnóstico con al menos un modelo | 3.033 |
 
 | Nomenclatura | Nodos |
 |---|---:|
+| in:cdsco-device-name | 11.371 |
 | emdn | 8.455 |
 | fda-product-code | 7.091 |
 | br:anvisa-nome-tecnico | 2.785 |
@@ -57,6 +61,7 @@ Generado: 2026-10-24T04:26:10Z. Se genera con `build.mjs`; no lo edite a mano.
 
 | Nomenclatura:decisión:criterio | Nodos |
 |---|---:|
+| in:cdsco-device-name:null:null | 11.371 |
 | emdn:null:null | 5.786 |
 | fda-product-code:false:cfr-non-diagnostic-subpart | 3.089 |
 | br:anvisa-nome-tecnico:null:null | 2.785 |
@@ -81,43 +86,45 @@ Generado: 2026-10-24T04:26:10Z. Se genera con `build.mjs`; no lo edite a mano.
 
 | Medida | Valor |
 |---|---:|
-| Filas de diagnóstico consolidadas | 187.515 |
-| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 254 |
-| Filas no diagnósticas (descartadas) | 2.371 |
-| Filas sin decisión (tipo sin criterio publicado) | 3.510.405 |
-| … de ellas sin ningún tipo | 2.334.508 |
-| Fabricantes | 19.020 |
-| Marcas | 71.808 |
-| Modelos | 117.628 |
-| Registros | 187.515 |
+| Filas de diagnóstico consolidadas | 250.151 |
+| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 349 |
+| Filas no diagnósticas (descartadas) | 2.624 |
+| Filas sin decisión (tipo sin criterio publicado) | 3.488.336 |
+| … de ellas sin ningún tipo | 2.286.266 |
+| Fabricantes | 19.941 |
+| Marcas | 80.165 |
+| Modelos | 165.195 |
+| Registros | 250.151 |
 
 | Jurisdicción | Modelos con registro |
 |---|---:|
-| US | 116.797 |
+| US | 120.536 |
+| CA | 43.839 |
 | EU | 434 |
 | AU | 405 |
-| BR | 226 |
-| CA | 5 |
+| BR | 238 |
+| IN | 36 |
 
 | Jurisdicciones por modelo | Modelos |
 |---|---:|
-| 1 | 117.389 |
-| 2 | 239 |
+| 1 | 164.909 |
+| 2 | 279 |
+| 3 | 7 |
 
 ## Fabricantes: fusiones y revisión
 
 | Regla de fusión | Fusiones |
 |---|---:|
-| same-name-same-country | 9.840 |
-| same-name-unique-country | 1.070 |
-| same-name-no-country | 503 |
+| same-name-same-country | 10.722 |
+| same-name-unique-country | 1.602 |
+| same-name-no-country | 1.003 |
 | same-registry-id | 109 |
 
 | Caso para revisión (no fusionado) | Casos |
 |---|---:|
-| possible-group-shared-first-word | 7.483 |
-| same-name-different-country | 1.218 |
-| same-name-ambiguous-country | 319 |
+| possible-group-shared-first-word | 7.667 |
+| same-name-different-country | 1.244 |
+| same-name-ambiguous-country | 414 |
 | name-match-conflicting-ids | 233 |
 
 ## Listados del sector (asociaciones y ferias)
@@ -127,6 +134,6 @@ Generado: 2026-10-24T04:26:10Z. Se genera con `build.mjs`; no lo edite a mano.
 | Organizaciones | 46 |
 | Menciones con URL | 552 |
 | Empresas distintas | 370 |
-| … que cruzan con un fabricante de los registros | 191 |
-| … solo en listados del sector (candidatas) | 179 |
+| … que cruzan con un fabricante de los registros | 192 |
+| … solo en listados del sector (candidatas) | 178 |
 

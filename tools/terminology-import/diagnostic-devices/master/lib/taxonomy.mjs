@@ -43,6 +43,19 @@ export const DIAGNOSTIC_SCOPE_SOURCES = Object.freeze({
     'https://www.cdc.gov/locs/2020/new_livd_test_code_mappings_for_sars-cov-2_test_results.html',
 });
 
+/**
+ * Tipos de licencia de un registro que el regulador define solo para IVD.
+ * Health Canada: la licencia «Test Kit» es un tipo de solicitud de IVDD
+ * («Guidance for determining medical device application type: Application
+ * type for IVDDs»). No se verificó el texto de SOR/98-282 art. 1.
+ */
+export const IVD_LICENCE_TYPES = Object.freeze({
+  'hc-mdall': {
+    values: ['Test Kit'],
+    url: 'https://www.canada.ca/en/health-canada/services/drugs-health-products/medical-devices/application-information/guidance-documents/guidance-determining-medical-device-application-type/application-type-ivdd.html',
+  },
+});
+
 export const nodeKey = (system, code, name) =>
   `${system}|${code ?? `name:${(name ?? '').trim().toUpperCase()}`}`;
 
@@ -290,6 +303,15 @@ export class Taxonomy {
     // Clase de riesgo de un esquema que el regulador define solo para IVD
     // (IVDR/IVDD de la UE, «Class N - IVD» de la TGA): es diagnóstico in vitro
     // por definición del propio registro.
+    const lic = IVD_LICENCE_TYPES[row.source];
+    if (lic && lic.values.includes(row.extra?.licenceType))
+      return {
+        diagnostic: true,
+        types: [
+          ...nodes.map((n) => n.key),
+          `ivd-licence-type|${row.source}:${row.extra.licenceType}`,
+        ],
+      };
     if (DIAGNOSTIC_SCOPE_SOURCES[row.source])
       return {
         diagnostic: true,

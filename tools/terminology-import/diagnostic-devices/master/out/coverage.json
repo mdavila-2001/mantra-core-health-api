@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-10-24T04:26:10Z",
+  "generatedAt": "2026-10-24T04:35:01Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "3bea44dc2af8b35ddc0d2dcb21d2ae08e76ed8ac",
-      "commitDate": "2026-10-24T04:03:29+00:00",
+      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
+      "commitDate": "2026-10-24T04:13:39+00:00",
       "dir": null,
       "alternatives": [
         "origin/claude/compassionate-brown-tr71nn"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:03:14.085Z",
-      "rowsRead": 189068,
+      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
+      "rowsRead": 204096,
       "gaps": [
         {
           "source": "fda-gudid",
@@ -95,12 +95,12 @@
       "region": "row",
       "status": "consolidated",
       "ref": "origin/claude/inspiring-planck-xhpf4w",
-      "commit": "4ab304c1a74eacd264d639c2b72ec5dc917f276a",
-      "commitDate": "2026-10-24T03:57:38+00:00",
+      "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
+      "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
       "alternatives": [],
-      "manifestGeneratedAt": "2026-10-24T03:54:33.975Z",
-      "rowsRead": 3508983,
+      "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
+      "rowsRead": 3534775,
       "gaps": [
         {
           "source": "anvisa-produtos",
@@ -129,12 +129,12 @@
         },
         {
           "source": "tfda-devices",
-          "reason": "403 del proxy (data.gov.tw)",
+          "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
           "url": "https://data.gov.tw/dataset/9576"
         },
         {
           "source": "cdsco-devices",
-          "reason": "403 del proxy (cdsco.gov.in)",
+          "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
           "url": "https://cdsco.gov.in/"
         },
         {
@@ -268,14 +268,36 @@
       "invalidSamples": []
     },
     {
+      "source": "fda-maude",
+      "region": "us",
+      "read": 1336,
+      "valid": 1336,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 1104,
+      "attachedBySameModel": 5,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-recall",
+      "region": "us",
+      "read": 13692,
+      "valid": 13692,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 13222,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
       "source": "cdc-livd-sars-cov-2",
       "region": "us",
       "read": 483,
       "valid": 483,
       "invalid": 0,
       "duplicates": 0,
-      "diagnostic": 0,
-      "attachedBySameModel": 8,
+      "diagnostic": 483,
+      "attachedBySameModel": 0,
       "invalidSamples": []
     },
     {
@@ -297,7 +319,7 @@
       "invalid": 0,
       "duplicates": 0,
       "diagnostic": 0,
-      "attachedBySameModel": 229,
+      "attachedBySameModel": 243,
       "invalidSamples": []
     },
     {
@@ -329,8 +351,8 @@
       "valid": 2333236,
       "invalid": 0,
       "duplicates": 0,
-      "diagnostic": 0,
-      "attachedBySameModel": 5,
+      "diagnostic": 47732,
+      "attachedBySameModel": 40,
       "invalidSamples": []
     },
     {
@@ -343,11 +365,23 @@
       "diagnostic": 424,
       "attachedBySameModel": 6,
       "invalidSamples": []
+    },
+    {
+      "source": "cdsco-import-licences",
+      "region": "row",
+      "read": 25792,
+      "valid": 25792,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 49,
+      "invalidSamples": []
     }
   ],
   "taxonomy": {
-    "nodes": 22245,
+    "nodes": 33616,
     "bySystem": {
+      "in:cdsco-device-name": 11371,
       "emdn": 8455,
       "fda-product-code": 7091,
       "br:anvisa-nome-tecnico": 2785,
@@ -361,6 +395,7 @@
       "gmdn": 79
     },
     "byDecision": {
+      "in:cdsco-device-name:null:null": 11371,
       "emdn:null:null": 5786,
       "fda-product-code:false:cfr-non-diagnostic-subpart": 3089,
       "br:anvisa-nome-tecnico:null:null": 2785,
@@ -395,7 +430,7 @@
       "fda-product-code→gmdn": 109,
       "gmdn→fda-product-code": 109
     },
-    "diagnosticTypesWithModels": 3022,
+    "diagnosticTypesWithModels": 3033,
     "ivdPanelsMeasured": [
       "IM",
       "MG",
@@ -551,13 +586,13 @@
     }
   },
   "catalog": {
-    "rowsIncluded": 187515,
-    "rowsNotDiagnostic": 2371,
-    "rowsAttachedBySameModel": 254,
-    "rowsUndetermined": 3510405,
-    "rowsWithoutType": 2334508,
+    "rowsIncluded": 250151,
+    "rowsNotDiagnostic": 2624,
+    "rowsAttachedBySameModel": 349,
+    "rowsUndetermined": 3488336,
+    "rowsWithoutType": 2286266,
     "undeterminedTopTypes": {
-      "(sin tipo)": 2334508,
+      "(sin tipo)": 2286266,
       "br:anvisa-nome-tecnico|name:INSTRUMENTOS CIRÚRGICOS": 130916,
       "br:anvisa-nome-tecnico|name:BROCAS CIRURGICAS": 74940,
       "br:anvisa-nome-tecnico|name:SISTEMAS DE FIXAÇÃO ORTOPÉDICOS E DISPOSITIVOS ASSOCIADOS": 39811,
@@ -608,55 +643,57 @@
       "br:anvisa-nome-tecnico|name:LIMAS PARA ODONTOLOGIA": 4216,
       "br:anvisa-nome-tecnico|name:FIXADORES EXTERNOS": 4179
     },
-    "manufacturers": 19020,
-    "brands": 71808,
-    "models": 117628,
-    "registrations": 187515,
+    "manufacturers": 19941,
+    "brands": 80165,
+    "models": 165195,
+    "registrations": 250151,
     "modelsByJurisdictionCount": {
-      "1": 117389,
-      "2": 239
+      "1": 164909,
+      "2": 279,
+      "3": 7
     },
     "modelsByJurisdiction": {
-      "US": 116797,
+      "US": 120536,
+      "CA": 43839,
       "EU": 434,
       "AU": 405,
-      "BR": 226,
-      "CA": 5
+      "BR": 238,
+      "IN": 36
     },
     "manufacturersByCountry": {
-      "US": 13573,
-      "CN": 1268,
-      "DE": 422,
-      "CA": 415,
-      "GB": 313,
-      "IL": 296,
-      "KR": 271,
-      "TW": 255,
-      "JP": 214,
-      "(sin país)": 196,
-      "FR": 192,
-      "IT": 150,
-      "NL": 120,
-      "AU": 111,
-      "CH": 94,
-      "SE": 94,
-      "IE": 88,
-      "IN": 88,
-      "DK": 79,
-      "MX": 75,
-      "ES": 57,
-      "BE": 56,
-      "FI": 53,
+      "US": 13687,
+      "CN": 1283,
+      "(sin país)": 768,
+      "CA": 525,
+      "DE": 450,
+      "GB": 328,
+      "IL": 300,
+      "KR": 281,
+      "TW": 256,
+      "JP": 219,
+      "FR": 202,
+      "IT": 155,
+      "NL": 123,
+      "AU": 114,
+      "SE": 100,
+      "CH": 96,
+      "IE": 91,
+      "IN": 89,
+      "DK": 80,
+      "MX": 76,
+      "BE": 58,
+      "ES": 58,
+      "FI": 56,
       "HK": 51,
-      "SG": 49,
+      "SG": 50,
       "PK": 47,
-      "AT": 32,
+      "AT": 33,
       "TR": 29,
       "MY": 26,
       "BR": 24,
       "VN": 23,
       "CR": 21,
-      "NO": 20,
+      "NO": 21,
       "NZ": 18,
       "PL": 18,
       "HU": 16,
@@ -677,6 +714,7 @@
       "CL": 3,
       "EG": 3,
       "GR": 3,
+      "LU": 3,
       "PH": 3,
       "PT": 3,
       "RO": 3,
@@ -686,7 +724,7 @@
       "GT": 2,
       "HR": 2,
       "ID": 2,
-      "LU": 2,
+      "LI": 2,
       "LV": 2,
       "MC": 2,
       "MU": 2,
@@ -694,6 +732,7 @@
       "SC": 2,
       "AM": 1,
       "BY": 1,
+      "CS": 1,
       "EE": 1,
       "FL": 1,
       "GA": 1,
@@ -706,7 +745,6 @@
       "KN": 1,
       "KP": 1,
       "KY": 1,
-      "LI": 1,
       "MA": 1,
       "MM": 1,
       "MT": 1,
@@ -719,17 +757,17 @@
     }
   },
   "manufacturers": {
-    "entitiesAll": 61927,
+    "entitiesAll": 63337,
     "mergesByRule": {
-      "same-name-same-country": 9840,
-      "same-name-unique-country": 1070,
-      "same-name-no-country": 503,
+      "same-name-same-country": 10722,
+      "same-name-unique-country": 1602,
+      "same-name-no-country": 1003,
       "same-registry-id": 109
     },
     "reviewByKind": {
-      "possible-group-shared-first-word": 7483,
-      "same-name-different-country": 1218,
-      "same-name-ambiguous-country": 319,
+      "possible-group-shared-first-word": 7667,
+      "same-name-different-country": 1244,
+      "same-name-ambiguous-country": 414,
       "name-match-conflicting-ids": 233
     }
   },
@@ -737,8 +775,8 @@
     "organizations": 46,
     "mentions": 552,
     "companies": 370,
-    "companiesMatchedToRegistry": 191,
-    "companiesOnlyInIndustryLists": 179
+    "companiesMatchedToRegistry": 192,
+    "companiesOnlyInIndustryLists": 178
   },
   "emdnCopies": {
     "rowsA": 8453,

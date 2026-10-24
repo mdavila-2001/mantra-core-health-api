@@ -117,7 +117,9 @@ export function consolidate(rows, taxonomy, resolution) {
     attachedBySameModel: 0,
   };
   for (const row of rows) {
-    const d = taxonomy.decideRow(row);
+    // `_decision`: la decisión ya tomada sobre la fila completa (build la guarda
+    // antes de recortar `extra`).
+    const d = row._decision ?? taxonomy.decideRow(row);
     if (d.diagnostic === false) {
       excluded.notDiagnostic++;
       continue;

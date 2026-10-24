@@ -1,20 +1,20 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T04:26:10Z",
+  "generatedAt": "2026-10-24T04:35:02Z",
   "regions": [
     {
       "region": "us",
       "status": "consolidated",
       "ref": "origin/justin/seed-dx-devices-us",
-      "commit": "3bea44dc2af8b35ddc0d2dcb21d2ae08e76ed8ac",
-      "commitDate": "2026-10-24T04:03:29+00:00",
+      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
+      "commitDate": "2026-10-24T04:13:39+00:00",
       "dir": null,
       "alternatives": [
         "origin/claude/compassionate-brown-tr71nn"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:03:14.085Z",
-      "rowsRead": 189068,
+      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
+      "rowsRead": 204096,
       "gaps": [
         {
           "source": "fda-gudid",
@@ -97,12 +97,12 @@
       "region": "row",
       "status": "consolidated",
       "ref": "origin/claude/inspiring-planck-xhpf4w",
-      "commit": "4ab304c1a74eacd264d639c2b72ec5dc917f276a",
-      "commitDate": "2026-10-24T03:57:38+00:00",
+      "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
+      "commitDate": "2026-10-24T04:21:10+00:00",
       "dir": null,
       "alternatives": [],
-      "manifestGeneratedAt": "2026-10-24T03:54:33.975Z",
-      "rowsRead": 3508983,
+      "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
+      "rowsRead": 3534775,
       "gaps": [
         {
           "source": "anvisa-produtos",
@@ -131,12 +131,12 @@
         },
         {
           "source": "tfda-devices",
-          "reason": "403 del proxy (data.gov.tw)",
+          "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
           "url": "https://data.gov.tw/dataset/9576"
         },
         {
           "source": "cdsco-devices",
-          "reason": "403 del proxy (cdsco.gov.in)",
+          "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
           "url": "https://cdsco.gov.in/"
         },
         {
@@ -205,9 +205,9 @@
   "files": [
     {
       "path": "taxonomy-nodes.ndjson.gz",
-      "rows": 22245,
-      "bytes": 1354469,
-      "sha256": "9d46beb81fc38a8d8693172f541f23eb8cdb62c5c750b7fa6a5d033a821ac132"
+      "rows": 33616,
+      "bytes": 1831432,
+      "sha256": "e2cd23c56d8c59e7bcde9bd5ec07ac517071945a075fce6056455171beafe87f"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -217,33 +217,39 @@
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 19020,
-      "bytes": 3440736,
-      "sha256": "c13f70ac2e64e5c40b815e3e4d76c42be4e85aef4a3908693ece7fd20fc955bf"
+      "rows": 19941,
+      "bytes": 3813288,
+      "sha256": "592d836e24c32c352b540d463f762a38a7d33dbfebd56047d155c57a950ab9a0"
     },
     {
-      "path": "models.ndjson.gz",
-      "rows": 117628,
-      "bytes": 9399293,
-      "sha256": "0a019ec1bb4ded037ccc69be2a67925c41cf648ed89c28e73a17743944dcbf86"
+      "path": "models-0001.ndjson.gz",
+      "rows": 136309,
+      "bytes": 10092254,
+      "sha256": "247d7ef0d7b557ba600ce79a51f55e2af2c8a147241cc7a883adef1972fa8efc"
+    },
+    {
+      "path": "models-0002.ndjson.gz",
+      "rows": 28886,
+      "bytes": 2238514,
+      "sha256": "96b36b765f5981e13b1dd708c566c6bd2577bb83c0571785b8556252a33dc4c9"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
-      "rows": 9253,
-      "bytes": 1101665,
-      "sha256": "64fb08010685737aca0454ff5096425a837ba53211e706a74e67081643c9e7f9"
+      "rows": 9558,
+      "bytes": 1136910,
+      "sha256": "43e53b2f0e3620b50333ce01f9df45a6c96b4afc4ee562750032fd7abcf5ad16"
     },
     {
       "path": "industry-mentions.ndjson.gz",
       "rows": 552,
-      "bytes": 26800,
-      "sha256": "fe86c2e38afade601a470c423cad5ddd46431b3f168bf0e5ca12da0f895c68be"
+      "bytes": 26845,
+      "sha256": "e0aa5de17a9e5cab76a611a2795fbcc680fa29a1b2c868f0799f732cc8524cc8"
     },
     {
       "path": "industry-candidates.ndjson.gz",
-      "rows": 179,
-      "bytes": 9896,
-      "sha256": "7e449150e2d8002dcefb81a2a227be6530e74dd3b50a398602cf57ecabc44db1"
+      "rows": 178,
+      "bytes": 9815,
+      "sha256": "7675ad1549f9b14b3af5a973d4571aed332e2abe777df5fe2bb5471b9f46ccad"
     }
   ]
 }
