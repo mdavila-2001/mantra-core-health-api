@@ -61,5 +61,37 @@ export const MIRRORS = Object.freeze([
       fetchedAt: '2026-08-17T20:39:37+00:00',
       sha256: '996cd24da0f15d1af632c5676916a3d7d351ee121dff791cdc153a5612bb25c4',
     },
+    priority: 10,
+  },
+  {
+    id: 'ej86-fda-ai-medical-device-analytics',
+    repo: 'https://github.com/ej86/fda-ai-medical-device-analytics',
+    commit: '8840a03632ffdc346a8bf05a459236c913b9198c',
+    files: ['foiclass.csv', 'aiml-devices-csv.csv'],
+    license: 'Sin licencia declarada en el repo; los archivos son copias sin transformar de publicaciones de FDA (dominio público): foiclass.txt y la lista de dispositivos con IA.',
+    upstream: {
+      url: 'https://www.accessdata.fda.gov/premarket/ftparea/foiclass.zip',
+      exportDate: null,
+      note: 'foiclass.txt crudo (delimitado por `|` aunque se llame .csv); fecha de corte = commit del espejo',
+    },
+    priority: 10,
+  },
+  {
+    id: 'bjoleary-fdadata',
+    repo: 'https://github.com/bjoleary/fdadata',
+    commit: '227bdaa24aec8565e333cc67689ff2c63ce5cea7',
+    files: ['data/pmn.rda', 'data/pma.rda', 'data/product_codes.rda', 'LICENSE.md', 'man/pmn.Rd', 'man/pma.Rd', 'man/product_codes.Rd'],
+    convert: [
+      { rda: 'data/pmn.rda', object: 'pmn', out: 'pmn.ndjson' },
+      { rda: 'data/pma.rda', object: 'pma', out: 'pma.ndjson' },
+      { rda: 'data/product_codes.rda', object: 'product_codes', out: 'product_codes.ndjson' },
+    ],
+    license: 'MIT (Brendan O\'Leary). Datos: archivos de descarga de FDA (pmn*.zip, pma.zip, foiclass.zip de accessdata.fda.gov/premarket/ftparea), dominio público.',
+    upstream: {
+      url: 'https://www.accessdata.fda.gov/premarket/ftparea/',
+      exportDate: '2026-10-20',
+      note: '«accessed 2026-10-20» según man/pmn.Rd, man/pma.Rd y man/product_codes.Rd',
+    },
+    priority: 20,
   },
 ]);

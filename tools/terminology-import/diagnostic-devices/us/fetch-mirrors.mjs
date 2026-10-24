@@ -6,10 +6,14 @@
 // nada del repo espejado.
 //
 //   node tools/terminology-import/diagnostic-devices/us/fetch-mirrors.mjs [--only <id>]
+//
+// Los .rda (R) se convierten a NDJSON con `lib/rda_to_ndjson.py`; requiere un
+// Python con `rdata` (`DX_PYTHON=/ruta/a/venv/bin/python`).
 // =============================================================================
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, statSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, sha256File } from './lib/io.mjs';
 import { MIRRORS_DIR } from './lib/paths.mjs';
@@ -22,7 +26,8 @@ function git(cwd, ...a) {
   return execFileSync('git', a, { cwd, encoding: 'utf8', env: { ...process.env, GIT_LFS_SKIP_SMUDGE: '1' }, stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 }
 
-const manifest = [];
+const manifestPath = join(MIRRORS_DIR, 'mirrors-manifest.json');
+const manifest = (only && existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : []).filter((x) => x.id !== only);
 for (const m of MIRRORS) {
   if (only && m.id !== only) continue;
   const dir = join(ensureDir(MIRRORS_DIR), m.id);
@@ -45,8 +50,16 @@ for (const m of MIRRORS) {
     if (!existsSync(p)) throw new Error(`[${m.id}] falta ${f} en ${m.commit}`);
     files.push({ path: f, bytes: statSync(p).size, sha256: await sha256File(p) });
   }
+  // Conversión de formatos que Node no lee (R .rda) a NDJSON, con Python.
+  for (const c of m.convert ?? []) {
+    const out = join(dir, '.converted', c.out);
+    ensureDir(join(dir, '.converted'));
+    const py = process.env.DX_PYTHON ?? 'python3';
+    console.log(execFileSync(py, ['-I', fileURLToPath(new URL('./lib/rda_to_ndjson.py', import.meta.url)), join(dir, c.rda), c.object, out], { encoding: 'utf8' }).trim());
+    files.push({ path: `.converted/${c.out}`, derivedFrom: c.rda, bytes: statSync(out).size, sha256: await sha256File(out) });
+  }
   manifest.push({ id: m.id, repo: m.repo, commit: got, commitDate: git(dir, 'log', '-1', '--format=%cI'), files, upstream: m.upstream ?? null });
   console.log(`[${m.id}] OK ${got.slice(0, 12)} · ${files.length} archivos`);
 }
-writeFileSync(join(MIRRORS_DIR, 'mirrors-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+writeFileSync(manifestPath, `${JSON.stringify(manifest.sort((a, b) => a.id.localeCompare(b.id)), null, 2)}\n`);
 console.log(`Manifiesto: ${join(MIRRORS_DIR, 'mirrors-manifest.json')}`);

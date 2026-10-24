@@ -9,7 +9,17 @@ import { test } from 'node:test';
 import { gunzipSync } from 'node:zlib';
 import { FIELDS, fdaRiskClass, isoDate, makeRecord, manufacturerKey, validateRecord } from '../lib/format.mjs';
 import { parseCsv, readPipeDelimited, streamOpenFdaResults, writeNdjsonParts } from '../lib/io.mjs';
-import { ProductCodeTable, from510kLineage, fromAccessGudidDelimited, fromOpenFdaUdi } from '../lib/normalize.mjs';
+import {
+  ProductCodeTable,
+  classificationFromFdadata,
+  classificationFromFoiclass,
+  from510kLineage,
+  fromAccessGudidDelimited,
+  fromFdadataPma,
+  fromFdadataPmn,
+  fromOpenFdaUdi,
+  regulationFromNumber,
+} from '../lib/normalize.mjs';
 import { classifyScope, panelCode, parseRegulation } from '../lib/scope.mjs';
 
 const FIX = new URL('./fixtures/', import.meta.url);
@@ -174,4 +184,57 @@ test('tabla de product codes: la clasificación oficial pisa lo observado', () =
   assert.equal(t.get('XYZ').regulationNumber, '862.2160');
   assert.equal(t.scope('XYZ').include, true);
   assert.equal(t.rows()[0].deviceName, 'Analyzer');
+});
+
+const ndjson = (name) => fixture(name).split('\n').filter(Boolean).map(JSON.parse);
+
+function realTable() {
+  const t = new ProductCodeTable();
+  return readPipeDelimited(Readable.from([fixture('foiclass.sample.txt')]), (r) => t.addClassification(classificationFromFoiclass(r))).then(() => {
+    for (const r of ndjson('fdadata-product-codes.sample.ndjson')) {
+      const c = classificationFromFdadata(r);
+      if (!t.get(c.product_code)) t.addClassification(c);
+    }
+    return t;
+  });
+}
+
+test('clasificación: foiclass real y fdadata (regulación numérica con 4 decimales)', async () => {
+  assert.equal(regulationFromNumber(868.582), '868.5820');
+  assert.equal(regulationFromNumber('862.1118'), '862.1118');
+  assert.equal(regulationFromNumber(null), null);
+  const t = await realTable();
+  assert.equal(t.get('ERA').name, 'Otoscope');
+  assert.equal(t.get('DQA').panel, 'CV', 'medical specialty manda sobre review panel');
+  assert.equal(t.scope('ERA').include, true);
+  assert.equal(t.scope('HRS').include, false);
+  assert.equal(t.get('MZP').classificationSource, 'fdadata:product_codes');
+  assert.equal(t.scope('MZP').include, true);
+});
+
+test('fdadata pmn real: país ISO, estado verbatim, dirección', async () => {
+  const t = await realTable();
+  const out = ndjson('fdadata-pmn.sample.ndjson').map((r) => fromFdadataPmn(r, t, PROV)).filter(Boolean);
+  assert.deepEqual(out.map((r) => r.sourceRecordId).sort(), ['DEN990008', 'K200001']);
+  const k = out.find((r) => r.sourceRecordId === 'K200001');
+  assert.deepEqual(validateRecord(k), []);
+  assert.equal(k.manufacturerCountry, 'CN');
+  assert.equal(k.status, 'Substantially Equivalent');
+  assert.equal(k.deviceTypeName, 'System, Imaging, Pulsed Doppler, Ultrasonic');
+  assert.match(k.extra.address, /Shenzhen/);
+});
+
+test('fdadata pma real: una fila por PMA y nombre comercial, suplementos contados', async () => {
+  const t = await realTable();
+  const rows = ndjson('fdadata-pma.sample.ndjson');
+  const out = fromFdadataPma(rows, t, PROV);
+  for (const r of out) assert.deepEqual(validateRecord(r), []);
+  const v = (x) => (x === '<NA>' || x === null ? null : x.trim() || null);
+  const names = new Set(rows.map((r) => (v(r.device) ?? v(r.generic_name) ?? '').toUpperCase()));
+  assert.equal(out.length, names.size);
+  const first = out.find((r) => r.sourceRecordId === 'P000010');
+  assert.equal(first.manufacturerName, 'Roche Molecular Systems, Inc.');
+  assert.equal(first.authorizationId, 'P000010');
+  assert.equal(first.manufacturerCountry, null, 'el país de pma.zip no se usa (fdadata lo rellena)');
+  assert.ok(out.reduce((n, r) => n + r.extra.recordsWithThisName, 0) === rows.length);
 });

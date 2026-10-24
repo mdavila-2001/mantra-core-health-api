@@ -1,37 +1,35 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T03:08:13.775Z",
+ "generatedAt": "2026-10-24T03:20:08.625Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
   {
    "path": "fda-510k-0001.ndjson.gz",
    "source": "fda-510k",
-   "sourceVersion": "openFDA device/510k export 2026-08-10 vía espejo https://github.com/choiben314/510k-lineage@806b59cba5c8",
-   "rows": 71523,
-   "bytes": 4656936,
-   "sha256": "6924c8cc1231cc354d9f146e854c0cd5b4a0204b82b5e451759fbbf08fc1b1c8"
+   "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "rows": 71955,
+   "bytes": 8879560,
+   "sha256": "ef06dbdf4203e716ca406c9270a6ea30be21ca83e1daced43f532ddcc5bf714f"
   },
   {
    "path": "fda-denovo-0001.ndjson.gz",
    "source": "fda-denovo",
-   "sourceVersion": "openFDA device/510k export 2026-08-10 vía espejo https://github.com/choiben314/510k-lineage@806b59cba5c8",
-   "rows": 237,
-   "bytes": 18623,
-   "sha256": "cd1d60448ac05afefb318852e8d978e8c68422109ad89b9ea114299cf2c01599"
+   "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "rows": 240,
+   "bytes": 38433,
+   "sha256": "4b2322701b084dca4bc4dd643cad3cbed7d9a194ba15c52e4acb0fa209515cd3"
+  },
+  {
+   "path": "fda-pma-0001.ndjson.gz",
+   "source": "fda-pma",
+   "sourceVersion": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "rows": 2646,
+   "bytes": 140067,
+   "sha256": "b122a819acee64bcde9513a1ff402e2acdeead146b70419c11d1c88d943aa616"
   }
  ],
  "gaps": [
-  {
-   "source": "fda-classification",
-   "url": "https://download.open.fda.gov/device/classification/",
-   "reason": "403 del proxy — host bloqueado por la red de la sesión (api.fda.gov / accessdata.fda.gov). Tipo, panel y clase se deducen de los propios registros."
-  },
-  {
-   "source": "fda-pma",
-   "url": "https://download.open.fda.gov/device/pma/",
-   "reason": "403 del proxy — host bloqueado (download.open.fda.gov / accessdata.fda.gov) y sin espejo completo verificado."
-  },
   {
    "source": "fda-rl",
    "url": "https://download.open.fda.gov/device/registrationlisting/",
@@ -45,12 +43,107 @@
  ],
  "inputs": [
   {
+   "source": "mirror ej86-fda-ai-medical-device-analytics foiclass.csv",
+   "version": "FDA foiclass.zip corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff",
+   "records": 7088
+  },
+  {
+   "source": "mirror bjoleary-fdadata product_codes",
+   "version": "FDA foiclass.zip 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "records": 7097,
+   "addedCodes": 9
+  },
+  {
    "source": "mirror choiben314-510k-lineage",
    "records": 175757,
-   "inScope": 71760
+   "inScope": 71894
+  },
+  {
+   "source": "mirror bjoleary-fdadata pmn",
+   "version": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "records": 176466,
+   "inScope": 72195
+  },
+  {
+   "source": "mirror bjoleary-fdadata pma",
+   "version": "FDA pma.zip (PMA y suplementos) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
+   "records": 57373,
+   "inScope": 2646
+  },
+  {
+   "source": "mirror ej86 aiml-devices-csv",
+   "version": "FDA AI-Enabled Medical Devices list corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff",
+   "records": 1524,
+   "inScope": 1429
   }
  ],
  "mirrors": [
+  {
+   "id": "bjoleary-fdadata",
+   "repo": "https://github.com/bjoleary/fdadata",
+   "commit": "227bdaa24aec8565e333cc67689ff2c63ce5cea7",
+   "commitDate": "2026-10-20T17:14:47+00:00",
+   "files": [
+    {
+     "path": "data/pmn.rda",
+     "bytes": 5623336,
+     "sha256": "0c0d51b11daf4fdd01153b210fb8a6205ec0447440d26baefe6f6468af048f5e"
+    },
+    {
+     "path": "data/pma.rda",
+     "bytes": 2450032,
+     "sha256": "09ffff0382b3d2c0678e600f01883cf59a3d18595b10728159b3c25a51ae6f12"
+    },
+    {
+     "path": "data/product_codes.rda",
+     "bytes": 334164,
+     "sha256": "4423c192af7a282af72270f0e732e83a58504e083b6c9d588a7356b228f3894b"
+    },
+    {
+     "path": "LICENSE.md",
+     "bytes": 1074,
+     "sha256": "245a3975c09f2f002470685ab538a5f8ebb1d275329e22363b09f8008eda1a26"
+    },
+    {
+     "path": "man/pmn.Rd",
+     "bytes": 2196,
+     "sha256": "62c093ab76e3fb97af710dd8c651e6d71e6494b888984533b57f532fecc1fee8"
+    },
+    {
+     "path": "man/pma.Rd",
+     "bytes": 2213,
+     "sha256": "89c7976d8627ee52d9d74ffcface4b760c6012fb69ca3d42fee975b4eba1427d"
+    },
+    {
+     "path": "man/product_codes.Rd",
+     "bytes": 1621,
+     "sha256": "8e94b17a4c7a408fa43073dbdc9d82fdfc9ac343fe2717304237e87afe8fcf7c"
+    },
+    {
+     "path": ".converted/pmn.ndjson",
+     "derivedFrom": "data/pmn.rda",
+     "bytes": 113875635,
+     "sha256": "f076fecce009e360057fa2159c4003a4c2a7d4f200c5820bd5e2aa8796c57726"
+    },
+    {
+     "path": ".converted/pma.ndjson",
+     "derivedFrom": "data/pma.rda",
+     "bytes": 52781251,
+     "sha256": "06916d482415760aac2bc7169ce7a3cd61c136dab83b7c0cd4596e2b73142f09"
+    },
+    {
+     "path": ".converted/product_codes.ndjson",
+     "derivedFrom": "data/product_codes.rda",
+     "bytes": 5889238,
+     "sha256": "fbac74d72d3198db61b7c89acdedf3705128ee6cc6c599383fda685105e0b133"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.accessdata.fda.gov/premarket/ftparea/",
+    "exportDate": "2026-10-20",
+    "note": "«accessed 2026-10-20» según man/pmn.Rd, man/pma.Rd y man/product_codes.Rd"
+   }
+  },
   {
    "id": "choiben314-510k-lineage",
    "repo": "https://github.com/choiben314/510k-lineage",
@@ -83,6 +176,29 @@
     "exportDate": "2026-08-10",
     "fetchedAt": "2026-08-17T20:39:37+00:00",
     "sha256": "996cd24da0f15d1af632c5676916a3d7d351ee121dff791cdc153a5612bb25c4"
+   }
+  },
+  {
+   "id": "ej86-fda-ai-medical-device-analytics",
+   "repo": "https://github.com/ej86/fda-ai-medical-device-analytics",
+   "commit": "8840a03632ffdc346a8bf05a459236c913b9198c",
+   "commitDate": "2026-08-28T23:08:44+09:00",
+   "files": [
+    {
+     "path": "foiclass.csv",
+     "bytes": 2150676,
+     "sha256": "ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de"
+    },
+    {
+     "path": "aiml-devices-csv.csv",
+     "bytes": 132922,
+     "sha256": "4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.accessdata.fda.gov/premarket/ftparea/foiclass.zip",
+    "exportDate": null,
+    "note": "foiclass.txt crudo (delimitado por `|` aunque se llame .csv); fecha de corte = commit del espejo"
    }
   }
  ],

@@ -435,3 +435,202 @@ export function fromAccessGudidDelimited(device, { productCodes, submissions, gm
     },
   );
 }
+
+// --- Espejo bjoleary/fdadata (archivos de descarga de FDA convertidos de .rda) ----
+
+/** `'<NA>'` de los factores de R → `null`. */
+function na(v) {
+  return v === '<NA>' || v === 'NaN' ? null : v;
+}
+
+/** fdadata guarda la regulación como número (868.582): las secciones 21 CFR llevan 4 decimales. */
+export function regulationFromNumber(v) {
+  if (v === null || v === undefined || v === '') return null;
+  const [part, sec = ''] = String(v).split('.');
+  return /^\d{3}$/.test(part) ? `${part}.${sec.padEnd(4, '0')}` : null;
+}
+
+/** Fila de `product_codes.rda` de fdadata → entrada para `ProductCodeTable.addClassification`. */
+export function classificationFromFdadata(r) {
+  return {
+    product_code: na(r.product_code),
+    device_name: na(r.device_type_name),
+    review_panel: na(r.review_panel),
+    medical_specialty: na(r.medical_specialty),
+    device_class: na(r.device_class),
+    regulation_number: regulationFromNumber(na(r.regulation)),
+    definition: na(r.definition),
+    implant_flag: na(r.implant),
+    life_sustain_support_flag: na(r.life_sustaining),
+    submission_type_id: na(r.submission_type),
+    __source: 'fdadata:product_codes',
+  };
+}
+
+/** Fila de `foiclass.txt` (FDA, delimitado por `|`) → entrada de clasificación. */
+export function classificationFromFoiclass(r) {
+  return {
+    product_code: r.PRODUCTCODE,
+    device_name: r.DEVICENAME,
+    review_panel: r.REVIEW_PANEL,
+    medical_specialty: r.MEDICALSPECIALTY,
+    device_class: r.DEVICECLASS,
+    regulation_number: r.REGULATIONNUMBER,
+    definition: r.DEFINITION,
+    gmp_exempt_flag: r.GMPEXEMPTFLAG,
+    third_party_flag: r.THIRDPARTYFLAG,
+    implant_flag: r.Implant_Flag,
+    life_sustain_support_flag: r.Life_Sustain_support_flag,
+    submission_type_id: r.SUBMISSION_TYPE_ID,
+    __source: 'fda:foiclass',
+  };
+}
+
+/** `pmn.rda` de fdadata (archivos pmn*.zip de FDA): 510(k) y De Novo, con dirección y país. */
+export function fromFdadataPmn(r, table, prov) {
+  const id = clean(r.submission_number)?.toUpperCase();
+  if (!id || !table.scope(na(r.product_code)).include) return null;
+  const kind = authorizationKind(id);
+  if (kind !== '510K' && kind !== 'DENOVO') return null;
+  const country = clean(na(r.country))?.toUpperCase();
+  return makeRecord(
+    {
+      source: kind === 'DENOVO' ? 'fda-denovo' : 'fda-510k',
+      sourceRecordId: id,
+      sourceUrl: OFFICIAL_RECORD_URL[kind](id),
+      sourceVersion: prov.sourceVersion,
+      retrievedAt: prov.retrievedAt,
+      ...typeFields(table, na(r.product_code)),
+      manufacturerName: verbatim(na(r.sponsor)),
+      manufacturerCountry: country && /^[A-Z]{2}$/.test(country) ? country : null,
+      manufacturerRegistryId: null,
+      brandName: verbatim(na(r.device)),
+      model: null,
+      udiDi: null,
+      riskClass: fdaRiskClass(table.get(na(r.product_code))?.deviceClass),
+      authorizationId: id,
+      authorizationDate: isoDate(r.date_decision),
+      status: verbatim(na(r.decision)),
+    },
+    {
+      recordLevel: 'authorization',
+      ...scopeExtra(table, na(r.product_code)),
+      decisionCode: clean(na(r.decision_code)),
+      dateReceived: isoDate(r.date_start),
+      track: clean(na(r.track)),
+      thirdPartyReview: clean(na(r.third_party_review)),
+      summaryType: clean(na(r.summary)),
+      address: [r.address_line_1, r.address_line_2, r.city, r.state, r.zip_code].map(na).map(verbatim).filter(Boolean).join(', ') || null,
+      contact: verbatim(na(r.contact)),
+      via: prov.via,
+    },
+  );
+}
+
+/**
+ * `pma.rda` de fdadata (pma.zip de FDA, con suplementos `P…/S…`): una fila por
+ * (PMA, nombre comercial). El primer registro con ese nombre (por fecha de
+ * decisión) da la fecha; los demás se cuentan.
+ */
+export function fromFdadataPma(rows, table, prov) {
+  // Suplementos sin product code publicado heredan el del PMA original (mismo dispositivo).
+  const parentCode = new Map();
+  for (const r of rows) {
+    const pma = clean(r.submission_number)?.toUpperCase().split('/')[0];
+    if (pma && na(r.product_code) && !parentCode.has(pma)) parentCode.set(pma, na(r.product_code));
+  }
+  const groups = new Map();
+  for (const raw of rows) {
+    const full = clean(raw.submission_number)?.toUpperCase();
+    if (!full) continue;
+    const [pma, sup = null] = full.split('/');
+    if (authorizationKind(pma) !== 'PMA' && authorizationKind(pma) !== 'HDE') continue;
+    const inherited = !na(raw.product_code) && parentCode.has(pma);
+    const r = inherited ? { ...raw, product_code: parentCode.get(pma), __inherited: true } : raw;
+    if (!table.scope(na(r.product_code)).include) continue;
+    const trade = verbatim(na(r.device)) ?? verbatim(na(r.generic_name)) ?? '';
+    const key = `${pma}|${trade.toUpperCase()}`;
+    const g = groups.get(key) ?? { first: null, sup: null, count: 0, supplements: [] };
+    g.count++;
+    if (sup) g.supplements.push(sup);
+    const d = isoDate(r.date_decision) ?? '9999-12-31';
+    if (!g.first || d < (isoDate(g.first.date_decision) ?? '9999-12-31') || (d === (isoDate(g.first.date_decision) ?? '9999-12-31') && !sup)) {
+      g.first = r;
+      g.sup = sup;
+    }
+    groups.set(key, g);
+  }
+  return [...groups.entries()].map(([key, g]) => {
+    const r = g.first;
+    const pma = key.split('|')[0];
+    const kind = authorizationKind(pma);
+    return makeRecord(
+      {
+        source: 'fda-pma',
+        sourceRecordId: `${pma}${g.sup ? `/${g.sup}` : ''}`,
+        sourceUrl: OFFICIAL_RECORD_URL[kind](pma),
+        sourceVersion: prov.sourceVersion,
+        retrievedAt: prov.retrievedAt,
+        ...typeFields(table, na(r.product_code)),
+        manufacturerName: verbatim(na(r.sponsor)),
+        manufacturerCountry: null,
+        manufacturerRegistryId: null,
+        brandName: verbatim(na(r.device)),
+        model: null,
+        udiDi: null,
+        riskClass: fdaRiskClass(table.get(na(r.product_code))?.deviceClass) ?? 'fda:3',
+        authorizationId: pma,
+        authorizationDate: isoDate(r.date_decision),
+        status: verbatim(na(r.decision)),
+      },
+      {
+        recordLevel: 'authorization',
+        ...scopeExtra(table, na(r.product_code)),
+        kind,
+        genericName: verbatim(na(r.generic_name)),
+        decisionCode: clean(na(r.decision_code)),
+        recordsWithThisName: g.count,
+        productCodeFromParentPma: r.__inherited === true,
+        supplements: [...new Set(g.supplements)].sort(),
+        docketNumber: clean(na(r.docket_number)),
+        address: [r.address_line_1, r.address_line_2, r.city, r.state, r.zip_code].map(na).map(verbatim).filter(Boolean).join(', ') || null,
+        countryAsPublished: clean(na(r.country)),
+        via: prov.via,
+      },
+    );
+  });
+}
+
+/**
+ * Lista FDA «AI-Enabled Medical Devices» (espejo ej86): número de envío,
+ * dispositivo, empresa, panel y product code. Sirve para marcar
+ * `extra.fdaAiEnabledList` y para agregar los envíos que falten.
+ */
+export function fromAiList(r, table, prov) {
+  const id = clean(r['Submission Number'])?.toUpperCase();
+  const pc = clean(r['Primary Product Code'])?.toUpperCase();
+  if (!id || !table.scope(pc).include) return null;
+  const kind = authorizationKind(id);
+  if (!kind || !OFFICIAL_RECORD_URL[kind]) return null;
+  return makeRecord(
+    {
+      source: kind === 'DENOVO' ? 'fda-denovo' : kind === 'PMA' || kind === 'HDE' ? 'fda-pma' : 'fda-510k',
+      sourceRecordId: id,
+      sourceUrl: OFFICIAL_RECORD_URL[kind](id),
+      sourceVersion: prov.sourceVersion,
+      retrievedAt: prov.retrievedAt,
+      ...typeFields(table, pc),
+      manufacturerName: verbatim(r.Company),
+      manufacturerCountry: null,
+      manufacturerRegistryId: null,
+      brandName: verbatim(r.Device),
+      model: null,
+      udiDi: null,
+      riskClass: fdaRiskClass(table.get(pc)?.deviceClass),
+      authorizationId: id,
+      authorizationDate: isoDate(r['Date of Final Decision']),
+      status: null,
+    },
+    { recordLevel: 'authorization', ...scopeExtra(table, pc), fdaAiEnabledList: true, via: prov.via },
+  );
+}

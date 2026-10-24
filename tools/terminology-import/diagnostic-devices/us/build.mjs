@@ -17,13 +17,19 @@
 //   node tools/terminology-import/diagnostic-devices/us/build.mjs
 // =============================================================================
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createReadStream, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FORMAT_VERSION, manufacturerKey, recordKey } from './lib/format.mjs';
+import { gunzipSync } from 'node:zlib';
+import { FIELDS, FORMAT_VERSION, manufacturerKey, recordKey } from './lib/format.mjs';
 import { ensureDir, parseCsv, readJsonIfExists, readPipeDelimited, streamOpenFdaResults, unzipStream, writeNdjsonParts, zipEntries } from './lib/io.mjs';
 import {
   ProductCodeTable,
+  classificationFromFdadata,
+  classificationFromFoiclass,
   from510kLineage,
+  fromAiList,
+  fromFdadataPma,
+  fromFdadataPmn,
   fromAccessGudidDelimited,
   fromOpenFda510k,
   fromOpenFdaPma,
@@ -41,19 +47,59 @@ const bySource = new Map(); // source → Map(recordKey → row)
 const inputs = [];
 const gaps = [];
 
+/** Prioridad de una vía: la oficial siempre gana; entre espejos, el más nuevo (`priority`). */
+const priority = (r) => (r.extra?.via?.kind === 'official' ? 1000 : (r.extra?.via?.priority ?? 0));
+
+/**
+ * Mismo registro (`source` + `sourceRecordId`) desde dos vías: queda la de
+ * mayor prioridad; sus `null` se completan con la otra y `extra.alsoIn`
+ * guarda la vía de la otra (procedencia de lo completado).
+ */
+function mergeRows(a, b) {
+  const [hi, lo] = priority(b) > priority(a) ? [b, a] : [a, b];
+  const out = { ...hi };
+  for (const f of FIELDS) if (out[f] === null && lo[f] !== null && !PROVENANCE.includes(f)) out[f] = lo[f];
+  const { via: loVia, alsoIn: loAlso = [], ...loExtra } = lo.extra ?? {};
+  const { alsoIn: hiAlso = [], ...hiExtra } = hi.extra ?? {};
+  const keep = Object.fromEntries(Object.entries(hiExtra).filter(([, v]) => v !== null && v !== undefined));
+  out.extra = { ...loExtra, ...keep, alsoIn: [...hiAlso, loVia, ...loAlso].filter(Boolean) };
+  return out;
+}
+const PROVENANCE = ['source', 'sourceRecordId', 'sourceUrl', 'sourceVersion', 'retrievedAt'];
+
 function add(row) {
   if (!row) return;
   const m = bySource.get(row.source) ?? new Map();
   const k = recordKey(row);
   const prev = m.get(k);
-  // Misma fila desde dos vías (oficial y espejo): gana la oficial.
-  if (!prev || (prev.extra?.via?.kind === 'mirror' && row.extra?.via?.kind === 'official')) m.set(k, row);
+  m.set(k, prev ? mergeRows(prev, row) : row);
   bySource.set(row.source, m);
 }
 
 const officialPath = (...p) => join(OFFICIAL_DIR, ...p);
 const officialManifest = readJsonIfExists(officialPath('manifest.json'), { files: [] });
 const mirrorsManifest = readJsonIfExists(join(MIRRORS_DIR, 'mirrors-manifest.json'), []);
+
+function mirrorFile(id, path) {
+  const p = join(MIRRORS_DIR, id, path);
+  return mirrorsManifest.some((m) => m.id === id) && existsSync(p) ? p : null;
+}
+function mirrorVersion(id, what) {
+  const m = MIRRORS.find((x) => x.id === id);
+  const mf = mirrorsManifest.find((x) => x.id === id);
+  const when = m.upstream?.exportDate ?? `corte ${mf?.commitDate?.slice(0, 10) ?? '?'}`;
+  return `${what} ${when} vía espejo ${m.repo}@${m.commit.slice(0, 12)}`;
+}
+function mirrorProv(id, file, what) {
+  const m = MIRRORS.find((x) => x.id === id);
+  const mf = mirrorsManifest.find((x) => x.id === id);
+  const f = mf?.files.find((x) => x.path === file);
+  return {
+    sourceVersion: mirrorVersion(id, what),
+    retrievedAt: new Date(m.upstream?.fetchedAt ?? `${m.upstream?.exportDate ?? mf?.commitDate?.slice(0, 10)}T00:00:00Z`).toISOString(),
+    via: { kind: 'mirror', repo: m.repo, commit: m.commit, file, sha256: f?.sha256 ?? null, derivedFrom: f?.derivedFrom ?? null, upstreamUrl: m.upstream?.url ?? null, upstreamSha256: m.upstream?.sha256 ?? null, priority: m.priority ?? 0 },
+  };
+}
 
 function openFdaZips(endpoint) {
   const dir = officialPath('openfda', ...endpoint.split('/'));
@@ -101,6 +147,25 @@ if (classZips.length) {
     }),
   );
   inputs.push({ source: 'FDA foiclass.zip', records: n });
+} else if (mirrorFile('ej86-fda-ai-medical-device-analytics', 'foiclass.csv') || mirrorFile('bjoleary-fdadata', '.converted/product_codes.ndjson')) {
+  const foi = mirrorFile('ej86-fda-ai-medical-device-analytics', 'foiclass.csv');
+  if (foi) {
+    const n = await readPipeDelimited(createReadStream(foi), (r) => table.addClassification(classificationFromFoiclass(r)));
+    inputs.push({ source: 'mirror ej86-fda-ai-medical-device-analytics foiclass.csv', version: mirrorVersion('ej86-fda-ai-medical-device-analytics', 'FDA foiclass.zip'), records: n });
+  }
+  const pcs = mirrorFile('bjoleary-fdadata', '.converted/product_codes.ndjson');
+  if (pcs) {
+    let added = 0;
+    const rows = readFileSync(pcs, 'utf8').split('\n').filter(Boolean).map(JSON.parse);
+    for (const r of rows) {
+      const c = classificationFromFdadata(r);
+      if (c.product_code && !table.get(c.product_code)?.classificationSource?.startsWith('fda:')) {
+        table.addClassification(c);
+        added++;
+      }
+    }
+    inputs.push({ source: 'mirror bjoleary-fdadata product_codes', version: mirrorVersion('bjoleary-fdadata', 'FDA foiclass.zip'), records: rows.length, addedCodes: added });
+  }
 } else {
   gaps.push({ source: 'fda-classification', url: 'https://download.open.fda.gov/device/classification/', reason: '403 del proxy — host bloqueado por la red de la sesión (api.fda.gov / accessdata.fda.gov). Tipo, panel y clase se deducen de los propios registros.' });
 }
@@ -139,6 +204,7 @@ if (lineageRows.length) {
       sha256: mf?.files.find((f) => f.path === 'dataset/devices.csv')?.sha256 ?? null,
       upstreamUrl: lineage.upstream.url,
       upstreamSha256: lineage.upstream.sha256,
+      priority: lineage.priority,
     },
   };
   let kept = 0;
@@ -152,6 +218,42 @@ if (lineageRows.length) {
   inputs.push({ source: `mirror ${lineage.id}`, records: lineageRows.length, inScope: kept });
 } else if (!official510k.length) {
   gaps.push({ source: 'fda-510k', url: 'https://download.open.fda.gov/device/510k/', reason: 'Ni el export oficial ni el espejo están en el directorio de crudos (correr fetch-mirrors.mjs).' });
+}
+
+// --- 2b. 510(k)/De Novo y PMA: espejo bjoleary/fdadata (archivos de descarga FDA) ---
+const fdPmn = mirrorFile('bjoleary-fdadata', '.converted/pmn.ndjson');
+const fdPma = mirrorFile('bjoleary-fdadata', '.converted/pma.ndjson');
+if (fdPmn) {
+  const prov = mirrorProv('bjoleary-fdadata', '.converted/pmn.ndjson', 'FDA pmn*.zip (510(k) Download Files)');
+  let n = 0;
+  let kept = 0;
+  for (const line of readFileSync(fdPmn, 'utf8').split('\n')) {
+    if (!line) continue;
+    n++;
+    const row = fromFdadataPmn(JSON.parse(line), table, prov);
+    if (row) (add(row), kept++);
+  }
+  inputs.push({ source: 'mirror bjoleary-fdadata pmn', version: prov.sourceVersion, records: n, inScope: kept });
+}
+let pmaDone = false;
+if (fdPma) {
+  const prov = mirrorProv('bjoleary-fdadata', '.converted/pma.ndjson', 'FDA pma.zip (PMA y suplementos)');
+  const rows = readFileSync(fdPma, 'utf8').split('\n').filter(Boolean).map(JSON.parse);
+  const out = fromFdadataPma(rows, table, prov);
+  out.forEach(add);
+  pmaDone = true;
+  inputs.push({ source: 'mirror bjoleary-fdadata pma', version: prov.sourceVersion, records: rows.length, inScope: out.length });
+}
+const aiCsv = mirrorFile('ej86-fda-ai-medical-device-analytics', 'aiml-devices-csv.csv');
+if (aiCsv) {
+  const prov = mirrorProv('ej86-fda-ai-medical-device-analytics', 'aiml-devices-csv.csv', 'FDA AI-Enabled Medical Devices list');
+  const rows = parseCsv(readFileSync(aiCsv, 'utf8'));
+  let kept = 0;
+  for (const r of rows) {
+    const row = fromAiList(r, table, prov);
+    if (row) (add(row), kept++);
+  }
+  inputs.push({ source: 'mirror ej86 aiml-devices-csv', version: prov.sourceVersion, records: rows.length, inScope: kept });
 }
 
 // --- 3. Fuentes oficiales de openFDA (cuando el host esté habilitado) ---------------
@@ -170,7 +272,7 @@ if (officialPma.length) {
   const rows = fromOpenFdaPma(all.map((x) => x.r), table, prov);
   rows.forEach(add);
   inputs.push({ source: 'openfda device/pma', records: n, inScope: rows.length });
-} else gaps.push({ source: 'fda-pma', url: 'https://download.open.fda.gov/device/pma/', reason: '403 del proxy — host bloqueado (download.open.fda.gov / accessdata.fda.gov) y sin espejo completo verificado.' });
+} else if (!pmaDone) gaps.push({ source: 'fda-pma', url: 'https://download.open.fda.gov/device/pma/', reason: '403 del proxy — host bloqueado (download.open.fda.gov / accessdata.fda.gov) y sin espejo completo verificado.' });
 
 if (officialListing.length) {
   let kept = 0;
@@ -219,6 +321,20 @@ if (officialUdi.length) {
 
 // --- 4. Escritura ------------------------------------------------------------------
 ensureDir(OUT_DIR);
+// Lo que había en out/ antes de esta corrida: base para contar lo nuevo de la pasada.
+const brandKey = (r) => `${manufacturerKey(r.manufacturerName) ?? ''}|${r.brandName.toUpperCase()}`;
+const previous = { records: new Set(), manufacturers: new Set(), brands: new Set(), udiDi: new Set() };
+for (const f of readdirSync(OUT_DIR).filter((x) => /^fda-[a-z0-9-]+-\d{4}\.ndjson\.gz$/.test(x))) {
+  for (const line of gunzipSync(readFileSync(join(OUT_DIR, f))).toString('utf8').split('\n')) {
+    if (!line) continue;
+    const r = JSON.parse(line);
+    previous.records.add(`${r.source}|${r.sourceRecordId}`);
+    const mk = manufacturerKey(r.manufacturerName);
+    if (mk) previous.manufacturers.add(mk);
+    if (r.brandName) previous.brands.add(brandKey(r));
+    if (r.udiDi) previous.udiDi.add(r.udiDi);
+  }
+}
 const SOURCES = ['fda-510k', 'fda-denovo', 'fda-pma', 'fda-rl', 'fda-gudid'];
 const parts = [];
 for (const source of SOURCES) {
@@ -242,7 +358,14 @@ const count = (arr, f) => {
   return Object.fromEntries(Object.entries(m).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 };
 const manufacturers = new Set(all.map((r) => manufacturerKey(r.manufacturerName)).filter(Boolean));
-const brands = new Set(all.filter((r) => r.brandName).map((r) => `${manufacturerKey(r.manufacturerName) ?? ''}|${r.brandName.toUpperCase()}`));
+const brands = new Set(all.filter((r) => r.brandName).map(brandKey));
+const deltaVsPrevious = {
+  records: all.filter((r) => !previous.records.has(`${r.source}|${r.sourceRecordId}`)).length,
+  manufacturers: [...manufacturers].filter((m) => !previous.manufacturers.has(m)).length,
+  brands: [...brands].filter((b) => !previous.brands.has(b)).length,
+  udiDi: all.filter((r) => r.udiDi && !previous.udiDi.has(r.udiDi)).length,
+  bySource: count(all.filter((r) => !previous.records.has(`${r.source}|${r.sourceRecordId}`)), (r) => r.source),
+};
 const coverage = {
   rawDir: RAW_DIR.replace(/^.*\/dx-devices-data\//, '<raw>/'),
   totals: {
@@ -255,6 +378,7 @@ const coverage = {
     withModel: all.filter((r) => r.model).length,
     withCountry: all.filter((r) => r.manufacturerCountry).length,
   },
+  deltaVsPrevious,
   productCodes: {
     seen: pcRows.length,
     included: pcRows.filter((p) => p.include).length,
@@ -291,4 +415,4 @@ writeFileSync(
   )}\n`,
 );
 
-console.log(JSON.stringify({ rows: all.length, bySource: coverage.totals.bySource, productCodes: coverage.productCodes, manufacturers: manufacturers.size, brands: brands.size, parts: parts.map((p) => `${p.path} ${p.rows} filas ${(p.bytes / 1e6).toFixed(1)} MB`), gaps: gaps.map((g) => g.source) }, null, 1));
+console.log(JSON.stringify({ deltaVsPrevious, rows: all.length, bySource: coverage.totals.bySource, productCodes: coverage.productCodes, manufacturers: manufacturers.size, brands: brands.size, parts: parts.map((p) => `${p.path} ${p.rows} filas ${(p.bytes / 1e6).toFixed(1)} MB`), gaps: gaps.map((g) => g.source) }, null, 1));
