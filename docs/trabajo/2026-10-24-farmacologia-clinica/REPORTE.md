@@ -29,7 +29,7 @@
 | H3.S2.M1 | Enlace con `drug-treatments` por código | `python3 -I evidencia/22-enlace-drug-treatments.py` | 3 032 de 4 842 fármacos (12 008 de 18 032 afirmaciones) llegan a una monografía |
 | H4.S1.M1 | Licencias leídas en su página | lectura 2026-10-24 | AEMPS, openFDA, RxNav, EMA, eEML, NLM |
 | H4.S1.M2 | Registro de pasadas | — | `docs/seed-research/clinical-pharmacology.md` |
-| H4.S1.M3 | Gates sobre HEAD `1b07eb16` (con `dev` `025e3e37` mergeado) | `node --test` (3 suites), `yarn typecheck`, `yarn lint`, `yarn build`, Jest dirigido | 115/115, exit 0, exit 0, exit 0, 12/12 (evidencia/23–27) |
+| H4.S1.M3 | Gates sobre HEAD `1b07eb16` (con `dev` `025e3e37` mergeado) | `node --test` (3 suites), `yarn typecheck`, `yarn lint`, `yarn build`, Jest dirigido | 115/115, exit 0, exit 0, exit 0, 12/12 (evidencia/23–27). `docs:validate` y `docs:build --strict` fallan sólo por 3 enlaces de otros reportes ya en `dev` (evidencia/28–29) |
 | H4.S1.M4 | PR contra `dev` | — | PR_NUEVO |
 | H4.S1.M5 | Plan y reporte | — | este directorio |
 
@@ -58,14 +58,14 @@ Pendiente.
 
 ## Evidencia
 
-Salidas literales en [`evidencia/`](./evidencia/):
+Salidas literales en la carpeta `evidencia/` de este directorio:
 
 - 01–15: primera sesión y pasada 1.
 - 16–19: pasadas 2–5.
 - 20: cobertura tras la pasada 5.
 - 21: carga y `validate-links`.
 - 22: enlace con `drug-treatments`.
-- 23–27: gates.
+- 23–29: gates (28–29: documentación).
 
 Extractos:
 
@@ -91,6 +91,11 @@ node --test: tests 115, pass 115, fail 0 · typecheck exit=0 · lint exit=0 · b
 - **Enfermedades:** no se validó el enlace con `diseases`, que no usa ATC. El enlace fármaco →
   enfermedad pasa por `drug-treatments`.
 - **Jest completo:** no se corrió `yarn test`; no hay cambios en `src/`.
+- **`yarn docs:validate` y `yarn docs:build`:** OpenAPI y AsyncAPI son válidos, pero los dos
+  comandos salen con 1. La causa son 3 enlaces `./evidencia/` (carpeta sin `index.md`) en reportes
+  de otros trabajos que ya están en `dev`: `diccionarios-medicos`, `marcelo-lane16-protection` y
+  `seed-dx-devices-eu-oficial`. El mismo enlace en este REPORTE se arregló en este PR. Los otros
+  quedan fuera de alcance (evidencia/28–29).
 
 ## Desvíos del plan
 
