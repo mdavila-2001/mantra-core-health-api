@@ -1,0 +1,184 @@
+{
+  "region": "row",
+  "generatedAt": "2026-10-24T03:54:33.975Z",
+  "formatVersion": 1,
+  "files": [
+    {
+      "path": "anvisa-produtos.ndjson.gz",
+      "source": "anvisa-produtos",
+      "sourceVersion": "DT_ATUALIZACAO_DADO 2025-06-17T19:00:01 (espejo victoracioly/g.stec@8a4c6ca3)",
+      "rows": 93770,
+      "bytes": 9014019,
+      "sha256": "c4095b2b2b50f5e2a861d21d863e0f89db7b3cc5b8a06fc31f38e7957c89e053"
+    },
+    {
+      "path": "anvisa-produtos-modelos.ndjson.gz",
+      "source": "anvisa-produtos-modelos",
+      "sourceVersion": "DT_ATUALIZACAO_DADO 2020-12-25T04:00:01 (espejo adnanioricce/DHsys@81800583)",
+      "rows": 1027762,
+      "bytes": 44748647,
+      "sha256": "59510f491dd710027c44a3a41c7fded94b07471d4baa9b13a106a57bc3ddc6e9"
+    },
+    {
+      "path": "pmda-approvals.ndjson.gz",
+      "source": "pmda-approvals",
+      "sourceVersion": "承認品目一覧・認証品目リスト hasta 2026-02-27 (espejo zoefcuk/pmda-medical-devices@d829883b)",
+      "rows": 35298,
+      "bytes": 2696929,
+      "sha256": "7c77504106d2974f67c4173f24716b9ebbbde27d66c3d60ce290c97c433794b1"
+    },
+    {
+      "path": "hc-mdall-0001.ndjson.gz",
+      "source": "hc-mdall",
+      "sourceVersion": "MDALL last_refresh_dt 2020-02-07 (espejo misterrPink1/symmetric@a43a1a58)",
+      "rows": 1853405,
+      "bytes": 47150922,
+      "sha256": "be4015158c0da6393da74410303b047ea6a27702eeaddcf5b9f066c6af319caf"
+    },
+    {
+      "path": "hc-mdall-0002.ndjson.gz",
+      "source": "hc-mdall",
+      "sourceVersion": "MDALL last_refresh_dt 2020-02-07 (espejo misterrPink1/symmetric@a43a1a58)",
+      "rows": 479831,
+      "bytes": 13524736,
+      "sha256": "09c9aa6055e5b1778f35e54b7cc804efd97ca9f13c1e6ac2f6f7ee818123dab1"
+    },
+    {
+      "path": "tga-daen.ndjson.gz",
+      "source": "tga-daen",
+      "sourceVersion": "DAEN reportes hasta 2020-10-29 (espejo tobinsouth/MedicalDeviceNLP@868d2e2a)",
+      "rows": 18917,
+      "bytes": 1111185,
+      "sha256": "f6ae0b982f8bb1bac614136c7255242f40c4250f168f3ec6f5e63c9e55ac6e84"
+    }
+  ],
+  "stats": {
+    "anvisa-produtos": {
+      "inputLines": 108492,
+      "rows": 93770
+    },
+    "anvisa-produtos-modelos": {
+      "inputFiles": 33,
+      "inputLines": 1242830,
+      "rows": 1027762
+    },
+    "pmda-approvals": {
+      "inputRows": 36116,
+      "rows": 35298,
+      "duplicates": 815,
+      "withoutManufacturer": 3
+    },
+    "hc-mdall": {
+      "licences": 62087,
+      "companies": 6448,
+      "orphanIdentifiers": 0,
+      "duplicateIdentifiers": 1,
+      "withoutCompany": 0,
+      "licencesWithoutDevices": 3,
+      "rows": 2333236
+    },
+    "tga-daen": {
+      "fullReports": 92702,
+      "summaryRows": 133108,
+      "rows": 18917,
+      "withoutManufacturer": 1
+    }
+  },
+  "gaps": [
+    {
+      "source": "anvisa-produtos",
+      "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
+      "url": "https://dados.anvisa.gov.br/dados/"
+    },
+    {
+      "source": "hc-mdall",
+      "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
+      "url": "https://health-products.canada.ca/mdall-limh/"
+    },
+    {
+      "source": "tga-artg",
+      "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+      "url": "https://www.tga.gov.au/resources/artg"
+    },
+    {
+      "source": "nmpa-udi",
+      "reason": "403 del proxy (udi.nmpa.gov.cn)",
+      "url": "https://udi.nmpa.gov.cn/"
+    },
+    {
+      "source": "mfds-devices",
+      "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
+      "url": "https://www.data.go.kr/"
+    },
+    {
+      "source": "tfda-devices",
+      "reason": "403 del proxy (data.gov.tw)",
+      "url": "https://data.gov.tw/dataset/9576"
+    },
+    {
+      "source": "cdsco-devices",
+      "reason": "403 del proxy (cdsco.gov.in)",
+      "url": "https://cdsco.gov.in/"
+    },
+    {
+      "source": "hsa-smdr",
+      "reason": "403 del proxy (data.gov.sg)",
+      "url": "https://data.gov.sg/"
+    },
+    {
+      "source": "amar-devices",
+      "reason": "403 del proxy (data.gov.il)",
+      "url": "https://data.gov.il/"
+    },
+    {
+      "source": "sfda-mdma",
+      "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+      "url": "https://medicaldevice.sfda.gov.sa/"
+    },
+    {
+      "source": "thai-fda-devices",
+      "reason": "403 del proxy (open.fda.moph.go.th)",
+      "url": "https://open.fda.moph.go.th/"
+    },
+    {
+      "source": "mda-medcast",
+      "reason": "403 del proxy (portal.mda.gov.my)",
+      "url": "https://portal.mda.gov.my/"
+    },
+    {
+      "source": "invima-dispositivos",
+      "reason": "403 del proxy (www.datos.gov.co)",
+      "url": "https://www.datos.gov.co/"
+    },
+    {
+      "source": "cofepris-dispositivos",
+      "reason": "403 del proxy (datos.gob.mx)",
+      "url": "https://datos.gob.mx/"
+    },
+    {
+      "source": "anmat-productos-medicos",
+      "reason": "403 del proxy (datos.gob.ar)",
+      "url": "https://datos.gob.ar/"
+    },
+    {
+      "source": "digemid-dispositivos",
+      "reason": "403 del proxy (www.datosabiertos.gob.pe)",
+      "url": "https://www.datosabiertos.gob.pe/"
+    },
+    {
+      "source": "agemed-dispositivos",
+      "reason": "403 del proxy (www.agemed.gob.bo)",
+      "url": "https://www.agemed.gob.bo/"
+    },
+    {
+      "source": "who-pq-ivd",
+      "reason": "403 del proxy (extranet.who.int)",
+      "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
+    },
+    {
+      "source": "unicef-supply",
+      "reason": "403 del proxy (supply.unicef.org)",
+      "url": "https://supply.unicef.org/"
+    }
+  ]
+}
