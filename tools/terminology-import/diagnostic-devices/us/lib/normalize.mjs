@@ -634,3 +634,59 @@ export function fromAiList(r, table, prov) {
     { recordLevel: 'authorization', ...scopeExtra(table, pc), fdaAiEnabledList: true, via: prov.via },
   );
 }
+
+/**
+ * `<device>` del AccessGUDID Full Release XML (espejo Delapro/GUDID, panel
+ * dental). Una fila por UDI-DI primaria.
+ */
+export function fromGudidXml(xml, table, prov, { xmlTag, xmlBlocks }) {
+  const ids = xmlBlocks(xml, 'identifier').map((b) => ({ id: xmlTag(b, 'deviceId'), type: xmlTag(b, 'deviceIdType'), agency: xmlTag(b, 'deviceIdIssuingAgency') }));
+  const di = ids.find((i) => String(i.type).toLowerCase() === 'primary');
+  if (!di?.id) return null;
+  const codes = xmlBlocks(xml, 'fdaProductCode').map((b) => ({ code: clean(xmlTag(b, 'productCode'))?.toUpperCase(), name: verbatim(xmlTag(b, 'productCodeName')) })).filter((c) => c.code);
+  const pc = firstInScope(codes.map((c) => c.code), table);
+  if (!pc) return null;
+  const subs = xmlBlocks(xml, 'premarketSubmission').map((b) => clean(xmlTag(b, 'submissionNumber'))?.toUpperCase()).filter(Boolean);
+  const gmdn = xmlBlocks(xml, 'gmdn').map((b) => ({ code: xmlTag(b, 'gmdnCode'), name: xmlTag(b, 'gmdnPTName'), definition: xmlTag(b, 'gmdnPTDefinition') }));
+  const duns = clean(xmlTag(xml, 'dunsNumber'));
+  const id = clean(di.id);
+  return makeRecord(
+    {
+      source: 'fda-gudid',
+      sourceRecordId: id,
+      sourceUrl: OFFICIAL_RECORD_URL.GUDID(id),
+      sourceVersion: prov.sourceVersion,
+      retrievedAt: prov.retrievedAt,
+      deviceTypeCode: pc,
+      deviceTypeSystem: SYSTEM,
+      deviceTypeName: codes.find((c) => c.code === pc)?.name ?? table.get(pc)?.name ?? null,
+      manufacturerName: verbatim(xmlTag(xml, 'companyName')),
+      manufacturerCountry: null,
+      manufacturerRegistryId: duns ? `duns:${duns}` : null,
+      brandName: verbatim(xmlTag(xml, 'brandName')),
+      model: verbatim(xmlTag(xml, 'versionModelNumber')),
+      udiDi: id,
+      riskClass: fdaRiskClass(table.get(pc)?.deviceClass),
+      authorizationId: subs[0] ?? null,
+      authorizationDate: null,
+      status: verbatim(xmlTag(xml, 'deviceCommDistributionStatus')),
+    },
+    {
+      recordLevel: 'udi_di',
+      ...scopeExtra(table, pc),
+      issuingAgency: clean(di.agency),
+      publicDeviceRecordKey: clean(xmlTag(xml, 'publicDeviceRecordKey')),
+      deviceRecordStatus: clean(xmlTag(xml, 'deviceRecordStatus')),
+      productCodes: codes.map((c) => c.code),
+      premarketSubmissions: subs,
+      deviceTypes: gmdnDeviceTypes(gmdn),
+      catalogNumber: verbatim(xmlTag(xml, 'catalogNumber')),
+      deviceDescription: verbatim(xmlTag(xml, 'deviceDescription')),
+      publicVersionDate: isoDate(xmlTag(xml, 'publicVersionDate')),
+      commercialDistributionEndDate: isoDate(xmlTag(xml, 'deviceCommDistributionEndDate')),
+      rx: xmlTag(xml, 'rx') === 'true',
+      otc: xmlTag(xml, 'otc') === 'true',
+      via: prov.via,
+    },
+  );
+}

@@ -21,13 +21,14 @@ import { createReadStream, existsSync, readdirSync, readFileSync, writeFileSync 
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { FIELDS, FORMAT_VERSION, manufacturerKey, recordKey } from './lib/format.mjs';
-import { ensureDir, parseCsv, readJsonIfExists, readPipeDelimited, streamOpenFdaResults, unzipStream, writeNdjsonParts, zipEntries } from './lib/io.mjs';
+import { ensureDir, parseCsv, readJsonIfExists, readPipeDelimited, streamOpenFdaResults, streamXmlElements, unzipStream, writeNdjsonParts, xmlBlocks, xmlTag, zipEntries } from './lib/io.mjs';
 import {
   ProductCodeTable,
   classificationFromFdadata,
   classificationFromFoiclass,
   from510kLineage,
   fromAiList,
+  fromGudidXml,
   fromFdadataPma,
   fromFdadataPmn,
   fromAccessGudidDelimited,
@@ -315,6 +316,25 @@ if (officialUdi.length) {
     if (row) (add(row), kept++);
   });
   inputs.push({ source: `AccessGUDID ${gudidZip}`, records: n, inScope: kept });
+} else if (mirrorsManifest.some((m) => m.id === 'delapro-gudid')) {
+  // Espejo parcial de GUDID (Full Release XML 2025-05-01, sólo panel dental).
+  const m = MIRRORS.find((x) => x.id === 'delapro-gudid');
+  let n = 0;
+  let kept = 0;
+  for (const file of m.files.filter((f) => f.endsWith('.zip'))) {
+    const zip = mirrorFile(m.id, file);
+    if (!zip) continue;
+    const prov = mirrorProv(m.id, file, 'AccessGUDID Full Release XML (filtro dental)');
+    for (const entry of await zipEntries(zip)) {
+      if (!entry.endsWith('.xml')) continue;
+      n += await streamXmlElements(unzipStream(zip, entry), 'device', (xml) => {
+        const row = fromGudidXml(xml, table, prov, { xmlTag, xmlBlocks });
+        if (row) (add(row), kept++);
+      });
+    }
+  }
+  inputs.push({ source: 'mirror delapro-gudid (dental)', version: mirrorVersion(m.id, 'AccessGUDID Full Release XML'), records: n, inScope: kept });
+  gaps.push({ source: 'fda-gudid', url: 'https://accessgudid.nlm.nih.gov/download/delimited', reason: '403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles.' });
 } else {
   gaps.push({ source: 'fda-gudid', url: 'https://accessgudid.nlm.nih.gov/download/delimited', reason: '403 del proxy — accessgudid.nlm.nih.gov y download.open.fda.gov bloqueados por la red de la sesión. Sin GUDID no hay UDI-DI ni modelo/versión por equipo.' });
 }

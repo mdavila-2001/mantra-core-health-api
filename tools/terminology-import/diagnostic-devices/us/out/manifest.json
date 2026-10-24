@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T03:20:08.625Z",
+ "generatedAt": "2026-10-24T03:24:04.729Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -27,6 +27,14 @@
    "rows": 2646,
    "bytes": 140067,
    "sha256": "b122a819acee64bcde9513a1ff402e2acdeead146b70419c11d1c88d943aa616"
+  },
+  {
+   "path": "fda-gudid-0001.ndjson.gz",
+   "source": "fda-gudid",
+   "sourceVersion": "AccessGUDID Full Release XML (filtro dental) 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
+   "rows": 3130,
+   "bytes": 309765,
+   "sha256": "0ac976b2d0aa6f31f06b19a0526ad4079e49369a27c6205b7417f18769c2cf3d"
   }
  ],
  "gaps": [
@@ -38,7 +46,7 @@
   {
    "source": "fda-gudid",
    "url": "https://accessgudid.nlm.nih.gov/download/delimited",
-   "reason": "403 del proxy — accessgudid.nlm.nih.gov y download.open.fda.gov bloqueados por la red de la sesión. Sin GUDID no hay UDI-DI ni modelo/versión por equipo."
+   "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
   }
  ],
  "inputs": [
@@ -75,6 +83,12 @@
    "version": "FDA AI-Enabled Medical Devices list corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff",
    "records": 1524,
    "inScope": 1429
+  },
+  {
+   "source": "mirror delapro-gudid (dental)",
+   "version": "AccessGUDID Full Release XML 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
+   "records": 812322,
+   "inScope": 3130
   }
  ],
  "mirrors": [
@@ -176,6 +190,129 @@
     "exportDate": "2026-08-10",
     "fetchedAt": "2026-08-17T20:39:37+00:00",
     "sha256": "996cd24da0f15d1af632c5676916a3d7d351ee121dff791cdc153a5612bb25c4"
+   }
+  },
+  {
+   "id": "delapro-gudid",
+   "repo": "https://github.com/Delapro/GUDID",
+   "commit": "9237402a49a6a6ad2fff2be9bb284be6eba96d09",
+   "commitDate": "2026-10-20T14:24:51+02:00",
+   "files": [
+    {
+     "path": "LICENSE",
+     "bytes": 1061,
+     "sha256": "7f2435753534eb358b4cb36703bb066a159fc47088564347207febe47da2f949"
+    },
+    {
+     "path": "DownloadGUDIDAndExpand.PS1",
+     "bytes": 4263,
+     "sha256": "246e5c09e91802ebe9f25eaadd38e8d6d0fdc0a92966895fa0d701929f31154b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml.zip",
+     "bytes": 5533225,
+     "sha256": "2e49629a7166c5c35926fe0beb30f4cfb2b731fb9d1fc5dc7be1deef56231a6b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml1.zip",
+     "bytes": 15448974,
+     "sha256": "5c1834f9d53a001917955d3d90f6cda9e851ee1b9b13e303ce67f97d10748d45"
+    },
+    {
+     "path": "Dental-xml/Dental-xml2.zip",
+     "bytes": 2435432,
+     "sha256": "3fd9d33b349d1f11eaf81c0aff4253ee4a9ce3f007638ebc08c5db8579701196"
+    },
+    {
+     "path": "Dental-xml/Dental-xml3.zip",
+     "bytes": 843001,
+     "sha256": "acedbb0e3cd18902ba00e9f1c4b6ac89249e04f44980d5af8397ce5c8c43774b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml4.zip",
+     "bytes": 847524,
+     "sha256": "7a147b0d7a4381ef1a427aa4da973404dece25024f80ac677d37cda3bcd06a17"
+    },
+    {
+     "path": "Dental-xml/Dental-xml5.zip",
+     "bytes": 950425,
+     "sha256": "b8be5e98d09bb196fbaf9193abdff397ea7b3b85ed3ef43695131c07b2fde72d"
+    },
+    {
+     "path": "Dental-xml/Dental-xml6.zip",
+     "bytes": 173055,
+     "sha256": "b5b89a53c564cbed296bd168e9c1d54b73492f888f90b34d1f378e406af56889"
+    },
+    {
+     "path": "Dental-xml/Dental-xml7.zip",
+     "bytes": 6490165,
+     "sha256": "4b0e0bea18ef89e4dee7ba4dfbe2b70701aa13824dfeadda894235d9fa7e2610"
+    },
+    {
+     "path": "Dental-xml/Dental-xml8.zip",
+     "bytes": 6588148,
+     "sha256": "519cc30b3759585a6cb21f4404e9ce326463eb27dab6eec0d7077d2610c47c13"
+    },
+    {
+     "path": "Dental-xml/Dental-xml9.zip",
+     "bytes": 6179959,
+     "sha256": "8a55da47e7bc512389daa9f9f1aab293a14e69c2b9f18a6e4899948b22d0c148"
+    },
+    {
+     "path": "Dental-xml/Dental-xml10.zip",
+     "bytes": 2958714,
+     "sha256": "e1de141afe7ea63fe174f646e54573f591bed4ee9e491509b9a067a03c9f182a"
+    },
+    {
+     "path": "Dental-xml/Dental-xml11.zip",
+     "bytes": 893090,
+     "sha256": "1774a829157aedb51a418173f0baa1f926a07ebd2c73bab2a1d8c189d9bad8e9"
+    },
+    {
+     "path": "Dental-xml/Dental-xml12.zip",
+     "bytes": 2000245,
+     "sha256": "a6c8671bb8d266dffcb25711f5957f0025f9c1a5306e1b0e77717acaf1f30817"
+    },
+    {
+     "path": "Dental-xml/Dental-xml13.zip",
+     "bytes": 1003244,
+     "sha256": "d43304e37bf5fbefc40b4d160e1c872341bea0b1b700478fdbbfbd8ca7cc8ff3"
+    },
+    {
+     "path": "Dental-xml/Dental-xml14.zip",
+     "bytes": 3387031,
+     "sha256": "cbb3fe9c05abd7d9a3af7e317e8ba99e8eb75d095e66516e8cb455bbf0b5c4a4"
+    },
+    {
+     "path": "Dental-xml/Dental-xml15.zip",
+     "bytes": 1895976,
+     "sha256": "26d3d5381bf1a2dfb56356cfc3a2ceb9e360372aa12af707b282b186d61d1a3b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml16.zip",
+     "bytes": 1792291,
+     "sha256": "15dd3cc077f285f6e9a4eddc90ce84f51c313aa2e715fe1656a26b006519972b"
+    },
+    {
+     "path": "Dental-xml/Dental-xml17.zip",
+     "bytes": 1806585,
+     "sha256": "060067c6fb8ea7a7c6895fb065f8815780581fcbc1789197e48699bcf480fd15"
+    },
+    {
+     "path": "Dental-xml/Dental-xml18.zip",
+     "bytes": 2918497,
+     "sha256": "35c93113eabefcf27263781c48e765627a95fddb484aff4fb2c85621e41e34f5"
+    },
+    {
+     "path": "Dental-xml/Dental-xml19.zip",
+     "bytes": 301439,
+     "sha256": "9c3edbbff25f6155670e77b4bebe19d2899e77904bd64ab26991cba8f5d69954"
+    }
+   ],
+   "upstream": {
+    "url": "https://accessgudid.nlm.nih.gov/release_files/download/gudid_full_release_20250501.zip",
+    "exportDate": "2025-05-01",
+    "note": "Partes FULLDownload_PartN_Of_192_2025-05-01-dental.xml; filtro en DownloadGUDIDAndExpand.PS1 (medicalspecialty -eq DE)"
    }
   },
   {

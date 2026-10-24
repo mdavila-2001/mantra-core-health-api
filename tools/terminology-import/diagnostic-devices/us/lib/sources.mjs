@@ -94,4 +94,17 @@ export const MIRRORS = Object.freeze([
     },
     priority: 20,
   },
+  {
+    id: 'delapro-gudid',
+    repo: 'https://github.com/Delapro/GUDID',
+    commit: '9237402a49a6a6ad2fff2be9bb284be6eba96d09',
+    files: ['LICENSE', 'DownloadGUDIDAndExpand.PS1', ...['', ...Array.from({ length: 19 }, (_, i) => String(i + 1))].map((n) => `Dental-xml/Dental-xml${n}.zip`)],
+    license: 'MIT (Delapro). Datos: AccessGUDID Full Release XML de FDA/NLM (dominio público), filtrado por el autor a los dispositivos con algún product code de especialidad dental (DE) según foiclass.',
+    upstream: {
+      url: 'https://accessgudid.nlm.nih.gov/release_files/download/gudid_full_release_20250501.zip',
+      exportDate: '2025-05-01',
+      note: 'Partes FULLDownload_PartN_Of_192_2025-05-01-dental.xml; filtro en DownloadGUDIDAndExpand.PS1 (medicalspecialty -eq DE)',
+    },
+    priority: 10,
+  },
 ]);

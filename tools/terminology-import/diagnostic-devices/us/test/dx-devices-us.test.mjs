@@ -8,7 +8,7 @@ import { Readable } from 'node:stream';
 import { test } from 'node:test';
 import { gunzipSync } from 'node:zlib';
 import { FIELDS, fdaRiskClass, isoDate, makeRecord, manufacturerKey, validateRecord } from '../lib/format.mjs';
-import { parseCsv, readPipeDelimited, streamOpenFdaResults, writeNdjsonParts } from '../lib/io.mjs';
+import { parseCsv, readPipeDelimited, streamOpenFdaResults, streamXmlElements, writeNdjsonParts, xmlBlocks, xmlTag, xmlText } from '../lib/io.mjs';
 import {
   ProductCodeTable,
   classificationFromFdadata,
@@ -17,6 +17,7 @@ import {
   fromAccessGudidDelimited,
   fromFdadataPma,
   fromFdadataPmn,
+  fromGudidXml,
   fromOpenFdaUdi,
   regulationFromNumber,
 } from '../lib/normalize.mjs';
@@ -237,4 +238,25 @@ test('fdadata pma real: una fila por PMA y nombre comercial, suplementos contado
   assert.equal(first.authorizationId, 'P000010');
   assert.equal(first.manufacturerCountry, null, 'el país de pma.zip no se usa (fdadata lo rellena)');
   assert.ok(out.reduce((n, r) => n + r.extra.recordsWithThisName, 0) === rows.length);
+});
+
+test('GUDID XML real (Full Release, espejo dental): UDI-DI, modelo, GMDN con código', async () => {
+  const t = new ProductCodeTable();
+  t.observe('EHD', { regulationNumber: '872.1800', panel: 'Dental', deviceClass: '2' });
+  const els = [];
+  await streamXmlElements(Readable.from(fixture('gudid-dental.sample.xml').match(/[\s\S]{1,4096}/g)), 'device', (x) => els.push(x));
+  assert.equal(els.length, 1);
+  const r = fromGudidXml(els[0], t, PROV, { xmlTag, xmlBlocks });
+  assert.deepEqual(validateRecord(r), []);
+  assert.equal(r.udiDi, '08904269400590');
+  assert.equal(r.brandName, 'Imagescan HD');
+  assert.equal(r.manufacturerName, 'SKANRAY TECHNOLOGIES LIMITED');
+  assert.equal(r.authorizationId, 'K170967');
+  assert.equal(r.deviceTypeCode, 'EHD');
+  assert.ok(r.model);
+  assert.equal(r.extra.deviceTypes[0].system, 'gmdn');
+  assert.match(r.extra.deviceTypes[0].code, /^\d+$/);
+  assert.equal(fromGudidXml(els[0].replace('<productCode>EHD</productCode>', '<productCode>HRS</productCode>'), t, PROV, { xmlTag, xmlBlocks }), null);
+  assert.equal(xmlText('A &amp; B &#233;'), 'A & B é');
+  assert.equal(xmlTag('<a><catalogNumber xsi:nil="true" /></a>', 'catalogNumber'), null);
 });

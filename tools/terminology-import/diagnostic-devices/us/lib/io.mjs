@@ -221,3 +221,59 @@ export function writeNdjsonParts(dir, prefix, rows, { maxBytes = 200 * 1024 * 10
 export function readJsonIfExists(path, fallback) {
   return existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : fallback;
 }
+
+/**
+ * Recorre en streaming los elementos `<name …>…</name>` de un XML (no
+ * anidados entre sí, como `<device>` en el Full Release XML de GUDID) y
+ * entrega el texto de cada uno.
+ */
+export async function streamXmlElements(stream, name, onElement) {
+  const open = `<${name}`;
+  const close = `</${name}>`;
+  let buf = '';
+  let n = 0;
+  for await (const chunk of stream) {
+    buf += chunk.toString('utf8');
+    for (;;) {
+      const i = buf.indexOf(open);
+      if (i < 0) {
+        buf = buf.slice(-open.length);
+        break;
+      }
+      const after = buf[i + open.length];
+      if (after !== ' ' && after !== '>' && after !== '\n' && after !== '\t' && after !== '\r' && after !== undefined) {
+        buf = buf.slice(i + open.length);
+        continue;
+      }
+      const j = buf.indexOf(close, i);
+      if (j < 0) {
+        buf = buf.slice(i);
+        break;
+      }
+      await onElement(buf.slice(i, j + close.length));
+      n++;
+      buf = buf.slice(j + close.length);
+    }
+  }
+  return n;
+}
+
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+
+export function xmlText(s) {
+  return s.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (_, e) =>
+    e[0] === '#' ? String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10)) : ENTITIES[e.toLowerCase()],
+  );
+}
+
+/** Texto del primer `<tag>` (o `null` si falta o es `xsi:nil`). */
+export function xmlTag(xml, tag) {
+  const m = xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?(?:/>|>([\\s\\S]*?)</${tag}>)`));
+  if (!m || m[1] === undefined) return null;
+  return xmlText(m[1]);
+}
+
+/** Todos los bloques `<tag>…</tag>`. */
+export function xmlBlocks(xml, tag) {
+  return [...xml.matchAll(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, 'g'))].map((m) => m[1]);
+}
