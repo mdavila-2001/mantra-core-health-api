@@ -3,7 +3,7 @@
 - Fecha: 2026-10-24 (actualizado 18:40 UTC) · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/seed-clinical-pharmacology`
 - PRs:
   - Mergeados en `dev`: #679, #705 y #710 (pasada 1).
-  - Este estado (pasadas 2–5): PR_NUEVO, sin mergear.
+  - Este estado (pasadas 2–5): https://github.com/mdavila-2001/mantra-core-health-api/pull/730, sin mergear.
 - Peldaño de evidencia alcanzado:
   - **`VERIFIED`** para la carga del corpus de la pasada 5 en un Postgres 16 desechable: filas,
     tamaño, idempotencia, integridad del texto (sha256) y enlaces a `vademecum`.
@@ -30,7 +30,7 @@
 | H4.S1.M1 | Licencias leídas en su página | lectura 2026-10-24 | AEMPS, openFDA, RxNav, EMA, eEML, NLM |
 | H4.S1.M2 | Registro de pasadas | — | `docs/seed-research/clinical-pharmacology.md` |
 | H4.S1.M3 | Gates sobre HEAD `1b07eb16` (con `dev` `025e3e37` mergeado) | `node --test` (3 suites), `yarn typecheck`, `yarn lint`, `yarn build`, Jest dirigido | 115/115, exit 0, exit 0, exit 0, 12/12 (evidencia/23–27). `docs:validate` y `docs:build --strict` fallan sólo por 3 enlaces de otros reportes ya en `dev` (evidencia/28–29) |
-| H4.S1.M4 | PR contra `dev` | — | PR_NUEVO |
+| H4.S1.M4 | PR contra `dev` | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/730 |
 | H4.S1.M5 | Plan y reporte | — | este directorio |
 
 Pasadas (ATC 5 nuevos con monografía / secciones nuevas):
