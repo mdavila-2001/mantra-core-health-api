@@ -5,7 +5,7 @@
   - **VERIFIED** para la carga de términos: el cargador corrió contra el DDL real del módulo 03 en un Postgres 16 desechable, se consultó lo que quedó persistido y la re-corrida inserta 0 filas.
   - **TESTED** para las relaciones: sólo corrieron contra la tabla propuesta aplicada en esa base desechable, y el modelo real no las admite.
   - No es REGRESSION_VERIFIED: no se arrancó la API ni se miró el glosario en el front.
-- Avance: 30 HECHO / 37 microtareas = **81,1 %** (1 A MEDIAS, 4 BLOQUEADO, 2 TODO)
+- Avance: 31 HECHO / 37 microtareas = **83,8 %** (1 A MEDIAS, 4 BLOQUEADO, 1 TODO)
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -18,6 +18,7 @@
 | H3.S3.M1 | Extensión opcional al glosario | idem | `glossaryMembers: 37292` (18 646 términos × 2 value sets) |
 | H4.S1.M1–M4 | Corpus de relaciones: HPOA 286 651, Mondo 974, DOID 2 268, enfermedades comunes 132 600 | build + pruebas | 50/50 pruebas |
 | H4.S2.M1–M3 | Propuesta de tabla probada; cargador bloqueado sin ella; con ella 344 981 aristas + 372 528 evidencias, re-corrida 0 | ver log abajo | ver log abajo |
+| H4.S3.M2 | Contra el catálogo **real** de #688 (snapshot f7f84be1: omim 10 744, orphanet 11 645, decipher 61, mondo 27 185, doid 14 854, mesh 8 863 conceptos): HPOA 268 906/268 906, DOID 2 268/2 268, Mondo 814/815, enfermedades comunes 116 824/132 277 → 387 637 aristas + 388 781 evidencias; re-corrida 0 | `evidencia/integracion-seed-diseases-688.txt` | 64 s; re-corrida 0/0 en 36 s |
 | H4.S3.M1 | Formatos de #688: HPOA resuelve 100 % directo | `load-disease-phenotypes.mjs --check --sources hpoa` | `diseaseUnresolved: 0`, `viaMondo: 0`, 268 306 aristas |
 | H5.S1.M1–M2 | 8 pasadas; 7 y 8 aportan 0 | `evidencia/saturation.json` + doc | ver `docs/seed-research/symptoms.md` |
 | H5.S2.M1 | Cobertura: 12 625 / 23 263 enfermedades de Mondo (54,3 %) con síntomas | build | `evidencia/coverage-resumen.json` |
@@ -38,7 +39,6 @@
 | H2.S1.M3 | BLOQUEADO | Abrir `hpo.jax.org/app/license` y los términos de uso del NCI EVS (hosts bloqueados). Hay que leerlos antes de publicar contenido |
 | H3.S3.M2 | BLOQUEADO | Acceso a `query.wikidata.org` para traer P3841 y deduplicar las fichas `wikidata-sintoma` contra HPO |
 | H4.S2.M4 | BLOQUEADO | El repo del modelo agrega `terminology.concept_relationship_evidence` y la API siembra `REL_SYMPTOM_EXCLUDED` |
-| H4.S3.M2 | TODO | Merge de #688 y correr los dos cargadores en una misma base |
 | H5.S1.M3 | BLOQUEADO | Acceso a Orphadata, CIE-11 ES, MeSH/DeCS (y licencia BIREME), Wikidata, PubMed/Europe PMC; SNOMED/UMLS/MedDRA/CIAP-2 requieren licencia |
 | H6.S2.M2 | TODO | Que Justin autorice empujar la rama `justin/seed-symptoms` (el entorno asignó otra) |
 
@@ -93,7 +93,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 
 ## No cubierto
 - No se arrancó la API: no se observó `/glossary` ni `GET /terminology/concepts` con los conceptos nuevos. El andamio de la base desechable (versionado en `evidencia/andamio/`) sembró a mano los 8 conceptos internos y los 2 value sets que en un entorno real siembra la API.
-- No se cargó contra el catálogo real de `seed-diseases`. Mondo se cargó desde `mondo.obo` como sustituto, y `omim`/`orphanet`/`decipher` se armaron con los códigos de HPOA en el formato que confirmó #688.
+- La integración con el catálogo real de #688 corrió en una base desechable con la tabla de evidencia **propuesta** aplicada a mano; sigue sin existir en el modelo. En esa base, la primera carga de términos corrió en un intento previo que falló al sembrar el andamio (los términos se cargaron, las relaciones no), así que el log de integración muestra la re-corrida de términos (0) y la primera y segunda de relaciones.
 - `fetch-symptom-sources.mjs --refresh` no se probó contra una release nueva: sólo bajada inicial y re-corrida con archivos presentes.
 - `concept_maps`: el plan genera 0 mapas, porque los xrefs NCIT de HPO apuntan a enfermedades fuera del subconjunto de NCIt. El código de mapas no tuvo ninguna fila real que ejercitar.
 

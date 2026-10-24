@@ -68,7 +68,7 @@
 | H4.S2.M3 | Carga e idempotencia con la propuesta | 344 981 aristas; 2.ª corrida 0 | idem con la tabla aplicada | HECHO |
 | H4.S2.M4 | Carga en un entorno real | tabla en el modelo | — | BLOQUEADO |
 | H4.S3.M1 | Formatos de código de `seed-diseases` (#688) | 100 % de HPOA resuelve directo | `--check --sources hpoa` → `diseaseUnresolved: 0` | HECHO |
-| H4.S3.M2 | Resolución contra los datos reales de #688 | misma base con ambos cargados | correr ambos cargadores en una base | TODO |
+| H4.S3.M2 | Resolución contra los datos reales de #688 | misma base con ambos cargados | `load-catalog.mjs --from-snapshot` (#688) + `load-disease-phenotypes.mjs --check/--apply` | HECHO |
 
 ## H5 — Saturación y cobertura
 **CA:** Dadas fuentes nuevas e independientes por pasada, cuando dos pasadas seguidas aportan 0, entonces se declara saturado lo accesible y se documentan los huecos.

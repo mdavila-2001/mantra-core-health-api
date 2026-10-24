@@ -220,6 +220,14 @@ Las relaciones se enlazan **por código**, en este orden:
 
 Medición en la base desechable con dos andamios:
 
+- **Con el catálogo real de `seed-diseases`** (snapshot de #688, commit f7f84be1,
+  `load-catalog.mjs --from-snapshot --systems omim,orphanet,decipher,mondo,doid,mesh`):
+  HPOA 268 906/268 906 directo; DOID 2 268/2 268; Mondo 814/815; enfermedades
+  comunes 116 824/132 277 → **387 637 aristas y 388 781 filas de evidencia**
+  (re-corrida 0). Sin resolver: 401 descriptores MeSH que el `mesh` de
+  `seed-diseases` no carga (14 777 filas; p. ej. `D018805`, `D002828`), 13 DOID
+  que la release vigente ya no tiene (676 filas) y 1 MONDO. Log en
+  `docs/trabajo/2026-10-24-seed-symptoms/evidencia/integracion-seed-diseases-688.txt`.
 - **Con el formato de #688** (`omim`/`orphanet`/`decipher` con los 8 478 + 4 355
   + 47 códigos de HPOA, código sin prefijo): HPOA resuelve **268 906 de 268 906**
   filas P directo por código, 0 vía Mondo, 0 sin resolver → 268 306 aristas.

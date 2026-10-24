@@ -1,0 +1,116 @@
+# Base de integración: catálogo real de seed-diseases (PR #688, f7f84be1, load-catalog.mjs --from-snapshot --systems omim,orphanet,decipher,mondo,doid,mesh) + este corpus
+## code systems de seed-diseases cargados (concepts)
+decipher|61
+doid|14854
+mantra-core-internal|12
+mesh|8863
+mondo|27185
+omim|10744
+orphanet|11645
+## andamio: seed-internal.mjs de seed-diseases + REL_SYMPTOM y REL_SYMPTOM_EXCLUDED
+$ load-symptoms.mjs --apply
+[load] {"codeSystem":"hpo","storedAs":"hpo","version":"2026-09-01","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"symp","storedAs":"symp","version":"2026-07-30","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+(9 s)
+$ psql -f proposal/concept_relationship_evidence.sql  (sólo en esta base desechable; ya aplicada en el intento anterior)
+$ load-disease-phenotypes.mjs --check --sources hpoa
+{
+  "loadedDiseaseSystems": {
+    "omim": 8478,
+    "decipher": 47,
+    "orphanet": 4355
+  },
+  "stats": {
+    "read": 286651,
+    "notPhenotype": 17745,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 0,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 268906,
+    "relationships": 268306
+  },
+  "unresolvedDiseasesByPrefix": {},
+  "negatedNeeds": null
+}
+$ load-disease-phenotypes.mjs --check --sources mondo
+{
+  "loadedDiseaseSystems": {
+    "mondo": 695
+  },
+  "stats": {
+    "read": 974,
+    "notPhenotype": 159,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 1,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 814,
+    "relationships": 814
+  },
+  "unresolvedDiseasesByPrefix": {
+    "MONDO": 1
+  },
+  "negatedNeeds": null
+}
+$ load-disease-phenotypes.mjs --check --sources doid
+{
+  "loadedDiseaseSystems": {
+    "doid": 873
+  },
+  "stats": {
+    "read": 2268,
+    "notPhenotype": 0,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 0,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 2268,
+    "relationships": 2268
+  },
+  "unresolvedDiseasesByPrefix": {},
+  "negatedNeeds": null
+}
+$ load-disease-phenotypes.mjs --check --sources hpo-common-disease
+{
+  "loadedDiseaseSystems": {
+    "doid": 2588,
+    "mesh": 645
+  },
+  "stats": {
+    "read": 132600,
+    "notPhenotype": 323,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 15453,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 116824,
+    "relationships": 116249
+  },
+  "unresolvedDiseasesByPrefix": {
+    "DOID": 13,
+    "MESH": 401
+  },
+  "negatedNeeds": null
+}
+$ load-disease-phenotypes.mjs --apply
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "inserted": {
+    "relationships": 387637,
+    "evidence": 388781
+  },
+  "segundos": 64
+}
+(64 s)
+$ load-disease-phenotypes.mjs --apply  (segunda corrida)
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "inserted": {
+    "relationships": 0,
+    "evidence": 0
+  },
+  "segundos": 36
+}
+(36 s)
