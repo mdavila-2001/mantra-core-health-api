@@ -823,4 +823,55 @@ test('jurisdicción: toda fuente de las regiones tiene una (BD/RDM italiano → 
   assert.equal(jurisdictionOf('eudamed-udi', 'eu'), 'EU');
   assert.equal(jurisdictionOf('tfda-tudid', 'row'), 'TW');
   assert.equal(jurisdictionOf('cdc-livd-sars-cov-2', 'us'), 'US');
+  assert.equal(jurisdictionOf('who-pq-ivd', 'row'), 'WHO');
+  assert.equal(jurisdictionOf('nmpa-udi', 'row'), 'CN');
+  assert.equal(jurisdictionOf('invima-dispositivos', 'row'), 'CO');
+  assert.equal(jurisdictionOf('sahpra-covid-ivd', 'row'), 'ZA');
+});
+
+test('marcas IVD del regulador: CDSCO, NMPA, INVIMA y fuentes que solo listan IVD', () => {
+  const tax = new Taxonomy();
+  const d = (over) => tax.decideRow(row(over)).diagnostic;
+  assert.equal(
+    d({ source: 'cdsco-approved-devices', extra: { cdscoCategory: 'ivd' } }),
+    true,
+  );
+  assert.equal(
+    d({ source: 'cdsco-approved-devices', extra: { cdscoCategory: 'md' } }),
+    null,
+  );
+  assert.equal(
+    d({ source: 'nmpa-udi', extra: { qxlb: '体外诊断试剂' } }),
+    true,
+  );
+  assert.equal(d({ source: 'nmpa-udi', extra: { qxlb: '器械' } }), null);
+  assert.equal(d({ source: 'who-pq-ivd' }), true);
+  assert.equal(d({ source: 'sahpra-covid-ivd' }), true);
+  const invima = (name) =>
+    row({
+      source: 'invima-dispositivos',
+      deviceTypeSystem: 'co:invima-grupo',
+      deviceTypeCode: null,
+      deviceTypeName: name,
+    });
+  tax.addFromRow(invima('REACTIVO DIAGNOSTICO'));
+  tax.addFromRow(invima('MEDICO QUIRURGICOS'));
+  assert.equal(tax.decideRow(invima('REACTIVO DIAGNOSTICO')).diagnostic, true);
+  assert.equal(tax.decideRow(invima('MEDICO QUIRURGICOS')).diagnostic, null);
+});
+
+test('formato común: la OMS tiene su prefijo propio (who:)', () => {
+  const ok = validateRow(
+    row({
+      deviceTypeSystem: 'who:assay-format',
+      deviceTypeCode: null,
+      deviceTypeName: 'NAT (nucleic acid testing)',
+    }),
+  );
+  assert.deepEqual(ok, []);
+  assert.ok(
+    validateRow(
+      row({ deviceTypeSystem: 'whox:assay-format', deviceTypeName: 'x' }),
+    ).length > 0,
+  );
 });
