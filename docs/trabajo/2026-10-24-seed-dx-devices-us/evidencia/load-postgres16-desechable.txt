@@ -1,0 +1,33 @@
+# PostgreSQL 16 desechable (puerto 5499) con database/SQL/00_shared + 03_terminology
+# corrida 1: DB_HOST=/tmp/pgdx DB_PORT=5499 DB_NAME=dxtest node tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs --apply
+Product codes en alcance: 3270 · cargables: 3268 · sin nombre publicado (no se cargan): 2
+Propiedades: 29226 · versión: FDA foiclass.zip corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff
+Insertados: 3268 conceptos · 29226 propiedades (el resto ya existía).
+exit=0
+# corrida 2: DB_HOST=/tmp/pgdx DB_PORT=5499 DB_NAME=dxtest node tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs --apply
+Product codes en alcance: 3270 · cargables: 3268 · sin nombre publicado (no se cargan): 2
+Propiedades: 29226 · versión: FDA foiclass.zip corte 2026-08-28 vía espejo https://github.com/ej86/fda-ai-medical-device-analytics@8840a03632ff
+Insertados: 0 conceptos · 0 propiedades (el resto ya existía).
+exit=0
+# conteos
+concepts|3268
+properties|29226
+code_systems|1
+DQA|Oximeter|cfr_regulation_number|"870.2700"
+DQA|Oximeter|diagnostic_scope_reason|"21 CFR 870 Subpart C — Cardiovascular Monitoring Devices"
+DQA|Oximeter|diagnostic_scope_rule|"subpart:870.2"
+DQA|Oximeter|fda_device_class|"2"
+DQA|Oximeter|fda_review_panel|"CV"
+DQA|Oximeter|manufacturer_count|263
+DQA|Oximeter|official_record_url|"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=DQA"
+DQA|Oximeter|registry_record_count|727
+DQA|Oximeter|registry_records_by_source|{"fda-510k": 727}
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|cfr_regulation_number|"892.1550"
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|diagnostic_scope_reason|"21 CFR 892 Subpart B — Diagnostic Devices"
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|diagnostic_scope_rule|"subpart:892.1"
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|fda_device_class|"2"
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|fda_review_panel|"RA"
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|manufacturer_count|237
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|official_record_url|"https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=IYN"
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|registry_record_count|1192
+IYN|System, Imaging, Pulsed Doppler, Ultrasonic|registry_records_by_source|{"fda-pma": 3, "fda-510k": 1189}

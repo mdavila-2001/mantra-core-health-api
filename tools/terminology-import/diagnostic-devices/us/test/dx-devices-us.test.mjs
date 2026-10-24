@@ -260,3 +260,24 @@ test('GUDID XML real (Full Release, espejo dental): UDI-DI, modelo, GMDN con có
   assert.equal(xmlText('A &amp; B &#233;'), 'A & B é');
   assert.equal(xmlTag('<a><catalogNumber xsi:nil="true" /></a>', 'catalogNumber'), null);
 });
+
+test('cargador: plan determinista, sin product codes sin nombre', async () => {
+  const { buildPlan, md5Uuid } = await import('../load-dx-device-types-us.mjs');
+  assert.equal(md5Uuid('abc'), '90015098-3cd2-4fb0-d696-3f7d28e17f72');
+  const pcs = [
+    { productCode: 'IYN', deviceName: 'System, Imaging, Pulsed Doppler, Ultrasonic', panel: 'RA', deviceClass: '2', regulationNumber: '892.1550', include: true, rule: 'subpart:892.1', reason: 'r', url: 'https://x.test/IYN' },
+    { productCode: 'QQQ', deviceName: null, include: true, rule: 'x', reason: 'r', url: 'https://x.test/QQQ' },
+    { productCode: 'HRS', deviceName: 'Plate', include: false, rule: 'subpart:888.3', reason: 'r', url: 'https://x.test/HRS' },
+  ];
+  const rows = [{ source: 'fda-510k', deviceTypeCode: 'IYN', manufacturerName: 'A Inc.' }, { source: 'fda-pma', deviceTypeCode: 'IYN', manufacturerName: 'A, Inc' }];
+  const a = buildPlan(pcs, rows, 'v1');
+  const b = buildPlan(pcs, rows, 'v1');
+  assert.deepEqual(a, b);
+  assert.equal(a.included, 2);
+  assert.equal(a.skippedWithoutName, 1);
+  assert.deepEqual(a.concepts.map((c) => c[2]), ['IYN']);
+  const props = Object.fromEntries(a.properties.map((p) => [p[2], JSON.parse(p[4])]));
+  assert.equal(props.registry_record_count, 2);
+  assert.equal(props.manufacturer_count, 1, 'misma razón social normalizada');
+  assert.deepEqual(props.registry_records_by_source, { 'fda-510k': 1, 'fda-pma': 1 });
+});
