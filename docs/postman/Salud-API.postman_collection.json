@@ -81854,10 +81854,10 @@
                     }
                   ]
                 },
-                "description": "Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.\n\n`POST /scheduling/resources/{id}/close-slots`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_closeSlots`",
+                "description": "Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada paciente.\n\n`POST /scheduling/resources/{id}/close-slots`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_closeSlots`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"reason\": \"reason-ejemplo\",\n  \"slotIds\": [\n    \"<slotIds: uuid existente>\"\n  ]\n}",
+                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"reason\": \"reason-ejemplo\",\n  \"slotIds\": [\n    \"<slotIds: uuid existente>\"\n  ],\n  \"cancelAffectedBookings\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -81990,10 +81990,10 @@
                     }
                   ]
                 },
-                "description": "Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.\n\n`POST /scheduling/resources/{id}/exceptions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_createException`",
+                "description": "Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente y bloquea.\n\n`POST /scheduling/resources/{id}/exceptions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_createException`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"endAt\": \"2026-01-01T00:00:00.000Z\",\n  \"reason\": \"reason-ejemplo\",\n  \"isAvailable\": false\n}",
+                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"endAt\": \"2026-01-01T00:00:00.000Z\",\n  \"reason\": \"reason-ejemplo\",\n  \"isAvailable\": false,\n  \"cancelAffectedBookings\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"

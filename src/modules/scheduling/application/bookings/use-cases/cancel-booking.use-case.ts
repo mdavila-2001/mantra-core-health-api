@@ -37,6 +37,15 @@ import {
   isWithinCancellationWindow,
 } from '../../../domain/booking/cancellation-policy';
 
+/** Lo que deja una cancelación ya escrita, antes de avisar a nadie. */
+export interface BookingCancelledInTransaction {
+  readonly result: CancelBookingResponseDto;
+  /** El motivo ya validado, tal como va en el aviso. */
+  readonly reason: string;
+  /** El cupo que volvió a ofrecerse, o `null` si no hay nada que promover. */
+  readonly releasedSlotId: string | null;
+}
+
 /** UC-41-09: cancela la cita y libera el cupo (también lo usa el rechazo). */
 @Injectable()
 export class CancelBookingUseCase {
@@ -72,12 +81,65 @@ export class CancelBookingUseCase {
     actor: AuthenticatedUser,
     change: BookingChange = 'CANCELLED',
   ): Promise<CancelBookingResponseDto> {
+    const cancelled = await this.em.transactional((tx) =>
+      this.cancelInTransaction(tx, bookingId, dto, actor, change),
+    );
+
+    await this.announceChange(
+      bookingId,
+      change,
+      cancelled.reason,
+      dto.cancelledBy,
+    );
+    await this.promoteWaitlistFor(cancelled.releasedSlotId);
+    return cancelled.result;
+  }
+
+  /**
+   * El aviso a la contraparte, **después** de que la cancelación quedó escrita.
+   *
+   * Es público porque hay quien cancela dentro de una transacción ajena —el
+   * bloqueo de agenda cancela las citas del rato en la misma operación que lo
+   * crea— y ese caller tiene que avisar recién cuando su propia transacción
+   * cerró. La regla es la de todos los avisos del módulo: nadie recibe
+   * «su cita se canceló» por una cancelación que se deshizo.
+   */
+  async announceChange(
+    bookingId: string,
+    change: BookingChange,
+    reason: string,
+    actorKind: CancelBookingDto['cancelledBy'],
+  ): Promise<void> {
+    await this.notifier.notifyChange(bookingId, change, reason, actorKind);
+  }
+
+  /**
+   * La cancelación en sí, dentro de la transacción que le pasan.
+   *
+   * ## Por qué está separada de `execute`
+   *
+   * Bloquear un rato con citas cancela cada una **en la misma transacción que
+   * crea el bloqueo**: si el bloqueo no se escribe, ninguna cita se cancela, y
+   * al revés. Abrir acá una transacción propia rompería justo eso. Así que
+   * `execute` abre la suya y delega; el bloqueo pasa la que ya tiene.
+   *
+   * No avisa ni promueve la lista de espera: eso va después del commit, y lo
+   * decide quien abrió la transacción (`announceChange`, `promoteWaitlistFor`).
+   */
+  async cancelInTransaction(
+    tx: EntityManager,
+    bookingId: string,
+    dto: CancelBookingDto,
+    actor: AuthenticatedUser,
+    change: BookingChange = 'CANCELLED',
+  ): Promise<BookingCancelledInTransaction> {
     const reason = requireReason(dto.reasonText, 'cancelar la cita');
 
     this.logger.info(
       {
         operation: 'scheduling.booking.cancel',
         bookingId,
+        change,
         isNoShow: dto.isNoShow === true,
       },
       'Cancelling booking',
@@ -88,7 +150,7 @@ export class CancelBookingUseCase {
     // detalle interno del caso de uso, no algo que el cliente deba conocer.
     let releasedSlotId: string | null = null;
 
-    const result = await this.em.transactional(async (tx) => {
+    {
       const booking = await this.bookingsRepo.findBookingByIdForUpdate(
         tx,
         bookingId,
@@ -256,17 +318,12 @@ export class CancelBookingUseCase {
         capacityReleased = true;
       }
 
-      return { bookingId, feeAmount, capacityReleased };
-    });
-
-    await this.notifier.notifyChange(
-      bookingId,
-      change,
-      reason,
-      dto.cancelledBy,
-    );
-    await this.promoteWaitlistFor(releasedSlotId);
-    return result;
+      return {
+        result: { bookingId, feeAmount, capacityReleased },
+        reason,
+        releasedSlotId,
+      };
+    }
   }
 
   /**
