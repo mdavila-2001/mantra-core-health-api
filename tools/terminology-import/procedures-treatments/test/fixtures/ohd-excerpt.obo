@@ -1,0 +1,47 @@
+format-version: 1.2
+data-version: releases/2026-10-01
+ontology: ohd
+
+[Term]
+id: OHD:0000002
+name: dental procedure
+def: "A healthcare encounter that realizes a dental patient role in which the patient undergoes a diagnostic or therapeutic process." []
+is_a: OGMS:0000097 ! health care encounter
+is_a: OHD:0008039 ! process during dental visit
+intersection_of: BFO:0000015 ! process
+intersection_of: BFO:0000055 OHD:0000052 ! realizes dental healthcare provider role
+intersection_of: BFO:0000055 OHD:0000190 ! realizes dental patient role
+relationship: BFO:0000055 OHD:0000052 ! realizes dental healthcare provider role
+relationship: BFO:0000055 OHD:0000190 ! realizes dental patient role
+relationship: RO:0002092 OHD:0000009 ! happens during dental visit
+property_value: editor_note "Bill Duncan 5/12/2015:\n\nChanged \"A specific healthcare activity\" to \"A health care encounter in which\"" xsd:string
+property_value: editor_note "Titus Schleyer 1/14/14: adapted definition slightly" xsd:string
+property_value: IAO:0000117 "PERSON:Pedro Cott" xsd:string
+property_value: isDefinedBy http://purl.obolibrary.org/obo/ohd.owl
+
+[Term]
+id: OHD:0000004
+name: tooth restoration procedure
+def: "A dental procedure in which either a whole tooth or a part of a tooth is replaced by dental restoration material in order to reestablish the tooth's anatomical and functional form and function." []
+is_a: OHD:0000002 ! dental procedure
+relationship: BFO:0000055 OHD:0000007 ! realizes tooth to be restored role
+relationship: OBI:0000417 OBI:0000434 ! achieves_planned_objective adding material objective
+relationship: RO:0000057 UBERON:0001091 ! has participant calcareous tooth
+property_value: dcterms:contributor https://orcid.org/0000-0001-9625-1899
+property_value: editor_note "Bill Duncan 12/16/2014:\nUpdated definition. \n\nOriginal defintion:\nA dental procedure in which a part of a tooth that has been lost due to disease, trauma or other causes is replaced by dental restoration material in order to reestablish the tooth's anatomical form and function.\nA tooth restoration procedure achieves some tooth restoration objective specification.\n\n1. Added \"either a whole tooth or part of a tooth\", since implants and pontics are also restoration procedures.\n\n2. Removed \"that has been lost due to disease, trauma or other causes\". This is information about why a restoration procedure may be performed, not necessarily what such a procedure is." xsd:string
+property_value: editor_note "Bill Duncan:\nRemoved axiom for tooth restoration procedure that has specified output some \"has_part some  (Tooth and ('has role' some 'tooth to be restored role'))\". \n\nMy reasons for doing this are:\n1) the 'has role' axiom looks wrong. The restoration process realizes the role, but it sounds odd for the process to output the role.\n\n2) Since the tooth restoration process outputs a restored tooth, a restored tooth by definition/axiom has part some (tooth and dental restoration material)." xsd:string
+property_value: editor_note "Mosby's Dental Dictionary 2nd ed" xsd:string
+property_value: editor_note "Titus Schleyer 3/14/2014: slightly edited definition" xsd:string
+property_value: IAO:0000117 "PERSON:Alan Ruttenberg" xsd:string
+property_value: IAO:0000117 "PERSON:Pedro Cott" xsd:string
+property_value: isDefinedBy http://purl.obolibrary.org/obo/ohd.owl
+
+[Term]
+id: OHD:0000037
+name: direct dental material insertion process
+def: "A material combination in which a moldable restorative material is placed directly into or on the tooth. The material then hardens and becomes (essentially) part of the tooth." []
+is_a: OBI:0000652 ! material combination
+relationship: OBI:0000293 UBERON:0001091 ! has_specified_input calcareous tooth
+property_value: editor_note "Bill Duncan 12/11/2014:\nMoved from this class from being a subtype of tooth restoration procedure to being a subclass of material combination." xsd:string
+property_value: editor_note "Titus Schleyer 1/1/2014: made definition clearer" xsd:string
+property_value: IAO:0000117 "Bill Duncan" xsd:string

@@ -1,0 +1,88 @@
+{
+  "generatedFrom": "build.mjs",
+  "files": [
+    {
+      "path": "out/procedures.ndjson.gz",
+      "bytes": 102951,
+      "uncompressedBytes": 1172669,
+      "sha256Uncompressed": "0c37d3ac57a3ccf1ce8881afbc923057a9cdf8a0d8184609e75578d0dc398c22",
+      "rows": 1988
+    },
+    {
+      "path": "out/assertions.ndjson.gz",
+      "bytes": 99657,
+      "uncompressedBytes": 955829,
+      "sha256Uncompressed": "5661281f730f49231ed0a16b1382af649d397154f0bafaa686f87f1c00ebf94e",
+      "rows": 746
+    },
+    {
+      "path": "out/maps.ndjson.gz",
+      "bytes": 53102,
+      "uncompressedBytes": 654626,
+      "sha256Uncompressed": "2b36926637b4883dff1d6e373f226351203ad265d2db6b5d71e165455ed2444b",
+      "rows": 1145
+    },
+    {
+      "path": "out/coverage.json.gz",
+      "bytes": 2581,
+      "uncompressedBytes": 10184,
+      "sha256Uncompressed": "7bc82e73d0f7078934d3fdae2f3ee4d20ac99a239d3e0cbdaf2d94269cd5fffc"
+    },
+    {
+      "path": "out/load-plan.dry-run.json.gz",
+      "bytes": 1016,
+      "uncompressedBytes": 2977,
+      "sha256Uncompressed": "1500b21df7f4e3d1876fd60e80e062aec7302f9ff5db0baf046163993b89a46b"
+    },
+    {
+      "path": "raw/maxo/maxo.obo.gz",
+      "bytes": 806471,
+      "uncompressedBytes": 4180499,
+      "sha256Uncompressed": "005178e62f2b3a3a173bd10f38b4538d4252b9f6c309574113671469826c60d8",
+      "source": "maxo",
+      "sha256Original": "005178e62f2b3a3a173bd10f38b4538d4252b9f6c309574113671469826c60d8"
+    },
+    {
+      "path": "raw/maxo-annotations/annotations.tsv.gz",
+      "bytes": 11742,
+      "uncompressedBytes": 78294,
+      "sha256Uncompressed": "92e6dcfe79e4276fa561408f8eab8e7f656b69bd4e874e4ecba61ad3edc1b75e",
+      "source": "maxo-annotations",
+      "sha256Original": "92e6dcfe79e4276fa561408f8eab8e7f656b69bd4e874e4ecba61ad3edc1b75e"
+    },
+    {
+      "path": "raw/ohd/ohd.obo.gz",
+      "bytes": 237180,
+      "uncompressedBytes": 1511068,
+      "sha256Uncompressed": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c",
+      "source": "ohd",
+      "sha256Original": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c"
+    }
+  ],
+  "omittedRaw": [
+    {
+      "source": "mondo",
+      "file": "mondo.obo",
+      "bytes": 53320617,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs mondo"
+    },
+    {
+      "source": "ncit-obo",
+      "file": "ncit.obo",
+      "bytes": 283269323,
+      "sha256": "e90ebb7e55f49cf2c43f14bbf9edc8969f0c327897547086187ed877998d5d1a",
+      "url": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs ncit-obo"
+    },
+    {
+      "source": "uberon",
+      "file": "uberon.obo",
+      "bytes": 22529133,
+      "sha256": "d4751a15d7551a8414caee2628c62bf68301d567caf54ccfa3eef383ae7cbb61",
+      "url": "https://github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs uberon"
+    }
+  ]
+}
