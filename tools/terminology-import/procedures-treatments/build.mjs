@@ -36,6 +36,10 @@ import {
   readMaxoTerms,
 } from './lib/sources/maxo.mjs';
 import { ncitProcedureAssertions, readNcit } from './lib/sources/ncit.mjs';
+import {
+  oboProcedureCorpus,
+  readOboTerms,
+} from './lib/sources/obo-procedures.mjs';
 import { mondoMaps, readXrefs, uberonMaps } from './lib/sources/xrefs.mjs';
 
 /** Metadatos de procedencia de una fuente descargada por `fetch.mjs`. */
@@ -103,8 +107,32 @@ async function main() {
     ...ncitOut.skipped,
   };
 
-  const assertions = [...poet.assertions, ...maxoSites, ...ncitOut.assertions];
-  const procedures = [...maxoProcs, ...ncitOut.procedures];
+  // --- OHD (procedimientos odontológicos) -----------------------------------------
+  const ohdRead = await readOboTerms(
+    oboStanzas(readLines(cacheDir('ohd', 'ohd.obo'))),
+  );
+  const ohdMeta = sourceMeta(
+    'ohd',
+    'ohd.obo',
+    `${ohdRead.version.dataVersion} (git ${readJson(cacheDir('ohd', 'meta.json')).commit.slice(0, 12)})`,
+  );
+  const ohd = oboProcedureCorpus({
+    terms: ohdRead.terms,
+    prefix: 'OHD',
+    root: 'OHD:0000002',
+    system: 'ohd',
+    category: 'dental',
+    typePrefix: 'ohd',
+    meta: ohdMeta,
+  });
+
+  const assertions = [
+    ...poet.assertions,
+    ...maxoSites,
+    ...ncitOut.assertions,
+    ...ohd.assertions,
+  ];
+  const procedures = [...maxoProcs, ...ncitOut.procedures, ...ohd.procedures];
 
   // --- Equivalencias publicadas (solo para los códigos que se usan) ----------------
   const wantedMondo = new Set(
@@ -162,6 +190,7 @@ async function main() {
     ['maxo', maxoMeta],
     ['maxo-annotations', poetMeta],
     ['ncit-obo', ncitMeta],
+    ['ohd', ohdMeta],
     ['mondo', mondoMeta],
     ['uberon', uberonMeta],
   ]) {

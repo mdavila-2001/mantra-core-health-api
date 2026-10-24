@@ -25,6 +25,17 @@ export const GITHUB_SOURCES = {
     repo: 'monarch-initiative/MAxO',
     files: { 'maxo.obo': 'maxo.obo' },
   },
+  ohd: {
+    name: 'Oral Health and Disease Ontology (OHD)',
+    publisher: 'OHD project (OBO Foundry)',
+    license: 'CC BY 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+    homepage:
+      'https://github.com/oral-health-and-disease-ontologies/ohd-ontology',
+    kind: 'github-raw',
+    repo: 'oral-health-and-disease-ontologies/ohd-ontology',
+    files: { 'ohd.obo': 'ohd.obo' },
+  },
   'ncit-obo': {
     name: 'NCI Thesaurus OBO Edition',
     publisher: 'NCIt OBO Edition project (derivado de NCI Thesaurus, NCI EVS)',

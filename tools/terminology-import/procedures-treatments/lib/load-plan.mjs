@@ -37,6 +37,20 @@ export const OWNED_CODE_SYSTEMS = {
     },
     createIfAbsent: true,
   },
+  ohd: {
+    internalCode: 'ohd',
+    name: 'Oral Health and Disease Ontology (OHD)',
+    canonicalUrl: 'http://purl.obolibrary.org/obo/ohd.owl',
+    source: {
+      code: 'OBO_OHD',
+      name: 'Oral Health and Disease Ontology (OBO Foundry)',
+      owner: 'OHD project',
+      officialUrl:
+        'https://github.com/oral-health-and-disease-ontologies/ohd-ontology',
+      license: 'CC BY 4.0',
+    },
+    createIfAbsent: true,
+  },
   ncit: {
     internalCode: 'ncit',
     name: 'NCI Thesaurus',
@@ -70,6 +84,7 @@ export const PROVENANCE_SOURCE_CODE = {
   maxo: 'MONARCH_MAXO',
   'maxo-annotations': 'MONARCH_MAXO',
   'ncit-obo': 'NCI_EVS_NCIT',
+  ohd: 'OBO_OHD',
 };
 
 /** Columnas mínimas de la tabla de procedencia propuesta (ver la propuesta para el modelo). */

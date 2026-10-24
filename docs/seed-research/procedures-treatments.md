@@ -29,7 +29,8 @@ Se resuelve todo por `code_systems.internal_code` (índice único) + `catalog_co
 |---|---|---|
 | `maxo` | `MAXO:0000011` (CURIE completo, como lo publica MAxO) | 1 576 procedimientos no farmacológicos |
 | `ncit` | `C15256` (sin prefijo) | 331 procedimientos NCIt referenciados por roles de sitio |
-| `procedure-relationship-types` | `maxo-poet:TREATS`, `ncit:R163`, `maxo:RO:0002233`… | 14 tipos de relación (predicado literal por fuente) |
+| `ohd` | `OHD:0000004` (CURIE completo) | 81 procedimientos odontológicos |
+| `procedure-relationship-types` | `maxo-poet:TREATS`, `ncit:R163`, `maxo:RO:0002233`… | 16 tipos de relación (predicado literal por fuente) |
 
 Y **espera** de las hermanas (no los crea): `mondo` (`MONDO:0005015`), `uberon` (`UBERON:0000945`),
 `ncit` anatomía (`C12391`). `validate-siblings.mjs` prueba ambas grafías (con y sin prefijo) y admite
@@ -89,7 +90,8 @@ de `assertion_kind varchar` (el cargador cambiaría una línea). Lo mismo le sir
 **Probado en una base desechable** (PostgreSQL 16.15 local, DDL canónico del módulo 03 + esta tabla,
 con MONDO/UBERON simulados solo con los códigos referenciados): 689 relaciones y 732 filas de
 procedencia; segunda corrida, 0 filas nuevas. Sin la tabla (DDL canónico tal cual): 1 921 conceptos y
-13 391 propiedades, 0 relaciones, segunda corrida 0.
+13 391 propiedades, 0 relaciones, segunda corrida 0 (medido en la pasada 1; con OHD el plan sube a 2 004
+conceptos y 13 964 propiedades).
 
 ## Hosts bloqueados
 
@@ -109,11 +111,13 @@ tipo + sujeto + objeto). Una pasada aporta 0 cuando ninguna fuente nueva agrega 
 | # | Fecha | Fuentes | Procedimientos nuevos | Relaciones nuevas (proc → enf / proc → sitio) | Descartadas en la pasada (motivo) |
 |---|---|---|---|---|---|
 | 1 | 2026-10-24 | MAxO 2026-01-15, MAxO/POET git `42edd966`, NCIt OBO 24.04e, MONDO 2026-10-06 y Uberon 2026-10-01 (estas dos solo para equivalencias) | 1 907 (MAxO 1 576 · NCIt 331) | 703 (250 / 453), de 746 afirmaciones | AutoMAxO (generado por modelo); anotaciones diagnósticas HPO (no es enfermedad); R172 (fármacos); SNOMED (licencia); las 13 fuentes de la tabla de hosts (red) |
+| 2 | 2026-10-24 | OHD 2026-10-01 (git `9cbaa1a1`); evaluadas sin aporte: CIDO, EFO 3.95.0, WHO SMART Guidelines (ANC, HIV, inmunizaciones, FP, STI, RA, BDS, SMBP) | 81 (OHD, odontológicos) | 0 (0 / 0) | SCDO (licencia GPL-3.0: decide el propietario); CDT dentro de OHD (copyright ADA); CIDO/EFO (sin relaciones de procedimiento); WHO SMART (lógica de decisión, no relación publicada); ramas hermanas aún ausentes; red sin cambios |
 
-## Cobertura (pasada 1)
+## Cobertura (acumulada a la pasada 2)
 
-- **Procedimientos:** 1 907. MAxO 1 576 (diagnósticos 841, terapéuticos u otros 430, quirúrgicos 292,
-  evitación 13); NCIt 331. ICHI / ICD-10-PCS / CUPS: 0 relaciones (fuentes bloqueadas por la red).
+- **Procedimientos:** 1 988. MAxO 1 576 (diagnósticos 841, terapéuticos u otros 430, quirúrgicos 292,
+  evitación 13); NCIt 331; OHD 81 (odontológicos, sin relaciones: se cargan como catálogo, 81 conceptos y
+  ~570 propiedades que hoy no responden ninguna consulta de relación). ICHI / ICD-10-PCS / CUPS: 0 relaciones (fuentes bloqueadas por la red).
 - **Procedimiento → enfermedad:** 293 afirmaciones, 250 relaciones únicas, 103 procedimientos, 167
   enfermedades (todas MONDO, mayormente enfermedades raras: es el foco de POET). Tipos: `TREATS` 266,
   `PREVENTS` 25, `NO_OBSERVED_BENEFIT` 2. Equivalencias publicadas: 111 con Orphanet, 89 con MeSH,

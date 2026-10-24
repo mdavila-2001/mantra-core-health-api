@@ -11,10 +11,11 @@ sha256, tamaño y fecha. Nada de esta tabla se copia al repositorio.
 | `maxo` | Monarch Initiative — Medical Action Ontology | `2026-01-15` (git `59b5d75a454f`) | `raw.githubusercontent.com/monarch-initiative/MAxO/59b5d75a…/maxo.obo` | `005178e6…` | CC BY 4.0 | 1 576 procedimientos no farmacológicos (1 930 términos vigentes; 354 farmacológicos excluidos); 15 sitios por axioma `RO:0002233 has input` → UBERON; 305 xrefs publicados a NCIt/MeSH |
 | `maxo-annotations` | Monarch Initiative — curación POET | git `42edd966faac` | `raw.githubusercontent.com/monarch-initiative/maxo-annotations/42edd966…/data/poet/annotations.tsv` | `92e6dcfe…` | CC BY 4.0 | 293 afirmaciones procedimiento → enfermedad (MONDO) con PMID, tipo literal `TREATS`/`PREVENTS`/`NO_OBSERVED_BENEFIT`; 145 filas farmacológicas excluidas |
 | `ncit-obo` | NCIt OBO Edition (derivada de NCI Thesaurus, NCI EVS) | NCIt `24.04e` (`releases/2024-05-07`) | `github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo` | `e90ebb7e…` | CC BY 4.0 (términos de uso de NCIt) | 331 procedimientos NCIt; 438 roles procedimiento → anatomía (R163, R165–R171) |
+| `ohd` | OHD project — Oral Health and Disease Ontology (OBO Foundry) | `releases/2026-10-01` (git `9cbaa1a17270`) | `raw.githubusercontent.com/oral-health-and-disease-ontologies/ohd-ontology/9cbaa1a1…/ohd.obo` | `f8518e5b…` | CC BY 4.0 | 81 procedimientos odontológicos (descendientes de `OHD:0000002` «dental procedure»); 0 relaciones (pasada 2) |
 | `mondo` | Monarch Initiative — Mondo Disease Ontology | `releases/2026-10-06` | `github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo` | `2631e8e1…` | CC BY 4.0 | Equivalencias `MONDO:equivalentTo` de las 167 enfermedades enlazadas (ICD-10-CM, MeSH, Orphanet, OMIM, NCIt, DOID, ICD-11 Foundation) |
 | `uberon` | Uberon consortium (OBO Foundry) | `releases/2026-10-01` | `github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo` | `d4751a15…` | CC BY 3.0 | Xrefs Uberon → NCIt (sitio NCIt expresado en Uberon, solo uno a uno) y Uberon → FMA/MeSH |
 
-Atribución: «Contains data from the Medical Action Ontology (MAxO) and MAxO annotations, Monarch Initiative,
+Atribución: «Oral Health and Disease Ontology (OHD), CC BY 4.0»; «Contains data from the Medical Action Ontology (MAxO) and MAxO annotations, Monarch Initiative,
 CC BY 4.0»; «NCI Thesaurus, National Cancer Institute (OBO Edition), CC BY 4.0» — la edición OBO es un
 derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontology, CC BY 4.0»; «Uberon, CC BY 3.0».
 
@@ -27,6 +28,11 @@ derivado y no se presenta como la edición oficial de NCI; «Mondo Disease Ontol
 | NCIt R172 `Regimen_Has_Accepted_Use_For_Disease` | Regímenes de quimioterapia: fármacos, de la sesión `justin/seed-drug-treatments`. |
 | SNOMED CT (xrefs `SCTID` en MONDO/Uberon/MAxO) | Bolivia no es miembro de SNOMED International: no se cargan ni se usan para resolver. |
 | CPT | Propiedad de la AMA. No se usa. |
+| CDT (términos `CDT:` dentro de OHD) | Códigos de facturación odontológica de la ADA, con copyright: no se cargan aunque OHD los incluya. |
+| SCDO — Sickle Cell Disease Ontology (`scdodev/scdo-ontology`, release 2021-04-15) | Tiene 286 relaciones `SCDO:1000018 treats` (cirugía, transfusión, fisioterapia, trasplante… → complicaciones de la drepanocitosis), pero la licencia declarada es **GPL-3.0**: incorporarlas en una base propietaria es una decisión del propietario. Hueco por licencia (pasada 2). |
+| CIDO — Coronavirus Infectious Disease Ontology (git `d1ebe2ef`) | La propiedad `CIDO_0000012 treatment for` se usa una sola vez (clase «COVID-19 treatment», sustancias): 0 relaciones procedimiento ↔ enfermedad o sitio (pasada 2). |
+| EFO 3.95.0 (`EBISPOT/efo`, release) | Sus `has input`/`has specified input` apuntan a CHEBI/CL/OBI: 0 relaciones procedimiento → UBERON o → enfermedad (pasada 2). |
+| WHO SMART Guidelines (`WorldHealthOrganization/smart-anc`, `smart-hiv`, `smart-immunizations`…) | Usan ~25 códigos ICHI con su nombre oficial, pero dentro de lógica de decisión (PlanDefinition/CQL): extraer «procedimiento para la condición X» exigiría interpretar la lógica, no leer una relación publicada. Sin la clasificación ICHI (bloqueada) tampoco dan el eje Target. (pasada 2) |
 | Espejos de terceros de fuentes oficiales (GitHub/PyPI de particulares) | No son el editor: procedencia no verificable. |
 | WebFetch como transporte de datos | Pasa el contenido por un modelo antes de devolverlo: no garantiza fidelidad. Solo se usa para descubrir y leer licencias. |
 

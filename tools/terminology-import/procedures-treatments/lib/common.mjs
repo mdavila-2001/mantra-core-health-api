@@ -125,11 +125,12 @@ export function parseTsv(text) {
  * `validate-siblings.mjs` prueba también la otra forma al comparar con las
  * claves de las sesiones hermanas, porque cada una pudo elegir distinto.
  */
-const OBO_SYSTEMS = new Set(['maxo', 'mondo', 'uberon', 'hp']);
+const OBO_SYSTEMS = new Set(['maxo', 'mondo', 'uberon', 'hp', 'ohd']);
 
 /** Prefijo de CURIE de la fuente → code system interno. */
 export const PREFIX_TO_SYSTEM = {
   MAXO: 'maxo',
+  OHD: 'ohd',
   MONDO: 'mondo',
   UBERON: 'uberon',
   HP: 'hp',

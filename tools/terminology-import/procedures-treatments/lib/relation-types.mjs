@@ -50,6 +50,20 @@ export const RELATION_TYPES = {
     label: 'Tiene como entrada la estructura (axioma «has input» de MAxO)',
   },
 
+  // --- OHD (procedimiento odontológico → sitio anatómico) ---------------------
+  'ohd:OBI:0000293': {
+    kind: 'procedure-site',
+    sourcePredicate: 'OBI:0000293 has specified input',
+    assertion: 'ontology-axiom',
+    label: 'Tiene como entrada especificada la estructura (axioma de OHD)',
+  },
+  'ohd:RO:0002233': {
+    kind: 'procedure-site',
+    sourcePredicate: 'RO:0002233 has input',
+    assertion: 'ontology-axiom',
+    label: 'Tiene como entrada la estructura (axioma «has input» de OHD)',
+  },
+
   // --- NCIt (procedimiento → sitio anatómico) -----------------------------------
   'ncit:R163': {
     kind: 'procedure-site',

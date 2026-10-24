@@ -225,3 +225,29 @@ test('plan de carga: sin columnas de procedencia, las relaciones se bloquean', a
   );
   assert.equal(relationshipsBlockedReason(['id', ...PROVENANCE_COLUMNS]), null);
 });
+
+test('OHD: solo procedimientos bajo «dental procedure»; un sitio en un proceso ajeno no entra', async () => {
+  const { readOboTerms, oboProcedureCorpus } =
+    await import('../lib/sources/obo-procedures.mjs');
+  const { terms } = await readOboTerms(
+    oboStanzas(readLines(join(FIX, 'ohd-excerpt.obo'))),
+  );
+  const { procedures, assertions } = oboProcedureCorpus({
+    terms,
+    prefix: 'OHD',
+    root: 'OHD:0000002',
+    system: 'ohd',
+    category: 'dental',
+    typePrefix: 'ohd',
+    meta: meta('ohd'),
+  });
+  assert.deepEqual(procedures.map((p) => p.code).sort(), [
+    'OHD:0000002',
+    'OHD:0000004',
+  ]);
+  assert.equal(
+    assertions.length,
+    0,
+    'OHD:0000037 (material combination) declara un sitio pero no es un procedimiento',
+  );
+});

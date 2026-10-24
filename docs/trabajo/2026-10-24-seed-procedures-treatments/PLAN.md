@@ -67,7 +67,7 @@
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H5.S1.M1 | Typecheck | exit 0 | `corepack yarn typecheck` | HECHO |
-| H5.S1.M2 | Lint | exit 0 | `corepack yarn lint` | EN CURSO |
+| H5.S1.M2 | Lint | exit 0 | `corepack yarn lint` | HECHO |
 | H5.S1.M3 | Tests dirigidos | 0 fallos | `node --test tools/terminology-import/procedures-treatments/test/*.test.mjs` | HECHO |
 | H5.S1.M4 | Medición con ramas hermanas | reporte `validate-siblings.json` con ramas reales | `node …/validate-siblings.mjs --db` | BLOQUEADO |
 | H5.S1.M5 | PR contra `dev` | PR abierto, sin mergear | URL del PR | TODO |
