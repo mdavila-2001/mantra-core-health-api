@@ -11,12 +11,20 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { ClaimsService } from '../../application/services';
 import {
+  CurrentUser,
+  NotAudited,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
+import { ClaimQuoteService, ClaimsService } from '../../application/services';
+import {
+  ClaimQuoteDto,
+  ClaimQuoteResultDto,
   CreateClaimDto,
   CreatedClaimDto,
   CreateAdjudicationDto,
@@ -41,7 +49,35 @@ export class ClaimsController {
    *
    * @param service - Valor de service requerido por la operación.
    */
-  constructor(private readonly service: ClaimsService) {}
+  constructor(
+    private readonly service: ClaimsService,
+    private readonly quoteService: ClaimQuoteService,
+  ) {}
+
+  /**
+   * REQ-16-026. Cotización previa del cobro, sin efectos.
+   *
+   * Misma puerta que el envío directo (el servicio exige BILLING, FINANCE o
+   * SUPERADMIN) y las mismas reglas que el cobro real, pero no guarda nada ni
+   * bloquea ninguna fila. Responde 200, no 201: no se creó ningún recurso.
+   */
+  @Post('quote')
+  @Roles()
+  @NotAudited(
+    'Cotización sin persistencia ni efectos (REQ-16-026): no muta estado. El cálculo queda sellado al enviar el reclamo, que es la ruta auditada.',
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Cotizar un cobro a la aseguradora (sin guardar)' })
+  @ApiOkResponse({ type: ClaimQuoteResultDto })
+  @ApiForbiddenResponse({
+    description: 'El rol no puede cobrar a la aseguradora.',
+  })
+  quote(
+    @Body() dto: ClaimQuoteDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ClaimQuoteResultDto> {
+    return this.quoteService.quote(dto, actor);
+  }
 
   /** UC-26-06. El servicio exige membresía OWNER/ADMIN por origen; conserva roles históricos para reclamos genéricos. */
   @Post()

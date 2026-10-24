@@ -47,7 +47,12 @@ describe('Insurance controllers (delegación)', () => {
       reverse: mockFn().mockResolvedValue({ id: ID }),
       openDispute: mockFn().mockResolvedValue({ ok: true }),
     };
-    const c = new ClaimsController(service as never);
+    const quoteService = {
+      quote: mockFn().mockResolvedValue({ canSubmit: true }),
+    };
+    const c = new ClaimsController(service as never, quoteService as never);
+    expect(await c.quote(dto, actor)).toEqual({ canSubmit: true });
+    expect(quoteService.quote).toHaveBeenCalledWith(dto, actor);
     expect(await c.submit(dto, actor)).toEqual({ ok: true });
     expect(service.submitClaim).toHaveBeenCalledWith(dto, actor);
     await c.adjudicate(ID, dto, actor);
@@ -276,7 +281,13 @@ describe('Insurance controllers (delegación)', () => {
     ]);
 
     // Los servicios distinguen OWNER/ADMIN por tenant de los roles genéricos históricos.
-    for (const write of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
+    for (const write of [
+      'quote',
+      'submit',
+      'adjudicate',
+      'publishEob',
+      'reverse',
+    ]) {
       expect(method(write)).toEqual([]);
     }
     for (const operation of ['submit', 'determine', 'inbox', 'getById']) {

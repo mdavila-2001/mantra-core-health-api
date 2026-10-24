@@ -15,3 +15,4 @@ export * from './insurance-portability.dto';
 export * from './practitioner-settlement-batch.dto';
 export * from './insurance-campaigns.dto';
 export * from './insurer-patients.dto';
+export * from './claim-quote.dto';
