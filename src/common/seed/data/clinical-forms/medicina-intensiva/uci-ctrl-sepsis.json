@@ -12,7 +12,7 @@
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "Disfunción orgánica por SOFA (publicado, de uso libre), lactato y metas de la primera hora. Ampliación internacional (2026-10-24): los seis componentes de la escala SOFA desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Disfunción orgánica por SOFA (publicado, de uso libre), lactato y metas de la primera hora. Ampliación internacional (2026-10-24): los seis componentes de la escala SOFA desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

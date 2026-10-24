@@ -47,6 +47,13 @@ DAKS = {
         "title": "Digital adaptation kit for immunizations: core data dictionary",
         "cols": None,
     },
+    "STI": {
+        "repo": "smart-sti",
+        "file": "input/datadictionary/WHO-DD.xlsx",
+        "title": "WHO Digital Adaptation Kit for sexually transmitted infections: data dictionary",
+        "sheets": ["New DD (Stacked)"],
+        "cols": {"id": 1, "label": 2, "desc": 3, "multi": 4, "type": 5, "input": 6},
+    },
     "FP": {
         "repo": "smart-fp",
         "file": "input/datadictionary/WHO-DD.xlsx",

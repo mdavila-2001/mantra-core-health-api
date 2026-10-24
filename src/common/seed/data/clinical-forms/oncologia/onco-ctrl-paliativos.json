@@ -9,7 +9,7 @@
     "url": "https://ecog-acrin.org/resources/ecog-performance-status/",
     "license": "De uso libre, citando la fuente",
     "retrievedAt": "2026-10-02",
-    "note": "Intensidad de síntomas, dolor por la escala de la OMS y estado funcional. Ampliación internacional (2026-10-24): escala de Karnofsky desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Intensidad de síntomas, dolor por la escala de la OMS y estado funcional. Ampliación internacional (2026-10-24): escala de Karnofsky desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

@@ -9,7 +9,7 @@
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "Puntaje de Aldrete (publicado) para el alta de la sala de recuperación, dolor y náuseas. Ampliación internacional (2026-10-24): el puntaje PADSS de alta de cirugía ambulatoria desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Puntaje de Aldrete (publicado) para el alta de la sala de recuperación, dolor y náuseas. Ampliación internacional (2026-10-24): el puntaje PADSS de alta de cirugía ambulatoria desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

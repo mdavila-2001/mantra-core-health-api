@@ -16,7 +16,18 @@
  * (`description`). El registro de pasadas, fuentes descartadas y licencias está
  * en `docs/seed-research/clinical-forms.md`.
  */
-import { alergias, b, control, i, s, seccion, si, t, una } from './lib.mjs';
+import {
+  alergias,
+  b,
+  control,
+  i,
+  informeDe,
+  s,
+  seccion,
+  si,
+  t,
+  una,
+} from './lib.mjs';
 import { escala, factores, seleccion } from './openehr/escalas.mjs';
 import { citaDak, dak, DESCARGO_OMS } from './who-dak/dak.mjs';
 
@@ -732,7 +743,7 @@ const MAYO = [
 );
 
 const NOTA_CKM = (escalas) =>
-  `Ampliación internacional (${FECHA}): ${escalas} desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas.`;
+  `Ampliación internacional (${FECHA}): ${escalas} desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas.`;
 
 export const MEJORAS = {
   PEDIA_RECIEN_NACIDO: {
@@ -2192,4 +2203,222 @@ Object.assign(MEJORAS, {
     nota: NOTA_DAK('el resultado del tratamiento de tuberculosis', 'HIV'),
     aplicar: (c) => despues(c, 'tb_fase', TB_RESULTADO),
   },
+});
+
+/* -- Pasada 7: clusters y CKM nacionales espejados ------------------------ */
+
+const REFLEJOS_ID = 'openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0';
+const REFLEJO_RESPUESTA = {
+  at0022: '0 — Ausente',
+  at0023: '± — Dudoso',
+  at0024: '1+ — Disminuido',
+  at0025: '2+ — Normal',
+  at0026: '3+ — Vivo',
+  at0027: '4+ — Clonus agotable',
+  at0028: '5+ — Clonus inagotable',
+};
+const REFLEJOS = [
+  ['bicipital', 'Bicipital (C5–C6)'],
+  ['braquiorradial', 'Braquiorradial o estilorradial (C6)'],
+  ['tricipital', 'Tricipital (C7)'],
+  ['rotuliano', 'Rotuliano (L4)'],
+  ['aquileo', 'Aquíleo (S1)'],
+].flatMap(([code, nombre]) =>
+  ['izquierdo', 'derecho'].map((lado) =>
+    escala(REFLEJOS_ID, 'at0013', `reflejo_${code}_${lado}`, {
+      nombre: `Reflejo ${nombre.replace(/^./, (c) => c.toLowerCase())} — ${lado}`,
+      fuente: 'graduación de los reflejos de estiramiento muscular',
+      traduccion: REFLEJO_RESPUESTA,
+      ...(code === 'bicipital' && lado === 'izquierdo'
+        ? {
+            extra:
+              'Los sitios y la graduación (0, ±, 1+ a 5+) son los del arquetipo; la notación numérica es la que el propio arquetipo menciona en cada respuesta.',
+          }
+        : {}),
+    }),
+  ),
+);
+
+const NRS_ID = 'openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1';
+const NRS_FUENTE =
+  'NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN';
+const SI_NO_NRS = (si, no) => ({ [si]: 'Sí', [no]: 'No' });
+const NRS = [
+  escala(NRS_ID, 'at0004', 'nrs_imc_menor_20_5', {
+    nombre: 'NRS 2002 — ¿IMC menor de 20,5 kg/m²?',
+    fuente: NRS_FUENTE,
+    traduccion: SI_NO_NRS('at0033', 'at0034'),
+    extra:
+      'Tamizaje inicial: si alguna de las cuatro preguntas es «sí», se completa el tamizaje final.',
+  }),
+  escala(NRS_ID, 'at0005', 'nrs_perdida_de_peso_3_meses', {
+    nombre: 'NRS 2002 — ¿Perdió peso en los últimos 3 meses?',
+    fuente: NRS_FUENTE,
+    traduccion: SI_NO_NRS('at0035', 'at0036'),
+  }),
+  escala(NRS_ID, 'at0006', 'nrs_ingesta_reducida', {
+    nombre: 'NRS 2002 — ¿Redujo la ingesta en la última semana?',
+    fuente: NRS_FUENTE,
+    traduccion: SI_NO_NRS('at0037', 'at0038'),
+  }),
+  escala(NRS_ID, 'at0007', 'nrs_enfermedad_grave', {
+    nombre:
+      'NRS 2002 — ¿Está gravemente enfermo (p. ej. en terapia intensiva)?',
+    fuente: NRS_FUENTE,
+    traduccion: SI_NO_NRS('at0039', 'at0040'),
+  }),
+  escala(NRS_ID, 'at0016', 'nrs_estado_nutricional', {
+    nombre: 'NRS 2002 — deterioro del estado nutricional',
+    fuente: NRS_FUENTE,
+    traduccion: {
+      at0018: 'Ausente: estado nutricional normal',
+      at0019:
+        'Leve: pérdida de peso > 5 % en 3 meses o ingesta del 50 al 75 % de lo requerido en la última semana',
+      at0020:
+        'Moderado: pérdida de peso > 5 % en 2 meses, o IMC 18,5 a 20,5 con deterioro del estado general, o ingesta del 25 al 50 %',
+      at0021:
+        'Grave: pérdida de peso > 5 % en 1 mes (> 15 % en 3 meses), o IMC < 18,5 con deterioro del estado general, o ingesta del 0 al 25 %',
+    },
+  }),
+  escala(NRS_ID, 'at0017', 'nrs_gravedad_enfermedad', {
+    nombre: 'NRS 2002 — gravedad de la enfermedad (aumento de requerimientos)',
+    fuente: NRS_FUENTE,
+    traduccion: {
+      at0022: 'Ausente: requerimientos normales',
+      at0023:
+        'Leve: p. ej. fractura de cadera, enfermedad crónica con complicaciones (cirrosis, EPOC, hemodiálisis, diabetes, cáncer)',
+      at0024:
+        'Moderada: p. ej. cirugía abdominal mayor, ACV, neumonía grave, neoplasia hematológica',
+      at0025:
+        'Grave: p. ej. traumatismo craneoencefálico, trasplante de médula ósea, paciente de terapia intensiva (APACHE II > 10)',
+    },
+  }),
+  escala(NRS_ID, 'at0027', 'nrs_edad_70_o_mas', {
+    nombre: 'NRS 2002 — ¿70 años o más?',
+    fuente: NRS_FUENTE,
+    traduccion: { at0028: 'No', at0029: 'Sí' },
+    extra:
+      'Puntaje total (0 a 7) de 3 o más: riesgo nutricional; indicar soporte.',
+  }),
+];
+
+const BEIGHTON = factores(
+  'openEHR-EHR-OBSERVATION.beighton_score.v0',
+  [
+    'at0004',
+    'at0007',
+    'at0014',
+    'at0017',
+    'at0020',
+    'at0023',
+    'at0026',
+    'at0029',
+    'at0030',
+  ],
+  'beighton_hallazgos',
+  {
+    nombre: 'Beighton: maniobras positivas',
+    fuente:
+      'puntaje de Beighton (Beighton P et al. Ann Rheum Dis. 1973;32:413-8)',
+    traduccion: {
+      at0004: 'Meñique izquierdo',
+      at0007: 'Meñique derecho',
+      at0014: 'Pulgar izquierdo',
+      at0017: 'Pulgar derecho',
+      at0020: 'Codo izquierdo',
+      at0023: 'Codo derecho',
+      at0026: 'Rodilla izquierda',
+      at0029: 'Rodilla derecha',
+      at0030: 'Tronco',
+    },
+    criterio: {
+      at0004: 'dorsiflexión pasiva mayor de 90°',
+      at0007: 'dorsiflexión pasiva mayor de 90°',
+      at0014: 'aposición pasiva a la cara flexora del antebrazo',
+      at0017: 'aposición pasiva a la cara flexora del antebrazo',
+      at0020: 'hiperextensión mayor de 10°',
+      at0023: 'hiperextensión mayor de 10°',
+      at0026: 'hiperextensión mayor de 10°',
+      at0029: 'hiperextensión mayor de 10°',
+      at0030: 'apoya las palmas en el suelo con las rodillas extendidas',
+    },
+    ninguno: 'Ninguna',
+    extra: 'Hipermovilidad articular: puntaje de 0 a 9.',
+  },
+);
+
+const GLEASON_ID = 'openEHR-EHR-CLUSTER.gleason_score.v0';
+const GLEASON_FUENTE =
+  'sistema de Gleason con los grupos de grado ISUP (Epstein JI et al. Am J Surg Pathol. 2016;40:244-52)';
+const GRADO = (p) =>
+  Object.fromEntries(
+    [1, 2, 3, 4, 5].map((n, k) => [`at0${p + k}`, `Grado ${n}`]),
+  );
+const GLEASON = [
+  escala(GLEASON_ID, 'at0166', 'gleason_primario', {
+    nombre: 'Gleason — patrón primario (predominante)',
+    fuente: GLEASON_FUENTE,
+    traduccion: GRADO(250),
+  }),
+  escala(GLEASON_ID, 'at0182', 'gleason_secundario', {
+    nombre: 'Gleason — patrón secundario',
+    fuente: GLEASON_FUENTE,
+    traduccion: GRADO(255),
+  }),
+  escala(GLEASON_ID, 'at0183', 'gleason_terciario', {
+    nombre: 'Gleason — patrón terciario (si existe)',
+    fuente: GLEASON_FUENTE,
+    traduccion: GRADO(260),
+  }),
+  i('gleason_puntaje', 'Gleason — puntaje (primario + secundario)'),
+  escala(GLEASON_ID, 'at0265', 'gleason_grupo_isup', {
+    nombre: 'Grupo de grado ISUP',
+    fuente: GLEASON_FUENTE,
+    req: true,
+    traduccion: {
+      at0266: 'Grupo 1 (Gleason ≤ 6)',
+      at0267: 'Grupo 2 (Gleason 7 = 3 + 4)',
+      at0268: 'Grupo 3 (Gleason 7 = 4 + 3)',
+      at0269: 'Grupo 4 (Gleason 8)',
+      at0270: 'Grupo 5 (Gleason 9 a 10)',
+    },
+  }),
+];
+
+Object.assign(MEJORAS, {
+  NEURO_EVALUACION_BASE: {
+    version: 3,
+    nota: NOTA_CKM(
+      'la graduación de los reflejos osteotendinosos por sitio y lado (cluster exam_tendon_reflexes)',
+    ),
+    aplicar: (c) => despues(c, 'reflejos_osteotendinosos', REFLEJOS),
+  },
+  NUTRI_EVALUACION_BASE: {
+    version: 3,
+    nota: NOTA_CKM('la NRS 2002 (arquetipo del CKM noruego espejado)'),
+    aplicar: (c) => despues(c, 'tendencia_de_peso', NRS),
+  },
+  REUMA_EVALUACION_BASE: {
+    version: 3,
+    nota: NOTA_CKM(
+      'el puntaje de hipermovilidad de Beighton (arquetipo de Clinical Models UK espejado)',
+    ),
+    aplicar: (c) => despues(c, 'examen_osteoarticular', [BEIGHTON]),
+  },
+});
+
+ESPECIFICAS_INTL.push({
+  code: 'PATOL_INFORME_BIOPSIA_PROSTATA',
+  carpeta: 'patologia-clinica',
+  nombre: 'Informe de biopsia de próstata (Gleason y grupo ISUP)',
+  fuente: 'CKM_GLEASON',
+  fecha: FECHA,
+  nota: 'Estructura de informe del catálogo (indicación, resultado, conclusión) y gradación del cluster openEHR-EHR-CLUSTER.gleason_score.v0 (traducción propia, no oficial).',
+  campos: () =>
+    informeDe('biopsia de próstata', [
+      i('cilindros_totales', 'Cilindros examinados'),
+      i('cilindros_con_carcinoma', 'Cilindros con carcinoma'),
+      b('carcinoma_presente', 'Adenocarcinoma presente'),
+      ...si('carcinoma_presente', true, GLEASON),
+    ]),
 });

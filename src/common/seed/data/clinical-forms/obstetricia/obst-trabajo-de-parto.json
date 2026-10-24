@@ -9,7 +9,7 @@
     "url": "https://www.who.int/publications/i/item/9789240017566",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Variables de la Labour Care Guide de la OMS: bienestar materno y fetal y progreso del trabajo de parto. Ampliación internacional (2026-10-24): los cinco ítems del puntaje de Bishop (con la estación corregida respecto del arquetipo) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Variables de la Labour Care Guide de la OMS: bienestar materno y fetal y progreso del trabajo de parto. Ampliación internacional (2026-10-24): los cinco ítems del puntaje de Bishop (con la estación corregida respecto del arquetipo) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

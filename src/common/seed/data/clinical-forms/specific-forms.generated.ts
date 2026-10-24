@@ -329,6 +329,7 @@ import f324 from './pediatria/nnac25-ped-31-varicela.json';
 import f325 from './gastroenterologia/gastro-ctrl-colitis-ulcerosa.json';
 import f326 from './infectologia/infecto-ctrl-its.json';
 import f327 from './enfermeria/enfer-ctrl-vacunacion.json';
+import f328 from './patologia-clinica/patol-informe-biopsia-prostata.json';
 
 export const SPECIFIC_FORMS = [
   f0,
@@ -659,4 +660,5 @@ export const SPECIFIC_FORMS = [
   f325,
   f326,
   f327,
+  f328,
 ];

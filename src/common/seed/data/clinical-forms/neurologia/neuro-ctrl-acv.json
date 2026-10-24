@@ -9,7 +9,7 @@
     "url": "https://www.ninds.nih.gov/health-information/stroke/assess-and-treat/nih-stroke-scale",
     "license": "Dominio público (Gobierno de los EE. UU.)",
     "retrievedAt": "2026-10-02",
-    "note": "Déficit por la escala NIHSS (dominio público), discapacidad por escala de Rankin modificada y prevención secundaria. Ampliación internacional (2026-10-24): el puntaje ABCD² para el accidente isquémico transitorio desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Déficit por la escala NIHSS (dominio público), discapacidad por escala de Rankin modificada y prevención secundaria. Ampliación internacional (2026-10-24): el puntaje ABCD² para el accidente isquémico transitorio desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -136,7 +136,7 @@
       "dataType": "string",
       "required": false,
       "options": ["0 — No", "1 — Sí"],
-      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
       "showWhen": {
         "field": "acv_tipo",
         "equals": "Accidente isquémico transitorio"
@@ -149,7 +149,7 @@
       "dataType": "string",
       "required": false,
       "options": ["0 — No", "1 — Sí"],
-      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
       "showWhen": {
         "field": "acv_tipo",
         "equals": "Accidente isquémico transitorio"
@@ -166,7 +166,7 @@
         "1 — Trastorno del habla sin debilidad",
         "2 — Debilidad unilateral"
       ],
-      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
       "showWhen": {
         "field": "acv_tipo",
         "equals": "Accidente isquémico transitorio"
@@ -183,7 +183,7 @@
         "1 — 10 a 59 minutos",
         "2 — 60 minutos o más"
       ],
-      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "description": "Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
       "showWhen": {
         "field": "acv_tipo",
         "equals": "Accidente isquémico transitorio"
@@ -196,7 +196,7 @@
       "dataType": "string",
       "required": false,
       "options": ["0 — No", "1 — Sí"],
-      "description": "Suma 0 a 7: riesgo precoz de ACV después de un accidente isquémico transitorio. Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "description": "Suma 0 a 7: riesgo precoz de ACV después de un accidente isquémico transitorio. Fuente: puntaje ABCD² (Johnston SC et al. Lancet. 2007;369:283-92), según el arquetipo openEHR openEHR-EHR-OBSERVATION.abcd2_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
       "showWhen": {
         "field": "acv_tipo",
         "equals": "Accidente isquémico transitorio"

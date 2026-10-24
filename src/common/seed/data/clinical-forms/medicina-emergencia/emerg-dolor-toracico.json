@@ -12,7 +12,7 @@
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "ECG en menos de 10 minutos, troponina y estratificación con el puntaje HEART (publicado, de uso libre). Ampliación internacional (2026-10-24): los cinco componentes del puntaje HEART (con la edad corregida respecto del arquetipo) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "ECG en menos de 10 minutos, troponina y estratificación con el puntaje HEART (publicado, de uso libre). Ampliación internacional (2026-10-24): los cinco componentes del puntaje HEART (con la edad corregida respecto del arquetipo) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

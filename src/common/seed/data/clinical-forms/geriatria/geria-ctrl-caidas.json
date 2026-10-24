@@ -9,7 +9,7 @@
     "url": "https://www.who.int/publications/i/item/WHO-FWC-ALC-19.1",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Caídas, factores de riesgo modificables y consecuencias. Ampliación internacional (2026-10-24): el índice de riesgo de caídas de Downton desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Caídas, factores de riesgo modificables y consecuencias. Ampliación internacional (2026-10-24): el índice de riesgo de caídas de Downton desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

@@ -9,7 +9,7 @@
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "Revisión de problemas activos, fármacos (polifarmacia ≥ 5) y prioridades del paciente. Ampliación internacional (2026-10-24): índice de comorbilidad de Charlson (traducción al castellano del CKM, con una corrección documentada) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Revisión de problemas activos, fármacos (polifarmacia ≥ 5) y prioridades del paciente. Ampliación internacional (2026-10-24): índice de comorbilidad de Charlson (traducción al castellano del CKM, con una corrección documentada) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {

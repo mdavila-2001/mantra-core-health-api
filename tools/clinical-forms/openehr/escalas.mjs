@@ -40,7 +40,9 @@ export const CKM_COMMIT = SNAP.commit;
 /** La cita corta de un arquetipo, para la ayuda de un campo. */
 export function citaCkm(id) {
   const a = arquetipo(id);
-  return `arquetipo openEHR ${id} (rev. ${a.revision}, ${a.lifecycle === 'published' ? 'publicado' : 'en desarrollo'}; CC BY-SA 4.0)`;
+  const version = /ShareAlike (\d\.\d)/.exec(a.licence ?? '')?.[1];
+  if (version === undefined) throw new Error(`${id}: licencia no reconocida`);
+  return `arquetipo openEHR ${id} (rev. ${a.revision}, ${a.lifecycle === 'published' ? 'publicado' : 'en desarrollo'}; CC BY-SA ${version})`;
 }
 
 function elemento(a, at) {

@@ -1,0 +1,161 @@
+{
+  "code": "PATOL_INFORME_BIOPSIA_PROSTATA",
+  "name": "Informe de biopsia de próstata (Gleason y grupo ISUP)",
+  "specialty": { "code": "PATOLOGIA_CLINICA", "display": "Patología Clínica" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Gleason score (openEHR-EHR-CLUSTER.gleason_score.v0), International Clinical Knowledge Manager",
+    "organization": "openEHR Foundation / Clinical Models UK",
+    "url": "https://ckm.openehr.org/ckm/",
+    "sourceVersion": "rev. 0.0.1-alpha (en desarrollo); espejo github.com/openEHR/CKM-mirror",
+    "license": "Arquetipo CC BY-SA 3.0; la gradación (Gleason; grupos ISUP, Epstein 2016) se usa como categorías clínicas",
+    "retrievedAt": "2026-10-24",
+    "note": "Estructura de informe del catálogo (indicación, resultado, conclusión) y gradación del cluster openEHR-EHR-CLUSTER.gleason_score.v0 (traducción propia, no oficial)."
+  },
+  "fields": [
+    {
+      "section": "Solicitud",
+      "code": "indicacion_del_estudio",
+      "name": "Indicación del estudio",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Solicitud",
+      "code": "diagnostico_presuntivo_solicitante",
+      "name": "Diagnóstico presuntivo del solicitante",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Solicitud",
+      "code": "fecha_del_estudio",
+      "name": "Fecha del estudio",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "cilindros_totales",
+      "name": "Cilindros examinados",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "cilindros_con_carcinoma",
+      "name": "Cilindros con carcinoma",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "carcinoma_presente",
+      "name": "Adenocarcinoma presente",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "gleason_primario",
+      "name": "Gleason — patrón primario (predominante)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — Grado 1",
+        "2 — Grado 2",
+        "3 — Grado 3",
+        "4 — Grado 4",
+        "5 — Grado 5"
+      ],
+      "description": "Fuente: sistema de Gleason con los grupos de grado ISUP (Epstein JI et al. Am J Surg Pathol. 2016;40:244-52), según el arquetipo openEHR openEHR-EHR-CLUSTER.gleason_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "carcinoma_presente", "equals": true }
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "gleason_secundario",
+      "name": "Gleason — patrón secundario",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — Grado 1",
+        "2 — Grado 2",
+        "3 — Grado 3",
+        "4 — Grado 4",
+        "5 — Grado 5"
+      ],
+      "description": "Fuente: sistema de Gleason con los grupos de grado ISUP (Epstein JI et al. Am J Surg Pathol. 2016;40:244-52), según el arquetipo openEHR openEHR-EHR-CLUSTER.gleason_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "carcinoma_presente", "equals": true }
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "gleason_terciario",
+      "name": "Gleason — patrón terciario (si existe)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — Grado 1",
+        "2 — Grado 2",
+        "3 — Grado 3",
+        "4 — Grado 4",
+        "5 — Grado 5"
+      ],
+      "description": "Fuente: sistema de Gleason con los grupos de grado ISUP (Epstein JI et al. Am J Surg Pathol. 2016;40:244-52), según el arquetipo openEHR openEHR-EHR-CLUSTER.gleason_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "carcinoma_presente", "equals": true }
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "gleason_puntaje",
+      "name": "Gleason — puntaje (primario + secundario)",
+      "dataType": "integer",
+      "required": false,
+      "showWhen": { "field": "carcinoma_presente", "equals": true }
+    },
+    {
+      "section": "Resultado: biopsia de próstata",
+      "code": "gleason_grupo_isup",
+      "name": "Grupo de grado ISUP",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "1 — Grupo 1 (Gleason ≤ 6)",
+        "2 — Grupo 2 (Gleason 7 = 3 + 4)",
+        "3 — Grupo 3 (Gleason 7 = 4 + 3)",
+        "4 — Grupo 4 (Gleason 8)",
+        "5 — Grupo 5 (Gleason 9 a 10)"
+      ],
+      "description": "Fuente: sistema de Gleason con los grupos de grado ISUP (Epstein JI et al. Am J Surg Pathol. 2016;40:244-52), según el arquetipo openEHR openEHR-EHR-CLUSTER.gleason_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano.",
+      "showWhen": { "field": "carcinoma_presente", "equals": true }
+    },
+    {
+      "section": "Conclusión",
+      "code": "conclusion",
+      "name": "Conclusión",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión",
+      "code": "recomendacion",
+      "name": "Recomendación",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico",
+      "name": "Hay un hallazgo crítico",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión",
+      "code": "hallazgo_critico_comunicado",
+      "name": "¿A quién se comunicó y a qué hora?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "hallazgo_critico", "equals": true }
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -9,7 +9,7 @@
     "url": "https://www.who.int/publications/i/item/who-ucn-ncd-20.1",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Visita de control de HEARTS-D: glucemia y HbA1c, hipoglucemias, pie, ojo y riñón, y factores de riesgo cardiovascular. Ampliación internacional (2026-10-24): grado de Wagner de la úlcera de pie diabético (traducción es-AR del CKM) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Visita de control de HEARTS-D: glucemia y HbA1c, hipoglucemias, pie, ojo y riñón, y factores de riesgo cardiovascular. Ampliación internacional (2026-10-24): grado de Wagner de la úlcera de pie diabético (traducción es-AR del CKM) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -130,7 +130,7 @@
         "4 — Úlceras que incluyen al pie con gangrena parcial",
         "5 — Úlceras del pie con tejido gangrenoso más extendido"
       ],
-      "description": "Las definiciones son las descripciones de la traducción es-AR del CKM, con la ortografía corregida (subcutáneo, osteomielitis, pie). Fuente: clasificación de Wagner (Wagner FW. Foot Ankle. 1981;2:64-122), según el arquetipo openEHR openEHR-EHR-OBSERVATION.diabetic_wound_wagner.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Texto del CKM con una corrección propia de un defecto comprobado (ver docs/seed-research/clinical-forms.md).",
+      "description": "Las definiciones son las descripciones de la traducción es-AR del CKM, con la ortografía corregida (subcutáneo, osteomielitis, pie). Fuente: clasificación de Wagner (Wagner FW. Foot Ankle. 1981;2:64-122), según el arquetipo openEHR openEHR-EHR-OBSERVATION.diabetic_wound_wagner.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Texto del CKM con una corrección propia de un defecto comprobado (ver docs/seed-research/clinical-forms.md).",
       "showWhen": { "field": "dm_pie", "equals": "Úlcera o lesión presente" }
     },
     {

@@ -286,6 +286,16 @@ export const FUENTES = {
     sourceVersion: 'input/L2/IMMZ DAK_core data dictionary.xlsx',
     license: LIBRE_OMS,
   },
+  CKM_GLEASON: {
+    sourceTitle:
+      'Gleason score (openEHR-EHR-CLUSTER.gleason_score.v0), International Clinical Knowledge Manager',
+    organization: 'openEHR Foundation / Clinical Models UK',
+    url: 'https://ckm.openehr.org/ckm/',
+    sourceVersion:
+      'rev. 0.0.1-alpha (en desarrollo); espejo github.com/openEHR/CKM-mirror',
+    license:
+      'Arquetipo CC BY-SA 3.0; la gradación (Gleason; grupos ISUP, Epstein 2016) se usa como categorías clínicas',
+  },
   ACR_BIRADS: {
     sourceTitle: 'Breast Imaging Reporting and Data System (BI-RADS)',
     organization: 'American College of Radiology (ACR)',

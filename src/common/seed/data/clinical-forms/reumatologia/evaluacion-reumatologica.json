@@ -2,7 +2,7 @@
   "code": "REUMA_EVALUACION_BASE",
   "name": "Reumatología — consulta inicial (ficha base)",
   "specialty": { "code": "REUMATOLOGIA", "display": "Reumatología" },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis y examen del aparato locomotor",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la caracterización del dolor articular y su ritmo, la rigidez matinal en minutos, el detalle de las articulaciones comprometidas y la tumefacción, y el compromiso cutáneo asociado. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "note": "De la norma salen la estructura común del registro: motivo de consulta, tiempo de enfermedad, antecedentes, examen físico, diagnóstico y conducta. Son agregados propios de la especialidad la caracterización del dolor articular y su ritmo, la rigidez matinal en minutos, el detalle de las articulaciones comprometidas y la tumefacción, y el compromiso cutáneo asociado. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): el puntaje de hipermovilidad de Beighton (arquetipo de Clinical Models UK espejado) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -155,6 +155,27 @@
       "name": "Examen osteoarticular",
       "dataType": "text",
       "required": true
+    },
+    {
+      "section": "Examen",
+      "code": "beighton_hallazgos",
+      "name": "Beighton: maniobras positivas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Meñique izquierdo: dorsiflexión pasiva mayor de 90° (1 punto)",
+        "Meñique derecho: dorsiflexión pasiva mayor de 90° (1 punto)",
+        "Pulgar izquierdo: aposición pasiva a la cara flexora del antebrazo (1 punto)",
+        "Pulgar derecho: aposición pasiva a la cara flexora del antebrazo (1 punto)",
+        "Codo izquierdo: hiperextensión mayor de 10° (1 punto)",
+        "Codo derecho: hiperextensión mayor de 10° (1 punto)",
+        "Rodilla izquierda: hiperextensión mayor de 10° (1 punto)",
+        "Rodilla derecha: hiperextensión mayor de 10° (1 punto)",
+        "Tronco: apoya las palmas en el suelo con las rodillas extendidas (1 punto)",
+        "Ninguna"
+      ],
+      "multiple": true,
+      "description": "Hipermovilidad articular: puntaje de 0 a 9. Fuente: puntaje de Beighton (Beighton P et al. Ann Rheum Dis. 1973;32:413-8), según el arquetipo openEHR openEHR-EHR-OBSERVATION.beighton_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 3.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Examen",

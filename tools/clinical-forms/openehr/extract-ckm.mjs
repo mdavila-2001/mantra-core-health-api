@@ -38,7 +38,24 @@ export const ARQUETIPOS = [
   'openEHR-EHR-OBSERVATION.downton_fall_risk_index.v0',
   'openEHR-EHR-OBSERVATION.padss.v0',
   'openEHR-EHR-OBSERVATION.tanner.v1',
+  // Pasada 7: clusters y CKM nacionales espejados (remote/)
+  'openEHR-EHR-CLUSTER.gleason_score.v0',
+  'openEHR-EHR-CLUSTER.exam_tendon_reflexes.v0',
+  'openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1',
+  'openEHR-EHR-OBSERVATION.beighton_score.v0',
 ];
+
+/** Busca el .adl en todo el espejo: `local/` y los CKM nacionales de `remote/`. */
+function ruta(espejo, id) {
+  const encontrados = execFileSync('find', [espejo, '-name', `${id}.adl`], {
+    encoding: 'utf8',
+  })
+    .split('\n')
+    .filter(Boolean);
+  if (encontrados.length !== 1)
+    throw new Error(`${id}: ${encontrados.length} archivos en el espejo`);
+  return encontrados[0];
+}
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 
@@ -61,10 +78,8 @@ function main() {
     archetypes: {},
   };
   for (const id of ARQUETIPOS) {
-    const tipo = id.split('.')[0].split('-')[2].toLowerCase();
-    const a = leerArquetipo(
-      join(espejo, 'local', 'archetypes', 'entry', tipo, `${id}.adl`),
-    );
+    const archivo = ruta(espejo, id);
+    const a = leerArquetipo(archivo);
     if (a.id !== id) throw new Error(`${id}: se leyó ${a.id}`);
     const es = a.languages.includes('es')
       ? 'es'
@@ -74,6 +89,7 @@ function main() {
       ...(es === undefined ? {} : { es: a.terms[es]?.[code], esLanguage: es }),
     });
     salida.archetypes[id] = {
+      path: archivo.slice(espejo.replace(/\/$/, '').length + 1),
       revision: a.revision,
       lifecycle: a.lifecycle,
       licence: a.licence,

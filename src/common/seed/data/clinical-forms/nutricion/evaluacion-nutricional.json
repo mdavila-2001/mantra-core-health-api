@@ -2,7 +2,7 @@
   "code": "NUTRI_EVALUACION_BASE",
   "name": "Nutrición y Dietética — consulta inicial (ficha base)",
   "specialty": { "code": "NUTRICION", "display": "Nutrición y Dietética" },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y registro de medidas antropométricas",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma salen la estructura común (motivo, tiempo de evolución, antecedentes, examen con medidas antropométricas, diagnóstico y conducta) y el registro de peso y talla. Son agregados propios de la especialidad los hábitos alimentarios, el número de comidas al día, las intolerancias y alergias alimentarias, el consumo de líquidos, la actividad física y el objetivo nutricional acordado en consulta. Los valores se registran tal como se miden: la ficha no calcula ni interpreta índices. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "note": "De la norma salen la estructura común (motivo, tiempo de evolución, antecedentes, examen con medidas antropométricas, diagnóstico y conducta) y el registro de peso y talla. Son agregados propios de la especialidad los hábitos alimentarios, el número de comidas al día, las intolerancias y alergias alimentarias, el consumo de líquidos, la actividad física y el objetivo nutricional acordado en consulta. Los valores se registran tal como se miden: la ficha no calcula ni interpreta índices. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): la NRS 2002 (arquetipo del CKM noruego espejado) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -155,6 +155,79 @@
         "field": "tendencia_de_peso",
         "equals": ["Aumentó", "Bajó"]
       }
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_imc_menor_20_5",
+      "name": "NRS 2002 — ¿IMC menor de 20,5 kg/m²?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No"],
+      "description": "Tamizaje inicial: si alguna de las cuatro preguntas es «sí», se completa el tamizaje final. Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_perdida_de_peso_3_meses",
+      "name": "NRS 2002 — ¿Perdió peso en los últimos 3 meses?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No"],
+      "description": "Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_ingesta_reducida",
+      "name": "NRS 2002 — ¿Redujo la ingesta en la última semana?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No"],
+      "description": "Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_enfermedad_grave",
+      "name": "NRS 2002 — ¿Está gravemente enfermo (p. ej. en terapia intensiva)?",
+      "dataType": "string",
+      "required": false,
+      "options": ["Sí", "No"],
+      "description": "Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_estado_nutricional",
+      "name": "NRS 2002 — deterioro del estado nutricional",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente: estado nutricional normal",
+        "1 — Leve: pérdida de peso > 5 % en 3 meses o ingesta del 50 al 75 % de lo requerido en la última semana",
+        "2 — Moderado: pérdida de peso > 5 % en 2 meses, o IMC 18,5 a 20,5 con deterioro del estado general, o ingesta del 25 al 50 %",
+        "3 — Grave: pérdida de peso > 5 % en 1 mes (> 15 % en 3 meses), o IMC < 18,5 con deterioro del estado general, o ingesta del 0 al 25 %"
+      ],
+      "description": "Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_gravedad_enfermedad",
+      "name": "NRS 2002 — gravedad de la enfermedad (aumento de requerimientos)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente: requerimientos normales",
+        "1 — Leve: p. ej. fractura de cadera, enfermedad crónica con complicaciones (cirrosis, EPOC, hemodiálisis, diabetes, cáncer)",
+        "2 — Moderada: p. ej. cirugía abdominal mayor, ACV, neumonía grave, neoplasia hematológica",
+        "3 — Grave: p. ej. traumatismo craneoencefálico, trasplante de médula ósea, paciente de terapia intensiva (APACHE II > 10)"
+      ],
+      "description": "Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Antropometría",
+      "code": "nrs_edad_70_o_mas",
+      "name": "NRS 2002 — ¿70 años o más?",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — No", "1 — Sí"],
+      "description": "Puntaje total (0 a 7) de 3 o más: riesgo nutricional; indicar soporte. Fuente: NRS 2002 (Kondrup J et al. Clin Nutr. 2003;22:415-21), recomendada por ESPEN, según el arquetipo openEHR openEHR-EHR-OBSERVATION.nutritional_risk_screening.v1 (rev. 1.1.1, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Hábitos",

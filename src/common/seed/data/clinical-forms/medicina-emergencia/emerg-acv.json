@@ -12,7 +12,7 @@
     "url": "https://www.ninds.nih.gov/health-information/stroke/assess-and-treat/nih-stroke-scale",
     "license": "Dominio público (Gobierno de los EE. UU.)",
     "retrievedAt": "2026-10-02",
-    "note": "Hora de inicio, Cincinnati, NIHSS, glucemia e imagen para decidir trombólisis. Ampliación internacional (2026-10-24): los 15 ítems de la NIH Stroke Scale (traducción propia, no la versión certificada en castellano) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
+    "note": "Hora de inicio, Cincinnati, NIHSS, glucemia e imagen para decidir trombólisis. Ampliación internacional (2026-10-24): los 15 ítems de la NIH Stroke Scale (traducción propia, no la versión certificada en castellano) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
