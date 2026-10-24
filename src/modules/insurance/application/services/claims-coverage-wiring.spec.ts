@@ -2,8 +2,11 @@ import { jest } from '@jest/globals';
 import { PreconditionFailedException } from '../../../../common';
 import { InsurancePlanBenefits } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
-import { ClaimCoveragePolicy } from './claim-coverage-policy';
-import { ClaimsService } from './claims.service';
+import {
+  CLAIM_COVERAGE_REASON,
+  ClaimCoveragePolicy,
+} from './claim-coverage-policy';
+import { CLAIM_COVERAGE_AUDIT, ClaimsService } from './claims.service';
 
 /**
  * El reclamo directo del consultorio guarda la parte del paciente que calcula
@@ -48,6 +51,7 @@ function build(benefits: Record<string, unknown>[]) {
       currencyConceptId: 'BOB',
     }),
   };
+  const auditTrail = { record: fn().mockResolvedValue(undefined) };
   const service = new ClaimsService(
     em as never,
     repo as never,
@@ -58,8 +62,9 @@ function build(benefits: Record<string, unknown>[]) {
     {} as never,
     {} as never,
     new ClaimCoveragePolicy(),
+    auditTrail as never,
   );
-  return { service, createdLines, repo };
+  return { service, createdLines, repo, auditTrail };
 }
 
 const billing = { id: 'user-billing', roles: ['BILLING'] } as never;
@@ -117,5 +122,34 @@ describe('ClaimsService — cobro directo contrastado con el plan', () => {
       service.submitClaim(claimDto(), billing),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
     expect(repo.createClaim).not.toHaveBeenCalled();
+  });
+
+  it('sella en la bitácora el reparto aplicado al reclamo', async () => {
+    const { service, auditTrail } = build([activeBenefit]);
+    await service.submitClaim(claimDto(), billing);
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      expect.anything(),
+      billing,
+      expect.objectContaining({
+        action: CLAIM_COVERAGE_AUDIT.APPLIED,
+        entity: 'insurance_claim',
+        entityId: 'claim-1',
+      }),
+    );
+  });
+
+  it('sella el rechazo con su motivo, sobre la cobertura y sin éxito', async () => {
+    const { service, auditTrail } = build([]);
+    await expect(service.submitClaim(claimDto(), billing)).rejects.toThrow();
+    expect(auditTrail.record).toHaveBeenCalledWith(
+      expect.anything(),
+      billing,
+      expect.objectContaining({
+        action: `${CLAIM_COVERAGE_AUDIT.REJECTED}:${CLAIM_COVERAGE_REASON.SERVICE_NOT_COVERED}`,
+        entity: 'patient_coverage',
+        entityId: 'coverage-1',
+        success: false,
+      }),
+    );
   });
 });
