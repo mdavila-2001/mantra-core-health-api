@@ -361,6 +361,29 @@ que esta pasada no es la segunda en 0: el contador vuelve a empezar.
   - Queda anotado como pendiente: hace falta una actualización explícita de propiedades con versión, no un upsert silencioso.
 - **Descartadas**: `foiclass.zip` oficial (detección de abuso de la FDA).
 
+### Pasada 12 (2026-10-24): EMDN v2026 oficial
+
+- **Regiones**: sin cambios desde la pasada 10.
+- **Fuente nueva propia**: la EMDN v2026, en el Excel oficial de la Comisión (`EMDN v2026_EN..xlsx`, enlazado desde `webgate.ec.europa.eu/dyna2/emdn/M90`).
+  - Licencia: CC BY 4.0 según el aviso legal de la Comisión. Excel con sha256 `a973dcdd…`.
+  - `extract-emdn-xlsx.py` (openpyxl) lo pasa a CSV: solo renombra las columnas, sin tocar los valores. El CSV tiene sha256 `d6f512dc…`.
+  - Pasa a ser la principal de la EMDN. La V2, verificada entre sus dos copias como antes, solo aporta los 12 códigos que la v2026 ya no trae, marcados `notInVersion: v2026` y decididos con el árbol de la V2: `C01901902`, `R01040101`, `R01040201`, `Z11030302`, `Z120306` y 7 hijos de `Z120306`.
+  - Queda cerrado el hueco de la pasada 9: la EMDN posterior a la V2 no estaba en git y ahora se baja del sitio oficial.
+- **Comparación V2 → v2026** (`coverage.json` → `emdnVersions`):
+  - 74 códigos nuevos.
+  - 148 términos con otro texto.
+  - **0 decisiones de diagnóstico cambiadas** en los códigos comunes.
+- **Nuevos tras deduplicar** (contra la pasada 11):
+  - Taxonomía: **+74 nodos EMDN** (37 274), de los cuales **+28 son de diagnóstico**:
+    - 12 por categoría W (`W01010132`, `W010501080301`…`04`, `W0106010402`…);
+    - 2 por título de grupo (`C01040401`, `C040401`);
+    - 14 heredados del título de su grupo (hijos de esos dos y `Z12030206` con sus 7 hijos).
+  - Value set `diagnostic-equipment-types`: 5 722 miembros (+28).
+  - Catálogo: **0**. Ningún registro consolidado usa todavía los códigos nuevos: `eu` sigue con 716 filas, y su código ya baja EUDAMED con la v2026, pero no publicó `out/` nuevo.
+- **Taxonomía cargada**: +74 conceptos, 225 designaciones, 222 propiedades, 74 relaciones is-a y la versión nueva del value set. La 2.ª corrida da 0.
+- **Descartadas**: ninguna.
+- **Saturación**: las pasadas 10 a 12 aportaron por fuentes nuevas (red completa). El contador vuelve a 0: faltan dos pasadas seguidas en 0. `eu` puede volver a empujar con su descarga oficial.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

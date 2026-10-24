@@ -23,6 +23,7 @@ export function coverageReport({
   resolution,
   industry = null,
   emdnCheck = null,
+  emdnVersions = null,
   fdaCheck = null,
   actorStats = [],
   sourceStats,
@@ -102,6 +103,7 @@ export function coverageReport({
     },
     industry,
     emdnCopies: emdnCheck,
+    emdnVersions,
     fdaCopies: fdaCheck,
     actors: actorStats,
     official: Object.fromEntries(
@@ -110,7 +112,7 @@ export function coverageReport({
         {
           url: o.url,
           exportDate: o.exportDate,
-          zipSha256: o.zipSha256,
+          downloadSha256: o.downloadSha256,
           path: o.path,
           sha256: o.sha256,
           license: o.license,
@@ -180,6 +182,12 @@ export function coverageReport({
     ...(fdaCheck
       ? [
           `Product codes de la FDA: ${fdaCheck.a} (${fdaCheck.countA}) contra ${fdaCheck.b} (${fdaCheck.countB}); solo en la oficial ${fdaCheck.onlyA.length}, solo en la copia ${fdaCheck.onlyB.length}; difieren nombre ${fdaCheck.diffs.name.length}, clase ${fdaCheck.diffs.class.length}, regulación ${fdaCheck.diffs.regulation.length}.`,
+          '',
+        ]
+      : []),
+    ...(emdnVersions
+      ? [
+          `EMDN ${emdnVersions.latest} oficial (${emdnVersions.rowsLatest} términos) contra la ${emdnVersions.previous} (${emdnVersions.rowsPrevious}): nuevos ${emdnVersions.onlyLatest.length}, solo en la ${emdnVersions.previous} ${emdnVersions.onlyPrevious.length} (quedan marcados \`notInVersion\`), término cambiado ${emdnVersions.termChanged.length}, decisión de diagnóstico cambiada ${emdnVersions.decisionChanged.length}.`,
           '',
         ]
       : []),

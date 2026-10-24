@@ -21,7 +21,8 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, extname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import {
   CACHE_DIR,
@@ -31,6 +32,7 @@ import {
   officialFilePath,
 } from './lib/sources.mjs';
 
+const HERE = dirname(fileURLToPath(import.meta.url));
 const FORCE = process.argv.includes('--force');
 const sha256 = (path) =>
   createHash('sha256').update(readFileSync(path)).digest('hex');
@@ -95,9 +97,22 @@ for (const [key, m] of Object.entries(MIRRORS)) {
   }
 }
 
-// Descargas oficiales: curl (respeta el proxy del entorno) + sha256 del zip y
-// del archivo. Un hash distinto no corta la etapa: avisa y la build usa la
-// copia en git.
+// Descargas oficiales: curl (respeta el proxy del entorno) + sha256 de lo
+// bajado y del archivo extraído. Un hash distinto no corta la etapa: avisa y
+// la build usa la copia en git.
+const EXTRACT = {
+  unzip: (download, out, o) =>
+    writeFileSync(
+      out,
+      execFileSync('unzip', ['-p', download, o.path], { maxBuffer: 1 << 30 }),
+    ),
+  'emdn-xlsx': (download, out) =>
+    execFileSync(
+      'python3',
+      ['-I', join(HERE, 'extract-emdn-xlsx.py'), download, out],
+      { stdio: ['ignore', 'ignore', 'inherit'] },
+    ),
+};
 manifest.official = {};
 for (const [key, o] of Object.entries(OFFICIAL)) {
   const path = officialFilePath(key);
@@ -105,28 +120,25 @@ for (const [key, o] of Object.entries(OFFICIAL)) {
     const dir = dirname(path);
     rmSync(dir, { recursive: true, force: true });
     mkdirSync(dir, { recursive: true });
-    const zip = join(dir, 'download.zip');
+    const download = join(dir, `download${extname(new URL(o.url).pathname)}`);
     try {
-      execFileSync('curl', ['-sSfL', '-m', '300', '-o', zip, o.url], {
+      execFileSync('curl', ['-sSfL', '-m', '300', '-o', download, o.url], {
         stdio: ['ignore', 'ignore', 'pipe'],
       });
     } catch (e) {
       console.warn(`[${key}] no se pudo bajar ${o.url}: ${e.message}`);
       continue;
     }
-    const gotZip = sha256(zip);
-    if (gotZip !== o.zipSha256) {
+    const gotDownload = sha256(download);
+    if (gotDownload !== o.downloadSha256) {
       console.warn(
-        `[${key}] el zip publicado tiene sha256 ${gotZip} ≠ fijado ${o.zipSha256} (otra exportación): no se usa; actualizá el pin en lib/sources.mjs`,
+        `[${key}] lo publicado tiene sha256 ${gotDownload} ≠ fijado ${o.downloadSha256} (otra versión): no se usa; actualizá el pin en lib/sources.mjs`,
       );
       rmSync(dir, { recursive: true, force: true });
       continue;
     }
-    writeFileSync(
-      path,
-      execFileSync('unzip', ['-p', zip, o.path], { maxBuffer: 1 << 30 }),
-    );
-    rmSync(zip, { force: true });
+    EXTRACT[o.extract](download, path, o);
+    rmSync(download, { force: true });
   }
   const got = sha256(path);
   if (got !== o.sha256) {
@@ -137,7 +149,7 @@ for (const [key, o] of Object.entries(OFFICIAL)) {
   manifest.official[key] = {
     url: o.url,
     exportDate: o.exportDate,
-    zipSha256: o.zipSha256,
+    downloadSha256: o.downloadSha256,
     path: o.path,
     sha256: got,
   };

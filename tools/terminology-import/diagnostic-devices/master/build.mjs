@@ -137,7 +137,7 @@ const pcdProvenance = openfdaRows
       retrievedAt,
       download: {
         url: openfda.url,
-        zipSha256: openfda.zipSha256,
+        downloadSha256: openfda.downloadSha256,
         path: openfda.path,
         sha256: openfda.sha256,
       },
@@ -233,8 +233,76 @@ if (emdn.problems.length)
   throw new Error(
     `EMDN: estructura inconsistente: ${emdn.problems.slice(0, 5).join('; ')}`,
   );
+// EMDN oficial más nueva (Excel de la Comisión, en el caché con el hash
+// fijado): es la principal. De la V2 solo quedan los códigos que la versión
+// nueva ya no trae, decididos con el árbol de la V2 y marcados.
+const emdnOfficial = OFFICIAL['ec-emdn-2026'];
+const emdnOfficialPath = officialFilePath('ec-emdn-2026');
+const emdnOfficialRows =
+  existsSync(emdnOfficialPath) &&
+  createHash('sha256').update(readFileSync(emdnOfficialPath)).digest('hex') ===
+    emdnOfficial.sha256
+    ? parseEmdn(readFileSync(emdnOfficialPath, 'utf8'))
+    : null;
+let emdnVersions = null;
+if (emdnOfficialRows) {
+  const latest = emdnNodes(emdnOfficialRows, {
+    source: emdnOfficial.source,
+    sourceUrl: emdnOfficial.officialUrl,
+    sourceVersion: `EMDN ${emdnOfficial.exportDate} · ${emdnOfficial.index}`,
+    retrievedAt,
+    download: {
+      url: emdnOfficial.url,
+      downloadSha256: emdnOfficial.downloadSha256,
+      path: emdnOfficial.path,
+      sha256: emdnOfficial.sha256,
+    },
+    license: emdnOfficial.license,
+  });
+  if (latest.problems.length)
+    throw new Error(
+      `EMDN ${emdnOfficial.exportDate}: estructura inconsistente: ${latest.problems.slice(0, 5).join('; ')}`,
+    );
+  const cmp = compareEmdnCopies(emdnOfficialRows, emdnRows);
+  const v2ByCode = new Map(emdn.nodes.map((n) => [n.code, n]));
+  const decisionChanged = latest.nodes
+    .filter(
+      (n) =>
+        v2ByCode.has(n.code) &&
+        v2ByCode.get(n.code).diagnostic !== n.diagnostic,
+    )
+    .map((n) => ({
+      code: n.code,
+      v2: v2ByCode.get(n.code).diagnostic,
+      latest: n.diagnostic,
+    }));
+  emdnVersions = {
+    latest: emdnOfficial.exportDate,
+    previous: 'V2',
+    rowsLatest: cmp.rowsA,
+    rowsPrevious: cmp.rowsB,
+    onlyLatest: cmp.onlyA,
+    onlyPrevious: cmp.onlyB,
+    termChanged: cmp.differ,
+    decisionChanged,
+  };
+  const onlyPrevious = new Set(cmp.onlyB);
+  emdn.nodes = [
+    ...latest.nodes,
+    ...emdn.nodes
+      .filter((n) => onlyPrevious.has(n.code))
+      .map((n) => ({
+        ...n,
+        attributes: {
+          ...n.attributes,
+          notInVersion: emdnOfficial.exportDate,
+        },
+      })),
+  ];
+}
 for (const n of emdn.nodes) {
-  if (fromB.has(n.code))
+  // Solo los nodos de la V2 (los de la versión oficial no traen `mirror`).
+  if (fromB.has(n.code) && n.provenance.mirror)
     n.provenance = {
       ...n.provenance,
       mirror: {
@@ -247,7 +315,7 @@ for (const n of emdn.nodes) {
   taxonomy.addNode(n);
 }
 console.log(
-  `taxonomía EMDN: ${emdn.nodes.length} términos (copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})`,
+  `taxonomía EMDN: ${emdn.nodes.length} términos (V2: copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})${emdnVersions ? `; ${emdnVersions.latest} oficial ${emdnVersions.rowsLatest}: nuevos ${emdnVersions.onlyLatest.length}, solo en V2 ${emdnVersions.onlyPrevious.length}, término cambiado ${emdnVersions.termChanged.length}, decisión cambiada ${emdnVersions.decisionChanged.length}` : '; EMDN oficial no está en el caché'}`,
 );
 
 // --- 2. Fuentes de filas ------------------------------------------------------
@@ -540,6 +608,7 @@ const coverage = coverageReport({
   resolution,
   industry: industry.stats,
   emdnCheck,
+  emdnVersions,
   fdaCheck,
   actorStats,
   sourceStats: [...sourceStats.values()],
@@ -547,7 +616,11 @@ const coverage = coverageReport({
   panelParts,
   ivdPanels: [...ivdPanels].sort(),
   mirrors: MIRRORS,
-  official: openfdaRows ? OFFICIAL : {},
+  official: Object.fromEntries(
+    Object.entries(OFFICIAL).filter(([k]) =>
+      k === 'ec-emdn-2026' ? emdnOfficialRows : openfdaRows,
+    ),
+  ),
 });
 writeFileSync(
   join(OUT, 'coverage.json'),

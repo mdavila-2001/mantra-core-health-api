@@ -101,7 +101,8 @@ export const OFFICIAL = Object.freeze({
     url: 'https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip',
     index: 'https://api.fda.gov/download.json',
     exportDate: '2026-10-21',
-    zipSha256:
+    extract: 'unzip',
+    downloadSha256:
       '0141400f49b9f2e8f075eabb8d0a841123e5904be061fab8addb42229b6bfa3d',
     path: 'device-classification-0001-of-0001.json',
     sha256: '36518da242de3d516c2a3de7ba35bc1a1f97f5d3160740b42e3c072e181c04e4',
@@ -112,6 +113,25 @@ export const OFFICIAL = Object.freeze({
       'https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files',
     license:
       'openFDA: dominio público, dedicación CC0 1.0 (https://open.fda.gov/license/).',
+  },
+  // El Excel se pasa a CSV con `extract-emdn-xlsx.py` (solo cambia el nombre
+  // de las columnas; los valores van verbatim).
+  'ec-emdn-2026': {
+    url: 'https://webgate.ec.europa.eu/dyna2/emdn/build/EMDN%20v2026_EN..xlsx',
+    index: 'https://webgate.ec.europa.eu/dyna2/emdn/M90',
+    exportDate: 'v2026',
+    extract: 'emdn-xlsx',
+    downloadSha256:
+      'a973dcdd8ae291248c9d06d355d3cc859d89a5584004db9354721c9c596bc1bd',
+    path: 'emdn-v2026.csv',
+    sha256: 'd6f512dc26230c0867e670646ba62d19eca12acca04b0600e1b7ca47ffd659c6',
+    records: 8516,
+    source: 'ec-emdn',
+    name: 'European Medical Device Nomenclature (EMDN), versión 2026',
+    officialUrl:
+      'https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en',
+    license:
+      '© Unión Europea; CC BY 4.0 (aviso legal de la Comisión, https://commission.europa.eu/legal-notice_en, Decisión 2011/833/UE). Cambio: Excel → CSV con las columnas renombradas.',
   },
 });
 
