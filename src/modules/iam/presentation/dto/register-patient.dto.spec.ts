@@ -1,8 +1,11 @@
-import { describe, it, expect } from '@jest/globals';
+import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
-import { RegisterPatientDto } from './register-patient.dto';
+import {
+  MAX_ADDITIONAL_PHONES,
+  RegisterPatientDto,
+} from './register-patient.dto';
 import { PROF } from '../../../profiles/profiles.concepts';
 
 /**
@@ -134,5 +137,125 @@ describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => 
 
   it('acepta un uuid', async () => {
     expect(await propertiesWithError(MINIMAL_REGISTRATION)).toEqual([]);
+  });
+});
+
+describe('RegisterPatientDto · rango de la fecha de nacimiento', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  /**
+   * El tope es «hoy» calculado al validar, no un año escrito a mano: el día
+   * que el calendario pase a 2027, una fecha de 2027 ya tiene que entrar.
+   */
+  it('el tope se mueve con el calendario: en 2027 acepta fechas de 2027', async () => {
+    jest.useFakeTimers({ now: new Date('2027-03-01T12:00:00Z') });
+
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '2027-02-01',
+      }),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '2027-03-02',
+      }),
+    ).toEqual(['birthDate']);
+  });
+
+  /** La fecha de hoy como la escribe el cliente, `YYYY-MM-DD`. */
+  const today = (): string => new Date().toISOString().slice(0, 10);
+
+  it('rechaza una fecha futura: la edad quedaría negativa', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '2999-01-01',
+      }),
+    ).toEqual(['birthDate']);
+  });
+
+  it('rechaza una fecha anterior a 1910', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '1909-12-31',
+      }),
+    ).toEqual(['birthDate']);
+  });
+
+  it('acepta los dos extremos: 1910-01-01 y hoy', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: '1910-01-01',
+      }),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        birthDate: today(),
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe('RegisterPatientDto · teléfonos y contactos de emergencia adicionales', () => {
+  it('acepta teléfonos adicionales con el mismo formato que el principal', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalPhones: ['+591 71111111', '72222222'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un teléfono adicional con texto libre', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalPhones: ['+591 71111111', 'llamar de noche'],
+      }),
+    ).toEqual(['additionalPhones']);
+  });
+
+  it('rechaza más teléfonos adicionales que el tope', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalPhones: Array.from(
+          { length: MAX_ADDITIONAL_PHONES + 1 },
+          (_, i) => `7000000${i}`,
+        ),
+      }),
+    ).toEqual(['additionalPhones']);
+  });
+
+  it('acepta contactos de emergencia adicionales con nombre', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalEmergencyContacts: [
+          {
+            name: 'Luis Paz',
+            phone: '+591 72222222',
+            relationshipConceptId: PROF.RELATIONSHIP_FATHER,
+          },
+          { name: 'Marta Rojas' },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un contacto adicional sin nombre', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        additionalEmergencyContacts: [{ phone: '+591 72222222' }],
+      }),
+    ).toEqual(['additionalEmergencyContacts']);
   });
 });

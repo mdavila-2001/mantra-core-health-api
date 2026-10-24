@@ -61756,6 +61756,24 @@ components:
         - role
         - action
       additionalProperties: false
+    AdditionalEmergencyContactDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          description: Nombre del contacto
+        phone:
+          type: string
+          maxLength: 40
+          description: Teléfono del contacto, en formato E.164 o nacional
+        relationshipConceptId:
+          type: string
+          format: uuid
+          description: Parentesco del contacto (conjunto related-person-relationship)
+      required:
+        - name
+      additionalProperties: false
     RegisterPatientDto:
       type: object
       properties:
@@ -61809,6 +61827,12 @@ components:
             Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6
             caracteres
           maxLength: 40
+        additionalPhones:
+          maxItems: 4
+          description: Otros teléfonos de la persona, además del principal; mismo formato que phone
+          type: array
+          items:
+            type: string
         occupationConceptId:
           type: string
           format: uuid
@@ -61890,6 +61914,12 @@ components:
           type: string
           format: uuid
           description: Parentesco del contacto de emergencia (conjunto related-person-relationship)
+        additionalEmergencyContacts:
+          maxItems: 4
+          description: Otros contactos de emergencia, además del primero
+          type: array
+          items:
+            $ref: '#/components/schemas/AdditionalEmergencyContactDto'
         privateInsurancePlanId:
           type: string
           format: uuid

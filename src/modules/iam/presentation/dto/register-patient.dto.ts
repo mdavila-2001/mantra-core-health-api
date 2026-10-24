@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   EMPLOYER_FREE_TEXT_MAX_LENGTH,
   OCCUPATION_FREE_TEXT_MAX_LENGTH,
@@ -16,6 +17,8 @@ export {
   PHONE_PATTERN_MESSAGE,
 } from '../../../../common/constants/person-field-limits';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsEmail,
   IsIn,
   IsISO8601,
@@ -29,6 +32,9 @@ import {
   Min,
   MinLength,
   ValidateIf,
+  ValidateNested,
+  registerDecorator,
+  type ValidationOptions,
 } from 'class-validator';
 import {
   ADMIN_GENDER_CODES,
@@ -36,6 +42,38 @@ import {
   type AdministrativeGenderCode,
   type BirthSexCode,
 } from '../../../profiles/profiles.concepts';
+
+/** La fecha de nacimiento más antigua que se acepta, la misma que ofrece el alta. */
+export const BIRTH_DATE_MIN = '1910-01-01';
+
+/**
+ * La fecha de nacimiento cae entre {@link BIRTH_DATE_MIN} y hoy.
+ *
+ * `@IsISO8601` solo revisa la forma: sin esto, un `2999-01-01` entra y la edad
+ * de la que salen dosis y valores de referencia queda negativa. Se compara por
+ * día (`YYYY-MM-DD`) para que nacer hoy sea válido en cualquier huso.
+ *
+ * @param options - Opciones de validación (mensaje).
+ * @returns El decorador de propiedad.
+ */
+function IsBirthDateInRange(options?: ValidationOptions): PropertyDecorator {
+  return (target, propertyName) => {
+    registerDecorator({
+      name: 'isBirthDateInRange',
+      target: target.constructor,
+      propertyName: propertyName.toString(),
+      options,
+      validator: {
+        validate(value: unknown): boolean {
+          if (typeof value !== 'string') return false;
+          const day = value.slice(0, 10);
+          const today = new Date().toISOString().slice(0, 10);
+          return day >= BIRTH_DATE_MIN && day <= today;
+        },
+      },
+    });
+  };
+}
 
 /**
  * Reglas de forma de los datos que el paciente declara sobre sí mismo.
@@ -72,6 +110,53 @@ import {
  */
 
 /** Mensaje de {@link PHONE_PATTERN}, para que los dos formularios digan lo mismo. */
+
+/**
+ * Cuántos teléfonos más, además del principal, se aceptan en el alta.
+ *
+ * El botón «+» del formulario agrega de a uno; el tope evita que el campo se use
+ * para cargar una agenda entera. Cinco números por persona alcanzan de sobra.
+ */
+export const MAX_ADDITIONAL_PHONES = 4;
+
+/** Cuántos contactos de emergencia más, además del primero, se aceptan. */
+export const MAX_ADDITIONAL_EMERGENCY_CONTACTS = 4;
+
+/**
+ * Un contacto de emergencia más, además del que viaja en `guardianName`,
+ * `guardianPhone` y `guardianRelationshipConceptId`.
+ *
+ * Mismas reglas que el primero: el nombre es lo único obligatorio, porque un
+ * teléfono sin dueño no se puede mostrar ni corregir.
+ */
+export class AdditionalEmergencyContactDto {
+  @ApiProperty({ maxLength: 200, description: 'Nombre del contacto' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  name!: string;
+
+  @ApiPropertyOptional({
+    maxLength: 40,
+    description: 'Teléfono del contacto, en formato E.164 o nacional',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  @Matches(/^[+]?[0-9 ()-]{6,}$/, {
+    message: 'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion',
+  })
+  phone?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Parentesco del contacto (conjunto related-person-relationship)',
+  })
+  @IsOptional()
+  @IsUUID()
+  relationshipConceptId?: string;
+}
 
 /**
  * Cuerpo de `POST /iam/auth/register-patient`.
@@ -253,6 +338,9 @@ export class RegisterPatientDto {
    */
   @ApiProperty({ format: 'date' })
   @IsISO8601()
+  @IsBirthDateInRange({
+    message: 'La fecha de nacimiento tiene que estar entre 1910 y hoy',
+  })
   birthDate!: string;
 
   /**
@@ -275,6 +363,27 @@ export class RegisterPatientDto {
   @MaxLength(PHONE_MAX_LENGTH)
   @Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })
   phone!: string;
+
+  /**
+   * Otros teléfonos de la persona, además del principal (botón «+»).
+   *
+   * Se guardan como puntos de contacto aparte, en el orden en que llegan y
+   * siempre **después** del principal (`rank` 2, 3…): «el teléfono» de la
+   * persona sigue siendo `phone`, que es el que lee y edita el perfil.
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    maxItems: MAX_ADDITIONAL_PHONES,
+    description:
+      'Otros teléfonos de la persona, además del principal; mismo formato que phone',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_ADDITIONAL_PHONES)
+  @IsString({ each: true })
+  @MaxLength(PHONE_MAX_LENGTH, { each: true })
+  @Matches(PHONE_PATTERN, { each: true, message: PHONE_PATTERN_MESSAGE })
+  additionalPhones?: string[];
 
   /**
    * Ocupación, miembro de `VS_BO_OCCUPATION`.
@@ -547,6 +656,24 @@ export class RegisterPatientDto {
   @IsOptional()
   @IsUUID()
   guardianRelationshipConceptId?: string;
+
+  /**
+   * Otros contactos de emergencia, además del primero (botón «+»).
+   *
+   * Cada uno se guarda igual que el primero: una persona relacionada marcada
+   * como contacto de emergencia, con su teléfono si lo trae.
+   */
+  @ApiPropertyOptional({
+    type: [AdditionalEmergencyContactDto],
+    maxItems: MAX_ADDITIONAL_EMERGENCY_CONTACTS,
+    description: 'Otros contactos de emergencia, además del primero',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_ADDITIONAL_EMERGENCY_CONTACTS)
+  @ValidateNested({ each: true })
+  @Type(() => AdditionalEmergencyContactDto)
+  additionalEmergencyContacts?: AdditionalEmergencyContactDto[];
 
   /**
    * Plan de salud privado que la persona declara tener.
