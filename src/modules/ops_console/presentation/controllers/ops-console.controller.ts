@@ -1,23 +1,14 @@
 import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../../../../common';
+import { OpsConsoleService } from '../../application/ops-console.service';
+import { OpsTrafficService } from '../../application/ops-traffic.service';
 import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiPropertyOptional,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsIn,
-  IsInt,
-  IsISO8601,
-  IsOptional,
-  Max,
-  Min,
-} from 'class-validator';
-import { Roles } from '../../common';
-import { OpsConsoleService } from './ops-console.service';
-import { OpsTrafficService } from './ops-traffic.service';
+  IncidentsQueryDto,
+  LimitQueryDto,
+  TrafficEndpointsQueryDto,
+  TrafficQueryDto,
+} from '../dto/ops-console-query.dto';
 
 /** Operación y gobierno: quien opera la plataforma y quien la audita. */
 export const OPS_READ_ROLES = [
@@ -27,69 +18,6 @@ export const OPS_READ_ROLES = [
   'RELEASE_MANAGER',
   'GOVERNANCE_ADMIN',
 ] as const;
-
-export class LimitQueryDto {
-  @ApiPropertyOptional({ minimum: 1, maximum: 200, default: 50 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(200)
-  limit?: number;
-}
-
-export class TrafficWindowQueryDto {
-  @ApiPropertyOptional({
-    format: 'date-time',
-    description: 'Por defecto: 00:00 UTC del día de `to`',
-  })
-  @IsOptional()
-  @IsISO8601()
-  from?: string;
-
-  @ApiPropertyOptional({
-    format: 'date-time',
-    description: 'Por defecto: ahora',
-  })
-  @IsOptional()
-  @IsISO8601()
-  to?: string;
-}
-
-export class TrafficQueryDto extends TrafficWindowQueryDto {
-  @ApiPropertyOptional({ enum: ['hour', 'day'], default: 'hour' })
-  @IsOptional()
-  @IsIn(['hour', 'day'])
-  interval?: 'hour' | 'day';
-}
-
-export class TrafficEndpointsQueryDto extends TrafficWindowQueryDto {
-  @ApiPropertyOptional({ minimum: 1, maximum: 200, default: 50 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(200)
-  limit?: number;
-
-  @ApiPropertyOptional({
-    enum: ['requests', 'failed', 'p95'],
-    default: 'requests',
-  })
-  @IsOptional()
-  @IsIn(['requests', 'failed', 'p95'])
-  sort?: 'requests' | 'failed' | 'p95';
-}
-
-export class IncidentsQueryDto extends LimitQueryDto {
-  @ApiPropertyOptional({
-    description: 'Sólo incidentes vivos (abiertos, reconocidos, mitigados)',
-  })
-  @IsOptional()
-  @Transform(({ value }) => value === true || value === 'true')
-  @IsBoolean()
-  open?: boolean;
-}
 
 /** Consola de operación del portal: sólo lectura (módulos 11, 36, 46, 67, 68). */
 @ApiTags('ops-console')

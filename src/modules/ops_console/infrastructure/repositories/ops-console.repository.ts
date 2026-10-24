@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS } from '../../common';
-import { SYSOPS } from '../system_ops/system_ops.concepts';
+import { CONCEPTS } from '../../../../common';
+import { SYSOPS } from '../../../system_ops/system_ops.concepts';
 
 /** Estados de incidente que siguen vivos. */
 const OPEN_INCIDENT = [

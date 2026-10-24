@@ -18,6 +18,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'insurance',
   'public',
   'iam',
+  'ops_console',
 ];
 
 const MODULES_DIR = join(process.cwd(), 'src', 'modules');

@@ -1,26 +1,26 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { DomainException, ErrorCode } from '../../common';
-import { loadHttpSliEnv } from '../../observability/http-sli/http-sli.env';
-import { SERIES_PREFIX } from '../../observability/http-sli/http-sli.aggregator';
-import { RouteIndexService } from '../../observability/route-index/route-index.service';
+import { DomainException, ErrorCode } from '../../../common';
+import { loadHttpSliEnv } from '../../../observability/http-sli/http-sli.env';
+import { SERIES_PREFIX } from '../../../observability/http-sli/http-sli.aggregator';
+import { RouteIndexService } from '../../../observability/route-index/route-index.service';
 import {
   WindowError,
   type AnalyticsWindow,
   type Interval,
-} from '../telemetry/domain/analytics-window';
+} from '../../../common/time/analytics-window';
 import {
   describeNotMeasured,
   mergeLatency,
   quantileFromBuckets,
   summarizeLatency,
   type CumulativeBuckets,
-} from './domain/latency-buckets';
-import { resolveTrafficWindow } from './domain/traffic-window';
+} from '../domain/latency-buckets';
+import { resolveTrafficWindow } from '../domain/traffic-window';
 import {
   OpsTrafficRepository,
   bucketsOf,
   type BucketRow,
-} from './ops-traffic.repository';
+} from '../infrastructure/repositories/ops-traffic.repository';
 
 export interface TrafficQuery {
   from?: string;
