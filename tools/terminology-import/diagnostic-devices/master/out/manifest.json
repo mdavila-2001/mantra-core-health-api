@@ -1,7 +1,7 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T18:30:48Z",
+  "generatedAt": "2026-10-24T18:56:49Z",
   "regions": [
     {
       "region": "us",
@@ -238,8 +238,8 @@
     {
       "path": "taxonomy-nodes.ndjson.gz",
       "rows": 39573,
-      "bytes": 2104995,
-      "sha256": "849cfe7c4bc73f252543c40b8b07ce23b9c93bc078ae5305351ab94ea63614b1"
+      "bytes": 2105572,
+      "sha256": "f5ba89c980fbc1b07b4ffcc0e6e1625b2146ca361e087d8f153276b85af37f65"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -249,33 +249,39 @@
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 23814,
-      "bytes": 6641483,
-      "sha256": "d52f63960097693146dab4e1e83a58501b3a02f36ba7ef408516ee9dd3238b95"
+      "rows": 24716,
+      "bytes": 7672418,
+      "sha256": "169668f8330763002fa2c62de7717f301c5787d7614f4aa7e3a3ad15bba12f4a"
     },
     {
       "path": "models-0001.ndjson.gz",
-      "rows": 139045,
-      "bytes": 11651097,
-      "sha256": "fa429ce177663e170ba4d39fcecfd8478d24b9563297e8ae2a20f51906becb5e"
+      "rows": 148942,
+      "bytes": 11627637,
+      "sha256": "1c7228c72879c8966ae04a753406d5694837cd22ceefc3b502ad247da2598550"
     },
     {
       "path": "models-0002.ndjson.gz",
-      "rows": 135267,
-      "bytes": 11085002,
-      "sha256": "5882ff63120ca472299f14e30daf67a3c6bf6860e43c023cba62773cb06260d2"
+      "rows": 141820,
+      "bytes": 11822949,
+      "sha256": "478999012508f5fbe0f888c84dee1009187200b6cde65b96608329fc5d480540"
     },
     {
       "path": "models-0003.ndjson.gz",
-      "rows": 133102,
-      "bytes": 11958919,
-      "sha256": "def26c12d24548d18a54689f44ad4b645d4e3c8ddedb8103c3453779fac88e88"
+      "rows": 143417,
+      "bytes": 11363438,
+      "sha256": "168dca6c04bcc97af2b84ce021003992bfb394203eb9773dfe785a9ec2d41cc0"
     },
     {
       "path": "models-0004.ndjson.gz",
-      "rows": 62214,
-      "bytes": 5542522,
-      "sha256": "7361a93bb85c0d59c686be5528dc5bfc77a73dde77945fe80df4d1071d64cf0b"
+      "rows": 138435,
+      "bytes": 11975670,
+      "sha256": "d5a58c1c2caed304c07e5de3e36b6b39751f1e06d5fa09b1c3d2b34bacf175e8"
+    },
+    {
+      "path": "models-0005.ndjson.gz",
+      "rows": 11971,
+      "bytes": 1068571,
+      "sha256": "21df5b1189933022c4e8e5a02b4d721339b0e38eb81d1951ac09fb2474fb544a"
     },
     {
       "path": "review-manufacturers.ndjson.gz",

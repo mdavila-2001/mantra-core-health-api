@@ -46,6 +46,9 @@ commit de la copia.
 | Paneles IVD para códigos sin regulación | Medido en el propio `foiclass` (`derivePanelParts`): un panel es IVD solo si **todos** sus códigos con regulación están en 862/864/866. Hoy: IM, MG, PA, TX. CH, HE y MI tienen algún código fuera de esas partes y no cuentan. |
 | EMDN categoría W = IVD; Z11/Z12 mezclan diagnóstico y terapia | MedTech Europe, *Practical guide to the use of the EMDN* (2025): <https://www.medtecheurope.org/wp-content/uploads/2025/05/250522_medtech-europe_emdn-booklet-final2.pdf>; MDCG 2025-2 y 2026-1 (actualizaciones de la EMDN) |
 | Estructura del código EMDN (letra de categoría, grupo de 2 dígitos, niveles de 2 dígitos) | Misma guía; ejemplo publicado `W0101060101` (tiras de glucosa) |
+| CND italiana categoría W = IVD | Ministero della Salute, dataset «Classificazione nazionale dei dispositivi medici (CND)» (<https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/>, IODL 2.0), archivo `DISPO_RDM_74_20261001.csv` (sha256 `0e5217c4b9ba8244b32e56d73002a8e705777a36f259f7e6788241bf5194e09a`, leído el 2026-10-24): `W;DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)`, vigente desde 2007-02-20. Fuera de W, la CND no decide: no hay tabla publicada código a código CND↔EMDN. |
+| Área de interés IVD de ANVISA | `DESC_AREA_INTERESSE` de los `CICLO_ANALISE_PETICOES_*` de <https://dados.anvisa.gov.br/dados/> (los une `row/`); solo si todas las áreas del proceso son de diagnóstico in vitro |
+| No adoptado: categorías A/B/C de la TFDA | 醫療器材分類分級管理辦法 (<https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0030120>, modificado 2023-08-22) y su 附表 (PDF, sha256 `94d060913f14a7607d248428caf8e5835113e86ccea5d65aa815edd2c6b65fb1`): el art. 2 clasifica por especialidad y no dice cuáles son IVD |
 
 No se usaron listas de paneles ni de tipos de presentación escritas de memoria:
 los nombres de los paneles de la FDA y el significado de `SUBMISSION_TYPE_ID`

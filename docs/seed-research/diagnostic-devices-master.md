@@ -408,6 +408,29 @@ que esta pasada no es la segunda en 0: el contador vuelve a empezar.
   - Listados del sector: 214 empresas cruzan con un registro (+17).
 - **Sin decisión**: 6 663 454 filas (+254 706): 62 569 de EUDAMED (sobre todo EMDN Z de títulos mixtos) y 197 375 del BD/RDM (CND).
 - **Taxonomía cargada**: +2 299 conceptos CND y +7 designaciones EMDN (nombres que trae EUDAMED). El value set no cambia (5 722) y la 2.ª corrida da 0.
+
+### Pasada 14 (2026-10-24): categoría W de la CND italiana
+
+- **Regiones**: sin cambios desde la pasada 13.
+- **Criterio nuevo** (publicado en la nomenclatura misma, como la W de la EMDN):
+  - En la CND oficial del Ministero della Salute (dataset en dati.salute.gov.it, IODL 2.0; `DISPO_RDM_74_20261001.csv`, sha256 `0e5217c4…`), la categoría **W** se titula «DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)», vigente desde 2007-02-20.
+  - El D. Lgs. 332/2000 es la transposición de la directiva IVD 98/79/CE.
+  - Todo código CND que empieza con W es IVD (`cnd-category-w`, `IVD_CATEGORY` en `lib/taxonomy.mjs`).
+  - Fuera de W la CND no decide: no se encontró una tabla publicada código a código CND↔EMDN. La CID que la reemplaza desde 2026 dice recoger los criterios de CND y EMDN, pero sin correspondencia publicada.
+- **Corrección**: la fuente `it-salute-bdrdm` no tenía jurisdicción (`jurisdictionOf`). En la primera corrida de esta pasada aparecieron 114 796 modelos con 0 jurisdicciones. Ahora el registro nacional italiano es `IT`, con test.
+- **Nuevos tras deduplicar** (contra la pasada 13):
+  - Registros: **+115 495** (739 835).
+  - Modelos: **+114 957** (584 585).
+  - Fabricantes: **+902** (24 716).
+  - Marcas: +92 471 (287 699).
+  - Jurisdicciones: **IT 118 097** (nueva), EU 181 678, US 130 324, BR 113 922, CA 44 378, TW 3 798, AU 420, IN 42.
+  - **Modelos en 2 jurisdicciones: 7 772** (antes 4 648); en 3: 139 (antes 61); en 4: 8 (antes 1).
+  - Tipos de diagnóstico con al menos un modelo: 7 281 (+1 681). Nodos CND: 1 681 de diagnóstico y 618 sin decisión.
+  - Por mismo modelo: 6 212 (antes 9 011). Los 3 188 italianos que entraban por mismo modelo ahora entran por su propio tipo.
+- **Taxonomía cargada**: versión nueva del value set con 7 403 miembros (+1 681). La 2.ª corrida da 0.
+- **Sin decisión**: 6 547 959 filas (−115 495).
+- **Descartadas**: ninguna.
+- **Saturación**: las pasadas 10 a 14 aportaron todas. Faltan dos seguidas en 0.
 - **Descartadas**: ninguna.
 
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)

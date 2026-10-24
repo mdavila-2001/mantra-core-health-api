@@ -71,7 +71,9 @@ Solo criterios publicados, nunca palabras clave del nombre:
    («Medical equipment…») mezcla diagnóstico y terapia en sus grupos Z11 y Z12:
    queda sin decisión salvo por mapeo publicado.
 4. **GMDN y nacionales**: solo por mapeo publicado, y solo si todos los
-   destinos coinciden.
+   destinos coinciden. Excepción: la categoría W de la CND italiana, que el
+   Ministero della Salute titula «DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO
+   (D. Lgs. 332/2000)» (`IVD_CATEGORY`).
 5. **Lo que el propio registro declara** (`decideRow` en `lib/taxonomy.mjs`):
    tipo de licencia IVD (Health Canada «Test Kit»), alcance publicado de la
    fuente (CDC LIVD), clase de un esquema exclusivo de IVD (IVDR/IVDD, «Class

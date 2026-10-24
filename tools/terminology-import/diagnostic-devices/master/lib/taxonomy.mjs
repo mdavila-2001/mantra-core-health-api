@@ -84,6 +84,22 @@ export const NOMENCLATURE_FAMILY = Object.freeze({
 });
 const familyOf = (system) => NOMENCLATURE_FAMILY[system] ?? system;
 
+/**
+ * Nomenclaturas nacionales con una categoría publicada como IVD. CND italiana
+ * (Ministero della Salute, dataset «Classificazione nazionale dei dispositivi
+ * medici (CND)», IODL 2.0): la categoría W se titula «DISPOSITIVI
+ * MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)», la transposición de la
+ * directiva IVD 98/79/CE.
+ */
+export const IVD_CATEGORY = Object.freeze({
+  cnd: {
+    prefix: 'W',
+    basis: 'cnd-category-w',
+    title: 'DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)',
+    url: 'https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/',
+  },
+});
+
 export const nodeKey = (system, code, name) =>
   `${system}|${code ?? `name:${(name ?? '').trim().toUpperCase()}`}`;
 
@@ -182,15 +198,20 @@ export class Taxonomy {
       } else if (t.system === 'emdn' && t.code) {
         this.addEmdn(t.code, t.name, prov);
       } else if (!existing) {
+        const ivd =
+          IVD_CATEGORY[t.system] &&
+          t.code?.startsWith(IVD_CATEGORY[t.system].prefix)
+            ? IVD_CATEGORY[t.system]
+            : null;
         this.addNode({
           system: t.system,
           code: t.code,
           name: t.name,
           definition: t.definition,
           parent: null,
-          diagnostic: null,
-          branch: null,
-          basis: null,
+          diagnostic: ivd ? true : null,
+          branch: ivd ? 'ivd' : null,
+          basis: ivd ? ivd.basis : null,
           attributes: {},
           provenance: prov,
         });

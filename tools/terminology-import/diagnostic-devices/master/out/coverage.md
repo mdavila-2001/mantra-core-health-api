@@ -1,6 +1,6 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T18:30:48Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T18:56:49Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 
@@ -40,7 +40,7 @@ Generado: 2026-10-24T18:30:48Z. Se genera con `build.mjs`; no lo edite a mano.
 |---|---:|
 | Nodos | 39.573 |
 | Mapeos publicados | 218 |
-| Tipos de diagnóstico con al menos un modelo | 5.600 |
+| Tipos de diagnóstico con al menos un modelo | 7.281 |
 
 Product codes de la FDA: openFDA 2026-10-21 (7096) contra git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28) (7088); solo en la oficial 8, solo en la copia 0; difieren nombre 10, clase 4, regulación 4.
 
@@ -63,6 +63,7 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 |---|---:|
 | emdn:ivd | 2.275 |
 | fda-product-code:ivd | 2.148 |
+| cnd:ivd | 1.681 |
 | fda-product-code:diagnostic | 777 |
 | emdn:diagnostic | 245 |
 | fda-product-code:monitoring | 198 |
@@ -76,13 +77,14 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 | jmdn:null:null | 3.874 |
 | fda-product-code:false:cfr-non-diagnostic-subpart | 3.096 |
 | br:anvisa-nome-tecnico:null:null | 2.867 |
-| cnd:null:null | 2.299 |
 | emdn:true:emdn-category-w | 2.275 |
 | fda-product-code:true:cfr-ivd-part | 2.081 |
 | gmdn-pt:null:null | 1.743 |
+| cnd:true:cnd-category-w | 1.681 |
 | tw:tfda-classification:null:null | 1.366 |
 | fda-product-code:true:cfr-subpart-title | 975 |
 | fda-product-code:null:no-regulation | 832 |
+| cnd:null:null | 618 |
 | tw:tfda-category:null:null | 346 |
 | emdn:true:emdn-group-title-inherited | 213 |
 | emdn:null:emdn-group-title-mixed-inherited | 174 |
@@ -99,41 +101,42 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 
 | Medida | Valor |
 |---|---:|
-| Filas de diagnóstico consolidadas | 624.340 |
-| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 9.011 |
+| Filas de diagnóstico consolidadas | 739.835 |
+| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 6.212 |
 | Filas no diagnósticas (descartadas) | 2.769 |
-| Filas sin decisión (tipo sin criterio publicado) | 6.663.454 |
-| … de ellas sin ningún tipo | 2.285.882 |
-| Fabricantes | 23.814 |
-| Marcas | 195.228 |
-| Modelos | 469.628 |
-| Registros | 624.340 |
+| Filas sin decisión (tipo sin criterio publicado) | 6.547.959 |
+| … de ellas sin ningún tipo | 2.285.705 |
+| Fabricantes | 24.716 |
+| Marcas | 287.699 |
+| Modelos | 584.585 |
+| Registros | 739.835 |
 
 | Jurisdicción | Modelos con registro |
 |---|---:|
 | EU | 181.678 |
 | US | 130.324 |
-| BR | 113.921 |
-| CA | 44.218 |
+| IT | 118.097 |
+| BR | 113.922 |
+| CA | 44.378 |
 | TW | 3.798 |
 | AU | 420 |
 | IN | 42 |
 
 | Jurisdicciones por modelo | Modelos |
 |---|---:|
-| 1 | 464.918 |
-| 2 | 4.648 |
-| 3 | 61 |
-| 4 | 1 |
+| 1 | 576.666 |
+| 2 | 7.772 |
+| 3 | 139 |
+| 4 | 8 |
 
 ## Fabricantes: fusiones y revisión
 
 | Regla de fusión | Fusiones |
 |---|---:|
-| same-name-same-country | 20.130 |
-| same-name-unique-country | 3.574 |
-| same-name-no-country | 3.126 |
-| same-registry-id | 991 |
+| same-name-same-country | 20.218 |
+| same-name-unique-country | 3.796 |
+| same-name-no-country | 3.185 |
+| same-registry-id | 1.012 |
 
 | Caso para revisión (no fusionado) | Casos |
 |---|---:|

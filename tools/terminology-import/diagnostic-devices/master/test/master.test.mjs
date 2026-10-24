@@ -41,7 +41,7 @@ import {
   normalizeManufacturerName,
   resolveManufacturers,
 } from '../lib/manufacturers.mjs';
-import { consolidate, labelKey } from '../lib/consolidate.mjs';
+import { consolidate, jurisdictionOf, labelKey } from '../lib/consolidate.mjs';
 import {
   locateRegion,
   readRegionManifest,
@@ -800,4 +800,27 @@ test('mapeos: dos niveles de la clasificación TFDA no son un mapeo entre nomenc
     }),
   );
   assert.equal(tax.crosswalks.size, 0);
+});
+
+test('CND: la categoría W (IVD por su título publicado) decide; las demás no', () => {
+  const tax = new Taxonomy();
+  const cnd = (code) =>
+    row({
+      source: 'it-salute-bdrdm',
+      deviceTypeSystem: 'cnd',
+      deviceTypeCode: code,
+      deviceTypeName: 'X',
+    });
+  tax.addFromRow(cnd('W0101010101'));
+  tax.addFromRow(cnd('Z12021004'));
+  assert.equal(tax.decideRow(cnd('W0101010101')).diagnostic, true);
+  assert.equal(tax.nodes.get('cnd|W0101010101').basis, 'cnd-category-w');
+  assert.equal(tax.decideRow(cnd('Z12021004')).diagnostic, null);
+});
+
+test('jurisdicción: toda fuente de las regiones tiene una (BD/RDM italiano → IT)', () => {
+  assert.equal(jurisdictionOf('it-salute-bdrdm', 'eu'), 'IT');
+  assert.equal(jurisdictionOf('eudamed-udi', 'eu'), 'EU');
+  assert.equal(jurisdictionOf('tfda-tudid', 'row'), 'TW');
+  assert.equal(jurisdictionOf('cdc-livd-sars-cov-2', 'us'), 'US');
 });
