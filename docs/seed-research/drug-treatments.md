@@ -1,6 +1,6 @@
 # Tratamientos farmacológicos por enfermedad — investigación, saturación y cobertura
 
-- Rama: `justin/seed-drug-treatments` · importador: `tools/terminology-import/drug-treatments/` · fuentes y licencias: [`SOURCES.md`](../../tools/terminology-import/drug-treatments/SOURCES.md)
+- Rama: `justin/seed-drug-treatments` · importador: `tools/terminology-import/drug-treatments/` · fuentes y licencias: `tools/terminology-import/drug-treatments/SOURCES.md`
 - Depende de: `justin/seed-diseases` (enfermedades) y del catálogo de medicamentos ya existente (`vademecum`, ATC nivel 5).
 - Sesión hermana: `justin/seed-procedures-treatments` (procedimientos y terapias no farmacológicas).
 - Última actualización: 2026-10-24.
