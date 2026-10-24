@@ -1,0 +1,74 @@
+$ build-monographs (caché = fixture real CIMA 15419)
+=== Monografías: universo 483 ATC 5; CIMA 2 medicamentos (0 sin ATC 5) ===
+[openfda] 0 etiquetas leídas; 0 de referencia para 0 conjuntos de UNII
+{
+  "generatedAt": "2026-10-24T02:51:58.283Z",
+  "granularity": "route",
+  "universe": 483,
+  "monographs": 1,
+  "sections": 2,
+  "sectionsBySource": {
+    "aemps-cima": 2
+  },
+  "cimaProductsWithoutAtc5": 0,
+  "openFdaLabelsScanned": 0,
+  "cimaDocsMissing": 0,
+  "cimaSectionsWithoutVersion": 0,
+  "skippedWithoutData": 482,
+  "uniiWithoutLabel": 0,
+  "segundos": 0
+}
+
+$ load-clinical-pharmacology (corrida 1)
+=== Farmacología clínica → terminology.*  ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 1,
+  "concepts": 5,
+  "designations": 3,
+  "properties": 14,
+  "relationships": 4,
+  "uniqueIds": 26
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 5,
+    "designations": 3,
+    "relationships": 4,
+    "prunedProperties": 0,
+    "properties": 14,
+    "vademecumMaps": 1,
+    "vademecumMapsPlanned": 1
+  },
+  "segundos": 0
+}
+
+$ load-clinical-pharmacology (corrida 2)
+=== Farmacología clínica → terminology.*  ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 1,
+  "concepts": 5,
+  "designations": 3,
+  "properties": 14,
+  "relationships": 4,
+  "uniqueIds": 26
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 0,
+    "properties": 0,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 1
+  },
+  "segundos": 0
+}

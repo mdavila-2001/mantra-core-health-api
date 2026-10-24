@@ -1,0 +1,72 @@
+$ ficha 15419 con fecha +1 día → build + load
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 2,
+    "properties": 2,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 1
+  },
+  "segundos": 0
+}
+$ vuelta a la versión original → build + load
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 2,
+    "properties": 2,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 1
+  },
+  "segundos": 0
+}
+$ conteo final de concept_properties
+14
+$ textSha256 guardado vs sha256 del texto de la fuente (4.1)
+7bfea730b6eec5ce0a0c0193503cb7c23f083c2dd0d99973480cf3eb528e8084
+7bfea730b6eec5ce0a0c0193503cb7c23f083c2dd0d99973480cf3eb528e8084
+$ validate-links
+{
+  "generatedAt": "2026-10-24T02:51:59.169Z",
+  "monographConcepts": 1,
+  "vademecum": {
+    "atc5": 483,
+    "withMonograph": 1,
+    "withMap": 1,
+    "withoutMonograph": [
+      "A01AA01",
+      "A01AB11",
+      "A02AD01",
+      "A02BA02",
+      "A02BB01",
+      "A02BC01",
+      "A02BX02",
+      "A03AX13",
+      "A03BA01",
+      "A03BB01",
+      "A03FA01",
+      "A03FA03",
+      "A04AA01",
+      "A05AA02",
+      "A06AB02",
+      "A06AC07",
+      "A06AD04",
+      "A06AD11",
+      "A06AG06",
+      "A06AX01",
+      "… (482)"
+    ]
+  },
+  "productCatalog": {},
+  "relationshipsTouchingAtc5": {},
+  "rxnorm": {
+    "rxcuis": 0,
+    "presentInRxnormCodeSystems": 0
+  }
+}

@@ -1,0 +1,17 @@
+=== Monografías: universo 483 ATC 5; CIMA 0 medicamentos (0 sin ATC 5) ===
+[openfda] 0 etiquetas leídas; 0 de referencia para 0 conjuntos de UNII
+{
+  "generatedAt": "2026-10-24T02:51:35.468Z",
+  "granularity": "route",
+  "universe": 483,
+  "monographs": 0,
+  "sections": 0,
+  "sectionsBySource": {},
+  "cimaProductsWithoutAtc5": 0,
+  "openFdaLabelsScanned": 0,
+  "cimaDocsMissing": 0,
+  "cimaSectionsWithoutVersion": 0,
+  "skippedWithoutData": 483,
+  "uniiWithoutLabel": 0,
+  "segundos": 0
+}

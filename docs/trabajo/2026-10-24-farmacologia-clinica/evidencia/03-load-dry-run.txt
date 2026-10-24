@@ -1,0 +1,12 @@
+=== Farmacología clínica → terminology.* (DRY-RUN, sin base) ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 0,
+  "concepts": 0,
+  "designations": 0,
+  "properties": 0,
+  "relationships": 0,
+  "uniqueIds": 0
+}
+No se tocó ninguna base.
