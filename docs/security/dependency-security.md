@@ -28,17 +28,10 @@ requiere pasar entrada de atacante a `expand()`/patrones glob de `minimatch`, al
 herramientas de build/test, no en código servido a clientes externos. Riesgo residual `MEDIUM`,
 **aceptado** (`SEC-003` en [matriz de trazabilidad](../governance/traceability-matrix.md)).
 
-## Acción recomendada
-
-Actualizar `brace-expansion` a `>=5.0.8` en el próximo mantenimiento rutinario de dependencias —
-no urgente dado que no hay ruta de explotación en producción, pero tampoco gratuito de posponer
-indefinidamente.
-
 ## Proceso de auditoría de dependencias
 
-No se identificó en esta fase un proceso automatizado de auditoría de dependencias en CI — `yarn
-audit` se ejecutó manualmente como parte de esta auditoría, no como gate automático existente en
-`.github/workflows/docs.yml` (que sí gobierna el contrato de API, no las dependencias).
+`.github/workflows/docs.yml` corre `yarn npm audit --all --recursive --environment production`
+como paso bloqueante: audita las dependencias de runtime, no las de desarrollo.
 
 ## Ver también
 

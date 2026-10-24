@@ -50,7 +50,7 @@ Esto importa para el costo de ingeniería — la mayor parte del andamiaje ya es
 
 | Pieza existente | Dónde | Qué aporta a WhatsApp/SMS |
 | --- | --- | --- |
-| Punto de extensión de proveedor | `NotificationProviderAdapter` en `src/worker/jobs/messaging/notification-delivery.job.ts` | El worker ya descubre pendientes y registra el intento; falta el adaptador que llama al proveedor |
+| Punto de extensión de proveedor | `NotificationProviderAdapter` en `src/worker/jobs/messaging/notification-delivery.job.ts` | El worker ya descubre pendientes y registra el intento; no hay adaptador que llame a un proveedor de SMS/WhatsApp |
 | Adaptador de referencia | `src/worker/jobs/messaging/google-email-provider.adapter.ts` | Patrón a copiar (wiring, errores, trazas) |
 | Credenciales por tenant | `provider_channel_configs.credential_id` → `integrations.provider_credentials` | Cada clínica puede tener su propio número/WABA sin tocar código |
 | Referencia de plantilla del proveedor | `message_templates.provider_template_ref` | Campo ya previsto para el *nombre de plantilla aprobada* de Meta |
@@ -58,7 +58,7 @@ Esto importa para el costo de ingeniería — la mayor parte del andamiaje ya es
 | Opt-in y horarios de silencio | `recipient_preferences.opted_in`, `quiet_hours_json`, comprobación de consentimiento en `NotificationsService` | WhatsApp **exige** opt-in; ya se puede registrar y hacer valer |
 | Límite de tasa por proveedor | `provider_channel_configs.rate_limit_per_min` | Los *messaging limits* de Meta (250/1k/10k/100k por 24 h) tienen dónde expresarse |
 
-**Lo que falta y no existe:** los conceptos de canal y de proveedor. Hoy
+**Lo que no existe:** los conceptos de canal y de proveedor. Hoy
 `src/common/constants/concepts.ts` sólo define `CHANNEL_TYPE_IN_APP`,
 `CHANNEL_TYPE_EMAIL` y `MSG_PROVIDER_TYPE_EMAIL`. No hay canal SMS ni WhatsApp
 en terminología, ni filas semilla que los instancien.
@@ -478,8 +478,8 @@ maneja datos clínicos son más determinantes que el precio.
    incoherente con el resto del sistema.
 3. **WhatsApp exige opt-in previo y verificable**, obtenido por un canal donde el
    paciente entendió qué iba a recibir. El módulo ya lo puede registrar
-   (`recipient_preferences.opted_in` + `consent`); lo que falta es que el flujo de
-   alta del paciente lo capture.
+   (`recipient_preferences.opted_in` + `consent`), pero el flujo de alta del
+   paciente no lo captura.
 4. **La política de mensajería de WhatsApp restringe contenido de salud**
    promocional (venta de medicamentos y productos médicos). Los avisos
    transaccionales de agenda no están afectados, pero cualquier campaña de

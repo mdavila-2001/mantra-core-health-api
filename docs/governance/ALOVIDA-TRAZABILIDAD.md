@@ -16,14 +16,14 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 | CAN-APT-002 solicitud ≠ cita; reprogramación no sobrescribe | scheduling.appointment_bookings + booking_reschedules | reprogramación como evento; assertTransition | booking-state-machine.spec | ✅ |
 | CAN-RX-001..004 receta: draft editable, emitida inmutable, invalidar/reemplazar/renovar | clinical.medication_requests | issue/invalidate/replace/renew (comandos, no CRUD) | medications.service.spec | ✅ |
 | CAN-NOTE-001 notas: borrador editable, firmada inmutable, adenda | chart.clinical_note_versions + signatures | signVersion/cosign/amend | chart-notes.spec | ✅ |
-| CAN-INT-001 cambio de paciente solo en borrador | procedures_perioperative.procedure_cases | guarda por estado (DRAFT-only) | periop-cases.spec | 🟡→✅ (Fase E) |
+| CAN-INT-001 cambio de paciente solo en borrador | procedures_perioperative.procedure_cases | guarda por estado (DRAFT-only) | periop-cases.spec | ✅ (Fase E) |
 | CAN-INT-002 credenciales del equipo vigentes antes de confirmar | procedures_perioperative team | aceptación del integrante + credencial vigente real antes de confirmar | periop-cases.spec, `yarn alovida:personas` | ✅ (2026-08-12: era inalcanzable — ver nota) |
-| CAN-SURVEY-001 encuestas privadas ≠ reseñas públicas | community.service_reviews + qa/encuestas | entidades separadas; agregados anonimizados | community smoke | 🟡 (umbral por afinar) |
+| CAN-SURVEY-001 encuestas privadas ≠ reseñas públicas | community.service_reviews + qa/encuestas | entidades separadas; agregados anonimizados | community smoke | 🟡 (umbral sin fijar) |
 | CAN-DELETE-001 sin hard-delete de datos protegidos | transversal | guardrail `HARD_DELETE_RESTRICTED_DATA` bloquea CI | alovida:guardrails | ✅ |
 | CAN-AUDIT-001 auditoría append-only con hash | audit.audit_log (WORM, previous_hash/record_hash) | append serializado por tenant (advisory lock) | audit-log.repository.spec | ✅ |
 | CAN-FIN-001 contabilidad: reversión, aprobaciones | accounting.journal_transactions | DRAFT→…→APPROVED→POSTED→REVERSED; assertTransition | ledger.service.spec | ✅ |
 | CAN-ADV-001 crédito publicitario | ads / payments.wallets | saldo prepago (decisión D-04) | — | 🔵 decisión negocio |
-| CAN-TIME-001 UTC + zona IANA congelada | transversal (timestamptz) | instantes en UTC; tz congelada en snapshot | — | 🟡 (tz por reserva pendiente) |
+| CAN-TIME-001 UTC + zona IANA congelada | transversal (timestamptz) | instantes en UTC; tz congelada en snapshot | — | 🟡 (sin tz por reserva) |
 | CAN-VERSION-001 versionado de políticas/consentimientos/… | consent, terminology, scheduling (policy version), booking_confirmation_rules (version) | versión + snapshot donde se consume | varios | 🟡 (estandarización continua) |
 
 ## Contradicciones (C-*) marcadas Crítica/Alta
@@ -44,15 +44,6 @@ Estado: ✅ implementado y probado · 🟡 parcial/base · 🔵 decisión de neg
 | C-18 registro asistido unificado | invitación/activación un-solo-uso, sin password del creador | iam (Fase F) | ✅ |
 | C-19 esquema canónico de auditoría | audit_log WORM con hash-chain | audit | ✅ |
 | C-20 consentimiento/autorización versionado | consent + access_grant + legal_representation + emergency_access_event | consent/authz | ✅ |
-
-## Decisiones de negocio pendientes (parametrizables, listas para configurar)
-
-| Decisión | Estado backend | Requiere |
-| --- | --- | --- |
-| D-05 firma de receta obligatoria por jurisdicción/tipo/canal | tabla `prescription_signature_policies` (fail-safe: no exige si no hay política) | valores por jurisdicción (legal) |
-| D-06 retención por jurisdicción | `system_ops.retention_policies` + ejecución existente | plazos por jurisdicción (legal) |
-| CAN-ADV-001 significado de crédito publicitario | saldo prepago (wallets) | confirmación de negocio |
-| umbral de anonimización de agregados (C-15) | — | definir umbral mínimo |
 
 ## Cobertura por actor clínico (2026-08-12)
 
