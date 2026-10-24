@@ -5,9 +5,13 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { ClinicalReadService } from '../../clinical/services/clinical-read.service';
+import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
+import { lockLogicalKey } from './clinical-ext-access';
 import { ReferralsRepository } from '../repositories';
 import {
   PatientProfilesRepository,
@@ -34,6 +38,9 @@ export class ReferralsService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param referralsRepo - Valor de referrals repo requerido por la operación.
+   * @param accountLinksRepo - Vínculo cuenta → persona.
+   * @param patientProfilesRepo - Perfiles de paciente.
+   * @param clinicalRead - Política de acceso a la historia del paciente.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -41,6 +48,7 @@ export class ReferralsService {
     private readonly referralsRepo: ReferralsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly clinicalRead: ClinicalReadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReferralsService.name);
@@ -58,12 +66,22 @@ export class ReferralsService {
       },
       'Creating referral',
     );
+    // Emitir una referencia escribe en el expediente del paciente: se exige la
+    // misma base de escritura que el resto de las rutas clínicas.
+    await this.clinicalRead.assertCanWriteHistory(dto.patientProfileId, actor);
+
     return this.em.transactional(async (tx) => {
       if (
         dto.sourceEncounterId &&
         dto.targetProfileId &&
         dto.specialtyConceptId
       ) {
+        // El DDL no impide el duplicado: se serializa a quien emite la misma
+        // referencia para que el segundo vea la fila del primero.
+        await lockLogicalKey(
+          tx,
+          `clinical_ext.referral:${dto.sourceEncounterId}:${dto.targetProfileId}:${dto.specialtyConceptId}`,
+        );
         const dup = await this.referralsRepo.findDuplicate(
           tx,
           dto.sourceEncounterId,
@@ -71,9 +89,11 @@ export class ReferralsService {
           dto.specialtyConceptId,
         );
         if (dup) {
-          throw new ConflictException('Ya existe una referencia equivalente', {
-            sourceEncounterId: dto.sourceEncounterId,
-          });
+          throw new ConflictException(
+            'Ya existe una referencia equivalente',
+            { sourceEncounterId: dto.sourceEncounterId },
+            ClinicalExtErrorReason.REFERRAL_ALREADY_EXISTS,
+          );
         }
       }
 
@@ -103,7 +123,14 @@ export class ReferralsService {
     });
   }
 
-  /** UC-18-08: el tenant destino acepta o rechaza la referencia. */
+  /**
+   * UC-18-08: el destinatario acepta o rechaza la referencia.
+   *
+   * Sólo responde quien recibe: el profesional destino (`targetProfileId`) o,
+   * si la referencia apunta a un tenant sin profesional concreto, un actor de
+   * ese tenant (`targetTenantId`). Cualquier otro —incluido quien emitió o un
+   * clínico sin relación— recibe el mismo 404 que una referencia inexistente.
+   */
   async respond(
     referralId: string,
     dto: RespondReferralDto,
@@ -117,12 +144,16 @@ export class ReferralsService {
       },
       'Responding referral',
     );
+    const activeTenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const referral = await this.referralsRepo.findById(tx, referralId);
-      if (!referral)
-        throw new ResourceNotFoundException('Referencia no encontrada', {
-          referralId,
-        });
+      if (!referral || !this.isDestination(referral, actor, activeTenantId)) {
+        throw new ResourceNotFoundException(
+          'Referencia no encontrada',
+          undefined,
+          ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+        );
+      }
       if (referral.statusConceptId !== CEXT.REFERRAL_REQUESTED) {
         throw new PreconditionFailedException(
           'La referencia no está en estado solicitado',
@@ -143,16 +174,45 @@ export class ReferralsService {
     });
   }
   /**
+   * ¿Es este actor el destinatario vigente de la referencia?
+   *
+   * @param referral - Referencia ya cargada.
+   * @param actor - Quién responde.
+   * @param activeTenantId - Tenant activo del actor.
+   * @returns `true` sólo si la referencia apunta al actor o a su tenant.
+   */
+  private isDestination(
+    referral: Referrals,
+    actor: AuthenticatedUser,
+    activeTenantId: string,
+  ): boolean {
+    if (referral.targetTenantId && referral.targetTenantId !== activeTenantId) {
+      return false;
+    }
+    if (referral.targetProfileId) {
+      return actor.practitionerProfileId === referral.targetProfileId;
+    }
+    return referral.targetTenantId === activeTenantId;
+  }
+
+  /**
    * Lista las derivaciones de un paciente.
    *
    * La cara de lectura que faltaba: se escribían y no había forma de verlas, así
-   * que el expediente no podía mostrarlas.
+   * que el expediente no podía mostrarlas. Exige base de lectura sobre la
+   * historia del paciente: el filtro por paciente solo no autoriza nada.
    *
    * @param patientProfileId - Paciente.
+   * @param actor - Quién lista.
    * @param limit - Tope de filas.
    * @returns Los registros, del más reciente al más antiguo.
    */
-  async listByPatient(patientProfileId: string, limit = 50) {
+  async listByPatient(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+    limit = 50,
+  ) {
+    await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
     const em = this.em.fork();
     return this.referralsRepo.findByPatient(em, patientProfileId, limit);
   }

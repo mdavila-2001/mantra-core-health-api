@@ -54,6 +54,7 @@ import {
   PersonAccountLinksRepository,
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
+  PersonsRepository,
 } from '../profiles/infrastructure/repositories';
 
 /**
@@ -102,6 +103,8 @@ import {
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
     PatientProfilesRepository,
+    // Fecha de nacimiento canónica para proyectar el plan de inmunización
+    PersonsRepository,
     // Servicios
     CareTeamsService,
     CdsService,
