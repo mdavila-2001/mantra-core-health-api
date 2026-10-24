@@ -1,0 +1,83 @@
+TAP version 13
+# Subtest: fila común: trae los 18 campos y rechaza una fila sin cita
+ok 1 - fila común: trae los 18 campos y rechaza una fila sin cita
+  ---
+  duration_ms: 3.890288
+  type: 'test'
+  ...
+# Subtest: texto verbatim: solo recorta extremos y conserva el espacio de ancho completo
+ok 2 - texto verbatim: solo recorta extremos y conserva el espacio de ancho completo
+  ---
+  duration_ms: 3.600006
+  type: 'test'
+  ...
+# Subtest: ANVISA registros: una fila por registro; el segundo fabricante vacío no duplica
+ok 3 - ANVISA registros: una fila por registro; el segundo fabricante vacío no duplica
+  ---
+  duration_ms: 1.624542
+  type: 'test'
+  ...
+# Subtest: ANVISA modelos: el modelo va verbatim y forma parte del id
+ok 4 - ANVISA modelos: el modelo va verbatim y forma parte del id
+  ---
+  duration_ms: 0.715409
+  type: 'test'
+  ...
+# Subtest: ANVISA: una línea con columnas de menos hace fallar el parseo
+ok 5 - ANVISA: una línea con columnas de menos hace fallar el parseo
+  ---
+  duration_ms: 0.49591
+  type: 'test'
+  ...
+# Subtest: PMDA: JMDN en japonés, mismo trámite en dos listados queda una fila con las dos citas
+ok 6 - PMDA: JMDN en japonés, mismo trámite en dos listados queda una fila con las dos citas
+  ---
+  duration_ms: 1.505269
+  type: 'test'
+  ...
+# Subtest: Health Canada: una fila por identificador, clase en romanos y país de la compañía
+ok 7 - Health Canada: una fila por identificador, clase en romanos y país de la compañía
+  ---
+  duration_ms: 3.58667
+  type: 'test'
+  ...
+# Subtest: Health Canada: licencia sin identificadores sale con model null; sin compañía no sale
+ok 8 - Health Canada: licencia sin identificadores sale con model null; sin compañía no sale
+  ---
+  duration_ms: 0.330949
+  type: 'test'
+  ...
+# Subtest: TGA DAEN: «-» es vacío, el GMDN va como gmdn-pt y los pares ya cubiertos no se repiten
+ok 9 - TGA DAEN: «-» es vacío, el GMDN va como gmdn-pt y los pares ya cubiertos no se repiten
+  ---
+  duration_ms: 2.281149
+  type: 'test'
+  ...
+# Subtest: salida: partes gzip legibles, filas completas y sha256 en el manifiesto
+ok 10 - salida: partes gzip legibles, filas completas y sha256 en el manifiesto
+  ---
+  duration_ms: 20.606666
+  type: 'test'
+  ...
+# Subtest: CDSCO: fabricante legal y país del sitio, «Show More» resuelto y clase A–D
+ok 11 - CDSCO: fabricante legal y país del sitio, «Show More» resuelto y clase A–D
+  ---
+  duration_ms: 2.472985
+  type: 'test'
+  ...
+# Subtest: CDSCO: licencia y artefacto de la página
+ok 12 - CDSCO: licencia y artefacto de la página
+  ---
+  duration_ms: 0.150137
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 184.133814
+exit 0

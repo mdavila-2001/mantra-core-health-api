@@ -1,0 +1,8 @@
+anvisa-produtos: {"inputLines":108492,"rows":93770} → anvisa-produtos.ndjson.gz (3.1 s)
+anvisa-produtos-modelos: {"inputFiles":33,"inputLines":1242830,"rows":1027762} → anvisa-produtos-modelos.ndjson.gz (44.8 s)
+pmda-approvals: {"inputRows":36116,"rows":35298,"duplicates":815,"withoutManufacturer":3} → pmda-approvals.ndjson.gz (1.7 s)
+hc-mdall: {"licences":62087,"companies":6448,"orphanIdentifiers":0,"duplicateIdentifiers":1,"withoutCompany":0,"licencesWithoutDevices":3,"rows":2333236} → hc-mdall-0001.ndjson.gz, hc-mdall-0002.ndjson.gz (93.5 s)
+tga-daen: {"fullReports":92702,"summaryRows":133108,"rows":18917,"withoutManufacturer":1} → tga-daen.ndjson.gz (3.5 s)
+cdsco-import-licences: {"sheetRows":25794,"rows":25792,"badLicence":0,"withoutManufacturer":0} → cdsco-import-licences.ndjson.gz (3.0 s)
+manifest → /home/user/mantra-core-health-api/tools/terminology-import/diagnostic-devices/row/out/manifest.json (3534775 filas en 7 archivos)
+exit 0
