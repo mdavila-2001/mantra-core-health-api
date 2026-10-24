@@ -81,6 +81,11 @@ export const { seeds: CLINICAL_EXT_CONCEPT_SEEDS, ids: CEXT } =
       code: 'REF_ROUTINE',
       display: 'Routine referral priority',
     },
+    // Categoría de la campana cuando el médico recomienda a otro profesional.
+    NOTICE_REFERRAL_RECOMMENDED: {
+      code: 'REF_NOTICE_RECOMMENDED',
+      display: 'Referral recommended notice',
+    },
 
     // --- care_gaps -----------------------------------------------------------
     CARE_GAP_OPEN: { code: 'GAP_OPEN', display: 'Care gap open' },
