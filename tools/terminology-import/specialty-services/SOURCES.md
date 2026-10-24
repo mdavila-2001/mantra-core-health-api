@@ -1,8 +1,13 @@
 # Fuentes — servicios por especialidad
 
 Registro de cada fuente que alimenta `build-specialty-services.mjs`: quién la
-publica, qué versión, por dónde llegaron los bytes, su hash y su licencia. Los
-bytes **no** viven en git: se bajan a `<BUILD_DIR>/cache/`
+publica, qué versión, por dónde llegaron los bytes, su hash y su licencia.
+
+Lo que **sí** vive en git es el corpus ya normalizado, en `data/`
+(`specialty-services.part-NNN.ndjson.gz`, partes de menos de 50 MB, con
+`MANIFEST.json` y el SHA-256 de cada parte): el cargador lo usa cuando no hay
+armado local, así que la carga no depende de volver a bajar nada. Los bytes
+**crudos** de las fuentes **no** viven en git: se bajan a `<BUILD_DIR>/cache/`
 (`$SPECIALTY_SERVICES_BUILD_DIR`, por defecto `../glossary-data-build/specialty-services/`)
 y el armado aborta si el SHA-256 no es el de esta tabla.
 

@@ -3,7 +3,9 @@
 // Servicios por especialidad · etapa 2 (corpus NDJSON → `terminology.*`).
 //
 // Lee `<BUILD_DIR>/specialty-services.ndjson` (lo escribe
-// `build-specialty-services.mjs`) y carga lo que describe `lib/load-plan.mjs`.
+// `build-specialty-services.mjs`) o, si no hay armado local, la copia versionada
+// de `data/` (verificada contra su `MANIFEST.json`), y carga lo que describe
+// `lib/load-plan.mjs`.
 // Sin DDL: sólo filas en tablas que el modelo ya declara.
 //
 // Idempotente: ids deterministas + `ON CONFLICT DO NOTHING`; la segunda
@@ -28,7 +30,9 @@ import pg from 'pg';
 import { existsSync, readFileSync } from 'node:fs';
 
 import { CONCEPT, RELATION_TYPE } from '../lib/glossary-es/load-plan.mjs';
-import { CORPUS_PATH } from './lib/common.mjs';
+import { join } from 'node:path';
+
+import { CORPUS_PATH, REPO_DATA_DIR, readGzParts } from './lib/common.mjs';
 import { batchPlans, boSourcePlan, buildPlan, codeSystemPlans } from './lib/load-plan.mjs';
 import { loadModelSpecialties } from './lib/rules.mjs';
 
@@ -45,11 +49,20 @@ const DB_CONFIG = {
 
 function readCorpus() {
   const path = CORPUS_PATH();
-  if (!existsSync(path)) throw new Error(`Falta ${path}. Corré primero build-specialty-services.mjs.`);
-  return readFileSync(path, 'utf8')
-    .split('\n')
-    .filter((l) => l.trim() !== '')
-    .map((l) => JSON.parse(l));
+  if (existsSync(path)) {
+    console.log(`Corpus: ${path}`);
+    return readFileSync(path, 'utf8')
+      .split('\n')
+      .filter((l) => l.trim() !== '')
+      .map((l) => JSON.parse(l));
+  }
+  const manifestPath = join(REPO_DATA_DIR, 'MANIFEST.json');
+  if (!existsSync(manifestPath)) throw new Error(`Falta ${path} y no hay copia en ${REPO_DATA_DIR}. Corré primero build-specialty-services.mjs.`);
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  const records = readGzParts(REPO_DATA_DIR, manifest.corpus).map((l) => JSON.parse(l));
+  if (records.length !== manifest.records) throw new Error(`data/: ${records.length} registros, el manifiesto declara ${manifest.records}`);
+  console.log(`Corpus: copia versionada de ${REPO_DATA_DIR} (armado ${manifest.builtAt})`);
+  return records;
 }
 
 async function insertMany(client, table, columns, tuples, casts, { audit = true } = {}) {

@@ -263,7 +263,7 @@ cobertura en [`docs/seed-research/specialty-services.md`](../../docs/seed-resear
 
 ```sh
 node tools/terminology-import/specialty-services/build-specialty-services.mjs --report   # fuentes → NDJSON (fuera de git)
-node tools/terminology-import/specialty-services/load-specialty-services.mjs              # dry-run
+node tools/terminology-import/specialty-services/load-specialty-services.mjs              # dry-run (sin armado local, usa specialty-services/data/)
 node tools/terminology-import/specialty-services/load-specialty-services.mjs --apply      # carga (.env DB_*)
 node --test "tools/terminology-import/specialty-services/test/*.test.mjs"
 ```

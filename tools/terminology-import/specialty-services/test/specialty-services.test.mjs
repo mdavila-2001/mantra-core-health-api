@@ -113,3 +113,21 @@ test('plan: sin la especialidad en la base, la relación no se escribe y se info
   assert.equal(plan.relationships.length, 0);
   assert.ok(Object.keys(plan.unresolved).length > 0);
 });
+
+test('copia versionada: las partes .gz vuelven idénticas y se rechazan si alguien las altera', async () => {
+  const { mkdtempSync, writeFileSync: write, readFileSync: read } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { writeGzParts, readGzParts } = await import('../lib/common.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'specialty-services-'));
+  const lines = ['{"a":1}', '{"b":"ñandú"}'];
+  const parts = writeGzParts(dir, 'x', lines);
+  assert.equal(parts.length, 1);
+  assert.deepEqual(readGzParts(dir, parts), lines);
+  // Mismo contenido, mismos bytes (gzip sin fecha): re-armar no ensucia el diff.
+  assert.equal(writeGzParts(dir, 'x', lines)[0].sha256, parts[0].sha256);
+  const file = join(dir, parts[0].file);
+  const bytes = read(file);
+  bytes[bytes.length - 1] ^= 0xff;
+  write(file, bytes);
+  assert.throws(() => readGzParts(dir, parts), /SHA-256/);
+});

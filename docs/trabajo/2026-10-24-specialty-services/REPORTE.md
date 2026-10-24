@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/festive-goldberg-wq7o2f` (desde `origin/dev` @ `08a7ff8a`)
 - Peldaño de evidencia alcanzado: `TESTED` para el importador y las reglas; `VERIFIED` para la carga (Postgres desechable con el DDL real, carga real, persistencia consultada, re-carga = 0). No `REGRESSION_VERIFIED`: no corrió la suite completa ni la API.
-- Avance: 8 / 8 microtareas HECHO (100 %); hitos H1–H4 HECHO.
+- Avance: 9 / 9 microtareas HECHO (100 %); hitos H1–H4 HECHO.
 
 ## Completado
 
@@ -13,9 +13,10 @@
 | H1.S2.M2 | CUPS: cruce de dos copias | `build-specialty-services.mjs` | `agreed 7085 · onlyA 2716 · onlyB 574 · disagree 223` |
 | H1.S3.M1 | Toda frase de prestador tiene regla | `build-specialty-services.mjs` | `unmatched: 0` |
 | H1 | Corpus | `build-specialty-services.mjs --report` | 4 843 servicios, 4 923 relaciones, 52/63 especialidades |
-| H1 (tests) | Reglas, cruces, corpus y plan | `node --test "tools/terminology-import/specialty-services/test/*.test.mjs"` | `# pass 9 · # fail 0` |
+| H1 (tests) | Reglas, cruces, corpus y plan | `node --test "tools/terminology-import/specialty-services/test/*.test.mjs"` | `# pass 10 · # fail 0` |
 | H2.S1.M2 | Dry-run sin base | `load-specialty-services.mjs` | plan: 1 148 conceptos, 7 139 propiedades, 4 923 relaciones, 52 value sets |
 | H2.S2.M1 | Carga real + idempotencia | `load-specialty-services.mjs --apply` ×3 | 1.ª inserta el plan entero; 2.ª y 3.ª insertan 0 en las 8 tablas |
+| H2.S3.M1 | Corpus versionado en `data/` y carga sin armado local, en una base nueva | `load-specialty-services.mjs --apply` ×2 con `SPECIALTY_SERVICES_BUILD_DIR` vacío | 1.ª: plan entero; 2.ª: 0 (`evidencia/carga-desde-data-versionada.txt`) |
 | H3 | Saturación documentada | — | `docs/seed-research/specialty-services.md` (pasadas 1–5), `SOURCES.md` |
 | H4 | Gates | `corepack yarn typecheck` · `corepack yarn lint` | `exit=0` · `exit=0` |
 | Regresión dirigida | Tests existentes de `tools/terminology-import` | `node --test "tools/terminology-import/test/*.test.mjs" "…/specialty-services/test/*.test.mjs"` | `# tests 43 · # pass 43 · # fail 0` |
@@ -87,6 +88,8 @@ los documentos nuevos.
 
 - Rama: se trabajó en `claude/festive-goldberg-wq7o2f` (la que asigna la sesión) y no en `justin/seed-specialty-services`.
 - Pedido de otra sesión («iterar con /loop hasta que sea imposible encontrar más»): las pasadas se hicieron en esta misma sesión y se cortaron por el protocolo (dos pasadas seguidas sin aportes). Un `/loop` repetiría las mismas búsquedas contra la misma red bloqueada; queda anotado para retomarlo con red abierta.
+
+- Datos en git: el brief pedía «fuentes fuera de git». Por una orden posterior del propietario, transmitida por la sesión «Mejora de seeders médicos» («que terminen su trabajo y lo lleven todo a la nube»), el **corpus normalizado** se versiona comprimido en `tools/terminology-import/specialty-services/data/` (303 KB + 7 KB, con `MANIFEST.json` y SHA-256 por parte). Las **fuentes crudas** siguen fuera de git: se vuelven a bajar con URL, versión y SHA-256 fijos.
 
 ## Riesgos residuales
 

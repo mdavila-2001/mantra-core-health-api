@@ -8,6 +8,8 @@
 // `src/common/seed/data/specialty-services/rules.json` y escribe:
 //   <BUILD_DIR>/specialty-services.ndjson     un servicio por línea, con su evidencia
 //   <BUILD_DIR>/specialty-services.meta.json  hashes, cruces, cobertura, huecos
+// y la copia versionada en `data/` (comprimida, partida en < 50 MB, con
+// `MANIFEST.json`), que es lo que sobrevive al contenedor.
 //
 // Uso:
 //   node tools/terminology-import/specialty-services/build-specialty-services.mjs
@@ -15,8 +17,9 @@
 // =============================================================================
 
 import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { BUILD_DIR, CORPUS_PATH, META_PATH, ensureDir, fetchCached, readTarGzMember, sha256 } from './lib/common.mjs';
+import { BUILD_DIR, CORPUS_PATH, META_PATH, REPO_DATA_DIR, ensureDir, fetchCached, readTarGzMember, sha256, writeGzParts } from './lib/common.mjs';
 import { buildCorpus, coverage } from './lib/corpus.mjs';
 import { compileRules, loadModelSpecialties, loadRules, referencedSpecialties } from './lib/rules.mjs';
 import {
@@ -103,6 +106,19 @@ async function main() {
     excluded: corpus.excluded,
   };
   writeFileSync(META_PATH(), JSON.stringify(meta, null, 2));
+
+  const corpusParts = writeGzParts(REPO_DATA_DIR, 'specialty-services', corpus.records.map((r) => JSON.stringify(r)));
+  const metaParts = writeGzParts(REPO_DATA_DIR, 'specialty-services.meta', [JSON.stringify(meta)]);
+  const manifest = {
+    _nota: 'Corpus normalizado de servicios por especialidad. Lo escribe build-specialty-services.mjs; lo lee load-specialty-services.mjs cuando no hay armado local. Las fuentes crudas no se versionan: se vuelven a bajar con URL y SHA-256 fijos (SOURCES.md).',
+    builtAt: retrievedAt,
+    rulesVersion: rules.version,
+    records: meta.records,
+    relations: meta.relations,
+    corpus: corpusParts,
+    meta: metaParts,
+  };
+  writeFileSync(join(REPO_DATA_DIR, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n');
 
   console.log(JSON.stringify({ corpus: CORPUS_PATH(), records: meta.records, relations: meta.relations, fonasa: { rows: meta.fonasa.rows, checkedAgainstPdf: fonasa.check.checked }, cups: cups.cross, gaps: corpus.gaps.length, unmatched: corpus.unmatched.length }, null, 2));
   if (REPORT) console.log(`\n${markdownCoverage(cov)}`);

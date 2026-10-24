@@ -6,7 +6,7 @@
 
 ## Alcance
 
-- IN: `src/common/seed/data/specialty-services/`, `tools/terminology-import/specialty-services/`, `docs/seed-research/specialty-services.md`, este directorio de trabajo.
+- IN: `src/common/seed/data/specialty-services/`, `tools/terminology-import/specialty-services/` (incluido `data/`, agregado a pedido del propietario: el contenedor se pierde), `docs/seed-research/specialty-services.md`, este directorio de trabajo.
 - OUT: DDL y migraciones (ADR-0021); el seed de arranque; el catálogo `billing.service_catalog` de cada práctica; los análisis de laboratorio (otra sesión); archivos compartidos con las otras tres sesiones (no se tocan).
 - Ambigüedades registradas:
   - «Rama `justin/seed-specialty-services`» vs. la rama designada por la sesión (`claude/festive-goldberg-wq7o2f`). Supuesto: se usa la designada (las instrucciones de la sesión prohíben empujar a otra). Confirmar con Justin si quiere renombrarla.
@@ -38,6 +38,7 @@
 | H2.S1.M1 | Plan puro (`lib/load-plan.mjs`) | Ids deterministas; sin `concept_maps` | test «plan: ids deterministas…» | HECHO |
 | H2.S1.M2 | Cargador con dry-run por defecto | Sin `--apply` no abre conexión | `load-specialty-services.mjs` → «Dry-run: nada se escribió» | HECHO |
 | H2.S2.M1 | Carga real y re-carga | 2.ª corrida = 0 filas | `evidencia/carga-2-idempotencia.txt` | HECHO |
+| H2.S3.M1 | Corpus normalizado versionado en `specialty-services/data/` (`.gz` < 50 MB por parte, con `MANIFEST.json`) y cargador que lo usa sin armado local | Dada una base nueva y sin armado local, cuando se carga, entonces inserta el plan y la re-carga da 0 | `load-specialty-services.mjs --apply` ×2 con `SPECIALTY_SERVICES_BUILD_DIR` vacío → `evidencia/carga-desde-data-versionada.txt` | HECHO |
 
 ## H3 — Saturación documentada
 

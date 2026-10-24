@@ -114,7 +114,7 @@ especialidad. Se detiene acá por el protocolo, con la salvedad de red de arriba
 
 ## Cobertura final
 
-Corpus: **4 843** servicios, **4 923** relaciones servicio → especialidad, en
+Corpus versionado en `tools/terminology-import/specialty-services/data/` (comprimido, con manifiesto y SHA-256): **4 843** servicios, **4 923** relaciones servicio → especialidad, en
 **52** de las 63 especialidades. Carga medida en un Postgres desechable (ver
 reporte): 1 148 conceptos nuevos (FONASA + CUPS), 1 148 designaciones, 7 139
 propiedades, 4 923 relaciones, 52 value sets con 4 923 miembros, 3 lotes; la
