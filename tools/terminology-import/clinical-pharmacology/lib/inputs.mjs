@@ -102,3 +102,14 @@ export async function openFdaSetIndex() {
   }
   return out;
 }
+
+/** Identidades de SPL de DailyMed guardadas por fetch-dailymed.mjs → Map(setId → identidad). */
+export function readDailyMedIdentities() {
+  const dir = cpCache('dailymed', 'spl-id');
+  const out = new Map();
+  for (const name of listJson(dir)) {
+    const d = readJsonIfExists(join(dir, name));
+    if (d?.setId && !d.notFound) out.set(d.setId, d);
+  }
+  return out;
+}

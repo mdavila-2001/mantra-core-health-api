@@ -9,7 +9,8 @@
 //      candidatas = las que openFDA no tiene + las que openFDA tiene sin UNII
 //      (sin bloque `openfda` armonizado). Las demás ya entraron por openFDA.
 //   3. SPL XML de cada candidata (`/services/v2/spls/<setid>.xml`): trae el UNII
-//      de cada principio activo, que permite enlazar por código.
+//      de cada principio activo, que permite enlazar por código. Se guarda sólo
+//      la identidad (cache/dailymed/spl-id/<setid>.json), no el XML.
 //
 // Uso:
 //   NODE_USE_ENV_PROXY=1 node …/fetch-dailymed.mjs --plan   # listado + cruce, sin bajar SPL
@@ -21,9 +22,9 @@ import { join } from 'node:path';
 
 import { HttpClient, mapPool, progressLogger, writeJson } from '../lib/glossary-es/common.mjs';
 import { parseArgs } from './lib/cli.mjs';
-import { DAILYMED_REST, RX_HUMAN_DOCTYPE, splListUrl, splXmlUrl } from './lib/dailymed.mjs';
+import { DAILYMED_REST, RX_HUMAN_DOCTYPE, splListUrl, splSummary, splXmlUrl } from './lib/dailymed.mjs';
 import { openFdaSetIndex } from './lib/inputs.mjs';
-import { cpCache, splPath } from './lib/paths.mjs';
+import { cpCache, splIdentityPath } from './lib/paths.mjs';
 
 const { has } = parseArgs();
 const PLAN = has('--plan');
@@ -47,11 +48,23 @@ async function main() {
   const missing = listed.filter((r) => !ofda.has(r.setid));
   const withoutUnii = listed.filter((r) => ofda.get(r.setid) === false);
   const candidates = [...missing, ...withoutUnii].map((r) => r.setid).sort();
-  const pending = candidates.filter((s) => !existsSync(splPath(s)));
+  const pending = candidates.filter((s) => !existsSync(splIdentityPath(s)));
   console.log(`[dailymed] cruce con openFDA: ${missing.length} ausentes en openFDA, ${withoutUnii.length} sin UNII en openFDA → ${candidates.length} candidatas (${pending.length} por bajar)`);
 
   if (!PLAN) {
-    await mapPool(pending, 3, (s) => http.getFileCached(splXmlUrl(s), splPath(s), { allow404: true }), progressLogger('dailymed:spl', 500));
+    // Del SPL se guarda sólo la identidad (UNII, vías, versión, secciones LOINC presentes): el texto de
+    // las etiquetas que openFDA ya tiene se toma de openFDA (dominio público declarado), y el de las que
+    // sólo están en DailyMed no se redistribuye (ver SOURCES.md). Así la caché ocupa MB, no GB.
+    await mapPool(
+      pending,
+      3,
+      async (s) => {
+        const { status, body } = await http.get(splXmlUrl(s), { allow404: true });
+        const ident = status === 404 ? { setId: s, notFound: true } : splSummary(body.toString('utf8'));
+        writeJson(splIdentityPath(s), { ...ident, retrievedAt: new Date().toISOString(), url: splXmlUrl(s) });
+      },
+      progressLogger('dailymed:spl', 500),
+    );
   }
   const meta = {
     source: 'nlm-dailymed',

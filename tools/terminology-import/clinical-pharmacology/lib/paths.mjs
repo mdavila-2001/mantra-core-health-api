@@ -37,4 +37,4 @@ export const atcMasterPath = (page) => cpCache('cima', 'maestra-atc', `page-${pa
 // RxNav y openFDA
 export const rxnavPath = (atc, kind, id = '') => cpCache('rxnav', atc, `${kind}${id ? `-${id}` : ''}.json`);
 export const openFdaDir = () => cpCache('openfda');
-export const splPath = (setid) => cpCache('dailymed', 'spl', `${setid}.xml`);
+export const splIdentityPath = (setid) => cpCache('dailymed', 'spl-id', `${setid}.json`);

@@ -20,7 +20,8 @@ import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from '
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex } from './lib/gsrs.mjs';
 import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
-import { readAllInputs, readBridge, readEma } from './lib/inputs.mjs';
+import { dailyMedPointer } from './lib/dailymed.mjs';
+import { readAllInputs, readBridge, readDailyMedIdentities, readEma } from './lib/inputs.mjs';
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
@@ -69,7 +70,7 @@ const OPENFDA_TYPES = new Set(['HUMAN PRESCRIPTION DRUG', 'HUMAN OTC DRUG']);
  * candidatos → se enlaza; GSRS sin ATC + RxNav único → se enlaza.
  * Pasada A: identidades y enlace; pasada B: texto completo de las de referencia.
  */
-async function openFdaLinked({ bridges, gsrs, inUse }) {
+async function openFdaLinked({ bridges, gsrs, inUse, dailymed }) {
   const rxnavByMoieties = rxnavIndex(bridges.values(), gsrs);
   const link = {
     scanned: 0,
@@ -81,9 +82,23 @@ async function openFdaLinked({ bridges, gsrs, inUse }) {
   };
   const groups = new Map(); // atc → Map(uniiKey → { ids, rules:Set })
   const ambiguous = new Map(); // fracciones→candidatos → etiquetas (las que siguen sin enlazar)
+  const seenSetIds = new Set();
+  const decide = (unii) => {
+    const g = gsrs ? linkUniiSet(unii, gsrs) : { status: 'none', atc: null, rule: null, moieties: [], candidates: [] };
+    const decided = combineLinks(g, rxnavByMoieties.get(moietiesOf(unii, gsrs).join('+')) ?? [], { inUse });
+    return { g, decided };
+  };
   for await (const { label } of openFdaLabels()) {
     link.scanned++;
-    const id = labelIdentity(label);
+    if (label.set_id) seenSetIds.add(label.set_id);
+    let id = labelIdentity(label);
+    // Etiqueta sin bloque `openfda`: si DailyMed la lista como Rx humana (doctype 34391-3) y su SPL declara
+    // los UNII de los principios activos, se usan esos identificadores. El texto sigue siendo el de openFDA.
+    const dm = id.unii.length === 0 ? dailymed?.get(label.set_id) : null;
+    if (dm?.unii?.length) {
+      id = { ...id, unii: dm.unii, routes: id.routes.length ? id.routes : dm.routes, productType: id.productType ?? 'HUMAN PRESCRIPTION DRUG', uniiSource: 'nlm-dailymed-spl' };
+      link.uniiFromDailyMed = (link.uniiFromDailyMed ?? 0) + 1;
+    }
     if (!OPENFDA_TYPES.has(id.productType)) continue;
     link.humanRxOrOtc++;
     if (id.unii.length === 0) {
@@ -91,10 +106,8 @@ async function openFdaLinked({ bridges, gsrs, inUse }) {
       continue;
     }
     const key = id.unii.join('+');
-    const g = gsrs ? linkUniiSet(id.unii, gsrs) : { status: 'none', atc: null, rule: null, moieties: [], candidates: [] };
+    const { g, decided } = decide(id.unii);
     link.gsrs[g.status === 'linked' ? g.rule : g.status]++;
-    const moietyKey = moietiesOf(id.unii, gsrs).join('+');
-    const decided = combineLinks(g, rxnavByMoieties.get(moietyKey) ?? [], { inUse });
     link.final[decided.rule] = (link.final[decided.rule] ?? 0) + 1;
     if (!decided.atc) {
       if (g.status === 'ambiguous') {
@@ -103,7 +116,7 @@ async function openFdaLinked({ bridges, gsrs, inUse }) {
       }
       continue;
     }
-    const targets = new Map([[decided.atc, decided.rule]]);
+    const targets = new Map([[decided.atc, id.uniiSource ? `${decided.rule} (UNII: SPL de DailyMed)` : decided.rule]]);
     for (const [atc, rule] of targets) {
       if (!groups.has(atc)) groups.set(atc, new Map());
       const byKey = groups.get(atc);
@@ -125,6 +138,17 @@ async function openFdaLinked({ bridges, gsrs, inUse }) {
   const chosen = new Set([...refs.values()].flat().map((r) => r.identity.id));
   const labels = new Map();
   for await (const { label, retrievedAt } of openFdaLabels()) if (chosen.has(label.id)) labels.set(label.id, { label, retrievedAt });
+  // Etiquetas Rx que sólo están en DailyMed: puntero (sin texto; licencia del texto de terceros no confirmada).
+  const pointers = new Map();
+  for (const [setId, dm] of dailymed ?? []) {
+    if (seenSetIds.has(setId) || !dm.unii?.length) continue;
+    const { decided } = decide(dm.unii);
+    link.dailyMedOnly = (link.dailyMedOnly ?? 0) + 1;
+    if (!decided.atc) continue;
+    link.dailyMedOnlyLinked = (link.dailyMedOnlyLinked ?? 0) + 1;
+    if (!pointers.has(decided.atc)) pointers.set(decided.atc, []);
+    pointers.get(decided.atc).push(dailyMedPointer(dm, decided.rule));
+  }
   link.ambiguousTop = [...ambiguous.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 40)
@@ -132,7 +156,7 @@ async function openFdaLinked({ bridges, gsrs, inUse }) {
       const [moieties, candidates] = k.split('→');
       return { moieties: moieties.split('+').map((u) => ({ unii: u, name: gsrs?.byUnii.get(u)?.name ?? null })), candidates: candidates.split(','), labels };
     });
-  return { refs, labels, link };
+  return { refs, labels, link, pointers };
 }
 
 async function main() {
@@ -150,7 +174,9 @@ async function main() {
   const gsrs = existsSync(cpOut('gsrs-entries.ndjson')) ? buildGsrsIndex(readNdjson(cpOut('gsrs-entries.ndjson'))) : null;
   // ATC 5 que la AEMPS asigna a medicamentos autorizados (desempate de conflictos GSRS/RxNav, sólo por código).
   const inUse = new Set(byAtc.keys());
-  const fda = await openFdaLinked({ bridges, gsrs, inUse });
+  const dailymed = readDailyMedIdentities();
+  const fda = await openFdaLinked({ bridges, gsrs, inUse, dailymed });
+  for (const code of [...fda.pointers.keys()].sort()) if (!universe.has(code)) universe.set(code, ['dailymed-spl']);
   console.log(`[openfda] ${fda.link.scanned} etiquetas leídas; ${fda.labels.size} de referencia en ${fda.refs.size} ATC 5`);
   for (const code of [...fda.refs.keys()].sort()) if (!universe.has(code)) universe.set(code, ['openfda-gsrs']);
 
@@ -223,13 +249,14 @@ async function main() {
       if (pc) fdaPharmClasses.push(pc);
     }
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
-    if (cimaProducts.length === 0 && sections.length === 0) {
+    const externalDocuments = fda.pointers.get(code) ?? [];
+    if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
       continue;
     }
     const lin = liname.get(code);
     const fallbackName = lin ? { display: lin.presentations[0].name, source: 'liname-bo', language: 'es' } : gsrs ? gsrsDisplayFor(code, gsrs) : null;
-    out.push({ ...buildMonograph({ code, names, cimaProducts, sections, safetyNotes, rxnorm: bridge, fdaPharmClasses, fallbackName }), universeOrigin: origin });
+    out.push({ ...buildMonograph({ code, names, cimaProducts, sections, safetyNotes, rxnorm: bridge, fdaPharmClasses, fallbackName, externalDocuments }), universeOrigin: origin });
   }
 
   await writeNdjson(MONOGRAPHS_NDJSON(), out);

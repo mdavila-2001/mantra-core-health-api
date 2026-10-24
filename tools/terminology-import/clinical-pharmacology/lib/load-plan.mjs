@@ -59,6 +59,7 @@ export const PROPERTY = {
   SAFETY_NOTES: 'pharmacology_safety_notes',
   FDA_CLASSES: 'pharmacology_fda_pharm_classes',
   COVERAGE: 'pharmacology_section_coverage',
+  EXTERNAL_DOCUMENTS: 'pharmacology_external_documents',
 };
 
 export const conceptId = (code) => md5uuid(`mantra:${CODE_SYSTEM}:concept:${code}`);
@@ -95,6 +96,7 @@ export function monographProperties(m) {
   if (m.rxnorm) out.push(prop(m.code, PROPERTY.RXNORM, 'json', m.rxnorm));
   if (m.safetyNotes.length) out.push(prop(m.code, PROPERTY.SAFETY_NOTES, 'json', m.safetyNotes));
   if (m.fdaPharmClasses.length) out.push(prop(m.code, PROPERTY.FDA_CLASSES, 'json', m.fdaPharmClasses));
+  if (m.externalDocuments?.length) out.push(prop(m.code, PROPERTY.EXTERNAL_DOCUMENTS, 'json', m.externalDocuments));
   if (Object.keys(m.coverage).length) out.push(prop(m.code, PROPERTY.COVERAGE, 'json', m.coverage));
   for (const s of m.sections) out.push(prop(m.code, sectionPropertyCode(s.key), 'json', s, sectionDiscriminator(s)));
   return out;

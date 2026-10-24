@@ -166,3 +166,32 @@ export function dailyMedSections(xml, ref, retrievedAt) {
   }
   return out;
 }
+
+/** Resumen guardable de un SPL: identidad + secciones LOINC de primer nivel presentes (sin texto). */
+export function splSummary(xml) {
+  return {
+    ...splIdentity(xml),
+    sections: topSections(xml)
+      .filter((s) => SPL_LOINC[s.code])
+      .map((s) => ({ loinc: s.code, key: SPL_LOINC[s.code], title: s.title ?? s.displayName })),
+  };
+}
+
+export const DAILYMED_TEXT_WITHHELD =
+  'Texto no redistribuido: la etiqueta sólo está en DailyMed (no en openFDA, que la declara de dominio público) y la NLM advierte que el contenido ' +
+  'aportado por terceros puede tener copyright (https://www.nlm.nih.gov/web_policies.html). Se guarda el puntero al documento oficial.';
+
+/** Identidad guardada de un SPL → puntero citable (sin texto). */
+export function dailyMedPointer(dm, atcLinkRule) {
+  return {
+    source: DAILYMED_SOURCE,
+    sourceName: DAILYMED_SOURCE_NAME,
+    document: { type: 'spl', id: dm.setId, title: dm.title, version: dm.version, effectiveDate: dm.effectiveDate, splId: dm.id, url: dailyMedSetUrl(dm.setId) },
+    sections: dm.sections ?? [],
+    unii: dm.unii,
+    routes: dm.routes,
+    atcLinkRule,
+    textWithheld: DAILYMED_TEXT_WITHHELD,
+    retrievedAt: dm.retrievedAt,
+  };
+}

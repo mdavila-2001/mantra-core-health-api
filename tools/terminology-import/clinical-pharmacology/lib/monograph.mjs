@@ -50,7 +50,7 @@ export function atcPath(code5, names) {
  * @param {object[]} [input.fdaPharmClasses]
  * @param {{display:string,source:string,language?:string}|null} [input.fallbackName]  nombre oficial alternativo (LINAME en castellano; sustancia GSRS en inglés) si CIMA no lo nombra
  */
-export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null }) {
+export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null, externalDocuments = [] }) {
   const path = atcPath(code, names);
   const own = path[4];
   const display = own.name ?? fallbackName?.display ?? null;
@@ -88,6 +88,7 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
     sections: sortedSections,
     safetyNotes,
     fdaPharmClasses,
+    externalDocuments,
     coverage: Object.fromEntries(Object.entries(bySource).map(([src, keys]) => [src, requiredCoverage(keys)])),
   };
 }
