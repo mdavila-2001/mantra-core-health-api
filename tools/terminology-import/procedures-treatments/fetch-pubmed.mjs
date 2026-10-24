@@ -29,7 +29,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { cacheDir, ensureDir, nowIso, writeJson } from './lib/common.mjs';
-import { PUBMED_SUBSETS, parsePubmedArticle } from './lib/sources/pubmed.mjs';
+import { PUBMED_SUBSETS, parsePubmedPage } from './lib/sources/pubmed.mjs';
 
 const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
 const BATCH = 200;
@@ -131,9 +131,9 @@ if (sum !== total)
   throw new Error(
     `Los tramos suman ${sum} y la búsqueda completa ${total}: revisar los rangos`,
   );
-const retrievedAt = nowIso();
 let saved = 0;
 let booksSkipped = 0;
+let refetched = 0;
 // Páginas con libros de Bookshelf (`PubmedBookArticle`): se cuentan, no se guardan
 // (no traen indexación MeSH de artículo). Sin esto, una página corta por un
 // corte de E-utilities (HTTP 200 con el cuerpo truncado) pasa por «libros».
@@ -149,12 +149,7 @@ function fetchPage(s, start, expected) {
     const xml = get(
       `${EUTILS}/efetch.fcgi?db=pubmed&query_key=${s.querykey}&WebEnv=${s.webenv}&retstart=${start}&retmax=${BATCH}&retmode=xml`,
     );
-    const records = [
-      ...xml.matchAll(/<PubmedArticle>([\s\S]*?)<\/PubmedArticle>/g),
-    ]
-      .map((m) => parsePubmedArticle(m[1]))
-      .filter(Boolean);
-    const bookCount = (xml.match(/<PubmedBookArticle>/g) ?? []).length;
+    const { records, bookCount } = parsePubmedPage(xml);
     if (records.length + bookCount === expected) return { records, bookCount };
     if (attempt >= 5)
       throw new Error(
@@ -184,6 +179,7 @@ for (const part of parts) {
       );
     }
     const { records, bookCount } = fetchPage(s, start, expected);
+    refetched += 1;
     writeFileSync(file, gzipSync(JSON.stringify(records)));
     if (bookCount) books[name] = bookCount;
     else delete books[name];
@@ -200,7 +196,16 @@ if (saved + booksSkipped !== total)
     `Guardados ${saved} + libros ${booksSkipped} = ${saved + booksSkipped}; la búsqueda completa dice ${total}`,
   );
 
-writeJson(cacheDir(subset.cache, 'meta.json'), {
+// Si ninguna página hubo que volver a pedir, el corpus es el de la descarga
+// original: se conserva su fecha y la revalidación queda aparte.
+const metaPath = cacheDir(subset.cache, 'meta.json');
+const previous = existsSync(metaPath)
+  ? JSON.parse(readFileSync(metaPath, 'utf8'))
+  : null;
+const now = nowIso();
+const unchanged =
+  previous && refetched === 0 && previous.records === saved ? previous : null;
+writeJson(metaPath, {
   source: subset.cache,
   name: `${subset.name} (metadatos e indexación MeSH de NLM)`,
   publisher: 'U.S. National Library of Medicine (indexación MeSH de MEDLINE)',
@@ -214,7 +219,8 @@ writeJson(cacheDir(subset.cache, 'meta.json'), {
   esearchCount: total,
   records: saved,
   booksSkipped,
-  retrievedAt,
+  retrievedAt: unchanged ? unchanged.retrievedAt : now,
+  ...(unchanged ? { revalidatedAt: now } : {}),
 });
 console.log(
   JSON.stringify({
