@@ -1,6 +1,7 @@
 # Reporte — Un médico solo ve las prácticas donde tiene una vinculación ACTIVE
 
-- Fecha: 2026-10-23 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/adoring-fermat-cfc4zb` · PR: [#678](https://github.com/mdavila-2001/mantra-core-health-api/pull/678) · Base: `origin/dev`
+- Fecha: 2026-10-23 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/adoring-fermat-cfc4zb` · PR: [#678](https://github.com/mdavila-2001/mantra-core-health-api/pull/678) (**mergeado** en `dev` el 2026-10-24, commit `00a07330`) · Base: `origin/dev`
+- Este plan, el reporte y la evidencia se subieron un minuto después del merge de #678 y no entraron; llegan en un PR aparte desde `justin/practice-ownership-report`.
 - Peldaño de evidencia alcanzado: **TESTED**. Pasan los tests unitarios dirigidos al cambio, typecheck y lint dan 0, y la suite completa no tiene fallos nuevos atribuibles al cambio. **No es VERIFIED:** el camino real (HTTP + Postgres) no se ejercitó, porque el int-spec no se pudo correr.
 - Avance: 9 / 10 microtareas HECHO (90 %). 1 BLOQUEADO (H1.S2.M4).
 
@@ -25,14 +26,14 @@
 - Qué anda: la regla y los dos endpoints, probados con unitarios. Esos unitarios usan los servicios de acceso reales sobre un repositorio de vinculaciones en memoria que filtra por estado y vigencia.
 - Qué no anda: nada que se haya observado.
 - Qué falta exactamente: correr `test/integration/practice-ownership.int-spec.ts` contra Postgres (`yarn test:integration --testPathPatterns=practice-ownership`). Es la única prueba que ejercita JWT real, el auto-registro en `DEFAULT` y la consulta real de vinculaciones.
-- Dónde quedó: rama `claude/adoring-fermat-cfc4zb`, PR #678.
+- Dónde quedó: en `dev`, por el merge de #678. El int-spec está en `test/integration/practice-ownership.int-spec.ts`.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
 | H1.S2.M4 | BLOQUEADO | Postgres disponible (CI con base o entorno local) |
-| Merge de #678 | BLOQUEADO | Revisión y merge de Justin |
+| Merge de #678 | HECHO | Aprobado por PabloArauzCaballero y mergeado el 2026-10-24 |
 
 ## Evidencia
 
