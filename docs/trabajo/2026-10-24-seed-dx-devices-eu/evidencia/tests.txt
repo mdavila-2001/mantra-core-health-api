@@ -3,136 +3,172 @@ TAP version 13
 # Subtest: makeDeviceRecord: todos los campos presentes, vacíos → null, extra compacto
 ok 1 - makeDeviceRecord: todos los campos presentes, vacíos → null, extra compacto
   ---
-  duration_ms: 2.72608
+  duration_ms: 1.978262
   type: 'test'
   ...
 # Subtest: makeDeviceRecord: aplica las reglas del formato común
 ok 2 - makeDeviceRecord: aplica las reglas del formato común
   ---
-  duration_ms: 1.635417
+  duration_ms: 2.60324
   type: 'test'
   ...
 # Subtest: dedupe: exacto por fila, UDI-DI y fabricante+modelo; nunca difuso
 ok 3 - dedupe: exacto por fila, UDI-DI y fabricante+modelo; nunca difuso
   ---
-  duration_ms: 0.816653
+  duration_ms: 0.91982
   type: 'test'
   ...
 # Subtest: writeNdjsonGzParts: <base>-0001…, orden determinista, sha256, borra partes viejas
 ok 4 - writeNdjsonGzParts: <base>-0001…, orden determinista, sha256, borra partes viejas
   ---
-  duration_ms: 10.233177
+  duration_ms: 68.953991
   type: 'test'
   ...
 # Subtest: parseCsv: comillas, separador y BOM
 ok 5 - parseCsv: comillas, separador y BOM
   ---
-  duration_ms: 0.807126
+  duration_ms: 1.334433
   type: 'test'
   ...
 # Subtest: resolveHeaders: alias exactos; si falta uno muestra los encabezados reales
 ok 6 - resolveHeaders: alias exactos; si falta uno muestra los encabezados reales
   ---
-  duration_ms: 0.767759
+  duration_ms: 1.584363
   type: 'test'
   ...
 # Subtest: EMDN: nivel y padre salen de la estructura del código
 ok 7 - EMDN: nivel y padre salen de la estructura del código
   ---
-  duration_ms: 0.298329
+  duration_ms: 0.346865
   type: 'test'
   ...
 # Subtest: EMDN: parsea jerarquía, deduce terminal si falta y marca el alcance
 ok 8 - EMDN: parsea jerarquía, deduce terminal si falta y marca el alcance
   ---
-  duration_ms: 1.19354
+  duration_ms: 1.969696
   type: 'test'
   ...
 # Subtest: EMDN: huérfanos, nivel incoherente y repetidos fallan
 ok 9 - EMDN: huérfanos, nivel incoherente y repetidos fallan
   ---
-  duration_ms: 0.751685
+  duration_ms: 1.67344
   type: 'test'
   ...
 # Subtest: EMDN: descubre enlaces a Excel en la página oficial
 ok 10 - EMDN: descubre enlaces a Excel en la página oficial
   ---
-  duration_ms: 0.948237
+  duration_ms: 0.928475
   type: 'test'
   ...
 # Subtest: alcance: W entera; fuera de W solo tipos explícitos; excluidas con motivo
 ok 11 - alcance: W entera; fuera de W solo tipos explícitos; excluidas con motivo
   ---
-  duration_ms: 0.460036
+  duration_ms: 1.303329
   type: 'test'
   ...
 # Subtest: Data Lake: URL con parámetros ordenados, format y api-version
 ok 12 - Data Lake: URL con parámetros ordenados, format y api-version
   ---
-  duration_ms: 0.323528
+  duration_ms: 0.488878
   type: 'test'
   ...
 # Subtest: Data Lake: sobre {value,nextLink} validado y nextLink sin cambiar la consulta
 ok 13 - Data Lake: sobre {value,nextLink} validado y nextLink sin cambiar la consulta
   ---
-  duration_ms: 0.632193
+  duration_ms: 1.530947
   type: 'test'
   ...
 # Subtest: Data Lake: fila /udi → formato común (srn:, decodificación, país por actor o SRN)
 ok 14 - Data Lake: fila /udi → formato común (srn:, decodificación, país por actor o SRN)
   ---
-  duration_ms: 1.746117
+  duration_ms: 2.684667
   type: 'test'
   ...
 # Subtest: Data Lake: clase con esquema solo si legislación y etiqueta encajan exactamente
 ok 15 - Data Lake: clase con esquema solo si legislación y etiqueta encajan exactamente
   ---
-  duration_ms: 0.163547
+  duration_ms: 0.146888
   type: 'test'
   ...
 # Subtest: portal: certificados deduplicados por número+revisión y enriquecimiento
 ok 16 - portal: certificados deduplicados por número+revisión y enriquecimiento
   ---
-  duration_ms: 0.368165
+  duration_ms: 0.503924
   type: 'test'
   ...
 # Subtest: swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés; desactivado
 ok 17 - swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés; desactivado
   ---
-  duration_ms: 0.380815
+  duration_ms: 1.146552
   type: 'test'
   ...
 # Subtest: BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real
 ok 18 - BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real
   ---
-  duration_ms: 0.592795
+  duration_ms: 1.438916
   type: 'test'
   ...
-# Subtest: buildCorpus: exporta alcance y revisión, excluye el resto, deduplica y rechaza sin fabricante
-ok 19 - buildCorpus: exporta alcance y revisión, excluye el resto, deduplica y rechaza sin fabricante
+# Subtest: buildCorpus: exporta solo lo que está en alcance, excluye el resto, deduplica y rechaza sin fabricante
+ok 19 - buildCorpus: exporta solo lo que está en alcance, excluye el resto, deduplica y rechaza sin fabricante
   ---
-  duration_ms: 1.387606
+  duration_ms: 3.109616
   type: 'test'
   ...
 # Subtest: plan de carga: ids estables y propiedades sin nulos
 ok 20 - plan de carga: ids estables y propiedades sin nulos
   ---
-  duration_ms: 0.351235
+  duration_ms: 1.365982
   type: 'test'
   ...
 # Subtest: fuentes: cada una declara términos y los hosts requeridos incluyen EUDAMED
 ok 21 - fuentes: cada una declara términos y los hosts requeridos incluyen EUDAMED
   ---
-  duration_ms: 0.385892
+  duration_ms: 1.30396
   type: 'test'
   ...
-1..21
-# tests 21
+# Subtest: firstbase: unidad base anidada en el empaque y GTIN de los niveles superiores
+ok 22 - firstbase: unidad base anidada en el empaque y GTIN de los niveles superiores
+  ---
+  duration_ms: 0.572151
+  type: 'test'
+  ...
+# Subtest: firstbase: documento → fila común con EMDN 88, clase con esquema, certificado y réplica citada
+ok 23 - firstbase: documento → fila común con EMDN 88, clase con esquema, certificado y réplica citada
+  ---
+  duration_ms: 2.518782
+  type: 'test'
+  ...
+# Subtest: firstbase: clases MDR/IVDR/legado con esquema; clase I marcada como posible defecto del convertidor
+ok 24 - firstbase: clases MDR/IVDR/legado con esquema; clase I marcada como posible defecto del convertidor
+  ---
+  duration_ms: 0.439825
+  type: 'test'
+  ...
+# Subtest: DLinRT: UUID del UDI-DI desde detail_url, clase verbatim sin legislación
+ok 25 - DLinRT: UUID del UDI-DI desde detail_url, clase verbatim sin legislación
+  ---
+  duration_ms: 1.97835
+  type: 'test'
+  ...
+# Subtest: actores: SRN con estado pegado, versión vigente por SRN, país exacto o por prefijo
+ok 26 - actores: SRN con estado pegado, versión vigente por SRN, país exacto o por prefijo
+  ---
+  duration_ms: 23.592658
+  type: 'test'
+  ...
+# Subtest: réplicas: cada una fija commit completo, licencia y fuente oficial
+ok 27 - réplicas: cada una fija commit completo, licencia y fuente oficial
+  ---
+  duration_ms: 0.262711
+  type: 'test'
+  ...
+1..27
+# tests 27
 # suites 0
-# pass 21
+# pass 27
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 122.088621
+# duration_ms 231.859493
 exit 0

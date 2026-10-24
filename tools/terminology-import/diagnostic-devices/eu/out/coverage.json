@@ -1,23 +1,84 @@
 {
-  "totalRead": 0,
-  "devicesExported": 0,
-  "devicesInScope": 0,
-  "devicesPendingReview": 0,
-  "duplicatesDropped": 0,
+  "totalRead": 22981,
+  "devicesExported": 716,
+  "devicesInScope": 716,
+  "duplicatesDropped": 157,
   "rejectedRows": 0,
   "rejectedSamples": [],
-  "excludedByRule": {},
-  "devicesBySource": {},
-  "devicesByScope": {},
-  "devicesByEmdnCategory": {},
-  "devicesByEmdnGroup": {},
-  "distinctManufacturers": 0,
-  "distinctBrands": 0,
+  "excludedByRule": {
+    "categoria-excluida:K": 708,
+    "no-diagnostico-tras-revision:V": 2163,
+    "no-diagnostico-tras-revision:Q": 729,
+    "categoria-excluida:Y": 3051,
+    "no-diagnostico-tras-revision:G": 1218,
+    "categoria-excluida:A": 1610,
+    "categoria-excluida:M": 3159,
+    "no-diagnostico-tras-revision:U": 563,
+    "categoria-excluida:L": 1389,
+    "no-diagnostico-tras-revision:Z": 493,
+    "categoria-excluida:T": 2684,
+    "no-diagnostico-tras-revision:R": 1181,
+    "categoria-excluida:S": 859,
+    "categoria-excluida:P": 1516,
+    "categoria-excluida:H": 222,
+    "no-diagnostico-tras-revision:C": 93,
+    "categoria-excluida:B": 90,
+    "no-diagnostico-tras-revision:N": 305,
+    "categoria-excluida:D": 55,
+    "categoria-excluida:F": 20
+  },
+  "devicesBySource": {
+    "eudamed-udi": 716
+  },
+  "devicesByScope": {
+    "tipo-incluido:V03": 26,
+    "tipo-incluido:U05": 24,
+    "tipo-incluido:Z120302": 34,
+    "tipo-incluido:Z120801": 28,
+    "tipo-incluido:G0206": 22,
+    "tipo-incluido:Z120207": 9,
+    "tipo-incluido:Z121201": 7,
+    "categoria-incluida:W": 310,
+    "tipo-incluido:Z119008": 30,
+    "tipo-incluido:Z1106": 19,
+    "tipo-incluido:Z120210": 54,
+    "tipo-incluido:Z120208": 73,
+    "tipo-incluido:Z120205": 2,
+    "tipo-incluido:Z120204": 10,
+    "tipo-incluido:Z121604": 7,
+    "tipo-incluido:Z121605": 9,
+    "tipo-incluido:Z1103": 4,
+    "tipo-incluido:C0205": 1,
+    "tipo-incluido:Z120505": 3,
+    "tipo-incluido:Z1215": 2,
+    "tipo-incluido:Z1104": 42
+  },
+  "devicesByEmdnCategory": {
+    "V": 26,
+    "U": 24,
+    "Z": 333,
+    "G": 22,
+    "W": 310,
+    "C": 1
+  },
+  "devicesByEmdnGroup": {
+    "V03": 26,
+    "U05": 24,
+    "Z12": 238,
+    "G02": 22,
+    "W05": 23,
+    "W01": 272,
+    "Z11": 95,
+    "W02": 15,
+    "C02": 1
+  },
+  "distinctManufacturers": 114,
+  "distinctBrands": 391,
   "emdn": {
-    "concepts": 0,
-    "inScopeConcepts": 0,
-    "inScopeTerminal": 0,
-    "inScopeTerminalWithoutDevices": 0
+    "concepts": 8453,
+    "inScopeConcepts": 3121,
+    "inScopeTerminal": 2661,
+    "inScopeTerminalWithoutDevices": 2521
   },
   "gaps": [
     {
@@ -101,13 +162,48 @@
       "source": "eudamed-udi",
       "url": "/home/user/diagnostic-devices-data/eu/cache/eudamed/reference/en",
       "reason": "paginación incompleta en caché (se volverá a pedir)"
-    },
-    {
-      "source": "ec-emdn",
-      "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en",
-      "reason": "EMDN no disponible en caché"
     }
   ],
-  "generatedAt": "2026-10-24T03:31:17.451Z",
-  "files": []
+  "generatedAt": "2026-10-24T03:48:43.597Z",
+  "actors": 26583,
+  "mirrors": [
+    {
+      "id": "batirmedical-emdn",
+      "repo": "https://github.com/BatirMedical/nomenclature-emdn",
+      "commit": "e0131762b3385c1085b97da9c5f74d32edb89df3",
+      "files": 1,
+      "sha256": "7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379"
+    },
+    {
+      "id": "zdavatz-eudamed2firstbase",
+      "repo": "https://github.com/zdavatz/eudamed2firstbase",
+      "commit": "48f93836f8ef89ba1ce8d0852de86b271d08b81b",
+      "files": 22865,
+      "sha256": "ebc22a2dc938b62304a7a80ad6433ab81164d2abc7ab927b95e7b99dc3909e02"
+    },
+    {
+      "id": "dlinrt-eudamed-emdn-discovery",
+      "repo": "https://github.com/DLinRT-eu/dlinrteu-website",
+      "commit": "f096a477301c8c30c870f69daaedbda87c28e173",
+      "files": 1,
+      "sha256": "69d6e067a99df53dfdb94f3d506cb5efa729a940e35ee2bb4891fb028977b1ad"
+    },
+    {
+      "id": "longtran-eudamed-manufacturers",
+      "repo": "https://github.com/longtran00/EUDAMED_ManufacturersScraper",
+      "commit": "44ff9f90fb70f561094f324571e0bddd7c85721c",
+      "files": 1,
+      "sha256": "a4137691826ef13a7997e504c2e15b786b8c8cee889da2f73dc40c66d0ef60fe"
+    }
+  ],
+  "files": [
+    {
+      "path": "eudamed-udi-0001.ndjson.gz",
+      "rows": 716,
+      "bytes": 91866,
+      "sha256": "467978555ffc1b96ff264ce7350d3ea1f0e6735c4bde8242a5415ec182b92afa",
+      "source": "eudamed-udi",
+      "sourceVersion": "eudamed-portal-api"
+    }
+  ]
 }
