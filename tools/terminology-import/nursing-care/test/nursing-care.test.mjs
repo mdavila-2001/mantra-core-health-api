@@ -227,3 +227,20 @@ ontology
   assert.equal(inGlossary(e), false);
   assert.ok(membershipsFor(e).some((m) => m.valueSet === 'nursing-care-clinical-models'));
 });
+
+test('Datos versionados: partición por filas y lectura verificada contra MANIFEST.json', async () => {
+  const { splitNdjson, readManifest, readRepoDataset, parseNdjsonText } = await import('../lib/repo-data.mjs');
+  const text = '{"a":1}\n{"a":2}\n{"a":3}\n';
+  const parts = splitNdjson(text, 16);
+  assert.deepEqual(parts, ['{"a":1}\n{"a":2}\n', '{"a":3}\n']);
+  assert.equal(parts.join(''), text);
+  const manifest = readManifest();
+  assert.ok(manifest, 'falta tools/terminology-import/nursing-care/data/MANIFEST.json');
+  for (const [name, entry] of Object.entries(manifest.datasets)) {
+    for (const p of entry.parts) assert.ok(p.gzBytes < 50 * 1024 * 1024, `${p.file} >= 50 MB`);
+    const rows = entry.rows === null ? null : parseNdjsonText(readRepoDataset(name)).length;
+    assert.equal(rows, entry.rows, name);
+  }
+  const reg = parseNdjsonText(readRepoDataset('nursing-terminology-registry'));
+  assert.equal(reg.length, 12);
+});

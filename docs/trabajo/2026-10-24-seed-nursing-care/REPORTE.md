@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `justin/seed-nursing-care` (desde `origin/dev` 08a7ff8a)
 - Peldaño de evidencia alcanzado: `VERIFIED` para el importador (carga real en PostgreSQL 16 desechable con el DDL del módulo 03, dos corridas, conteos y consultas de contenido); `TESTED` para parsers y plan (11 pruebas dirigidas). No `REGRESSION_VERIFIED`: no se corrió contra el stack completo ni con la API arrancada (prerrequisitos emulados).
-- Avance: 15 / 15 microtareas HECHO (100 %). PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/684 (sin mergear).
+- Avance: 17 / 17 microtareas HECHO (100 %). PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/684 (sin mergear).
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -21,6 +21,8 @@
 | H3.S1.M2 | `link-check.mjs` | `node tools/terminology-import/nursing-care/link-check.mjs --db` | 3 ramas hermanas ausentes (pendiente); `seed-procedures-treatments`: 0 menciones de enfermería en sus 23 archivos |
 | H3.S1.M3 | Fuente CMDIC (Ministerio de Sanidad) | tests + carga | 58 arquetipos, 617 conceptos, informe de enfermería con 16 ranuras |
 | H3.S2.M2 | PR contra `dev` | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/684 |
+| H3.S3.M1 | Datos normalizados versionados (gzip + manifiesto) | `node tools/terminology-import/nursing-care/pack-data.mjs` ×2 + `sha256sum` | 6 conjuntos, 1,25 MB; bytes idénticos entre corridas |
+| H3.S3.M2 | Carga desde los datos versionados | `load-nursing-care.mjs --apply --from-repo-data` ×2 | 8 015 / 617 / 12 conceptos; 2.ª corrida 0 |
 | H3.S2.M1 | typecheck y lint | `NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck` / `… lint` | exit 0 / exit 0 |
 
 ## A medias
@@ -44,7 +46,8 @@ ninguna
   [load] {"codeSystem":"es-msssi-cmdic-13606","concepts":0,…}
   [load] {"codeSystem":"nursing-terminology-registry","concepts":0,…}
   ```
-- `evidencia/node-test-nursing-care.txt` — `# tests 11 · # pass 11 · # fail 0 · exit=0`.
+- `evidencia/node-test-nursing-care.txt` — `# tests 12 · # pass 12 · # fail 0 · exit=0` (incluye la ida y vuelta de `data/`).
+- `evidencia/load-desde-data-versionada.txt` — base nueva, carga con `--from-repo-data`: mismos conteos; segunda corrida 0 filas.
 - `evidencia/typecheck.txt` — `exit=0` (con `NODE_OPTIONS=--max-old-space-size=8192`; con el heap por defecto de 2 GB `tsc` aborta por memoria en este contenedor).
 - `evidencia/lint.txt` — `exit=0` (mismo `NODE_OPTIONS`).
 - Regresión de las librerías compartidas: `node --test "tools/terminology-import/test/*.test.mjs"` → `# tests 34 · # pass 34 · # fail 0`.
@@ -57,6 +60,7 @@ ninguna
 - `yarn install` en el contenedor necesitó sustituir, sólo localmente y sin commitear, el tarball de `xlsx` de `cdn.sheetjs.com` (host bloqueado) por `@e965/xlsx@0.20.3` de npm para poder correr typecheck y lint.
 
 ## Desvíos del plan
+- (A8) Por orden del propietario se versionan los datos normalizados en `tools/terminology-import/nursing-care/data/` (H3.S3.M1–M2). Los crudos siguen fuera de git y se reproducen con `fetch-sources.mjs`.
 - Se agregó la fuente CMDIC del Ministerio de Sanidad (H3.S1.M3), hallada en la pasada 4.
 - El value set propio pasó de `nursing-care-openehr` a `nursing-care-clinical-models` (cubre las dos fuentes de arquetipos).
 - No se agregó script a `package.json` (los tests corren con `node --test`; se evitó tocar un archivo compartido).

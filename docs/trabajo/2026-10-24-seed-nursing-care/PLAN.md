@@ -14,6 +14,7 @@
   - A4. Las traducciones al castellano de los arquetipos son las publicadas en CKM por traductores nombrados: se cargan como designación con su autor y se marcan «traducción publicada en openEHR CKM», nunca como traducción oficial de la escala.
   - A5. Una escala con aviso de copyright de terceros en su propio arquetipo se carga sólo con metadatos (nombre, propósito, uso, aviso, referencias, enlace LOINC de la raíz); sus ítems y respuestas no. Sin aviso de terceros se cargan ítems y respuestas con puntaje, bajo CC-BY-SA, con la atribución por fila. Confirmar con legal el alcance de *share-alike*.
   - A6. El subconjunto «enfermería» de CKM es una regla de texto documentada (navegación), no juicio clínico; el sistema de códigos completo se carga entero.
+  - A8. (agregada en curso, 2026-10-24) Orden del propietario, transmitida por la sesión coordinadora «Mejora de seeders médicos»: todo debe quedar subido, incluidos los datos normalizados, comprimidos y en partes de menos de 50 MB; los crudos pesados no. Cambia el «fuentes fuera de git» del pedido original para los normalizados. Supuesto: se versionan los normalizados en `tools/terminology-import/nursing-care/data/` y los crudos se reproducen con `fetch-sources.mjs` (commits y tarball fijos). Los crudos de CKM no se suben porque contienen ítems con copyright de terceros.
   - A7. (agregada en curso) Los arquetipos ISO 13606 del Ministerio de Sanidad (CMDIC) no declaran licencia. Supuesto: se cargan con estado `official-publication-license-not-stated` y la base legal (RD 1093/2010; art. 13 TRLPI). Confirmar con el propietario y, por escrito, con el Ministerio.
 
 ## H1 — Corpus normalizado con procedencia por fila
@@ -50,6 +51,8 @@
 | H3.S2.M1 | `corepack yarn typecheck` y `corepack yarn lint` | exit 0 | salida pegada | HECHO |
 | H3.S1.M3 | (agregada) Fuente CMDIC del Ministerio de Sanidad (ISO 13606) | 58 arquetipos, informe de enfermería con sus ranuras | test dirigido + carga | HECHO |
 | H3.S2.M2 | PR contra `dev` (sin mergear) + `REPORTE.md` | PR abierto | URL | HECHO |
+| H3.S3.M1 | (agregada, A8) `pack-data.mjs`: normalizados gzip en `data/` con `MANIFEST.json` | partes < 50 MB; misma entrada → mismos bytes | `node …/pack-data.mjs` dos veces → `sha256sum` idéntico | HECHO |
+| H3.S3.M2 | (agregada, A8) `load-nursing-care.mjs --from-repo-data` | dada una base limpia y sin build local, la carga desde `data/` da los mismos conteos y la 2.ª corrida 0 | `evidencia/load-desde-data-versionada.txt` | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

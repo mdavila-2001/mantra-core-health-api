@@ -1,0 +1,19 @@
+# Base desechable nueva (mismo DDL y prerrequisitos emulados que load-postgres16-desechable.txt).
+## 1.ª corrida: load-nursing-care.mjs --apply --from-repo-data
+[entrada] datos versionados en tools/terminology-import/nursing-care/data/
+[load] {"codeSystem":"openehr-ckm","concepts":8015,"designations":9017,"properties":114110,"relationships":7481,"memberships":134,"glossaryMembershipsSkipped":0,"loincMaps":3,"loincCodesNotInDb":98}
+[load] {"codeSystem":"es-msssi-cmdic-13606","concepts":617,"designations":617,"properties":6725,"relationships":559,"memberships":39,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+[load] {"codeSystem":"nursing-terminology-registry","concepts":12,"designations":12,"properties":156,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+## 2.ª corrida
+[load] {"codeSystem":"openehr-ckm","concepts":0,"designations":0,"properties":0,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":98}
+[load] {"codeSystem":"es-msssi-cmdic-13606","concepts":0,"designations":0,"properties":0,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+[load] {"codeSystem":"nursing-terminology-registry","concepts":0,"designations":0,"properties":0,"relationships":0,"memberships":0,"glossaryMembershipsSkipped":0,"loincMaps":0,"loincCodesNotInDb":0}
+        internal_code         | count 
+------------------------------+-------
+ openehr-ckm                  |  8015
+ es-msssi-cmdic-13606         |   617
+ nursing-terminology-registry |    12
+ fixture-internal             |     7
+ loinc                        |     3
+(5 rows)
+

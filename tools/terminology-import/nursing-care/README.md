@@ -16,9 +16,14 @@ node tools/terminology-import/nursing-care/fetch-sources.mjs \
   --tho-version 7.0.1
 # 2. sin red: NDJSON + coverage.json en glossary-data-build/nursing-care/
 node tools/terminology-import/nursing-care/build-nursing-care.mjs
+# 2b. copia versionada (gzip + MANIFEST) en tools/terminology-import/nursing-care/data/
+node tools/terminology-import/nursing-care/link-check.mjs
+node tools/terminology-import/nursing-care/pack-data.mjs
 # 3. base: dry-run por defecto; --apply carga (.env DB_*). Requiere que la API haya arrancado una vez.
 node tools/terminology-import/nursing-care/load-nursing-care.mjs
 node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply
+# sin build local (p. ej. en otra máquina): usa los datos versionados de data/
+node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply --from-repo-data
 # validación con las ramas hermanas (y con la base si se pasa --db)
 node tools/terminology-import/nursing-care/link-check.mjs [--db]
 # pruebas con archivos reales

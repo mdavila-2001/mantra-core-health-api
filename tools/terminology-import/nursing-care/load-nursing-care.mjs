@@ -19,6 +19,7 @@
 // Uso:
 //   node tools/terminology-import/nursing-care/load-nursing-care.mjs            # dry-run, sin base
 //   node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply    # carga (.env DB_*)
+//   … --from-repo-data   lee los datos versionados en nursing-care/data/ aunque haya build local
 // =============================================================================
 
 import 'dotenv/config';
@@ -34,10 +35,12 @@ import {
 } from './lib/plan.mjs';
 import { MSSSI_CODE_SYSTEM } from './lib/msssi.mjs';
 import { REGISTRY_CODE_SYSTEM } from './lib/registry.mjs';
+import { parseNdjsonText, readManifest, readRepoDataset } from './lib/repo-data.mjs';
 
 const args = process.argv.slice(2);
 if (args.includes('--dry-run') && args.includes('--apply')) throw new Error('Use --dry-run o --apply, no ambos.');
 const DRY_RUN = !args.includes('--apply');
+const FROM_REPO_DATA = args.includes('--from-repo-data');
 const BATCH = 1000;
 
 const DB_CONFIG = {
@@ -104,19 +107,25 @@ async function assertPrerequisites(client) {
   return { glossaryReady: g.length === glossary.length };
 }
 
+/**
+ * Entradas: el build local (`glossary-data-build/nursing-care/`) si está completo;
+ * si no, o con `--from-repo-data`, los datos versionados en `nursing-care/data/`
+ * (verificados contra su `MANIFEST.json`).
+ */
 function readInputs() {
-  const meta = JSON.parse(readFileSync(SOURCES_META, 'utf8'));
+  const names = [CODE_SYSTEM, MSSSI_CODE_SYSTEM, REGISTRY_CODE_SYSTEM];
+  const local = existsSync(SOURCES_META) && names.every((cs) => existsSync(join(NURSING_OUT, `${cs}.ndjson`)));
+  const fromRepo = FROM_REPO_DATA || !local;
+  if (fromRepo && !readManifest()) throw new Error('No hay build local ni datos versionados: corré fetch-sources.mjs y build-nursing-care.mjs');
+  const meta = fromRepo ? JSON.parse(readRepoDataset('sources-meta')) : JSON.parse(readFileSync(SOURCES_META, 'utf8'));
   const rowsByCs = {};
-  for (const cs of [CODE_SYSTEM, MSSSI_CODE_SYSTEM, REGISTRY_CODE_SYSTEM]) {
-    const p = join(NURSING_OUT, `${cs}.ndjson`);
-    if (!existsSync(p)) throw new Error(`Falta ${p}: corré build-nursing-care.mjs`);
-    rowsByCs[cs] = readNdjson(p);
-  }
+  for (const cs of names) rowsByCs[cs] = fromRepo ? parseNdjsonText(readRepoDataset(cs)) : readNdjson(join(NURSING_OUT, `${cs}.ndjson`));
   const versions = {
     [CODE_SYSTEM]: `${meta.ckm.commitDate.slice(0, 10)}+${meta.ckm.commit.slice(0, 8)}`,
     [MSSSI_CODE_SYSTEM]: `${meta.adlArchetypes.commitDate.slice(0, 10)}+${meta.adlArchetypes.commit.slice(0, 8)}`,
     [REGISTRY_CODE_SYSTEM]: meta.tho.packageVersion,
   };
+  console.log(`[entrada] ${fromRepo ? 'datos versionados en tools/terminology-import/nursing-care/data/' : NURSING_OUT}`);
   return { meta, rowsByCs, versions };
 }
 

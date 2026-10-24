@@ -1,8 +1,9 @@
 # Fuentes — importador de cuidados de enfermería
 
-Consultadas el **2026-10-24**. Las descargas viven fuera de git, en
+Consultadas el **2026-10-24**. Las descargas crudas viven fuera de git, en
 `glossary-data-build/cache/nursing-care/` (ver `GLOSSARY_BUILD_DIR`), con
-`sources.meta.json` (commit, fecha, URL, SHA-256 / integridad).
+`sources.meta.json` (commit, fecha, URL, SHA-256 / integridad). Los datos **normalizados** sí se
+versionan, comprimidos, en [`data/`](./data/README.md) (orden del propietario del 2026-10-24).
 
 ## Cargadas
 
