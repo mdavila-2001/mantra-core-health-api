@@ -134,9 +134,10 @@ export class ResearchController {
     summary: 'Listar releases con manifiesto vencido sin cerrar',
   })
   listExpiredReleases(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingExpiredReleasesResponseDto> {
-    return this.releaseService.listExpiredReleases(limit);
+    return this.releaseService.listExpiredReleases(actor, limit);
   }
 
   /** UC-63-12. */

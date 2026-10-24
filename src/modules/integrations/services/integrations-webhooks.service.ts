@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import {
   ResourceNotFoundException,
   UnauthorizedException,
   canonicalJson,
-  deriveWebhookSecret,
   verifySignature,
 } from '../../../common';
+import { IntegrationsSecretsService } from './integrations-secrets.service';
 import {
   ProviderConnectionsRepository,
   InboundMessagesRepository,
@@ -20,8 +21,9 @@ import { INTEG } from '../integrations.concepts';
  *
  * Endpoint público (el gateway externo no porta token de usuario): el tenant se
  * identifica por la conexión y la autenticidad por la firma HMAC, que se verifica
- * aquí (fail-closed) contra el secreto de la conexión antes de persistir nada. La
- * idempotencia por (connection_id, signature) de-duplica reentregas del proveedor.
+ * aquí (fail-closed) contra el secreto de la credencial activa de la conexión antes
+ * de persistir nada. La idempotencia por (connection_id, signature) de-duplica
+ * reentregas del proveedor de forma atómica (lock transaccional + índice único).
  */
 @Injectable()
 export class IntegrationsWebhooksService {
@@ -37,6 +39,7 @@ export class IntegrationsWebhooksService {
     private readonly em: EntityManager,
     private readonly connectionsRepo: ProviderConnectionsRepository,
     private readonly inboundRepo: InboundMessagesRepository,
+    private readonly secrets: IntegrationsSecretsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IntegrationsWebhooksService.name);
@@ -53,6 +56,37 @@ export class IntegrationsWebhooksService {
       },
       'Receiving inbound webhook',
     );
+    try {
+      return await this.persistInbound(dto);
+    } catch (error) {
+      // Respaldo del índice único (connection_id, signature): si dos entregas
+      // llegaron a insertar a la vez, la segunda pierde la carrera y responde
+      // como duplicado de la primera, ya confirmada.
+      if (
+        error instanceof UniqueConstraintViolationException &&
+        dto.signature
+      ) {
+        const existing = await this.inboundRepo.findByConnectionAndSignature(
+          this.em.fork(),
+          dto.connectionId,
+          dto.signature,
+        );
+        if (existing) {
+          return {
+            id: existing.id,
+            status: existing.statusConceptId,
+            duplicate: true,
+          };
+        }
+      }
+      throw error;
+    }
+  }
+
+  /** Verificación, de-duplicación atómica e inserción dentro de una transacción. */
+  private persistInbound(
+    dto: InboundWebhookDto,
+  ): Promise<InboundMessageResponseDto> {
     return this.em.transactional(async (tx) => {
       const connection = await this.connectionsRepo.findById(
         tx,
@@ -65,17 +99,32 @@ export class IntegrationsWebhooksService {
       }
 
       // Verificación de firma HMAC ANTES de persistir (fail-closed): sin firma
-      // válida contra el secreto de la conexión no se admite el webhook.
-      const secret = deriveWebhookSecret('connection', connection.id);
+      // válida contra un secreto activo de la conexión (el de su credencial
+      // vigente; dos durante una rotación) no se admite el webhook.
+      const secrets = await this.secrets.resolveActiveSecrets(
+        tx,
+        connection.id,
+      );
       const rawBody = canonicalJson(dto.payloadJson);
-      if (!verifySignature(secret, rawBody, dto.signature)) {
+      if (
+        !secrets.some((secret) =>
+          verifySignature(secret, rawBody, dto.signature),
+        )
+      ) {
         throw new UnauthorizedException('Firma del webhook inválida', {
           connectionId: dto.connectionId,
         });
       }
 
-      // De-duplicación de reentregas por firma dentro de la conexión.
+      // De-duplicación de reentregas por firma dentro de la conexión. El lock
+      // transaccional por (conexión, firma) serializa las entregas simultáneas:
+      // la segunda espera el commit de la primera y ya la encuentra. El índice
+      // único de la base es el respaldo si el lock se saltara.
       if (dto.signature) {
+        await tx.execute(
+          'select pg_advisory_xact_lock(hashtextextended(?, 0))',
+          [`integrations.inbound:${dto.connectionId}:${dto.signature}`],
+        );
         const existing = await this.inboundRepo.findByConnectionAndSignature(
           tx,
           dto.connectionId,

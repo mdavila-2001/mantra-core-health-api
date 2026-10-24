@@ -108,6 +108,34 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `external_providers`, 
 corepack yarn test src/modules/integrations --runInBand --silent
 ```
 
-Revisión 2026-10-05: **7 suites y 53 pruebas aprobadas**. Las pruebas son unitarias con mocks;
-no cubren aislamiento entre tenants, bóveda de secretos, carrera de callbacks ni el contrato
-`status + code + reason`.
+Las pruebas son unitarias con mocks de repositorio y EntityManager; cubren el aislamiento entre
+tenants, la resolución del secreto de la credencial activa y la deduplicación de callbacks. La
+unicidad `(connection_id, signature)` y la serialización por lock se prueban contra un doble de la
+base, no contra PostgreSQL.
+
+## Alcance por tenant y secretos
+
+- **El tenant sale del contexto.** `tenantId` en el cuerpo de `POST /providers/:id/connections` y de
+  `.../webhook-subscriptions` es opcional y, si llega, debe coincidir con el activo
+  (`412 INTEGRATIONS_TENANT_MISMATCH`). Sin tenant activo se responde `412 TENANT_REQUIRED`.
+- **Mensaje → conexión → tenant.** Encolar, despachar, reintentar, enviar a dead-letter y correlacionar
+  resuelven la conexión del recurso por `id + tenantId` antes de leer o mutar. Un recurso de otro
+  tenant responde igual que uno inexistente: `404`, mismo mensaje y `reason`
+  `INTEGRATIONS_RESOURCE_NOT_AVAILABLE`, sin `details`. Los listados de descubrimiento
+  (`pending-dispatch`, `pending-retry`, `pending-correlation`) se acotan a las conexiones del tenant.
+- **`SYSTEM` sin tenant** es el único actor que barre todas las conexiones (los jobs internos de
+  despacho, reintento y correlación); con `X-Tenant-Id` queda acotado a ese tenant.
+- **Callback → conexión → saliente.** La correlación sólo alcanza salientes de la misma conexión que
+  recibió el callback y bloquea el callback (`FOR UPDATE`): dos correlaciones simultáneas producen una
+  sola respuesta.
+- **El secreto lo da la credencial activa.** El despacho se firma y el callback se verifica con la
+  referencia (`secretRef`) de la credencial activa de la conexión, resuelta por
+  `IntegrationsSecretsService` (`env:WEBHOOK_SECRET_<NOMBRE>`, ver `common/crypto/secret-ref.ts`). Para
+  una rotación con ventana, la referencia admite dos entradas: `env:..._V2,env:..._V1` (firma con la
+  primera; valen ambas al verificar). Rotar la credencial retira la anterior. Sin credencial activa o
+  con una referencia que no resuelve se responde `412
+  INTEGRATIONS_CONNECTION_SECRET_UNAVAILABLE`; no hay retroceso a una clave derivada del UUID.
+- **Callbacks idempotentes.** Un lock transaccional por `(conexión, firma)` serializa las entregas
+  simultáneas y el índice único `uq_inbound_messages_connection_id_signature`
+  (`database/SQL/patches/2026-10-24_integrations_inbound_signature_unique.sql`) es el respaldo: la
+  entrega perdedora responde como duplicado de la primera.

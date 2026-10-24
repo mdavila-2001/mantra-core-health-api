@@ -6,7 +6,7 @@ Capa HTTP. Validan, autorizan y delegan; la transacción vive en el servicio.
 
 | Controlador | Prefijo | Endpoints |
 | --- | --- | --- |
-| `MarketingController` | `marketing` | 12 sobre `segments`, `campaigns`, `content-templates`, `journeys`, `enrollments`, `tracked-links`, `touchpoints` y `attribution:compute` |
+| `MarketingController` | `marketing` | 13 sobre `segments`, `campaigns`, `content-templates`, `journeys`, `enrollments`, `tracked-links`, `touchpoints` y `attribution:compute` |
 | `TrackedLinkRedirectController` | `r` | 1: `GET /r/:code` |
 
 La redirección vive en su propio controlador porque el código corto es la URL que se publica dentro
@@ -19,15 +19,16 @@ plantillas; `SYSTEM` está en lo que ejecutan los workers (refresco, materializa
 de inscripciones, touchpoints y atribución).
 
 `GET /r/:code` es `@Public()`: quien hace click es el destinatario del mensaje, no un usuario con
-sesión. Lo que se registra sale de la petición, no de un token.
+sesión. El destinatario no se declara en la petición: lo identifica el token `?t=` que emite
+`POST /marketing/tracked-links/:id/recipient-tokens`.
 
 ## Validaciones HTTP
 
 `ParseUUIDPipe` en todos los parámetros de ruta salvo `:code` de plantillas y de enlaces, que son
 claves naturales legibles, no UUID. `ValidationPipe` global sobre los cuerpos.
 
-La identidad del miembro en `GET /r/:code` llega por query (`memberType`, `memberRefId`) y es
-opcional: un click anónimo sigue contando aunque no genere touchpoint.
+El token de destinatario de `GET /r/:code` llega por query (`t`) y es opcional: un click anónimo
+sigue contando aunque no genere touchpoint, y un token inválido o vencido se rechaza sin contar.
 
 ## Códigos de respuesta
 

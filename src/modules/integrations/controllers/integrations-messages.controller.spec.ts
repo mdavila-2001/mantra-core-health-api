@@ -71,28 +71,36 @@ describe('IntegrationsMessagesController', () => {
 
   it('delegates listPendingDispatch with a parsed limit (Fase 5)', async () => {
     const d = build();
-    await d.controller.listPendingDispatch(10);
-    expect(d.messagingService.listQueuedForDispatch).toHaveBeenCalledWith(10);
+    await d.controller.listPendingDispatch(10, actor);
+    expect(d.messagingService.listQueuedForDispatch).toHaveBeenCalledWith(
+      actor,
+      10,
+    );
   });
 
   it('delegates listPendingDispatch without a limit', async () => {
     const d = build();
-    await d.controller.listPendingDispatch();
+    await d.controller.listPendingDispatch(undefined, actor);
     expect(d.messagingService.listQueuedForDispatch).toHaveBeenCalledWith(
+      actor,
       undefined,
     );
   });
 
   it('delegates listPendingRetry with a parsed limit (Fase 5)', async () => {
     const d = build();
-    await d.controller.listPendingRetry(20);
-    expect(d.messagingService.listFailedForRetry).toHaveBeenCalledWith(20);
+    await d.controller.listPendingRetry(20, actor);
+    expect(d.messagingService.listFailedForRetry).toHaveBeenCalledWith(
+      actor,
+      20,
+    );
   });
 
   it('delegates listPendingCorrelation with a parsed limit (Fase 5)', async () => {
     const d = build();
-    await d.controller.listPendingCorrelation(30);
+    await d.controller.listPendingCorrelation(30, actor);
     expect(d.messagingService.listReceivedForCorrelation).toHaveBeenCalledWith(
+      actor,
       30,
     );
   });
