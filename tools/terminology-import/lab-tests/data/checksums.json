@@ -1,0 +1,51 @@
+{
+  "lab-tests-fonasa-mle": {
+    "sha256": "1e5df212c836debbf8d155a069e7cf37d5310de1498974f548af2fbe225d3c15",
+    "lines": 648,
+    "files": [
+      "lab-tests-fonasa-mle.ndjson.gz"
+    ]
+  },
+  "lab-tests-hl7-tho": {
+    "sha256": "5de7f408dd229c0c4e6d3a3a1fa63f46b410eaf146425a2df85a4f87bbf0f2ad",
+    "lines": 479,
+    "files": [
+      "lab-tests-hl7-tho.ndjson.gz"
+    ]
+  },
+  "lab-tests-icd10pcs-cms": {
+    "sha256": "47b51694efb397a705dd8cc78b745d3daaaf35df4c1a244b0a7e9f53cb9220cd",
+    "lines": 4397,
+    "files": [
+      "lab-tests-icd10pcs-cms.ndjson.gz"
+    ]
+  },
+  "lab-tests-pami-nomenclador": {
+    "sha256": "edc981bc7b0100c610e9c5fbf1f5c32d15cf7b469f45decde448a6e1d408f996",
+    "lines": 3034,
+    "files": [
+      "lab-tests-pami-nomenclador.ndjson.gz"
+    ]
+  },
+  "lab-tests-sigtap-sus": {
+    "sha256": "8f301cfdf24cfb4b276e3b5f3ba73d63b9ec876351e1ac346bf6503fe784ad79",
+    "lines": 1108,
+    "files": [
+      "lab-tests-sigtap-sus.ndjson.gz"
+    ]
+  },
+  "lab-tests-tuss-ans": {
+    "sha256": "3627fc8b076bfd19824ceaf08ca5c99097f51759cf7ced95296129165cc8bbd7",
+    "lines": 2211,
+    "files": [
+      "lab-tests-tuss-ans.ndjson.gz"
+    ]
+  },
+  "lab-tests-ucum": {
+    "sha256": "c1e047a0e4192edb636601ed8730311c9270355f35cd1f1299c2e38ee556df42",
+    "lines": 888,
+    "files": [
+      "lab-tests-ucum.ndjson.gz"
+    ]
+  }
+}

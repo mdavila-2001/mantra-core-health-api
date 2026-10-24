@@ -1,0 +1,100 @@
+{
+  "hl7-tho": {
+    "retrievedAt": "2026-10-24T00:38:09.476Z",
+    "spec": "hl7.terminology.r4@7.0.1",
+    "tarball": "hl7.terminology.r4-7.0.1.tgz",
+    "sha256": "170c546f761fb51b3355788ca500206f6b772b21c57348c29205de85a6612baa",
+    "npm": {
+      "name": "hl7.terminology.r4",
+      "version": "7.0.1",
+      "integrity": "sha512-UamZUcARk/TEaJb7X0hDyANmC7bCv0Jof0u0uGIOB2O9VQX0uV45Vf4EyONHM6Sejv6q7sXEAzKAQsgw1Cld3A==",
+      "shasum": "821279c60ef8564f7bd61403738de1a3dd26afda"
+    },
+    "registryUrl": "https://registry.npmjs.org/hl7.terminology.r4/7.0.1",
+    "license": "CC0-1.0 (HL7 Terminology, https://terminology.hl7.org/license.html)."
+  },
+  "ucum": {
+    "retrievedAt": "2026-10-24T00:38:10.053Z",
+    "spec": "@lhncbc/ucum-lhc@8.0.1",
+    "tarball": "lhncbc-ucum-lhc-8.0.1.tgz",
+    "sha256": "cf64e6ad36b54954b52f2d77efba220a5aeb325bbca88b83f17b826b9fcca76e",
+    "npm": {
+      "name": "@lhncbc/ucum-lhc",
+      "version": "8.0.1",
+      "integrity": "sha512-tRcifNm0NPeu9hYrzNnzSFnerwv+sao1OptWR/iCPSAcQkL2LXu3y8YM0RlCAY/NaKmNvyeKmCuRf7hKWy7ieg==",
+      "shasum": "ecffd2a068f8399e952947b98599b216e030d1b4"
+    },
+    "registryUrl": "https://registry.npmjs.org/@lhncbc/ucum-lhc/8.0.1",
+    "license": "UCUM table and codes © 1995-2009 Regenstrief Institute, Inc. and the UCUM Organization, under https://ucum.org/license. Tabla `data/ucumDefs.min.json` de @lhncbc/ucum-lhc (NLM/LHNCBC; LICENSE.md tipo BSD: redistribución permitida conservando el aviso del dueño). Incluye combinaciones de unidades tomadas de LOINC: rige además https://loinc.org/terms-of-use."
+  },
+  "fonasa-mle": {
+    "retrievedAt": "2026-10-24T00:47:54.038Z",
+    "spec": "@mariohealthbits/fonasa-mle-open@1.0.0",
+    "tarball": "mariohealthbits-fonasa-mle-open-1.0.0.tgz",
+    "sha256": "b622019be7a3a1e3eb560c01415d991947ac21561ed074187f2b9ee687e9e05c",
+    "npm": {
+      "name": "@mariohealthbits/fonasa-mle-open",
+      "version": "1.0.0",
+      "integrity": "sha512-heMqNXY6n+BBghUC3d1/0h4Yg1FKV8HcyneyAV9qcTZMSoAXZwRHRqgehPWRTKt1VVLflyET0MjfuOGsOqI7RA==",
+      "shasum": "4b38cb8563d2b42f97275766e68a9c0a7c90ece7"
+    },
+    "registryUrl": "https://registry.npmjs.org/@mariohealthbits/fonasa-mle-open/1.0.0",
+    "license": "Arancel público de FONASA (información pública del Estado de Chile). Extraído de los XLSX oficiales y redistribuido por @mariohealthbits/fonasa-mle-open (licencia MIT del paquete). NO cotejado con el XLSX oficial: fonasa.cl responde 403 desde la sesión que lo cargó."
+  },
+  "sigtap-sus": {
+    "retrievedAt": "2026-10-24T00:47:54.419Z",
+    "spec": "@br-health-kit/sigtap@1.0.0",
+    "tarball": "br-health-kit-sigtap-1.0.0.tgz",
+    "sha256": "e5869f743a4b4a2b219dafe10724e2f2d49154d61d15e0d985c78b3b9e103d07",
+    "npm": {
+      "name": "@br-health-kit/sigtap",
+      "version": "1.0.0",
+      "integrity": "sha512-4k9TY5z1GEaMLo7EQcXVJUsmpCtwBFyMIEScImZXTeXzdc3NfdKg1yM0Umz1/1qTwQw24qDw1siOLir6YwrKHg==",
+      "shasum": "cdc5ebcbd9300387cd58023e99af3a0d81062818"
+    },
+    "registryUrl": "https://registry.npmjs.org/@br-health-kit/sigtap/1.0.0",
+    "license": "Dados públicos do Ministério da Saúde (DATASUS). Redistribuídos sem modificação de conteúdo por @br-health-kit/sigtap (MIT), desde ftp2.datasus.gov.br/pub/sistemas/tup/downloads/ (archivo y checksum en el metadata.json del paquete)."
+  },
+  "tuss-ans": {
+    "retrievedAt": "2026-10-24T00:47:55.025Z",
+    "spec": "@br-health-kit/tuss@1.0.0",
+    "tarball": "br-health-kit-tuss-1.0.0.tgz",
+    "sha256": "5c09f69cb82efc316f895c3986373d16815dda519bed8025336bf49ad8f4dd54",
+    "npm": {
+      "name": "@br-health-kit/tuss",
+      "version": "1.0.0",
+      "integrity": "sha512-RsE6vJtFDwu9G7GnQ/XiD5Ma/fXZWZVuFpcST4fXCvGWWvnItlVjF/CBzEgYC+cBrMeG+FYfE0O2VW0RF02Edw==",
+      "shasum": "9de9886dde68d48a70a65b7c66fb8be571d2c707"
+    },
+    "registryUrl": "https://registry.npmjs.org/@br-health-kit/tuss/1.0.0",
+    "license": "Dados abertos da ANS (Plano de Dados Abertos, PDA-049), redistribuídos sem modificação por @br-health-kit/tuss (MIT). La licencia del conjunto en el portal de la ANS no se pudo leer (403 desde la sesión): a confirmar."
+  },
+  "pami-nomenclador": {
+    "retrievedAt": "2026-10-24T00:47:55.407Z",
+    "spec": "nomenclador-salud-js@1.0.2",
+    "tarball": "nomenclador-salud-js-1.0.2.tgz",
+    "sha256": "cb19be3f93387b4b2b7d7ac1fb8862bd6a3d6f6dc8c6d25f24a2915eebf1039e",
+    "npm": {
+      "name": "nomenclador-salud-js",
+      "version": "1.0.2",
+      "integrity": "sha512-RTeWX2j2bBvQoi0ITSujl7tnQ/I1Jlkqoa0i5H3/L7Z55CgU8mZDRHzVPeq1wbRPpzjGBPKKBxjlFMJXE48xKA==",
+      "shasum": "b17189ed4e5f3673fd27434ebd8750db36832d01"
+    },
+    "registryUrl": "https://registry.npmjs.org/nomenclador-salud-js/1.0.2",
+    "license": "Datos abiertos de PAMI en datos.gob.ar (conjunto creado y modificado por última vez el 2022-08-03), redistribuidos por nomenclador-salud-js (ISC). La licencia del conjunto en el portal no se pudo leer (403 desde la sesión): a confirmar."
+  },
+  "icd10pcs-cms": {
+    "retrievedAt": "2026-10-24T00:51:24.693Z",
+    "spec": "@cyanheads/medical-codes-mcp-server@0.4.1",
+    "tarball": "cyanheads-medical-codes-mcp-server-0.4.1.tgz",
+    "sha256": "8b493ed2ce1ac94b975716548c0a2b66b5b9ecdf31480649368cce1d284a9cbe",
+    "npm": {
+      "name": "@cyanheads/medical-codes-mcp-server",
+      "version": "0.4.1",
+      "integrity": "sha512-tsSwHTJCcQue7kL5gUjT4aIEUR3hTWgzEilUZ8wLuhlmfK0EQHUT5Ax4sFCvjwNmlLmCXICji6vlfMfiMj98fw==",
+      "shasum": "3715c6a86dd771eadea0da57d1b227f71e4099a0"
+    },
+    "registryUrl": "https://registry.npmjs.org/@cyanheads/medical-codes-mcp-server/0.4.1",
+    "license": "Obra del gobierno federal de EE. UU. (CMS), dominio público. Tomado del índice SQLite que empaqueta @cyanheads/medical-codes-mcp-server (Apache-2.0), construido desde los order files oficiales de CMS (release y URL en su tabla build_meta)."
+  }
+}
