@@ -258,18 +258,3 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 Monografías por ATC 5 con las secciones literales de la ficha técnica de CIMA y de la etiqueta FDA
 (openFDA), cada una con su cita: `clinical-pharmacology/` (ver su `README.md` y `SOURCES.md`).
 Registro de pasadas: `docs/seed-research/clinical-pharmacology.md`.
-
-## Servicios por especialidad (2026-10-24)
-
-`specialty-services/`: relaciona servicios (FONASA MLE 2026, CUPS y los aranceles
-bolivianos ya sembrados) con las especialidades de `VS_MEDICAL_SPECIALTY`, sólo
-con evidencia de la fuente. Fuentes, hashes y licencias en
-[`specialty-services/SOURCES.md`](specialty-services/SOURCES.md); pasadas y
-cobertura en [`docs/seed-research/specialty-services.md`](../../docs/seed-research/specialty-services.md).
-
-```sh
-node tools/terminology-import/specialty-services/build-specialty-services.mjs --report   # fuentes → NDJSON (fuera de git)
-node tools/terminology-import/specialty-services/load-specialty-services.mjs              # dry-run (sin armado local, usa specialty-services/data/)
-node tools/terminology-import/specialty-services/load-specialty-services.mjs --apply      # carga (.env DB_*)
-node --test "tools/terminology-import/specialty-services/test/*.test.mjs"
-```
