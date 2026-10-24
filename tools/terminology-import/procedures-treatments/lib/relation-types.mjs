@@ -11,6 +11,7 @@
 //   terminology-role    rol declarado por la terminología (NCIt)
 //   by-definition       eje del propio código (ICD-10-PCS Body Part, ICHI Target)
 //   investigational     ensayo clínico registrado: SIEMPRE «en estudio», nunca «indicado»
+//   collaborative-referenced  fuente colaborativa (Wikidata) con referencia citada; no oficial
 // =============================================================================
 
 export const RELATION_TYPES = {
@@ -118,6 +119,45 @@ export const RELATION_TYPES = {
     sourcePredicate: 'R180 Procedure_Has_Target_Disease',
     assertion: 'terminology-role',
     label: 'Enfermedad diana del procedimiento (rol NCIt)',
+  },
+
+  // --- ICD-10-PCS (procedimiento → sitio, por definición del código) -----------
+  // Un tipo por título literal del eje 4 de la tabla de CMS.
+  ...Object.fromEntries(
+    [
+      'Body Part',
+      'Body Region',
+      'Treatment Site',
+      'Body System / Region',
+      'Body System',
+    ].map((axis) => [
+      `icd10pcs:${axis}`,
+      {
+        kind: 'procedure-site',
+        sourcePredicate: `ICD-10-PCS axis 4 «${axis}»`,
+        assertion: 'by-definition',
+        label: `Eje «${axis}» del propio código ICD-10-PCS (tablas oficiales de CMS)`,
+      },
+    ]),
+  ),
+
+  // --- Wikidata (fuente colaborativa, solo con referencia real) ----------------
+  'wikidata:P924': {
+    kind: 'procedure-disease',
+    sourcePredicate: 'P924 possible treatment',
+    assertion: 'collaborative-referenced',
+    label:
+      'Tratamiento posible según Wikidata (fuente colaborativa, no oficial; declaración con referencia)',
+  },
+
+  // --- ClinicalTrials.gov (procedimiento ↔ condición, solo en estudio) --------
+  'ctgov:investigational': {
+    kind: 'procedure-disease',
+    sourcePredicate:
+      'MeSH de intervención y MeSH de condición derivados por NLM para el mismo estudio intervencional',
+    assertion: 'investigational',
+    label:
+      'En estudio: registrados juntos en ensayos intervencionales de ClinicalTrials.gov (no implica indicación ni eficacia)',
   },
 };
 

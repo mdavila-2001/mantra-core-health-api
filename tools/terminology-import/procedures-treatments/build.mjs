@@ -26,7 +26,17 @@ import {
   writeNdjson,
 } from './lib/common.mjs';
 import { headerVersion, oboStanzas } from './lib/obo.mjs';
-import { withPublishedSiteAlternates } from './lib/records.mjs';
+import { uniqueById, withPublishedSiteAlternates } from './lib/records.mjs';
+import { ctgovCorpus, ctgovStudies } from './lib/sources/ctgov.mjs';
+import {
+  expandTables,
+  icd10pcsCorpus,
+  parseOrderFile,
+} from './lib/sources/icd10pcs.mjs';
+import { readMeshDescriptors } from './lib/sources/mesh.mjs';
+import { readNcitOwlZip } from './lib/sources/ncit-owl.mjs';
+import { wikidataP924Corpus } from './lib/sources/wikidata.mjs';
+import { execFileSync } from 'node:child_process';
 import { BLOCKED_SOURCES } from './lib/sources.mjs';
 import {
   maxoProcedureMaps,
@@ -56,7 +66,7 @@ function sourceMeta(key, file, version) {
     license: m.license,
     fileUrl: f.fileUrl,
     sha256: f.sha256,
-    pin: m.commit ?? m.tag,
+    pin: m.commit ?? m.tag ?? m.lastModified,
   };
 }
 
@@ -126,13 +136,122 @@ async function main() {
     meta: ohdMeta,
   });
 
+  // --- NCIt edición oficial (EVS) ---------------------------------------------------
+  // Mismas reglas que la edición OBO; la misma relación con las dos fuentes queda
+  // como dos afirmaciones de un mismo relationshipId.
+  const ncitEvs = await readNcitOwlZip(
+    cacheDir('ncit-evs', 'Thesaurus.OWL.zip'),
+  );
+  const ncitEvsMeta = sourceMeta(
+    'ncit-evs',
+    'Thesaurus.OWL.zip',
+    ncitEvs.version.versionInfo,
+  );
+  const ncitEvsOut = ncitProcedureAssertions(ncitEvs, ncitEvsMeta);
+  coverage.skipped['ncit-evs'] = {
+    rolesRead: ncitEvs.roles.length,
+    ...ncitEvsOut.skipped,
+  };
+
+  // --- ICD-10-PCS (CMS) ---------------------------------------------------------------
+  const unzipText = (zip, entry, enc = 'utf8') =>
+    execFileSync('unzip', ['-p', cacheDir('icd10pcs', zip), entry], {
+      encoding: enc,
+      maxBuffer: 1 << 30,
+    });
+  const pcsTables = expandTables(
+    unzipText('icd10pcs-tables-index-2027.zip', 'icd10pcs_tables_2027.xml'),
+  );
+  const pcsOrder = parseOrderFile(
+    unzipText('icd10pcs-order-2027.zip', 'icd10pcs_order_2027.txt', 'latin1'),
+  );
+  const pcsMeta = sourceMeta(
+    'icd10pcs',
+    'icd10pcs-tables-index-2027.zip',
+    'FY2027 (tablas e índice, CMS)',
+  );
+  const pcs = icd10pcsCorpus(pcsTables.rows, pcsOrder, pcsMeta);
+  coverage.skipped.icd10pcs = {
+    codesDeclared: pcsTables.declared,
+    codesExpanded: pcsTables.rows.length,
+    ...pcs.skipped,
+  };
+
+  // --- MeSH + ClinicalTrials.gov ------------------------------------------------------
+  const { descriptors: mesh, year: meshYear } = await readMeshDescriptors(
+    cacheDir('mesh', 'desc2026.xml.gz'),
+  );
+  const meshMeta = sourceMeta(
+    'mesh',
+    'desc2026.xml.gz',
+    `MeSH ${meshYear} (desc${meshYear}.xml)`,
+  );
+  let ctgov = {
+    assertions: [],
+    procedures: [],
+    stats: { pending: 'falta cache/ctgov/meta.json: corra fetch-ctgov.mjs' },
+  };
+  let ctgovMeta = null;
+  if (existsSync(cacheDir('ctgov', 'meta.json'))) {
+    const m = readJson(cacheDir('ctgov', 'meta.json'));
+    ctgovMeta = {
+      source: 'ctgov',
+      version: `API ${m.apiVersion}, datos ${m.dataTimestamp}`,
+      retrievedAt: m.retrievedAt,
+      license: m.license,
+      fileUrl: 'https://clinicaltrials.gov/api/v2/studies',
+      sha256: null,
+      pin: m.dataTimestamp,
+    };
+    ctgov = ctgovCorpus(
+      ctgovStudies(cacheDir('ctgov', 'pages')),
+      mesh,
+      ctgovMeta,
+      meshMeta,
+    );
+  }
+  coverage.skipped.ctgov = ctgov.stats;
+
+  // --- Wikidata P924 (colaborativa, con referencia) ----------------------------------
+  const wdMetaRaw = readJson(cacheDir('wikidata-p924', 'meta.json'));
+  const wdMeta = {
+    ...sourceMeta(
+      'wikidata-p924',
+      'p924.json',
+      `consulta SPARQL del ${wdMetaRaw.retrievedAt}`,
+    ),
+    pin: wdMetaRaw.queriedAt,
+  };
+  const wd = wikidataP924Corpus(
+    JSON.parse(readFileSync(cacheDir('wikidata-p924', 'p924.json'), 'utf8'))
+      .results.bindings,
+    mesh,
+    wdMeta,
+    meshMeta,
+  );
+  coverage.skipped['wikidata-p924'] = wd.skipped;
+
   const assertions = [
     ...poet.assertions,
     ...maxoSites,
     ...ncitOut.assertions,
+    ...ncitEvsOut.assertions,
     ...ohd.assertions,
+    ...pcs.assertions,
+    ...ctgov.assertions,
+    ...wd.assertions,
   ];
-  const procedures = [...maxoProcs, ...ncitOut.procedures, ...ohd.procedures];
+  // La edición oficial de NCIt va primero: si un procedimiento está en las dos, se queda su nombre vigente.
+  const procedures = uniqueById([
+    ...maxoProcs,
+    ...ncitEvsOut.procedures,
+    ...ncitOut.procedures,
+    ...ohd.procedures,
+    ...pcs.procedures,
+    ...pcs.sites,
+    ...ctgov.procedures,
+    ...wd.procedures,
+  ]);
 
   // --- Equivalencias publicadas (solo para los códigos que se usan) ----------------
   const wantedMondo = new Set(
@@ -191,6 +310,11 @@ async function main() {
     ['maxo-annotations', poetMeta],
     ['ncit-obo', ncitMeta],
     ['ohd', ohdMeta],
+    ['ncit-evs', ncitEvsMeta],
+    ['icd10pcs', pcsMeta],
+    ['mesh', meshMeta],
+    ...(ctgovMeta ? [['ctgov', ctgovMeta]] : []),
+    ['wikidata-p924', wdMeta],
     ['mondo', mondoMeta],
     ['uberon', uberonMeta],
   ]) {
@@ -230,9 +354,19 @@ async function main() {
 
   Object.assign(coverage, {
     procedures: {
-      total: procedures.length,
-      bySystem: count(procedures, (p) => p.system),
-      byCategory: count(procedures, (p) => `${p.system}:${p.category}`),
+      total: procedures.filter((p) => p.kind !== 'site').length,
+      bySystem: count(
+        procedures.filter((p) => p.kind !== 'site'),
+        (p) => p.system,
+      ),
+      byCategory: count(
+        procedures.filter((p) => p.kind !== 'site'),
+        (p) => `${p.system}:${p.category}`,
+      ),
+      siteConceptsOwned: count(
+        procedures.filter((p) => p.kind === 'site'),
+        (p) => `${p.system}:${p.category}`,
+      ),
     },
     assertions: {
       total: assertions.length,
@@ -263,9 +397,7 @@ async function main() {
       withIcd10Equivalent: expressible(diseases, ['icd10', 'icd10cm']),
       withMeshEquivalent: expressible(diseases, ['mesh']),
       withOrphanetEquivalent: expressible(diseases, ['orphanet']),
-      withoutAnyEquivalent: diseases.filter(
-        (k) => !(mapIndex.get(k) ?? []).length,
-      ).length,
+      withoutAnyEquivalent: diseases.filter((k) => k.startsWith('mondo|') && !(mapIndex.get(k) ?? []).length).length,
     },
     sites: {
       linked: sites.length,

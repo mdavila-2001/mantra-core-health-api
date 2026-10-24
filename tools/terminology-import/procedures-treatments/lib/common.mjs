@@ -161,5 +161,13 @@ export function fromCurie(curie) {
   };
 }
 
+/**
+ * Copia una cadena a memoria propia. V8 representa `match()`/`slice()` como
+ * vistas sobre la cadena madre: guardar 200 000 nombres sacados de bloques de un
+ * archivo de 750 MB retiene esos bloques enteros (se midió 1,2 GB para NCIt).
+ */
+export const own = (s) =>
+  s == null ? s : Buffer.from(s, 'utf8').toString('utf8');
+
 /** Clave de deduplicación: siempre por código, nunca por nombre. */
 export const conceptKey = (ref) => `${ref.system}|${ref.code}`;

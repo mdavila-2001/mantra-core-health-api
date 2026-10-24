@@ -251,3 +251,156 @@ test('OHD: solo procedimientos bajo «dental procedure»; un sitio en un proceso
     'OHD:0000037 (material combination) declara un sitio pero no es un procedimiento',
   );
 });
+
+// --- Fuentes de la red abierta (2026-10-24): extractos reales de MeSH 2026,
+// ClinicalTrials.gov API v2, ICD-10-PCS FY2027 (CMS) y NCIt 26.09d (EVS).
+
+test('MeSH: procedimiento, condición y exclusión farmacológica por árbol (no por nombre)', async () => {
+  const {
+    readMeshDescriptors,
+    isNonPharmacologicalIntervention,
+    isCondition,
+    meshInterventionCategory,
+  } = await import('../lib/sources/mesh.mjs');
+  const { descriptors, year } = await readMeshDescriptors(
+    join(FIX, 'mesh-excerpt.xml'),
+  );
+  assert.equal(year, '2026');
+  const d = (ui) => descriptors.get(ui);
+  assert.equal(d('D007044').name, 'Hysterectomy');
+  assert.ok(isNonPharmacologicalIntervention(d('D007044')));
+  assert.equal(meshInterventionCategory(d('D007044')), 'surgical');
+  assert.ok(
+    isNonPharmacologicalIntervention(d('D015928')),
+    'Cognitive Behavioral Therapy (F04.754)',
+  );
+  assert.equal(meshInterventionCategory(d('D015928')), 'behavioral');
+  assert.ok(
+    !isNonPharmacologicalIntervention(d('D000001')),
+    'Calcimycin: solo árbol D',
+  );
+  assert.ok(
+    !isNonPharmacologicalIntervention(d('D000971')),
+    'protocolo de quimioterapia: E02.183.750 + E02.319, fuera entero',
+  );
+  assert.ok(!isNonPharmacologicalIntervention(d('D008774')), 'Methylphenidate');
+  assert.ok(isCondition(d('D014594')) && isCondition(d('D001289')));
+  assert.ok(!isCondition(d('D007044')));
+});
+
+test('ClinicalTrials.gov: solo el par no farmacológico, «en estudio», con el NCT en la evidencia', async () => {
+  const { readMeshDescriptors } = await import('../lib/sources/mesh.mjs');
+  const { ctgovCorpus } = await import('../lib/sources/ctgov.mjs');
+  const { descriptors } = await readMeshDescriptors(
+    join(FIX, 'mesh-excerpt.xml'),
+  );
+  const { body } = JSON.parse(
+    readFileSync(join(FIX, 'ctgov-studies-excerpt.json'), 'utf8'),
+  );
+  const { assertions, procedures, stats } = ctgovCorpus(
+    body.studies,
+    descriptors,
+    meta('ctgov'),
+    meta('mesh'),
+  );
+  assert.equal(stats.interventional, 2);
+  assert.equal(
+    assertions.length,
+    1,
+    'NCT02210728: tres fármacos + TCC para TDAH → solo TCC ↔ TDAH; NCT01949883 (fármaco) no aporta',
+  );
+  const [a] = assertions;
+  assert.deepEqual([a.subject.code, a.object.code], ['D015928', 'D001289']);
+  assert.equal(a.relationType.assertion, 'investigational');
+  assert.match(a.relationType.label, /^En estudio/);
+  assert.deepEqual(a.evidence.trials, ['NCT02210728']);
+  assert.equal(
+    a.provenance.uri,
+    'https://clinicaltrials.gov/study/NCT02210728',
+  );
+  assert.deepEqual(
+    procedures.map((p) => p.code),
+    ['D015928'],
+  );
+});
+
+test('ICD-10-PCS: expansión exacta de la tabla, título oficial y sitio por el eje 4', async () => {
+  const { expandTables, parseOrderFile, icd10pcsCorpus } =
+    await import('../lib/sources/icd10pcs.mjs');
+  const { rows, declared } = expandTables(
+    readFileSync(join(FIX, 'pcs-tables-excerpt.xml'), 'utf8'),
+  );
+  assert.equal(
+    rows.length,
+    declared,
+    'la expansión da exactamente los códigos que declara la tabla',
+  );
+  const order = parseOrderFile(
+    readFileSync(join(FIX, 'pcs-order-excerpt.txt'), 'latin1'),
+  );
+  assert.equal(
+    order.get('0016070').long,
+    'Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Open Approach',
+  );
+  assert.equal(
+    order.get('001').valid,
+    false,
+    'los encabezados no son códigos válidos',
+  );
+  const c = icd10pcsCorpus(rows, order, meta('icd10pcs'));
+  assert.equal(c.assertions.length, declared);
+  const a = c.assertions.find((x) => x.subject.code === '0016070');
+  assert.equal(a.relationType.code, 'icd10pcs:Body Part');
+  assert.equal(a.relationType.assertion, 'by-definition');
+  assert.deepEqual(
+    [a.object.system, a.object.code, a.object.label],
+    ['icd10pcs-body-part', '006', 'Cerebral Ventricle'],
+  );
+  assert.ok(c.sites.every((s) => s.kind === 'site'));
+});
+
+test('NCIt oficial (OWL): roles, nombre preferido y padres de una clase real', async () => {
+  const { parseNcitClass } = await import('../lib/sources/ncit-owl.mjs');
+  const c = parseNcitClass(
+    readFileSync(join(FIX, 'ncit-owl-class-C15256.xml'), 'utf8'),
+  );
+  assert.equal(c.id, 'NCIT:C15256');
+  assert.equal(c.name, 'Hysterectomy');
+  assert.ok(c.parents.includes('NCIT:C15332'));
+  assert.ok(
+    c.roles.some((r) => r.role === 'R167' && r.target === 'NCIT:C12405'),
+  );
+  assert.equal(c.retired, false);
+});
+
+test('Wikidata P924: solo con referencia real (P248/P854), tipo colaborativo, id de declaración', async () => {
+  const { readMeshDescriptors } = await import('../lib/sources/mesh.mjs');
+  const { wikidataP924Corpus } = await import('../lib/sources/wikidata.mjs');
+  const { descriptors } = await readMeshDescriptors(
+    join(FIX, 'mesh-excerpt.xml'),
+  );
+  const { results } = JSON.parse(
+    readFileSync(join(FIX, 'wikidata-p924-excerpt.json'), 'utf8'),
+  );
+  const { assertions, skipped } = wikidataP924Corpus(
+    results.bindings,
+    descriptors,
+    meta('wikidata-p924'),
+    meta('mesh'),
+  );
+  assert.equal(
+    skipped.withoutRealReference,
+    1,
+    'D001062: la referencia no cita fuente ni URL',
+  );
+  assert.equal(assertions.length, 1);
+  const [a] = assertions;
+  assert.deepEqual(
+    [a.subject.code, a.object.system, a.object.code],
+    ['D017130', 'mesh', 'D062108'],
+  );
+  assert.equal(a.relationType.assertion, 'collaborative-referenced');
+  assert.match(a.relationType.label, /colaborativa, no oficial/);
+  assert.ok(a.evidence.referenceUrls.length >= 1);
+  assert.match(a.provenance.sourceRecordId, /^Q\d+-/);
+});
