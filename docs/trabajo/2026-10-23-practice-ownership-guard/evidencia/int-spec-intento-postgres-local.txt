@@ -1,0 +1,21 @@
+# Intento de int-spec en Postgres 16 local (sin Docker; sin pgvector/TimescaleDB, Mongo, Redis ni OpenSearch)
+## DDL: apply_all.sql + apply_deferred.sql + patches (sin *_dev_seed ni *backfill*)
+apply_all → exit 0 · apply_deferred → exit 0
+FAIL 2026-07-25_v407_nullable_embedding_model_versions.sql  (schema "vector_rag" no existe: sin pgvector)
+FAIL 2026-09-26_v4231_seed_insurer_accounts.sql  (FK a catalog_concepts: conceptos se siembran después)
+
+## 1) practice-ownership.int-spec.ts sobre origin/dev 35ccebd7, sin tocar nada
+    MetadataError: Metadata for entity choiceOptionsOf not found   (en bootstrapTestApp → builder.compile())
+Tests:       4 failed, 4 total
+
+## 2) Control: admin-listados.int-spec.ts (existente) en la misma base
+      7     MetadataError: Metadata for entity choiceOptionsOf not found
+      1 Tests:       7 failed, 7 total
+
+## 3) Con parche LOCAL temporal en forms.module.ts (filtrar choiceOptionsOf de forFeature; NO commiteado)
+    thrown: "Exceeded timeout of 180000 ms for a hook.
+    thrown: "Exceeded timeout of 180000 ms for a hook.
+(bootstrapTestApp no termina en 180 s: los seeds corren y se detiene tras ClinicalFormsSeedService; sin Mongo/Redis/OpenSearch del compose)
+
+## 4) App compilada (yarn build → exit 0) arrancando AppModule vía tools/openapi/generate-openapi.mjs
+ERROR [ExceptionHandler] MetadataError: Metadata for entity choiceOptionsOf not found
