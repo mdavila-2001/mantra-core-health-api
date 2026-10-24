@@ -84,7 +84,7 @@ detiene con dos pasadas seguidas en 0.
 ### Pasada 1 (2026-10-24)
 
 - **Regiones**: ninguna rama hermana tiene todavía `out/manifest.json`
-  (`us`, `eu`, `row`: pendientes). Avisé a las tres sesiones con el formato
+  (`us`, `eu`, `row`: sin publicar). Avisé a las tres sesiones con el formato
   común y con el dato de red (git clone de GitHub funciona; los registros
   oficiales dan 403).
 - **Fuentes nuevas**: FDA Product Classification (7 088 product codes) y la
@@ -117,7 +117,7 @@ detiene con dos pasadas seguidas en 0.
   `fda-gudid` 3 130 del subconjunto dental, `fda-denovo` 240). `eu` publicó
   su `out/manifest.json` en `origin/claude/adoring-curie-xdkt83` (`14f81a41`)
   con **0 filas** y 11 huecos (403 del proxy en EUDAMED, MHRA, Swissmedic,
-  CND, NANDO, BfArM, AEMPS, ANSM). `row`: pendiente.
+  CND, NANDO, BfArM, AEMPS, ANSM). `row`: sin publicar.
 - **Fuentes nuevas**: EMDN V2 completa, desde dos copias independientes en git
   (`BatirMedical/nomenclature-emdn@e0131762` y `lisadonlon/GMDNEMDN@ef608648`).
   Coinciden en código, término y nivel en los 8 453 códigos comunes; a la
@@ -150,7 +150,7 @@ detiene con dos pasadas seguidas en 0.
   `coverage.json`.
 - **Taxonomía cargada** en el Postgres 16 desechable: EMDN 8 454 conceptos y
   8 431 relaciones is-a, 218 mapeos, 5 692 miembros del value set; 2.ª corrida
-  en 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada2.txt`).
+  en 0.
 - **Listados del sector**: `data/industry-directories.json` (46
   organizaciones, 552 menciones con URL). Con el corpus de `us`, 130 de 370
   empresas cruzan con un fabricante de los registros; 240 quedan como
@@ -170,7 +170,7 @@ detiene con dos pasadas seguidas en 0.
     `cl-tud/riskman-device-code-validation-scripts`: similitud de texto
     automática, no un mapeo publicado por una autoridad.
   - `bjoleary/fdadata` (`foiclass` del 2026-10-20 en `.rda` de R): no hay R ni
-    lector de `.rda` en el entorno; queda para la próxima pasada (lo usa `us`).
+    lector de `.rda` en el entorno, así que no se leyó (lo usa `us`).
   - `misterrPink1/symmetric` `device.txt` de GUDID 2020: no trae product code
     ni GMDN, así que sin cruzarlo no hay tipo; se lo pasé a `us`.
   - Nota de método: el agente de búsqueda de espejos usó la búsqueda de código
@@ -183,7 +183,7 @@ detiene con dos pasadas seguidas en 0.
 - **Regiones**:
   - `us` @`3ba3358e`: 189 072 filas. Sumó `fda-rl` (110 614) y `cdc-livd-sars-cov-2` (487). De LIVD, 4 filas son inválidas (sin `manufacturerName`; tres son filas de prueba `Test_*` de la planilla) y las 483 válidas no traen tipo de dispositivo, así que quedan sin decisión. Se lo avisé a `us`.
   - `eu` @`e1601ac2` (`origin/claude/adoring-curie-xdkt83`): 716 filas `eudamed-udi`, todas válidas, más 26 583 actores EUDAMED con SRN en `manifest.actors`.
-  - `row`: pendiente. Avisó que va a empujar a `origin/claude/inspiring-planck-xhpf4w`.
+  - `row`: sin publicar en esta pasada.
 - **Fuente nueva para la resolución**: los actores EUDAMED (SRN, nombre, país) entran al resolvedor como identidad publicada. No son equipos.
 - **Nuevos tras deduplicar** (contra la pasada 2):
   - Fabricantes: +5 675 (18 978).
@@ -193,7 +193,7 @@ detiene con dos pasadas seguidas en 0.
   - Tipos con al menos un modelo: 2 976 (+548).
   - Fusiones `same-registry-id`: 107 (SRN). A revisión: 233 `name-match-conflicting-ids`, porque el mismo nombre aparece con SRN distintos y no se fusiona.
   - Listados del sector: 148 empresas cruzan con un fabricante (+18).
-- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada3.txt`).
+- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0.
 - **Descartadas**: ninguna nueva.
 
 ### Pasada 4 (2026-10-24)
@@ -277,6 +277,26 @@ detiene con dos pasadas seguidas en 0.
 - **Descartadas**: ninguna.
 - **Nota**: el PR #696 se mergeó con las pasadas 1 a 5. Las pasadas 6 y siguientes van en un PR nuevo, desde `dev` actualizado, en la rama `justin/seed-dx-devices-master-p6`: el force push sobre la rama original fue denegado.
 
+### Pasada 8 (2026-10-24)
+
+- **Regiones**: sin filas nuevas. `us` @`14a6d974` (215 690 filas), `eu` y `row` sin cambios; las tres cerraron.
+- **Fuente nueva propia**: suplemento del PCD de la FDA, tomado del `foiclass` del 2026-10-20 en `bjoleary/fdadata@227bdaa2` (`data/product_codes.rda`, sha256 `4423c192…`, MIT).
+  - No es una copia literal: los paneles van por nombre y la regulación como número. Por eso no reemplaza a la copia literal de `ej86`.
+  - `extract-pcd-supplement.py` toma solo los 9 product codes que la copia literal no tiene y reconstruye la sección a 4 dígitos. El resultado está en `data/fda-pcd-supplement.json`.
+- **Nuevos tras deduplicar** (contra la pasada 7):
+  - Taxonomía: +9 product codes (33 624 nodos). +1 de diagnóstico: `SJD`, «Integrated Continuous Glucose Ketone Monitoring System», 862.1354, parte IVD.
+  - Catálogo: +1 registro (261 340) y +1 modelo (175 071), del De Novo que declara `SJD`.
+  - Cargado en el Postgres desechable: +8 conceptos (`SJD` ya existía como nodo sin decisión); la 2.ª corrida da 0.
+- **Descartadas**: ninguna.
+
+### Pasada 9 (2026-10-24): 0
+
+- **Regiones**: sin cambios desde la pasada 8. Último commit con `out/`: `us` `14a6d974`, `eu` `e1601ac2`, `row` `33e67ca1`.
+- **Fuentes propias**: `git ls-remote` de las cuatro copias fijadas (`ej86`, `BatirMedical`, `lisadonlon`, `bjoleary`) da el mismo HEAD que el commit fijado.
+- **Búsqueda de fuentes nuevas**: hay una EMDN posterior a la V2 (el paquete MDCG 2026-1/2/3; la historia de versiones tiene 8 535 registros), pero solo en el sitio de la Comisión, que da 403; no hay copia en git. La lista de IA de la FDA más nueva tampoco tiene copia en git.
+- **Nuevos tras deduplicar: 0.**
+- **Estado de la saturación**: primera pasada en 0. La regla pide dos seguidas: falta una más (pasada 10) con las entradas sin cambios.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`
@@ -304,8 +324,7 @@ sirviendo para texto libre cuando el equipo no está en el catálogo).
 El importador del catálogo sale directo de `out/manufacturers.ndjson.gz` y
 `out/models-*.ndjson.gz`: cada modelo ya trae sus registros con procedencia.
 
-**Unión con la propuesta de `row`**
-(`docs/trabajo/2026-10-24-seed-dx-devices-row/REPORTE.md`). Coinciden en
+**Unión con la propuesta de `row`**. Coinciden en
 fabricantes con identificadores por esquema, modelos con tipo como FK a
 `terminology.catalog_concepts`, autorizaciones con la cita completa por fila,
 identificadores por modelo y la FK opcional `device_model_id` en

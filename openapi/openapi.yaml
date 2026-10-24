@@ -51018,7 +51018,10 @@ paths:
       tags:
         - scheduling
     post:
-      description: Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.
+      description: >-
+        Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode
+        BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente
+        y bloquea.
       operationId: SchedulingController_createException
       parameters:
         - name: id
@@ -51060,7 +51063,10 @@ paths:
         - scheduling
   /scheduling/resources/{id}/close-slots:
     post:
-      description: Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.
+      description: >-
+        Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con
+        la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada
+        paciente.
       operationId: SchedulingController_closeSlots
       parameters:
         - name: id
@@ -94400,6 +94406,12 @@ components:
           items:
             type: string
             format: uuid
+        cancelAffectedBookings:
+          type: boolean
+          description: >-
+            true: cancela las citas de esos cupos y avisa a cada paciente. Ausente o false: si hay citas, responde 409
+            con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no cierra.
+          default: false
       required:
         - exceptionType
         - slotIds
@@ -94455,6 +94467,12 @@ components:
         isAvailable:
           type: boolean
           description: true cuando la excepción **añade** disponibilidad extraordinaria
+          default: false
+        cancelAffectedBookings:
+          type: boolean
+          description: >-
+            true: cancela las citas del rato y avisa a cada paciente. Ausente o false: si hay citas, responde 422 con la
+            lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea.
           default: false
       required:
         - exceptionType

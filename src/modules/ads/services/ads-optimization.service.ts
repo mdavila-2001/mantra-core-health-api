@@ -817,7 +817,7 @@ export class AdsOptimizationService {
           destinationReference: form.destinationCrmPipelineId,
           attemptNumber: attempts + 1,
           // La creación del lead en CRM la resuelve el outbox: aquí sólo se
-          // encola el intento (ver README, sección Pendiente).
+          // encola el intento.
           resultConceptId: CONCEPTS.DELIVERY_QUEUED,
         });
         deliveryEventId = delivery.id;

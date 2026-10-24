@@ -3,7 +3,7 @@
   Fuente real: src/modules/crm/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `crm`
@@ -17,7 +17,7 @@
 
 Gestiona cuentas, contactos, equipos, leads, oportunidades, actividades, alianzas, casos y preferencias de contacto mediante `CrmController` bajo `/crm`.
 
-Los roles `CRM_ADMIN` y `CRM_AGENT` habilitan las operaciones según la ruta. El módulo debe resolver además el tenant y cada relación comercial en el servidor; esa comprobación está incompleta y se detalla en la [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/crm.md).
+Los roles `CRM_ADMIN` y `CRM_AGENT` habilitan las operaciones según la ruta. El módulo no resuelve por completo el tenant ni cada relación comercial en el servidor.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -93,4 +93,4 @@ Entidades (`tableName`, 32 de 32 archivos `*.entity.ts`): `account_contact_relat
 
 ## Pruebas
 
-`corepack yarn test src/modules/crm --runInBand --silent` aprobó 3 suites y 46 pruebas durante la revisión. Faltan escenarios de dos tenants y de pipeline/etapa cruzados.
+`corepack yarn test src/modules/crm --runInBand --silent` aprobó 3 suites y 46 pruebas durante la revisión. No cubren dos tenants ni pipeline/etapa cruzados.

@@ -1,3 +1,0 @@
-Test Suites: 29 passed, 29 total
-Tests:       285 passed, 285 total
-EXIT=0

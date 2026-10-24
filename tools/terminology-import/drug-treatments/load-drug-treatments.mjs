@@ -15,8 +15,8 @@
 // load-medicine-catalog.mjs). No actualiza filas existentes.
 //
 // Por defecto es DRY-RUN (plan y conteos, sin conexión). La carga real exige
-// `--apply` y el `.env` (DB_*). Ver la decisión pendiente en
-// docs/seed-research/drug-treatments.md antes de correrla contra una base compartida.
+// `--apply` y el `.env` (DB_*). Antes de correrla contra una base compartida, ver
+// §6 de docs/seed-research/drug-treatments.md (dónde viven estas afirmaciones en el modelo).
 //
 // Uso:
 //   node tools/terminology-import/drug-treatments/load-drug-treatments.mjs

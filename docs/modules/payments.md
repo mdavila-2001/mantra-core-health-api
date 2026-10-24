@@ -3,7 +3,7 @@
   Fuente real: src/modules/payments/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `payments`
@@ -102,8 +102,8 @@ reconciliation    -> registros del proveedor vs ledger; descuadres abren excepci
 ## Reglas de negocio
 
 - **Idempotencia del intent**: el servicio consulta por tenant y clave antes de crear. El índice
-  versionado actual es global sobre `idempotency_key`, por lo que la semántica entre tenants debe
-  acordarse antes de afirmarla como idempotencia por tenant; ver la [revisión de pagos](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/payments.md#pay-05--media--contrato-de-idempotencia-por-tenant-contradice-el-índice-único-global).
+  versionado actual es global sobre `idempotency_key`, así que no es una idempotencia por
+  tenant.
 - **Riesgo previo al cobro**: no se procesa una transacción sin evaluación de riesgo, y una
   decisión `DECLINE` bloquea el cobro.
 - **Un solo bloqueo de cambio vigente** por intent, y solo mientras está `pending`.
@@ -138,10 +138,7 @@ La pasada dirigida del 2026-10-05 ejecutó 7 suites y 104 tests con:
 `corepack yarn test src/modules/payments --runInBand --silent`. Son pruebas unitarias; faltan
 integración con PostgreSQL, RLS, carreras e integración real con proveedor.
 
-## Pendiente
+## Límites conocidos
 
-La proyección eventual vía `messaging.outbox_events` (read models, search, time series) queda
-para el módulo 35, que aún no está implementado. El callback verifica HMAC por conexión, pero
-todavía no consume la configuración de endpoint, ventana de replay y CIDR modelada en DDL; los
-flujos de payout tampoco ejecutan un adaptador de proveedor. El detalle y plan están en la
-[revisión de pagos](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/payments.md).
+El callback verifica HMAC por conexión, pero no consume la configuración de endpoint, ventana de
+replay y CIDR modelada en DDL. Los flujos de payout no ejecutan un adaptador de proveedor.

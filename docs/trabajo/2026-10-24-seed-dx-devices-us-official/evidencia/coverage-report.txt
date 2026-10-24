@@ -1,0 +1,1 @@
+Cobertura escrita en /home/user/mantra-core-health-api/docs/seed-research/diagnostic-devices-us.md

@@ -3,7 +3,7 @@
   Fuente real: src/modules/reporting/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `reporting`
@@ -143,25 +143,21 @@ parámetros de ejecución ni direcciones de destinatarios.
 `corepack yarn test src/modules/reporting --runInBand --silent` — 3 suites y 68 pruebas
 aprobadas durante la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real de la consulta**: este módulo gobierna el ciclo de vida de la corrida
-  (`queued → succeeded | failed`), pero no ejecuta SQL. El worker que lo hace llamará a
+  (`queued → succeeded | failed`), pero no ejecuta SQL. El worker que la ejecuta llama a
   `POST /executions/:id/snapshot` con el artefacto ya en el almacén.
 - **Cálculo del cron**: `next_run_at` se recibe en el alta y avanza por intervalo en el tick. La
   resolución de la expresión cron con su zona horaria pertenece al planificador, fuera de la
   transacción.
-- **Envío efectivo**: las distribuciones quedan en `pending`; marcarlas `sent` es de messaging
-  (módulo 35), consumiendo el outbox.
+- **Envío efectivo**: las distribuciones quedan en `pending`; marcarlas `sent` no es de este módulo.
 - **Consent-aware**: el caso de uso pide filtrar por consentimiento. La fuente declara
   `row_security_json` y la definición su permiso; aplicar el filtro pertenece a quien ejecuta la
   consulta.
 - **Limpieza por retención**: `expires_at` se fija en el snapshot; el barrido que borra artefactos
   vencidos pertenece al módulo de almacenamiento.
-- **Outbox**: `ReportPublished`, `ExecutionQueued`, `ReportDistributed` se emitirán cuando exista el
-  módulo 35.
 
 ## Revisión ALOVIDA
 
-Las rutas por UUID aún no comparan el tenant activo con definición, ejecución o programación;
-ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/reporting.md).
+Las rutas por UUID no comparan el tenant activo con definición, ejecución o programación.

@@ -39,12 +39,12 @@ Cada nombre corresponde a `src/worker-<nombre>.ts`; la tabla suma 24. `docker-co
 | `scripts/` | Utilidades de operación (poda de Docker, DDL, Postgres, benchmark de telemetría). |
 | `tools/` | Generadores y verificadores en Node/Python: catálogo ORM, documentación, OpenAPI, seeds, Postman. |
 | `openapi/`, `asyncapi/` | Contratos HTTP y de eventos generados. |
-| `docs/` | Documentación técnica (fuente del sitio MkDocs); los informes de proceso históricos están en [`docs/progress/archive/`](docs/progress/archive/). |
+| `docs/` | Documentación técnica (fuente del sitio MkDocs). |
 | `mock-provider-server/` | Emulador de proveedores externos para desarrollo; ver su [README](mock-provider-server/README.md). |
 | `structurizr/` | Modelo de arquitectura (`workspace.dsl`). |
 | `evidencias/` | Evidencia de merges y pruebas de ciclos anteriores. |
 
-En la raíz sólo quedan `README.md` y `AGENTS.md` (instrucciones para agentes) además de la configuración. El estado y los pendientes están en [`docs/progress/ESTADO-Y-PENDIENTES.md`](docs/progress/ESTADO-Y-PENDIENTES.md), el registro de defectos en [`docs/progress/REGISTRO-DEFECTOS.md`](docs/progress/REGISTRO-DEFECTOS.md), la trazabilidad en [`docs/governance/ALOVIDA-TRAZABILIDAD.md`](docs/governance/ALOVIDA-TRAZABILIDAD.md) y el informe de cobertura en [`docs/reports/ALOVIDA-COBERTURA.md`](docs/reports/ALOVIDA-COBERTURA.md) (lo regenera `corepack yarn alovida:coverage`).
+En la raíz sólo quedan `README.md` y `AGENTS.md` (instrucciones para agentes) además de la configuración. La trazabilidad está en [`docs/governance/ALOVIDA-TRAZABILIDAD.md`](docs/governance/ALOVIDA-TRAZABILIDAD.md) y el informe de cobertura, en [`docs/reports/ALOVIDA-COBERTURA.md`](docs/reports/ALOVIDA-COBERTURA.md) (lo regenera `corepack yarn alovida:coverage`).
 
 ## Requisitos y configuración local
 
@@ -89,4 +89,3 @@ La API y los workers tienen bootstrap de telemetría y pueden exportar trazas po
 - Imagen y stack: [`Dockerfile`](Dockerfile), [`docker-compose.yml`](docker-compose.yml), [`docker-compose.coolify.yml`](docker-compose.coolify.yml).
 - Despliegue, rollback, salud y mantenimiento: [operaciones](docs/operations/deployment.md) y [runbooks](docs/operations/runbooks/index.md).
 - Contratos: [`openapi/`](openapi/), [`asyncapi/`](asyncapi/) y sitio MkDocs (`mkdocs.yml`).
-- Hallazgos y plan de corrección: [revisión del backend](docs/revision-backend-2026-10-04/README.md).

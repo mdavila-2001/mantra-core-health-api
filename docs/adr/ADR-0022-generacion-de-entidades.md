@@ -1,9 +1,8 @@
 # ADR-0022: Generación de entidades — cuerpo desde el modelo, documentación en pasada aparte
 
 ## Estado
-Aceptado (2026-08-06, v4.0.10). Es el ADR que `orm-mapping-guide.md` §6 dejó
-explícitamente pendiente («Política de generación/regeneración de entidades ante
-cambios del modelo»).
+Aceptado (2026-08-06, v4.0.10). Responde a la pregunta que `orm-mapping-guide.md` §6
+dejó abierta («Política de generación/regeneración de entidades ante cambios del modelo»).
 
 ## Contexto
 

@@ -4,7 +4,7 @@ Contratos versionados de read model, materialized views, contratos de vista de
 frontend (portal, ruta, vista y sus hijos), preferencias de usuario y una
 proyección pública de directorio. La administración de contratos y las consultas
 públicas usan identificadores/columnas constantes o validadas; la proyección de
-datos autenticada todavía no ejecuta la materialized view ni pagina filas.
+datos autenticada no ejecuta la materialized view ni pagina filas.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -118,9 +118,8 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `frontend_page_views`,
   el estado genérico `ACTIVE` reutiliza `CONCEPTS.STATE_ACTIVE` transversal.
 - Auth: guard global; endpoints admin `@Roles('SECURITY_ADMIN')`; datos/acciones/
   preferencias con usuario autenticado; proyecciones públicas `@Public()`. Las
-  rutas de datos y acciones todavía no hacen cumplir `requiredPermissionId`,
-  audiencia, propósito, feature flag ni los contextos de tenant/paciente del
-  contrato; ver el informe de revisión.
+  rutas de datos y acciones no hacen cumplir `requiredPermissionId`, audiencia,
+  propósito, feature flag ni los contextos de tenant/paciente del contrato.
   `health` (UC-30-12) y `reconcile` (UC-30-07) suman `SYSTEM` al rol humano:
   el worker de reconciliación (Fase 4 del plan de corrección de workers)
   descubre definiciones `stale` por el primero y actúa con el segundo — mismo
@@ -137,5 +136,4 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `frontend_page_views`,
 
 La revisión de 2026-10-05 confirmó tres hallazgos altos: autorización omitida
 al servir contratos de vista, datos autenticados no materializados y errores de
-la MV pública convertidos en listas vacías. El plan y los casos de regresión
-están en [el informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/read_models.md).
+la MV pública convertidos en listas vacías.

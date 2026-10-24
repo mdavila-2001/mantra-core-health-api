@@ -1,2 +1,0 @@
-$ corepack yarn build
-exit=0

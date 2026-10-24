@@ -39,4 +39,4 @@ es también la estrategia de producción o solo de desarrollo/staging — no ver
 `docker-compose.yml`, `Dockerfile`, `src/worker/bootstrap.ts`.
 
 ## Plan de revisión
-Definir en Fase 14 si producción usa Docker Compose, un orquestador, o un servicio gestionado.
+Revisar si producción deja Docker Compose por un orquestador o un servicio gestionado.

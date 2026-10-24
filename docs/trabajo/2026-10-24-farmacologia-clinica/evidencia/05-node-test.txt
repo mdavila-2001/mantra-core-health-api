@@ -2,549 +2,651 @@ TAP version 13
 # Subtest: secciones: numeración QRD exacta y código de propiedad por clave
 ok 1 - secciones: numeración QRD exacta y código de propiedad por clave
   ---
-  duration_ms: 2.405138
+  duration_ms: 1.391927
   type: 'test'
   ...
 # Subtest: ATC: nivel y ancestros salen de la forma del código
 ok 2 - ATC: nivel y ancestros salen de la forma del código
   ---
-  duration_ms: 1.649459
+  duration_ms: 1.092273
   type: 'test'
   ...
 # Subtest: CIMA: agrupa por ATC 5 y elige una ficha por (VTM, vías) de forma determinista
 ok 3 - CIMA: agrupa por ATC 5 y elige una ficha por (VTM, vías) de forma determinista
   ---
-  duration_ms: 14.359024
+  duration_ms: 7.809642
   type: 'test'
   ...
 # Subtest: CIMA: las secciones son el texto literal de la ficha, con documento, versión y cita
 ok 4 - CIMA: las secciones son el texto literal de la ficha, con documento, versión y cita
   ---
-  duration_ms: 5.247004
+  duration_ms: 3.274943
   type: 'test'
   ...
 # Subtest: CIMA: reacciones adversas conservan las tablas celda a celda (frecuencia literal)
 ok 5 - CIMA: reacciones adversas conservan las tablas celda a celda (frecuencia literal)
   ---
-  duration_ms: 2.053036
+  duration_ms: 1.776525
   type: 'test'
   ...
 # Subtest: tablas: anidadas y celdas vacías no inventan contenido
 ok 6 - tablas: anidadas y celdas vacías no inventan contenido
   ---
-  duration_ms: 0.529368
+  duration_ms: 0.587217
   type: 'test'
   ...
 # Subtest: monografía: nombres ATC de la AEMPS; lo que ninguna fuente nombra queda en null
 ok 7 - monografía: nombres ATC de la AEMPS; lo que ninguna fuente nombra queda en null
   ---
-  duration_ms: 1.71224
+  duration_ms: 1.509408
   type: 'test'
   ...
 # Subtest: plan de carga: 5 niveles, IS_A al padre, ids estables y únicos
 ok 8 - plan de carga: 5 niveles, IS_A al padre, ids estables y únicos
   ---
-  duration_ms: 4.964045
+  duration_ms: 2.384905
   type: 'test'
   ...
 # Subtest: LINAME (archivo del repo): presentaciones por ATC 5 con su código y uso restringido
 ok 9 - LINAME (archivo del repo): presentaciones por ATC 5 con su código y uso restringido
   ---
-  duration_ms: 20.692693
+  duration_ms: 8.579328
+  type: 'test'
+  ...
+# Subtest: GSRS real: UNII, fracción activa de la sal y códigos WHO-ATC
+ok 10 - GSRS real: UNII, fracción activa de la sal y códigos WHO-ATC
+  ---
+  duration_ms: 1.990028
+  type: 'test'
+  ...
+# Subtest: enlace por código: sal → ATC del principio; combinación sólo con su combinación; series 50/70 de la OMS
+ok 11 - enlace por código: sal → ATC del principio; combinación sólo con su combinación; series 50/70 de la OMS
+  ---
+  duration_ms: 0.704182
+  type: 'test'
+  ...
+# Subtest: openFDA real: una fila por campo, texto = párrafos de la etiqueta, cita con set_id/versión/fecha
+ok 12 - openFDA real: una fila por campo, texto = párrafos de la etiqueta, cita con set_id/versión/fecha
+  ---
+  duration_ms: 7.074142
+  type: 'test'
+  ...
+# Subtest: openFDA real: referencia por conjunto exacto de UNII
+ok 13 - openFDA real: referencia por conjunto exacto de UNII
+  ---
+  duration_ms: 0.232127
+  type: 'test'
+  ...
+# Subtest: lector en streaming: objetos completos aunque el corte caiga dentro de strings, escapes y llaves
+ok 14 - lector en streaming: objetos completos aunque el corte caiga dentro de strings, escapes y llaves
+  ---
+  duration_ms: 6399.169346
   type: 'test'
   ...
 # Subtest: openFDA: fecha efectiva literal e identidad de la etiqueta
-ok 10 - openFDA: fecha efectiva literal e identidad de la etiqueta
+ok 15 - openFDA: fecha efectiva literal e identidad de la etiqueta
   ---
-  duration_ms: 1.888433
+  duration_ms: 1.193937
   type: 'test'
   ...
-# Subtest: openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; Rx antes que OTC
-ok 11 - openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; Rx antes que OTC
+# Subtest: openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; Rx antes que OTC dentro de cada vía
+ok 16 - openFDA: referencia por conjunto EXACTO de UNII y vía; la más reciente; Rx antes que OTC dentro de cada vía
   ---
-  duration_ms: 10.58197
+  duration_ms: 5.928509
   type: 'test'
   ...
 # Subtest: openFDA: una fila por campo, en inglés, sin unir campos distintos; campos no mapeados se ignoran
-ok 12 - openFDA: una fila por campo, en inglés, sin unir campos distintos; campos no mapeados se ignoran
+ok 17 - openFDA: una fila por campo, en inglés, sin unir campos distintos; campos no mapeados se ignoran
   ---
-  duration_ms: 3.687286
+  duration_ms: 2.287599
   type: 'test'
   ...
 # Subtest: RxNav: parsers defensivos — forma desconocida → vacío, nunca un código adivinado
-ok 13 - RxNav: parsers defensivos — forma desconocida → vacío, nunca un código adivinado
+ok 18 - RxNav: parsers defensivos — forma desconocida → vacío, nunca un código adivinado
   ---
-  duration_ms: 0.731873
+  duration_ms: 0.299052
   type: 'test'
   ...
 # Subtest: RxNav: un MIN se resuelve a sus IN; si a un ingrediente le falta UNII, el puente queda sin UNII
-ok 14 - RxNav: un MIN se resuelve a sus IN; si a un ingrediente le falta UNII, el puente queda sin UNII
+ok 19 - RxNav: un MIN se resuelve a sus IN; si a un ingrediente le falta UNII, el puente queda sin UNII
   ---
-  duration_ms: 0.511828
+  duration_ms: 0.424715
   type: 'test'
   ...
 # Subtest: pack-data: parte el NDJSON en trozos gzip bajo el tope sin perder ni reordenar filas
-ok 15 - pack-data: parte el NDJSON en trozos gzip bajo el tope sin perder ni reordenar filas
+ok 20 - pack-data: parte el NDJSON en trozos gzip bajo el tope sin perder ni reordenar filas
   ---
-  duration_ms: 11.023598
+  duration_ms: 5.445902
   type: 'test'
   ...
 # Subtest: cada sección lleva los seis campos de procedencia y el kind correcto
-ok 16 - cada sección lleva los seis campos de procedencia y el kind correcto
+ok 21 - cada sección lleva los seis campos de procedencia y el kind correcto
   ---
-  duration_ms: 14.857606
+  duration_ms: 12.0258
   type: 'test'
   ...
 # Subtest: la 4.3 publicada es LITERAL: las dos oraciones de la ficha, sin cambios
-ok 17 - la 4.3 publicada es LITERAL: las dos oraciones de la ficha, sin cambios
+ok 22 - la 4.3 publicada es LITERAL: las dos oraciones de la ficha, sin cambios
   ---
-  duration_ms: 4.832121
+  duration_ms: 2.337833
   type: 'test'
   ...
 # Subtest: 5.1 publica solo la línea «Grupo farmacoterapéutico», no el resto de la sección
-ok 18 - 5.1 publica solo la línea «Grupo farmacoterapéutico», no el resto de la sección
+ok 23 - 5.1 publica solo la línea «Grupo farmacoterapéutico», no el resto de la sección
   ---
-  duration_ms: 2.732169
+  duration_ms: 1.59213
   type: 'test'
   ...
-# Subtest: 4.4 se publica como special_populations con el título oficial en locator (decisión pendiente en GAPS)
-ok 19 - 4.4 se publica como special_populations con el título oficial en locator (decisión pendiente en GAPS)
+# Subtest: 4.4 se publica como special_populations con el título oficial en locator
+ok 24 - 4.4 se publica como special_populations con el título oficial en locator
   ---
-  duration_ms: 0.356231
+  duration_ms: 0.153319
   type: 'test'
   ...
 # Subtest: una sección sin fecha de la ficha no se publica (el aviso legal de AEMPS exige la fecha)
-ok 20 - una sección sin fecha de la ficha no se publica (el aviso legal de AEMPS exige la fecha)
+ok 25 - una sección sin fecha de la ficha no se publica (el aviso legal de AEMPS exige la fecha)
   ---
-  duration_ms: 0.636587
+  duration_ms: 0.201956
   type: 'test'
   ...
 # Subtest: una sección vacía o ausente en la fuente produce rechazo explícito, no texto de relleno
-ok 21 - una sección vacía o ausente en la fuente produce rechazo explícito, no texto de relleno
+ok 26 - una sección vacía o ausente en la fuente produce rechazo explícito, no texto de relleno
   ---
-  duration_ms: 0.252465
+  duration_ms: 0.090649
   type: 'test'
   ...
 # Subtest: idempotencia: la misma entrada produce exactamente la misma salida
-ok 22 - idempotencia: la misma entrada produce exactamente la misma salida
+ok 27 - idempotencia: la misma entrada produce exactamente la misma salida
   ---
-  duration_ms: 9.404503
+  duration_ms: 2.822897
   type: 'test'
   ...
 # Subtest: presentations lista formas y vías, sin nombres de presentación (llevan la concentración)
-ok 23 - presentations lista formas y vías, sin nombres de presentación (llevan la concentración)
+ok 28 - presentations lista formas y vías, sin nombres de presentación (llevan la concentración)
   ---
-  duration_ms: 2.723285
+  duration_ms: 2.101431
   type: 'test'
   ...
 # Subtest: imágenes de CIMA: máximo 4, hosts de la CSP, leyenda sin nombre comercial y alt genérico
-ok 24 - imágenes de CIMA: máximo 4, hosts de la CSP, leyenda sin nombre comercial y alt genérico
+ok 29 - imágenes de CIMA: máximo 4, hosts de la CSP, leyenda sin nombre comercial y alt genérico
   ---
-  duration_ms: 2.141127
+  duration_ms: 2.14131
   type: 'test'
   ...
 # Subtest: validateArticle: acepta el artículo real y rechaza violaciones del contrato
-ok 25 - validateArticle: acepta el artículo real y rechaza violaciones del contrato
+ok 30 - validateArticle: acepta el artículo real y rechaza violaciones del contrato
   ---
-  duration_ms: 7.350492
+  duration_ms: 3.634601
   type: 'test'
   ...
 # Subtest: htmlToLines une los saltos de línea del código fuente y separa párrafos y celdas
-ok 26 - htmlToLines une los saltos de línea del código fuente y separa párrafos y celdas
+ok 31 - htmlToLines une los saltos de línea del código fuente y separa párrafos y celdas
   ---
-  duration_ms: 0.56039
+  duration_ms: 0.262896
   type: 'test'
   ...
 # Subtest: fechas de la API: se cuentan en hora de Madrid, no en UTC
-ok 27 - fechas de la API: se cuentan en hora de Madrid, no en UTC
+ok 32 - fechas de la API: se cuentan en hora de Madrid, no en UTC
   ---
-  duration_ms: 1.670045
+  duration_ms: 0.146027
   type: 'test'
   ...
 # Subtest: artículo de una sustancia: descripción CC0, clase P2868 y facts con identificadores
-ok 28 - artículo de una sustancia: descripción CC0, clase P2868 y facts con identificadores
+ok 33 - artículo de una sustancia: descripción CC0, clase P2868 y facts con identificadores
   ---
-  duration_ms: 2.231184
+  duration_ms: 0.665891
   type: 'test'
   ...
 # Subtest: una sustancia sin descripción en castellano no recibe sección definition inventada
-ok 29 - una sustancia sin descripción en castellano no recibe sección definition inventada
+ok 34 - una sustancia sin descripción en castellano no recibe sección definition inventada
   ---
-  duration_ms: 0.860208
+  duration_ms: 0.386334
   type: 'test'
   ...
 # Subtest: un artículo limpio pasa (el código ATC «A11G» no es «11 g»)
-ok 30 - un artículo limpio pasa (el código ATC «A11G» no es «11 g»)
+ok 35 - un artículo limpio pasa (el código ATC «A11G» no es «11 g»)
   ---
-  duration_ms: 14.975407
+  duration_ms: 11.523762
   type: 'test'
   ...
 # Subtest: una dosis en el texto, en un fact o en rejected.ndjson hace fallar la auditoría
-ok 31 - una dosis en el texto, en un fact o en rejected.ndjson hace fallar la auditoría
+ok 36 - una dosis en el texto, en un fact o en rejected.ndjson hace fallar la auditoría
   ---
-  duration_ms: 14.23101
+  duration_ms: 10.40902
   type: 'test'
   ...
 # Subtest: una sección con locator 4.2 hace fallar la auditoría
-ok 32 - una sección con locator 4.2 hace fallar la auditoría
+ok 37 - una sección con locator 4.2 hace fallar la auditoría
   ---
-  duration_ms: 4.347267
+  duration_ms: 4.824036
   type: 'test'
   ...
 # Subtest: una imagen fuera de la CSP o con licencia NC hace fallar la auditoría
-ok 33 - una imagen fuera de la CSP o con licencia NC hace fallar la auditoría
+ok 38 - una imagen fuera de la CSP o con licencia NC hace fallar la auditoría
   ---
-  duration_ms: 6.129321
+  duration_ms: 6.110774
   type: 'test'
   ...
 # Subtest: cada patrón de dosis conocido se detecta
-ok 34 - cada patrón de dosis conocido se detecta
+ok 39 - cada patrón de dosis conocido se detecta
   ---
-  duration_ms: 7.324304
+  duration_ms: 4.937398
   type: 'test'
   ...
 # Subtest: texto sin dosis no se marca (códigos ATC, frecuencias MedDRA, remisiones a otras secciones)
-ok 35 - texto sin dosis no se marca (códigos ATC, frecuencias MedDRA, remisiones a otras secciones)
+ok 40 - texto sin dosis no se marca (códigos ATC, frecuencias MedDRA, remisiones a otras secciones)
   ---
-  duration_ms: 2.678563
+  duration_ms: 1.725554
   type: 'test'
   ...
 # Subtest: assertNoDose rechaza una dosis en cualquier campo de prosa del artículo
-ok 36 - assertNoDose rechaza una dosis en cualquier campo de prosa del artículo
+ok 41 - assertNoDose rechaza una dosis en cualquier campo de prosa del artículo
   ---
-  duration_ms: 1.141454
+  duration_ms: 0.650557
   type: 'test'
   ...
 # Subtest: validateArticle también corta una dosis aunque el resto del contrato esté bien
-ok 37 - validateArticle también corta una dosis aunque el resto del contrato esté bien
+ok 42 - validateArticle también corta una dosis aunque el resto del contrato esté bien
   ---
-  duration_ms: 4.615003
+  duration_ms: 3.940858
   type: 'test'
   ...
 # Subtest: cleanLines retira SOLO la oración con dosis y conserva el resto, literal
-ok 38 - cleanLines retira SOLO la oración con dosis y conserva el resto, literal
+ok 43 - cleanLines retira SOLO la oración con dosis y conserva el resto, literal
   ---
-  duration_ms: 1.184849
+  duration_ms: 0.879523
   type: 'test'
   ...
 # Subtest: sobre una respuesta real (4.4/4.8 de CIMA) la salida no contiene dosis y es literal
-ok 39 - sobre una respuesta real (4.4/4.8 de CIMA) la salida no contiene dosis y es literal
+ok 44 - sobre una respuesta real (4.4/4.8 de CIMA) la salida no contiene dosis y es literal
   ---
-  duration_ms: 4.192418
+  duration_ms: 2.556101
   type: 'test'
   ...
 # Subtest: splitSentences no corta abreviaturas en minúscula ni números de sección
-ok 40 - splitSentences no corta abreviaturas en minúscula ni números de sección
+ok 45 - splitSentences no corta abreviaturas en minúscula ni números de sección
   ---
-  duration_ms: 0.225144
+  duration_ms: 0.12088
   type: 'test'
   ...
 # Subtest: cleanLines retira una referencia a la 4.2 partida entre dos párrafos
-ok 41 - cleanLines retira una referencia a la 4.2 partida entre dos párrafos
+ok 46 - cleanLines retira una referencia a la 4.2 partida entre dos párrafos
   ---
-  duration_ms: 0.252703
+  duration_ms: 0.147156
   type: 'test'
   ...
 # Subtest: hosts: solo los tres de la CSP, por https
-ok 42 - hosts: solo los tres de la CSP, por https
+ok 47 - hosts: solo los tres de la CSP, por https
   ---
-  duration_ms: 1.164542
+  duration_ms: 1.606305
   type: 'test'
   ...
 # Subtest: licencias: admitidas y rechazadas
-ok 43 - licencias: admitidas y rechazadas
+ok 48 - licencias: admitidas y rechazadas
   ---
-  duration_ms: 0.777358
+  duration_ms: 1.302111
   type: 'test'
   ...
 # Subtest: licenseUrlFor arma la URL de CC solo con versión explícita
-ok 44 - licenseUrlFor arma la URL de CC solo con versión explícita
+ok 49 - licenseUrlFor arma la URL de CC solo con versión explícita
   ---
-  duration_ms: 0.256389
+  duration_ms: 0.364556
   type: 'test'
   ...
 # Subtest: filas reales de Commons: dominio público y CC BY-SA entran; «No restrictions» y CC BY sin autor, no
-ok 45 - filas reales de Commons: dominio público y CC BY-SA entran; «No restrictions» y CC BY sin autor, no
+ok 50 - filas reales de Commons: dominio público y CC BY-SA entran; «No restrictions» y CC BY sin autor, no
   ---
-  duration_ms: 0.920132
+  duration_ms: 0.72805
   type: 'test'
   ...
 # Subtest: 1 petición por segundo como máximo y User-Agent identificable
-ok 46 - 1 petición por segundo como máximo y User-Agent identificable
+ok 51 - 1 petición por segundo como máximo y User-Agent identificable
   ---
-  duration_ms: 36.229253
+  duration_ms: 29.483704
   type: 'test'
   ...
 # Subtest: reintenta con retroceso ante 429 (respeta Retry-After) y ante 5xx
-ok 47 - reintenta con retroceso ante 429 (respeta Retry-After) y ante 5xx
+ok 52 - reintenta con retroceso ante 429 (respeta Retry-After) y ante 5xx
   ---
-  duration_ms: 1.120818
+  duration_ms: 1.057477
   type: 'test'
   ...
 # Subtest: se rinde tras maxRetries con un error explícito
-ok 48 - se rinde tras maxRetries con un error explícito
+ok 53 - se rinde tras maxRetries con un error explícito
   ---
-  duration_ms: 1.489705
+  duration_ms: 1.268105
   type: 'test'
   ...
 # Subtest: caché en disco: la segunda lectura no hace petición; un 404 se guarda como null
-ok 49 - caché en disco: la segunda lectura no hace petición; un 404 se guarda como null
+ok 54 - caché en disco: la segunda lectura no hace petición; un 404 se guarda como null
   ---
-  duration_ms: 4.052645
+  duration_ms: 3.15831
   type: 'test'
   ...
 # Subtest: lee la fecha SOLO si el documento la escribe
-ok 50 - lee la fecha SOLO si el documento la escribe
+ok 55 - lee la fecha SOLO si el documento la escribe
   ---
-  duration_ms: 2.546871
+  duration_ms: 3.750838
   type: 'test'
   ...
 # Subtest: la lista blanca no contiene la 4.2 ni variantes
-ok 51 - la lista blanca no contiene la 4.2 ni variantes
+ok 56 - la lista blanca no contiene la 4.2 ni variantes
   ---
-  duration_ms: 2.022978
+  duration_ms: 3.17429
   type: 'test'
   ...
 # Subtest: no existe forma de armar la URL de la 4.2: ni el endpoint, ni el enlace público, ni la ruta de caché
-ok 52 - no existe forma de armar la URL de la 4.2: ni el endpoint, ni el enlace público, ni la ruta de caché
+ok 57 - no existe forma de armar la URL de la 4.2: ni el endpoint, ni el enlace público, ni la ruta de caché
   ---
-  duration_ms: 0.778369
+  duration_ms: 1.270895
   type: 'test'
   ...
 # Subtest: buildCimaSection rechaza pedir la 4.2 aunque la respuesta la traiga
-ok 53 - buildCimaSection rechaza pedir la 4.2 aunque la respuesta la traiga
+ok 58 - buildCimaSection rechaza pedir la 4.2 aunque la respuesta la traiga
   ---
-  duration_ms: 0.500101
+  duration_ms: 0.454158
   type: 'test'
   ...
 # Subtest: una respuesta que mezcla 4.3 y 4.2 solo publica la 4.3
-ok 54 - una respuesta que mezcla 4.3 y 4.2 solo publica la 4.3
+ok 59 - una respuesta que mezcla 4.3 y 4.2 solo publica la 4.3
   ---
-  duration_ms: 5.53
+  duration_ms: 7.048923
   type: 'test'
   ...
 # Subtest: un mapa de secciones con una «4.2» inyectada NO aparece en la salida del artículo
-ok 55 - un mapa de secciones con una «4.2» inyectada NO aparece en la salida del artículo
+ok 60 - un mapa de secciones con una «4.2» inyectada NO aparece en la salida del artículo
   ---
-  duration_ms: 5.200043
+  duration_ms: 6.85172
   type: 'test'
   ...
 # Subtest: slimVtm descarta drugFacts.sections (donde el importador anterior dejó la 4.2)
-ok 56 - slimVtm descarta drugFacts.sections (donde el importador anterior dejó la 4.2)
+ok 61 - slimVtm descarta drugFacts.sections (donde el importador anterior dejó la 4.2)
   ---
-  duration_ms: 0.335106
+  duration_ms: 0.404066
   type: 'test'
   ...
 # Subtest: deterministicId replica exacta de src/common/constants/concepts.ts
-ok 57 - deterministicId replica exacta de src/common/constants/concepts.ts
+ok 62 - deterministicId replica exacta de src/common/constants/concepts.ts
   ---
-  duration_ms: 0.932917
+  duration_ms: 1.237395
   type: 'test'
   ...
 # Subtest: md5uuid equivale a md5(key)::uuid de Postgres
-ok 58 - md5uuid equivale a md5(key)::uuid de Postgres
+ok 63 - md5uuid equivale a md5(key)::uuid de Postgres
   ---
-  duration_ms: 0.217866
+  duration_ms: 0.40243
   type: 'test'
   ...
 # Subtest: slugify y htmlToText
-ok 59 - slugify y htmlToText
+ok 64 - slugify y htmlToText
   ---
-  duration_ms: 1.051508
+  duration_ms: 1.084138
   type: 'test'
   ...
 # Subtest: CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
-ok 60 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
+ok 65 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
   ---
-  duration_ms: 3.793236
+  duration_ms: 3.592008
   type: 'test'
   ...
 # Subtest: CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
-ok 61 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
+ok 66 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
   ---
-  duration_ms: 0.992885
+  duration_ms: 0.801899
   type: 'test'
   ...
 # Subtest: taxonomías: ATC, capítulos y grupos MedlinePlus
-ok 62 - taxonomías: ATC, capítulos y grupos MedlinePlus
+ok 67 - taxonomías: ATC, capítulos y grupos MedlinePlus
   ---
-  duration_ms: 0.304276
+  duration_ms: 0.353308
   type: 'test'
   ...
 # Subtest: CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
-ok 63 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
+ok 68 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
   ---
-  duration_ms: 8.907082
+  duration_ms: 9.947601
   type: 'test'
   ...
 # Subtest: MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
-ok 64 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
+ok 69 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
   ---
-  duration_ms: 2.854955
+  duration_ms: 2.509589
   type: 'test'
   ...
 # Subtest: MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
-ok 65 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
+ok 70 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
   ---
-  duration_ms: 3.882274
+  duration_ms: 3.345824
   type: 'test'
   ...
 # Subtest: Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
-ok 66 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
+ok 71 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
   ---
-  duration_ms: 1.243724
+  duration_ms: 1.364668
   type: 'test'
   ...
 # Subtest: LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
-ok 67 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
+ok 72 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
   ---
-  duration_ms: 1.41814
+  duration_ms: 1.488302
   type: 'test'
   ...
 # Subtest: plan de carga: membresías a los value sets del glosario con los ids del backend
-ok 68 - plan de carga: membresías a los value sets del glosario con los ids del backend
+ok 73 - plan de carga: membresías a los value sets del glosario con los ids del backend
   ---
-  duration_ms: 1.173395
+  duration_ms: 1.414985
   type: 'test'
   ...
 # Subtest: Anatomía Wikidata: verificación de dominio y de ids de propiedad
-ok 69 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
+ok 74 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
   ---
-  duration_ms: 1.646284
+  duration_ms: 1.288153
   type: 'test'
   ...
 # Subtest: Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
-ok 70 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
+ok 75 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
   ---
-  duration_ms: 0.725427
+  duration_ms: 0.794958
   type: 'test'
   ...
 # Subtest: Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
-ok 71 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
+ok 76 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
   ---
-  duration_ms: 1.595155
+  duration_ms: 1.578644
   type: 'test'
   ...
 # Subtest: Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
-ok 72 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
+ok 77 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
   ---
-  duration_ms: 0.326157
+  duration_ms: 0.42041
   type: 'test'
   ...
 # Subtest: CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
-ok 73 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
+ok 78 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
   ---
-  duration_ms: 0.421242
+  duration_ms: 0.577365
   type: 'test'
   ...
 # Subtest: Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
-ok 74 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
+ok 79 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
   ---
-  duration_ms: 0.521433
+  duration_ms: 0.561688
   type: 'test'
   ...
 # Subtest: Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
-ok 75 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
+ok 80 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
   ---
-  duration_ms: 0.941122
+  duration_ms: 1.865123
   type: 'test'
   ...
 # Subtest: INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
-ok 76 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
+ok 81 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
   ---
-  duration_ms: 4.504612
+  duration_ms: 3.545731
+  type: 'test'
+  ...
+# Subtest: HL7 THO v2-0487 (recorte real): verbatim, deprecado no seleccionable, procedencia completa
+ok 82 - HL7 THO v2-0487 (recorte real): verbatim, deprecado no seleccionable, procedencia completa
+  ---
+  duration_ms: 2.290164
+  type: 'test'
+  ...
+# Subtest: UCUM (recortes reales): une ucum-lhc y ucum-common por código, sin inventar nombres
+ok 83 - UCUM (recortes reales): une ucum-lhc y ucum-common por código, sin inventar nombres
+  ---
+  duration_ms: 1.175972
+  type: 'test'
+  ...
+# Subtest: LOINC (CSV SINTÉTICO): dominios, exclusiones, miembros de panel, variante ES
+ok 84 - LOINC (CSV SINTÉTICO): dominios, exclusiones, miembros de panel, variante ES
+  ---
+  duration_ms: 2.440108
+  type: 'test'
+  ...
+# Subtest: LOINC: cabeceras ausentes abortan mostrando las reales
+ok 85 - LOINC: cabeceras ausentes abortan mostrando las reales
+  ---
+  duration_ms: 0.591188
+  type: 'test'
+  ...
+# Subtest: LOINC: ids y property_code idénticos a import-loinc.mjs (enriquece, no duplica)
+ok 86 - LOINC: ids y property_code idénticos a import-loinc.mjs (enriquece, no duplica)
+  ---
+  duration_ms: 1.237954
+  type: 'test'
+  ...
+# Subtest: dominios: reglas por CLASS/CLASSTYPE; lo no reconocido queda sin dominio
+ok 87 - dominios: reglas por CLASS/CLASSTYPE; lo no reconocido queda sin dominio
+  ---
+  duration_ms: 0.353093
+  type: 'test'
+  ...
+# Subtest: plan de carga: relaciones dentro del plan, value sets y conteos deterministas
+ok 88 - plan de carga: relaciones dentro del plan, value sets y conteos deterministas
+  ---
+  duration_ms: 3.149902
+  type: 'test'
+  ...
+# Subtest: FONASA MLE (recorte real): prefijos homogéneos, exclusión terapéutica explícita, nombre oficial verbatim
+ok 89 - FONASA MLE (recorte real): prefijos homogéneos, exclusión terapéutica explícita, nombre oficial verbatim
+  ---
+  duration_ms: 1.187909
+  type: 'test'
+  ...
+# Subtest: SIGTAP (recorte real): sólo grupo 02, categoría con nombres oficiales, genética gana a laboratorio
+ok 90 - SIGTAP (recorte real): sólo grupo 02, categoría con nombres oficiales, genética gana a laboratorio
+  ---
+  duration_ms: 0.835802
+  type: 'test'
+  ...
+# Subtest: TUSS (recorte real): 4.03 laboratorio; 4.08.13 y 40502210 excluidos; consultas fuera
+ok 91 - TUSS (recorte real): 4.03 laboratorio; 4.08.13 y 40502210 excluidos; consultas fuera
+  ---
+  duration_ms: 0.704307
+  type: 'test'
+  ...
+# Subtest: PAMI (recorte real): código rellenado a 6 dígitos; 77621 es capítulo 07, no laboratorio
+ok 92 - PAMI (recorte real): código rellenado a 6 dígitos; 77621 es capítulo 07, no laboratorio
+  ---
+  duration_ms: 0.357025
+  type: 'test'
+  ...
+# Subtest: ICD-10-PCS (recorte real): B imagen, C1 imagen, C7 terapia fuera, 4A y F0 evaluaciones funcionales
+ok 93 - ICD-10-PCS (recorte real): B imagen, C1 imagen, C7 terapia fuera, 4A y F0 evaluaciones funcionales
+  ---
+  duration_ms: 0.572609
   type: 'test'
   ...
 # Subtest: CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
-ok 77 - CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
+ok 94 - CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
   ---
-  duration_ms: 2.232418
+  duration_ms: 2.280272
   type: 'test'
   ...
 # Subtest: CIMA: revocado o suspendido no es seleccionable
-ok 78 - CIMA: revocado o suspendido no es seleccionable
+ok 95 - CIMA: revocado o suspendido no es seleccionable
   ---
-  duration_ms: 0.405553
+  duration_ms: 0.433998
   type: 'test'
   ...
 # Subtest: CIMA: lo que la fuente no declara queda en null
-ok 79 - CIMA: lo que la fuente no declara queda en null
+ok 96 - CIMA: lo que la fuente no declara queda en null
   ---
-  duration_ms: 0.147537
+  duration_ms: 0.151792
   type: 'test'
   ...
 # Subtest: ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
-ok 80 - ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
+ok 97 - ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
   ---
-  duration_ms: 0.577963
+  duration_ms: 0.38628
   type: 'test'
   ...
 # Subtest: ANVISA: una fila sin nº de registro no tiene identidad y se descarta
-ok 81 - ANVISA: una fila sin nº de registro no tiene identidad y se descarta
+ok 98 - ANVISA: una fila sin nº de registro no tiene identidad y se descarta
   ---
-  duration_ms: 0.178714
+  duration_ms: 0.160657
   type: 'test'
   ...
 # Subtest: INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
-ok 82 - INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
+ok 99 - INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
   ---
-  duration_ms: 0.365541
+  duration_ms: 0.408879
   type: 'test'
   ...
 # Subtest: INVIMA: la muestra médica no entra como presentación vendible
-ok 83 - INVIMA: la muestra médica no entra como presentación vendible
+ok 100 - INVIMA: la muestra médica no entra como presentación vendible
   ---
-  duration_ms: 0.202583
+  duration_ms: 0.294322
   type: 'test'
   ...
 # Subtest: ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
-ok 84 - ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
+ok 101 - ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
   ---
-  duration_ms: 0.202165
+  duration_ms: 0.186709
   type: 'test'
   ...
 # Subtest: ATC: sólo nivel 5 exacto
-ok 85 - ATC: sólo nivel 5 exacto
+ok 102 - ATC: sólo nivel 5 exacto
   ---
-  duration_ms: 0.305746
+  duration_ms: 0.332231
   type: 'test'
   ...
 # Subtest: CSV: comillas, comillas escapadas, saltos de línea y BOM
-ok 86 - CSV: comillas, comillas escapadas, saltos de línea y BOM
+ok 103 - CSV: comillas, comillas escapadas, saltos de línea y BOM
   ---
-  duration_ms: 0.603243
+  duration_ms: 0.643126
   type: 'test'
   ...
 # Subtest: plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
-ok 87 - plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
+ok 104 - plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
   ---
-  duration_ms: 0.805411
+  duration_ms: 0.715081
   type: 'test'
   ...
 # Subtest: plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
-ok 88 - plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
+ok 105 - plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
   ---
-  duration_ms: 0.726677
+  duration_ms: 0.634497
   type: 'test'
   ...
 # Subtest: propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
-ok 89 - propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
+ok 106 - propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
   ---
-  duration_ms: 0.677869
+  duration_ms: 0.365902
   type: 'test'
   ...
 # Subtest: plan de carga: un code system sin definición falla en voz alta
-ok 90 - plan de carga: un code system sin definición falla en voz alta
+ok 107 - plan de carga: un code system sin definición falla en voz alta
   ---
-  duration_ms: 0.557808
+  duration_ms: 0.57358
   type: 'test'
   ...
-1..90
-# tests 90
+1..107
+# tests 107
 # suites 0
-# pass 90
+# pass 107
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 482.257779
+# duration_ms 6503.233057

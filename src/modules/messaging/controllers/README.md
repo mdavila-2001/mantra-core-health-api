@@ -58,7 +58,7 @@ solicitud de notificación (05, 10). `USER` sólo en 13, y el servicio comprueba
 notificación sea suya.
 
 `/webhooks/providers/:providerCode/receipts` es `@Public()`: quien llama es un proveedor externo sin
-sesión. La verificación de firma está pendiente (ver README del módulo).
+sesión. La ruta verifica la firma HMAC antes de conciliar (ver README del módulo).
 
 ## Pruebas
 

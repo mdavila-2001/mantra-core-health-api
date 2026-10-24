@@ -3,7 +3,7 @@
   Fuente real: src/modules/diagnostic_units/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `diagnostic_units`
@@ -120,9 +120,8 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
 Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
 activo y nunca reciben `tenantId` del cliente; los comandos requieren rol
 `SECURITY_ADMIN` (`@Roles('SECURITY_ADMIN')`) y `@CurrentUser()` como actor.
-Los identificadores de ruta se validan con `ParseUUIDPipe`. Los comandos todavía
-no comparan el tenant activo contra los recursos cargados por UUID; ver la
-[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/diagnostic_units.md).
+Los identificadores de ruta se validan con `ParseUUIDPipe`. Los comandos no
+comparan el tenant activo contra los recursos cargados por UUID.
 
 ## Conceptos
 

@@ -1,9 +1,0 @@
-  anvisa-produtos.ndjson.gz: 93770 filas, 9.0 MB
-  anvisa-produtos-modelos.ndjson.gz: 1027762 filas, 44.7 MB
-  pmda-approvals.ndjson.gz: 35298 filas, 2.7 MB
-  hc-mdall-0001.ndjson.gz: 1853405 filas, 47.2 MB
-  hc-mdall-0002.ndjson.gz: 479831 filas, 13.5 MB
-  tga-daen.ndjson.gz: 18917 filas, 1.1 MB
-  cdsco-import-licences.ndjson.gz: 25792 filas, 7.4 MB
-OK: 3534775 filas en 7 archivos, 0 errores
-exit 0

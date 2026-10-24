@@ -12,7 +12,7 @@
    internos, y `mkdocs build --strict`.
 3. El revisor humano confirma que la casilla marcada corresponde al cambio real — CI verifica
    *que* la documentación es válida, no *que* sea la documentación correcta para el cambio.
-4. `.github/CODEOWNERS` (ver [ownership](ownership.md), con marcadores pendientes de completar)
+4. `.github/CODEOWNERS` (ver [ownership](ownership.md); sus entradas son marcadores sin equipos reales)
    determina qué área debe revisar cambios en zonas críticas (autorización, datos, contrato de
    API).
 

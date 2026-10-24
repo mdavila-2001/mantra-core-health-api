@@ -93,7 +93,7 @@ no pasan por esta capa:
 
 | # | Riesgo | Gravedad | Estado |
 |---|---|---|---|
-| 1 | La aplicación opera como superusuario con `BYPASSRLS`; el RLS de 288 tablas no aplica | Alta | Roles sin privilegio creados y verificados; **falta activarlos en un despliegue** |
+| 1 | La aplicación opera como superusuario con `BYPASSRLS`; el RLS de 288 tablas no aplica | Alta | Roles sin privilegio creados y verificados; **no activados en ningún despliegue** |
 | 2 | Lecturas y escrituras comparten conexión y credencial | Media | Enrutado disponible; separación no activada |
 | 3 | 257 servicios acoplados a `EntityManager` | Media | 1 módulo migrado (piloto) |
 | 4 | Errores del driver expuestos a la capa de aplicación | Media | Resuelto en la ruta nueva |
@@ -101,5 +101,5 @@ no pasan por esta capa:
 | 6 | Sin conexión administrativa separada del runtime | Media | Soportada vía `POSTGRES_ADMIN_URL`; no configurada |
 
 Los estados de esta tabla describen lo que hay hoy en el repositorio, no lo que hay en producción.
-Los puntos 1 y 2 dependen de una decisión operativa —fijar `DB_READ_USER` y cambiar el usuario de
-runtime— que todavía no se ha tomado.
+Los puntos 1 y 2 dependen de una decisión operativa: fijar `DB_READ_USER` y cambiar el usuario de
+runtime.

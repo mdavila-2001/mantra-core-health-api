@@ -50,9 +50,9 @@ decisiones; revocar un consentimiento o una relación asistencial debe invalidar
 ## Aislamiento por tenant
 
 `TenantContextInterceptor` (`src/common/tenant/tenant-context.interceptor.ts`) — único interceptor
-del sistema — fija el tenant activo para la request/transacción. La aplicación real de Row-Level
-Security (`RLS_ENFORCE`) es una verificación operativa pendiente por entorno, no solo una
-propiedad del código — ver `SEC-001` en `docs/governance/traceability-matrix.md`.
+del sistema — fija el tenant activo para la request/transacción. Que Row-Level Security
+(`RLS_ENFORCE`) esté activo depende de la configuración de cada entorno, no sólo del código — ver
+[aislamiento por tenant](../security/tenant-isolation.md).
 
 ### Prácticas visibles para un `PRACTITIONER`
 

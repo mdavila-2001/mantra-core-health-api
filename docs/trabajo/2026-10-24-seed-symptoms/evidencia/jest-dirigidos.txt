@@ -1,4 +1,0 @@
-$ corepack yarn test src/common/seed/glossary-seed.service.spec.ts src/modules/terminology/repositories/concept-relationships.repository.spec.ts
-Test Suites: 2 passed, 2 total
-Tests:       17 passed, 17 total
-exit=0

@@ -9,8 +9,8 @@ ocurre, cómo se reproduce y qué lo contiene hoy.
 - **Criticidad** = impacto × probabilidad, evaluada sobre el sistema *después*
   del hardening. Un riesgo crítico con mitigación ✅ sigue siendo crítico: el
   control puede fallar o retirarse.
-- **Estado**: ✅ mitigado y verificado por prueba · 🟡 mitigado, pendiente de
-  validar en entorno real · 🔵 abierto, requiere decisión o insumo externo.
+- **Estado**: ✅ mitigado y verificado por prueba · 🟡 mitigado, sin validar en
+  entorno real · 🔵 sin mitigar: depende de una decisión o de un insumo externo.
 
 ## Índice por criticidad
 
@@ -167,7 +167,7 @@ ocurre, cómo se reproduce y qué lo contiene hoy.
 | **Criticidad** | **Alta** |
 | **Cómo detectarlo** | `503 DEPENDENCY_UNAVAILABLE` con mensaje de saturación (antes era un `500` opaco). |
 | **Prevención** | El mamparo de `SystemApiClient` acota la concurrencia que 20 workers pueden imponer a la API, y con ella la que la API impone a la base. R-01 elimina la multiplicación por solapamiento. ✅ |
-| **Pendiente** 🟡 | El pool de MikroORM no declara `min`/`max` explícitos: hoy vale el default del driver. Dimensionarlo requiere una medición de carga real que este repositorio no tiene. Ver [06-checklists.md](06-checklists.md). |
+| **Límite** 🟡 | El pool de MikroORM no declara `min`/`max` explícitos: hoy vale el default del driver. Dimensionarlo requiere una medición de carga real que este repositorio no tiene. Ver [06-checklists.md](06-checklists.md). |
 
 ---
 
@@ -206,7 +206,7 @@ ocurre, cómo se reproduce y qué lo contiene hoy.
 | **Descripción** | Un mensaje cuyo procesamiento falla siempre por su propio contenido: bloquea la cola o consume reintentos indefinidamente. |
 | **Impacto** | Cola detenida o trabajo repetido sin fin. |
 | **Criticidad** | **Alta** |
-| **Estado** 🟡 | **Parcialmente cubierto de antes.** El sistema ya tenía cola de mensajes muertos (`messaging.dead_letter_jobs`, `cross_store_consistency.projection_dead_letters`) y contador de agotamiento en el relevo del outbox (`exhausted`). El hardening añade que el fallo del elemento no aborte el lote (modo anidado de `runTick`), pero **no** se auditó en esta pasada si los 30 jobs agotan correctamente sus reintentos ni si las DLQ tienen un procedimiento de reproceso documentado. Es el primer candidato para la siguiente iteración. |
+| **Estado** 🟡 | **Parcialmente cubierto de antes.** El sistema ya tenía cola de mensajes muertos (`messaging.dead_letter_jobs`, `cross_store_consistency.projection_dead_letters`) y contador de agotamiento en el relevo del outbox (`exhausted`). El hardening añade que el fallo del elemento no aborte el lote (modo anidado de `runTick`), pero **no** se auditó en esta pasada si los 30 jobs agotan correctamente sus reintentos ni si las DLQ tienen un procedimiento de reproceso documentado. |
 
 ---
 
@@ -319,5 +319,4 @@ El descarte de ticks solapados (R-01) convierte una degradación en pérdida de
 frecuencia, que es lo correcto. Pero si el descarte se sostiene, el sistema está
 procesando menos de lo que debería y **eso no es visible sin mirar el contador**.
 
-`skipped` está en `GET :9100/status`. Falta la alerta, por el mismo motivo que
-R-17.
+`skipped` está en `GET :9100/status`, sin alerta, por el mismo motivo que R-17.

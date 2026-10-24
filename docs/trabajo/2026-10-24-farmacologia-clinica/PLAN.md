@@ -31,18 +31,20 @@
 ## H2 — Importador
 **CA:** Dado lo descargado, cuando se corre build + load, entonces quedan monografías literales con procedencia, y la segunda carga inserta 0.
 **DoD:** `node --test …/clinical-pharmacology/test/*.test.mjs` verde + carga doble en Postgres desechable.
-**Estado:** A MEDIAS (fetchers sin correr: red bloqueada)
+**Estado:** A MEDIAS (CIMA y RxNav siguen bloqueados; openFDA + GSRS corridos el 2026-10-24 15:xx UTC)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H2.S1.M1 | Catálogo de secciones + extracción literal (texto, tablas) | Texto = `htmlToText` de la fuente; tablas celda a celda | test «las secciones son el texto literal…» verde | HECHO |
 | H2.S1.M2 | Normalizador CIMA (referencia determinista, cita) | Con fixture real 15419, cita con nº reg., sección y versión | tests CIMA verdes | HECHO |
-| H2.S1.M3 | Normalizador openFDA | Con una partición REAL, secciones por campo con set_id/versión | test con partición real | A MEDIAS |
+| H2.S1.M3 | Normalizador openFDA | Con una partición REAL, secciones por campo con set_id/versión | `test/gsrs-openfda-real.test.mjs` verde | HECHO |
 | H2.S1.M4 | Parsers RxNav | Con respuestas REALES, ATC 5 → RxCUI → UNII | test con respuestas reales | A MEDIAS |
 | H2.S1.M5 | Monografía + plan de carga | 5 niveles, IS_A, ids estables y únicos | test «plan de carga» verde | HECHO |
+| H2.S1.M6 | Puente GSRS (UNII → fracción activa → WHO-ATC) + lector en streaming | Con sustancias reales: sal → ATC del principio; combinación sólo con su combinación; streaming sin perder objetos | `test/gsrs-openfda-real.test.mjs` verde | HECHO |
 | H2.S2.M1 | `fetch-cima.mjs` | Baja fichas completas de todas las referencias | correrlo → `fetch.meta.json` | BLOQUEADO |
 | H2.S2.M2 | `fetch-rxnorm.mjs` | Baja el puente de cada ATC 5 del universo | correrlo → `fetch.meta.json` | BLOQUEADO |
-| H2.S2.M3 | `fetch-openfda.mjs` | Baja todas las particiones con sha256 | correrlo → `fetch.meta.json` | BLOQUEADO |
+| H2.S2.M3 | `fetch-openfda.mjs` | Baja todas las particiones con sha256 | `NODE_USE_ENV_PROXY=1 node fetch-openfda.mjs` → 14/14 particiones | HECHO |
+| H2.S2.M4 | `fetch-gsrs.mjs` | Baja y normaliza las sustancias GSRS | → 167 385 registros = declarados | HECHO |
 | H2.S3.M1 | `build-monographs.mjs` | Arma monografías desde la caché, sin red | `node build-monographs.mjs` exit 0 | HECHO |
 | H2.S3.M2 | `load-clinical-pharmacology.mjs` idempotente | 2.ª carga: 0 nuevas, 0 borradas | evidencia/06 | HECHO |
 | H2.S3.M3 | `coverage-report.mjs` | Informe por nivel ATC, fuente, catálogo y huecos | evidencia/02 | HECHO |
@@ -58,7 +60,8 @@
 |---|---|---|---|---|
 | H3.S1.M1 | Pasada 0: fuentes del repo | Universo medido | evidencia/01 | HECHO |
 | H3.S1.M2 | Pasada 1: CIMA | ATC 5 y secciones nuevas medidas | fila en el registro | BLOQUEADO |
-| H3.S1.M3 | Pasada 2: RxNav + openFDA | Ídem | fila en el registro | BLOQUEADO |
+| H3.S1.M3 | Pasada 1: openFDA + GSRS | ATC 5 y secciones nuevas medidas | evidencia/13–14: 1 033 monografías, 18 853 secciones | HECHO |
+| H3.S1.M5 | Pasada: RxNav (destraba las etiquetas ambiguas) | Ídem | fila en el registro | BLOQUEADO |
 | H3.S1.M4 | Pasadas 3–6 (CIMA exhaustiva, DailyMed, EMA/FTN, maestra) | Dos ceros seguidos | filas en el registro | BLOQUEADO |
 | H3.S2.M1 | Validar enlace con `seed-drug-treatments`/`seed-diseases` | `validate-links` sobre sus datos | evidencia | BLOQUEADO |
 

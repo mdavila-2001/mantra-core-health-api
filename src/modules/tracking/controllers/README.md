@@ -26,7 +26,7 @@ cumplimiento, y quien opera no debería poder cambiar la vara con la que se le m
 `POST /tracking/webhooks/carriers/:carrierCode` es `@Public()`: el transportista es un tercero sin
 sesión en el sistema. Su identidad se acredita con el código de la ruta —que debe existir como
 transportista registrado— y, cuando el conector de integraciones lo aporte, con la firma del
-proveedor (ver *Pendiente* del módulo).
+proveedor (ver *Fuera de este módulo* en el README del módulo).
 
 Es también el único método del controlador que no recibe `@CurrentUser()`: no hay actor.
 

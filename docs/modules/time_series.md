@@ -3,7 +3,7 @@
   Fuente real: src/modules/time_series/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `time_series`
@@ -228,21 +228,17 @@ aprobadas durante la revisión.
   ejecuta el descarte con la ventana recibida y lo registra; la política vigente no se guarda porque
   no hay dónde.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Tabla de catálogo de políticas** de retención y compresión: no existe en el modelo, así que hoy
-  cada llamada lleva su umbral. Cuando se declare, estos endpoints pasarían a leerla en vez de
-  recibirla.
+- **Tabla de catálogo de políticas** de retención y compresión: no existe en el modelo, así que cada
+  llamada lleva su umbral.
 - **Definición de los agregados continuos en el modelo**: `continuous_sli_hourly`,
-  `continuous_sli_daily` y `continuous_audit_daily` sólo están descritos en el texto del caso de uso.
-  Aquí viven en `ROLLUPS`, dentro del módulo. Si el modelo los declara como objetos, esa constante
-  sobra.
+  `continuous_sli_daily` y `continuous_audit_daily` sólo están descritos en el texto del caso de uso;
+  aquí viven en `ROLLUPS`, dentro del módulo.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-58-01, 05, 12): aquí lo
-  cubren las claves naturales y la clave de idempotencia del outbox. Ese esquema es del módulo 56,
-  **sin asignar**.
+  cubren las claves naturales y la clave de idempotencia del outbox.
 - **Comprobación de consentimiento contra `consent.consents`** (UC-58-09, 13): el consentimiento se
-  exige y se propaga, pero no se contrasta contra el módulo 07. Esa comprobación es de `authz` y
-  `consent`, que son de la parte de Pablo.
+  exige y se propaga, pero no se contrasta contra el módulo 07.
 - **`audit.audit_events` en la lectura de datos sensibles** (UC-58-09): el caso de uso pide registrar
   la consulta. El registro de auditoría es del módulo 06.
 - **Re-materialización automática de los rollups afectados por un backfill** (UC-58-12): el evento
@@ -252,5 +248,5 @@ aprobadas durante la revisión.
 
 ## Revisión ALOVIDA
 
-La referencia de consentimiento de ubicación se exige pero todavía no se verifica contra la
-política canónica; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/time_series.md).
+La referencia de consentimiento de ubicación se exige pero no se verifica contra la política
+canónica.

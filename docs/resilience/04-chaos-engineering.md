@@ -21,15 +21,13 @@ hardening en evidencia.
 | Marca | Significado |
 | --- | --- |
 | ✅ | Cubierto por prueba automatizada: el control está verificado a nivel unitario |
-| 🟡 | Diseñado, **no ejecutado todavía** contra el sistema levantado |
+| 🟡 | Diseñado, **no ejecutado** contra el sistema levantado |
 
 Dos experimentos (CHAOS-01 parcial y CHAOS-04) se ejecutaron contra procesos
 worker reales el 2026-08-06 y están en el [registro](#registro-de-ejecuciones).
-El resto **está pendiente**: el hardening trae 163 pruebas que verifican cada
+El resto **no se ejecutó**: el hardening trae 163 pruebas que verifican cada
 primitiva de forma aislada, pero la campaña completa sobre el compose levantado
-no se ha corrido. Decirlo así es parte del entregable:
-[06-checklists.md](06-checklists.md) la registra como bloqueante de la casilla
-«Production Ready».
+no se ha corrido.
 
 ---
 
@@ -235,12 +233,10 @@ En Jaeger, los spans de la operación previa presentes.
 **Hipótesis.** Un mensaje cuyo procesamiento falla siempre acaba en la cola de
 mensajes muertos sin bloquear al resto del lote.
 
-**Estado.** 🟡 **Sin diseñar en detalle.** Depende de auditar antes cómo agotan
-sus reintentos los 30 jobs y qué procedimiento de reproceso tienen las DLQ
-existentes (`messaging.dead_letter_jobs`,
-`cross_store_consistency.projection_dead_letters`). Ver
-[R-10](01-matriz-de-riesgos.md#r-10): es el primer candidato de la siguiente
-iteración.
+**Estado.** 🟡 **Sin diseñar en detalle.** Depende de cómo agotan sus reintentos
+los 30 jobs y de qué procedimiento de reproceso tienen las DLQ existentes
+(`messaging.dead_letter_jobs`, `cross_store_consistency.projection_dead_letters`).
+Ver [R-10](01-matriz-de-riesgos.md#r-10).
 
 ---
 

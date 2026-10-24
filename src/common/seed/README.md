@@ -34,5 +34,4 @@ La cadena se ejecuta en bootstrap con `SEED_ON_BOOT=true`, o una sola vez con
 curado. Los IDs deterministas permiten repeticiones sin duplicados. Ejecutar
 `corepack yarn test --runInBand --silent src/common/seed` para los tests
 dirigidos. Un fallo de paso core hoy se registra y resume sin bloquear por sí
-solo el bootstrap; la corrección propuesta está en el
-[informe de revisión](../../../docs/revision-backend-2026-10-04/nucleo/common-seed.md).
+solo el bootstrap.

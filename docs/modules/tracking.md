@@ -3,7 +3,7 @@
   Fuente real: src/modules/tracking/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `tracking`
@@ -139,18 +139,15 @@ loguea qué se transporta ni datos del destinatario.
 
 ## Pruebas
 
-`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura actual no demuestra autenticación del webhook ni aislamiento entre tenants en mutaciones por UUID; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
+`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura actual no demuestra autenticación del webhook ni aislamiento entre tenants en mutaciones por UUID.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Firma del webhook**: la ruta es pública y hoy sólo valida que el código de transportista exista.
-  La verificación de firma HMAC del proveedor debe impedir mutaciones antes del conector de integraciones;
-  el riesgo y la corrección propuesta están en la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
+- **Firma del webhook**: la ruta es pública y sólo valida que el código de transportista exista; no
+  verifica firma, secreto, fecha ni nonce del proveedor.
 - **Geolocalización**: `location_ping_id` se acepta si llega, pero los pings viven en `geo` y los
-  produce el módulo de localización. `tracked_subject_id` del envío se poblará con esa integración.
+  produce el módulo de localización. Este módulo no escribe `tracked_subject_id` del envío.
 - **Cálculo del ETA**: el módulo registra y aplica la estimación, pero no la calcula. El motor
   —distancia, tráfico o dato del transportista— vive fuera y llama a este endpoint.
 - **Reprogramación del reintento**: `retry_scheduled` marca el estado; agendar el nuevo intento
   pertenece al planificador.
-- **Outbox**: `SubjectOpened`, `ShipmentDispatched`, `ShipmentDelivered`, `SlaBreached` se emitirán
-  cuando exista el módulo 35.

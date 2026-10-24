@@ -20,6 +20,12 @@ export const OFFICIAL_RECORD_URL = Object.freeze({
   PRODUCT_CODE: (pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=${encodeURIComponent(pc)}`,
   /** Ficha pública de un listado (`lid` = KEY_VAL del listado, `lpcd` = product code). */
   LISTING: (keyVal, pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm?lid=${encodeURIComponent(keyVal)}&lpcd=${encodeURIComponent(pc)}`,
+  /**
+   * Listado en la API oficial de openFDA `device/registrationlisting`, por registro (o FEI) y
+   * product code: el export de openFDA no publica el KEY_VAL que pide la ficha `rl.cfm`.
+   */
+  LISTING_OPENFDA: (field, id, pc) =>
+    `https://api.fda.gov/device/registrationlisting.json?search=registration.${field}:%22${encodeURIComponent(id)}%22+AND+products.product_code:%22${encodeURIComponent(pc)}%22`,
 });
 
 /** Tipo de autorización a partir del número FDA. */

@@ -1088,4 +1088,28 @@ export class SchedulingCatalogRepository {
       endAt: { $gt: startAt },
     });
   }
+
+  /**
+   * Los cupos que **pisan** la ventana, bloqueados para escribir.
+   *
+   * Distinto de `findSlotsOfResourceForUpdate`, que exige que el cupo
+   * *empiece* dentro: un bloqueo que arranca a mitad de una cita también la
+   * alcanza, y es exactamente la cita que hay que cancelar.
+   */
+  findSlotsOverlappingForUpdate(
+    em: EntityManager,
+    resourceId: string,
+    startAt: Date,
+    endAt: Date,
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      {
+        resourceId,
+        startAt: { $lt: endAt },
+        endAt: { $gt: startAt },
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
+    );
+  }
 }

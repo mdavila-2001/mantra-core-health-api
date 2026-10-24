@@ -538,7 +538,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       // Verificación de firma HMAC del proveedor ANTES de conciliar nada
       // (fail-closed): sin firma válida contra el secreto del proveedor se
       // rechaza el acuse. Esta es la única superficie pública del módulo.
-      const secret = deriveWebhookSecret('provider', provider.id); // TODO secreto por proveedor
+      const secret = deriveWebhookSecret('provider', provider.id);
       const rawBody = canonicalJson(dto.rawPayloadJson);
       if (!verifySignature(secret, rawBody, dto.signature)) {
         throw new UnauthorizedException(

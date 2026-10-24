@@ -11,7 +11,7 @@
 | `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Conexión administrativa (DDL/migraciones/seed) — ver `docs/security/tenant-isolation.md` sobre por qué deben ser roles distintos |
 | `MIKRO_ORM_DEBUG` | Log de queries SQL |
 | `ORM_SCHEMA_SYNC` | `off` \| `dry-run` \| `safe` — ver `src/orm/README.md`. `off` es obligatorio al generar documentación (`tools/openapi/generate-openapi.mjs`) para no mutar el esquema de una base compartida |
-| `RLS_ENFORCE` | Activa Row-Level Security por tenant — **verificar por entorno**, ver `SEC-001` en `docs/governance/traceability-matrix.md` |
+| `RLS_ENFORCE` | Activa Row-Level Security por tenant — **verificar por entorno**, ver `docs/security/tenant-isolation.md` |
 
 ## Otros almacenes
 

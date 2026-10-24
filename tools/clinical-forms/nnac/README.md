@@ -23,7 +23,7 @@ build-forms.mjs   escribe los .json y el barrel
 - **El tratamiento no se transcribe a opciones** (dosis, vías, esquemas por nivel): campo de texto que apunta a la página. Un filtro descarta dosis, vías de administración e instrucciones, y una prueba del catálogo lo fija.
 - Donde el PDF imprime referencia y alta (o contrarreferencia) en columnas pegadas, la lista es una sola.
 - Los criterios diagnósticos descartan instrucciones al médico («Identificar…», «Considerar…»): no son hallazgos.
-- **Revisión clínica pendiente**: la extracción es mecánica con filtros. Las listas pueden estar incompletas.
+- **Sin revisión clínica**: la extracción es mecánica con filtros. Las listas pueden estar incompletas.
 
 ## Una ficha por enfermedad
 

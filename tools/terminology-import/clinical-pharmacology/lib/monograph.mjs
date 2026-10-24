@@ -48,13 +48,14 @@ export function atcPath(code5, names) {
  * @param {object[]} [input.safetyNotes]
  * @param {object|null} [input.rxnorm]        de `atcBridge`
  * @param {object[]} [input.fdaPharmClasses]
- * @param {{display:string,source:string}|null} [input.fallbackName]  nombre oficial alternativo (LINAME) si CIMA no lo nombra
+ * @param {{display:string,source:string,language?:string}|null} [input.fallbackName]  nombre oficial alternativo (LINAME en castellano; sustancia GSRS en inglés) si CIMA no lo nombra
  */
 export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null }) {
   const path = atcPath(code, names);
   const own = path[4];
   const display = own.name ?? fallbackName?.display ?? null;
   const displaySource = own.name ? own.nameSource : (fallbackName?.source ?? null);
+  const displayLanguage = own.name ? 'es' : (fallbackName?.language ?? (fallbackName ? 'es' : null));
   const vtms = new Map();
   for (const p of cimaProducts) if (p.vtm) vtms.set(p.vtm.id, p.vtm);
   const bySource = {};
@@ -72,6 +73,7 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
     code,
     display,
     displaySource,
+    displayLanguage,
     atcPath: path,
     nameVariants: names.get(code)?.variants ?? [],
     cima: cimaProducts.length

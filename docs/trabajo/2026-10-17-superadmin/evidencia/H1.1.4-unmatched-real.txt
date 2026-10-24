@@ -1,8 +1,0 @@
-404 -> 404
-404 (otro verbo) -> 404
-$ GET /admin/ops/traffic/endpoints (tras corregir el comodín)
-DELETE UNMATCHED None 1 1
-GET UNMATCHED None 1 1
-$ SQL series
-http|DELETE|UNMATCHED|1
-http|GET|UNMATCHED|1

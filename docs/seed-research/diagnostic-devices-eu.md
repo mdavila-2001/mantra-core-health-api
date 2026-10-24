@@ -153,8 +153,8 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
 
 - `probe.mjs`: 0/11 alcanzables (`out/probe/probe-20261024T0335.json`). Sin cambios en la
   política de red: no se descargó nada.
-- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO**. Para reanudar, habilitar
-  los hosts listados arriba y relanzar el /loop (o `probe → fetch → build`).
+- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO** por los hosts listados
+  arriba.
 
 ### Pasada 4 — 2026-10-24 · réplicas públicas en GitHub (aviso de `master`)
 

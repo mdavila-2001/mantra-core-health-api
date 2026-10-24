@@ -1,2 +1,0 @@
-Generated 3 directory paths and 8 schemas from real Nest metadata; other paths preserved.
-EXIT_CODE=0

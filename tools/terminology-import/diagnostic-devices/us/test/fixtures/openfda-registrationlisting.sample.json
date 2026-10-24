@@ -1,0 +1,103 @@
+{
+ "results": [
+  {
+   "proprietary_name": [
+    "Alinity hq Processing Module (LN 09P6801)",
+    "Alinity hs Processing Module (LN 09P6901)"
+   ],
+   "establishment_type": [
+    "Export Device to the United States But Perform No Other Operation on Device"
+   ],
+   "registration": {
+    "registration_number": "3006412379",
+    "fei_number": "3006412379",
+    "status_code": "1",
+    "initial_importer_flag": "N",
+    "reg_expiry_date_year": "2026",
+    "name": "Abbott Laboratories (Singapore) Private Limited",
+    "address_line_1": "3 Fraser Street #23-28",
+    "address_line_2": "DUO Tower",
+    "city": "- Central Singapore",
+    "state_code": "",
+    "iso_country_code": "SG",
+    "zip_code": "",
+    "postal_code": "189352",
+    "owner_operator": {
+     "firm_name": "ABBOTT LABORATORIES",
+     "owner_operator_number": "1415939"
+    }
+   },
+   "pma_number": "",
+   "k_number": "K220031",
+   "products": [
+    {
+     "product_code": "GKZ",
+     "created_date": "2023-09-28",
+     "owner_operator_number": "1415939",
+     "exempt": "",
+     "openfda": {
+      "device_name": "Counter, Differential Cell",
+      "medical_specialty_description": "Hematology",
+      "regulation_number": "864.5220",
+      "device_class": "2"
+     }
+    },
+    {
+     "product_code": "KPA",
+     "created_date": "2023-09-28",
+     "owner_operator_number": "1415939",
+     "exempt": "",
+     "openfda": {
+      "device_name": "Slide Stainer, Automated",
+      "medical_specialty_description": "Pathology",
+      "regulation_number": "864.3800",
+      "device_class": "1"
+     }
+    }
+   ]
+  },
+  {
+   "proprietary_name": [
+    "SimpleScreen CRC"
+   ],
+   "establishment_type": [
+    "Manufacture Medical Device"
+   ],
+   "registration": {
+    "registration_number": "",
+    "fei_number": "",
+    "status_code": "5",
+    "initial_importer_flag": "N",
+    "reg_expiry_date_year": "2027",
+    "name": "FREENOME, LLC",
+    "address_line_1": "3300 Marina Blvd",
+    "address_line_2": "",
+    "city": "Brisbane",
+    "state_code": "CA",
+    "iso_country_code": "US",
+    "zip_code": "94005",
+    "postal_code": "",
+    "owner_operator": {
+     "firm_name": "Freenome, LLC",
+     "owner_operator_number": "10096364"
+    }
+   },
+   "pma_number": "P250029",
+   "k_number": "",
+   "products": [
+    {
+     "product_code": "PHP",
+     "created_date": "2026-10-05",
+     "owner_operator_number": "10096364",
+     "exempt": "",
+     "openfda": {
+      "device_name": "System, Colorectal Neoplasia, Dna Methylation And Hemoglobin Detection",
+      "medical_specialty_description": "Unknown",
+      "regulation_number": "",
+      "device_class": "3"
+     }
+    }
+   ]
+  }
+ ]
+}

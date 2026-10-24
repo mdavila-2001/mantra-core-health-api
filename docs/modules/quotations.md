@@ -3,7 +3,7 @@
   Fuente real: src/modules/quotations/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `quotations`
@@ -111,10 +111,8 @@ anticipo entre 0 y el precio, cuota mayor que cero.
 
 ## Auditoría vigente
 
-La práctica se valida al crear, pero la revisión de octubre de 2026 halló que se
-debe comprobar además el acceso clínico al paciente y validar las referencias
-clínicas que entran en la solicitud. El detalle y la matriz de pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/quotations.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/quotations.md).
+La práctica se valida al crear; el acceso clínico al paciente y las referencias
+clínicas que entran en la solicitud no se comprueban.
 
 ```bash
 corepack yarn test src/modules/quotations --runInBand --silent

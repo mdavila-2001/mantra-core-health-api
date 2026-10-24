@@ -1,6 +1,6 @@
 # Contexto de negocio
 
-> Fase 9. Síntesis a partir de `src/modules/README.md`, `docs/progress/ESTADO-Y-PENDIENTES.md` y el inventario
+> Fase 9. Síntesis a partir de `src/modules/README.md` y el inventario
 > real de 60 módulos / 1184 entidades / 878 operaciones (`docs/reports/system-inventory.md`).
 
 ## Qué es ALOVIDA Health
@@ -50,10 +50,3 @@ Tres decisiones de negocio explican gran parte de las decisiones técnicas docum
    alcance clínico vigente. Es una decisión de negocio (cumplimiento regulatorio en salud), no
    solo una preferencia técnica.
 
-## Estado y hoja de ruta real
-
-`docs/progress/ESTADO-Y-PENDIENTES.md` (mantenido junto al código, fuente de verdad operativa) documenta
-prioridades vigentes: terminar y operar los 20 workers, validar aislamiento por tenant en cada
-entorno, ampliar integración real contra almacenes reales, y revisar las entidades candidatas a
-huérfanas. Este portal no duplica ese documento — lo referencia como la fuente viva de
-prioridades de negocio a corto plazo.

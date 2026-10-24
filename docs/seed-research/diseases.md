@@ -185,7 +185,7 @@ independiente por vez; la 15 la aportó `seed-symptoms`. Para sumar una fuente:
   CIE-11 MMS 20,8 % (las categorías de los caps. 22–26 y X casi no tienen
   correspondencia en MONDO: es esperable, son lesiones, causas externas,
   factores y extensiones).
-- **UMLS**: pendiente para el propietario (cuenta UTS; no se creó).
+- **UMLS**: no medido (exige cuenta UTS del propietario; no se creó).
 
 ## 6. Peso y consulta por sistema
 
@@ -399,17 +399,17 @@ Tablas generadas por `coverage-report.mjs` (`glossary-data-build/diseases-covera
 | EFO | Apache-2.0 | Cargada (clases propias) |
 | Anotaciones HPO | Licencia HPO (uso libre con atribución) | Sólo identificadores |
 | phenopacket-store | BSD-3-Clause | Sólo identificadores |
-| OMIM | Registro + licencia | **Pendiente** — sólo números MIM citados por otras fuentes |
-| CIE-10 OMS (títulos) | Licencia OMS para uso comercial | **Pendiente** — sólo códigos |
-| CIE-10 OPS en castellano | OPS/OMS | **Pendiente** (y host bloqueado) |
-| UMLS / MedGen | Cuenta UTS + licencia | **Pendiente para el propietario** — sólo CUI citados |
+| OMIM | Registro + licencia | **Sin licencia** — sólo números MIM citados por otras fuentes |
+| CIE-10 OMS (títulos) | Licencia OMS para uso comercial | **Sin licencia** — sólo códigos |
+| CIE-10 OPS en castellano | OPS/OMS | **Sin licencia** (y host bloqueado) |
+| UMLS / MedGen | Cuenta UTS + licencia | **Sin cuenta** — sólo CUI citados |
 | SNOMED CT | Afiliación de país | **Excluido**: Bolivia no es miembro |
 | MedDRA | Suscripción MSSO | **Excluido** — sólo como texto de referencia |
-| DeCS | Formulario BIREME + token | **Pendiente** |
-| ICD-O-3 | Licencia OMS | **Pendiente** (sin archivo accesible) |
-| CIAP-2 / ICPC-2 | WONCA | **Pendiente** (sin archivo accesible) |
+| DeCS | Formulario BIREME + token | **Sin token** |
+| ICD-O-3 | Licencia OMS | **Sin licencia** (sin archivo accesible) |
+| CIAP-2 / ICPC-2 | WONCA | **Sin licencia** (sin archivo accesible) |
 | DSM | APA | Excluido |
-| NANDO, OncoTree | No declarada en el repositorio | **Pendiente**: confirmar con el editor |
+| NANDO, OncoTree | No declarada en el repositorio | **Sin confirmar** con el editor |
 
 ## 9. Propuestas para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
@@ -425,20 +425,17 @@ Nada de esto bloquea la carga; son mejoras para consultar el catálogo:
    sesiones (la unicidad ya existe por `(code_system_version_id, code)`).
 3. **Índice sobre `concept_properties (property_code)`** si se van a filtrar
    conceptos por clasificación (`icd11_classification`, `orphanet_classification`).
-4. (Ya documentado en `tools/terminology-import/README.md`) resolver
-   `ConceptsService.searchConcepts` con `JOIN`/`EXISTS` antes de sumar el
-   catálogo de enfermedades a los value sets del glosario.
 
-## 10. Huecos que quedan
+## 10. Huecos
 
 - **Castellano**: sólo Orphanet (11 645 conceptos, 6 868 definiciones). MONDO,
   DOID, NCIt, CIE-11 y EFO quedan en inglés: CIE-11 ES, CIE-10 OPS y DeCS no
   son accesibles o exigen licencia. Una traducción propia **no** se presenta
   como oficial y no se hizo.
 - **Glosario**: el catálogo no se sumó a los value sets `glossary-*` (evita
-  duplicar CIE-10-ES y no agrava el `IN` de §9.4). Para mostrar Orphanet ES en
-  `/glossary` hace falta decidir la curación (qué categoría, cómo convive con
-  CIE-10-ES) — decisión del propietario.
+  duplicar CIE-10-ES): mostrar Orphanet ES en
+  `/glossary` exige una decisión de curación del propietario (qué categoría,
+  cómo convive con CIE-10-ES).
 - **Fuentes por encima de lo cargado** (§5): MeSH oficial (≥ 1 562 descriptores
   del árbol C sin cruce), GARD (≥ 2 598), NANDO (685), OncoTree (189).
 - **CIE-11**: 9 códigos que Orphanet alinea ya no están en la MMS 2026-01;

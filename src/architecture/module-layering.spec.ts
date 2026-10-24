@@ -113,10 +113,10 @@ function locate(
  * Son clases sin estado que reciben la unidad de trabajo por parámetro, y
  * `application/` las usa como su puerto de persistencia (la clase es el
  * contrato). Convertirlas en interfaces con mapeadores a un modelo de dominio
- * separado de la entidad ORM es la decisión pendiente A3 del inventario
- * (`docs/architecture/module-layout.md`, «Trampas»). Mientras tanto, y sólo
- * mientras tanto, se permite exactamente esta ruta; los adaptadores y el
- * cableado de persistencia siguen vetados para `application/`.
+ * separado de la entidad ORM es la decisión A3 del inventario
+ * (`docs/architecture/module-layout.md`, «Trampas»). Sin ese modelo separado
+ * se permite exactamente esta ruta; los adaptadores y el cableado de
+ * persistencia siguen vetados para `application/`.
  */
 const OWN_REPOSITORIES = /[\\/]infrastructure[\\/]repositories([\\/]|$)/;
 

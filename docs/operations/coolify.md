@@ -156,8 +156,8 @@ Deriva detectada entre el modelo y la base: 71 diferencias
   (tabla-ausente=45, columna-ausente=2, obligatoriedad-divergente=24)
 ```
 
-Las 45 tablas ausentes incluyen el schema `pharma_lab` entero —B-8 de
-`docs/progress/REGISTRO-DEFECTOS.md`, todavía abierto— y sus tablas de historia en `audit`.
+Las 45 tablas ausentes incluían el schema `pharma_lab` entero —su DDL llegó después en
+`database/SQL/69_pharma_lab/`— y sus tablas de historia en `audit`.
 Las 24 divergencias de obligatoriedad son columnas que la base exige NOT NULL y
 la entidad declara opcionales: un INSERT que no las escriba falla.
 

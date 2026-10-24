@@ -158,11 +158,10 @@ Variables (ver `.env.example`): `TELEMETRY_WEB_ANALYTICS_ENABLED`,
 
 `corepack yarn test src/modules/telemetry --runInBand --silent` aprobó 14 suites y
 121 pruebas durante la revisión. Hay cobertura unitaria de controladores, servicios,
-ventanas, configuración y mapeo de GA4. Falta cobertura de integración para propiedad
-de consentimiento, referencias de ingesta y aislamiento de tenant.
+ventanas, configuración y mapeo de GA4. No hay integración que cubra propiedad de
+consentimiento, referencias de ingesta ni aislamiento de tenant.
 
 ## Limitaciones conocidas
 
-La revisión ALOVIDA documenta problemas críticos de propiedad de consentimiento,
-referencias de ingesta, validación de propiedades y aislamiento de tenant en la
-[revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/telemetry.md).
+La revisión ALOVIDA encontró problemas críticos de propiedad de consentimiento,
+referencias de ingesta, validación de propiedades y aislamiento de tenant.

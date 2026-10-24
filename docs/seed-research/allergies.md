@@ -14,8 +14,8 @@
   19 y 20) aportaron **0** cada una. El techo real lo pone la red: la política
   de esta sesión bloquea (403) las fuentes de referencia de alergología (IUIS,
   ICD-11, openFDA/UNII, RxNav vigente, NCIt, ChEBI completo, UniProt, EUR-Lex,
-  Codex, Wikidata). La lista está en «Huecos». Ahí está el trabajo que falta, y
-  no se puede completar desde este contenedor.
+  Codex, Wikidata). La lista está en «Huecos»: esa cobertura no es alcanzable
+  desde este contenedor.
 - **Enumeraciones FHIR en la API**: los seis campos de catálogo de
   `clinical.allergy_intolerances` y `clinical.allergy_reactions` (tipo,
   categoría, criticidad, estado clínico, verificación y severidad de la reacción)
@@ -51,7 +51,6 @@
 | Correspondencia HL7 | `src/common/seed/data/allergies/fhir-allergy-enum-codes.json` | concepto interno ↔ sistema, código y versión HL7. La lee el importador para los `concept_maps` |
 | Importador | `tools/terminology-import/allergies/` | `fetch-` (descarga) → `build-` (NDJSON y pasadas) → `load-` (Postgres) |
 | Datos normalizados | `tools/terminology-import/allergies/data/` | NDJSON comprimido (4,3 MB), informe de pasadas, manifiesto de fuentes y `SHA256SUMS`. Los crudos (~1 GB) no se suben: se rebajan con el script |
-| Plan y reporte | `docs/trabajo/2026-10-24-seed-alergias/` | `PLAN.md`, `REPORTE.md` y `evidencia/` (salidas literales) |
 | Fuentes y licencias | `tools/terminology-import/allergies/SOURCES.md` | artefacto, commit o versión, SHA-256, licencia y evidencia |
 
 Las tres líneas que tocan archivos compartidos son aditivas:
@@ -90,9 +89,8 @@ inventar equivalencias.
 
 **Criterio de parada:** las pasadas 18, 19 y 20 aportaron 0 seguidas, y no
 queda ninguna fuente **alcanzable desde esta red** que no se haya revisado. Las
-fuentes que faltan no son «imposibles de encontrar»: están bloqueadas. En
-cuanto la red las permita, cada una es una pasada más con su propio aporte
-esperado (ver «Huecos»).
+fuentes ausentes no son «imposibles de encontrar»: están bloqueadas (ver
+«Huecos», con el aporte esperado de cada una).
 
 ### Fuentes evaluadas y descartadas
 

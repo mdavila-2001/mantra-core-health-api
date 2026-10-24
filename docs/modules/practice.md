@@ -3,7 +3,7 @@
   Fuente real: src/modules/practice/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `practice`
@@ -172,5 +172,4 @@ Pino estructurado por operación (`practice.site.create`, `practice.inventory.mo
 Comando dirigido: `corepack yarn test src/modules/practice --runInBand --silent`.
 En la revisión pasaron **11 suites y 106 pruebas**. Son pruebas unitarias con
 mocks: no demuestran RLS ni aislamiento de escrituras por UUID entre dos
-tenants. El informe de alcance y el hallazgo confirmado están en
-[`docs/revision-backend-2026-10-04/modulos/practice.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/practice.md).
+tenants.

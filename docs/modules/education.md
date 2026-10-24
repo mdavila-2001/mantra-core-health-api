@@ -3,7 +3,7 @@
   Fuente real: src/modules/education/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `education`
@@ -138,9 +138,7 @@ emite certificados y acredita CME — son pasos que dispara un worker tras la fi
 
 El tenant de la petición se valida globalmente y los roles con alcance se evalúan
 contra él. En el código actual, las mutaciones que reciben UUID no acotan el
-recurso al tenant ni anclan las operaciones `LEARNER` al perfil del sujeto;
-los hallazgos y el plan de cierre están en la
-[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/education.md).
+recurso al tenant ni anclan las operaciones `LEARNER` al perfil del sujeto.
 
 ## Concurrencia
 
@@ -157,19 +155,14 @@ respuestas de evaluación ni datos del aprendiz más allá del identificador.
 
 `corepack yarn test src/modules/education --runInBand --silent` — 3 suites y 84
 pruebas aprobadas durante la revisión. Son pruebas unitarias con repositorios
-simulados; faltan integración HTTP con dos tenants, RLS y dos aprendices para
-cubrir los hallazgos documentados.
+simulados; no hay integración HTTP con dos tenants, RLS ni dos aprendices.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Verificación pública del certificado**: el `verification_code` se genera y se devuelve, pero el
-  endpoint público que lo resuelve pertenece a la superficie de lectura, aún no implementada.
-- **Cruce con habilitaciones**: el caso de uso pide validar el crédito CME contra
-  `profiles.practitioner_specialties` y `jurisdiction_authorizations` (módulo 05). Aquí se acepta la
-  especialidad y la jurisdicción que llegan; la validación cruzada se conectará con ese módulo.
+- **Validación cruzada con habilitaciones**: el crédito CME se acepta con la especialidad y la
+  jurisdicción que llegan; no se contrasta contra `profiles.practitioner_specialties` ni
+  `jurisdiction_authorizations` (módulo 05).
 - **Documento del certificado**: `file_id` se acepta si llega, pero generar el PDF pertenece al
   módulo de archivos.
 - **Valoración agregada del curso**: el caso de uso la marca como derivada y opcional vía
   proyección; no se calcula aquí.
-- **Outbox**: `CoursePublished`, `EnrollmentCompleted`, `CertificateIssued`, `CmeCreditAwarded` se
-  emitirán cuando exista el módulo 35.

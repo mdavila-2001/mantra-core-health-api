@@ -34,9 +34,9 @@ No la hay entre agregados distintos. Si tu caso de uso la requiere, esa es una l
 diseño real a resolver en tu consumidor (p. ej. reordenando por timestamp del evento), no algo que
 el sistema de mensajería garantice hoy.
 
-## Checklist antes de ir a producción con un consumidor nuevo
+## Requisitos de un consumidor nuevo antes de producción
 
-- [ ] Manejo idempotente confirmado (reprocesar el mismo evento dos veces no corrompe estado).
-- [ ] Validación defensiva del payload (no asumir campos sin confirmarlos con el productor).
-- [ ] Estrategia definida para el caso "evento nunca llega" (timeout / reconciliación).
-- [ ] Sin dependencia de orden entre eventos de agregados distintos, o mitigación explícita si la hay.
+- Manejo idempotente confirmado (reprocesar el mismo evento dos veces no corrompe estado).
+- Validación defensiva del payload (no asumir campos sin confirmarlos con el productor).
+- Estrategia definida para el caso "evento nunca llega" (timeout / reconciliación).
+- Sin dependencia de orden entre eventos de agregados distintos, o mitigación explícita si la hay.

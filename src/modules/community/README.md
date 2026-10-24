@@ -248,9 +248,8 @@ Dos cosas que no se deducen del código:
   `SystemApiClient` de los workers firma con rol `SYSTEM`: con sólo
   `SECURITY_ADMIN` el worker recibía 403 y el fan-out no se ejecutaba nunca.
 
-Pendiente declarado: el reparto es siempre _push_. El umbral híbrido push/pull
-para autores con muchísimos seguidores es una decisión abierta del equipo; el
-tope de seguidores por pasada acota el daño mientras tanto.
+El reparto es siempre _push_, sin umbral híbrido push/pull para autores con
+muchísimos seguidores; el tope de seguidores por pasada acota el costo.
 
 ## Concurrencia y persistencia
 
@@ -276,4 +275,4 @@ tope de seguidores por pasada acota el daño mientras tanto.
   visibilidad `PRIVATE`/`FOLLOWERS` contra filas reales, el bloqueo en los dos
   sentidos y que la review no arrastre el encuentro clínico.
 
-La revisión ejecutó `corepack yarn test src/modules/community --runInBand --silent`: 41 suites y 616 pruebas aprobadas, con dos advertencias JSON preexistentes. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/community.md).
+La revisión ejecutó `corepack yarn test src/modules/community --runInBand --silent`: 41 suites y 616 pruebas aprobadas, con dos advertencias JSON preexistentes.

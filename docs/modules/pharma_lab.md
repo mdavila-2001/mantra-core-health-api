@@ -3,7 +3,7 @@
   Fuente real: src/modules/pharma_lab/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `pharma_lab`
@@ -309,4 +309,4 @@ Entidades (`tableName`, 31 de 31 archivos `*.entity.ts`): `doctor_visit_blocks`,
 
 ## Pruebas y revisión
 
-`corepack yarn test src/modules/pharma_lab --runInBand --silent` aprobó 10 suites y 120 pruebas. La guardia de alcance limita cada laboratorio a su personal activo, visitadores operativos o roles de red. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharma_lab.md).
+`corepack yarn test src/modules/pharma_lab --runInBand --silent` aprobó 10 suites y 120 pruebas. La guardia de alcance limita cada laboratorio a su personal activo, visitadores operativos o roles de red.

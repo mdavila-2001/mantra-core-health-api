@@ -30,22 +30,20 @@ perder logs tempranos (incluida la materialización de DDL en `OnApplicationBoot
   del servidor.
 
 ## Consecuencias negativas
-- Sin decisión formal de métricas (Prometheus/OpenTelemetry) identificada en el código durante
-  esta fase — es una brecha, no una decisión consciente documentada. Ver `GAP-008` en
-  [análisis de brechas](../reports/documentation-gap-analysis.md).
+- Este ADR no decide métricas: las métricas HTTP de la API las fija
+  [ADR-0027](ADR-0027-metricas-http-en-proceso.md) y las del host, `infra/monitoring`.
 - La brecha de **trazas distribuidas** que este ADR declaraba quedó cerrada por
   [ADR-0020](ADR-0020-trazas-opentelemetry-jaeger.md): OpenTelemetry + OTLP + Jaeger. Pino se
   mantiene como sistema de logs, y ahora cada línea lleva además `trace_id`/`span_id` tomados del
   contexto activo de OpenTelemetry.
 
 ## Riesgos
-El riesgo de diagnosticar incidentes de latencia solo con logs quedó mitigado por ADR-0020. Sigue
-abierto el de métricas.
+El riesgo de diagnosticar incidentes de latencia solo con logs quedó mitigado por ADR-0020.
 
 ## Evidencia
 `src/main.ts` (comentarios de diseño sobre `bufferLogs`), `package.json` (`nestjs-pino`),
 `src/logging/`.
 
 ## Plan de revisión
-Trazas: resuelto en [ADR-0020](ADR-0020-trazas-opentelemetry-jaeger.md). Métricas: pendiente de
-una decisión formal.
+Trazas: [ADR-0020](ADR-0020-trazas-opentelemetry-jaeger.md). Métricas HTTP:
+[ADR-0027](ADR-0027-metricas-http-en-proceso.md).

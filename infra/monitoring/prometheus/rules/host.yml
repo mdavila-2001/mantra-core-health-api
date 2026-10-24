@@ -67,8 +67,9 @@ groups:
           summary: "Carga del VPS en {{ $value | humanize }}× los núcleos"
           description: "La carga a 5 min supera 1,5 por núcleo durante 10 min."
 
-      # TODO(fase 4): el umbral de 150 Mbit/s es PROVISIONAL. Se fija con la
-      # línea base de 7 días de este mismo Prometheus (pico × 1,5).
+      # El umbral de 150 Mbit/s es un valor inicial: no sale de una línea base
+      # medida. La referencia para ajustarlo es el pico de 7 días de este mismo
+      # Prometheus × 1,5.
       - alert: HostNetworkReceiveHigh
         expr: rate(node_network_receive_bytes_total[5m]) * 8 > 150e6
         for: 10m

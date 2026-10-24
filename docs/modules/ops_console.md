@@ -3,7 +3,7 @@
   Fuente real: src/modules/ops_console/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `ops_console`
@@ -76,6 +76,3 @@ corepack yarn test src/modules/ops_console --runInBand --silent
 # contra una base descartable con el DDL de database/SQL aplicado
 OPS_TRAFFIC_IT_DB_URL=postgres://… corepack yarn test:integration test/integration/ops-traffic.int-spec.ts
 ```
-
-La auditoría visual y de contratos de octubre de 2026 está en
-[`docs/revision-backend-2026-10-04/modulos/ops_console.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/ops_console.md).
