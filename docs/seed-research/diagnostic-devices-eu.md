@@ -2,7 +2,8 @@
 
 Sesión `seed-dx-devices-eu` · rama `claude/adoring-curie-xdkt83` (desde `dev`) · código en
 [`tools/terminology-import/diagnostic-devices/eu/`](../../tools/terminology-import/diagnostic-devices/eu/)
-· formato común en [`tools/terminology-import/diagnostic-devices/README.md`](../../tools/terminology-import/diagnostic-devices/README.md)
+· formato común: `tools/terminology-import/diagnostic-devices/README.md`, escrito por la sesión
+`master` (rama `justin/seed-dx-devices-master`); esta rama lo respeta y no lo modifica
 · fuentes y términos en [`SOURCES.md`](../../tools/terminology-import/diagnostic-devices/eu/SOURCES.md).
 
 ## Resumen honesto
@@ -69,14 +70,23 @@ Clases de riesgo: se conservan tal como las publica la fuente (EUDAMED decodific
 ```
 node tools/terminology-import/diagnostic-devices/eu/probe.mjs    # qué hosts responden → out/probe/*.json
 node tools/terminology-import/diagnostic-devices/eu/fetch.mjs    # crudos → ../diagnostic-devices-data/eu/cache (+manifest.json con sha256)
-node tools/terminology-import/diagnostic-devices/eu/build.mjs    # → out/{emdn,devices-eu,manufacturers-eu}-NNN.ndjson.gz + coverage
+node tools/terminology-import/diagnostic-devices/eu/build.mjs    # → out/manifest.json + out/<source>-NNNN.ndjson.gz + out/emdn/ + coverage
 node tools/terminology-import/diagnostic-devices/eu/load.mjs     # dry-run; --apply carga la EMDN a terminology.* (idempotente)
 node --test "tools/terminology-import/diagnostic-devices/eu/test/*.test.mjs"
 ```
 
-- **EUDAMED**: `GET /udi?NOMENCLATURE_CODE=<código>` por cada código EMDN en alcance, siguiendo
+- **Formato de salida** (el de `master`): `out/manifest.json` con región, archivos (filas, sha256)
+  y huecos; una parte `<source>-0001.ndjson.gz` por fuente (`eudamed-udi`, `it-salute-bdrdm`, …);
+  `manufacturerRegistryId` con prefijo `srn:`; clase con esquema (`eu-mdr:IIa`, `eu-ivdr:C`) solo
+  si legislación y etiqueta decodificadas encajan exactamente, si no `eudamed:<etiqueta>`; lo
+  propio de la fuente en `extra`. La EMDN va aparte en `out/emdn/` (clasificación, no filas).
+- **Recorte**: se exportan las filas en alcance (W) **y** las de categorías en revisión, marcadas
+  en `extra.dxScope = "pendiente-revision:<letra>"`, para que `master` las clasifique con su
+  taxonomía; las categorías excluidas ni se piden.
+- **EUDAMED**: `GET /udi?NOMENCLATURE_CODE=<código>` por cada código EMDN exportable, siguiendo
   `nextLink`; luego `GET /actors?ACTOR_ID=<SRN>` por cada fabricante visto. País del fabricante =
-  prefijo del SRN (formato `XX-MF-000000000`), marcado en `extensions.manufacturerCountrySource`.
+  `ACT_COUNTRY_ISO2_CODE` del actor; si falta, prefijo del SRN (`XX-MF-000000000`), marcado en
+  `extra.manufacturerCountrySource`.
   Certificado y organismo notificado no están en el Data Lake; el adaptador del portal
   (`basicUdiData`) queda listo pero sin descarga en bloque hasta verificar términos.
 - **EMDN**: el enlace al Excel se descubre en la página oficial; se valida que cada código tenga
@@ -123,6 +133,17 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
   los huecos.
 - Nuevos tras deduplicar: **0 · 0 · 0**.
 
+### Pasada 2 — 2026-10-24 · formato común de `master` y nuevo sondeo
+
+- Cambio: la sesión `master` publicó el formato común (`diagnostic-devices/README.md`); la salida
+  se adaptó a él (manifest, nombres de fuente, `srn:`, `extra`, clase con esquema) y se retiró el
+  README propio para no pisarlo. Las categorías en revisión ahora se exportan marcadas.
+- `probe.mjs`: 0/11 alcanzables (`out/probe/probe-20261024T0330.json`).
+- `fetch.mjs`: 0 archivos, 11 huecos. `build.mjs`: 0 filas; `out/manifest.json` con 11 huecos.
+- Fuentes nuevas buscadas: ninguna adicional alcanzable (los hosts siguen bloqueados).
+- Nuevos tras deduplicar: **0 · 0 · 0**. Segunda pasada seguida en 0 **por bloqueo**: el loop se
+  cierra como **BLOQUEADO**, no como saturado.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 El modelo no tiene catálogo de equipos. Propuesta concreta (a decidir y escribir en el repo del
@@ -145,7 +166,7 @@ modelo; la API no escribe DDL, ADR-0021):
    el equipo instalado apunte al modelo del catálogo en vez de repetir `manufacturer`/`model` como
    texto libre (que se conservan por compatibilidad).
 3. Con eso, `load.mjs` agrega la carga de `devices-*.ndjson.gz` y `manufacturers-*.ndjson.gz`
-   (las cuatro regiones comparten el formato).
+   (las cuatro regiones comparten el formato; `master` ya consolida modelos y fabricantes).
 
 ## Entorno (para quien retome)
 

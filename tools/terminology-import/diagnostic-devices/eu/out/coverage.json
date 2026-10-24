@@ -1,14 +1,18 @@
 {
   "totalRead": 0,
+  "devicesExported": 0,
   "devicesInScope": 0,
+  "devicesPendingReview": 0,
   "duplicatesDropped": 0,
+  "rejectedRows": 0,
+  "rejectedSamples": [],
   "excludedByRule": {},
   "devicesBySource": {},
+  "devicesByScope": {},
   "devicesByEmdnCategory": {},
   "devicesByEmdnGroup": {},
   "distinctManufacturers": 0,
   "distinctBrands": 0,
-  "manufacturerRecords": 0,
   "emdn": {
     "concepts": 0,
     "inScopeConcepts": 0,
@@ -19,97 +23,91 @@
     {
       "source": "EUDAMED_PORTAL",
       "url": "https://ec.europa.eu/tools/eudamed/",
-      "at": "2026-10-24T03:11:57.079Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial."
     },
     {
       "source": "MHRA_PARD",
       "url": "https://pard.mhra.gov.uk/",
-      "at": "2026-10-24T03:11:57.079Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida."
     },
     {
       "source": "SWISSDAMED",
       "url": "https://swissdamed.ch/",
-      "at": "2026-10-24T03:11:57.080Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite)."
     },
     {
       "source": "NANDO",
       "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies",
-      "at": "2026-10-24T03:11:57.080Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio."
     },
     {
       "source": "DE_BFARM",
       "url": "https://www.bfarm.de/EN/Medical-devices/_node.html",
-      "at": "2026-10-24T03:11:57.080Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "No evaluado: no hay descarga pública."
     },
     {
       "source": "ES_AEMPS",
       "url": "https://www.aemps.gob.es/",
-      "at": "2026-10-24T03:11:57.080Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "No evaluado: no hay descarga pública."
     },
     {
       "source": "FR_ANSM",
       "url": "https://ansm.sante.fr/",
-      "at": "2026-10-24T03:11:57.080Z",
+      "at": "2026-10-24T03:30:49.660Z",
       "reason": "sin descarga automática",
       "note": "No aplica."
     },
     {
       "source": "EMDN",
       "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en",
-      "at": "2026-10-24T03:11:57.290Z",
+      "at": "2026-10-24T03:30:49.891Z",
       "reason": "bloqueado por la política de red del entorno (proxy 403)",
       "note": null
     },
     {
       "source": "EUDAMED_DATALAKE",
       "url": "https://api.datalake.sante.service.ec.europa.eu/eudamed/reference?LANGUAGE=en&format=json&api-version=v1.0",
-      "at": "2026-10-24T03:11:57.500Z",
+      "at": "2026-10-24T03:30:50.024Z",
       "reason": "bloqueado por la política de red del entorno (proxy 403)",
       "note": null
     },
     {
       "source": "IT_BDRDM",
       "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/",
-      "at": "2026-10-24T03:11:57.737Z",
+      "at": "2026-10-24T03:30:50.221Z",
       "reason": "bloqueado por la política de red del entorno (proxy 403)",
       "note": null
     },
     {
       "source": "IT_CND",
       "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/",
-      "at": "2026-10-24T03:11:58.043Z",
+      "at": "2026-10-24T03:30:50.431Z",
       "reason": "bloqueado por la política de red del entorno (proxy 403)",
       "note": null
     },
     {
-      "source": "EUDAMED_DATALAKE",
+      "source": "eudamed-udi",
       "url": "/home/user/diagnostic-devices-data/eu/cache/eudamed/reference/en",
-      "at": "2026-10-24T03:12:03.872Z",
       "reason": "paginación incompleta en caché (se volverá a pedir)"
     },
     {
-      "source": "EMDN",
+      "source": "ec-emdn",
       "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en",
-      "at": "2026-10-24T03:12:03.872Z",
       "reason": "EMDN no disponible en caché"
     }
   ],
-  "generatedAt": "2026-10-24T03:12:03.872Z",
-  "parts": {
-    "emdn": [],
-    "devices": [],
-    "manufacturers": []
-  }
+  "generatedAt": "2026-10-24T03:31:17.451Z",
+  "files": []
 }

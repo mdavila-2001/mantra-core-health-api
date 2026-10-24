@@ -135,8 +135,9 @@ export function httpFetch(
 }
 
 // -----------------------------------------------------------------------------
-// Formato común (ver ../README.md). Todos los campos presentes; lo que la
-// fuente no publica va en null.
+// Formato común: lo define `../README.md` (escrito por la sesión `master`; acá
+// solo se respeta). Todos los campos presentes; lo que la fuente no publica va
+// en null; la cita de la fila y el fabricante nunca son null.
 // -----------------------------------------------------------------------------
 
 export const DEVICE_FIELDS = [
@@ -160,24 +161,24 @@ export const DEVICE_FIELDS = [
   'status',
 ];
 
-export const MANUFACTURER_FIELDS = [
+const NOT_NULL = [
   'source',
   'sourceRecordId',
   'sourceUrl',
   'sourceVersion',
   'retrievedAt',
-  'manufacturerRegistryId',
   'manufacturerName',
-  'manufacturerCountry',
-  'actorRole',
 ];
+const SOURCE_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const ISO_DATETIME_RE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const REGISTRY_ID_RE = /^[a-z][a-z0-9-]*:\S/;
+const SYSTEM_RE =
+  /^(?:fda-product-code|emdn|gmdn|gmdn-pt|jmdn|cnd|[a-z]{2}:[a-z0-9-]+)$/;
 
-const PROVENANCE_REQUIRED = [
-  'source',
-  'sourceRecordId',
-  'sourceUrl',
-  'retrievedAt',
-];
+/** Fila que no cumple el formato común: se cuenta y se descarta, nunca se rellena. */
+export class RowError extends Error {}
 
 /** Texto limpio o null: nunca cadena vacía, nunca "null" literal. */
 export function clean(value) {
@@ -186,53 +187,70 @@ export function clean(value) {
   return s === '' || s.toLowerCase() === 'null' ? null : s;
 }
 
-function build(fields, input, idPrefix) {
-  const record = {};
-  for (const f of fields) record[f] = clean(input[f]);
-  for (const f of PROVENANCE_REQUIRED)
-    if (!record[f])
-      throw new Error(
-        `Registro sin procedencia (${f}) de ${input.source ?? '¿fuente?'}: ${JSON.stringify(input).slice(0, 200)}`,
-      );
-  if (
-    record.manufacturerCountry &&
-    !/^[A-Z]{2}$/.test(record.manufacturerCountry)
-  )
-    throw new Error(
-      `manufacturerCountry no es ISO alfa-2: ${record.manufacturerCountry}`,
-    );
-  record.id = md5uuid(
-    `mantra:dx-devices:${idPrefix}:${record.source}:${record.sourceRecordId}`,
-  );
-  const ext = Object.fromEntries(
-    Object.entries(input.extensions ?? {}).filter(
+/** Fecha ISO (con o sin hora) → `YYYY-MM-DD`; cualquier otra forma → null. */
+export function isoDate(value) {
+  const m = /^(\d{4}-\d{2}-\d{2})(?:$|T)/.exec(clean(value) ?? '');
+  return m ? m[1] : null;
+}
+
+function compactExtra(extra = {}) {
+  return Object.fromEntries(
+    Object.entries(extra).filter(
       ([, v]) => v !== null && v !== undefined && v !== '',
     ),
   );
-  record.extensions = ext;
-  return record;
 }
 
-export const makeDeviceRecord = (input) =>
-  build(DEVICE_FIELDS, input, 'device');
-export const makeManufacturerRecord = (input) =>
-  build(MANUFACTURER_FIELDS, input, 'manufacturer');
+export function makeDeviceRecord(input) {
+  const r = {};
+  for (const f of DEVICE_FIELDS) r[f] = clean(input[f]);
+  const fail = (msg) => {
+    throw new RowError(
+      `${msg} (${r.source ?? '¿fuente?'}:${r.sourceRecordId ?? '¿id?'})`,
+    );
+  };
+  for (const f of NOT_NULL) if (!r[f]) fail(`${f} no puede ser null`);
+  if (!SOURCE_RE.test(r.source)) fail(`source inválido: ${r.source}`);
+  if (!/^https?:\/\//.test(r.sourceUrl)) fail(`sourceUrl no es http(s)`);
+  if (!ISO_DATETIME_RE.test(r.retrievedAt))
+    fail(`retrievedAt no es ISO 8601 con zona: ${r.retrievedAt}`);
+  if (r.authorizationDate && !ISO_DATE_RE.test(r.authorizationDate))
+    fail(`authorizationDate no es YYYY-MM-DD: ${r.authorizationDate}`);
+  if (r.manufacturerCountry && !/^[A-Z]{2}$/.test(r.manufacturerCountry))
+    fail(`manufacturerCountry no es ISO alfa-2: ${r.manufacturerCountry}`);
+  if (
+    r.manufacturerRegistryId &&
+    !REGISTRY_ID_RE.test(r.manufacturerRegistryId)
+  )
+    fail(
+      `manufacturerRegistryId sin prefijo de esquema: ${r.manufacturerRegistryId}`,
+    );
+  if (r.deviceTypeSystem && !SYSTEM_RE.test(r.deviceTypeSystem))
+    fail(`deviceTypeSystem desconocido: ${r.deviceTypeSystem}`);
+  if ((r.deviceTypeCode === null) !== (r.deviceTypeSystem === null))
+    fail('deviceTypeCode y deviceTypeSystem van juntos');
+  r.extra = compactExtra(input.extra);
+  return r;
+}
+
+/** Clave estable de una fila (la misma que usa `master/`). */
+export const rowKey = (r) => `${r.source}\u0000${r.sourceRecordId}`;
 
 // -----------------------------------------------------------------------------
-// Deduplicación exacta (nunca difusa): UDI-DI, certificado, o fabricante +
-// modelo normalizados. Devuelve qué fila ganó y por qué clave cayó cada
-// duplicado, para que el reporte de cobertura lo muestre.
+// Deduplicación exacta (nunca difusa): misma fila de la misma fuente, mismo
+// UDI-DI, mismo certificado + modelo, o mismo fabricante + modelo + marca
+// normalizados (mayúsculas, espacios colapsados).
 // -----------------------------------------------------------------------------
 
 export const normKey = (s) =>
   clean(s)?.normalize('NFKC').toUpperCase().replace(/\s+/g, ' ') ?? null;
 
 export function dedupeKeys(r) {
-  const keys = [];
+  const keys = [`row:${rowKey(r)}`];
   if (r.udiDi) keys.push(`udi:${normKey(r.udiDi)}`);
   if (r.authorizationId && r.model)
     keys.push(`cert+model:${normKey(r.authorizationId)}|${normKey(r.model)}`);
-  if ((r.manufacturerRegistryId || r.manufacturerName) && r.model)
+  if (r.model)
     keys.push(
       `mf+model:${normKey(r.manufacturerRegistryId ?? r.manufacturerName)}|${normKey(r.model)}|${normKey(r.brandName) ?? ''}`,
     );
@@ -247,43 +265,54 @@ export function dedupe(records) {
     const keys = dedupeKeys(r);
     const hit = keys.find((k) => seen.has(k));
     if (hit) {
-      duplicates.push({ id: r.id, duplicateOf: seen.get(hit), key: hit });
+      duplicates.push({
+        row: rowKey(r),
+        duplicateOf: seen.get(hit),
+        key: hit.split(':')[0],
+      });
       continue;
     }
-    for (const k of keys) seen.set(k, r.id);
+    for (const k of keys) seen.set(k, rowKey(r));
     kept.push(r);
   }
   return { kept, duplicates };
 }
 
 // -----------------------------------------------------------------------------
-// NDJSON comprimido y partido: orden determinista por `id`, partes < maxBytes
-// comprimidos, y las partes viejas que sobran se borran.
+// NDJSON gzip partido (`<base>-0001.ndjson.gz`, …): orden determinista, partes
+// < maxBytes comprimidos, sin cortar líneas; las partes viejas que sobran se
+// borran. Devuelve path, filas y sha256 de cada parte para el manifest.
 // -----------------------------------------------------------------------------
 
 export function writeNdjsonGzParts(
   baseName,
   rows,
-  { dir = outDir(), maxBytes = 45 * 1024 * 1024 } = {},
+  { dir = outDir(), maxBytes = 45 * 1024 * 1024, sortKey = rowKey } = {},
 ) {
   ensureDir(dir);
-  const sorted = [...rows].sort((a, b) =>
-    a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
-  );
+  const sorted = rows
+    .map((r) => [sortKey(r), r])
+    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+    .map(([, r]) => r);
   const parts = [];
   let chunk = [];
   let chunkBytes = 0;
-  // ~8:1 de compresión típica en NDJSON; se corta por tamaño crudo con margen.
+  // Se corta por tamaño crudo con margen (el NDJSON comprime ~8:1).
   const rawBudget = maxBytes * 6;
   const flush = () => {
-    const name = `${baseName}-${String(parts.length + 1).padStart(3, '0')}.ndjson.gz`;
+    const name = `${baseName}-${String(parts.length + 1).padStart(4, '0')}.ndjson.gz`;
     const buf = gzipSync(Buffer.from(chunk.join(''), 'utf8'), { level: 9 });
     if (buf.length >= maxBytes)
       throw new Error(
         `${name} pesa ${buf.length} B comprimido: bajar maxBytes`,
       );
     writeFileSync(join(dir, name), buf);
-    parts.push({ file: name, rows: chunk.length, bytes: buf.length });
+    parts.push({
+      path: name,
+      rows: chunk.length,
+      bytes: buf.length,
+      sha256: createHash('sha256').update(buf).digest('hex'),
+    });
     chunk = [];
     chunkBytes = 0;
   };
@@ -294,11 +323,10 @@ export function writeNdjsonGzParts(
     chunkBytes += line.length;
   }
   if (chunk.length) flush();
-  const keep = new Set(parts.map((p) => p.file));
+  const keep = new Set(parts.map((p) => p.path));
   for (const f of readdirSync(dir))
     if (
-      f.startsWith(`${baseName}-`) &&
-      f.endsWith('.ndjson.gz') &&
+      new RegExp(`^${baseName}-\\d{4}\\.ndjson\\.gz$`).test(f) &&
       !keep.has(f)
     )
       unlinkSync(join(dir, f));
@@ -308,7 +336,7 @@ export function writeNdjsonGzParts(
 export function readNdjsonGzParts(baseName, { dir = outDir() } = {}) {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((f) => f.startsWith(`${baseName}-`) && f.endsWith('.ndjson.gz'))
+    .filter((f) => new RegExp(`^${baseName}-\\d{4}\\.ndjson\\.gz$`).test(f))
     .sort()
     .flatMap((f) =>
       gunzipSync(readFileSync(join(dir, f)))

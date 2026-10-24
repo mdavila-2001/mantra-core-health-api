@@ -115,7 +115,7 @@ export function parseEmdnRows(header, records, prov) {
     terminal: c.terminal ?? !hasChild.has(c.code),
     terminalSource: c.terminal === null ? 'deducido-sin-hijos' : 'archivo',
     scope: classifyEmdn(c.code),
-    source: 'EMDN',
+    source: 'ec-emdn',
     sourceRecordId: c.code,
     sourceUrl: `https://webgate.ec.europa.eu/dyna2/emdn/${c.code}`,
     sourceFileUrl: prov.sourceUrl,

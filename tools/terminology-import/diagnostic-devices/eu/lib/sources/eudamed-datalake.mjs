@@ -12,9 +12,9 @@
 // lee por su nombre exacto y lo desconocido se conserva sin interpretar.
 // =============================================================================
 
-import { clean, makeDeviceRecord, makeManufacturerRecord } from '../common.mjs';
+import { clean, makeDeviceRecord } from '../common.mjs';
 
-export const SOURCE = 'EUDAMED';
+export const SOURCE = 'eudamed-udi';
 export const BASE_URL = (
   process.env.EUDAMED_BASE_URL ??
   'https://api.datalake.sante.service.ec.europa.eu/eudamed'
@@ -87,10 +87,39 @@ export function splitNomenclature(value) {
     .filter(Boolean);
 }
 
+/** Esquema de clase según la legislación decodificada por /reference. */
+const LEGISLATION_SCHEMES = [
+  [/2017\/745|\bMDR\b/i, 'eu-mdr'],
+  [/2017\/746|\bIVDR\b/i, 'eu-ivdr'],
+  [/93\/42|\bMDD\b/i, 'eu-mdd'],
+  [/98\/79|\bIVDD\b/i, 'eu-ivdd'],
+  [/90\/385|\bAIMDD\b/i, 'eu-aimdd'],
+];
+const CLASS_RE = /^(?:class\s+)?(I{1,3}|IIA|IIB|A|B|C|D)$/i;
+
 /**
- * Fila de GET /udi → registro común.
+ * Clase de riesgo con esquema: `eu-mdr:IIa`, `eu-ivdr:C`, … solo si la
+ * legislación y la etiqueta decodificadas encajan exactamente; si no, la
+ * etiqueta verbatim con el esquema `eudamed:`. Nunca se deduce una clase.
+ */
+export function riskClassWithScheme(riskLabel, legislationLabel) {
+  const label = clean(riskLabel);
+  if (!label) return null;
+  const scheme = LEGISLATION_SCHEMES.find(([re]) =>
+    re.test(legislationLabel ?? ''),
+  )?.[1];
+  const m = CLASS_RE.exec(label);
+  if (scheme && m) {
+    const c = m[1].toUpperCase();
+    return `${scheme}:${c === 'IIA' ? 'IIa' : c === 'IIB' ? 'IIb' : c}`;
+  }
+  return `eudamed:${label}`;
+}
+
+/**
+ * Fila de GET /udi → fila del formato común.
  * @param {object} row
- * @param {{ reference?: Map, emdnByCode?: Map, sourceUrl: string, retrievedAt: string }} ctx
+ * @param {{ reference?: Map, emdnByCode?: Map, actorsBySrn?: Map, sourceUrl: string, retrievedAt: string }} ctx
  */
 export function normalizeUdiRow(row, ctx) {
   const emdnCodes = splitNomenclature(row.NOMENCLATURE_CODE);
@@ -98,30 +127,38 @@ export function normalizeUdiRow(row, ctx) {
   const model = clean(row.DEVICE_MODEL);
   const reference = clean(row.REFERENCE);
   const mfSrn = clean(row.MF_SRN);
+  const actor = mfSrn ? ctx.actorsBySrn?.get(mfSrn) : null;
+  const actorCountry =
+    clean(actor?.ACT_COUNTRY_ISO2_CODE)?.toUpperCase() ?? null;
+  const legislation = decode(
+    ctx.reference,
+    'APPLICABLE_LEGISLATION_ID',
+    row.APPLICABLE_LEGISLATION_ID,
+  );
+  const riskLabel = decode(ctx.reference, 'RISK_CLASS_ID', row.RISK_CLASS_ID);
   const recordId =
     clean(row.UUID) ??
     (row.ID !== null && row.ID !== undefined ? `ID:${row.ID}` : null);
+  const hasVersion =
+    row.VERSION_NUMBER !== null && row.VERSION_NUMBER !== undefined;
   return makeDeviceRecord({
     source: SOURCE,
     sourceRecordId: recordId,
     sourceUrl: ctx.sourceUrl,
-    sourceVersion:
-      row.VERSION_NUMBER !== null && row.VERSION_NUMBER !== undefined
-        ? String(row.VERSION_NUMBER)
-        : null,
+    sourceVersion: `eudamed-public-api-${API_VERSION}${hasVersion ? `;record-version=${row.VERSION_NUMBER}` : ''}`,
     retrievedAt: ctx.retrievedAt,
     deviceTypeCode: primary,
-    deviceTypeSystem: primary ? 'EMDN' : null,
+    deviceTypeSystem: primary ? 'emdn' : null,
     deviceTypeName: primary
       ? (ctx.emdnByCode?.get(primary)?.display ?? null)
       : null,
     manufacturerName: row.MF_NAME,
-    manufacturerCountry: countryFromSrn(mfSrn),
-    manufacturerRegistryId: mfSrn,
+    manufacturerCountry: actorCountry ?? countryFromSrn(mfSrn),
+    manufacturerRegistryId: mfSrn ? `srn:${mfSrn}` : null,
     brandName: row.TRADE_NAME,
     model: model ?? reference,
     udiDi: row.PRIMARY_DI,
-    riskClass: decode(ctx.reference, 'RISK_CLASS_ID', row.RISK_CLASS_ID),
+    riskClass: riskClassWithScheme(riskLabel, legislation),
     authorizationId: null,
     authorizationDate: null,
     status: decode(
@@ -129,17 +166,21 @@ export function normalizeUdiRow(row, ctx) {
       'DEVICE_STATUS_TYPE_ID',
       row.DEVICE_STATUS_TYPE_ID ?? null,
     ),
-    extensions: {
+    extra: {
       basicUdiDi: clean(row.BASIC_UDI),
       deviceName: clean(row.DEVICE_NAME),
       reference,
       modelSource: model ? 'DEVICE_MODEL' : reference ? 'REFERENCE' : null,
-      emdnCodes: emdnCodes.length > 1 ? emdnCodes : null,
-      legislation: decode(
-        ctx.reference,
-        'APPLICABLE_LEGISLATION_ID',
-        row.APPLICABLE_LEGISLATION_ID,
-      ),
+      deviceTypes:
+        emdnCodes.length > 1
+          ? emdnCodes.slice(1).map((code) => ({
+              system: 'emdn',
+              code,
+              name: ctx.emdnByCode?.get(code)?.display ?? null,
+            }))
+          : null,
+      riskClassLabel: riskLabel,
+      legislation,
       placedOnTheMarket: decode(
         ctx.reference,
         'PLACED_ON_THE_MARKET_ID',
@@ -148,27 +189,22 @@ export function normalizeUdiRow(row, ctx) {
       recordStatus: decode(ctx.reference, 'STATUS_ID', row.STATUS_ID),
       authorisedRepresentativeSrn: clean(row.AR_SRN),
       authorisedRepresentativeName: clean(row.AR_NAME),
-      manufacturerCountrySource: countryFromSrn(mfSrn) ? 'prefijo-SRN' : null,
+      manufacturerCountrySource: actorCountry
+        ? 'eudamed-actors:ACT_COUNTRY_ISO2_CODE'
+        : countryFromSrn(mfSrn)
+          ? 'prefijo-SRN'
+          : null,
+      manufacturerActorName: clean(actor?.NAME),
     },
   });
 }
 
-/** Fila de GET /actors → registro de fabricante. */
-export function normalizeActorRow(row, ctx) {
-  return makeManufacturerRecord({
-    source: SOURCE,
-    sourceRecordId: row.ACTOR_ID,
-    sourceUrl: ctx.sourceUrl,
-    sourceVersion: null,
-    retrievedAt: ctx.retrievedAt,
-    manufacturerRegistryId: row.ACTOR_ID,
-    manufacturerName: row.NAME,
-    manufacturerCountry:
-      clean(row.ACT_COUNTRY_ISO2_CODE)?.toUpperCase() ?? null,
-    actorRole: row.ACTOR_TYPE,
-    extensions: {
-      abbreviatedName: clean(row.ABBREVIATED_NAME),
-      actorStatus: clean(row.STATUS),
-    },
-  });
+/** Filas de GET /actors → mapa SRN → actor (para país y nombre registrados). */
+export function indexActors(rows) {
+  const idx = new Map();
+  for (const r of rows) {
+    const id = clean(r.ACTOR_ID);
+    if (id) idx.set(id, r);
+  }
+  return idx;
 }

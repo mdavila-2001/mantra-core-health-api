@@ -1,34 +1,42 @@
 # Cobertura — equipos de diagnóstico, registros de Europa
 
-Generado: 2026-10-24T03:12:03.872Z
+Generado: 2026-10-24T03:31:17.451Z
 
 | Métrica | Valor |
 |---|---|
 | Filas leídas de las fuentes | 0 |
-| Equipos en alcance (tras deduplicar) | 0 |
+| Filas exportadas (tras deduplicar) | 0 |
+| · en alcance diagnóstico | 0 |
+| · en categorías pendientes de revisión | 0 |
 | Duplicados descartados | 0 |
+| Filas rechazadas por formato | 0 |
 | Fabricantes distintos | 0 |
 | Marcas distintas (fabricante + marca) | 0 |
 | Conceptos EMDN cargados | 0 |
 | Conceptos EMDN en alcance | 0 |
 | Tipos terminales en alcance sin ningún equipo | 0 |
 
-## Equipos por fuente
-| Fuente | Equipos |
+## Filas por fuente
+| Fuente | Filas |
 |---|---|
 | — | 0 |
 
-## Equipos por categoría EMDN
-| Categoría | Equipos |
+## Filas por regla de alcance
+| Regla | Filas |
 |---|---|
 | — | 0 |
 
-## Equipos por grupo EMDN
-| Grupo | Equipos |
+## Filas por categoría EMDN
+| Categoría | Filas |
 |---|---|
 | — | 0 |
 
-## Filas excluidas por regla de alcance
+## Filas por grupo EMDN
+| Grupo | Filas |
+|---|---|
+| — | 0 |
+
+## Filas no exportadas por regla de alcance
 | Regla | Filas |
 |---|---|
 | — | 0 |
@@ -36,11 +44,11 @@ Generado: 2026-10-24T03:12:03.872Z
 ## Alcance EMDN
 - Incluidas enteras: W
 - Tipos incluidos fuera de W: ninguno todavía
-- En revisión tipo por tipo: C, G, N, Q, R, U, V, Z
+- Exportadas como pendientes de revisión: C, G, N, Q, R, U, V, Z
 - Excluidas enteras: A, B, D, F, H, J, K, L, M, P, S, T, X, Y
 
 ## Huecos
-**Bloqueadas por la política de red del entorno** (sondeo 2026-10-24T03:11:54.583Z): `health.ec.europa.eu`, `api.datalake.sante.service.ec.europa.eu`, `ec.europa.eu`, `pard.mhra.gov.uk`, `swissdamed.ch`, `www.dati.salute.gov.it`, `www.dati.salute.gov.it`, `webgate.ec.europa.eu`, `www.bfarm.de`, `www.aemps.gob.es`, `ansm.sante.fr`.
+**Bloqueadas por la política de red del entorno** (sondeo 2026-10-24T03:30:47.327Z): `health.ec.europa.eu`, `api.datalake.sante.service.ec.europa.eu`, `ec.europa.eu`, `pard.mhra.gov.uk`, `swissdamed.ch`, `www.dati.salute.gov.it`, `www.dati.salute.gov.it`, `webgate.ec.europa.eu`, `www.bfarm.de`, `www.aemps.gob.es`, `ansm.sante.fr`.
 
 Hosts a habilitar: `ansm.sante.fr`, `api.datalake.sante.service.ec.europa.eu`, `ec.europa.eu`, `health.ec.europa.eu`, `pard.mhra.gov.uk`, `swissdamed.ch`, `webgate.ec.europa.eu`, `www.aemps.gob.es`, `www.bfarm.de`, `www.dati.salute.gov.it`.
 
@@ -57,5 +65,5 @@ Hosts a habilitar: `ansm.sante.fr`, `api.datalake.sante.service.ec.europa.eu`, `
 | EUDAMED_DATALAKE | bloqueado por la política de red del entorno (proxy 403) |  |
 | IT_BDRDM | bloqueado por la política de red del entorno (proxy 403) |  |
 | IT_CND | bloqueado por la política de red del entorno (proxy 403) |  |
-| EUDAMED_DATALAKE | paginación incompleta en caché (se volverá a pedir) |  |
-| EMDN | EMDN no disponible en caché |  |
+| eudamed-udi | paginación incompleta en caché (se volverá a pedir) |  |
+| ec-emdn | EMDN no disponible en caché |  |

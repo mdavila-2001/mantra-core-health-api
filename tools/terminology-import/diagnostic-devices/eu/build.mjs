@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // =============================================================================
-// Etapa 2 (sin red): crudos del caché → NDJSON del formato común.
+// Etapa 2 (sin red): crudos del caché → formato común de
+// `../README.md` (lo define la sesión `master`):
 //
-//   out/emdn-NNN.ndjson.gz               EMDN completa con jerarquía y alcance
-//   out/devices-eu-NNN.ndjson.gz         equipos de diagnóstico (formato común)
-//   out/manufacturers-eu-NNN.ndjson.gz   fabricantes legales de esos equipos
+//   out/manifest.json                    región, archivos (filas, sha256) y huecos
+//   out/<source>-NNNN.ndjson.gz          una fila por registro de un modelo
+//                                        (eudamed-udi, it-salute-bdrdm, …)
+//   out/emdn/ec-emdn-NNNN.ndjson.gz      EMDN completa con jerarquía y alcance
+//                                        (clasificación, no filas de equipos)
 //   out/coverage.json / coverage.md      cobertura y huecos
 //   out/emdn-scope-review.md             tipos EMDN pendientes de decidir
 //
@@ -19,6 +22,7 @@ import {
   outDir,
   parseCsv,
   readJson,
+  RowError,
   writeJson,
   writeNdjsonGzParts,
 } from './lib/common.mjs';
@@ -40,11 +44,11 @@ import {
 import { SOURCES, requiredHosts } from './lib/sources.mjs';
 
 const MANIFEST = cacheDir('manifest.json');
-const manifest = existsSync(MANIFEST)
+const cache = existsSync(MANIFEST)
   ? readJson(MANIFEST)
   : { files: [], gaps: [] };
-const fileMeta = new Map(manifest.files.map((f) => [f.file, f]));
-const gaps = [...(manifest.gaps ?? [])];
+const fileMeta = new Map(cache.files.map((f) => [f.file, f]));
+const gaps = [...(cache.gaps ?? [])];
 
 function latestProbe() {
   const dir = outDir('probe');
@@ -56,7 +60,7 @@ function latestProbe() {
   return last ? readJson(join(dir, last)) : null;
 }
 
-/** Páginas completas de una carpeta del Data Lake (las incompletas se ignoran y se reportan). */
+/** Páginas completas de una carpeta del Data Lake (las incompletas se reportan y se ignoran). */
 function readPagedDirs(root) {
   if (!existsSync(root)) return [];
   const out = [];
@@ -64,9 +68,8 @@ function readPagedDirs(root) {
     const dir = join(root, sub);
     if (!existsSync(join(dir, '_complete.json'))) {
       gaps.push({
-        source: 'EUDAMED_DATALAKE',
+        source: 'eudamed-udi',
         url: dir,
-        at: nowIso(),
         reason: 'paginación incompleta en caché (se volverá a pedir)',
       });
       continue;
@@ -84,7 +87,7 @@ function readPagedDirs(root) {
 }
 
 async function loadEmdn() {
-  const xlsx = manifest.files.find(
+  const xlsx = cache.files.find(
     (f) => f.source === 'EMDN' && /\.xlsx?$/i.test(f.file),
   );
   if (!xlsx) return [];
@@ -99,7 +102,7 @@ async function loadEmdn() {
 }
 
 function loadBdrdm() {
-  const csv = manifest.files.find(
+  const csv = cache.files.find(
     (f) => f.source === 'IT_BDRDM' && /\.csv$/i.test(f.file),
   );
   if (!csv) return [];
@@ -112,22 +115,62 @@ function loadBdrdm() {
   try {
     assertColumnMap(map, header);
   } catch (err) {
-    gaps.push({
-      source: 'IT_BDRDM',
-      url: csv.url,
-      at: nowIso(),
-      reason: err.message,
-    });
-    console.warn(`[IT_BDRDM] ${err.message}`);
+    gaps.push({ source: 'it-salute-bdrdm', url: csv.url, reason: err.message });
+    console.warn(`[it-salute-bdrdm] ${err.message}`);
     return [];
   }
-  return records.map((row) =>
-    normalizeBdrdmRow(row, map, {
-      sourceUrl: csv.url,
-      sourceVersion: `sha256:${csv.sha256.slice(0, 12)}`,
-      retrievedAt: csv.retrievedAt,
-    }),
+  const rows = [];
+  for (const row of records)
+    try {
+      rows.push(
+        normalizeBdrdmRow(row, map, {
+          sourceUrl: csv.url,
+          sourceVersion: `sha256:${csv.sha256.slice(0, 12)}`,
+          retrievedAt: csv.retrievedAt,
+        }),
+      );
+    } catch (err) {
+      if (!(err instanceof RowError)) throw err;
+    }
+  return rows;
+}
+
+/**
+ * Huecos con la clave de fuente del formato común: uno por fuente sin filas,
+ * con el bloqueo del último sondeo si lo hubo y el motivo propio (términos,
+ * sin descarga masiva, mapeo pendiente) si existe.
+ */
+function manifestGaps(rawGaps, probe) {
+  const blocked = new Map(
+    (probe?.results ?? []).map((r) => [r.source, r.blockedByEnvironment]),
   );
+  const keyOf = new Map(
+    Object.entries(SOURCES).flatMap(([k, s]) => [
+      [k, s.exchangeSource],
+      [s.exchangeSource, s.exchangeSource],
+    ]),
+  );
+  const out = new Map();
+  for (const [key, s] of Object.entries(SOURCES)) {
+    const reasons = [];
+    if (blocked.get(key))
+      reasons.push(
+        `403 del proxy (política de red del entorno, sondeo ${probe.startedAt})`,
+      );
+    if (!s.autoFetch) reasons.push(`sin descarga automática: ${s.terms.text}`);
+    if (reasons.length)
+      out.set(s.exchangeSource, {
+        source: s.exchangeSource,
+        reason: reasons.join(' · '),
+        url: s.officialUrl,
+      });
+  }
+  for (const g of rawGaps) {
+    const source = keyOf.get(g.source) ?? g.source;
+    if (out.has(source) || /^bloqueado/.test(g.reason)) continue;
+    out.set(source, { source, reason: g.reason, url: g.url });
+  }
+  return [...out.values()];
 }
 
 function scopeReviewMd(concepts) {
@@ -166,30 +209,38 @@ Generado: ${cov.generatedAt}
 | Métrica | Valor |
 |---|---|
 | Filas leídas de las fuentes | ${cov.totalRead} |
-| Equipos en alcance (tras deduplicar) | ${cov.devicesInScope} |
+| Filas exportadas (tras deduplicar) | ${cov.devicesExported} |
+| · en alcance diagnóstico | ${cov.devicesInScope} |
+| · en categorías pendientes de revisión | ${cov.devicesPendingReview} |
 | Duplicados descartados | ${cov.duplicatesDropped} |
+| Filas rechazadas por formato | ${cov.rejectedRows} |
 | Fabricantes distintos | ${cov.distinctManufacturers} |
 | Marcas distintas (fabricante + marca) | ${cov.distinctBrands} |
 | Conceptos EMDN cargados | ${cov.emdn.concepts} |
 | Conceptos EMDN en alcance | ${cov.emdn.inScopeConcepts} |
 | Tipos terminales en alcance sin ningún equipo | ${cov.emdn.inScopeTerminalWithoutDevices} |
 
-## Equipos por fuente
-| Fuente | Equipos |
+## Filas por fuente
+| Fuente | Filas |
 |---|---|
 ${t(cov.devicesBySource)}
 
-## Equipos por categoría EMDN
-| Categoría | Equipos |
+## Filas por regla de alcance
+| Regla | Filas |
+|---|---|
+${t(cov.devicesByScope)}
+
+## Filas por categoría EMDN
+| Categoría | Filas |
 |---|---|
 ${t(cov.devicesByEmdnCategory)}
 
-## Equipos por grupo EMDN
-| Grupo | Equipos |
+## Filas por grupo EMDN
+| Grupo | Filas |
 |---|---|
 ${t(cov.devicesByEmdnGroup)}
 
-## Filas excluidas por regla de alcance
+## Filas no exportadas por regla de alcance
 | Regla | Filas |
 |---|---|
 ${t(cov.excludedByRule)}
@@ -197,7 +248,7 @@ ${t(cov.excludedByRule)}
 ## Alcance EMDN
 - Incluidas enteras: ${Object.keys(INCLUDED_CATEGORIES).join(', ')}
 - Tipos incluidos fuera de W: ${INCLUDED_TYPE_PREFIXES.length || 'ninguno todavía'}
-- En revisión tipo por tipo: ${Object.keys(REVIEW_CATEGORIES).join(', ')}
+- Exportadas como pendientes de revisión: ${Object.keys(REVIEW_CATEGORIES).join(', ')}
 - Excluidas enteras: ${Object.keys(EXCLUDED_CATEGORIES).join(', ')}
 
 ## Huecos
@@ -220,32 +271,76 @@ async function main() {
     (p) => p.rows,
   );
   const udiPages = readPagedDirs(cacheDir('eudamed', 'udi'));
-  const actorPages = readPagedDirs(cacheDir('eudamed', 'actors'));
+  const actorRows = readPagedDirs(cacheDir('eudamed', 'actors')).flatMap(
+    (p) => p.rows,
+  );
   const bdrdm = loadBdrdm();
   if (!emdnConcepts.length)
     gaps.push({
-      source: 'EMDN',
+      source: 'ec-emdn',
       url: SOURCES.EMDN.officialUrl,
-      at: nowIso(),
       reason: 'EMDN no disponible en caché',
     });
 
-  const { devices, manufacturers, coverage } = buildCorpus({
+  const { devices, coverage } = buildCorpus({
     emdnConcepts,
     referenceRows,
     udiPages,
-    actorPages,
+    actorRows,
     extraDevices: bdrdm,
     gaps,
   });
   coverage.generatedAt = nowIso();
 
-  const parts = {
-    emdn: emdnConcepts.length ? writeNdjsonGzParts('emdn', emdnConcepts) : [],
-    devices: writeNdjsonGzParts('devices-eu', devices),
-    manufacturers: writeNdjsonGzParts('manufacturers-eu', manufacturers),
-  };
-  coverage.parts = parts;
+  // Un juego de partes por fuente; las fuentes sin filas no dejan archivos.
+  const bySource = new Map();
+  for (const d of devices)
+    (bySource.get(d.source) ?? bySource.set(d.source, []).get(d.source)).push(
+      d,
+    );
+  const knownSources = [
+    'eudamed-udi',
+    'it-salute-bdrdm',
+    'swissmedic-swissdamed',
+    'mhra-pard',
+  ];
+  const files = [];
+  for (const source of new Set([...knownSources, ...bySource.keys()])) {
+    const rows = bySource.get(source) ?? [];
+    const version = [
+      ...new Set(rows.map((r) => r.sourceVersion.split(';')[0])),
+    ].join(',');
+    for (const part of writeNdjsonGzParts(source, rows))
+      files.push({ ...part, source, sourceVersion: version });
+  }
+  const emdnParts = writeNdjsonGzParts('ec-emdn', emdnConcepts, {
+    dir: outDir('emdn'),
+    sortKey: (c) => c.code,
+  });
+
+  writeJson(outDir('manifest.json'), {
+    region: 'eu',
+    generatedAt: nowIso().replace(/\.\d+Z$/, 'Z'),
+    formatVersion: 1,
+    files: files.map(({ path, source, sourceVersion, rows, sha256 }) => ({
+      path,
+      source,
+      sourceVersion,
+      rows,
+      sha256,
+    })),
+    classifications: emdnParts.map(({ path, rows, sha256 }) => ({
+      path: `emdn/${path}`,
+      system: 'emdn',
+      sourceVersion: emdnConcepts[0]?.sourceVersion ?? null,
+      rows,
+      sha256,
+    })),
+    scope:
+      'Exporta filas con EMDN/CND en alcance (categoría W entera y tipos listados) y, marcadas en extra.dxScope = "pendiente-revision:<letra>", las de categorías C, G, N, Q, R, U, V y Z para que master las clasifique. No exporta categorías excluidas (ver lib/emdn-scope.mjs).',
+    gaps: manifestGaps(gaps, latestProbe()),
+  });
+  coverage.files = files;
   writeJson(outDir('coverage.json'), coverage);
   writeFileSync(outDir('coverage.md'), coverageMd(coverage, latestProbe()));
   if (emdnConcepts.length)
@@ -254,12 +349,15 @@ async function main() {
   console.log(
     JSON.stringify(
       {
+        devicesExported: coverage.devicesExported,
         devicesInScope: coverage.devicesInScope,
-        manufacturers: manufacturers.length,
+        devicesPendingReview: coverage.devicesPendingReview,
+        distinctManufacturers: coverage.distinctManufacturers,
         distinctBrands: coverage.distinctBrands,
+        rejectedRows: coverage.rejectedRows,
         emdnConcepts: emdnConcepts.length,
         gaps: coverage.gaps.length,
-        parts,
+        files: files.length,
       },
       null,
       2,
