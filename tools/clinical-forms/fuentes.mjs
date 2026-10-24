@@ -260,6 +260,16 @@ export const FUENTES = {
     url: 'https://www.aao.org/education/preferred-practice-pattern',
     license: CATEGORIAS,
   },
+  CKM_MAYO: {
+    sourceTitle:
+      'Mayo score (openEHR-EHR-OBSERVATION.mayo_score.v1), International Clinical Knowledge Manager',
+    organization: 'openEHR Foundation',
+    url: 'https://ckm.openehr.org/ckm/',
+    sourceVersion:
+      'rev. 1.0.0 (publicado); espejo github.com/openEHR/CKM-mirror',
+    license:
+      'Arquetipo CC BY-SA 4.0; el puntaje (Schroeder KW et al., NEJM 1987) se usa como categorías clínicas',
+  },
   ACR_BIRADS: {
     sourceTitle: 'Breast Imaging Reporting and Data System (BI-RADS)',
     organization: 'American College of Radiology (ACR)',

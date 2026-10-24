@@ -2,7 +2,7 @@
   "code": "ANEST_VALORACION_PREANESTESICA",
   "name": "Anestesiología — valoración preanestésica (ficha base)",
   "specialty": { "code": "ANESTESIOLOGIA", "display": "Anestesiología" },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, anamnesis, antecedentes y examen físico preoperatorio",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -10,7 +10,7 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "De la norma sale la estructura común de la consulta: motivo, antecedentes patológicos, alergias, medicación habitual, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad el procedimiento previsto, el ayuno en horas, la evaluación de la vía aérea (Mallampati, apertura bucal, movilidad cervical), las piezas dentarias en riesgo, las experiencias anestésicas previas y sus complicaciones, la clasificación ASA registrada como texto libre y el plan anestésico propuesto. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ASA, Mallampati, distancia tiromentoniana de Patil."
+    "note": "De la norma sale la estructura común de la consulta: motivo, antecedentes patológicos, alergias, medicación habitual, examen físico dirigido, diagnóstico y conducta. Son agregados propios de la especialidad el procedimiento previsto, el ayuno en horas, la evaluación de la vía aérea (Mallampati, apertura bucal, movilidad cervical), las piezas dentarias en riesgo, las experiencias anestésicas previas y sus complicaciones, la clasificación ASA registrada como texto libre y el plan anestésico propuesto. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación ASA, Mallampati, distancia tiromentoniana de Patil. Ampliación internacional (2026-10-24): factores del índice de riesgo cardíaco revisado de Lee desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -320,6 +320,24 @@
       "name": "Laboratorio y ECG relevantes",
       "dataType": "text",
       "required": false
+    },
+    {
+      "section": "Evaluación",
+      "code": "rcri_factores",
+      "name": "Índice de riesgo cardíaco revisado (Lee): factores presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cirugía de alto riesgo: intraperitoneal, intratorácica o vascular suprainguinal (1 punto)",
+        "Cardiopatía isquémica: infarto previo, prueba de esfuerzo positiva, angina actual, uso de nitratos u onda Q en el ECG (1 punto)",
+        "Insuficiencia cardíaca (1 punto)",
+        "Enfermedad cerebrovascular: ACV o accidente isquémico transitorio previo (1 punto)",
+        "Diabetes en tratamiento con insulina (1 punto)",
+        "Creatinina preoperatoria elevada: ≥ 2 mg/dL (≥ 177 µmol/L) (1 punto)",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "Riesgo de complicación cardíaca mayor según Lee et al.: 0 factores 0,4 %; 1 factor 0,9 %; 2 factores 6,6 %; 3 o más ≥ 11 %. Fuente: índice de riesgo cardíaco revisado (Lee TH et al. Circulation. 1999;100(10):1043-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.revised_cardiac_risk_index.v1 (rev. 1.0.0, publicado; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación",

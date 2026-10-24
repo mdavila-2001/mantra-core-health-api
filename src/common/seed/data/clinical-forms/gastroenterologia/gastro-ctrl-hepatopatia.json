@@ -2,14 +2,14 @@
   "code": "GASTRO_CTRL_HEPATOPATIA",
   "name": "Control de hepatopatía crónica y cirrosis",
   "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
     "organization": "Ministerio de Salud del Perú (MINSA)",
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "Gravedad por Child-Pugh (puntaje publicado de uso libre), descompensaciones y tamizaje de hepatocarcinoma."
+    "note": "Gravedad por Child-Pugh (puntaje publicado de uso libre), descompensaciones y tamizaje de hepatocarcinoma. Ampliación internacional (2026-10-24): los cinco ítems de la clasificación de Child-Pugh desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -88,6 +88,63 @@
         "Autoinmune",
         "Otra o no establecida"
       ]
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_bilirrubina",
+      "name": "Child-Pugh — bilirrubina total (µmol/L)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — menor de 34 µmol/L",
+        "2 — de 34 a 50 µmol/L",
+        "3 — mayor de 50 µmol/L"
+      ],
+      "description": "Conversión de unidades: 1 mg/dL de bilirrubina = 17,1 µmol/L (34 µmol/L ≈ 2 mg/dL; 50 µmol/L ≈ 3 mg/dL). Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_albumina",
+      "name": "Child-Pugh — albúmina sérica (g/L)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — mayor de 35 g/L",
+        "2 — de 28 a 35 g/L",
+        "3 — menor de 28 g/L"
+      ],
+      "description": "Conversión de unidades: 35 g/L = 3,5 g/dL; 28 g/L = 2,8 g/dL. Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_inr",
+      "name": "Child-Pugh — INR",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 — menor de 1,7", "2 — de 1,7 a 2,3", "3 — mayor de 2,3"],
+      "description": "Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_ascitis",
+      "name": "Child-Pugh — ascitis",
+      "dataType": "string",
+      "required": false,
+      "options": ["1 — Ausente", "2 — Leve", "3 — Moderada a grave"],
+      "description": "Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
+    },
+    {
+      "section": "Evaluación: hepatopatía crónica",
+      "code": "child_pugh_encefalopatia",
+      "name": "Child-Pugh — encefalopatía hepática",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "1 — Ausente",
+        "2 — Grado I a II o controlada con medicación",
+        "3 — Grado III a IV o refractaria"
+      ],
+      "description": "La suma de los cinco ítems (5 a 15) da la clase: A 5–6, B 7–9, C 10–15. Fuente: clasificación de Child-Pugh (Child CG, Turcotte JG. 1964; Pugh RN et al. Br J Surg. 1973;60:646-9), según el arquetipo openEHR openEHR-EHR-OBSERVATION.child_pugh_score.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: hepatopatía crónica",

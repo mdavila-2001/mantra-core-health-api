@@ -2,14 +2,14 @@
   "code": "ENDO_CTRL_DM2",
   "name": "Control de diabetes mellitus tipo 2",
   "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "HEARTS-D: diagnóstico y manejo de la diabetes tipo 2",
     "organization": "Organización Mundial de la Salud (OMS)",
     "url": "https://www.who.int/publications/i/item/who-ucn-ncd-20.1",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Visita de control de HEARTS-D: glucemia y HbA1c, hipoglucemias, pie, ojo y riñón, y factores de riesgo cardiovascular."
+    "note": "Visita de control de HEARTS-D: glucemia y HbA1c, hipoglucemias, pie, ojo y riñón, y factores de riesgo cardiovascular. Ampliación internacional (2026-10-24): grado de Wagner de la úlcera de pie diabético (traducción es-AR del CKM) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -115,6 +115,23 @@
         "Úlcera o lesión presente",
         "No evaluado"
       ]
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "dm_pie_wagner",
+      "name": "Úlcera de pie diabético — grado de Wagner",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Piel intacta en pacientes en riesgo",
+        "1 — Úlceras superficiales con tejido subcutáneo expuesto",
+        "2 — Tendones y estructuras profundas expuestas",
+        "3 — Úlceras extendidas a los tejidos profundos, asociadas a absceso de tejidos blandos u osteomielitis",
+        "4 — Úlceras que incluyen al pie con gangrena parcial",
+        "5 — Úlceras del pie con tejido gangrenoso más extendido"
+      ],
+      "description": "Las definiciones son las descripciones de la traducción es-AR del CKM, con la ortografía corregida (subcutáneo, osteomielitis, pie). Fuente: clasificación de Wagner (Wagner FW. Foot Ankle. 1981;2:64-122), según el arquetipo openEHR openEHR-EHR-OBSERVATION.diabetic_wound_wagner.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Texto del CKM con una corrección propia de un defecto comprobado (ver docs/seed-research/clinical-forms.md).",
+      "showWhen": { "field": "dm_pie", "equals": "Úlcera o lesión presente" }
     },
     {
       "section": "Evaluación: diabetes tipo 2",

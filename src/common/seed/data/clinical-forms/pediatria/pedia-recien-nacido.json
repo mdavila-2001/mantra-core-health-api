@@ -2,14 +2,14 @@
   "code": "PEDIA_RECIEN_NACIDO",
   "name": "Atención del recién nacido",
   "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Recomendaciones de la OMS sobre la atención materna y neonatal para una experiencia posnatal positiva (2022)",
     "organization": "Organización Mundial de la Salud (OMS)",
     "url": "https://www.who.int/publications/i/item/9789240045989",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Apgar, antropometría, tamizajes y signos de peligro del recién nacido."
+    "note": "Apgar, antropometría, tamizajes y signos de peligro del recién nacido. Ampliación internacional (2026-10-24): ítems del puntaje de Apgar al minuto y a los 5 minutos (traducción al castellano del CKM) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 4.0, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -22,10 +22,132 @@
     },
     {
       "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_respiracion",
+      "name": "Apgar al minuto — esfuerzo respiratorio",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Ausente", "1 — Débil o irregular", "2 — Normal"],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_frecuencia_cardiaca",
+      "name": "Apgar al minuto — frecuencia cardíaca",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "1 — <100 latidos por minuto",
+        "2 — ≥100 latidos por minuto"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_tono",
+      "name": "Apgar al minuto — tono muscular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente (flácido)",
+        "1 — Tono reducido",
+        "2 — Tono normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_reflejos",
+      "name": "Apgar al minuto — reflejos e irritabilidad",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin respuesta",
+        "1 — Respuesta reducida",
+        "2 — Respuesta normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1min_color",
+      "name": "Apgar al minuto — color de la piel",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Completamente azul",
+        "1 — Cuerpo rosado; extremidades azules",
+        "2 — Completamente rosado"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
       "code": "apgar_1",
       "name": "Apgar al minuto",
       "dataType": "integer",
       "required": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_respiracion",
+      "name": "Apgar a los 5 minutos — esfuerzo respiratorio",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Ausente", "1 — Débil o irregular", "2 — Normal"],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_frecuencia_cardiaca",
+      "name": "Apgar a los 5 minutos — frecuencia cardíaca",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente",
+        "1 — <100 latidos por minuto",
+        "2 — ≥100 latidos por minuto"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_tono",
+      "name": "Apgar a los 5 minutos — tono muscular",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente (flácido)",
+        "1 — Tono reducido",
+        "2 — Tono normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_reflejos",
+      "name": "Apgar a los 5 minutos — reflejos e irritabilidad",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Sin respuesta",
+        "1 — Respuesta reducida",
+        "2 — Respuesta normal"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5min_color",
+      "name": "Apgar a los 5 minutos — color de la piel",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Completamente azul",
+        "1 — Cuerpo rosado; extremidades azules",
+        "2 — Completamente rosado"
+      ],
+      "description": "Fuente: puntaje de Apgar (Apgar V. Curr Res Anesth Analg. 1953;32:260-7), según el arquetipo openEHR openEHR-EHR-OBSERVATION.apgar.v2 (rev. 2.0.5, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
     },
     {
       "section": "Evaluación: recién nacido",
