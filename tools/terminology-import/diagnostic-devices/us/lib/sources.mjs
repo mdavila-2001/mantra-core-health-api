@@ -107,4 +107,14 @@ export const MIRRORS = Object.freeze([
     },
     priority: 10,
   },
+  {
+    id: 'double-strand-naat-registry',
+    repo: 'https://github.com/double-strand/IVDmicrobialNAATregistry',
+    commit: '6cdd1e5ed9ebf875069d7028b3b9481ff185a386',
+    files: ['FDA510kPathogens_NAAT.csv', 'LICENSE'],
+    license: 'GPL-3.0 (double-strand). Contenido: la lista FDA «Nucleic Acid Based Tests» (dominio público) reordenada por patógeno con TaxID de NCBI.',
+    upstream: { url: 'https://www.fda.gov/medical-devices/in-vitro-diagnostics/nucleic-acid-based-tests', exportDate: null, note: 'sólo enriquece: patógenos y tecnología por K-number' },
+    enrichOnly: true,
+    priority: 0,
+  },
 ]);

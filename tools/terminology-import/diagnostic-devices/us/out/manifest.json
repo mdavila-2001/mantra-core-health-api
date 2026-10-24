@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T03:24:04.729Z",
+ "generatedAt": "2026-10-24T03:27:50.039Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -9,8 +9,8 @@
    "source": "fda-510k",
    "sourceVersion": "FDA pmn*.zip (510(k) Download Files) 2026-10-20 vía espejo https://github.com/bjoleary/fdadata@227bdaa24aec",
    "rows": 71955,
-   "bytes": 8879560,
-   "sha256": "ef06dbdf4203e716ca406c9270a6ea30be21ca83e1daced43f532ddcc5bf714f"
+   "bytes": 8959097,
+   "sha256": "0059523eea3d581ac0b47cc35366d51e6aef53f04f751ddc47393f64d48c70f4"
   },
   {
    "path": "fda-denovo-0001.ndjson.gz",
@@ -89,6 +89,17 @@
    "version": "AccessGUDID Full Release XML 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
    "records": 812322,
    "inScope": 3130
+  },
+  {
+   "source": "mirror double-strand-naat-registry",
+   "version": "FDA Nucleic Acid Based Tests list corte 2026-10-19 vía espejo https://github.com/double-strand/IVDmicrobialNAATregistry@6cdd1e5ed9eb",
+   "records": 456,
+   "submissions": 255,
+   "enriched": 253,
+   "unmatched": [
+    "K133448",
+    "K133883"
+   ]
   }
  ],
  "mirrors": [
@@ -313,6 +324,29 @@
     "url": "https://accessgudid.nlm.nih.gov/release_files/download/gudid_full_release_20250501.zip",
     "exportDate": "2025-05-01",
     "note": "Partes FULLDownload_PartN_Of_192_2025-05-01-dental.xml; filtro en DownloadGUDIDAndExpand.PS1 (medicalspecialty -eq DE)"
+   }
+  },
+  {
+   "id": "double-strand-naat-registry",
+   "repo": "https://github.com/double-strand/IVDmicrobialNAATregistry",
+   "commit": "6cdd1e5ed9ebf875069d7028b3b9481ff185a386",
+   "commitDate": "2026-10-19T23:31:31-04:00",
+   "files": [
+    {
+     "path": "FDA510kPathogens_NAAT.csv",
+     "bytes": 90664,
+     "sha256": "b1cfcc5091518abc375538d2520c23061710675aa34c2cd8f009b110b481b644"
+    },
+    {
+     "path": "LICENSE",
+     "bytes": 35149,
+     "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.fda.gov/medical-devices/in-vitro-diagnostics/nucleic-acid-based-tests",
+    "exportDate": null,
+    "note": "sólo enriquece: patógenos y tecnología por K-number"
    }
   },
   {

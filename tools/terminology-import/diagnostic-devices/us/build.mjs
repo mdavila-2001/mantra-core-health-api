@@ -41,7 +41,7 @@ import {
   observeUdi,
 } from './lib/normalize.mjs';
 import { MIRRORS_DIR, OFFICIAL_DIR, OUT_DIR, RAW_DIR } from './lib/paths.mjs';
-import { MIRRORS } from './lib/sources.mjs';
+import { MIRRORS, authorizationKind } from './lib/sources.mjs';
 
 const table = new ProductCodeTable();
 const bySource = new Map(); // source → Map(recordKey → row)
@@ -337,6 +337,36 @@ if (officialUdi.length) {
   gaps.push({ source: 'fda-gudid', url: 'https://accessgudid.nlm.nih.gov/download/delimited', reason: '403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles.' });
 } else {
   gaps.push({ source: 'fda-gudid', url: 'https://accessgudid.nlm.nih.gov/download/delimited', reason: '403 del proxy — accessgudid.nlm.nih.gov y download.open.fda.gov bloqueados por la red de la sesión. Sin GUDID no hay UDI-DI ni modelo/versión por equipo.' });
+}
+
+// --- 3b. Enriquecimiento: lista FDA de pruebas de ácidos nucleicos (patógenos por K-number) ---
+const naat = mirrorFile('double-strand-naat-registry', 'FDA510kPathogens_NAAT.csv');
+if (naat) {
+  const prov = mirrorProv('double-strand-naat-registry', 'FDA510kPathogens_NAAT.csv', 'FDA Nucleic Acid Based Tests list');
+  const byK = new Map();
+  const rows = parseCsv(readFileSync(naat, 'utf8'));
+  for (const r of rows) {
+    for (const k of String(r.Submissions ?? '').split(',').map((x) => x.trim().toUpperCase()).filter(Boolean)) {
+      const e = byK.get(k) ?? { targets: [], technologies: new Set() };
+      e.targets.push({ ncbiTaxId: r.TaxID, label: r.FDAregulatoryLabels, rank: r.rank });
+      if (r.Technology && r.Technology !== 'NA') e.technologies.add(r.Technology);
+      byK.set(k, e);
+    }
+  }
+  let matched = 0;
+  const unmatched = [];
+  for (const [k, e] of byK) {
+    const kind = authorizationKind(k);
+    const src = kind === 'DENOVO' ? 'fda-denovo' : kind === 'PMA' ? 'fda-pma' : 'fda-510k';
+    const row = [...(bySource.get(src)?.values() ?? [])].find((r) => r.authorizationId === k);
+    if (!row) {
+      unmatched.push(k);
+      continue;
+    }
+    row.extra = { ...row.extra, fdaNaatList: { targets: e.targets.sort((a, b) => a.ncbiTaxId.localeCompare(b.ncbiTaxId)), technologies: [...e.technologies].sort(), via: prov.via } };
+    matched++;
+  }
+  inputs.push({ source: 'mirror double-strand-naat-registry', version: prov.sourceVersion, records: rows.length, submissions: byK.size, enriched: matched, unmatched: unmatched.sort() });
 }
 
 // --- 4. Escritura ------------------------------------------------------------------

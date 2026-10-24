@@ -19,13 +19,11 @@
   "withCountry": 72195
  },
  "deltaVsPrevious": {
-  "records": 3130,
-  "manufacturers": 71,
-  "brands": 809,
-  "udiDi": 3130,
-  "bySource": {
-   "fda-gudid": 3130
-  }
+  "records": 0,
+  "manufacturers": 0,
+  "brands": 0,
+  "udiDi": 0,
+  "bySource": {}
  },
  "productCodes": {
   "seen": 7119,
@@ -2746,6 +2744,17 @@
    "version": "AccessGUDID Full Release XML 2025-05-01 vía espejo https://github.com/Delapro/GUDID@9237402a49a6",
    "records": 812322,
    "inScope": 3130
+  },
+  {
+   "source": "mirror double-strand-naat-registry",
+   "version": "FDA Nucleic Acid Based Tests list corte 2026-10-19 vía espejo https://github.com/double-strand/IVDmicrobialNAATregistry@6cdd1e5ed9eb",
+   "records": 456,
+   "submissions": 255,
+   "enriched": 253,
+   "unmatched": [
+    "K133448",
+    "K133883"
+   ]
   }
  ],
  "gaps": [
