@@ -36,6 +36,8 @@ const NO_CIMA = has('--no-cima');
 const NO_EMA = has('--no-ema');
 /** `--no-eml`: arma sin la eEML de la OMS (medición por pasada). */
 const NO_EML = has('--no-eml');
+/** `--no-dailymed`: arma sin las identidades SPL de DailyMed (medición por pasada). */
+const NO_DAILYMED = has('--no-dailymed');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -177,7 +179,7 @@ async function main() {
   const gsrs = existsSync(cpOut('gsrs-entries.ndjson')) ? buildGsrsIndex(readNdjson(cpOut('gsrs-entries.ndjson'))) : null;
   // ATC 5 que la AEMPS asigna a medicamentos autorizados (desempate de conflictos GSRS/RxNav, sólo por código).
   const inUse = new Set(byAtc.keys());
-  const dailymed = readDailyMedIdentities();
+  const dailymed = NO_DAILYMED ? new Map() : readDailyMedIdentities();
   const fda = await openFdaLinked({ bridges, gsrs, inUse, dailymed });
   for (const code of [...fda.pointers.keys()].sort()) if (!universe.has(code)) universe.set(code, ['dailymed-spl']);
   console.log(`[openfda] ${fda.link.scanned} etiquetas leídas; ${fda.labels.size} de referencia en ${fda.refs.size} ATC 5`);
@@ -323,7 +325,7 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
-    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', 'openFDA', 'GSRS', 'RxNav'].join(', '),
+    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', 'openFDA', 'GSRS', 'RxNav'].join(', '),
     ema: emaStats,
     eml: emlStats,
     universe: universe.size,
