@@ -16,7 +16,7 @@ modelo tenga dónde guardarlos.
 
 | Etapa | Script | Red | Qué hace |
 |---|---|---|---|
-| 0 | `fetch-sources.mjs` | sí (git) | Baja los archivos fijados en `lib/sources.mjs` (repo + commit + sha256) a `<GLOSSARY_BUILD_DIR>/diagnostic-devices-master/cache/`. Rechaza un archivo cuyo hash no coincide. |
+| 0 | `fetch-sources.mjs` | sí (git, HTTPS) | Baja los archivos fijados en `lib/sources.mjs` (repo + commit + sha256, y las descargas oficiales de `OFFICIAL`, hoy openFDA `device/classification` y la EMDN v2026 de la Comisión) a `<GLOSSARY_BUILD_DIR>/diagnostic-devices-master/cache/`. Rechaza un archivo cuyo hash no coincide; si openFDA publicó otra exportación, avisa y el build usa la copia en git. |
 | — | `git fetch origin` | sí (git) | Trae las ramas de las regiones. `build.mjs` las lee con `git show`, sin checkout. |
 | — | `extract-pcd-supplement.py` | no | Solo si cambia el suplemento del PCD: saca de `bjoleary/fdadata` (`.rda`) los product codes que la copia literal no tiene → `data/fda-pcd-supplement.json` (necesita `pyreadr` y `pandas`). |
 | 1 | `build.mjs` | no | Taxonomía + filas propias + filas de las regiones → `out/` (NDJSON gzip < 50 MB por archivo), `out/coverage.{json,md}`, `out/manifest.json`. |
@@ -71,7 +71,21 @@ Solo criterios publicados, nunca palabras clave del nombre:
    («Medical equipment…») mezcla diagnóstico y terapia en sus grupos Z11 y Z12:
    queda sin decisión salvo por mapeo publicado.
 4. **GMDN y nacionales**: solo por mapeo publicado, y solo si todos los
-   destinos coinciden.
+   destinos coinciden. Excepción: la categoría W de la CND italiana, que el
+   Ministero della Salute titula «DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO
+   (D. Lgs. 332/2000)» (`IVD_CATEGORY`).
+5. **Lo que el propio registro declara** (`decideRow` en `lib/taxonomy.mjs`):
+   tipo de licencia IVD (Health Canada «Test Kit»), alcance publicado de la
+   fuente (CDC LIVD), clase de un esquema exclusivo de IVD (IVDR/IVDD, «Class
+   N - IVD» de la TGA) y, en ANVISA, el área de interés del trámite cuando
+   todas sus áreas son de diagnóstico in vitro («Dispositivos Médicos para
+   Diagnóstico in Vitro», «Produtos para diagnóstico de uso in vitro»).
+6. **Mismo modelo**: una fila sin decisión entra si es del mismo fabricante,
+   marca y modelo (o UDI-DI) que una fila de diagnóstico.
+
+No son criterio: las categorías A, B y C de la TFDA (el 醫療器材分類分級管理辦法
+las agrupa por especialidad, art. 2, sin decir que sean IVD) ni el 類別 de la
+JMDN.
 
 Lo que no se puede decidir (`diagnostic: null`) queda en la taxonomía y en el
 reporte, fuera del catálogo, para revisión.

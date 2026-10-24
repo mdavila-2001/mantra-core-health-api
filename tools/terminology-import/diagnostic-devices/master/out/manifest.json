@@ -1,7 +1,7 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T16:08:47Z",
+  "generatedAt": "2026-10-24T18:56:49Z",
   "regions": [
     {
       "region": "us",
@@ -11,17 +11,21 @@
       "commitDate": "2026-10-24T14:00:48+00:00",
       "dir": null,
       "alternatives": [
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/claude/adoring-curie-xdkt83",
         "origin/master",
+        "origin/claude/inspiring-planck-xhpf4w",
+        "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
         "origin/justin/seed-clinical-pharmacology",
         "origin/justin/dictionaries-wikidata-es",
         "origin/justin/seed-dx-devices-us-followup",
         "origin/justin/seed-dx-devices-us-official",
         "origin/claude/limpieza-pendientes",
+        "origin/dev",
         "origin/justin/seed-dx-devices-master-p6",
         "origin/claude/compassionate-brown-tr71nn",
         "origin/claude/eager-pasteur-hxks7i",
-        "origin/dev",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/itzan/fix-forms-entity-registration"
       ],
@@ -39,22 +43,25 @@
       "region": "eu",
       "status": "consolidated",
       "ref": "origin/claude/adoring-curie-xdkt83",
-      "commit": "2e7f6e46f8db8d41c87d91aa4fb27c5d94464d6a",
-      "commitDate": "2026-10-24T03:59:33+00:00",
+      "commit": "0ac247f88b6549dbb123fd0f9deff2d8f3298f31",
+      "commitDate": "2026-10-24T18:01:37+00:00",
       "dir": null,
       "alternatives": [
+        "origin/justin/seed-dx-devices-master-p10",
         "origin/master",
+        "origin/claude/inspiring-planck-xhpf4w",
+        "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
         "origin/justin/seed-clinical-pharmacology",
         "origin/justin/dictionaries-wikidata-es",
         "origin/justin/seed-dx-devices-us-followup",
         "origin/justin/seed-dx-devices-us-official",
         "origin/claude/limpieza-pendientes",
+        "origin/dev",
         "origin/justin/seed-dx-devices-master-p6",
         "origin/claude/compassionate-brown-tr71nn",
         "origin/justin/seed-dx-devices-us",
         "origin/claude/eager-pasteur-hxks7i",
-        "origin/dev",
         "origin/test",
         "origin/codex/upload-health-api-20261015",
         "origin/justin/practice-ownership-int-spec-blocker",
@@ -66,62 +73,42 @@
         "origin/justin/fix-dev-red-gates",
         "origin/leonardo/carril-03-alta-paciente-dev"
       ],
-      "manifestGeneratedAt": "2026-10-24T03:48:44Z",
-      "rowsRead": 716,
+      "manifestGeneratedAt": "2026-10-24T17:54:51Z",
+      "rowsRead": 503648,
       "gaps": [
         {
-          "source": "ec-emdn",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
-          "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
-        },
-        {
-          "source": "eudamed-udi",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
-          "url": "https://developer.datalake.sante.service.ec.europa.eu/"
-        },
-        {
           "source": "eudamed-certificates",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "reason": "sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
           "url": "https://ec.europa.eu/tools/eudamed/"
         },
         {
           "source": "mhra-pard",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
+          "reason": "sin descarga automática: Leído en vivo el 2026-10-24: pard.mhra.gov.uk solo muestra «© Crown Copyright» y no declara la Open Government Licence; los términos de GOV.UK (gov.uk/help/terms-conditions) dicen que la mayoría, no todo, del contenido de GOV.UK va bajo OGL, y PARD no está en GOV.UK. Además, los nombres de tipo GMDN son propiedad de la GMDN Agency con uso comercial restringido. Sin licencia abierta explícita: no se descarga (hueco).",
           "url": "https://pard.mhra.gov.uk/"
         },
         {
           "source": "swissmedic-swissdamed",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "reason": "sin descarga automática: Leído en vivo el 2026-10-24: las condiciones de uso de Swissmedic prohíben reproducir la información del sitio sin autorización expresa e incluyen expresamente toda extracción y almacenamiento automatizado (scraping/data mining), salvo las áreas pensadas para eso (RSS). No hay términos de reutilización propios de swissdamed. Sin autorización de Swissmedic NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
           "url": "https://swissdamed.ch/"
         },
         {
-          "source": "it-salute-bdrdm",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
-          "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
-        },
-        {
-          "source": "it-salute-cnd",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
-          "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/"
-        },
-        {
           "source": "ec-nando",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "reason": "sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
           "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
         },
         {
           "source": "de-bfarm",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
           "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
         },
         {
           "source": "es-aemps-ccps",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
           "url": "https://www.aemps.gob.es/"
         },
         {
           "source": "fr-ansm",
-          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No aplica.",
+          "reason": "sin descarga automática: No aplica.",
           "url": "https://ansm.sante.fr/"
         }
       ]
@@ -130,22 +117,25 @@
       "region": "row",
       "status": "consolidated",
       "ref": "origin/claude/inspiring-planck-xhpf4w",
-      "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
-      "commitDate": "2026-10-24T04:21:10+00:00",
+      "commit": "fef932d6f0bfc93dc0902f15b4ac2b90063a679a",
+      "commitDate": "2026-10-24T17:14:57+00:00",
       "dir": null,
       "alternatives": [
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/claude/adoring-curie-xdkt83",
         "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
         "origin/claude/fervent-galileo-t68vaj",
         "origin/justin/seed-clinical-pharmacology",
         "origin/justin/dictionaries-wikidata-es",
         "origin/justin/seed-dx-devices-us-followup",
         "origin/justin/seed-dx-devices-us-official",
         "origin/claude/limpieza-pendientes",
+        "origin/dev",
         "origin/justin/seed-dx-devices-master-p6",
         "origin/claude/compassionate-brown-tr71nn",
         "origin/justin/seed-dx-devices-us",
         "origin/claude/eager-pasteur-hxks7i",
-        "origin/dev",
         "origin/justin/practice-ownership-int-spec-blocker",
         "origin/justin/practice-ownership-report",
         "origin/justin/fix-dev-failing-specs",
@@ -153,14 +143,9 @@
         "origin/justin/fix-dev-red-gates",
         "origin/leonardo/carril-03-alta-paciente-dev"
       ],
-      "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
-      "rowsRead": 3534775,
+      "manifestGeneratedAt": "2026-10-24T17:12:06.410Z",
+      "rowsRead": 6569701,
       "gaps": [
-        {
-          "source": "anvisa-produtos",
-          "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
-          "url": "https://dados.anvisa.gov.br/dados/"
-        },
         {
           "source": "hc-mdall",
           "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
@@ -180,11 +165,6 @@
           "source": "mfds-devices",
           "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
           "url": "https://www.data.go.kr/"
-        },
-        {
-          "source": "tfda-devices",
-          "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
-          "url": "https://data.gov.tw/dataset/9576"
         },
         {
           "source": "cdsco-devices",
@@ -257,9 +237,9 @@
   "files": [
     {
       "path": "taxonomy-nodes.ndjson.gz",
-      "rows": 33624,
-      "bytes": 1834625,
-      "sha256": "d237881d72af8704ea0c9944351d535d5c3ee81840bc1d834c35085f91ce5871"
+      "rows": 39573,
+      "bytes": 2105572,
+      "sha256": "f5ba89c980fbc1b07b4ffcc0e6e1625b2146ca361e087d8f153276b85af37f65"
     },
     {
       "path": "taxonomy-crosswalks.ndjson.gz",
@@ -269,39 +249,57 @@
     },
     {
       "path": "manufacturers.ndjson.gz",
-      "rows": 20755,
-      "bytes": 4106544,
-      "sha256": "3706fb0d756858cec3c1d423e1738d1c1b5d9a71df2e366644fc4dfa9fde44fa"
+      "rows": 24716,
+      "bytes": 7672418,
+      "sha256": "169668f8330763002fa2c62de7717f301c5787d7614f4aa7e3a3ad15bba12f4a"
     },
     {
       "path": "models-0001.ndjson.gz",
-      "rows": 136807,
-      "bytes": 10330924,
-      "sha256": "03d133310cb25d5cf5b31af88336c990a34bf6f5edc96da362734b4f6e316617"
+      "rows": 148942,
+      "bytes": 11627637,
+      "sha256": "1c7228c72879c8966ae04a753406d5694837cd22ceefc3b502ad247da2598550"
     },
     {
       "path": "models-0002.ndjson.gz",
-      "rows": 38264,
-      "bytes": 2936184,
-      "sha256": "1417b7ccb9b8e8e23ca60e3fabe0c6b4e86230b23fb826a5aec98a177190b994"
+      "rows": 141820,
+      "bytes": 11822949,
+      "sha256": "478999012508f5fbe0f888c84dee1009187200b6cde65b96608329fc5d480540"
+    },
+    {
+      "path": "models-0003.ndjson.gz",
+      "rows": 143417,
+      "bytes": 11363438,
+      "sha256": "168dca6c04bcc97af2b84ce021003992bfb394203eb9773dfe785a9ec2d41cc0"
+    },
+    {
+      "path": "models-0004.ndjson.gz",
+      "rows": 138435,
+      "bytes": 11975670,
+      "sha256": "d5a58c1c2caed304c07e5de3e36b6b39751f1e06d5fa09b1c3d2b34bacf175e8"
+    },
+    {
+      "path": "models-0005.ndjson.gz",
+      "rows": 11971,
+      "bytes": 1068571,
+      "sha256": "21df5b1189933022c4e8e5a02b4d721339b0e38eb81d1951ac09fb2474fb544a"
     },
     {
       "path": "review-manufacturers.ndjson.gz",
-      "rows": 9650,
-      "bytes": 1155783,
-      "sha256": "159445bd92e5801f8a72499ccb7e2b8e86442190c4187f546c130a44dd96b9dd"
+      "rows": 10643,
+      "bytes": 1245594,
+      "sha256": "aac7cb574bc6cced6630f0c80f00e7ea0b1c46563d0f4c0fb31a87e1e3a62749"
     },
     {
       "path": "industry-mentions.ndjson.gz",
       "rows": 552,
-      "bytes": 26899,
-      "sha256": "4646fb46b08d820695b7ccb4a96f3873326504358da34d4f30d7299dd2c179fc"
+      "bytes": 27363,
+      "sha256": "e66a1d2cd8c2a0ce26a934268f72753acee3cddedc394970b2c51139c9b9b560"
     },
     {
       "path": "industry-candidates.ndjson.gz",
-      "rows": 176,
-      "bytes": 9751,
-      "sha256": "8c920886375e3460d9401d980956fe0ca504cb073543d3f69d0eb88c938e3525"
+      "rows": 156,
+      "bytes": 9272,
+      "sha256": "156db351ba33658d955faa98d088231646c063f04af8fb8901af13a740ed8af8"
     }
   ]
 }

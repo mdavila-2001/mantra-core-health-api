@@ -56,6 +56,50 @@ export const IVD_LICENCE_TYPES = Object.freeze({
   },
 });
 
+/**
+ * Áreas de interés con que ANVISA tramita un registro (`DESC_AREA_INTERESSE`
+ * de los archivos `CICLO_ANALISE_PETICOES_*` de https://dados.anvisa.gov.br/dados/,
+ * unidas por número de proceso en `extra.anvisaPetitions.areas`). Solo cuando
+ * todas las áreas del proceso son de diagnóstico in vitro; si se mezcla con
+ * «Dispositivos Médicos» o «Correlatos» queda sin decisión.
+ */
+export const IVD_INTEREST_AREAS = Object.freeze({
+  sources: ['anvisa-produtos', 'anvisa-produtos-modelos'],
+  values: [
+    'Dispositivos Médicos para Diagnóstico in Vitro',
+    'Produtos para diagnóstico de uso in vitro',
+  ],
+  url: 'https://dados.anvisa.gov.br/dados/',
+});
+
+/**
+ * Sistemas que son niveles o versiones de una misma clasificación del mismo
+ * regulador: que una fila declare los dos no es un mapeo entre nomenclaturas.
+ * TFDA: la categoría (A–P, o el código de 4 dígitos) y el código de
+ * clasificación (`A.1345`) son de la misma clasificación del 醫療器材分類分級管理辦法.
+ */
+export const NOMENCLATURE_FAMILY = Object.freeze({
+  'tw:tfda-category': 'tw:tfda',
+  'tw:tfda-classification': 'tw:tfda',
+});
+const familyOf = (system) => NOMENCLATURE_FAMILY[system] ?? system;
+
+/**
+ * Nomenclaturas nacionales con una categoría publicada como IVD. CND italiana
+ * (Ministero della Salute, dataset «Classificazione nazionale dei dispositivi
+ * medici (CND)», IODL 2.0): la categoría W se titula «DISPOSITIVI
+ * MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)», la transposición de la
+ * directiva IVD 98/79/CE.
+ */
+export const IVD_CATEGORY = Object.freeze({
+  cnd: {
+    prefix: 'W',
+    basis: 'cnd-category-w',
+    title: 'DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)',
+    url: 'https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/',
+  },
+});
+
 export const nodeKey = (system, code, name) =>
   `${system}|${code ?? `name:${(name ?? '').trim().toUpperCase()}`}`;
 
@@ -154,15 +198,20 @@ export class Taxonomy {
       } else if (t.system === 'emdn' && t.code) {
         this.addEmdn(t.code, t.name, prov);
       } else if (!existing) {
+        const ivd =
+          IVD_CATEGORY[t.system] &&
+          t.code?.startsWith(IVD_CATEGORY[t.system].prefix)
+            ? IVD_CATEGORY[t.system]
+            : null;
         this.addNode({
           system: t.system,
           code: t.code,
           name: t.name,
           definition: t.definition,
           parent: null,
-          diagnostic: null,
-          branch: null,
-          basis: null,
+          diagnostic: ivd ? true : null,
+          branch: ivd ? 'ivd' : null,
+          basis: ivd ? ivd.basis : null,
           attributes: {},
           provenance: prov,
         });
@@ -180,7 +229,8 @@ export class Taxonomy {
     // Mapeo publicado: la misma fila declara varios tipos.
     for (let i = 0; i < keys.length; i++) {
       for (let j = 0; j < keys.length; j++) {
-        if (i === j || types[i].system === types[j].system) continue;
+        if (i === j || familyOf(types[i].system) === familyOf(types[j].system))
+          continue;
         const k = `${keys[i]}→${keys[j]}`;
         const cw = this.crosswalks.get(k) ?? {
           from: keys[i],
@@ -311,6 +361,17 @@ export class Taxonomy {
           ...nodes.map((n) => n.key),
           `ivd-licence-type|${row.source}:${row.extra.licenceType}`,
         ],
+      };
+    const areas = row.extra?.anvisaPetitions?.areas;
+    if (
+      IVD_INTEREST_AREAS.sources.includes(row.source) &&
+      Array.isArray(areas) &&
+      areas.length &&
+      areas.every((a) => IVD_INTEREST_AREAS.values.includes(a))
+    )
+      return {
+        diagnostic: true,
+        types: [...nodes.map((n) => n.key), `ivd-interest-area|${row.source}`],
       };
     if (DIAGNOSTIC_SCOPE_SOURCES[row.source])
       return {

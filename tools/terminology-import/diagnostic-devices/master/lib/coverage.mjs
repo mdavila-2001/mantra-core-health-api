@@ -23,12 +23,15 @@ export function coverageReport({
   resolution,
   industry = null,
   emdnCheck = null,
+  emdnVersions = null,
+  fdaCheck = null,
   actorStats = [],
   sourceStats,
   regionStatus,
   panelParts,
   ivdPanels,
   mirrors,
+  official = {},
 }) {
   const nodes = taxonomy.nodes;
   const dxNodes = nodes.filter((n) => n.diagnostic === true);
@@ -100,7 +103,22 @@ export function coverageReport({
     },
     industry,
     emdnCopies: emdnCheck,
+    emdnVersions,
+    fdaCopies: fdaCheck,
     actors: actorStats,
+    official: Object.fromEntries(
+      Object.entries(official).map(([k, o]) => [
+        k,
+        {
+          url: o.url,
+          exportDate: o.exportDate,
+          downloadSha256: o.downloadSha256,
+          path: o.path,
+          sha256: o.sha256,
+          license: o.license,
+        },
+      ]),
+    ),
     mirrors: Object.fromEntries(
       Object.entries(mirrors).map(([k, m]) => [
         k,
@@ -161,6 +179,18 @@ export function coverageReport({
       'Valor',
     ),
     '',
+    ...(fdaCheck
+      ? [
+          `Product codes de la FDA: ${fdaCheck.a} (${fdaCheck.countA}) contra ${fdaCheck.b} (${fdaCheck.countB}); solo en la oficial ${fdaCheck.onlyA.length}, solo en la copia ${fdaCheck.onlyB.length}; difieren nombre ${fdaCheck.diffs.name.length}, clase ${fdaCheck.diffs.class.length}, regulación ${fdaCheck.diffs.regulation.length}.`,
+          '',
+        ]
+      : []),
+    ...(emdnVersions
+      ? [
+          `EMDN ${emdnVersions.latest} oficial (${emdnVersions.rowsLatest} términos) contra la ${emdnVersions.previous} (${emdnVersions.rowsPrevious}): nuevos ${emdnVersions.onlyLatest.length}, solo en la ${emdnVersions.previous} ${emdnVersions.onlyPrevious.length} (quedan marcados \`notInVersion\`), término cambiado ${emdnVersions.termChanged.length}, decisión de diagnóstico cambiada ${emdnVersions.decisionChanged.length}.`,
+          '',
+        ]
+      : []),
     table(json.taxonomy.bySystem, 'Nomenclatura', 'Nodos'),
     '',
     table(
