@@ -409,22 +409,29 @@ export class IamPatientSelfRegistrationService {
         },
       );
 
-      // El tutor o persona autorizada, si lo declaró.
-      await createGuardianRelatedPerson(
-        {
-          persons: this.personsRepo,
-          relatedPersons: this.relatedPersonsRepo,
-          contactPoints: this.contactPointsRepo,
-        },
-        tx,
-        {
+      // El tutor o persona autorizada, si lo declaró, y los demás contactos de
+      // emergencia que agregó con el «+»: cada uno es una persona relacionada.
+      const relatedRepos = {
+        persons: this.personsRepo,
+        relatedPersons: this.relatedPersonsRepo,
+        contactPoints: this.contactPointsRepo,
+      };
+      await createGuardianRelatedPerson(relatedRepos, tx, {
+        patientProfileId: patient.profileId,
+        name: dto.guardianName,
+        phone: dto.guardianPhone,
+        relationshipConceptId: dto.guardianRelationshipConceptId,
+        actorUserId: user.id,
+      });
+      for (const contact of dto.additionalEmergencyContacts ?? []) {
+        await createGuardianRelatedPerson(relatedRepos, tx, {
           patientProfileId: patient.profileId,
-          name: dto.guardianName,
-          phone: dto.guardianPhone,
-          relationshipConceptId: dto.guardianRelationshipConceptId,
+          name: contact.name,
+          phone: contact.phone,
+          relationshipConceptId: contact.relationshipConceptId,
           actorUserId: user.id,
-        },
-      );
+        });
+      }
 
       // Los seguros declarados. Privado y público conviven: una persona puede
       // estar afiliada a la Caja y tener además una póliza.
@@ -454,16 +461,24 @@ export class IamPatientSelfRegistrationService {
       }
 
       // El teléfono es independiente del correo: se guarda aunque no haya email.
-      if (dto.phone) {
+      // El principal va con `rank` 1 y los demás detrás (2, 3…): el perfil lee
+      // y reemplaza «el teléfono» por el `rank` más bajo, y sin esto un número
+      // agregado con el «+» podría quedar por delante del principal.
+      const phones = [
+        ...(dto.phone ? [dto.phone] : []),
+        ...(dto.additionalPhones ?? []),
+      ];
+      phones.forEach((phone, index) => {
         this.contactPointsRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
           systemConceptId: CONCEPTS.CONTACT_PHONE,
-          value: dto.phone,
+          value: phone,
           useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          rank: index + 1,
           actorUserId: user.id,
         });
-      }
+      });
 
       let emailVerificationToken: string | undefined;
       if (dto.email) {
