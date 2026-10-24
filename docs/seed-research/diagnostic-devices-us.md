@@ -45,24 +45,25 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 | 5 | 2026-10-24 | FDA **Establishment Registration & Device Listing**, archivos planos 2024 (`Registration.txt` 46 496, `registration_listing.txt` 325 731, `Listing_PCD.txt` 316 023, `Owner_Operator.txt`), espejo `sdgoldberg/MedDev@6cbd231b` · **LIVD SARS-CoV-2** de CDC (pruebas IVD con EUA de FDA; 1 144 filas; se descartan 4 kits sin `Manufacturer`, 3 de ellos filas de prueba de la planilla `Test_*_Device`), `CDCgov/routes@e2e16eed` · extracto de la base **CLIA** de FDA (20 832 filas documento → sistema de prueba → analito, 2025-03), `unmtransinfo/cfde-biomarkers@9a121841` | 111 097 (110 614 listados de establecimiento por product code + 483 kits de prueba con EUA, 7 con UDI-DI) · además: 2 218 autorizaciones con analitos CLIA | 5 755 | 471 | GUDID `device.txt` ~2020-02 de `misterrPink1/symmetric@a43a1a58` (2 424 295 dispositivos **sin product code**: decidir el alcance exigiría cruzar por nombre, prohibido); extracto GUDID 2026-07-23 de `russellmiller49/Interventional-Pulm-Education-Project@b18a0f5b` (15 229, sin product code, mismo motivo); UDI de audífonos de `SyneticSLZ/MarketIntel@13c86b7b` (874.3300, prótesis: fuera de alcance); muestras de 100 a 1 000 filas (`mgree/ffs`, `AmitXShukla/P2P.ai`, `ikmdev/tinkar-core`); EUA COVID 2020 de `TommyJones/covid_fda_eua_tests` (59, contenidas en LIVD); `datasets.zip` de `symmetric` es MDALL de Health Canada (se pasó a la sesión ROW) |
 | 6 | 2026-10-24 | **MAUDE** (openFDA `device/event`, recibidos 2026-09-01 a 2026-10-13, 62 533 filas de dispositivo), `Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8` · **retiros** openFDA `device/enforcement`+`recall` 2012-06 a 2026-09 (40 057 productos), `Sarath-Venkatesan/fda-device-recalls-analytics@3e485d48` · openFDA `device/recall` 2026-10-07 (1 794; CC0), `hxlvvm/RecallTrace@ffe8177d` | 15 028 (13 692 retiros por número Z + 1 336 combinaciones marca/modelo de MAUDE) | 304 | 943 | `hsh20020209-cell/fda-recall-qa-decision-support` (eventos agregados con texto «limpio», no el registro por producto); `wcedmisten/510k.fyi` (510(k) sin solicitante, hasta 2024-01: nada nuevo); `danielw4/device-recall-warehouse` (sólo K-number y product code); `akshay-ak-pradhan/fda-maude-data` (sin product code por modelo y «No license is granted»); `HazyResearch/icij-maude` (2 × 1 000 filas ~2014, sin product code); MAUDE de robot da Vinci, rehabilitación y cemento óseo (fuera de alcance). En MAUDE el espejo cambió ® y ™ por «¿»: se conserva verbatim |
 | 7 | 2026-10-24 | MAUDE de product codes de dispositivos con IA (21 923 informes recibidos 2020-01 a 2026-04; CC BY 4.0), `hayden-farquhar/MAUDE-AI-Devices@355566d7` · listas FDA de IA `Adaezethetechie/FDA-AI-Medical-Devices-Analysis@64a8b462` (1 524), `neelchauhan332/healthcare-ai-fda-clearances@55f7adb5` (557), `GigHz-com/fda-aiml-devices-dataset@1995f98a` (1 430) | 1 391 combinaciones marca/modelo de MAUDE (ECG, ecografía, monitores, CAD/PACS…) | 49 | 802 | Las tres listas de IA: todos sus envíos ya estaban (0 nuevos); columnas `matched_*` del extracto MAUDE-AI (cruce del autor por nombre, no es dato de FDA: no se usan); `DorothyOteng/FDA-MAUDE-Analysis` (12 294 informes «limpiados» con `Unknown` y `SAME AS ABOVE` en lugar de los valores, y combinaciones incoherentes: no es verbatim); `jdonaldson/gudid-explorer` (formato binario propio, quirúrgico/ortopédico); `medical-device-design/medical-device-kg-pipeline` (datos en apps.okn.us, bloqueado); `wang177777/fda-ai-clinical-function-annotations` (sin product code) |
+| 8 | 2026-10-24 | Más extractos MAUDE (encontrados con la búsqueda de repositorios de GitHub): openFDA `device/event` 1991–2010 (30 000 informes, `device` aplanado), `arpan2217/medical-device-adverse-events@c2096e3e` · cardiovascular 2024 (108 265), `sarcom2/fda-device-events-elt@d7e08df3` · archivos masivos MAUDE 2022–2024 (500 000 filas), `levisw/FDA-Medical-Device-Failure-Classification@728544bf` | 10 203 combinaciones marca/modelo/fabricante (620 se sumaron a combinaciones ya existentes) | 709 | 8 165 | MAUDE de clavos de fractura y de robots de rodilla/cadera de `MightyAli98` (ortopedia, fuera de alcance); `Yogendra-Kanchapu` (MAUDE 2023 sin product code: alcance indecidible); `bogdan-alexander/fda-maude-intelligence` (sin marca ni modelo); muestras de 200–5 840 informes (`NainicaD/Vigil-MD`, `MedTraceAI`, `sdr9`, `Parsavafaei26`, `Manas103`, `luisavgonzalez27`, `giillbertt`, `BrandyBrandt`); `d8557379/FDA_510K_streamlit_app` (510(k) de 2026-08: contenido en pasada 2); `AmatSaw04` (valores imputados); repos sintéticos (`basil-sys`, `mnemalur`, `Zeinab-Razmi`) |
 
 <!-- coverage:start -->
 ## Cobertura (generada por `coverage-report.mjs`)
 
 | | Cantidad |
 |---|---|
-| Registros (filas del NDJSON) | 205 487 |
+| Registros (filas del NDJSON) | 215 690 |
 | · `fda-rl` | 110 614 |
 | · `fda-510k` | 71 955 |
 | · `fda-recall` | 13 692 |
+| · `fda-maude` | 12 930 |
 | · `fda-gudid` | 3 130 |
-| · `fda-maude` | 2 727 |
 | · `fda-pma` | 2 646 |
 | · `cdc-livd-sars-cov-2` | 483 |
 | · `fda-denovo` | 240 |
 | UDI-DI (con modelo/versión) | 3 137 |
-| Fabricantes distintos (razón social normalizada exacta) | 18 749 |
-| Marcas distintas (fabricante + nombre comercial) | 74 335 |
+| Fabricantes distintos (razón social normalizada exacta) | 19 458 |
+| Marcas distintas (fabricante + nombre comercial) | 82 500 |
 | Registros con país del fabricante | 182 809 |
 | Product codes vistos / incluidos / excluidos | 7 119 / 3 270 / 3 849 |
 
@@ -70,24 +71,24 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 
 | Panel | Incluidos | Excluidos | Registros de equipos |
 |---|---|---|---|
-| CH — Clinical Chemistry | 563 | 1 | 34 202 |
-| MI — Microbiology | 549 | 0 | 16 369 |
-| HE — Hematology | 405 | 23 | 10 051 |
-| IM — Immunology | 315 | 0 | 7 844 |
-| TX — Clinical Toxicology | 287 | 0 | 10 225 |
-| CV — Cardiovascular | 199 | 266 | 35 657 |
-| GU — Gastroenterology, Urology | 170 | 454 | 15 211 |
-| PA — Pathology | 154 | 0 | 4 000 |
-| RA — Radiology | 140 | 75 | 37 387 |
-| OP — Ophthalmic | 123 | 213 | 3 858 |
-| AN — Anesthesiology | 82 | 172 | 5 936 |
-| OB — Obstetrics/Gynecology | 81 | 196 | 4 122 |
-| NE — Neurology | 71 | 211 | 5 545 |
-| EN — Ear, Nose, Throat | 41 | 219 | 3 383 |
-| HO — General Hospital | 23 | 325 | 3 046 |
-| DE — Dental | 22 | 333 | 4 099 |
-| PM — Physical Medicine | 13 | 214 | 866 |
-| OR — Orthopedic | 12 | 322 | 2 714 |
+| CH — Clinical Chemistry | 563 | 1 | 35 846 |
+| MI — Microbiology | 549 | 0 | 16 697 |
+| HE — Hematology | 405 | 23 | 10 274 |
+| IM — Immunology | 315 | 0 | 7 914 |
+| TX — Clinical Toxicology | 287 | 0 | 10 237 |
+| CV — Cardiovascular | 199 | 266 | 41 227 |
+| GU — Gastroenterology, Urology | 170 | 454 | 16 283 |
+| PA — Pathology | 154 | 0 | 4 029 |
+| RA — Radiology | 140 | 75 | 37 908 |
+| OP — Ophthalmic | 123 | 213 | 3 868 |
+| AN — Anesthesiology | 82 | 172 | 6 009 |
+| OB — Obstetrics/Gynecology | 81 | 196 | 4 246 |
+| NE — Neurology | 71 | 211 | 5 623 |
+| EN — Ear, Nose, Throat | 41 | 219 | 3 503 |
+| HO — General Hospital | 23 | 325 | 3 087 |
+| DE — Dental | 22 | 333 | 4 108 |
+| PM — Physical Medicine | 13 | 214 | 880 |
+| OR — Orthopedic | 12 | 322 | 2 979 |
 | SU — General, Plastic Surgery | 11 | 595 | 442 |
 | MG — Medical Genetics | 9 | 0 | 47 |
 | sin panel publicado | 0 | 230 | 0 |
@@ -208,97 +209,97 @@ La lista completa, código por código con nombre, panel, clase, regulación, re
 
 | Product code | Nombre FDA | Registros |
 |---|---|---|
-| LLZ | System, Image Processing, Radiological | 4 795 |
-| GCJ | Laparoscope, General & Plastic Surgery | 4 506 |
-| IYN | System, Imaging, Pulsed Doppler, Ultrasonic | 4 358 |
-| IYO | System, Imaging, Pulsed Echo, Ultrasonic | 3 936 |
-| ITX | Transducer, Ultrasonic, Diagnostic | 3 732 |
-| DXN | System, Measurement, Blood-Pressure, Non-Invasive | 2 868 |
-| LNH | System, Nuclear Magnetic Resonance Imaging | 2 868 |
-| JAK | System, X-Ray, Tomography, Computed | 2 780 |
-| DQY | Catheter, Percutaneous | 2 674 |
-| DQX | Wire, Guide, Catheter | 2 359 |
-| DQA | Oximeter | 2 291 |
-| FLL | Continuous Measurement Thermometer | 2 241 |
-| DYB | Introducer, Catheter | 2 140 |
-| HRX | Arthroscope | 2 035 |
-| JJX | Single (Specified) Analyte Controls (Assayed And Unassayed) | 1 677 |
-| OWB | Interventional Fluoroscopic X-Ray System | 1 506 |
-| NBW | System, Test, Blood Glucose, Over The Counter | 1 487 |
-| JJY | Multi-Analyte Controls, All Kinds (Assayed) | 1 390 |
-| KPS | System, Tomography, Computed, Emission | 1 346 |
-| DQO | Catheter, Intravascular, Diagnostic | 1 341 |
-| MHX | Monitor, Physiological, Patient(With Arrhythmia Detection Or Alarms) | 1 333 |
-| MOS | Coil, Magnetic Resonance, Specialty | 1 257 |
-| MQB | Solid State X-Ray Imager (Flat Panel/Digital Imager) | 1 209 |
-| MUH | System, X-Ray, Extraoral Source, Digital | 1 122 |
-| EHD | Unit, X-Ray, Extraoral With Timer | 1 117 |
-| JJE | Analyzer, Chemistry (Photometric, Discrete), For Clinical Use | 1 101 |
-| DPS | Electrocardiograph | 1 099 |
-| DQK | Computer, Diagnostic, Programmable | 1 099 |
+| GCJ | Laparoscope, General & Plastic Surgery | 5 009 |
+| LLZ | System, Image Processing, Radiological | 4 809 |
+| IYN | System, Imaging, Pulsed Doppler, Ultrasonic | 4 367 |
+| IYO | System, Imaging, Pulsed Echo, Ultrasonic | 3 981 |
+| ITX | Transducer, Ultrasonic, Diagnostic | 3 743 |
+| DQY | Catheter, Percutaneous | 3 257 |
+| DQX | Wire, Guide, Catheter | 3 082 |
+| DXN | System, Measurement, Blood-Pressure, Non-Invasive | 2 950 |
+| LNH | System, Nuclear Magnetic Resonance Imaging | 2 905 |
+| JAK | System, X-Ray, Tomography, Computed | 2 836 |
+| DYB | Introducer, Catheter | 2 794 |
+| DQA | Oximeter | 2 456 |
+| FLL | Continuous Measurement Thermometer | 2 247 |
+| HRX | Arthroscope | 2 227 |
+| DQO | Catheter, Intravascular, Diagnostic | 1 799 |
+| NBW | System, Test, Blood Glucose, Over The Counter | 1 771 |
+| JJX | Single (Specified) Analyte Controls (Assayed And Unassayed) | 1 678 |
+| MHX | Monitor, Physiological, Patient(With Arrhythmia Detection Or Alarms) | 1 592 |
+| OWB | Interventional Fluoroscopic X-Ray System | 1 552 |
+| JJY | Multi-Analyte Controls, All Kinds (Assayed) | 1 391 |
+| JJE | Analyzer, Chemistry (Photometric, Discrete), For Clinical Use | 1 359 |
+| KPS | System, Tomography, Computed, Emission | 1 355 |
+| MOS | Coil, Magnetic Resonance, Specialty | 1 259 |
+| DQK | Computer, Diagnostic, Programmable | 1 237 |
+| JKA | Tubes, Vials, Systems, Serum Separators, Blood Collection | 1 236 |
+| MQB | Solid State X-Ray Imager (Flat Panel/Digital Imager) | 1 214 |
+| LIT | Catheter, Angioplasty, Peripheral, Transluminal | 1 187 |
+| KNW | Instrument, Biopsy | 1 149 |
+| DPS | Electrocardiograph | 1 144 |
+| MUH | System, X-Ray, Extraoral Source, Digital | 1 123 |
+| EHD | Unit, X-Ray, Extraoral With Timer | 1 120 |
+| LON | System, Test, Automated, Antimicrobial Susceptibility, Short Incubation | 1 075 |
+| JAA | System, X-Ray, Fluoroscopic, Image-Intensified | 1 072 |
 | JIT | Calibrator, Secondary | 1 061 |
-| LON | System, Test, Automated, Antimicrobial Susceptibility, Short Incubation | 1 052 |
-| JKA | Tubes, Vials, Systems, Serum Separators, Blood Collection | 1 050 |
-| KNW | Instrument, Biopsy | 1 031 |
-| GKZ | Counter, Differential Cell | 1 001 |
-| CGA | Glucose Oxidase, Glucose | 981 |
-| CCK | Analyzer, Gas, Carbon-Dioxide, Gaseous-Phase | 976 |
-| GXY | Electrode, Cutaneous | 929 |
-| EOQ | Bronchoscope (Flexible Or Rigid) | 901 |
-| JAA | System, X-Ray, Fluoroscopic, Image-Intensified | 894 |
-| LIT | Catheter, Angioplasty, Peripheral, Transluminal | 873 |
-| JIX | Calibrator, Multi-Analyte Mixture | 834 |
+| GKZ | Counter, Differential Cell | 1 040 |
+| CGA | Glucose Oxidase, Glucose | 1 009 |
+| CCK | Analyzer, Gas, Carbon-Dioxide, Gaseous-Phase | 988 |
+| EOQ | Bronchoscope (Flexible Or Rigid) | 953 |
+| GXY | Electrode, Cutaneous | 933 |
+| DSI | Detector And Alarm, Arrhythmia | 904 |
 
 ### Fabricantes con más registros
 
 | Fabricante (clave normalizada) | Registros |
 |---|---|
-| SIEMENS HEALTHCARE DIAGNOSTICS | 3 231 |
+| SIEMENS HEALTHCARE DIAGNOSTICS | 3 355 |
 | TRACEY HOLEVAS | 2 537 |
-| BECKMAN COULTER | 1 894 |
-| SIEMENS MEDICAL SOLUTIONS | 1 851 |
-| ABBOTT LABORATORIES | 1 586 |
-| ORTHO CLINICAL DIAGNOSTICS | 1 583 |
+| BECKMAN COULTER | 1 972 |
+| SIEMENS MEDICAL SOLUTIONS | 1 858 |
+| ABBOTT LABORATORIES | 1 635 |
+| ORTHO CLINICAL DIAGNOSTICS | 1 631 |
+| BOSTON SCIENTIFIC | 1 613 |
 | ISOMEDIX OPERATIONS | 1 296 |
-| BOSTON SCIENTIFIC | 1 252 |
-| BIOMERIEUX | 1 170 |
-| KARL STORZ ENDOSCOPY AMERICA | 1 169 |
+| BIOMERIEUX | 1 183 |
+| KARL STORZ ENDOSCOPY AMERICA | 1 173 |
 | STERIGENICS U S | 1 115 |
 | SHAYLEE MASILUNAS | 1 096 |
+| ROCHE DIAGNOSTICS | 1 076 |
 | AMY NELSON | 936 |
-| BECTON DICKINSON AND | 923 |
-| INSTRUMENTATION LABORATORY | 892 |
-| RANDOX LABORATORIES | 888 |
-| PHILIPS NORTH AMERICA | 861 |
-| PHILIPS ULTRASOUND | 858 |
+| BECTON DICKINSON AND | 926 |
+| PHILIPS NORTH AMERICA | 902 |
+| INSTRUMENTATION LABORATORY | 897 |
+| RANDOX LABORATORIES | 890 |
+| PHILIPS ULTRASOUND | 864 |
 | JAMES CLIFFORD | 841 |
-| GE MEDICAL SYSTEMS | 759 |
-| MASIMO | 754 |
-| ROCHE DIAGNOSTICS | 732 |
-| GE HEALTHCARE | 723 |
+| COOK | 784 |
+| GE MEDICAL SYSTEMS | 783 |
+| MASIMO | 770 |
+| GE HEALTHCARE | 727 |
 | STERIGENICS | 691 |
 | DIAMOND DIAGNOSTICS | 683 |
 | BIO RAD LABORATORIES | 682 |
 | OLYMPUS OF THE AMERICAS | 681 |
-| SIEMENS HEALTHINEERS | 657 |
-| COOK | 644 |
+| SIEMENS HEALTHINEERS | 672 |
 | DAVID LENNARZ | 606 |
-| GE MEDICAL SYSTEMS INFORMATION TECHNOLOGIES | 585 |
-| PHILIPS MEDIZIN SYSTEME BOEBLINGEN | 575 |
-| NOVA BIOMEDICAL | 568 |
-| PHILIPS MEDICAL SYSTEMS CLEVELAND | 560 |
-| HOLOGIC | 531 |
+| GE MEDICAL SYSTEMS INFORMATION TECHNOLOGIES | 594 |
+| NOVA BIOMEDICAL | 587 |
+| PHILIPS MEDIZIN SYSTEME BOEBLINGEN | 577 |
+| HOLOGIC | 567 |
+| PHILIPS MEDICAL SYSTEMS CLEVELAND | 562 |
+| COVIDIEN | 538 |
 | JERRY DOANE | 531 |
 | HEALGEN SCIENTIFIC | 512 |
-| MIDMARK | 505 |
-| COVIDIEN | 504 |
-| BD BECTON DICKINSON VACUTAINER SYSTEMS PREANALYTIC | 463 |
+| MIDMARK | 509 |
+| MEDTRONIC MINIMED | 502 |
 
 ### Clase de riesgo y estado
 
-Clase: `fda:2` 162 197 · `fda:1` 39 436 · `fda:3` 2 116 · `fda:U` 622 · `fda:N` 619 · `sin clase` 491 · `fda:f` 6.
+Clase: `fda:2` 171 314 · `fda:1` 40 169 · `fda:3` 2 410 · `fda:N` 664 · `fda:U` 636 · `sin clase` 491 · `fda:f` 6.
 
-Estado (verbatim de la fuente): sin estado 113 824 · Substantially Equivalent 71 726 · Terminated 8 288 · Ongoing 4 983 · In Commercial Distribution 2 923 · Approved 1 369 · Accepted 1 068 · Completed 281 · De Novo Granted 240 · Not in Commercial Distribution 207 · Open, Classified 140 · Approved - Reclassified 123.
+Estado (verbatim de la fuente): sin estado 124 027 · Substantially Equivalent 71 726 · Terminated 8 288 · Ongoing 4 983 · In Commercial Distribution 2 923 · Approved 1 369 · Accepted 1 068 · Completed 281 · De Novo Granted 240 · Not in Commercial Distribution 207 · Open, Classified 140 · Approved - Reclassified 123.
 
 ### Huecos
 

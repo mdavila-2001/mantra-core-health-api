@@ -23,6 +23,7 @@ import {
   fromOpenFdaUdi,
   fromRecall,
   fromRlFlat,
+  parseFlatMap,
   regulationFromNumber,
 } from '../lib/normalize.mjs';
 import { classifyScope, panelCode, parseRegulation } from '../lib/scope.mjs';
@@ -346,4 +347,11 @@ test('retiros reales (enforcement y recall): una fila por número Z, estado verb
     assert.ok(r.manufacturerName);
   }
   assert.equal(fromRecall({ ...ndjson('recalls.sample.ndjson')[0], product_code: 'HRS' }, t, PROV), null);
+});
+
+test('MAUDE aplanado como mapa de texto: sólo corta en claves conocidas', () => {
+  const m = parseFlatMap('[{device_event_key=127, brand_name=HI-LO- TRACHEAL TUBE CUFFED, MURPHY EYE, model_number=86114, device_report_product_code=BSK}]', ['device_event_key', 'brand_name', 'model_number', 'device_report_product_code']);
+  assert.equal(m.brand_name, 'HI-LO- TRACHEAL TUBE CUFFED, MURPHY EYE');
+  assert.equal(m.model_number, '86114');
+  assert.equal(m.device_report_product_code, 'BSK');
 });

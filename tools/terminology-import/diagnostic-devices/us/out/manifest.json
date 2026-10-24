@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T04:53:10.803Z",
+ "generatedAt": "2026-10-24T05:47:44.811Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -47,10 +47,10 @@
   {
    "path": "fda-maude-0001.ndjson.gz",
    "source": "fda-maude",
-   "sourceVersion": "openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04 corte 2026-05-28 vía espejo https://github.com/hayden-farquhar/MAUDE-AI-Devices@355566d7211b + openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
-   "rows": 2727,
-   "bytes": 218233,
-   "sha256": "c5fbf75445f317f4adabd4d7fdb1f7b41958bc52c003af3849af2c908ee63c14"
+   "sourceVersion": "Archivos masivos MAUDE de FDA, eventos 2022–2024 corte 2026-08-04 vía espejo https://github.com/levisw/FDA-Medical-Device-Failure-Classification@728544bf5893 + openFDA device/event (MAUDE) cardiovascular 2024 corte 2026-05-24 vía espejo https://github.com/sarcom2/fda-device-events-elt@d7e08df377ce + openFDA device/event (MAUDE) recibidos 1991–2010 corte 2025-05-10 vía espejo https://github.com/arpan2217/medical-device-adverse-events@c2096e3e12a9 + openFDA device/event (MAUDE), product codes de IA, recibidos 2020-01 a 2026-04 corte 2026-05-28 vía espejo https://github.com/hayden-farquhar/MAUDE-AI-Devices@355566d7211b + openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
+   "rows": 12930,
+   "bytes": 1254185,
+   "sha256": "ca542a7d2615f0ecc47d262ea7fc48eb8ebad33013087860731b684993055d11"
   },
   {
    "path": "fda-recall-0001.ndjson.gz",
@@ -155,6 +155,27 @@
    "mergedIntoExisting": 0
   },
   {
+   "source": "mirror sarcom2-maude-cardio-2024",
+   "version": "openFDA device/event (MAUDE) cardiovascular 2024 corte 2026-05-24 vía espejo https://github.com/sarcom2/fda-device-events-elt@d7e08df377ce",
+   "records": 108265,
+   "newCombinations": 3689,
+   "mergedIntoExisting": 13
+  },
+  {
+   "source": "mirror levisw-maude-2022-2024",
+   "version": "Archivos masivos MAUDE de FDA, eventos 2022–2024 corte 2026-08-04 vía espejo https://github.com/levisw/FDA-Medical-Device-Failure-Classification@728544bf5893",
+   "records": 500000,
+   "newCombinations": 3189,
+   "mergedIntoExisting": 606
+  },
+  {
+   "source": "mirror arpan2217-maude-1991-2010",
+   "version": "openFDA device/event (MAUDE) recibidos 1991–2010 corte 2025-05-10 vía espejo https://github.com/arpan2217/medical-device-adverse-events@c2096e3e12a9",
+   "records": 30222,
+   "newCombinations": 3325,
+   "mergedIntoExisting": 1
+  },
+  {
    "source": "mirror hxlvvm-recalltrace",
    "version": "openFDA device/recall (FRN, MKJ, CBK, MHX, DQA) 2026-10-07 vía espejo https://github.com/hxlvvm/RecallTrace@ffe8177d7906",
    "records": 1794,
@@ -186,6 +207,24 @@
   }
  ],
  "mirrors": [
+  {
+   "id": "arpan2217-maude-1991-2010",
+   "repo": "https://github.com/arpan2217/medical-device-adverse-events",
+   "commit": "c2096e3e12a9a8f505f4057ce544e3b6b59fff6c",
+   "commitDate": "2025-05-10T15:52:25-04:00",
+   "files": [
+    {
+     "path": "data/fda_adverse_events_subset.csv",
+     "bytes": 73056506,
+     "sha256": "b63e825148aa0e9e0cbdbac68b454b68518aa2d929cb9036bf0e9d97a12ec1fe"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/event.json",
+    "exportDate": null,
+    "note": "30 000 informes recibidos 1991–2010, todos los paneles"
+   }
+  },
   {
    "id": "bjoleary-fdadata",
    "repo": "https://github.com/bjoleary/fdadata",
@@ -531,6 +570,44 @@
    }
   },
   {
+   "id": "levisw-maude-2022-2024",
+   "repo": "https://github.com/levisw/FDA-Medical-Device-Failure-Classification",
+   "commit": "728544bf5893161bd741e10796872746cd7ab9d1",
+   "commitDate": "2026-08-04T22:19:26-04:00",
+   "files": [
+    {
+     "path": "data/train_data_1.csv",
+     "bytes": 13349819,
+     "sha256": "0d912aa4344f7e4ee5418f136af5021e187079ece7ac3cd0a4a29d5c4a087b92"
+    },
+    {
+     "path": "data/train_data_2.csv",
+     "bytes": 13343519,
+     "sha256": "7c4b02eaae121472c260890a0007d068763c8613b60bcf3de2b0165412b643a4"
+    },
+    {
+     "path": "data/train_data_3.csv",
+     "bytes": 13359275,
+     "sha256": "3fba2dd08c4e9c4626b23ae56c7bbeaa1e1845f52987f64b978bc2a9d5da9aeb"
+    },
+    {
+     "path": "data/train_data_4.csv",
+     "bytes": 13360753,
+     "sha256": "11ca29f754555936fd5d281749b4217afd07f0e6bb177c7b882e952366039e74"
+    },
+    {
+     "path": "data/test_data.csv",
+     "bytes": 13359901,
+     "sha256": "93a5ae5565b435913f4fdd728406d8dcd9aeb02a52830046bf691886844da2fe"
+    }
+   ],
+   "upstream": {
+    "url": "https://www.fda.gov/medical-devices/medical-device-reporting-mdr-how-report-medical-device-problems/mdr-data-files",
+    "exportDate": null,
+    "note": "MDR_REPORT_KEY, DEVICE_REPORT_PRODUCT_CODE, BRAND_NAME, MANUFACTURER_G1_NAME; sin modelo ni fabricante D"
+   }
+  },
+  {
    "id": "sarath-fda-device-recalls",
    "repo": "https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics",
    "commit": "3e485d48c4f9ff490d0ce31d5f152acb323a2c9e",
@@ -552,6 +629,30 @@
     "url": "https://api.fda.gov/device/enforcement.json",
     "exportDate": null,
     "note": "report_date 2012-06-20 a 2026-09-23"
+   }
+  },
+  {
+   "id": "sarcom2-maude-cardio-2024",
+   "repo": "https://github.com/sarcom2/fda-device-events-elt",
+   "commit": "d7e08df377ce61ab012a554d9a68b4c729a4dd50",
+   "commitDate": "2026-05-24T23:05:00-06:00",
+   "files": [
+    {
+     "path": "data/snapshots/device_events_cardio_2024.parquet",
+     "bytes": 3419525,
+     "sha256": "8225c37a49c021facea18a216b7bd8714470508772d54743812d0b339675bfe6"
+    },
+    {
+     "path": ".converted/cardio_2024.ndjson",
+     "derivedFrom": "data/snapshots/device_events_cardio_2024.parquet",
+     "bytes": 30076702,
+     "sha256": "29059d43eb7e8a0d60960924c5b3b8e7bbd44385c8ded9cbe931719ae6542879"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/event.json",
+    "exportDate": null,
+    "note": "108 265 informes recibidos en 2024 (cardiovascular); sin número de modelo"
    }
   },
   {

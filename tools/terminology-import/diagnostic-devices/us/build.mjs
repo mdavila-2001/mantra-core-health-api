@@ -33,6 +33,7 @@ import {
   fromMaudeDevices,
   fromMaudeReports,
   maudeComboKey,
+  parseFlatMap,
   fromRecall,
   fromRlFlat,
   fromFdadataPma,
@@ -429,6 +430,57 @@ if (aiMaude) {
     }
   }
   inputs.push({ source: 'mirror hayden-farquhar-maude-ai', version: prov.sourceVersion, records: rows.length, newCombinations: added, mergedIntoExisting: merged });
+}
+
+// Extractos MAUDE adicionales: se llevan a la forma de `maude_devices.csv` y se fusionan por combinación.
+function mergeMaude(id, file, what, rows) {
+  const prov = mirrorProv(id, file, what);
+  let added = 0;
+  let merged = 0;
+  for (const row of fromMaudeDevices(rows, table, prov)) {
+    const key = maudeComboKey({ device_report_product_code: row.deviceTypeCode, manufacturer_d_name: row.manufacturerName, brand_name: row.brandName, model_number: row.model });
+    const prev = maudeCombos.get(key);
+    if (prev) {
+      prev.extra = { ...prev.extra, alsoIn: [...(prev.extra.alsoIn ?? []), { ...prov.via, sourceRecordId: row.sourceRecordId, reportCount: row.extra.reportCount }] };
+      merged++;
+    } else {
+      add(row);
+      maudeCombos.set(key, row);
+      added++;
+    }
+  }
+  inputs.push({ source: `mirror ${id}`, version: prov.sourceVersion, records: rows.length, newCombinations: added, mergedIntoExisting: merged });
+}
+{
+  const f = mirrorFile('sarcom2-maude-cardio-2024', '.converted/cardio_2024.ndjson');
+  if (f) {
+    const rows = readFileSync(f, 'utf8').split('\n').filter(Boolean).map(JSON.parse).map((r) => ({ ...r, manufacturer_d_name: r.manufacturer_name, model_number: null, __manufacturerField: 'manufacturer_name (device)' }));
+    mergeMaude('sarcom2-maude-cardio-2024', '.converted/cardio_2024.ndjson', 'openFDA device/event (MAUDE) cardiovascular 2024', rows);
+  }
+  const lv = MIRRORS.find((m) => m.id === 'levisw-maude-2022-2024');
+  const lvFiles = lv.files.map((x) => [x, mirrorFile(lv.id, x)]).filter(([, p]) => p);
+  if (lvFiles.length) {
+    const rows = [];
+    for (const [, p] of lvFiles) {
+      for (const r of parseCsv(readFileSync(p, 'utf8'))) {
+        rows.push({ mdr_report_key: r.MDR_REPORT_KEY, brand_name: r.BRAND_NAME, manufacturer_d_name: r.MANUFACTURER_G1_NAME, model_number: null, device_report_product_code: r.DEVICE_REPORT_PRODUCT_CODE, __manufacturerField: 'MANUFACTURER_G1_NAME' });
+      }
+    }
+    mergeMaude(lv.id, 'data/train_data_1.csv', 'Archivos masivos MAUDE de FDA, eventos 2022–2024', rows);
+  }
+  const ap = mirrorFile('arpan2217-maude-1991-2010', 'data/fda_adverse_events_subset.csv');
+  if (ap) {
+    const KEYS = ['device_event_key', 'implant_flag', 'date_removed_flag', 'device_sequence_number', 'date_received', 'brand_name', 'generic_name', 'manufacturer_d_name', 'manufacturer_d_address_1', 'manufacturer_d_address_2', 'manufacturer_d_city', 'manufacturer_d_state', 'manufacturer_d_zip_code', 'manufacturer_d_zip_code_ext', 'manufacturer_d_country', 'manufacturer_d_postal_code', 'model_number', 'catalog_number', 'lot_number', 'other_id_number', 'device_operator', 'device_availability', 'device_report_product_code', 'device_age_text', 'device_evaluated_by_manufacturer', 'baseline_510_k__flag', 'baseline_510_k__number', 'baseline_510_k__exempt_flag', 'openfda', 'udi_di', 'udi_public', 'combination_product_flag'];
+    const rows = [];
+    for (const r of parseCsv(readFileSync(ap, 'utf8'))) {
+      const devs = String(r.device ?? '').replace(/^\[|\]$/g, '').split(/\}, \{(?=device_event_key=)/);
+      for (const d of devs) {
+        const m = parseFlatMap(d, KEYS);
+        rows.push({ mdr_report_key: r.mdr_report_key, device_ordinal: m.device_sequence_number || null, brand_name: m.brand_name, generic_name: m.generic_name, manufacturer_d_name: m.manufacturer_d_name, model_number: m.model_number, device_report_product_code: m.device_report_product_code });
+      }
+    }
+    mergeMaude('arpan2217-maude-1991-2010', 'data/fda_adverse_events_subset.csv', 'openFDA device/event (MAUDE) recibidos 1991–2010', rows);
+  }
 }
 
 // --- 2f. Retiros del mercado (openFDA enforcement/recall) -----------------------------
