@@ -297,6 +297,175 @@ detiene con dos pasadas seguidas en 0.
 - **Nuevos tras deduplicar: 0.**
 - **Estado de la saturación**: primera pasada en 0. La regla pide dos seguidas: falta una más (pasada 10) con las entradas sin cambios.
 
+### Pasada 10 (2026-10-24)
+
+La red del entorno pasó a completa y las hermanas volvieron a publicar, así
+que esta pasada no es la segunda en 0: el contador vuelve a empezar.
+
+- **Regiones**:
+  - `us` @`b6999585`: 215 690 filas (sin cambios).
+  - `eu` @`63de12cb`: 716 filas. El código de `eu` ya baja EUDAMED y la EMDN v2026 oficiales, pero su `out/` todavía es el de antes.
+  - `row` @`fef932d6`: **6 569 701 filas** (antes 3 534 775), todas válidas:
+    - ANVISA desde los archivos oficiales: `anvisa-produtos` 100 681 y `anvisa-produtos-modelos` 3 274 089;
+    - nuevas de Taiwán: `tfda-devices` 93 430 y `tfda-tudid` 688 258;
+    - PMDA con el código JMDN, la clase y el 類別 en `extra.deviceTypes`.
+- **Criterio nuevo** (publicado por el regulador en el propio registro):
+  - **Área de interés de ANVISA.** Los archivos `CICLO_ANALISE_PETICOES_*` de `dados.anvisa.gov.br` publican el área con que se tramita cada proceso (`DESC_AREA_INTERESSE`).
+  - Si **todas** las áreas del proceso son «Dispositivos Médicos para Diagnóstico in Vitro» o «Produtos para diagnóstico de uso in vitro», el registro es IVD (`ivd-interest-area`).
+  - Si se mezclan con «Dispositivos Médicos» o «Correlatos», queda sin decisión.
+  - Entran 113 762 registros (18 265 de productos y 95 497 de modelos).
+- **Criterios revisados y no adoptados**:
+  - **Categorías A, B y C de la TFDA.** Se leyó el texto vigente del 醫療器材分類分級管理辦法 (law.moj.gov.tw, `pcode=L0030120`, modificado el 2023-08-22) y su 附表 (PDF, sha256 `94d06091…`).
+    - El art. 2 clasifica «視其應用科別» (por especialidad) en 16 clases: 臨床化學及臨床毒理學, 血液學、病理學及基因學, 免疫學及微生物學…
+    - Ni el texto ni el 附表 dicen que esas tres sean IVD. Que la numeración coincida con 21 CFR 862/864/866 es una convención, no un mapeo publicado.
+    - Las filas de TFDA quedan sin decisión, salvo 9 que entran por mismo modelo.
+  - **類別 de la JMDN**: no tiene una marca publicada de diagnóstico, y decidir por el nombre de la clase (p. ej. «検査用») sería por palabra clave.
+- **Corrección**: la misma fila de TFDA declara el código de clasificación (`E.9999`) y su categoría (`E`). El build los contaba como mapeo entre nomenclaturas (+3 560 mapeos).
+  - Son niveles de la misma clasificación del regulador. `NOMENCLATURE_FAMILY` en `lib/taxonomy.mjs` los excluye y los mapeos vuelven a 218.
+  - No había cambiado ninguna decisión: los nodos heredados por mapeo siguen en 79.
+- **Nuevos tras deduplicar** (contra la pasada 9):
+  - Registros: **+114 774** (376 114).
+  - Modelos: **+113 254** (288 325).
+  - Fabricantes: **+773** (21 528).
+  - Marcas: +18 458 (107 407).
+  - Jurisdicciones: **BR 113 912** (antes 241), US 130 010, CA 43 845, EU 434, AU 420, IN 42 y **TW 9** (nueva).
+  - Modelos en 2 jurisdicciones: 335 (+27); en 3: 6 (−1).
+  - Tipos de diagnóstico con al menos un modelo: 3 897 (+858).
+  - Fusiones `same-registry-id`: 970 (+861, CNPJ de ANVISA).
+  - Listados del sector: 197 empresas cruzan con un registro (+3).
+  - Nodos: 37 200 (+3 576: 1 782 JMDN con código, 1 366 códigos y 346 categorías TFDA, 82 «nome técnico»), todos sin decisión.
+  - **EE. UU.: 0 registros perdidos** (212 376 → 212 377). La baja de 402 modelos de EE. UU. (130 412 → 130 010) viene de fusiones de fabricantes por las reglas publicadas: juntan modelos con la misma marca y modelo.
+- **Taxonomía cargada** en el Postgres 16 desechable: +3 786 conceptos (ANVISA 292, JMDN 1 782, TFDA 1 712). El value set no cambia (5 694 miembros) y la 2.ª corrida da 0.
+- **Sin decisión**: 6 408 748 filas. 2 286 312 no traen tipo (MDALL); el resto son nomenclaturas nacionales sin criterio publicado (nome técnico, TFDA, JMDN).
+- **Descartadas**: ninguna fuente nueva.
+
+### Pasada 11 (2026-10-24): fuente oficial de la FDA
+
+- **Regiones**: sin cambios desde la pasada 10.
+- **Fuente nueva propia**: openFDA `device/classification`, la exportación oficial del 2026-10-21.
+  - Datos: 7 096 product codes, CC0 1.0. Zip con sha256 `0141400f…` y JSON con sha256 `36518da2…`.
+  - Pasa a ser la principal de la taxonomía de la FDA. La copia de `ej86` queda como verificación y para completar códigos; el suplemento de `bjoleary` solo aporta los que no están en ninguna de las dos.
+  - El `foiclass.zip` de `accessdata.fda.gov` no se pudo usar: redirige a la página de detección de abuso de la FDA, y eso no se elude.
+- **Verificación de la copia en git** (`coverage.json` → `fdaCopies`):
+  - Los 7 088 códigos de la copia están en la oficial, y la oficial trae 8 más (los mismos 8 que ya daba el suplemento).
+  - Difieren:
+    - 10 nombres: 7 por codificación (la copia tiene «�», la oficial el carácter de cp1252 tal cual, p. ej. `\x92`) y 3 cambios de texto (`MNT`, `SFH`, `ONG`);
+    - 4 clases y 4 regulaciones: `PNK`, `NYQ`, `OWE`, `MVD` ahora tienen 864.1890 y clase 2.
+  - Gana la oficial, verbatim, incluidos los caracteres de control de cp1252, que no se corrigen.
+  - Del suplemento solo queda `SHJ` (868.5830, no diagnóstico), que no está en la exportación del 2026-10-21.
+- **Nuevos tras deduplicar** (contra la pasada 10):
+  - Catálogo: **0** (376 114 registros, 288 325 modelos y 21 528 fabricantes, sin cambios).
+  - Taxonomía: 0 nodos nuevos. Hay 18 correcciones de atributos desde la fuente oficial. 4 códigos pasan de `fda-review-panel-ivd` a `cfr-ivd-part` y su decisión no cambia.
+- **Taxonomía cargada**: +15 designaciones (los nombres nuevos) y la 2.ª corrida da 0.
+  - **Limitación del importador**: solo inserta (`ON CONFLICT DO NOTHING`), así que en una base ya cargada no actualiza la regulación ni la clase corregidas de esos 4 códigos.
+  - Queda anotado como pendiente: hace falta una actualización explícita de propiedades con versión, no un upsert silencioso.
+- **Descartadas**: `foiclass.zip` oficial (detección de abuso de la FDA).
+
+### Pasada 12 (2026-10-24): EMDN v2026 oficial
+
+- **Regiones**: sin cambios desde la pasada 10.
+- **Fuente nueva propia**: la EMDN v2026, en el Excel oficial de la Comisión (`EMDN v2026_EN..xlsx`, enlazado desde `webgate.ec.europa.eu/dyna2/emdn/M90`).
+  - Licencia: CC BY 4.0 según el aviso legal de la Comisión. Excel con sha256 `a973dcdd…`.
+  - `extract-emdn-xlsx.py` (openpyxl) lo pasa a CSV: solo renombra las columnas, sin tocar los valores. El CSV tiene sha256 `d6f512dc…`.
+  - Pasa a ser la principal de la EMDN. La V2, verificada entre sus dos copias como antes, solo aporta los 12 códigos que la v2026 ya no trae, marcados `notInVersion: v2026` y decididos con el árbol de la V2: `C01901902`, `R01040101`, `R01040201`, `Z11030302`, `Z120306` y 7 hijos de `Z120306`.
+  - Queda cerrado el hueco de la pasada 9: la EMDN posterior a la V2 no estaba en git y ahora se baja del sitio oficial.
+- **Comparación V2 → v2026** (`coverage.json` → `emdnVersions`):
+  - 74 códigos nuevos.
+  - 148 términos con otro texto.
+  - **0 decisiones de diagnóstico cambiadas** en los códigos comunes.
+- **Nuevos tras deduplicar** (contra la pasada 11):
+  - Taxonomía: **+74 nodos EMDN** (37 274), de los cuales **+28 son de diagnóstico**:
+    - 12 por categoría W (`W01010132`, `W010501080301`…`04`, `W0106010402`…);
+    - 2 por título de grupo (`C01040401`, `C040401`);
+    - 14 heredados del título de su grupo (hijos de esos dos y `Z12030206` con sus 7 hijos).
+  - Value set `diagnostic-equipment-types`: 5 722 miembros (+28).
+  - Catálogo: **0**. Ningún registro consolidado usa todavía los códigos nuevos: `eu` sigue con 716 filas, y su código ya baja EUDAMED con la v2026, pero no publicó `out/` nuevo.
+- **Taxonomía cargada**: +74 conceptos, 225 designaciones, 222 propiedades, 74 relaciones is-a y la versión nueva del value set. La 2.ª corrida da 0.
+- **Descartadas**: ninguna.
+- **Saturación**: las pasadas 10 a 12 aportaron por fuentes nuevas (red completa). El contador vuelve a 0: faltan dos pasadas seguidas en 0. `eu` puede volver a empujar con su descarga oficial.
+
+### Pasada 13 (2026-10-24): EUDAMED y BD/RDM oficiales vía `eu`
+
+- **Base**: `dev` @`c3d08ca5` mergeado en la rama (sin conflictos). `dev` ya trae las pasadas 7 y 8 de `eu` (mdavila-2001/mantra-core-health-api#724).
+- **Regiones**:
+  - `eu` @`0ac247f8` (`claude/adoring-curie-xdkt83`): **503 648 filas**, todas válidas, de fuentes oficiales:
+    - `eudamed-udi` 303 085, del Data Lake de EUDAMED, por código EMDN;
+    - `it-salute-bdrdm` 200 563, banca dati del Ministero della Salute (IODL 2.0), con su CND.
+  - `eu` publica 32 753 actores (antes 26 583) y la EMDN v2026. Su sha256 (`a973dcdd8ae2`) es el mismo que el del Excel que bajó master en la pasada 12: dos descargas independientes del mismo archivo.
+  - `us` y `row`: sin cambios.
+- **Nuevos tras deduplicar** (contra la pasada 12):
+  - Registros: **+248 226** (624 340). De EUDAMED entran 240 516 (333 por mismo modelo). Del BD/RDM entran 3 188, solo por mismo modelo, porque la CND todavía no tenía criterio.
+  - Modelos: **+181 303** (469 628).
+  - Fabricantes: **+2 286** (23 814).
+  - Marcas: +87 821 (195 228).
+  - Jurisdicciones: **EU 181 678** (antes 434), US 130 324, BR 113 921, CA 44 218, **TW 3 798** (antes 9), AU 420, IN 42.
+  - Por mismo modelo entran 9 011 registros (antes 536); 4 532 son de TFDA que comparten modelo con uno de diagnóstico de otro país.
+  - **Modelos en 2 jurisdicciones: 4 648** (antes 335); en 3: 61 (antes 6); en 4: **1** (antes 0).
+  - Tipos de diagnóstico con al menos un modelo: 5 600 (+1 703).
+  - Nodos: 39 573 (+2 299 de la CND italiana, sin decisión en esta pasada).
+  - Fusiones: `same-name-same-country` 20 130 (+4 048), `same-name-unique-country` 3 574 (+1 584), `same-name-no-country` 3 126 (+1 082), `same-registry-id` 991 (+21).
+  - A revisión: 510 `name-match-conflicting-ids` (+276), 2 052 mismo nombre en otro país.
+  - Listados del sector: 214 empresas cruzan con un registro (+17).
+- **Sin decisión**: 6 663 454 filas (+254 706): 62 569 de EUDAMED (sobre todo EMDN Z de títulos mixtos) y 197 375 del BD/RDM (CND).
+- **Taxonomía cargada**: +2 299 conceptos CND y +7 designaciones EMDN (nombres que trae EUDAMED). El value set no cambia (5 722) y la 2.ª corrida da 0.
+
+### Pasada 14 (2026-10-24): categoría W de la CND italiana
+
+- **Regiones**: sin cambios desde la pasada 13.
+- **Criterio nuevo** (publicado en la nomenclatura misma, como la W de la EMDN):
+  - En la CND oficial del Ministero della Salute (dataset en dati.salute.gov.it, IODL 2.0; `DISPO_RDM_74_20261001.csv`, sha256 `0e5217c4…`), la categoría **W** se titula «DISPOSITIVI MEDICO-DIAGNOSTICI IN VITRO (D. Lgs. 332/2000)», vigente desde 2007-02-20.
+  - El D. Lgs. 332/2000 es la transposición de la directiva IVD 98/79/CE.
+  - Todo código CND que empieza con W es IVD (`cnd-category-w`, `IVD_CATEGORY` en `lib/taxonomy.mjs`).
+  - Fuera de W la CND no decide: no se encontró una tabla publicada código a código CND↔EMDN. La CID que la reemplaza desde 2026 dice recoger los criterios de CND y EMDN, pero sin correspondencia publicada.
+- **Corrección**: la fuente `it-salute-bdrdm` no tenía jurisdicción (`jurisdictionOf`). En la primera corrida de esta pasada aparecieron 114 796 modelos con 0 jurisdicciones. Ahora el registro nacional italiano es `IT`, con test.
+- **Nuevos tras deduplicar** (contra la pasada 13):
+  - Registros: **+115 495** (739 835).
+  - Modelos: **+114 957** (584 585).
+  - Fabricantes: **+902** (24 716).
+  - Marcas: +92 471 (287 699).
+  - Jurisdicciones: **IT 118 097** (nueva), EU 181 678, US 130 324, BR 113 922, CA 44 378, TW 3 798, AU 420, IN 42.
+  - **Modelos en 2 jurisdicciones: 7 772** (antes 4 648); en 3: 139 (antes 61); en 4: 8 (antes 1).
+  - Tipos de diagnóstico con al menos un modelo: 7 281 (+1 681). Nodos CND: 1 681 de diagnóstico y 618 sin decisión.
+  - Por mismo modelo: 6 212 (antes 9 011). Los 3 188 italianos que entraban por mismo modelo ahora entran por su propio tipo.
+- **Taxonomía cargada**: versión nueva del value set con 7 403 miembros (+1 681). La 2.ª corrida da 0.
+- **Sin decisión**: 6 547 959 filas (−115 495).
+- **Descartadas**: ninguna.
+- **Saturación**: las pasadas 10 a 14 aportaron todas. Faltan dos seguidas en 0.
+
+### Pasada 15 (2026-10-24): ROW con CDSCO oficial, NMPA China, INVIMA, OMS, HSA y SAHPRA
+
+- **Base**: el PR #822 (pasadas 10 a 14) se mergeó en `dev`; esta pasada va en `justin/seed-dx-devices-master-p15`, desde `dev`.
+- **Regiones**: `row` @`24cbabb5` (PR de ROW #821): **14 239 561 filas** en 26 archivos (antes 6 569 701). `us` y `eu` sin cambios.
+  - `cdsco-approved-devices` 180 124 (lista oficial de cdscomdonline.gov.in; reemplaza al espejo `cdsco-import-licences`);
+  - `nmpa-udi` 6 294 994 (release completo 2026-10-01 de la base UDI de China);
+  - `invima-dispositivos` 71 434 (Colombia);
+  - `hsa-smdr` 20 857 y `hsa-class-a` 1 127 525 (Singapur);
+  - `who-pq-ivd` 435 (IVD precalificados por la OMS);
+  - `sahpra-covid-ivd` 283 (Sudáfrica).
+- **Criterios nuevos** (publicados por el regulador en el propio registro; en `lib/taxonomy.mjs`):
+  - **CDSCO**: la lista «In Vitro Diagnostic» frente a «Medical Device» (`extra.cdscoCategory = ivd`) → 74 428 registros.
+  - **NMPA**: `qxlb = 体外诊断试剂` → 249 577 registros. El documento de la API (V2.1) no define el campo; se usa el valor verbatim.
+  - **INVIMA**: el grupo «REACTIVO DIAGNOSTICO» y «REACTIVOS  IN VITRO» frente a «MEDICO QUIRURGICOS» y «ODONTOLOGICOS» → 44 794 registros.
+  - **Alcance de la fuente**: OMS PQ IVD (435) y SAHPRA COVID-19 (283).
+- **Criterio no adoptado**: las especialidades de HSA («Clinical chemistry», «Immunology»…) son áreas de la HSA, que no publica que equivalgan a IVD. Sus filas entran solo por mismo modelo (647).
+- **Correcciones**:
+  - `who-pq-ivd` quedó entero inválido (435 de 435) porque el formato común no admitía el prefijo `who:`. Ahora lo admite (README y validador, con test) y la jurisdicción es `WHO`.
+  - `diagnosticTypesWithModels` contaba también tipos sin decisión; ahora cuenta solo los de diagnóstico y `typesWithModels` queda aparte.
+- **Nuevos tras deduplicar** (contra la pasada 14):
+  - Registros: **+370 655** (1 110 490).
+  - Modelos: **+144 547** (729 132).
+  - Fabricantes: **+3 020** (27 736).
+  - Marcas: +28 542 (316 241).
+  - Jurisdicciones: **CN 95 911**, **IN 45 419** (antes 42), **CO 3 212**, **WHO 435**, **SG 318**, **ZA 217**, EU 181 668, US 130 393, IT 118 098, BR 113 974, CA 44 314, TW 3 797, AU 420.
+  - Modelos en 2 jurisdicciones: 8 611; en 3: 200; en 4: 11.
+  - Nodos: 106 607 (+67 034, casi todos nombres de dispositivo de CDSCO, sin decisión). Tipos de diagnóstico con al menos un modelo: 6 372.
+  - Por mismo modelo: 7 350.
+- **Sin decisión**: 13 847 164 filas, de las cuales 3 413 059 no traen tipo (MDALL, Taiwán y NMPA de «器械»). La gran mayoría son dispositivos que no son de diagnóstico y no deben entrar.
+- **Taxonomía cargada** en el Postgres desechable: CDSCO +63 782 conceptos, NMPA +3 216, INVIMA +4, HSA +19, OMS +11, SAHPRA +4. El value set pasa a 7 405 miembros. La 2.ª corrida da 0.
+- **Descartadas**: ninguna fuente nueva.
+- **Saturación**: la pasada 15 también aportó. Faltan dos seguidas en 0.
+- **Descartadas**: ninguna.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

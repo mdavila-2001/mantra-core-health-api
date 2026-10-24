@@ -8,8 +8,11 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { EncountersRepository } from '../../clinical/repositories';
 import { ReferralsRepository } from '../repositories';
+import { ReferralNotifier } from './referral-notifier.service';
 import {
+  HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/infrastructure/repositories';
@@ -41,12 +44,32 @@ export class ReferralsService {
     private readonly referralsRepo: ReferralsRepository,
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly encountersRepo: EncountersRepository,
+    private readonly notifier: ReferralNotifier,
+    private readonly practitionersRepo: HealthPractitionerProfilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ReferralsService.name);
   }
 
-  /** UC-18-07: emite una referencia en estado solicitado. */
+  /**
+   * UC-18-07: emite una referencia en estado solicitado.
+   *
+   * ## Qué cambió el 24/10/2026
+   *
+   * - **Quien deriva sale del token**, no del cuerpo: `referringProfileId` es el
+   *   perfil profesional del actor cuando lo tiene. Un campo que el cliente
+   *   puede falsear no dice quién recomienda.
+   * - **El encuentro tiene que ser de ese paciente y de la organización del
+   *   actor**, o responde 404 — igual que un encuentro inexistente, para no
+   *   revelar que existe en otra historia (mismo criterio que
+   *   `ConditionsService`).
+   * - **La paciente recibe un aviso** en su campana —«Su médico le recomienda
+   *   consultar con …», con un enlace a la ficha del profesional, donde reserva—
+   *   **sólo si hay encuentro verificado y profesional destino**. Sin encuentro
+   *   no hay relación asistencial demostrada, y un aviso «su médico…» sin ella
+   *   sería un mensaje que cualquiera podría mandarle a cualquiera.
+   */
   async create(
     dto: CreateReferralDto,
     actor: AuthenticatedUser,
@@ -58,7 +81,23 @@ export class ReferralsService {
       },
       'Creating referral',
     );
-    return this.em.transactional(async (tx) => {
+    // Sólo del token: un `referringProfileId` del cuerpo se puede falsear y
+    // el aviso saldría a nombre de otro médico.
+    const referringProfileId = actor.practitionerProfileId;
+
+    const created = await this.em.transactional(async (tx) => {
+      if (dto.targetProfileId) {
+        await this.assertTargetIsPractitioner(tx, dto.targetProfileId);
+      }
+      if (dto.sourceEncounterId) {
+        await this.assertEncounterBelongsToPatient(
+          tx,
+          dto.sourceEncounterId,
+          dto.patientProfileId,
+          actor,
+        );
+      }
+
       if (
         dto.sourceEncounterId &&
         dto.targetProfileId &&
@@ -80,7 +119,7 @@ export class ReferralsService {
       const referral = this.referralsRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
         sourceEncounterId: dto.sourceEncounterId,
-        referringProfileId: dto.referringProfileId,
+        referringProfileId,
         targetProfileId: dto.targetProfileId,
         targetTenantId: dto.targetTenantId,
         specialtyConceptId: dto.specialtyConceptId,
@@ -101,6 +140,49 @@ export class ReferralsService {
         createdAt: referral.createdAt,
       };
     });
+
+    // Después del commit, y sin poder romperlo: el aviso es de cortesía, la
+    // derivación ya existe.
+    if (dto.sourceEncounterId && dto.targetProfileId) {
+      await this.notifier.notifyRecommended(created.id);
+    }
+    return created;
+  }
+
+  /** El destino tiene que ser un perfil profesional real, no cualquier uuid. */
+  private async assertTargetIsPractitioner(
+    tx: EntityManager,
+    targetProfileId: string,
+  ): Promise<void> {
+    const target = await this.practitionersRepo.findById(tx, targetProfileId);
+    if (!target) {
+      throw new ResourceNotFoundException('Profesional no encontrado', {
+        targetProfileId,
+      });
+    }
+  }
+
+  /**
+   * El encuentro tiene que ser del paciente y de una organización del actor.
+   * Inexistente e incoherente responden igual (404): distinguirlos diría que
+   * ese id existe en otra historia u otra organización.
+   */
+  private async assertEncounterBelongsToPatient(
+    tx: EntityManager,
+    encounterId: string,
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const encounter = await this.encountersRepo.findById(tx, encounterId);
+    if (
+      !encounter ||
+      encounter.patientProfileId !== patientProfileId ||
+      actor.tenantIds?.includes(encounter.tenantId) !== true
+    ) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
   }
 
   /** UC-18-08: el tenant destino acepta o rechaza la referencia. */

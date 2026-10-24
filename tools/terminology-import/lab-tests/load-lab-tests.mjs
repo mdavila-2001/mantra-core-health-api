@@ -36,7 +36,7 @@ import { DATA_DIR } from './pack-lab-tests-data.mjs';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
-const LAYERS = args.includes('--layers') ? args[args.indexOf('--layers') + 1].split(',') : ['loinc', 'hl7-tho', 'ucum', 'fonasa-mle', 'sigtap-sus', 'tuss-ans', 'icd10pcs-cms', 'pami-nomenclador', 'cups-co', 'gtr-ncbi'];
+const LAYERS = args.includes('--layers') ? args[args.indexOf('--layers') + 1].split(',') : ['loinc', 'hl7-tho', 'ucum', 'fonasa-mle', 'sigtap-sus', 'tuss-ans', 'icd10pcs-cms', 'pami-nomenclador', 'cups-co', 'gtr-ncbi', 'cdisc-sdtm', 'npu-ifcc'];
 const BATCH = 1000;
 
 const DB_CONFIG = {

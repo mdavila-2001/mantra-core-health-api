@@ -32,6 +32,14 @@ export const DIRECT_SOURCES = {
       { name: '2027-icd-10-pcs-code-tables-index.zip', url: 'https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip' },
     ],
   },
+  'nci-cdisc-sdtm': {
+    dir: 'cdisc',
+    files: [{ name: 'SDTM Terminology.txt', url: 'https://evs.nci.nih.gov/ftp1/CDISC/SDTM/SDTM%20Terminology.txt' }],
+  },
+  'ifcc-npu': {
+    dir: 'npu',
+    files: [{ name: 'npu-codes-latest.csv', url: 'https://cms.ifcc.org/wp-content/uploads/npu-codes-latest.csv' }],
+  },
   'cie10es-px': {
     dir: 'cie10es',
     files: [{ name: PX_FILE, url: `${CIE_BASE}/${PX_FILE}` }],

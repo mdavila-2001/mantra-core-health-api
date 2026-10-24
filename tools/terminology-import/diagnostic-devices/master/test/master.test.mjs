@@ -25,18 +25,23 @@ import {
 } from '../lib/exchange.mjs';
 import { classifyRegulation } from '../lib/cfr.mjs';
 import {
+  decidePcd,
   derivePanelParts,
   ivdPanelsFrom,
   parsePcd,
   pcdNode,
 } from '../lib/fda-pcd.mjs';
 import { aimlRows, fdaSubmissionUrl, parseCsv } from '../lib/own-sources.mjs';
+import {
+  comparePcdCopies,
+  parseOpenfdaClassification,
+} from '../lib/openfda-classification.mjs';
 import { Taxonomy, emdnParent } from '../lib/taxonomy.mjs';
 import {
   normalizeManufacturerName,
   resolveManufacturers,
 } from '../lib/manufacturers.mjs';
-import { consolidate, labelKey } from '../lib/consolidate.mjs';
+import { consolidate, jurisdictionOf, labelKey } from '../lib/consolidate.mjs';
 import {
   locateRegion,
   readRegionManifest,
@@ -702,6 +707,40 @@ test('decideRow: clase IVD del regulador y alcance publicado de la fuente', () =
   );
 });
 
+test('decideRow: área de interés IVD de ANVISA, solo si todas lo son', () => {
+  const tax = new Taxonomy();
+  const anvisa = (areas) =>
+    row({
+      source: 'anvisa-produtos',
+      deviceTypeSystem: 'br:anvisa-nome-tecnico',
+      deviceTypeName: 'PROTEÍNA TOTAL',
+      extra: { anvisaPetitions: { areas, primarySubjects: [] } },
+    });
+  assert.deepEqual(
+    tax.decideRow(
+      anvisa([
+        'Dispositivos Médicos para Diagnóstico in Vitro',
+        'Produtos para diagnóstico de uso in vitro',
+      ]),
+    ).types,
+    ['ivd-interest-area|anvisa-produtos'],
+  );
+  assert.equal(
+    tax.decideRow(
+      anvisa([
+        'Dispositivos Médicos',
+        'Dispositivos Médicos para Diagnóstico in Vitro',
+      ]),
+    ).diagnostic,
+    null,
+  );
+  assert.equal(
+    tax.decideRow(anvisa(['Dispositivos Médicos'])).diagnostic,
+    null,
+  );
+  assert.equal(tax.decideRow(anvisa([])).diagnostic, null);
+});
+
 test('suplemento del PCD: el código nuevo se decide por su regulación reconstruida', () => {
   const sup = JSON.parse(
     readFileSync(
@@ -721,5 +760,118 @@ test('suplemento del PCD: el código nuevo se decide por su regulación reconstr
         /^\d{3}\.\d{4}$/.test(r.REGULATIONNUMBER),
     ),
     'sección a 4 dígitos',
+  );
+});
+
+test('openFDA classification: misma forma que el foiclass y misma decisión', () => {
+  const { meta, rows } = parseOpenfdaClassification(
+    readFileSync(join(FX, 'openfda-classification.sample.json'), 'utf8'),
+  );
+  assert.equal(meta.last_updated, '2026-10-21');
+  const byCode = Object.fromEntries(rows.map((r) => [r.PRODUCTCODE, r]));
+  assert.equal(byCode.CGA.REGULATIONNUMBER, '862.1345');
+  assert.equal(byCode.CGA.REVIEW_PANEL, 'CH');
+  assert.equal(byCode.CGA.PHYSICALSTATE, '');
+  assert.equal(decidePcd(byCode.CGA).diagnostic, true);
+  assert.equal(decidePcd(byCode.EJY).diagnostic, false);
+  // PNK: la copia fijada lo trae sin regulación; la oficial, con 864.1890.
+  assert.equal(decidePcd(byCode.PNK).branch, 'ivd');
+  const literal = parsePcd(
+    readFileSync(join(FX, 'foiclass.sample.txt'), 'utf8'),
+  );
+  const cmp = comparePcdCopies(rows, literal);
+  assert.deepEqual(cmp.onlyA, ['EJY', 'JJX', 'PNK']);
+  assert.equal(cmp.diffs.name.length + cmp.diffs.regulation.length, 0);
+});
+
+test('mapeos: dos niveles de la clasificación TFDA no son un mapeo entre nomenclaturas', () => {
+  const tax = new Taxonomy();
+  tax.addFromRow(
+    row({
+      source: 'tfda-devices',
+      deviceTypeSystem: 'tw:tfda-classification',
+      deviceTypeCode: 'E.9999',
+      deviceTypeName: '其他',
+      extra: {
+        deviceTypes: [
+          { system: 'tw:tfda-category', code: 'E', name: '心臟血管醫學科學' },
+        ],
+      },
+    }),
+  );
+  assert.equal(tax.crosswalks.size, 0);
+});
+
+test('CND: la categoría W (IVD por su título publicado) decide; las demás no', () => {
+  const tax = new Taxonomy();
+  const cnd = (code) =>
+    row({
+      source: 'it-salute-bdrdm',
+      deviceTypeSystem: 'cnd',
+      deviceTypeCode: code,
+      deviceTypeName: 'X',
+    });
+  tax.addFromRow(cnd('W0101010101'));
+  tax.addFromRow(cnd('Z12021004'));
+  assert.equal(tax.decideRow(cnd('W0101010101')).diagnostic, true);
+  assert.equal(tax.nodes.get('cnd|W0101010101').basis, 'cnd-category-w');
+  assert.equal(tax.decideRow(cnd('Z12021004')).diagnostic, null);
+});
+
+test('jurisdicción: toda fuente de las regiones tiene una (BD/RDM italiano → IT)', () => {
+  assert.equal(jurisdictionOf('it-salute-bdrdm', 'eu'), 'IT');
+  assert.equal(jurisdictionOf('eudamed-udi', 'eu'), 'EU');
+  assert.equal(jurisdictionOf('tfda-tudid', 'row'), 'TW');
+  assert.equal(jurisdictionOf('cdc-livd-sars-cov-2', 'us'), 'US');
+  assert.equal(jurisdictionOf('who-pq-ivd', 'row'), 'WHO');
+  assert.equal(jurisdictionOf('nmpa-udi', 'row'), 'CN');
+  assert.equal(jurisdictionOf('invima-dispositivos', 'row'), 'CO');
+  assert.equal(jurisdictionOf('sahpra-covid-ivd', 'row'), 'ZA');
+});
+
+test('marcas IVD del regulador: CDSCO, NMPA, INVIMA y fuentes que solo listan IVD', () => {
+  const tax = new Taxonomy();
+  const d = (over) => tax.decideRow(row(over)).diagnostic;
+  assert.equal(
+    d({ source: 'cdsco-approved-devices', extra: { cdscoCategory: 'ivd' } }),
+    true,
+  );
+  assert.equal(
+    d({ source: 'cdsco-approved-devices', extra: { cdscoCategory: 'md' } }),
+    null,
+  );
+  assert.equal(
+    d({ source: 'nmpa-udi', extra: { qxlb: '体外诊断试剂' } }),
+    true,
+  );
+  assert.equal(d({ source: 'nmpa-udi', extra: { qxlb: '器械' } }), null);
+  assert.equal(d({ source: 'who-pq-ivd' }), true);
+  assert.equal(d({ source: 'sahpra-covid-ivd' }), true);
+  const invima = (name) =>
+    row({
+      source: 'invima-dispositivos',
+      deviceTypeSystem: 'co:invima-grupo',
+      deviceTypeCode: null,
+      deviceTypeName: name,
+    });
+  tax.addFromRow(invima('REACTIVO DIAGNOSTICO'));
+  tax.addFromRow(invima('MEDICO QUIRURGICOS'));
+  assert.equal(tax.decideRow(invima('REACTIVO DIAGNOSTICO')).diagnostic, true);
+  assert.equal(tax.decideRow(invima('MEDICO QUIRURGICOS')).diagnostic, null);
+});
+
+test('formato común: la OMS tiene su prefijo propio (who:)', () => {
+  const ok = validateRow(
+    row({
+      deviceTypeSystem: 'who:assay-format',
+      deviceTypeCode: null,
+      deviceTypeName: 'NAT (nucleic acid testing)',
+    }),
+  );
+  assert.deepEqual(ok, []);
+  assert.ok(
+    validateRow(
+      row({ deviceTypeSystem: 'whox:assay-format', deviceTypeName: 'x' }),
+    ).length > 0,
   );
 });

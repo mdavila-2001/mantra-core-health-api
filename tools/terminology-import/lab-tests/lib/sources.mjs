@@ -112,6 +112,26 @@ export const SOURCES = {
     obtain: 'ftp',
     dir: 'gtr',
   },
+  'cdisc-sdtm': {
+    sourceCode: 'CDISC_SDTM_CT',
+    name: 'CDISC SDTM Controlled Terminology (NCI EVS)',
+    owner: 'Clinical Data Interchange Standards Consortium (CDISC), mantenida por NCI Enterprise Vocabulary Services',
+    officialUrl: 'https://evs.nci.nih.gov/ftp1/CDISC/SDTM/',
+    license:
+      'CDISC Controlled Terminology se mantiene y distribuye como parte del NCI Thesaurus (cdisc.org, página «Controlled Terminology»); NCI Thesaurus se publica bajo CC BY 4.0 (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm). Se cita a CDISC y a NCI EVS.',
+    obtain: 'url',
+    dir: 'cdisc',
+  },
+  'npu-ifcc': {
+    sourceCode: 'IFCC_IUPAC_NPU',
+    name: 'NPU Terminology (IFCC-IUPAC), versión internacional',
+    owner: 'International Federation of Clinical Chemistry and Laboratory Medicine (IFCC) e International Union of Pure and Applied Chemistry (IUPAC); repositorio: Danish Health Data Authority',
+    officialUrl: 'https://npu-terminology.org/npu-database/',
+    license:
+      'NPU License & Terms of Use (2023-05-17): uso y copia sin cargo, comercial o no comercial, para identificar observaciones clínicas de pacientes; prohibido cambiar códigos, definiciones o términos y traducirlos; toda copia cita la NPU Terminology como propiedad de IFCC e IUPAC y el sitio www.labterm.dk.',
+    obtain: 'url',
+    dir: 'npu',
+  },
   'pami-nomenclador': {
     sourceCode: 'PAMI_NOMENCLADOR',
     name: 'PAMI — Nomenclador Común de prácticas médicas (Argentina)',
@@ -183,6 +203,30 @@ export const GAPS = [
     source: 'CPT (AMA)',
     url: 'https://www.ama-assn.org/practice-management/cpt',
     reason: 'Propiedad de la AMA, licencia comercial.',
+    status: 'licencia',
+  },
+  {
+    source: 'MBS — Medicare Benefits Schedule (Australia), grupos de patología e imagen',
+    url: 'https://www.mbsonline.gov.au/internet/mbsonline/publishing.nsf/Content/copyright',
+    reason: 'El XML se descarga, pero el copyright del Commonwealth sólo permite uso personal no comercial y prohíbe redistribuir sin permiso escrito. Se borró la copia.',
+    status: 'licencia',
+  },
+  {
+    source: 'JLAC10 / JLAC11 (Japanese Society of Laboratory Medicine)',
+    url: 'https://www.jslm.org/committees/code/index.html',
+    reason: 'Las tablas se descargan, pero la JSLM exige solicitar permiso de reproducción (転載許諾申請); no hay licencia abierta publicada.',
+    status: 'licencia',
+  },
+  {
+    source: 'Nomenclatura INAMI (Bélgica), NABM y CCAM (Francia)',
+    url: 'https://www.inami.fgov.be/fr/nomenclature',
+    reason: 'INAMI publica la nomenclatura sólo en PDF/Word («tous droits réservés») y NomenSoft responde 403; ameli.fr responde 403 y data.gouv.fr no tiene conjunto NABM.',
+    status: 'sin-acceso',
+  },
+  {
+    source: 'WHO Essential In Vitro Diagnostics List, ICHI (OMS), NICIP (NHS), CPMS (Perú)',
+    url: 'https://www.who.int/publications/i/item/9789240081093',
+    reason: 'EDL: informe PDF de categorías, no códigos, con licencia no comercial de la OMS (IRIS 403). ICHI: versión beta, sólo por API con registro. NICIP: TRUD exige cuenta. CPMS: basado en CPT (AMA).',
     status: 'licencia',
   },
   {

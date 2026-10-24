@@ -7183,6 +7183,104 @@ paths:
       tags:
         - messaging-webhooks
       security: []
+  /notifications/web-push/config:
+    get:
+      operationId: WebPushController_config
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Clave pública VAPID, o enabled=false si no hay push
+      tags:
+        - messaging
+      description: >-
+        Clave pública VAPID, o enabled=false si no hay push. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /notifications/web-push/subscription:
+    put:
+      operationId: WebPushController_subscribe
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebPushSubscriptionDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Guarda la suscripción push de este navegador
+      tags:
+        - messaging
+      description: >-
+        Guarda la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: WebPushController_unsubscribe
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebPushUnsubscribeDto'
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Quita la suscripción push de este navegador
+      tags:
+        - messaging
+      description: >-
+        Quita la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /internal/storage-lifecycle/audio/{assetId}/begin:
     post:
       operationId: InternalStorageLifecycleController_begin
@@ -18801,7 +18899,9 @@ paths:
       description: >-
         Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A
         diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio
-        busca en la ciudad, no en su institución.
+        busca en la ciudad, no en su institución. Con `studyConceptIds` responde por cobertura —cada centro con
+        `complete`, `missingStudyConceptIds` y `distanceKm`—: completos primero, después por distancia en línea recta
+        desde `lat`/`lng`.
       operationId: DiagnosticUnitsController_search
       parameters:
         - name: q
@@ -18830,6 +18930,27 @@ paths:
           description: Código del estudio buscado
           schema:
             type: string
+        - name: studyConceptIds
+          required: false
+          in: query
+          description: Conceptos de estudio separados por coma (uuid). Activa la búsqueda por cobertura.
+          schema:
+            example: 1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d
+            type: string
+        - name: lat
+          required: false
+          in: query
+          schema:
+            minimum: -90
+            maximum: 90
+            type: number
+        - name: lng
+          required: false
+          in: query
+          schema:
+            minimum: -180
+            maximum: 180
+            type: number
         - name: insurerTenantId
           required: false
           in: query
@@ -63011,6 +63132,19 @@ components:
         address:
           $ref: '#/components/schemas/OwnSiteAddressDto'
       additionalProperties: false
+    DiagnosticUnitBranchDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 200
+          example: Sucursal Equipetrol
+        address:
+          $ref: '#/components/schemas/OwnSiteAddressDto'
+      required:
+        - name
+      additionalProperties: false
     DiagnosticUnitProfileDto:
       type: object
       properties:
@@ -63038,6 +63172,11 @@ components:
           default: false
         primarySite:
           $ref: '#/components/schemas/DiagnosticUnitPrimarySiteDto'
+        branches:
+          maxItems: 50
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticUnitBranchDto'
       additionalProperties: false
     RegisterPharmacyBranchDto:
       type: object
@@ -66920,6 +67059,39 @@ components:
       required:
         - providerMessageRef
         - receiptType
+      additionalProperties: false
+    WebPushKeysDto:
+      type: object
+      properties:
+        p256dh:
+          type: string
+          description: Clave pública ECDH (base64url)
+        auth:
+          type: string
+          description: Secreto de autenticación (base64url)
+      required:
+        - p256dh
+        - auth
+      additionalProperties: false
+    WebPushSubscriptionDto:
+      type: object
+      properties:
+        endpoint:
+          type: string
+          description: Dirección HTTPS del servicio de push del navegador
+        keys:
+          $ref: '#/components/schemas/WebPushKeysDto'
+      required:
+        - endpoint
+        - keys
+      additionalProperties: false
+    WebPushUnsubscribeDto:
+      type: object
+      properties:
+        endpoint:
+          type: string
+      required:
+        - endpoint
       additionalProperties: false
     BeginStoragePublicationDto:
       type: object
@@ -73803,6 +73975,31 @@ components:
           type: array
           items:
             type: string
+        complete:
+          type: boolean
+          description: 'Solo con `studyConceptIds`: ofrece todos los estudios pedidos'
+        missingStudyConceptIds:
+          description: 'Solo con `studyConceptIds`: los estudios pedidos que no ofrece'
+          type: array
+          items:
+            type: string
+            format: uuid
+        distanceKm:
+          type: number
+          nullable: true
+          description: 'Solo con `studyConceptIds`: km en línea recta desde `lat`/`lng` hasta la sede principal'
+        addressText:
+          type: string
+          nullable: true
+          description: 'Solo con `studyConceptIds`: dirección de la sede principal'
+        latitude:
+          type: number
+          nullable: true
+          description: 'Solo con `studyConceptIds`: latitud de la sede principal'
+        longitude:
+          type: number
+          nullable: true
+          description: 'Solo con `studyConceptIds`: longitud de la sede principal'
       required:
         - id
         - code

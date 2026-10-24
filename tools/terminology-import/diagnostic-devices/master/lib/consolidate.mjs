@@ -17,6 +17,8 @@ import { rowKey } from './exchange.mjs';
 const JURISDICTION_BY_PREFIX = [
   ['fda-', 'US'],
   ['eudamed-', 'EU'],
+  // Banca dati dei dispositivi medici del Ministero della Salute (registro nacional).
+  ['it-salute-', 'IT'],
   ['mhra-', 'GB'],
   ['swissmedic-', 'CH'],
   ['anvisa-', 'BR'],
@@ -43,6 +45,8 @@ const JURISDICTION_BY_PREFIX = [
   ['medsafe-', 'NZ'],
   ['sahpra-', 'ZA'],
   ['roszdravnadzor-', 'RU'],
+  // Precalificación de la OMS: no es un país; queda como su propia jurisdicción.
+  ['who-', 'WHO'],
 ];
 
 export function jurisdictionOf(source, region = null) {

@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1525 de 1525 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1529 de 1529 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -46,7 +46,7 @@ Se documentan **1525 de 1525 endpoints** en **72 módulos**. La referencia compl
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 14 | [Abrir referencia](endpoints/marketing.md) |
 | `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
-| `messaging` | 17 | [Abrir referencia](endpoints/messaging.md) |
+| `messaging` | 20 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
 | `ops_console` | 9 | [Abrir referencia](endpoints/ops-console.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
@@ -67,7 +67,7 @@ Se documentan **1525 de 1525 endpoints** en **72 módulos**. La referencia compl
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
-| `scheduling` | 58 | [Abrir referencia](endpoints/scheduling.md) |
+| `scheduling` | 59 | [Abrir referencia](endpoints/scheduling.md) |
 | `search_platform` | 3 | [Abrir referencia](endpoints/search-platform.md) |
 | `surveys` | 17 | [Abrir referencia](endpoints/surveys.md) |
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |

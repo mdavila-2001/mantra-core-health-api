@@ -7,22 +7,22 @@ Importador: [`tools/terminology-import/lab-tests/`](https://github.com/mdavila-2
 fuentes y licencias: [`SOURCES.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/lab-tests/SOURCES.md) ·
 pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
 
-## Resumen (2026-10-24, cierre de la fase con red abierta)
+## Resumen (2026-10-24, saturación alcanzada)
 
-- **158 309 conceptos** de 10 fuentes oficiales de 5 países y de HL7/NLM/NCBI: **156 942 prestaciones
-  diagnósticas** (LOINC 79 462, NCBI GTR 63 919, ICD-10-PCS 4 402, PAMI 3 034, TUSS 2 211, CUPS 2 158,
+- **188 729 conceptos** de 12 fuentes oficiales (Chile, Brasil, EE. UU., Argentina, Colombia e
+  internacionales: IFCC-IUPAC, CDISC, HL7, NLM, NCBI): **187 362 prestaciones diagnósticas** (LOINC 79 462,
+  NCBI GTR 63 919, NPU 25 699, CDISC 4 721, ICD-10-PCS 4 402, PAMI 3 034, TUSS 2 211, CUPS 2 158,
   SIGTAP 1 108, FONASA 648) y **1 367 conceptos de descripción** (479 tablas HL7 de muestra, aditivo,
-  sección; 888 unidades UCUM). 3 864 840 propiedades, 114 065 designaciones en castellano oficiales,
-  18 236 relaciones de panel, 313 value sets y 511 404 membresías.
+  sección; 888 unidades UCUM). 4 585 753 propiedades, 114 065 designaciones en castellano oficiales,
+  18 236 relaciones de panel, 335 value sets y 602 664 membresías.
 - **LOINC 2.82 está cargado sin cuenta en loinc.org**, desde tx.fhir.org (servidor de terminología de
   HL7) y NLM Clinical Tables: clase como categoría, CLASSTYPE, estado, pedible/observación, los 6 ejes
   (componente, propiedad y método de NLM; tiempo, sistema y escala en castellano, del nombre corto
   es-AR), unidades UCUM, 1 934 paneles con sus miembros en orden y nombres oficiales es-MX/es-AR en
   79 435 términos. Lo que sólo trae el zip oficial queda pendiente (ver Huecos).
-- **Búsqueda cerrada por orden del propietario (2026-10-24).** Con la red abierta las pasadas 10–13
-  aportaron conceptos; la 14 (re-sondeo) aportó 0; la 15 encontró CDISC «Laboratory Test Code»
-  (2 513 términos), que queda descartado al cerrar. **No es saturación por protocolo**: no hubo dos
-  pasadas seguidas en 0 con todo lo alcanzable cargado.
+- **Saturación por protocolo**: las pasadas 15 (CDISC) y 16 (NPU) aportaron conceptos; la 17 y la 18
+  aportaron **0** cada una, con todas las fuentes alcanzables cargadas o descartadas con motivo
+  (licencia, acceso o formato). Lo que queda afuera está en «Huecos», con lo que lo destraba.
 - **Rangos de referencia: ninguno**, porque ninguna fuente alcanzable los publica (NLM no trae `range`
   en ninguna unidad). No se inventan.
 
@@ -61,25 +61,28 @@ pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
 | 12 | **Cotejo de las redistribuciones contra los originales** y cambio a archivos oficiales: TUSS (ZIP `pda-049-tuss.zip` de la ANS), PAMI (`nomenclador-comun.csv` de datos.pami.org.ar), ICD-10-PCS (order files 2026 y 2027 y code tables 2027 de cms.gov), SIGTAP (FTP de DATASUS) | **5** códigos ICD-10-PCS nuevos (FY2027, vigente desde el 2026-10-01; 4 402 en total) | TUSS: el ZIP oficial tiene el **mismo SHA-256** que declara el paquete npm (`8d3bc59e…`); 5 966 códigos, 0 diferencias de nombre o vigencia. PAMI: mismos 4 739 códigos, pero el paquete npm **había cambiado la caja** de los nombres; se pasa al CSV oficial (nombre verbatim, módulo, valor en pesos de febrero 2019; licencia **CC-BY-4.0** verificada en la API del portal). ICD-10-PCS FY2026 de npm = order file 2026 de CMS (79 115 códigos, 0 diferencias); se pasa a **FY2027 oficial** con nombres de tipo oficiales (code tables XML); 5 códigos nuevos sin traducción en CIE-10-ES 2026. SIGTAP: el FTP de DATASUS sólo responde por FTP (el proxy sólo admite HTTPS): **no cotejado**. FONASA: fonasa.cl sigue en 403: **no cotejado**. RSNA Playbook: la descarga exige aceptar la licencia RadLex (no se acepta en nombre del propietario). DICOM CID 29: legible, pero no se encontró la página de licencia de NEMA: no se carga. |
 | 13 | **LOINC 2.82 sin cuenta**: tx.fhir.org (servidor de terminología de HL7: 435 clases descubiertas por exclusión, términos por `CLASS` con partición por `COMPONENT` cuando pasa de 3 000, `STATUS` y `ORDER_OBS` por filtros oficiales) + NLM Clinical Tables (112 405 términos: componente, propiedad, método, unidades, tipo de dato; 1 979 definiciones de panel pedidas, 1 747 publicadas) | **79 462** términos LOINC en el catálogo (de 109 325 de tx.fhir.org), 84 298 términos con nombre oficial en castellano (es-MX nombre largo, es-AR nombre corto), 1 934 paneles con 18 236 miembros | 29 863 términos sin dominio por clase (documentos, encuestas, adjuntos de reclamos, antecedentes, signos vitales, administración…; detalle en `excludedByClass`); `CARD.RISK` (puntajes) y `CARD.PROC` (mezcla intervenciones) sin dominio. **3 080** términos presentes en NLM pero no en tx.fhir.org: son posteriores a 2.82 (tx.fhir.org responde «Unknown code») y sin clase no se pueden clasificar. Ningún rango de referencia: NLM no publica `range` en ninguna unidad. tx.fhir.org responde 500 «not supported» ante una regex sin coincidencias (se trata como vacío) y 500 transitorios bajo carga (reintentos). |
 | 14 | Re-sondeo de lo que quedó sin acceso (18:04Z): loinc.org, fonasa.cl, datos.gob.mx, dgis.salud.gob.mx, inlasa.gob.bo, minsalud.gob.bo, sigtap.datasus.gov.br, www2/ftp2.datasus.gov.br | **0** | loinc.org 403 (servidor), fonasa.cl 403 (`awselb`), datos.gob.mx 403 (Akamai «Access Denied»), DGIS, INLASA, MinSalud Bolivia y DATASUS sin respuesta por HTTPS. gob.mx/salud responde, pero no publica un catálogo de procedimientos descargable en las páginas sondeadas. |
-| 15 | Fuentes abiertas no evaluadas aún: NCI EVS (CDISC SDTM), CMS Clinical Laboratory Fee Schedule, OHDSI Athena, Orphadata | **0 cargados; CDISC descartado al cerrar** | **CDISC SDTM `C65047` «Laboratory Test Code»** (`SDTM Terminology.txt` de evs.nci.nih.gov, 2 513 términos): alcanzable, pero (a) la licencia de CDISC no se verificó y (b) son códigos de *analito* para ensayos clínicos, sin muestra ni método, sin mapeo publicado a LOINC para deduplicar. Decide el propietario: no se cargan por conveniencia ni se descartan por conveniencia. CMS CLFS: usa códigos y descriptores CPT (AMA, licencia comercial). Athena: la descarga exige cuenta y licencias por vocabulario. Orphadata: no publica un catálogo de tests en sus productos libres. |
+| 15 | Fuentes abiertas no evaluadas aún: NCI EVS (CDISC SDTM), CMS Clinical Laboratory Fee Schedule, OHDSI Athena, Orphadata | **4 721** términos CDISC de 10 codelists «Test Code» diagnósticas (LB 2 513, CP 982, MB 562, MI 254, RE 141, ECG 115, IS 100, GF 20, MS 18, Holter 16) | Licencia de CDISC verificada: cdisc.org declara que su terminología se mantiene y distribuye como parte del NCI Thesaurus, publicado bajo **CC BY 4.0**. Fuera: codelists de hallazgos de examen, cuestionarios, signos vitales y mezclas (Cardiovascular, Ophthalmic Exam, Nervous System…; conteo en `excludedCodelists`). 126 C-codes están en más de una codelist (p. ej. Laboratory y Microscopic Findings): el concepto es `<codelist>.<C-code>` y cada uno lleva el dominio de su codelist. CDISC publica además un mapeo LOINC→LB: es un mapeo, no conceptos, y no se carga. CMS CLFS: códigos y descriptores CPT (AMA). Athena: exige cuenta. Orphadata: sin catálogo de tests en sus productos libres. |
+| 16 | Terminologías internacionales y aranceles nacionales con la red abierta: **NPU (IFCC-IUPAC)**, MBS (Australia), JLAC10/11 (Japón), INAMI (Bélgica), NABM/CCAM (Francia) | **25 699** códigos NPU (todos los activos de la versión vigente: MIC 6 402, CLC 5 589, ALL 3 408, IMM 3 374, CLP 3 200, MBG 2 562, TAH 534, TOX 486, RAF 143, FUN 1) | NPU: licencia sin cargo, comercial o no comercial, para identificar observaciones clínicas; prohíbe modificar y traducir (no se traduce). La especialidad va con su sigla tal cual: el archivo no trae el nombre y no se deduce. **MBS**: el XML baja, pero el copyright del Commonwealth sólo permite uso personal no comercial y prohíbe redistribuir; se borró la copia. **JLAC10/11**: la JSLM exige pedir permiso de reproducción. **INAMI**: sólo PDF/Word, «tous droits réservés», NomenSoft 403. **NABM/CCAM**: ameli.fr 403; data.gouv.fr sin conjunto NABM. |
+| 17 | Listas y clasificaciones internacionales restantes: WHO Essential In Vitro Diagnostics List, ICHI (OMS), NICIP (NHS Digital), CPMS (MINSA Perú), tarifario de Ecuador; re-intento de NABM en data.gouv.fr | **0** | EDL: informe PDF de categorías de prueba, no códigos, con licencia no comercial de la OMS (IRIS 403). ICHI: versión beta, sólo por la API de la OMS con registro. NICIP: TRUD exige cuenta. CPMS: se basa en CPT (AMA). Ecuador: 404. data.gouv.fr: 0 conjuntos «NABM». |
+| 18 | Búsqueda sistemática en portales de datos abiertos (API CKAN/hub): data.gov.uk, open.canada.ca, data.europa.eu, datos.gob.cl, datos.gob.ar, catalog.data.gov, dados.gov.br | **0** | Los resultados son datos veterinarios (VLA), volúmenes o resultados de pruebas, tiempos de espera, guías de dispositivos COVID y ensayos de vehículos: ninguno es un catálogo de pruebas. catalog.data.gov ya no expone la API CKAN; datos.gob.ar responde 403; dados.gov.br pide token (401). |
 
-**Las pasadas 7 y 8 aportaron 0 con la red cerrada; con la red abierta, la 14 aportó 0 y la 15 dejó
-una candidata que se descartó al cerrar.** El propietario ordenó cerrar la búsqueda el 2026-10-24.
-Queda registrado como cierre por decisión, **no como saturación por protocolo**.
+**Saturación por protocolo:** con la red cerrada, las pasadas 7 y 8 dieron 0. Con la red abierta,
+las 10–13, 15 y 16 aportaron, y **la 17 y la 18 dieron 0 seguidas** con todo lo alcanzable cargado o
+descartado con motivo.
 
 ## Cobertura
 
 ### Prestaciones diagnósticas por dominio y fuente
 
-| Dominio | LOINC | GTR (NCBI) | ICD-10-PCS (US) | PAMI (AR) | TUSS (BR) | CUPS (CO) | SIGTAP (BR) | FONASA (CL) | **Total** |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Laboratorio clínico | 62 668 | — | — | 2 658 | 1 456 | 1 402 | 527 | 443 | **69 154** |
-| Imagenología | 8 293 | — | 3 360 | 315 | 369 | 518 | 233 | 187 | **13 275** |
-| Anatomía patológica | 939 | — | — | 41 | 44 | 68 | 14 | 13 | **1 119** |
-| Genética y molecular | 3 254 | 63 919 | — | 20 | 144 | — | 25 | — | **67 362** |
-| Pruebas funcionales | 3 409 | — | 962 | — | 198 | 170 | 127 | 5 | **4 871** |
-| Sin dominio | 899 | — | 80 | — | — | — | 182 | — | **1 161** |
-| **Total** | **79 462** | **63 919** | **4 402** | **3 034** | **2 211** | **2 158** | **1 108** | **648** | **156 942** |
+| Dominio | LOINC | GTR (NCBI) | NPU (IFCC) | CDISC | ICD-10-PCS (US) | PAMI (AR) | TUSS (BR) | CUPS (CO) | SIGTAP (BR) | FONASA (CL) | **Total** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Laboratorio clínico | 62 668 | — | 25 699 | 4 175 | — | 2 658 | 1 456 | 1 402 | 527 | 443 | **99 028** |
+| Imagenología | 8 293 | — | — | — | 3 360 | 315 | 369 | 518 | 233 | 187 | **13 275** |
+| Anatomía patológica | 939 | — | — | 254 | — | 41 | 44 | 68 | 14 | 13 | **1 373** |
+| Genética y molecular | 3 254 | 63 919 | — | 20 | — | 20 | 144 | — | 25 | — | **67 382** |
+| Pruebas funcionales | 3 409 | — | — | 272 | 962 | — | 198 | 170 | 127 | 5 | **5 143** |
+| Sin dominio | 899 | — | — | — | 80 | — | — | — | 182 | — | **1 161** |
+| **Total** | **79 462** | **63 919** | **25 699** | **4 721** | **4 402** | **3 034** | **2 211** | **2 158** | **1 108** | **648** | **187 362** |
 
 «Sin dominio»: en LOINC, los 899 son miembros (a cualquier profundidad) de un panel incluido cuya
 propia clase no tiene dominio (encuestas CMS dentro de paneles funcionales, `CARD.PROC`, antecedentes…):
@@ -94,7 +97,8 @@ administración…; conteo por clase en `excludedByClass` del reporte de cobertu
 ### Categorías
 
 Cada fuente aporta su categoría oficial, como value set `lab-catalog-<fuente>-cat-<código>`: la clase
-LOINC (`lab-catalog-loinc-class-<clase>`), la categoría mayor de método de GTR, sección›tipo de
+LOINC (`lab-catalog-loinc-class-<clase>`), la categoría mayor de método de GTR, la especialidad NPU,
+la codelist CDISC, sección›tipo de
 ICD-10-PCS con nombres oficiales de las code tables de CMS, las formas de organización de SIGTAP con su
 nombre, el módulo de PAMI y los prefijos de FONASA, TUSS y CUPS. Esos tres aranceles no publican el
 nombre del capítulo en sus datos, así que la categoría es el prefijo, sin nombre inventado.
@@ -105,6 +109,8 @@ nombre del capítulo en sus datos, así que la categoría es el prefijo, sin nom
 |---|---|
 | LOINC | Clase y CLASSTYPE, estado, pedible/observación (ORDER_OBS), componente, propiedad y método (NLM), tiempo, sistema y escala (en castellano, del nombre corto es-AR), unidades UCUM, tipo de dato, nombres relacionados y para el consumidor, miembros de panel con orden, nombre oficial es-MX y es-AR. |
 | NCBI GTR | Laboratorio y país, tipo (clínico/investigación), métodos y categoría de método, genes y condiciones, estado crudo de NCBI. |
+| NPU | Sistema (con especificación), componente (con especificación), tipo de propiedad, procedimiento, unidad, tipo de escala, especialidad, vigencia, códigos que reemplaza o lo reemplazan; definición corta y completa. |
+| CDISC | C-code de NCI, codelist y dominio SDTM, código de envío (TESTCD), nombre de prueba (TEST), sinónimos, definición CDISC, término preferido NCI. |
 | ICD-10-PCS | Sección y tipo oficiales, descripción corta y larga, nombre oficial en castellano (CIE-10-ES 2026). |
 | SIGTAP | Subgrupo y forma oficiales, complejidad, restricción de sexo, edad mínima/máxima (meses), valores SUS. |
 | FONASA | Precio y copago por nivel 1–3 (CLP), nombre oficial verbatim. |
@@ -151,7 +157,8 @@ muestras con su subconjunto de 0487. Tamaño medido en Postgres 16 desechable: v
   que se conservan las dos.
 - **Sin traducciones propias.** Castellano sólo donde la fuente lo es: LOINC es-MX y es-AR, CIE-10-ES 2026
   (traducción oficial de ICD-10-PCS, mismo código; 5 códigos nuevos de FY2027 sin traducción), FONASA,
-  CUPS y PAMI. SIGTAP y TUSS quedan en portugués; GTR, HL7 y UCUM en inglés.
+  CUPS y PAMI. SIGTAP y TUSS quedan en portugués; GTR, NPU, CDISC, HL7 y UCUM en inglés (la licencia NPU
+  prohíbe traducirlo).
 
 ## Huecos
 
@@ -160,7 +167,10 @@ muestras con su subconjunto de 0487. Tamaño medido en Postgres 16 desechable: v
 | **LOINC, lo que sólo trae el zip oficial**: TIME/SYSTEM/SCALE en inglés, partes LP, Universal Lab Orders, Top 2000, RSNA Playbook; 3 080 términos posteriores a 2.82 (en NLM, sin clase en tx.fhir.org) | cuenta en loinc.org | Bajar el zip con una cuenta a `lab-tests-sources/loinc/` y correr `build-lab-tests.mjs --loinc-release <v>`: el parser existe y enriquece los mismos ids. |
 | RSNA RadLex Playbook por separado | licencia (click-through RadLex) | Que el propietario acepte la licencia, o el zip LOINC (trae el Playbook armonizado). |
 | DICOM CID 29 (modalidades) | licencia no verificada | Ubicar el aviso de copyright de NEMA aplicable. |
-| **CDISC «Laboratory Test Code»** (2 513) | descartado al cerrar (orden del propietario); licencia sin verificar | Retomarlo como capa nueva, previa verificación de los términos de uso de CDISC. |
+| MBS (Australia), patología e imagen | licencia: uso personal no comercial, sin redistribución | Permiso escrito del Department of Health, Disability and Ageing (mbsonline@health.gov.au). |
+| JLAC10 / JLAC11 (Japón) | licencia: permiso de reproducción de la JSLM | Solicitud de permiso a la Japanese Society of Laboratory Medicine. |
+| INAMI (Bélgica), NABM y CCAM (Francia) | sin formato estructurado abierto / 403 | Acceso a NomenSoft o a ameli.fr. |
+| WHO EDL, ICHI, NICIP, CPMS (Perú) | licencia no comercial, beta con registro, cuenta TRUD, CPT | Ver la pasada 17. |
 | Cotejo de SIGTAP y FONASA con sus originales | FTP sólo por FTP; fonasa.cl 403 | Un entorno con FTP saliente, o acceso a fonasa.cl. |
 | CUPS completo (Colombia) | no hay tabla completa en datos.gov.co | Resolución de CUPS vigente de MinSalud en formato tabular. |
 | México, SUS Bolivia, INLASA | 403 / sin respuesta | Acceso a datos.gob.mx, minsalud.gob.bo, inlasa.gob.bo. |
@@ -189,9 +199,10 @@ Todo entró en las tablas existentes. Mejoras posibles en el modelo:
   idioma ES, tipos de designación, relaciones part-of/is-a), insertados a mano en lugar de arrancar la API.
 - Carga completa **sólo desde `data/`** (`GLOSSARY_BUILD_DIR` apuntando a una carpeta vacía, con
   verificación de SHA-256), dos corridas de `load-lab-tests.mjs --apply`:
-  - corrida 1 (218 s): 158 309 conceptos, 3 864 840 propiedades, 114 065 designaciones, 18 236
-    relaciones, 313 value sets, 511 404 membresías: igual al plan del dry-run;
-  - corrida 2 (138 s): **0 filas nuevas** (sólo los 15 registros de lote, que son auditoría);
-  - schema `terminology` después de cargar: **1 193 MB** (tablas + índices).
-- Salidas literales en [el historial de git](https://github.com/mdavila-2001/mantra-core-health-api/tree/79a7e4865ae3a5e94c3fb1304c90e19d61e1fdaa/docs/trabajo/2026-10-24-seed-lab-tests-red/evidencia).
-- `node --test "tools/terminology-import/test/*.test.mjs"`: 54/54.
+  - corrida 1 (293 s): 188 729 conceptos, 4 585 753 propiedades, 114 065 designaciones, 18 236
+    relaciones, 335 value sets, 602 664 membresías: igual al plan del dry-run;
+  - corrida 2 (169 s): **0 filas nuevas** (sólo los 17 registros de lote, que son auditoría);
+  - schema `terminology` después de cargar: **1 394 MB** (tablas + índices).
+- Salidas literales en [el historial de git](https://github.com/mdavila-2001/mantra-core-health-api/tree/a765cffd7dc230084967520ecd8cf26822fb34b5/docs/trabajo/2026-10-24-seed-lab-tests-red/evidencia)
+  (`carga-completa-final-postgres16.txt`, `dry-run-plan-final.txt`, `regresion-final.txt`).
+- `node --test "tools/terminology-import/test/*.test.mjs"`: 56/56.

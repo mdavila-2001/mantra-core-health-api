@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1525 de 1525 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1529 de 1529 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -84,7 +84,7 @@ Esta referencia documenta **1525 de 1525 operaciones HTTP** registradas en `open
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
 | [marketing](marketing.md) | 14 | `marketing` | 2 |
 | [medical_groups](medical-groups.md) | 8 | `medical-groups` | 1 |
-| [messaging](messaging.md) | 17 | `messaging`, `messaging-internal`, `messaging-webhooks` | 3 |
+| [messaging](messaging.md) | 20 | `messaging`, `messaging-internal`, `messaging-webhooks` | 4 |
 | [object_storage](object-storage.md) | 14 | `dicomweb`, `object-storage` | 2 |
 | [ops_console](ops-console.md) | 9 | `ops-console` | 1 |
 | [organization_extensions](organization-extensions.md) | 9 | `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals` | 4 |
@@ -105,7 +105,7 @@ Esta referencia documenta **1525 de 1525 operaciones HTTP** registradas en `open
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 58 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 7 |
+| [scheduling](scheduling.md) | 59 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 7 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [surveys](surveys.md) | 17 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
@@ -123,4 +123,4 @@ Esta referencia documenta **1525 de 1525 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1525 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1529 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

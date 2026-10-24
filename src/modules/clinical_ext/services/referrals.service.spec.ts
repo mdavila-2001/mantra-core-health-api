@@ -16,6 +16,13 @@ import {
 import { CEXT } from '../clinical_ext.concepts';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
+/** Un profesional de la organización del encuentro, con su perfil en el token. */
+const doctor = {
+  id: 'md-1',
+  roles: ['PRACTITIONER'],
+  practitionerProfileId: 'hp-1',
+  tenantIds: ['t-1'],
+} as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -35,15 +42,31 @@ function build() {
     findActiveByUser: mockFn(() => Promise.resolve(null)),
   };
   const patientProfilesRepo = { findById: mockFn() };
+  const encountersRepo = { findById: mockFn() };
+  const notifier = { notifyRecommended: mockFn(() => Promise.resolve(true)) };
+  const practitionersRepo = {
+    findById: mockFn(() => Promise.resolve({ profileId: 'hp-2' })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new ReferralsService(
     em as any,
     referralsRepo,
     accountLinksRepo as any,
     patientProfilesRepo as any,
+    encountersRepo as any,
+    notifier as any,
+    practitionersRepo as any,
     logger as any,
   );
-  return { service, referralsRepo, accountLinksRepo, patientProfilesRepo };
+  return {
+    service,
+    referralsRepo,
+    accountLinksRepo,
+    patientProfilesRepo,
+    encountersRepo,
+    notifier,
+    practitionersRepo,
+  };
 }
 
 describe('ReferralsService', () => {
@@ -63,6 +86,11 @@ describe('ReferralsService', () => {
 
     it('rejects a duplicated referral (conflict)', async () => {
       const d = build();
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'e1',
+        patientProfileId: 'p1',
+        tenantId: 't-1',
+      });
       d.referralsRepo.findDuplicate.mockResolvedValue({ id: 'ref0' });
       await expect(
         d.service.create(
@@ -72,9 +100,178 @@ describe('ReferralsService', () => {
             targetProfileId: 't1',
             specialtyConceptId: 's1',
           } as any,
-          actor,
+          doctor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+    });
+
+    /**
+     * Derivar avisa a la paciente (pedido del propietario, 24/10/2026). El
+     * aviso sólo sale si hay un encuentro verificado: sin él no hay relación
+     * asistencial demostrada y «su médico le recomienda…» podría mandárselo
+     * cualquiera a cualquiera.
+     */
+    describe('el aviso a la paciente', () => {
+      const created = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+        createdAt: new Date(),
+      };
+      const encounter = { id: 'e1', patientProfileId: 'p1', tenantId: 't-1' };
+
+      it('con encuentro verificado y profesional destino, avisa DESPUÉS de crear', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.referralsRepo.findDuplicate.mockResolvedValue(null);
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetProfileId: 't9',
+          } as any,
+          doctor,
+        );
+
+        expect(d.notifier.notifyRecommended).toHaveBeenCalledWith('ref1');
+      });
+
+      it('sin encuentro NO avisa: no hay relación asistencial demostrada', async () => {
+        const d = build();
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          { patientProfileId: 'p1', targetProfileId: 't9' } as any,
+          doctor,
+        );
+
+        expect(d.referralsRepo.create).toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+
+      it('sin profesional destino NO avisa: no hay a quién recomendar', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          { patientProfileId: 'p1', sourceEncounterId: 'e1' } as any,
+          doctor,
+        );
+
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('quién deriva y sobre qué encuentro', () => {
+      it('un encuentro de OTRO paciente responde 404 y no crea nada ni avisa', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue({
+          id: 'e1',
+          patientProfileId: 'otro-paciente',
+          tenantId: 't-1',
+        });
+
+        await expect(
+          d.service.create(
+            {
+              patientProfileId: 'p1',
+              sourceEncounterId: 'e1',
+              targetProfileId: 't9',
+            } as any,
+            doctor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+
+      it('un encuentro de OTRA organización responde 404, igual que uno inexistente', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue({
+          id: 'e1',
+          patientProfileId: 'p1',
+          tenantId: 'otra-organizacion',
+        });
+
+        await expect(
+          d.service.create(
+            {
+              patientProfileId: 'p1',
+              sourceEncounterId: 'e1',
+              targetProfileId: 't9',
+            } as any,
+            doctor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+        d.encountersRepo.findById.mockResolvedValue(null);
+        await expect(
+          d.service.create(
+            {
+              patientProfileId: 'p1',
+              sourceEncounterId: 'e2',
+              targetProfileId: 't9',
+            } as any,
+            doctor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+
+      it('quien deriva sale del token, no del cuerpo que manda el cliente', async () => {
+        const d = build();
+        d.referralsRepo.create.mockReturnValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+          createdAt: new Date(),
+        });
+
+        await d.service.create(
+          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          doctor,
+        );
+
+        expect(d.referralsRepo.create.mock.calls[0][1].referringProfileId).toBe(
+          'hp-1',
+        );
+      });
+
+      it('sin perfil profesional en el token, el cuerpo no puede poner quién deriva', async () => {
+        const d = build();
+        d.referralsRepo.create.mockReturnValue({
+          id: 'ref1',
+          patientProfileId: 'p1',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+          createdAt: new Date(),
+        });
+
+        await d.service.create(
+          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          actor,
+        );
+
+        expect(
+          d.referralsRepo.create.mock.calls[0][1].referringProfileId,
+        ).toBeUndefined();
+      });
+
+      it('un destino que no es un perfil profesional responde 404 y no crea nada', async () => {
+        const d = build();
+        d.practitionersRepo.findById.mockResolvedValue(null);
+
+        await expect(
+          d.service.create(
+            { patientProfileId: 'p1', targetProfileId: 'no-existe' } as any,
+            doctor,
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.referralsRepo.create).not.toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
     });
   });
 
