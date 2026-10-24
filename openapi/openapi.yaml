@@ -18801,7 +18801,9 @@ paths:
       description: >-
         Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A
         diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio
-        busca en la ciudad, no en su institución.
+        busca en la ciudad, no en su institución. Con `studyConceptIds` responde por cobertura —cada centro con
+        `complete`, `missingStudyConceptIds` y `distanceKm`—: completos primero, después por distancia en línea recta
+        desde `lat`/`lng`.
       operationId: DiagnosticUnitsController_search
       parameters:
         - name: q
@@ -18830,6 +18832,27 @@ paths:
           description: Código del estudio buscado
           schema:
             type: string
+        - name: studyConceptIds
+          required: false
+          in: query
+          description: Conceptos de estudio separados por coma (uuid). Activa la búsqueda por cobertura.
+          schema:
+            example: 1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d
+            type: string
+        - name: lat
+          required: false
+          in: query
+          schema:
+            minimum: -90
+            maximum: 90
+            type: number
+        - name: lng
+          required: false
+          in: query
+          schema:
+            minimum: -180
+            maximum: 180
+            type: number
         - name: insurerTenantId
           required: false
           in: query
@@ -73803,6 +73826,31 @@ components:
           type: array
           items:
             type: string
+        complete:
+          type: boolean
+          description: 'Solo con `studyConceptIds`: ofrece todos los estudios pedidos'
+        missingStudyConceptIds:
+          description: 'Solo con `studyConceptIds`: los estudios pedidos que no ofrece'
+          type: array
+          items:
+            type: string
+            format: uuid
+        distanceKm:
+          type: number
+          nullable: true
+          description: 'Solo con `studyConceptIds`: km en línea recta desde `lat`/`lng` hasta la sede principal'
+        addressText:
+          type: string
+          nullable: true
+          description: 'Solo con `studyConceptIds`: dirección de la sede principal'
+        latitude:
+          type: number
+          nullable: true
+          description: 'Solo con `studyConceptIds`: latitud de la sede principal'
+        longitude:
+          type: number
+          nullable: true
+          description: 'Solo con `studyConceptIds`: longitud de la sede principal'
       required:
         - id
         - code

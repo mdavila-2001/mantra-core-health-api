@@ -33376,6 +33376,24 @@
                   "disabled": true
                 },
                 {
+                  "key": "studyConceptIds",
+                  "value": "1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+                  "description": "Conceptos de estudio separados por coma (uuid). Activa la búsqueda por cobertura.",
+                  "disabled": true
+                },
+                {
+                  "key": "lat",
+                  "value": "-90",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "lng",
+                  "value": "-180",
+                  "description": "",
+                  "disabled": true
+                },
+                {
                   "key": "insurerTenantId",
                   "value": "<insurerTenantId: uuid existente>",
                   "description": "",
@@ -33425,7 +33443,7 @@
                 }
               ]
             },
-            "description": "Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio busca en la ciudad, no en su institución.\n\n`GET /diagnostic-units/search`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DiagnosticUnitsController_search`"
+            "description": "Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio busca en la ciudad, no en su institución. Con `studyConceptIds` responde por cobertura —cada centro con `complete`, `missingStudyConceptIds` y `distanceKm`—: completos primero, después por distancia en línea recta desde `lat`/`lng`.\n\n`GET /diagnostic-units/search`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `DiagnosticUnitsController_search`"
           },
           "response": [],
           "event": [
