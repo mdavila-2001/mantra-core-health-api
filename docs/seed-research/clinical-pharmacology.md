@@ -14,6 +14,11 @@ La primera sesión (00:30 UTC) no tenía salida a ninguna fuente. Tras habilitar
 `www.whocc.no`, `list.essentialmeds.org`, `www.wikidata.org`, `gsrs.ncats.nih.gov`,
 `www.minsalud.gob.bo`, `api.cpicpgx.org`, `www.ebi.ac.uk` y `eutils.ncbi.nlm.nih.gov`.
 
+Comprobación a las 16:00 UTC, tras un aviso de que CIMA, RxNav, DailyMed y EMA estaban
+habilitados, con una petición real a cada uno: `cima.aemps.es`, `rxnav.nlm.nih.gov`,
+`dailymed.nlm.nih.gov`, `www.ema.europa.eu` y `open.fda.gov` siguen rechazados. El proxy responde
+literalmente: «gateway answered 403 to CONNECT (policy denial or upstream failure)».
+
 Con eso se corrió la **pasada 1 (openFDA + GSRS)**. Las demás fuentes siguen bloqueadas, así que
 la regla de «dos pasadas seguidas con 0» **no se puede cumplir**: un 403 no es un cero. Los
 bloqueos se registran como bloqueos.
