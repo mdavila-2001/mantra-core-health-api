@@ -1,6 +1,6 @@
 # Reporte — Equipos de diagnóstico y sus marcas: registros de Europa
 
-- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `claude/adoring-curie-xdkt83` (desde `dev`) · PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/691 (sin mergear)
+- Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `claude/adoring-curie-xdkt83` (desde `dev`) · PRs: https://github.com/mdavila-2001/mantra-core-health-api/pull/691 (→ `dev`) y https://github.com/mdavila-2001/mantra-core-health-api/pull/692 (→ `test`, rama `claude/adoring-curie-xdkt83-test`), sin mergear
 - Peldaño de evidencia alcanzado: `TESTED` (tests dirigidos, typecheck y lint en verde; corrida
   real de `fetch-mirrors → build → load` pegada). La carga a base (`--apply`) no se ejecutó.
 - Avance: 16 / 18 microtareas HECHO (88,9 %), 1 A MEDIAS (H2.S2.M3), 1 EN CURSO (H3).
