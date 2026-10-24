@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { ForbiddenException } from '@nestjs/common';
 
 /**
  * Ejecuta la operación mock fn.
@@ -14,7 +15,9 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 import { PERIOP } from '../procedures_perioperative.concepts';
 
 const actor = { id: 'user-1', roles: ['PERIOP_ADMIN'] };
@@ -26,6 +29,45 @@ const CASE = '55555555-5555-5555-5555-555555555555';
 const CONDITION = '66666666-6666-6666-6666-666666666666';
 const REASON = '77777777-7777-7777-7777-777777777777';
 const BILLABLE = '88888888-8888-8888-8888-888888888888';
+const TENANT_A = '11111111-1111-1111-1111-111111111111';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/**
+ * Mock de una consulta de casos por id. Los casos de prueba son del tenant
+ * activo (`TENANT_A`) salvo que el propio caso declare otro `custodianTenantId`.
+ *
+ * @returns Un `jest.fn` cuyo `mockResolvedValue` sella el tenant del caso.
+ */
+function caseLookupMock(): any {
+  const lookup = mockFn();
+  const resolve = lookup.mockResolvedValue.bind(lookup);
+  lookup.mockResolvedValue = (row: any) =>
+    resolve(
+      row && typeof row === 'object' && row.custodianTenantId === undefined
+        ? Object.assign(row, { custodianTenantId: TENANT_A })
+        : row,
+    );
+  return lookup;
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -36,8 +78,8 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const casesRepo = {
     createCase: mockFn(),
-    findCaseById: mockFn(),
-    findCaseForUpdate: mockFn(),
+    findCaseById: caseLookupMock(),
+    findCaseForUpdate: caseLookupMock(),
     findCaseByNumber: mockFn(),
     countCases: mockFn(),
     findOverlappingCases: mockFn(),
@@ -89,6 +131,11 @@ function build() {
     findImplantsByCase: mockFn().mockResolvedValue([]),
     findIdentifiersByImplants: mockFn().mockResolvedValue([]),
   };
+  // Política clínica del paciente: por defecto, sin base (los tests que prueban
+  // el detalle con un actor clínico la conceden).
+  const clinicalRead = {
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
+  };
   const service = new PeriopCasesService(
     em as any,
     casesRepo,
@@ -98,10 +145,13 @@ function build() {
     auditTrail as any,
     outbox as any,
     conditions as any,
+    clinicalRead as any,
     logger as any,
   );
   return {
-    service,
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    clinicalRead,
     tx,
     casesRepo,
     preopRepo,
@@ -1233,7 +1283,7 @@ describe('PeriopCasesService', () => {
         },
       ]);
 
-      const detail = await d.service.getCaseDetail(CASE);
+      const detail = await d.service.getCaseDetail(CASE, actor);
 
       expect(detail.operativeSteps).toHaveLength(1);
       expect(detail.operativeSteps[0].description).toBe('Abordaje');
@@ -1281,7 +1331,7 @@ describe('PeriopCasesService', () => {
         },
       ]);
 
-      const detail = await d.service.getCaseDetail(CASE);
+      const detail = await d.service.getCaseDetail(CASE, actor);
 
       expect(d.intraopRepo.findIdentifiersByImplants).toHaveBeenCalledWith(
         expect.anything(),
@@ -1298,7 +1348,7 @@ describe('PeriopCasesService', () => {
       const d = build();
       d.casesRepo.findCaseById.mockResolvedValue(readCase);
 
-      const detail = await d.service.getCaseDetail(CASE);
+      const detail = await d.service.getCaseDetail(CASE, actor);
 
       expect(detail.operativeSteps).toEqual([]);
       expect(detail.findings).toEqual([]);
@@ -1309,7 +1359,7 @@ describe('PeriopCasesService', () => {
       const d = build();
       d.casesRepo.findCaseById.mockResolvedValue(readCase);
 
-      await d.service.getCaseDetail(CASE);
+      await d.service.getCaseDetail(CASE, actor);
 
       expect(d.intraopRepo.findIdentifiersByImplants).toHaveBeenCalledWith(
         expect.anything(),
@@ -1321,8 +1371,288 @@ describe('PeriopCasesService', () => {
       const d = build();
       d.casesRepo.findCaseById.mockResolvedValue(null);
 
-      await expect(d.service.getCaseDetail(CASE)).rejects.toBeInstanceOf(
+      await expect(d.service.getCaseDetail(CASE, actor)).rejects.toBeInstanceOf(
         ResourceNotFoundException,
+      );
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de PERIOP-01. */
+async function expectCaseNotFound(promise: Promise<unknown>) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe('Caso quirúrgico no encontrado');
+  expect(exception.reason).toBe(
+    ProceduresPerioperativeErrorReason.PERIOP_CASE_NOT_FOUND,
+  );
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('PeriopCasesService · alcance de tenant (PERIOP-01)', () => {
+  const ownCase = (overrides: Record<string, unknown> = {}): any => ({
+    id: CASE,
+    custodianTenantId: TENANT_A,
+    patientProfileId: PATIENT,
+    caseNumber: 'CQ-0001',
+    statusConceptId: CONCEPTS.CASE_SCHEDULED,
+    ...overrides,
+  });
+  const foreignCase = (overrides: Record<string, unknown> = {}): any =>
+    ownCase({ custodianTenantId: TENANT_B, ...overrides });
+  const clinician = {
+    id: 'user-2',
+    roles: ['SURGEON'],
+    practitionerProfileId: SURGEON,
+  } as any;
+
+  describe('detalle y equipo por UUID', () => {
+    it('el detalle de un caso de otro tenant: 404 uniforme, igual que inexistente, y no lee nada del caso', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+      const foreign = await expectCaseNotFound(
+        d.service.getCaseDetail(CASE, actor),
+      );
+      d.casesRepo.findCaseById.mockResolvedValue(null);
+      const missing = await expectCaseNotFound(
+        d.service.getCaseDetail(CASE, actor),
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.casesRepo.findDiagnosesByCase).not.toHaveBeenCalled();
+      expect(d.casesRepo.findTeamByCase).not.toHaveBeenCalled();
+      expect(d.preopRepo.findOrdersByCase).not.toHaveBeenCalled();
+      expect(d.intraopRepo.findImplantsByCase).not.toHaveBeenCalled();
+    });
+
+    it('la consulta del detalle lleva el tenant del contexto, el mismo de la agenda', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(ownCase());
+
+      await d.service.getCaseDetail(CASE, actor);
+      await d.service.listCases(TENANT_A, {} as any);
+
+      expect(d.casesRepo.findCaseById).toHaveBeenCalledWith(
+        expect.anything(),
+        CASE,
+        TENANT_A,
+      );
+      expect(d.casesRepo.findCases).toHaveBeenCalledWith(
+        expect.anything(),
+        TENANT_A,
+        expect.anything(),
+      );
+    });
+
+    it('sin tenant en el contexto no se lee el detalle ni el equipo', async () => {
+      const d = build();
+
+      await expect(d.raw.getCaseDetail(CASE, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      await expect(d.raw.listTeamMembers(CASE)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(d.casesRepo.findCaseById).not.toHaveBeenCalled();
+    });
+
+    it('el equipo de un caso de otro tenant: 404 uniforme y no lista a nadie', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+
+      await expectCaseNotFound(d.service.listTeamMembers(CASE));
+
+      expect(d.casesRepo.findTeamByCase).not.toHaveBeenCalled();
+    });
+
+    it('el equipo del caso propio se lista', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(ownCase());
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        {
+          id: 'm-1',
+          practitionerProfileId: SURGEON,
+          teamRoleConceptId: 'role',
+          statusConceptId: CONCEPTS.TEAM_ASSIGNED,
+        },
+      ]);
+
+      const team = await d.service.listTeamMembers(CASE);
+
+      expect(team).toHaveLength(1);
+    });
+  });
+
+  describe('autorización clínica sobre el paciente (detalle)', () => {
+    it('el integrante del equipo lee el detalle sin pasar por la política de la historia', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(
+        ownCase({ primarySurgeonProfileId: 'otro' }),
+      );
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        { id: 'm-1', practitionerProfileId: SURGEON },
+      ]);
+
+      const detail = await d.service.getCaseDetail(CASE, clinician);
+
+      expect(detail.case.id).toBe(CASE);
+      expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
+    });
+
+    it('el cirujano principal lee el detalle', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(
+        ownCase({ primarySurgeonProfileId: SURGEON }),
+      );
+
+      const detail = await d.service.getCaseDetail(CASE, clinician);
+
+      expect(detail.case.id).toBe(CASE);
+    });
+
+    it('un profesional ajeno al caso con base clínica sobre el paciente lo lee', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(ownCase());
+
+      await d.service.getCaseDetail(CASE, clinician);
+
+      expect(d.clinicalRead.assertCanReadHistory).toHaveBeenCalledWith(
+        PATIENT,
+        clinician,
+      );
+    });
+
+    it('un profesional ajeno al caso y sin base clínica: el mismo 404, sin datos clínicos', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(ownCase());
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+        new ForbiddenException(
+          'Sólo puede consultar su propia historia clínica.',
+        ),
+      );
+
+      await expectCaseNotFound(d.service.getCaseDetail(CASE, clinician));
+
+      expect(d.casesRepo.findDiagnosesByCase).not.toHaveBeenCalled();
+      expect(d.preopRepo.findAssessmentByCase).not.toHaveBeenCalled();
+    });
+
+    it('una caída de la política no se disfraza de 404', async () => {
+      const d = build();
+      d.casesRepo.findCaseById.mockResolvedValue(ownCase());
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+        new Error('db down'),
+      );
+
+      await expect(d.service.getCaseDetail(CASE, clinician)).rejects.toThrow(
+        'db down',
+      );
+    });
+  });
+
+  describe('mutaciones por UUID de caso', () => {
+    it('modificar el caso de otro tenant: 404 uniforme, sin tocarlo', async () => {
+      const d = build();
+      const foreign = foreignCase();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(foreign);
+
+      await expectCaseNotFound(
+        d.service.updateCase(CASE, { priority: 'URGENT' } as any, actor),
+      );
+
+      expect(foreign.priorityConceptId).toBeUndefined();
+      expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
+    });
+
+    it('el tenant del contexto viaja a la consulta que bloquea el caso', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(null);
+
+      await expectCaseNotFound(d.service.confirmCase(CASE, actor));
+
+      expect(d.casesRepo.findCaseForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        CASE,
+        TENANT_A,
+      );
+    });
+
+    it.each([
+      [
+        'confirmar',
+        (d: ReturnType<typeof build>) => d.service.confirmCase(CASE, actor),
+      ],
+      [
+        'agregar diagnósticos',
+        (d: ReturnType<typeof build>) =>
+          d.service.addDiagnoses(CASE, { diagnoses: [] } as any, actor),
+      ],
+      [
+        'asignar integrante',
+        (d: ReturnType<typeof build>) =>
+          d.service.assignTeamMember(
+            CASE,
+            { practitionerProfileId: SURGEON } as any,
+            actor,
+          ),
+      ],
+      [
+        'aceptar participación',
+        (d: ReturnType<typeof build>) =>
+          d.service.acceptTeamMember(CASE, 'm-1', actor),
+      ],
+      [
+        'responder participación',
+        (d: ReturnType<typeof build>) =>
+          d.service.respondTeamMember(CASE, 'm-1', {} as any, actor),
+      ],
+      [
+        'cancelar',
+        (d: ReturnType<typeof build>) =>
+          d.service.cancelCase(CASE, {} as any, actor),
+      ],
+      [
+        'cargar cargos',
+        (d: ReturnType<typeof build>) =>
+          d.service.postCharges(CASE, { items: [] } as any, actor),
+      ],
+    ])(
+      '%s en el caso de otro tenant: 404 uniforme y no persiste',
+      async (_name, call) => {
+        const d = build();
+        d.casesRepo.findCaseForUpdate.mockResolvedValue(foreignCase());
+
+        await expectCaseNotFound(call(d));
+
+        expect(d.casesRepo.createDiagnosis).not.toHaveBeenCalled();
+        expect(d.casesRepo.createTeamMember).not.toHaveBeenCalled();
+        expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
+        expect(d.casesRepo.createCancellation).not.toHaveBeenCalled();
+        expect(d.casesRepo.createChargeItem).not.toHaveBeenCalled();
+      },
+    );
+
+    it('programar un caso toma el tenant custodio del contexto e ignora el del cuerpo', async () => {
+      const d = build();
+      d.casesRepo.findOverlappingCases.mockResolvedValue([]);
+      d.casesRepo.countCases.mockResolvedValue(0);
+      d.casesRepo.findCaseByNumber.mockResolvedValue(null);
+      d.casesRepo.createCase.mockReturnValue({ id: CASE });
+      d.casesRepo.createMilestone.mockReturnValue({ id: 'milestone-1' });
+
+      await d.service.scheduleCase(
+        scheduleDto({ custodianTenantId: TENANT_B }),
+        actor,
+      );
+
+      expect(d.casesRepo.createCase.mock.calls[0][1].custodianTenantId).toBe(
+        TENANT_A,
       );
     });
   });

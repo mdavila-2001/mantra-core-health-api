@@ -10,9 +10,15 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { FrontendViewsService } from '../services';
+import { parseServeViewQuery } from '../services/serve-view-query';
 import {
   PublishViewContractDto,
   UpsertViewPreferencesDto,
@@ -57,14 +63,40 @@ export class FrontendViewsController {
   @ApiOperation({
     summary:
       'Servir el read model al frontend (consent-aware, masking heredado)',
+    description:
+      'Exige cumplir el contrato de acceso de la vista (audiencia, permiso, propósito, feature flag y contextos de tenant/paciente); si no, responde el mismo 404 que una vista inexistente. Los parámetros distintos de los reservados son filtros declarados en el contrato de la vista.',
+  })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Se recorta al máximo de página de la definición',
+  })
+  @ApiQuery({ name: 'sort', required: false, description: 'Código de orden' })
+  @ApiQuery({
+    name: 'purposeOfUse',
+    required: false,
+    description: 'Propósito de uso (concepto) que la ruta exige',
+  })
+  @ApiQuery({
+    name: 'patientProfileId',
+    required: false,
+    description: 'Paciente de las vistas con contexto de paciente',
   })
   serveData(
     @Param('portalCode') portalCode: string,
     @Param('routeCode') routeCode: string,
     @Param('viewCode') viewCode: string,
     @CurrentUser() user: AuthenticatedUser,
+    @Query() query?: Record<string, unknown>,
   ): Promise<ServeViewDataResponseDto> {
-    return this.service.serveData(portalCode, routeCode, viewCode, user);
+    return this.service.serveData(
+      portalCode,
+      routeCode,
+      viewCode,
+      user,
+      parseServeViewQuery(query),
+    );
   }
 
   /** UC-30-11. */
@@ -78,13 +110,18 @@ export class FrontendViewsController {
     @Param('viewCode') viewCode: string,
     @Query('state') state: string | undefined,
     @CurrentUser() user: AuthenticatedUser,
+    @Query('purposeOfUse') purposeOfUse?: string,
+    @Query('patientProfileId') patientProfileId?: string,
   ): Promise<AvailableActionDto[]> {
+    const { purposeOfUse: purpose, patientProfileId: patient } =
+      parseServeViewQuery({ purposeOfUse, patientProfileId });
     return this.service.deriveAvailableActions(
       portalCode,
       routeCode,
       viewCode,
       state,
       user,
+      { purposeOfUse: purpose, patientProfileId: patient },
     );
   }
 

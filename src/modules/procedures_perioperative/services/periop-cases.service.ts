@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -6,6 +6,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -19,7 +20,10 @@ import { AuditTrailService } from '../../audit/services';
 import { OutboxService } from '../../messaging/services';
 // La historia clínica sigue siendo de `clinical`: el caso quirúrgico pide que
 // registre la condición, no la escribe por su cuenta.
-import { ConditionsService } from '../../clinical/services';
+import {
+  ClinicalReadService,
+  ConditionsService,
+} from '../../clinical/services';
 import {
   ScheduleCaseDto,
   CaseResponseDto,
@@ -49,8 +53,23 @@ import {
   type CancellationCategory,
   type ChargeType,
 } from '../dto';
+import type { ProcedureCases } from '../entities';
 import { PERIOP } from '../procedures_perioperative.concepts';
+import {
+  assertCaseInScope,
+  loadCaseForUpdateInScope,
+  periopCaseNotFound,
+} from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
+
+/**
+ * Roles de administración de la programación quirúrgica: ven el detalle de los
+ * casos de su tenant sin necesitar una relación asistencial con el paciente.
+ */
+const CASE_DETAIL_ADMIN_ROLES: readonly string[] = [
+  'PERIOP_ADMIN',
+  'SURGERY_SCHEDULER',
+];
 
 const CASE_TYPE_CONCEPT: Readonly<Record<SurgicalCaseType, string>> = {
   ELECTIVE: CONCEPTS.CASE_TYPE_ELECTIVE,
@@ -179,6 +198,7 @@ export class PeriopCasesService {
    * @param preopRepo - Lectura de la fase preoperatoria (detalle del caso).
    * @param intraopRepo - Lectura de la fase intraoperatoria (detalle del caso).
    * @param conditions - Alta de condiciones en la historia clínica (`clinical`).
+   * @param clinicalRead - Política de acceso al paciente (detalle del caso).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -192,6 +212,8 @@ export class PeriopCasesService {
     private readonly auditTrail: AuditTrailService,
     private readonly outbox: OutboxService,
     private readonly conditions: ConditionsService,
+    // Política de acceso al paciente: ver `assertCanReadCaseDetail`.
+    private readonly clinicalRead: ClinicalReadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopCasesService.name);
@@ -236,6 +258,10 @@ export class PeriopCasesService {
       );
     }
 
+    // El tenant custodio sale del contexto verificado; el del cuerpo no es fuente
+    // de verdad (el interceptor ya rechaza uno distinto).
+    const custodianTenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const overlapping = await this.casesRepo.findOverlappingCases(
         tx,
@@ -255,9 +281,9 @@ export class PeriopCasesService {
         );
       }
 
-      const caseNumber = await this.nextCaseNumber(tx, dto.custodianTenantId);
+      const caseNumber = await this.nextCaseNumber(tx, custodianTenantId);
       const surgicalCase = this.casesRepo.createCase(tx, {
-        custodianTenantId: dto.custodianTenantId,
+        custodianTenantId,
         patientProfileId: dto.patientProfileId,
         encounterId: dto.encounterId,
         serviceRequestId: dto.serviceRequestId,
@@ -351,16 +377,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -528,16 +549,11 @@ export class PeriopCasesService {
     );
 
     const result = await this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -726,16 +742,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -866,16 +877,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -973,20 +979,24 @@ export class PeriopCasesService {
    * en ocho llamadas dejaría la pantalla a medias en cuanto una fallara.
    *
    * @param caseId - Caso consultado.
+   * @param actor - Quien consulta: debe tener base para ver el caso (ver
+   *   {@link PeriopCasesService.assertCanReadCaseDetail}).
    * @returns El caso con todo lo que cuelga de él.
-   * @throws ResourceNotFoundException si el caso no existe.
+   * @throws ResourceNotFoundException (`PERIOP_CASE_NOT_FOUND`) si el caso no
+   *   existe, es de otro tenant o el actor no tiene base para verlo.
    */
-  async getCaseDetail(caseId: string): Promise<CaseDetailDto> {
-    const surgicalCase = await this.casesRepo.findCaseById(this.em, caseId);
-    if (!surgicalCase) {
-      throw new ResourceNotFoundException(
-        'Caso quirúrgico no encontrado',
-        {
-          caseId,
-        },
-        ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-      );
-    }
+  async getCaseDetail(
+    caseId: string,
+    actor: AuthenticatedUser,
+  ): Promise<CaseDetailDto> {
+    // El tenant sale del contexto verificado y va en la consulta: un caso de
+    // otro tenant es, para este actor, un caso inexistente (mismo 404).
+    const tenantId = requireTenantId();
+    const surgicalCase = assertCaseInScope(
+      await this.casesRepo.findCaseById(this.em, caseId, tenantId),
+      tenantId,
+    );
+    await this.assertCanReadCaseDetail(surgicalCase, actor);
 
     const [
       diagnoses,
@@ -1127,6 +1137,60 @@ export class PeriopCasesService {
   }
 
   /**
+   * Decide si el actor puede ver el detalle clínico de un caso del tenant activo.
+   *
+   * El caso ya está acotado al tenant; esto es la segunda puerta, sobre el
+   * paciente. Pasa quien:
+   *
+   * 1. administra la programación del tenant (`PERIOP_ADMIN`, `SURGERY_SCHEDULER`):
+   *    su rol es de la organización, no de un paciente;
+   * 2. es el cirujano principal, el anestesiólogo o integrante del equipo del caso;
+   * 3. tiene base clínica sobre el paciente según la política de la historia
+   *    (`ClinicalReadService.assertCanReadHistory`: turno de hoy, relación
+   *    asistencial vigente o consentimiento).
+   *
+   * Cualquier otro actor recibe el mismo 404 que un caso inexistente: negar con
+   * 403 confirmaría que el uuid es de un caso real.
+   *
+   * @throws ResourceNotFoundException (`PERIOP_CASE_NOT_FOUND`) si no hay base.
+   */
+  private async assertCanReadCaseDetail(
+    surgicalCase: ProcedureCases,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (actor.roles.some((role) => CASE_DETAIL_ADMIN_ROLES.includes(role))) {
+      return;
+    }
+
+    const profileId = actor.practitionerProfileId;
+    if (profileId) {
+      if (
+        surgicalCase.primarySurgeonProfileId === profileId ||
+        surgicalCase.anesthesiologistProfileId === profileId
+      ) {
+        return;
+      }
+      const team = await this.casesRepo.findTeamByCase(
+        this.em,
+        surgicalCase.id,
+      );
+      if (team.some((member) => member.practitionerProfileId === profileId)) {
+        return;
+      }
+    }
+
+    try {
+      await this.clinicalRead.assertCanReadHistory(
+        surgicalCase.patientProfileId,
+        actor,
+      );
+    } catch (error) {
+      if (error instanceof ForbiddenException) throw periopCaseNotFound();
+      throw error;
+    }
+  }
+
+  /**
    * Proyección de cabecera compartida por el listado y el detalle.
    *
    * Varias columnas son opcionales en el esquema aunque el alta las exija
@@ -1161,19 +1225,15 @@ export class PeriopCasesService {
    *
    * @param caseId - Caso consultado.
    * @returns Los integrantes; lista vacía si el caso no tiene ninguno.
-   * @throws ResourceNotFoundException si el caso no existe.
+   * @throws ResourceNotFoundException (`PERIOP_CASE_NOT_FOUND`) si el caso no
+   *   existe o es de otro tenant.
    */
   async listTeamMembers(caseId: string): Promise<TeamMemberSummaryDto[]> {
-    const surgicalCase = await this.casesRepo.findCaseById(this.em, caseId);
-    if (!surgicalCase) {
-      throw new ResourceNotFoundException(
-        'Caso quirúrgico no encontrado',
-        {
-          caseId,
-        },
-        ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-      );
-    }
+    const tenantId = requireTenantId();
+    assertCaseInScope(
+      await this.casesRepo.findCaseById(this.em, caseId, tenantId),
+      tenantId,
+    );
     const team = await this.casesRepo.findTeamByCase(this.em, caseId);
     return team.map((member) => ({
       id: member.id,
@@ -1212,16 +1272,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -1337,16 +1392,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -1440,16 +1490,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new ConflictException(
           'El caso ya está cancelado',
@@ -1531,16 +1576,11 @@ export class PeriopCasesService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED) {
         throw new PreconditionFailedException(
           'Sólo se factura un caso completado',
