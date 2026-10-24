@@ -5,6 +5,7 @@ import {
   ResourceNotFoundException,
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../common';
 import { assertResourceInTenant } from '../../common/tenant/resource-scope';
@@ -40,7 +41,8 @@ export function activeLakehouseTenant(bodyTenantId?: string): string {
  * Tenant al que se acota el cierre y el descubrimiento de releases.
  *
  * - Con tenant en el contexto, ése es el alcance.
- * - Sin tenant, sólo el actor `SYSTEM` (el worker que barre los releases
+ * - Sin tenant, sólo el actor `SYSTEM` como rol global (uno concedido con
+ *   ámbito de tenant no barre; el worker que barre los releases
  *   vencidos de todas las organizaciones) opera sin alcance: `undefined`.
  * - Cualquier otro actor sin tenant se rechaza (`412 TENANT_REQUIRED`).
  *
@@ -48,11 +50,11 @@ export function activeLakehouseTenant(bodyTenantId?: string): string {
  * @returns El tenant activo, o `undefined` para el barrido interno de `SYSTEM`.
  */
 export function lakehouseSweepScope(
-  actor: Pick<AuthenticatedUser, 'roles'>,
+  actor: AuthenticatedUser,
 ): string | undefined {
   const tenantId = getCurrentTenantId();
   if (tenantId) return tenantId;
-  if (actor.roles?.includes('SYSTEM')) return undefined;
+  if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) return undefined;
   return requireTenantId();
 }
 

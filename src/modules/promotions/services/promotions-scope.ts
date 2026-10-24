@@ -1,6 +1,7 @@
 import {
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
@@ -12,7 +13,8 @@ import { PromotionsErrorReason } from '../promotions.error-reasons';
  *
  * - Un actor con sesión de tenant (administrador, cajero, miembro, paciente)
  *   opera dentro del tenant activo: el del contexto, nunca el del cuerpo.
- * - El worker `SYSTEM` sin tenant en contexto es el barrido global explícito
+ * - El worker `SYSTEM` (rol global; uno concedido con ámbito de tenant no
+ *   barre) sin tenant en contexto es el barrido global explícito
  *   (acumulación por eventos, expiración, calificación de referidos de todos los
  *   tenants): devuelve `undefined`. Si el worker declara tenant, queda acotado a él.
  *
@@ -21,9 +23,11 @@ import { PromotionsErrorReason } from '../promotions.error-reasons';
  * @throws PreconditionFailedException si un actor de tenant no tiene tenant activo.
  */
 export function resolvePromotionsScope(
-  actor: Pick<AuthenticatedUser, 'roles'>,
+  actor: AuthenticatedUser,
 ): string | undefined {
-  if (actor.roles.includes('SYSTEM')) return getCurrentTenantId();
+  if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
+    return getCurrentTenantId();
+  }
   return requireTenantId();
 }
 

@@ -236,19 +236,29 @@ export class PharmacyInventoryScopePolicy {
   }
 
   /**
-   * Paciente y receta del cuerpo: el perfil debe existir y la receta, si se
-   * indica, debe ser de ese paciente. Un perfil o una receta inexistentes o
-   * ajenos responden igual.
+   * Paciente y receta del cuerpo: el perfil debe existir y tener relación con
+   * la farmacia administrada, y la receta, si se indica, debe ser de ese
+   * paciente y llegar a la farmacia. El perfil de paciente no pertenece a un
+   * tenant, así que la relación sale de los datos: una receta en custodia del
+   * tenant de la farmacia o un pedido que el propio paciente le hizo. Un
+   * perfil o una receta inexistentes, ajenos o sin relación responden igual.
    */
   async requirePatientContext(
     tx: EntityManager,
+    pharmacy: PharmacyScope,
     patientProfileId: string | undefined,
     medicationRequestId: string | undefined,
   ): Promise<void> {
     if (patientProfileId !== undefined) {
-      if (!(await this.scope.patientExists(tx, patientProfileId))) {
-        throw this.notAvailable();
-      }
+      const served =
+        (await this.scope.patientExists(tx, patientProfileId)) &&
+        (await this.scope.patientServedByPharmacy(
+          tx,
+          patientProfileId,
+          pharmacy.tenantId,
+          pharmacy.pharmacyId,
+        ));
+      if (!served) throw this.notAvailable();
     }
     if (medicationRequestId !== undefined) {
       const owned =
@@ -257,6 +267,12 @@ export class PharmacyInventoryScopePolicy {
           tx,
           medicationRequestId,
           patientProfileId,
+        )) &&
+        (await this.scope.medicationRequestServedByPharmacy(
+          tx,
+          medicationRequestId,
+          pharmacy.tenantId,
+          pharmacy.pharmacyId,
         ));
       if (!owned) throw this.notAvailable();
     }

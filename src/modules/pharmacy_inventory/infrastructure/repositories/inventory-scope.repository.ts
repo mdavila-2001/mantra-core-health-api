@@ -11,8 +11,10 @@ import { PatientProfiles } from '../../../profiles/entities';
 import {
   InventoryLocations,
   InventoryLots,
+  InventoryReservations,
   InventoryStockPositions,
 } from '../../entities';
+import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 
 /**
  * Consultas de pertenencia del módulo: cada una resuelve un agregado **dentro**
@@ -107,6 +109,56 @@ export class InventoryScopeRepository {
   ): Promise<boolean> {
     return (
       (await em.count(PatientProfiles, { profileId: patientProfileId })) > 0
+    );
+  }
+
+  /**
+   * Si el paciente tiene relación con la farmacia, según los datos que el
+   * modelo guarda: una receta en custodia del tenant de la farmacia, o un
+   * pedido que el propio paciente le hizo (el pedido sale del `pid` del token,
+   * no del cuerpo de quien administra).
+   */
+  async patientServedByPharmacy(
+    em: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+    pharmacyId: string,
+  ): Promise<boolean> {
+    const prescribed = await em.count(MedicationRequests, {
+      patientProfileId,
+      custodianTenantId: tenantId,
+    });
+    if (prescribed > 0) return true;
+    return (
+      (await em.count(InventoryReservations, {
+        pharmacyId,
+        patientProfileId,
+        reservationStatusConceptId: { $in: [...ORDER_STATUS_IDS] },
+      })) > 0
+    );
+  }
+
+  /**
+   * Si la receta llega a la farmacia: está en custodia de su tenant o la
+   * nombra un pedido de paciente hecho a esa farmacia.
+   */
+  async medicationRequestServedByPharmacy(
+    em: EntityManager,
+    medicationRequestId: string,
+    tenantId: string,
+    pharmacyId: string,
+  ): Promise<boolean> {
+    const custody = await em.count(MedicationRequests, {
+      id: medicationRequestId,
+      custodianTenantId: tenantId,
+    });
+    if (custody > 0) return true;
+    return (
+      (await em.count(InventoryReservations, {
+        pharmacyId,
+        medicationRequestId,
+        reservationStatusConceptId: { $in: [...ORDER_STATUS_IDS] },
+      })) > 0
     );
   }
 

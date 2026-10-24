@@ -12,6 +12,7 @@ import {
 import {
   OrganizationAffiliationsRepository,
   OrganizationDataBoundariesRepository,
+  OrgextReferencesRepository,
 } from '../repositories';
 import {
   CreateAffiliationDto,
@@ -22,6 +23,7 @@ import { hasPrivilegedTenantRole } from '../../../common/tenant/tenant-resolutio
 import { ORGEXT } from '../organization_extensions.concepts';
 import {
   ORGEXT_NOT_AVAILABLE,
+  orgextNotAvailable,
   requireOrgextResource,
   resolveOwnerTenantId,
 } from '../organization_extensions.tenant-scope';
@@ -43,12 +45,14 @@ export class OrgextAffiliationsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param affiliationsRepo - Valor de affiliations repo requerido por la operación.
    * @param boundariesRepo - Valor de boundaries repo requerido por la operación.
+   * @param references - Pertenencia de la sede, el servicio y el acuerdo de uso de datos del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly affiliationsRepo: OrganizationAffiliationsRepository,
     private readonly boundariesRepo: OrganizationDataBoundariesRepository,
+    private readonly references: OrgextReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrgextAffiliationsService.name);
@@ -77,6 +81,40 @@ export class OrgextAffiliationsService {
           'El tenant primario y el participante deben ser distintos',
           { tenantId: primaryTenantId },
         );
+      }
+
+      // Sede anfitriona, servicio y acuerdo de uso de datos: de alguna de las
+      // dos partes de la afiliación, nunca de un tercero.
+      const parties = [primaryTenantId, dto.participatingTenantId];
+      if (
+        dto.hostPracticeSiteId &&
+        !(await this.references.practiceSiteInTenants(
+          tx,
+          dto.hostPracticeSiteId,
+          parties,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.healthcareServiceId &&
+        !(await this.references.healthcareServiceInTenants(
+          tx,
+          dto.healthcareServiceId,
+          parties,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.dataUseAgreementId &&
+        !(await this.references.dataUseAgreementInTenants(
+          tx,
+          dto.dataUseAgreementId,
+          parties,
+        ))
+      ) {
+        throw orgextNotAvailable();
       }
 
       // <<include>> UC-22-08: debe existir una frontera de datos para el participante.

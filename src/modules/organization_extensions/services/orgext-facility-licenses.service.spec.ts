@@ -39,6 +39,19 @@ async function rejection(promise: Promise<unknown>): Promise<any> {
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
+/** Pertenencia de los UUID ajenos del cuerpo: por defecto todos son del tenant. */
+function referencesDouble() {
+  return {
+    practiceInTenants: mockFn().mockResolvedValue(true),
+    practiceSiteInTenants: mockFn().mockResolvedValue(true),
+    healthcareServiceInTenants: mockFn().mockResolvedValue(true),
+    clinicalUnitInTenants: mockFn().mockResolvedValue(true),
+    publicProfileInTenants: mockFn().mockResolvedValue(true),
+    fileInTenants: mockFn().mockResolvedValue(true),
+    dataUseAgreementInTenants: mockFn().mockResolvedValue(true),
+  };
+}
+
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
@@ -51,14 +64,16 @@ function build() {
     findByNumber: mockFn(),
     create: mockFn(),
   };
+  const references = referencesDouble();
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new OrgextFacilityLicensesService(
     em as any,
     licensesRepo as any,
+    references as any,
     logger as any,
   );
-  return { service, tx, licensesRepo };
+  return { service, tx, licensesRepo, references };
 }
 
 describe('OrgextFacilityLicensesService', () => {
@@ -87,6 +102,31 @@ describe('OrgextFacilityLicensesService', () => {
         createdAt: license.createdAt,
       });
       expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('una sede o un archivo de evidencia de otro tenant responde 404 uniforme y no crea la licencia', async () => {
+      for (const [field, check] of [
+        ['practiceSiteId', 'practiceSiteInTenants'],
+        ['evidenceFileId', 'fileInTenants'],
+      ] as const) {
+        const d = build();
+        d.licensesRepo.findByNumber.mockResolvedValue(null);
+        d.references[check].mockResolvedValue(false);
+
+        const error = await rejection(
+          inTenant(() =>
+            d.service.register(
+              { tenantId: T1, licenseNumber: 'L-1', [field]: 'x-t2' } as any,
+              actor,
+            ),
+          ),
+        );
+
+        expect(error.reason).toBe(NOT_AVAILABLE);
+        expect(error.details).toBeUndefined();
+        expect(d.references[check]).toHaveBeenCalledWith(d.tx, 'x-t2', [T1]);
+        expect(d.licensesRepo.create).not.toHaveBeenCalled();
+      }
     });
 
     it('rejects a duplicate license number (conflict)', async () => {

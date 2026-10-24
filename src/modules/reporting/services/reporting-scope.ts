@@ -2,6 +2,7 @@ import {
   ResourceNotFoundException,
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
@@ -12,7 +13,8 @@ import { ReportingErrorReason } from '../reporting.error-reasons';
  *
  * - Un actor con sesión de tenant (administrador, autor, lector) opera dentro
  *   del tenant activo: el del contexto, nunca el del cuerpo.
- * - El worker `SYSTEM` sin tenant en contexto es el barrido global explícito
+ * - El worker `SYSTEM` (rol global; uno concedido con ámbito de tenant no
+ *   barre) sin tenant en contexto es el barrido global explícito
  *   (cola de ejecuciones y programaciones de todos los tenants): devuelve
  *   `undefined`. Si el worker declara tenant, queda acotado a él.
  *
@@ -21,9 +23,11 @@ import { ReportingErrorReason } from '../reporting.error-reasons';
  * @throws PreconditionFailedException si un actor de tenant no tiene tenant activo.
  */
 export function resolveReportingScope(
-  actor: Pick<AuthenticatedUser, 'roles'>,
+  actor: AuthenticatedUser,
 ): string | undefined {
-  if (actor.roles.includes('SYSTEM')) return getCurrentTenantId();
+  if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
+    return getCurrentTenantId();
+  }
   return requireTenantId();
 }
 

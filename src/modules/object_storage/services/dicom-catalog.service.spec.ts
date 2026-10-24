@@ -423,7 +423,7 @@ describe('DicomCatalogService', () => {
       const missingPatient = await rejection(
         inTenant(() =>
           d.service.catalogStudy(
-            { ...CATALOG, patientProfileId: PATIENT },
+            { ...CATALOG, patientProfileId: PATIENT, imagingStudyId: 'img-1' },
             actor,
           ),
         ),
@@ -441,6 +441,50 @@ describe('DicomCatalogService', () => {
 
       expect(missingPatient.reason).toBe(OUT_OF_SCOPE);
       expect(foreignImaging.reason).toBe(OUT_OF_SCOPE);
+    });
+
+    it('un paciente sin estudio de imagen que lo respalde no se ata al estudio DICOM', async () => {
+      const d = build();
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.catalogStudy(
+            { ...CATALOG, patientProfileId: PATIENT },
+            actor,
+          ),
+        ),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.dicomRepo.createStudy).not.toHaveBeenCalled();
+      expect(d.dicomRepo.createInstance).not.toHaveBeenCalled();
+    });
+
+    it('un estudio de imagen ajeno o de otro paciente no ata el paciente al estudio DICOM', async () => {
+      const d = build();
+      d.dicomRepo.imagingStudyInScope.mockResolvedValue(false);
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.catalogStudy(
+            {
+              ...CATALOG,
+              patientProfileId: PATIENT,
+              imagingStudyId: 'img-de-otro-paciente',
+            },
+            actor,
+          ),
+        ),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.dicomRepo.imagingStudyInScope).toHaveBeenCalledWith(
+        d.tx,
+        'img-de-otro-paciente',
+        T1,
+        PATIENT,
+      );
+      expect(d.dicomRepo.createStudy).not.toHaveBeenCalled();
     });
 
     it('sin tenant en el contexto catalogStudy no llega a la base', async () => {

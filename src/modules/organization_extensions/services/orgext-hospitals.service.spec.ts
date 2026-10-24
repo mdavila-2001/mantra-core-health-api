@@ -52,6 +52,19 @@ const hospitalOf = (
   updatedAt: new Date('2026-01-01'),
 });
 
+/** Pertenencia de los UUID ajenos del cuerpo: por defecto todos son del tenant. */
+function referencesDouble() {
+  return {
+    practiceInTenants: mockFn().mockResolvedValue(true),
+    practiceSiteInTenants: mockFn().mockResolvedValue(true),
+    healthcareServiceInTenants: mockFn().mockResolvedValue(true),
+    clinicalUnitInTenants: mockFn().mockResolvedValue(true),
+    publicProfileInTenants: mockFn().mockResolvedValue(true),
+    fileInTenants: mockFn().mockResolvedValue(true),
+    dataUseAgreementInTenants: mockFn().mockResolvedValue(true),
+  };
+}
+
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
@@ -66,6 +79,7 @@ function build() {
   };
   const serviceLinesRepo = { findByIdForHospital: mockFn(), create: mockFn() };
   const licensesRepo = { countVerifiedForTenant: mockFn() };
+  const references = referencesDouble();
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new OrgextHospitalsService(
@@ -73,9 +87,17 @@ function build() {
     hospitalsRepo,
     serviceLinesRepo,
     licensesRepo as any,
+    references as any,
     logger as any,
   );
-  return { service, tx, hospitalsRepo, serviceLinesRepo, licensesRepo };
+  return {
+    service,
+    tx,
+    hospitalsRepo,
+    serviceLinesRepo,
+    licensesRepo,
+    references,
+  };
 }
 
 describe('OrgextHospitalsService', () => {
@@ -123,6 +145,89 @@ describe('OrgextHospitalsService', () => {
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.hospitalsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('referencias del cuerpo (tenant)', () => {
+    it('una práctica de otro tenant responde 404 uniforme y no crea ni confirma nada', async () => {
+      const d = build();
+      d.references.practiceInTenants.mockResolvedValue(false);
+      // Aunque la práctica ajena ya esté especializada, no se filtra un 409.
+      d.hospitalsRepo.findByTenantOrPractice.mockResolvedValue({ id: 'h0' });
+      const missing = build();
+      missing.references.practiceInTenants.mockResolvedValue(false);
+      missing.hospitalsRepo.findByTenantOrPractice.mockResolvedValue(null);
+
+      const foreign = await rejection(
+        inTenant(() =>
+          d.service.specialize(
+            { tenantId: T1, practiceId: 'p-de-t2' } as any,
+            actor,
+          ),
+        ),
+      );
+      const absent = await rejection(
+        inTenant(() =>
+          missing.service.specialize(
+            { tenantId: T1, practiceId: 'p-9' } as any,
+            actor,
+          ),
+        ),
+      );
+
+      expect(foreign).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreign.reason).toBe(NOT_AVAILABLE);
+      expect(foreign.details).toBeUndefined();
+      expect(foreign.getResponse()).toEqual(absent.getResponse());
+      expect(d.references.practiceInTenants).toHaveBeenCalledWith(
+        d.tx,
+        'p-de-t2',
+        [T1],
+      );
+      expect(d.hospitalsRepo.create).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('activar con una sede o un perfil público de otro tenant responde 404 y no activa', async () => {
+      for (const [field, check] of [
+        ['primaryPracticeSiteId', 'practiceSiteInTenants'],
+        ['publicProfileId', 'publicProfileInTenants'],
+      ] as const) {
+        const d = build();
+        const hospital = hospitalOf(T1, ORGEXT.HOSPITAL_DRAFT);
+        d.hospitalsRepo.findByIdInTenant.mockResolvedValue(hospital);
+        d.licensesRepo.countVerifiedForTenant.mockResolvedValue(1);
+        d.references[check].mockResolvedValue(false);
+
+        const error = await rejection(
+          inTenant(() => d.service.activate('h1', { [field]: 'x-t2' }, actor)),
+        );
+
+        expect(error.reason).toBe(NOT_AVAILABLE);
+        expect(d.references[check]).toHaveBeenCalledWith(d.tx, 'x-t2', [T1]);
+        expect(hospital.statusConceptId).toBe(ORGEXT.HOSPITAL_DRAFT);
+      }
+    });
+
+    it('una unidad o un servicio de otro tenant no entran en la línea de servicio', async () => {
+      for (const [field, check] of [
+        ['clinicalUnitId', 'clinicalUnitInTenants'],
+        ['healthcareServiceId', 'healthcareServiceInTenants'],
+      ] as const) {
+        const d = build();
+        d.hospitalsRepo.findByIdInTenant.mockResolvedValue(hospitalOf(T1));
+        d.references[check].mockResolvedValue(false);
+
+        const error = await rejection(
+          inTenant(() =>
+            d.service.addServiceLine('h1', { [field]: 'x-t2' } as any, actor),
+          ),
+        );
+
+        expect(error.reason).toBe(NOT_AVAILABLE);
+        expect(d.references[check]).toHaveBeenCalledWith(d.tx, 'x-t2', [T1]);
+        expect(d.serviceLinesRepo.create).not.toHaveBeenCalled();
+      }
     });
   });
 

@@ -1,6 +1,7 @@
 import {
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../common';
 import { assertResourceInTenant } from '../../common/tenant/resource-scope';
@@ -13,7 +14,8 @@ import { VectorErrorReason } from './vector_rag.error-reasons';
  * - `tenantId` definido: la operación sólo alcanza recursos de ese tenant.
  * - `tenantId` indefinido: sólo lo produce la credencial de servicio `SYSTEM`
  *   cuando la petición no fija tenant (los barridos del worker cruzan
- *   organizaciones por diseño); el recurso resuelto por UUID fija entonces el
+ *   organizaciones por diseño). Un `SYSTEM` concedido con ámbito de tenant
+ *   (`scopedRoles`) no es la credencial de servicio y no barre; el recurso resuelto por UUID fija entonces el
  *   tenant de todo lo que se escriba a partir de él.
  */
 export interface VectorScope {
@@ -26,6 +28,8 @@ export interface VectorScope {
  * El tenant sale del contexto que verificó el guard, nunca del cuerpo ni de la
  * ruta. Todo actor que no sea la credencial `SYSTEM` necesita tenant activo: sin
  * él la operación falla cerrada (412) en lugar de alcanzar cualquier tenant.
+ * `SYSTEM` cuenta sólo como rol global: si aparece en `scopedRoles` vale dentro de
+ * ese tenant y fuera de él no concede el barrido (misma regla que `RolesGuard`).
  *
  * @param actor - Usuario autenticado.
  * @returns El alcance de la operación.
@@ -34,7 +38,9 @@ export interface VectorScope {
 export function resolveVectorScope(actor: AuthenticatedUser): VectorScope {
   const tenantId = getCurrentTenantId();
   if (tenantId) return { tenantId };
-  if (actor.roles.includes('SYSTEM')) return { tenantId: undefined };
+  if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
+    return { tenantId: undefined };
+  }
   return { tenantId: requireTenantId() };
 }
 

@@ -134,6 +134,7 @@ function session(overrides: any = {}) {
   return {
     id: SESSION_ID,
     tenantId: TENANT_ID,
+    principalId: actor.id,
     status: 'open',
     patientProfileId: PATIENT_ID,
     consentDirectiveId: CONSENT_ID,
@@ -551,6 +552,88 @@ describe('RetrievalService', () => {
           actor,
         ),
       ).rejects.toThrow(/sesión completada/);
+    });
+
+    it('otro usuario del mismo tenant no puede dar feedback ni marcar la sesión de alguien más', async () => {
+      const d = build();
+      const s = session({ status: 'completed', principalId: 'user-owner' });
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(s);
+
+      let error: ResourceNotFoundException | undefined;
+      try {
+        await d.service.captureFeedback(
+          SESSION_ID,
+          { feedbackType: 'safety', safetyIssueCode: 'HALLUCINATION' },
+          actor,
+        );
+      } catch (e) {
+        error = e as ResourceNotFoundException;
+      }
+
+      expect(error?.getStatus()).toBe(404);
+      expect(error?.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(error?.details).toBeUndefined();
+      expect(s.status).toBe('completed');
+      expect(d.retrievalRepo.createFeedback).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('la sesión ajena responde igual que una inexistente', async () => {
+      const ajena = build();
+      ajena.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ status: 'completed', principalId: 'user-owner' }),
+      );
+      const inexistente = build();
+      inexistente.retrievalRepo.findSessionForUpdate.mockResolvedValue(null);
+      const feedback = { feedbackType: 'relevance' } as any;
+
+      const a: any = await ajena.service
+        .captureFeedback(SESSION_ID, feedback, actor)
+        .catch((e: unknown) => e);
+      const b: any = await inexistente.service
+        .captureFeedback(SESSION_ID, feedback, actor)
+        .catch((e: unknown) => e);
+
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('PLATFORM_ADMIN global sí puede dar feedback de la sesión de otro principal', async () => {
+      const d = build();
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ status: 'completed', principalId: 'user-owner' }),
+      );
+      const admin = { id: 'admin-1', roles: ['PLATFORM_ADMIN'] } as any;
+
+      const result = await d.service.captureFeedback(
+        SESSION_ID,
+        { feedbackType: 'relevance' } as any,
+        admin,
+      );
+
+      expect(result.flagged).toBe(false);
+      expect(d.retrievalRepo.createFeedback).toHaveBeenCalled();
+    });
+
+    it('un PLATFORM_ADMIN con ámbito en otro tenant no cuenta como administrador de plataforma', async () => {
+      const d = build();
+      d.retrievalRepo.findSessionForUpdate.mockResolvedValue(
+        session({ status: 'completed', principalId: 'user-owner' }),
+      );
+      const scopedElsewhere = {
+        id: 'admin-2',
+        roles: ['PLATFORM_ADMIN'],
+        scopedRoles: {
+          '99999999-9999-9999-9999-999999999999': ['PLATFORM_ADMIN'],
+        },
+      } as any;
+
+      await expect(
+        d.service.captureFeedback(
+          SESSION_ID,
+          { feedbackType: 'relevance' } as any,
+          scopedElsewhere,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 

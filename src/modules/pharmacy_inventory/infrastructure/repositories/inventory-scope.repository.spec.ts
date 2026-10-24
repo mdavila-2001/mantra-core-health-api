@@ -10,8 +10,10 @@ import { PatientProfiles } from '../../../profiles/entities';
 import {
   InventoryLocations,
   InventoryLots,
+  InventoryReservations,
   InventoryStockPositions,
 } from '../../entities';
+import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 import { InventoryScopeRepository } from './inventory-scope.repository';
 
 // Loose-typed mock factory: keeps runtime 'jest' but avoids @jest/globals' strict Mock<never> typings under the root tsconfig.
@@ -102,6 +104,59 @@ describe('InventoryScopeRepository', () => {
     expect(em.count).toHaveBeenNthCalledWith(2, MedicationRequests, {
       id: 'rx',
       patientProfileId: 'pat',
+    });
+  });
+
+  it('el paciente llega a la farmacia por receta en custodia del tenant o por un pedido propio', async () => {
+    const em = {
+      count: mockFn()
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0),
+    } as any;
+
+    await expect(
+      repo.patientServedByPharmacy(em, 'pat', 't1', 'ph-1'),
+    ).resolves.toBe(true);
+    await expect(
+      repo.patientServedByPharmacy(em, 'pat', 't1', 'ph-1'),
+    ).resolves.toBe(false);
+
+    expect(em.count).toHaveBeenNthCalledWith(1, MedicationRequests, {
+      patientProfileId: 'pat',
+      custodianTenantId: 't1',
+    });
+    expect(em.count).toHaveBeenNthCalledWith(2, InventoryReservations, {
+      pharmacyId: 'ph-1',
+      patientProfileId: 'pat',
+      reservationStatusConceptId: { $in: [...ORDER_STATUS_IDS] },
+    });
+  });
+
+  it('la receta llega a la farmacia por custodia del tenant o por un pedido que la nombra', async () => {
+    const em = {
+      count: mockFn()
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0),
+    } as any;
+
+    await expect(
+      repo.medicationRequestServedByPharmacy(em, 'rx', 't1', 'ph-1'),
+    ).resolves.toBe(true);
+    await expect(
+      repo.medicationRequestServedByPharmacy(em, 'rx', 't1', 'ph-1'),
+    ).resolves.toBe(false);
+
+    expect(em.count).toHaveBeenNthCalledWith(1, MedicationRequests, {
+      id: 'rx',
+      custodianTenantId: 't1',
+    });
+    expect(em.count).toHaveBeenNthCalledWith(3, InventoryReservations, {
+      pharmacyId: 'ph-1',
+      medicationRequestId: 'rx',
+      reservationStatusConceptId: { $in: [...ORDER_STATUS_IDS] },
     });
   });
 });

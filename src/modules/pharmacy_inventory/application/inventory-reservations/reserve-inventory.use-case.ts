@@ -61,6 +61,7 @@ export class ReserveInventoryUseCase {
       );
       await this.scope.requirePatientContext(
         tx,
+        pharmacy,
         dto.patientProfileId,
         dto.medicationRequestId,
       );

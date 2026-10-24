@@ -13,6 +13,7 @@ import {
   HospitalsRepository,
   HospitalServiceLinesRepository,
   FacilityLicensesRepository,
+  OrgextReferencesRepository,
 } from '../repositories';
 import {
   CreateHospitalDto,
@@ -24,6 +25,7 @@ import {
 } from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
 import {
+  orgextNotAvailable,
   requireOrgextResource,
   resolveOwnerTenantId,
 } from '../organization_extensions.tenant-scope';
@@ -47,6 +49,7 @@ export class OrgextHospitalsService {
    * @param hospitalsRepo - Valor de hospitals repo requerido por la operación.
    * @param serviceLinesRepo - Valor de service lines repo requerido por la operación.
    * @param licensesRepo - Valor de licenses repo requerido por la operación.
+   * @param references - Pertenencia de las prácticas, sedes y demás UUID ajenos del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -54,6 +57,7 @@ export class OrgextHospitalsService {
     private readonly hospitalsRepo: HospitalsRepository,
     private readonly serviceLinesRepo: HospitalServiceLinesRepository,
     private readonly licensesRepo: FacilityLicensesRepository,
+    private readonly references: OrgextReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrgextHospitalsService.name);
@@ -74,6 +78,16 @@ export class OrgextHospitalsService {
       'Specializing practice as hospital',
     );
     return this.em.transactional(async (tx) => {
+      // La práctica es del tenant activo. Se comprueba antes del guard de
+      // unicidad: un 409 sobre una práctica ajena confirmaría que existe y
+      // dejaría a un tenant reservar la práctica de otro.
+      if (
+        !(await this.references.practiceInTenants(tx, dto.practiceId, [
+          tenantId,
+        ]))
+      ) {
+        throw orgextNotAvailable();
+      }
       const clash = await this.hospitalsRepo.findByTenantOrPractice(
         tx,
         tenantId,
@@ -148,6 +162,29 @@ export class OrgextHospitalsService {
         );
       }
 
+      // Sede y perfil público que se fijan al activar: del tenant del hospital.
+      const ownTenant = [hospital.tenantId];
+      if (
+        dto.primaryPracticeSiteId &&
+        !(await this.references.practiceSiteInTenants(
+          tx,
+          dto.primaryPracticeSiteId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.publicProfileId &&
+        !(await this.references.publicProfileInTenants(
+          tx,
+          dto.publicProfileId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+
       const verifiedCount = await this.licensesRepo.countVerifiedForTenant(
         tx,
         hospital.tenantId,
@@ -205,6 +242,29 @@ export class OrgextHospitalsService {
         throw new PreconditionFailedException('El hospital no está activo', {
           hospitalId,
         });
+      }
+
+      // Unidad clínica y servicio de salud de la línea: del tenant del hospital.
+      const ownTenant = [hospital.tenantId];
+      if (
+        dto.clinicalUnitId &&
+        !(await this.references.clinicalUnitInTenants(
+          tx,
+          dto.clinicalUnitId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.healthcareServiceId &&
+        !(await this.references.healthcareServiceInTenants(
+          tx,
+          dto.healthcareServiceId,
+          ownTenant,
+        ))
+      ) {
+        throw orgextNotAvailable();
       }
 
       const line = this.serviceLinesRepo.create(tx, {

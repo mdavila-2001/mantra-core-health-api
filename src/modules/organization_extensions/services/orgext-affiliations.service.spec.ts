@@ -45,6 +45,19 @@ async function rejection(promise: Promise<unknown>): Promise<any> {
   throw new Error('no rechazó');
 }
 
+/** Pertenencia de los UUID ajenos del cuerpo: por defecto todos son del tenant. */
+function referencesDouble() {
+  return {
+    practiceInTenants: mockFn().mockResolvedValue(true),
+    practiceSiteInTenants: mockFn().mockResolvedValue(true),
+    healthcareServiceInTenants: mockFn().mockResolvedValue(true),
+    clinicalUnitInTenants: mockFn().mockResolvedValue(true),
+    publicProfileInTenants: mockFn().mockResolvedValue(true),
+    fileInTenants: mockFn().mockResolvedValue(true),
+    dataUseAgreementInTenants: mockFn().mockResolvedValue(true),
+  };
+}
+
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
@@ -58,15 +71,17 @@ function build() {
     create: mockFn(),
   };
   const boundariesRepo = { countActiveForTenant: mockFn() };
+  const references = referencesDouble();
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new OrgextAffiliationsService(
     em as any,
     affiliationsRepo,
     boundariesRepo as any,
+    references as any,
     logger as any,
   );
-  return { service, tx, affiliationsRepo, boundariesRepo };
+  return { service, tx, affiliationsRepo, boundariesRepo, references };
 }
 
 const baseDto = { primaryTenantId: 't1', participatingTenantId: 't2' };
@@ -100,6 +115,34 @@ describe('OrgextAffiliationsService', () => {
       await expect(
         inTenant(() => d.service.declare(baseDto as any, actor)),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('una sede, un servicio o un DUA de un tercero responde 404 uniforme y no declara nada', async () => {
+      for (const [field, check] of [
+        ['hostPracticeSiteId', 'practiceSiteInTenants'],
+        ['healthcareServiceId', 'healthcareServiceInTenants'],
+        ['dataUseAgreementId', 'dataUseAgreementInTenants'],
+      ] as const) {
+        const d = build();
+        d.boundariesRepo.countActiveForTenant.mockResolvedValue(1);
+        d.affiliationsRepo.findActiveDuplicate.mockResolvedValue(null);
+        d.references[check].mockResolvedValue(false);
+
+        const error = await rejection(
+          inTenant(() =>
+            d.service.declare({ ...baseDto, [field]: 'x-t3' } as any, actor),
+          ),
+        );
+
+        expect(error.reason).toBe(NOT_AVAILABLE);
+        expect(error.details).toBeUndefined();
+        // Sólo las dos partes de la afiliación cuentan como dueños válidos.
+        expect(d.references[check]).toHaveBeenCalledWith(d.tx, 'x-t3', [
+          T1,
+          T2,
+        ]);
+        expect(d.affiliationsRepo.create).not.toHaveBeenCalled();
+      }
     });
 
     it('creates the affiliation when preconditions hold', async () => {

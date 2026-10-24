@@ -97,6 +97,7 @@ export class DispenseMedicationUseCase {
       );
       await this.scope.requirePatientContext(
         tx,
+        pharmacy,
         dto.patientProfileId,
         dto.medicationRequestId,
       );

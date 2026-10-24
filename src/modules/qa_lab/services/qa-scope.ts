@@ -2,6 +2,7 @@ import {
   ResourceNotFoundException,
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
@@ -12,7 +13,8 @@ import { QaLabErrorReason } from '../qa_lab.error-reasons';
  *
  * - Un actor con sesión de tenant (`QA_ADMIN`, `QA_ENGINEER`, …) opera dentro
  *   del tenant activo: el del contexto, nunca el del cuerpo.
- * - El worker `SYSTEM` sin tenant en contexto es el barrido global explícito
+ * - El worker `SYSTEM` (rol global; uno concedido con ámbito de tenant no
+ *   barre) sin tenant en contexto es el barrido global explícito
  *   (corridas y programaciones de todos los tenants): devuelve `undefined`. Si
  *   el worker declara tenant, queda acotado a él.
  *
@@ -20,10 +22,10 @@ import { QaLabErrorReason } from '../qa_lab.error-reasons';
  * @returns El tenant activo, o `undefined` sólo para el barrido `SYSTEM`.
  * @throws PreconditionFailedException si un actor de tenant no tiene tenant activo.
  */
-export function resolveQaScope(
-  actor: Pick<AuthenticatedUser, 'roles'>,
-): string | undefined {
-  if (actor.roles.includes('SYSTEM')) return getCurrentTenantId();
+export function resolveQaScope(actor: AuthenticatedUser): string | undefined {
+  if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
+    return getCurrentTenantId();
+  }
   return requireTenantId();
 }
 

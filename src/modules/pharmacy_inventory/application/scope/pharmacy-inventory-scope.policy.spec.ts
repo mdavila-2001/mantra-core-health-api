@@ -246,21 +246,22 @@ describe('PharmacyInventoryScopePolicy', () => {
 
     it('requirePatientContext exige perfil existente y receta de ese paciente', async () => {
       const { policy } = build();
+      const pharmacy = { tenantId: T1, pharmacyId: 'ph-1' };
 
       await expect(
-        policy.requirePatientContext(tx, 'pat-1', 'rx-1'),
+        policy.requirePatientContext(tx, pharmacy, 'pat-1', 'rx-1'),
       ).resolves.toBeUndefined();
       await expect(
-        policy.requirePatientContext(tx, undefined, undefined),
+        policy.requirePatientContext(tx, pharmacy, undefined, undefined),
       ).resolves.toBeUndefined();
       const missingPatient = await rejection(
-        policy.requirePatientContext(tx, 'pat-9', undefined),
+        policy.requirePatientContext(tx, pharmacy, 'pat-9', undefined),
       );
       const foreignRequest = await rejection(
-        policy.requirePatientContext(tx, 'pat-1', 'rx-9'),
+        policy.requirePatientContext(tx, pharmacy, 'pat-1', 'rx-9'),
       );
       const requestWithoutPatient = await rejection(
-        policy.requirePatientContext(tx, undefined, 'rx-1'),
+        policy.requirePatientContext(tx, pharmacy, undefined, 'rx-1'),
       );
 
       for (const error of [
@@ -271,6 +272,52 @@ describe('PharmacyInventoryScopePolicy', () => {
         expect(error.reason).toBe(NOT_AVAILABLE);
         expect(error.details).toBeUndefined();
       }
+    });
+
+    it('requirePatientContext rechaza al paciente y a la receta sin relación con la farmacia', async () => {
+      const { policy, repo } = build();
+      const pharmacy = { tenantId: T1, pharmacyId: 'ph-1' };
+
+      // El perfil existe y la receta es suya, pero no hay receta en custodia de
+      // T1 ni pedido hecho a esta farmacia.
+      const foreignPatient = await rejection(
+        policy.requirePatientContext(tx, pharmacy, 'pat-foreign', 'rx-foreign'),
+      );
+      const missing = await rejection(
+        policy.requirePatientContext(tx, pharmacy, 'pat-9', undefined),
+      );
+
+      expect(foreignPatient).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreignPatient.reason).toBe(NOT_AVAILABLE);
+      expect(foreignPatient.details).toBeUndefined();
+      expect(foreignPatient.getResponse()).toEqual(missing.getResponse());
+      expect(repo.patientServedByPharmacy).toHaveBeenCalledWith(
+        tx,
+        'pat-foreign',
+        T1,
+        'ph-1',
+      );
+    });
+
+    it('requirePatientContext rechaza una receta del paciente que la farmacia no recibe', async () => {
+      const { policy, repo } = build();
+      const pharmacy = { tenantId: T1, pharmacyId: 'ph-1' };
+      repo.patientExists.mockResolvedValue(true);
+      repo.patientServedByPharmacy.mockResolvedValue(true);
+      repo.medicationRequestBelongsToPatient.mockResolvedValue(true);
+      repo.medicationRequestServedByPharmacy.mockResolvedValue(false);
+
+      const error = await rejection(
+        policy.requirePatientContext(tx, pharmacy, 'pat-1', 'rx-otra'),
+      );
+
+      expect(error.reason).toBe(NOT_AVAILABLE);
+      expect(repo.medicationRequestServedByPharmacy).toHaveBeenCalledWith(
+        tx,
+        'rx-otra',
+        T1,
+        'ph-1',
+      );
     });
   });
 

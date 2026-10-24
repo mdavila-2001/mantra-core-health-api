@@ -5,6 +5,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
@@ -466,6 +467,11 @@ export class RetrievalService {
   /**
    * UC-59-09: capturar el feedback.
    *
+   * Sólo el principal que abrió la sesión da feedback sobre ella: otro usuario
+   * del mismo tenant recibe el mismo `404` que ante una sesión inexistente.
+   * `PLATFORM_ADMIN` (rol de plataforma) queda fuera de esa restricción; quien
+   * ranquea y cita (`SYSTEM`, workers) no llega a esta ruta.
+   *
    * Un `safety_issue_code` marca la sesión como `flagged` y publica un evento
    * aparte. Un problema de relevancia se agrega en una métrica de calidad; uno de
    * seguridad tiene que llegar a alguien.
@@ -486,6 +492,16 @@ export class RetrievalService {
         ),
         'Sesión de retrieval no encontrada.',
       );
+      if (
+        session.principalId !== actor.id &&
+        !roleAuthorizesInTenant(actor, 'PLATFORM_ADMIN', session.tenantId)
+      ) {
+        throw new ResourceNotFoundException(
+          'Sesión de retrieval no encontrada.',
+          undefined,
+          VectorErrorReason.RESOURCE_OUT_OF_SCOPE,
+        );
+      }
       if (session.status !== 'completed' && session.status !== 'flagged') {
         throw new PreconditionFailedException(
           'Sólo se puede dar feedback de una sesión completada.',

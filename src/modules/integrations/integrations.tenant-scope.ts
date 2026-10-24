@@ -3,6 +3,7 @@ import {
   ResourceNotFoundException,
   getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../common';
 import { assertResourceInTenant } from '../../common/tenant/resource-scope';
@@ -19,7 +20,8 @@ interface TenantOwned {
  *
  * - Con tenant en el contexto, ése es el alcance (también para `SYSTEM` si
  *   declara `X-Tenant-Id`).
- * - Sin tenant, sólo el actor `SYSTEM` (los jobs internos de despacho,
+ * - Sin tenant, sólo el actor `SYSTEM` como rol global (uno concedido con
+ *   ámbito de tenant no barre; los jobs internos de despacho,
  *   reintento y correlación, que barren todas las conexiones) opera sin
  *   alcance: devuelve `undefined`.
  * - Cualquier otro actor sin tenant se rechaza (`412 TENANT_REQUIRED`).
@@ -29,11 +31,11 @@ interface TenantOwned {
  * @throws PreconditionFailedException `TENANT_REQUIRED` si un actor que no es `SYSTEM` no tiene tenant.
  */
 export function integrationsScope(
-  actor: Pick<AuthenticatedUser, 'roles'>,
+  actor: AuthenticatedUser,
 ): string | undefined {
   const tenantId = getCurrentTenantId();
   if (tenantId) return tenantId;
-  if (actor.roles?.includes('SYSTEM')) return undefined;
+  if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) return undefined;
   return requireTenantId();
 }
 

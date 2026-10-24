@@ -164,10 +164,21 @@ export function buildScopeWorld() {
     findConnection: mockFn(
       async (_tx: unknown, id: string) => connections.get(id) ?? null,
     ),
-    patientExists: mockFn(async (_tx: unknown, id: string) => id === 'pat-1'),
+    patientExists: mockFn(async (_tx: unknown, id: string) =>
+      ['pat-1', 'pat-foreign'].includes(id),
+    ),
     medicationRequestBelongsToPatient: mockFn(
       async (_tx: unknown, id: string, patientId: string) =>
-        id === 'rx-1' && patientId === 'pat-1',
+        (id === 'rx-1' && patientId === 'pat-1') ||
+        (id === 'rx-foreign' && patientId === 'pat-foreign'),
+    ),
+    // Relación con la farmacia: `pat-1` y `rx-1` son de la farmacia de T1;
+    // `pat-foreign` y `rx-foreign` existen pero no tienen relación con ella.
+    patientServedByPharmacy: mockFn(
+      async (_tx: unknown, id: string) => id === 'pat-1',
+    ),
+    medicationRequestServedByPharmacy: mockFn(
+      async (_tx: unknown, id: string) => id === 'rx-1',
     ),
   };
   const policy = new PharmacyInventoryScopePolicy(repo as any);

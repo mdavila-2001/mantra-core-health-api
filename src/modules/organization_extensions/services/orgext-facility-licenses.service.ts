@@ -8,7 +8,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { FacilityLicensesRepository } from '../repositories';
+import {
+  FacilityLicensesRepository,
+  OrgextReferencesRepository,
+} from '../repositories';
 import {
   CreateFacilityLicenseDto,
   VerifyLicenseDto,
@@ -17,6 +20,7 @@ import {
 } from '../dto';
 import { ORGEXT } from '../organization_extensions.concepts';
 import {
+  orgextNotAvailable,
   requireOrgextResource,
   resolveOwnerTenantId,
 } from '../organization_extensions.tenant-scope';
@@ -33,11 +37,13 @@ export class OrgextFacilityLicensesService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param licensesRepo - Valor de licenses repo requerido por la operación.
+   * @param references - Pertenencia de la sede y del archivo de evidencia del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly licensesRepo: FacilityLicensesRepository,
+    private readonly references: OrgextReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrgextFacilityLicensesService.name);
@@ -54,6 +60,23 @@ export class OrgextFacilityLicensesService {
       'Registering facility license',
     );
     return this.em.transactional(async (tx) => {
+      // La sede y el archivo de evidencia que cita la licencia son del tenant.
+      if (
+        dto.practiceSiteId &&
+        !(await this.references.practiceSiteInTenants(tx, dto.practiceSiteId, [
+          tenantId,
+        ]))
+      ) {
+        throw orgextNotAvailable();
+      }
+      if (
+        dto.evidenceFileId &&
+        !(await this.references.fileInTenants(tx, dto.evidenceFileId, [
+          tenantId,
+        ]))
+      ) {
+        throw orgextNotAvailable();
+      }
       const licenseTypeConceptId =
         dto.licenseTypeConceptId ?? ORGEXT.LICENSE_TYPE_OPERATING;
       const clash = await this.licensesRepo.findByNumber(

@@ -15,6 +15,20 @@ export const ORGEXT_NOT_AVAILABLE = {
 } as const;
 
 /**
+ * El 404 uniforme del módulo, para un UUID del cuerpo que no existe o que
+ * pertenece a otro tenant.
+ *
+ * @returns La excepción lista para lanzar (sin `details`).
+ */
+export function orgextNotAvailable(): ResourceNotFoundException {
+  return new ResourceNotFoundException(
+    ORGEXT_NOT_AVAILABLE.message,
+    undefined,
+    ORGEXT_NOT_AVAILABLE.reason,
+  );
+}
+
+/**
  * Exige que un recurso cargado por UUID pertenezca al tenant activo.
  *
  * @param resource - Recurso ya cargado, o `null` si no se encontró.

@@ -399,6 +399,11 @@ export class DicomCatalogService {
   /**
    * El paciente y el estudio de imagen que el cuerpo cita al crear el estudio
    * deben existir y ser coherentes con el tenant del gateway.
+   *
+   * Declarar un paciente exige el estudio de imagen que lo respalda: ese estudio
+   * (en custodia del tenant y de ese mismo paciente) es la única prueba de que
+   * la organización tiene relación con él. Con sólo `patientProfileId` un
+   * gateway ataría imágenes al expediente de cualquier persona.
    */
   private async assertClinicalReferences(
     tx: EntityManager,
@@ -407,7 +412,8 @@ export class DicomCatalogService {
   ): Promise<void> {
     if (
       dto.patientProfileId &&
-      !(await this.dicomRepo.patientProfileExists(tx, dto.patientProfileId))
+      (!dto.imagingStudyId ||
+        !(await this.dicomRepo.patientProfileExists(tx, dto.patientProfileId)))
     ) {
       throw this.catalogOutOfScope();
     }

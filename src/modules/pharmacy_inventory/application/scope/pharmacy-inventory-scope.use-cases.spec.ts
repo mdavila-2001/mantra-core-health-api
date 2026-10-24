@@ -877,6 +877,20 @@ describe('Ámbito del inventario por caso de uso (PINV-01 / PINV-02)', () => {
       ],
       ['paciente inexistente', 'ph-1', { ...body, patientProfileId: 'pat-9' }],
       ['receta ajena', 'ph-1', { ...body, medicationRequestId: 'rx-9' }],
+      [
+        'paciente sin relación con la farmacia',
+        'ph-1',
+        { ...body, patientProfileId: 'pat-foreign' },
+      ],
+      [
+        'receta de un paciente sin relación con la farmacia',
+        'ph-1',
+        {
+          ...body,
+          patientProfileId: 'pat-foreign',
+          medicationRequestId: 'rx-foreign',
+        },
+      ],
     ])(
       'rechaza %s sin dispensación, asientos ni descuento de stock',
       async (_name, pharmacyId, payload) => {
