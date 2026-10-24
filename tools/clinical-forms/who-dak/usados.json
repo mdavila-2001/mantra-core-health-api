@@ -49,5 +49,15 @@
   ],
   "ANC": [
     "ANC.B5.DE48"
+  ],
+  "IMMZ": [
+    "IMMZ.D.DE.126",
+    "IMMZ.D.DE.258",
+    "IMMZ.D.DE.161",
+    "IMMZ.D.DE.1",
+    "IMMZ.D.DE.5",
+    "IMMZ.D.DE.95",
+    "IMMZ.D.DE.107",
+    "IMMZ.D.DE.115"
   ]
 }

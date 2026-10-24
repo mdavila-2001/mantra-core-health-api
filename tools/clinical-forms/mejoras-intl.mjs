@@ -16,7 +16,7 @@
  * (`description`). El registro de pasadas, fuentes descartadas y licencias está
  * en `docs/seed-research/clinical-forms.md`.
  */
-import { b, control, i, si, una } from './lib.mjs';
+import { alergias, b, control, i, s, seccion, si, t, una } from './lib.mjs';
 import { escala, factores } from './openehr/escalas.mjs';
 import { citaDak, dak, DESCARGO_OMS } from './who-dak/dak.mjs';
 
@@ -1609,3 +1609,223 @@ ESPECIFICAS_INTL.push({
       ],
     }),
 });
+
+/* -- Pasada 3: DAK de inmunizaciones de la OMS --------------------------- */
+
+const IMMZ = 'IMMZ';
+
+ESPECIFICAS_INTL.push({
+  code: 'ENFER_CTRL_VACUNACION',
+  carpeta: 'enfermeria',
+  nombre: 'Vacunación: registro de la dosis y de eventos adversos (ESAVI)',
+  fuente: 'OMS_DAK_IMMZ',
+  fecha: FECHA,
+  nota: `Estructura de evaluación puntual del catálogo (NT 022) y elementos de datos de la actividad «Administer vaccine» (IMMZ.D) de la DAK de inmunizaciones de la OMS. No fija esquemas ni edades de vacunación: el calendario es el del programa nacional. Traducción propia del inglés, no oficial. ${DESCARGO_OMS}`,
+  campos: () =>
+    control({
+      condicion: 'vacunación',
+      modo: 'evaluacion',
+      evaluacion: [
+        dak(IMMZ, 'IMMZ.D.DE.126', 'immz_enfermedad_prevenida', {
+          nombre: 'Enfermedad que previene la vacuna aplicada',
+          req: true,
+          traduccion: {
+            'IMMZ.D.DE.127': 'Fiebre tifoidea',
+            'IMMZ.D.DE.128': 'Influenza',
+            'IMMZ.D.DE.129': 'Sarampión',
+            'IMMZ.D.DE.133': 'Tos ferina',
+            'IMMZ.D.DE.135': 'Parotiditis',
+            'IMMZ.D.DE.136': 'Varicela',
+            'IMMZ.D.DE.137': 'Hepatitis A',
+            'IMMZ.D.DE.139': 'Tuberculosis',
+            'IMMZ.D.DE.140': 'Hepatitis B',
+            'IMMZ.D.DE.141': 'Haemophilus influenzae tipo b',
+            'IMMZ.D.DE.142': 'Tétanos',
+            'IMMZ.D.DE.143': 'Rotavirus',
+            'IMMZ.D.DE.144': 'Virus del papiloma humano',
+            'IMMZ.D.DE.175': 'Encefalitis japonesa',
+            'IMMZ.D.DE.146': 'Poliomielitis',
+            'IMMZ.D.DE.176': 'Difteria',
+            'IMMZ.D.DE.177': 'Enfermedad neumocócica',
+            'IMMZ.D.DE.178': 'Rubéola',
+            'IMMZ.D.DE.179': 'Dengue',
+            'IMMZ.D.DE.180': 'Rabia',
+            'IMMZ.D.DE.181': 'Enfermedad meningocócica',
+            'IMMZ.D.DE.182': 'Cólera',
+            'IMMZ.D.DE.183': 'Encefalitis transmitida por garrapatas',
+            'IMMZ.D.DE.184': 'Fiebre amarilla',
+            'IMMZ.D.DE.148': 'COVID-19',
+          },
+        }),
+        dak(IMMZ, 'IMMZ.D.DE.258', 'immz_tipo_de_dosis', {
+          nombre: 'Tipo de dosis',
+          traduccion: {
+            'IMMZ.D.DE.259': 'Serie primaria',
+            'IMMZ.D.DE.260': 'Dosis cero (fuera de la serie habitual)',
+            'IMMZ.D.DE.261': 'Dosis suplementaria',
+            'IMMZ.D.DE.262': 'Refuerzo',
+          },
+        }),
+        i('immz_numero_de_dosis', 'Número de dosis', {
+          ayuda: `Elemento IMMZ.D.DE.124 «Dose number» de la ${citaDak(IMMZ)}.`,
+        }),
+        s('immz_lote', 'Lote de la vacuna', {
+          ayuda: `Elemento IMMZ.D.DE.24 «Vaccine batch number» de la ${citaDak(IMMZ)}.`,
+        }),
+        dak(IMMZ, 'IMMZ.D.DE.161', 'immz_contraindicaciones', {
+          nombre: 'Posibles contraindicaciones o precauciones presentes',
+          traduccion: {
+            'IMMZ.D.DE.162': 'Embarazo actual',
+            'IMMZ.D.DE.163': 'Inmunocomprometido',
+            'IMMZ.D.DE.200': 'Gravemente inmunocomprometido',
+            'IMMZ.D.DE.164': 'Tratamiento inmunosupresor actual o reciente',
+            'IMMZ.D.DE.165': 'Gravemente inmunosuprimido',
+            'IMMZ.D.DE.187': 'Síndrome de inmunodeficiencia',
+            'IMMZ.D.DE.166': 'Antecedente de anafilaxia',
+            'IMMZ.D.DE.167': 'Reacción alérgica grave',
+            'IMMZ.D.DE.168': 'Infección por VIH sintomática',
+            'IMMZ.D.DE.169': 'Planea embarazarse en el próximo mes',
+            'IMMZ.D.DE.170': 'Recibe hemoderivados',
+            'IMMZ.D.DE.188': 'Enfermedad aguda grave',
+            'IMMZ.D.DE.190': 'Tuberculosis activa',
+            'IMMZ.D.DE.191': 'Lactancia',
+            'IMMZ.D.DE.192': 'Espina bífida',
+            'IMMZ.D.DE.193': 'Extrofia vesical',
+            'IMMZ.D.DE.194': 'Gastroenteritis aguda',
+            'IMMZ.D.DE.195': 'Fiebre moderada a alta',
+            'IMMZ.D.DE.196': 'Antecedente de invaginación intestinal',
+            'IMMZ.D.DE.197': 'Inmunocompetencia alterada',
+            'IMMZ.D.DE.198': 'Hipersensibilidad a componentes de la vacuna',
+            'IMMZ.D.DE.199': 'Toma antibióticos',
+          },
+          extra:
+            'Cuál de estas condiciones contraindica cada vacuna lo define la ficha técnica y la norma del programa nacional.',
+        }),
+        dak(IMMZ, 'IMMZ.D.DE.1', 'immz_estado', {
+          nombre: 'Estado de la vacunación',
+          req: true,
+          traduccion: {
+            'IMMZ.D.DE.2': 'Aplicada',
+            'IMMZ.D.DE.3': 'Registrada por error',
+            'IMMZ.D.DE.4': 'No aplicada',
+          },
+        }),
+        ...si('immz_estado', 'No aplicada', [
+          dak(IMMZ, 'IMMZ.D.DE.5', 'immz_motivo_no_aplicada', {
+            nombre: 'Motivo por el que no se aplicó',
+            req: true,
+            traduccion: {
+              'IMMZ.D.DE.6': 'Inmunidad comprobada',
+              'IMMZ.D.DE.7': 'Precaución médica',
+              'IMMZ.D.DE.8': 'Falta de la vacuna',
+              'IMMZ.D.DE.9': 'Objeción de la persona o su tutor',
+              'IMMZ.D.DE.10': 'Rechazo del cuidador',
+              'IMMZ.D.DE.11': 'Motivo no especificado',
+              'IMMZ.D.DE.12': 'Alergia a la vacuna o a un componente',
+              'IMMZ.D.DE.13': 'Inmunocomprometido',
+              'IMMZ.D.DE.14': 'Enfermedad o condición crónica',
+              'IMMZ.D.DE.15': 'Enfermedad aguda',
+              'IMMZ.D.DE.16': 'Ya tuvo la enfermedad',
+              'IMMZ.D.DE.17': 'Otros motivos',
+            },
+          }),
+        ]),
+        b(
+          'immz_esavi',
+          'Evento supuestamente atribuible a la vacunación (ESAVI)',
+          {
+            ayuda: `Elementos IMMZ.D.DE.95, DE.107 y DE.115 de la ${citaDak(IMMZ)}.`,
+          },
+        ),
+        ...si('immz_esavi', true, [
+          dak(IMMZ, 'IMMZ.D.DE.95', 'immz_esavi_manifestacion', {
+            nombre: 'Manifestación del evento',
+            req: true,
+            traduccion: {
+              'IMMZ.D.DE.96': 'Reacción local grave',
+              'IMMZ.D.DE.98': 'Convulsiones',
+              'IMMZ.D.DE.99': 'Absceso',
+              'IMMZ.D.DE.100': 'Sepsis',
+              'IMMZ.D.DE.101': 'Encefalopatía',
+              'IMMZ.D.DE.102': 'Síndrome de shock tóxico',
+              'IMMZ.D.DE.103': 'Anafilaxia',
+              'IMMZ.D.DE.104': 'Fiebre',
+            },
+          }),
+          dak(IMMZ, 'IMMZ.D.DE.107', 'immz_esavi_gravedad', {
+            nombre: 'Gravedad del evento',
+            traduccion: {
+              'IMMZ.D.DE.174': 'No grave',
+              'IMMZ.D.DE.108': 'Muerte',
+              'IMMZ.D.DE.109': 'Puso en riesgo la vida',
+              'IMMZ.D.DE.110': 'Discapacidad',
+              'IMMZ.D.DE.111': 'Hospitalización',
+              'IMMZ.D.DE.112': 'Anomalía congénita',
+            },
+          }),
+          dak(IMMZ, 'IMMZ.D.DE.115', 'immz_esavi_desenlace', {
+            nombre: 'Desenlace del evento',
+            traduccion: {
+              'IMMZ.D.DE.116': 'Falleció',
+              'IMMZ.D.DE.117': 'Recuperado',
+              'IMMZ.D.DE.118': 'Recuperado con secuelas',
+              'IMMZ.D.DE.119': 'En recuperación',
+              'IMMZ.D.DE.120': 'No recuperado',
+              'IMMZ.D.DE.121': 'Desconocido',
+            },
+          }),
+        ]),
+      ],
+    }),
+});
+
+/* -- Pasada 4: HL7 FHIR International Patient Summary --------------------- */
+
+const IPS =
+  'HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0)';
+const ips = (seccion) => `Sección «${seccion}» del ${IPS}.`;
+
+const EPICRISIS_IPS = seccion('Resumen para la continuidad (IPS)', [
+  alergias('alergias_ips_detalle').map((c) =>
+    c.code === 'tiene_alergias'
+      ? { ...c, description: ips('Allergies and Intolerances (obligatoria)') }
+      : c,
+  ),
+  b('vacunas_en_internacion', 'Se aplicaron vacunas durante la internación', {
+    ayuda: ips('Immunizations'),
+  }),
+  ...si('vacunas_en_internacion', true, [
+    t('vacunas_en_internacion_cuales', '¿Cuáles, con fecha y lote?', {
+      req: true,
+    }),
+  ]),
+  b('dispositivos_medicos', 'Porta o se le colocó un dispositivo médico', {
+    ayuda: `${ips('Medical Devices')} Por ejemplo: marcapasos, prótesis, catéter, sonda.`,
+  }),
+  ...si('dispositivos_medicos', true, [
+    t('dispositivos_medicos_cuales', '¿Cuál y desde cuándo?', { req: true }),
+  ]),
+  b('embarazo_en_curso', 'Cursa un embarazo', {
+    ayuda: `${ips('History of Pregnancy')} El value set de estado de embarazo del IPS es SNOMED CT y no se usa.`,
+  }),
+  t('estado_funcional_al_egreso', 'Estado funcional al egreso', {
+    ayuda: `${ips('Functional Status')} Autonomía, movilidad, necesidad de ayuda o de cuidador.`,
+  }),
+  b('directivas_anticipadas', 'Tiene directivas anticipadas', {
+    ayuda: ips('Advance Directives'),
+  }),
+  ...si('directivas_anticipadas', true, [
+    t('directivas_anticipadas_detalle', '¿Cuáles y dónde constan?', {
+      req: true,
+    }),
+  ]),
+  t('alertas_clinicas', 'Alertas para quien continúe la atención', {
+    ayuda: `${ips('Alerts')} Riesgos o condiciones que el próximo profesional tiene que saber.`,
+  }),
+]);
+
+MEJORAS.TRANSV_EPICRISIS = {
+  version: 3,
+  nota: `Ampliación internacional (${FECHA}): secciones del International Patient Summary de HL7 que la epicrisis no tenía (alergias, inmunizaciones, dispositivos, embarazo, estado funcional, directivas anticipadas y alertas). Sólo la estructura de secciones: no se usan los value sets SNOMED CT del IPS.`,
+  aplicar: (c) => antes(c, 'condicion_al_egreso', EPICRISIS_IPS),
+};

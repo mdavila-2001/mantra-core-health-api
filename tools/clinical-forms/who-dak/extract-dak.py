@@ -41,6 +41,12 @@ DAKS = {
         "title": "WHO Digital Adaptation Kit for antenatal care: data dictionary",
         "cols": None,  # se detectan por encabezado
     },
+    "IMMZ": {
+        "repo": "smart-immunizations",
+        "file": "input/L2/IMMZ DAK_core data dictionary.xlsx",
+        "title": "Digital adaptation kit for immunizations: core data dictionary",
+        "cols": None,
+    },
     "FP": {
         "repo": "smart-fp",
         "file": "input/datadictionary/WHO-DD.xlsx",
@@ -72,7 +78,7 @@ def columnas(encabezado):
         "desc": buscar("description"),
         "multi": buscar("multiple choice"),
         "type": buscar("data type"),
-        "input": buscar("input options"),
+        "input": buscar("input option"),
     }
 
 

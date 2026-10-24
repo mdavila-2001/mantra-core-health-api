@@ -328,6 +328,7 @@ import f323 from './pediatria/nnac25-ped-30-trastornos-metabolicos-equilib.json'
 import f324 from './pediatria/nnac25-ped-31-varicela.json';
 import f325 from './gastroenterologia/gastro-ctrl-colitis-ulcerosa.json';
 import f326 from './infectologia/infecto-ctrl-its.json';
+import f327 from './enfermeria/enfer-ctrl-vacunacion.json';
 
 export const SPECIFIC_FORMS = [
   f0,
@@ -657,4 +658,5 @@ export const SPECIFIC_FORMS = [
   f324,
   f325,
   f326,
+  f327,
 ];

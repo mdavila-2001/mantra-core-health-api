@@ -1,0 +1,241 @@
+{
+  "code": "ENFER_CTRL_VACUNACION",
+  "name": "Vacunación: registro de la dosis y de eventos adversos (ESAVI)",
+  "specialty": { "code": "ENFERMERIA", "display": "Enfermería" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Digital adaptation kit for immunizations: core data dictionary (SMART Guidelines)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://github.com/WorldHealthOrganization/smart-immunizations",
+    "sourceVersion": "input/L2/IMMZ DAK_core data dictionary.xlsx",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-24",
+    "note": "Estructura de evaluación puntual del catálogo (NT 022) y elementos de datos de la actividad «Administer vaccine» (IMMZ.D) de la DAK de inmunizaciones de la OMS. No fija esquemas ni edades de vacunación: el calendario es el del programa nacional. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_enfermedad_prevenida",
+      "name": "Enfermedad que previene la vacuna aplicada",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Fiebre tifoidea",
+        "Influenza",
+        "Sarampión",
+        "Tos ferina",
+        "Parotiditis",
+        "Varicela",
+        "Hepatitis A",
+        "Tuberculosis",
+        "Hepatitis B",
+        "Haemophilus influenzae tipo b",
+        "Tétanos",
+        "Rotavirus",
+        "Virus del papiloma humano",
+        "Encefalitis japonesa",
+        "Poliomielitis",
+        "Difteria",
+        "Enfermedad neumocócica",
+        "Rubéola",
+        "Dengue",
+        "Rabia",
+        "Enfermedad meningocócica",
+        "Cólera",
+        "Encefalitis transmitida por garrapatas",
+        "Fiebre amarilla",
+        "COVID-19"
+      ],
+      "multiple": true,
+      "description": "Fuente: elemento IMMZ.D.DE.126 «Disease targeted» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_tipo_de_dosis",
+      "name": "Tipo de dosis",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Serie primaria",
+        "Dosis cero (fuera de la serie habitual)",
+        "Dosis suplementaria",
+        "Refuerzo"
+      ],
+      "description": "Fuente: elemento IMMZ.D.DE.258 «Type of dose» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_numero_de_dosis",
+      "name": "Número de dosis",
+      "dataType": "integer",
+      "required": false,
+      "description": "Elemento IMMZ.D.DE.124 «Dose number» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72)."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_lote",
+      "name": "Lote de la vacuna",
+      "dataType": "string",
+      "required": false,
+      "description": "Elemento IMMZ.D.DE.24 «Vaccine batch number» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72)."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_contraindicaciones",
+      "name": "Posibles contraindicaciones o precauciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Embarazo actual",
+        "Inmunocomprometido",
+        "Gravemente inmunocomprometido",
+        "Tratamiento inmunosupresor actual o reciente",
+        "Gravemente inmunosuprimido",
+        "Síndrome de inmunodeficiencia",
+        "Antecedente de anafilaxia",
+        "Reacción alérgica grave",
+        "Infección por VIH sintomática",
+        "Planea embarazarse en el próximo mes",
+        "Recibe hemoderivados",
+        "Enfermedad aguda grave",
+        "Tuberculosis activa",
+        "Lactancia",
+        "Espina bífida",
+        "Extrofia vesical",
+        "Gastroenteritis aguda",
+        "Fiebre moderada a alta",
+        "Antecedente de invaginación intestinal",
+        "Inmunocompetencia alterada",
+        "Hipersensibilidad a componentes de la vacuna",
+        "Toma antibióticos"
+      ],
+      "multiple": true,
+      "description": "Cuál de estas condiciones contraindica cada vacuna lo define la ficha técnica y la norma del programa nacional. Fuente: elemento IMMZ.D.DE.161 «Potential contraindications» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_estado",
+      "name": "Estado de la vacunación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Aplicada", "Registrada por error", "No aplicada"],
+      "description": "Fuente: elemento IMMZ.D.DE.1 «Immunization event status» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_motivo_no_aplicada",
+      "name": "Motivo por el que no se aplicó",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Inmunidad comprobada",
+        "Precaución médica",
+        "Falta de la vacuna",
+        "Objeción de la persona o su tutor",
+        "Rechazo del cuidador",
+        "Motivo no especificado",
+        "Alergia a la vacuna o a un componente",
+        "Inmunocomprometido",
+        "Enfermedad o condición crónica",
+        "Enfermedad aguda",
+        "Ya tuvo la enfermedad",
+        "Otros motivos"
+      ],
+      "description": "Fuente: elemento IMMZ.D.DE.5 «Reason vaccine was not administered» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "immz_estado", "equals": "No aplicada" }
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_esavi",
+      "name": "Evento supuestamente atribuible a la vacunación (ESAVI)",
+      "dataType": "boolean",
+      "required": false,
+      "description": "Elementos IMMZ.D.DE.95, DE.107 y DE.115 de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72)."
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_esavi_manifestacion",
+      "name": "Manifestación del evento",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Reacción local grave",
+        "Convulsiones",
+        "Absceso",
+        "Sepsis",
+        "Encefalopatía",
+        "Síndrome de shock tóxico",
+        "Anafilaxia",
+        "Fiebre"
+      ],
+      "allowOther": true,
+      "description": "Fuente: elemento IMMZ.D.DE.95 «Reaction manifestation» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "immz_esavi", "equals": true }
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_esavi_gravedad",
+      "name": "Gravedad del evento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "No grave",
+        "Muerte",
+        "Puso en riesgo la vida",
+        "Discapacidad",
+        "Hospitalización",
+        "Anomalía congénita"
+      ],
+      "allowOther": true,
+      "description": "Fuente: elemento IMMZ.D.DE.107 «Type of reaction» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "immz_esavi", "equals": true }
+    },
+    {
+      "section": "Evaluación: vacunación",
+      "code": "immz_esavi_desenlace",
+      "name": "Desenlace del evento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Falleció",
+        "Recuperado",
+        "Recuperado con secuelas",
+        "En recuperación",
+        "No recuperado",
+        "Desconocido"
+      ],
+      "description": "Fuente: elemento IMMZ.D.DE.115 «Reaction outcome» de la Digital adaptation kit for immunizations: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-immunizations, commit bd7fa72). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "immz_esavi", "equals": true }
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

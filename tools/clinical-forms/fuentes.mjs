@@ -278,6 +278,14 @@ export const FUENTES = {
     sourceVersion: 'HIV_DAK_2023-Web_Annex_A.Data_dictionary_231117_CLEAN.xlsx',
     license: LIBRE_OMS,
   },
+  OMS_DAK_IMMZ: {
+    sourceTitle:
+      'Digital adaptation kit for immunizations: core data dictionary (SMART Guidelines)',
+    organization: 'Organización Mundial de la Salud (OMS)',
+    url: 'https://github.com/WorldHealthOrganization/smart-immunizations',
+    sourceVersion: 'input/L2/IMMZ DAK_core data dictionary.xlsx',
+    license: LIBRE_OMS,
+  },
   ACR_BIRADS: {
     sourceTitle: 'Breast Imaging Reporting and Data System (BI-RADS)',
     organization: 'American College of Radiology (ACR)',

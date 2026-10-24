@@ -5,7 +5,7 @@
     "code": "TRANSVERSAL",
     "display": "Transversal (todas las especialidades)"
   },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Resolución 1995 de 1999 — normas para el manejo de la historia clínica: epicrisis y resumen de egreso",
     "organization": "Ministerio de Salud de Colombia",
@@ -13,7 +13,7 @@
     "license": "Norma estatal de acceso público",
     "sourceVersion": "1995 de 1999",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción del contenido mínimo que la norma exige en el resumen de egreso. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "note": "Transcripción del contenido mínimo que la norma exige en el resumen de egreso. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): secciones del International Patient Summary de HL7 que la epicrisis no tenía (alergias, inmunizaciones, dispositivos, embarazo, estado funcional, directivas anticipadas y alertas). Sólo la estructura de secciones: no se usan los value sets SNOMED CT del IPS."
   },
   "fields": [
     {
@@ -94,6 +94,112 @@
       "dataType": "text",
       "required": true,
       "showWhen": { "field": "hubo_complicaciones", "equals": true }
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "tiene_alergias",
+      "name": "¿Tiene alergias conocidas?",
+      "dataType": "boolean",
+      "required": false,
+      "description": "Sección «Allergies and Intolerances (obligatoria)» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0)."
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "tipo_de_alergia",
+      "name": "¿A qué es alérgico?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Medicamentos",
+        "Alimentos",
+        "Látex",
+        "Picadura de insectos",
+        "Polen, polvo o ácaros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "alergias_ips_detalle",
+      "name": "¿Cuál exactamente y qué reacción le produjo?",
+      "dataType": "text",
+      "required": false,
+      "description": "Por ejemplo: penicilina → urticaria; AINE → broncoespasmo.",
+      "showWhen": { "field": "tiene_alergias", "equals": true }
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "vacunas_en_internacion",
+      "name": "Se aplicaron vacunas durante la internación",
+      "dataType": "boolean",
+      "required": false,
+      "description": "Sección «Immunizations» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0)."
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "vacunas_en_internacion_cuales",
+      "name": "¿Cuáles, con fecha y lote?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "vacunas_en_internacion", "equals": true }
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "dispositivos_medicos",
+      "name": "Porta o se le colocó un dispositivo médico",
+      "dataType": "boolean",
+      "required": false,
+      "description": "Sección «Medical Devices» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0). Por ejemplo: marcapasos, prótesis, catéter, sonda."
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "dispositivos_medicos_cuales",
+      "name": "¿Cuál y desde cuándo?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "dispositivos_medicos", "equals": true }
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "embarazo_en_curso",
+      "name": "Cursa un embarazo",
+      "dataType": "boolean",
+      "required": false,
+      "description": "Sección «History of Pregnancy» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0). El value set de estado de embarazo del IPS es SNOMED CT y no se usa."
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "estado_funcional_al_egreso",
+      "name": "Estado funcional al egreso",
+      "dataType": "text",
+      "required": false,
+      "description": "Sección «Functional Status» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0). Autonomía, movilidad, necesidad de ayuda o de cuidador."
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "directivas_anticipadas",
+      "name": "Tiene directivas anticipadas",
+      "dataType": "boolean",
+      "required": false,
+      "description": "Sección «Advance Directives» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0)."
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "directivas_anticipadas_detalle",
+      "name": "¿Cuáles y dónde constan?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "directivas_anticipadas", "equals": true }
+    },
+    {
+      "section": "Resumen para la continuidad (IPS)",
+      "code": "alertas_clinicas",
+      "name": "Alertas para quien continúe la atención",
+      "dataType": "text",
+      "required": false,
+      "description": "Sección «Alerts» del HL7 FHIR International Patient Summary (IPS), perfil Composition (uv-ips); https://github.com/HL7/fhir-ips, commit df27097; licencia FHIR de HL7 (CC0). Riesgos o condiciones que el próximo profesional tiene que saber."
     },
     {
       "section": "Egreso",

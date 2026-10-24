@@ -2292,5 +2292,525 @@
         ]
       }
     }
+  },
+  "IMMZ": {
+    "title": "Digital adaptation kit for immunizations: core data dictionary",
+    "repository": "https://github.com/WorldHealthOrganization/smart-immunizations",
+    "file": "input/L2/IMMZ DAK_core data dictionary.xlsx",
+    "commit": "bd7fa726706efc92d972d0dcebba9505f386b078 2026-10-01T16:04:31+02:00",
+    "elements": {
+      "IMMZ.D.DE.126": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.126",
+        "label": "Disease targeted",
+        "description": "Vaccine-preventable disease being targeted",
+        "multiple": true,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.127",
+            "label": "Typhoid",
+            "description": "The vaccine-preventable disease being targeted is typhoid"
+          },
+          {
+            "id": "IMMZ.D.DE.128",
+            "label": "Influenza",
+            "description": "The vaccine-preventable disease being targeted is influenza"
+          },
+          {
+            "id": "IMMZ.D.DE.129",
+            "label": "Measles",
+            "description": "The vaccine-preventable disease being targeted is measles"
+          },
+          {
+            "id": "IMMZ.D.DE.133",
+            "label": "Pertussis",
+            "description": "The vaccine-preventable disease being targeted is pertussis"
+          },
+          {
+            "id": "IMMZ.D.DE.135",
+            "label": "Mumps",
+            "description": "The vaccine-preventable disease being targeted is mumps"
+          },
+          {
+            "id": "IMMZ.D.DE.136",
+            "label": "Varicella",
+            "description": "The vaccine-preventable disease being targeted is varicella"
+          },
+          {
+            "id": "IMMZ.D.DE.137",
+            "label": "Viral hepatitis A",
+            "description": "The vaccine-preventable disease being targeted is viral hepatitis A"
+          },
+          {
+            "id": "IMMZ.D.DE.139",
+            "label": "Tuberculosis",
+            "description": "The vaccine-preventable disease being targeted is TB"
+          },
+          {
+            "id": "IMMZ.D.DE.140",
+            "label": "Viral hepatitis B",
+            "description": "The vaccine-preventable disease being targeted is viral hepatitis B"
+          },
+          {
+            "id": "IMMZ.D.DE.141",
+            "label": "Haemophilus influenzae type b",
+            "description": "The vaccine-preventable disease being targeted is Haemophilus influenzae type b (Hib)"
+          },
+          {
+            "id": "IMMZ.D.DE.142",
+            "label": "Tetanus",
+            "description": "The vaccine-preventable disease being targeted is tetanus"
+          },
+          {
+            "id": "IMMZ.D.DE.143",
+            "label": "Rotavirus",
+            "description": "The vaccine-preventable disease being targeted is rotavirus"
+          },
+          {
+            "id": "IMMZ.D.DE.144",
+            "label": "Human papillomavirus",
+            "description": "The vaccine-preventable disease being targeted is human papillomavirus (HPV) infection"
+          },
+          {
+            "id": "IMMZ.D.DE.175",
+            "label": "Japanese encephalitis",
+            "description": "The vaccine-preventable disease being targeted is Japanese encephalitis (JE)"
+          },
+          {
+            "id": "IMMZ.D.DE.146",
+            "label": "Poliomyelitis",
+            "description": "The vaccine-preventable disease being targeted is poliomyelitis (polio)"
+          },
+          {
+            "id": "IMMZ.D.DE.176",
+            "label": "Diphtheria",
+            "description": "The vaccine-preventable disease being targeted is diphtheria"
+          },
+          {
+            "id": "IMMZ.D.DE.177",
+            "label": "Pneumococcal disease",
+            "description": "The vaccine-preventable disease being targeted is pneumococcal"
+          },
+          {
+            "id": "IMMZ.D.DE.178",
+            "label": "Rubella",
+            "description": "The vaccine-preventable disease being targeted is rubella"
+          },
+          {
+            "id": "IMMZ.D.DE.179",
+            "label": "Dengue",
+            "description": "The vaccine-preventable disease being targeted is dengue"
+          },
+          {
+            "id": "IMMZ.D.DE.180",
+            "label": "Rabies",
+            "description": "The vaccine-preventable disease being targeted is rabies"
+          },
+          {
+            "id": "IMMZ.D.DE.181",
+            "label": "Meningococcal",
+            "description": "The vaccine-preventable disease being targeted is meningococcal"
+          },
+          {
+            "id": "IMMZ.D.DE.182",
+            "label": "Cholera",
+            "description": "The vaccine-preventable disease being targeted is cholera"
+          },
+          {
+            "id": "IMMZ.D.DE.183",
+            "label": "Tick-borne encephalitis",
+            "description": "The vaccine-preventable disease being targeted is tick-borne encephalitis (TBE)"
+          },
+          {
+            "id": "IMMZ.D.DE.184",
+            "label": "Yellow fever",
+            "description": "The vaccine-preventable disease being targeted is yellow fever"
+          },
+          {
+            "id": "IMMZ.D.DE.148",
+            "label": "COVID-19",
+            "description": "The vaccine-preventable disease being targeted is coronovirus disease (COVID-19)"
+          }
+        ]
+      },
+      "IMMZ.D.DE.258": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.258",
+        "label": "Type of dose",
+        "description": "The type of dose in a series that the client received",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.259",
+            "label": "Primary series",
+            "description": "Indicates that the client received the primary vaccination series of a product/antigen. This is also applicable for antigens with one dose"
+          },
+          {
+            "id": "IMMZ.D.DE.260",
+            "label": "Dose 0",
+            "description": "Indicates that the client received a dose of a product/ antigen that is not a part of the primary vaccination series and is administered before the primary vaccination series is provided"
+          },
+          {
+            "id": "IMMZ.D.DE.261",
+            "label": "Supplementary dose",
+            "description": "Indicates that the client received a supplementary dose of a product/antigen"
+          },
+          {
+            "id": "IMMZ.D.DE.262",
+            "label": "Booster dose",
+            "description": "Indicates that the client received booster dose of a product/antigen"
+          }
+        ]
+      },
+      "IMMZ.D.DE.161": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.161",
+        "label": "Potential contraindications",
+        "description": "Specific situations or medical conditions for which it is advised or recommended to avoid or delay administering a particular vaccine",
+        "multiple": true,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.162",
+            "label": "Currently pregnant",
+            "description": "The client is currently pregnant"
+          },
+          {
+            "id": "IMMZ.D.DE.163",
+            "label": "Immunocompromised",
+            "description": "The client is known to be immunocompromised"
+          },
+          {
+            "id": "IMMZ.D.DE.200",
+            "label": "Severely immunocompromised",
+            "description": "The client is known to be severely immunocompromised"
+          },
+          {
+            "id": "IMMZ.D.DE.164",
+            "label": "Exposed to immunosuppressive treatment",
+            "description": "The client is undergoing immunosuppressive treatment or was exposed to immunosuppressive treatment in utero or via breastfeeding."
+          },
+          {
+            "id": "IMMZ.D.DE.165",
+            "label": "Severely immunosuppressed",
+            "description": "The client is known to be severely immunosuppressed"
+          },
+          {
+            "id": "IMMZ.D.DE.187",
+            "label": "Immunodeficiency syndromes",
+            "description": "The client has immunodeficiency syndromes (e.g. HIV/AIDS, known or suspected congenital immunodeficiency, leukaemia, lymphoma or other malignant disease)"
+          },
+          {
+            "id": "IMMZ.D.DE.166",
+            "label": "History of anaphylactic reactions",
+            "description": "The client is known to have history of anaphylaxis in the past"
+          },
+          {
+            "id": "IMMZ.D.DE.167",
+            "label": "Severe allergic reactions",
+            "description": "The client is known to have severe allergic reaction"
+          },
+          {
+            "id": "IMMZ.D.DE.168",
+            "label": "Symptomatic HIV infection",
+            "description": "The client is experiencing HIV-related symptoms"
+          },
+          {
+            "id": "IMMZ.D.DE.169",
+            "label": "Planning to get pregnant in the next month",
+            "description": "The client's intention or desire is to become pregnant in the next month"
+          },
+          {
+            "id": "IMMZ.D.DE.170",
+            "label": "Receiving blood products",
+            "description": "The client is receiving blood or blood-related products as part of a medical treatment."
+          },
+          {
+            "id": "IMMZ.D.DE.188",
+            "label": "Severe acute illness",
+            "description": "The client has a severe acute illness"
+          },
+          {
+            "id": "IMMZ.D.DE.190",
+            "label": "TB disease",
+            "description": "The client has been diagnosed with tuberculosis (TB)"
+          },
+          {
+            "id": "IMMZ.D.DE.191",
+            "label": "Breastfeeding",
+            "description": "The client is currently breastfeeding"
+          },
+          {
+            "id": "IMMZ.D.DE.192",
+            "label": "Spina bifida",
+            "description": "The client has spina bifida"
+          },
+          {
+            "id": "IMMZ.D.DE.193",
+            "label": "Bladder exstrophy",
+            "description": "The client has exstrophy of urinary bladder"
+          },
+          {
+            "id": "IMMZ.D.DE.194",
+            "label": "Acute gastroenteritis",
+            "description": "The client has acute gastroenteritis"
+          },
+          {
+            "id": "IMMZ.D.DE.195",
+            "label": "Moderate to severe fever",
+            "description": "The client has moderate to severe fever"
+          },
+          {
+            "id": "IMMZ.D.DE.196",
+            "label": "Prior history of intussusception",
+            "description": "The client has prior history of intussusception"
+          },
+          {
+            "id": "IMMZ.D.DE.197",
+            "label": "Altered immunocompetence",
+            "description": "The client's immune system is not functioning at its typical capacity"
+          },
+          {
+            "id": "IMMZ.D.DE.198",
+            "label": "Hypersensitivity to vaccine components",
+            "description": "The client has heightened sensitivity or allergic reactions to specific components found in vaccines"
+          },
+          {
+            "id": "IMMZ.D.DE.199",
+            "label": "Taking antibiotics",
+            "description": "The client is currently taking antibiotics to treat certain infections"
+          }
+        ]
+      },
+      "IMMZ.D.DE.1": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.1",
+        "label": "Immunization event status",
+        "description": "The current status of the individual immunization event",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.2",
+            "label": "Completed",
+            "description": "The immunization event was successfully carried out as intended"
+          },
+          {
+            "id": "IMMZ.D.DE.3",
+            "label": "Entered in error",
+            "description": "Immunization event record has been mistakenly created or entered into the system. Recorded information is incorrect or should not have been documented, though it is possible that real-world decisions were based on it"
+          },
+          {
+            "id": "IMMZ.D.DE.4",
+            "label": "Not done",
+            "description": "Planned immunization event was not carried out for some reason"
+          }
+        ]
+      },
+      "IMMZ.D.DE.5": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.5",
+        "label": "Reason vaccine was not administered",
+        "description": "The reason this immunization event was not performed",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.6",
+            "label": "Immunity",
+            "description": "Testing has shown that the client already has immunity to the agent targeted by the immunization"
+          },
+          {
+            "id": "IMMZ.D.DE.7",
+            "label": "Medical precaution",
+            "description": "The client currently has a medical condition for which the vaccine is contraindicated or for which precaution is warranted"
+          },
+          {
+            "id": "IMMZ.D.DE.8",
+            "label": "Product out of stock",
+            "description": "There was no supply of the product on hand to perform the service"
+          },
+          {
+            "id": "IMMZ.D.DE.9",
+            "label": "Client objection",
+            "description": "The client or their guardian objects to receiving the vaccine"
+          },
+          {
+            "id": "IMMZ.D.DE.10",
+            "label": "Caregiver refusal",
+            "description": "The client's caregiver refused the vaccine"
+          },
+          {
+            "id": "IMMZ.D.DE.11",
+            "label": "Unspecified reason",
+            "description": "The immunization event was not carried out for an unspecified reason"
+          },
+          {
+            "id": "IMMZ.D.DE.12",
+            "label": "Client allergy to vaccine or component",
+            "description": "The immunization event was not carried out because of client allergy to vaccine or component"
+          },
+          {
+            "id": "IMMZ.D.DE.13",
+            "label": "Immunocompromised",
+            "description": "The immunization event was not carried out because the client is immunocompromised"
+          },
+          {
+            "id": "IMMZ.D.DE.14",
+            "label": "Chronic illness or condition",
+            "description": "The immunization event was not carried out due a chronic illness or condition of the client"
+          },
+          {
+            "id": "IMMZ.D.DE.15",
+            "label": "Acute illness",
+            "description": "The immunization event was not carried out due to an acute illness present in the client"
+          },
+          {
+            "id": "IMMZ.D.DE.16",
+            "label": "Had the disease",
+            "description": "The immunization event was not carried out due to the client having had the disease"
+          },
+          {
+            "id": "IMMZ.D.DE.17",
+            "label": "Immunization not carried out for other reasons",
+            "description": "The immunization event was not carried out for other reasons"
+          }
+        ]
+      },
+      "IMMZ.D.DE.95": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.95",
+        "label": "Reaction manifestation",
+        "description": "The manifestation of the reaction (e.g. infected abscess, swelling, rash, hives, diarrhoea, etc.) observed after administering the vaccine",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.96",
+            "label": "Severe local reaction",
+            "description": "The client's reaction manifested in severe local reaction"
+          },
+          {
+            "id": "IMMZ.D.DE.98",
+            "label": "Seizures",
+            "description": "The client's reaction manifested in seizures"
+          },
+          {
+            "id": "IMMZ.D.DE.99",
+            "label": "Abscess",
+            "description": "The client's reaction manifested in an abscess"
+          },
+          {
+            "id": "IMMZ.D.DE.100",
+            "label": "Sepsis",
+            "description": "The client's reaction manifested in sepsis"
+          },
+          {
+            "id": "IMMZ.D.DE.101",
+            "label": "Encephalopathy",
+            "description": "The client's reaction manifested in encephalopathy"
+          },
+          {
+            "id": "IMMZ.D.DE.102",
+            "label": "Toxic shock syndrome",
+            "description": "The client's reaction manifested in toxic shock syndrome"
+          },
+          {
+            "id": "IMMZ.D.DE.103",
+            "label": "Anaphylaxis",
+            "description": "The client's reaction manifested in anaphylaxis"
+          },
+          {
+            "id": "IMMZ.D.DE.104",
+            "label": "Fever",
+            "description": "The client's reaction manifested as a fever"
+          },
+          {
+            "id": "IMMZ.D.DE.105",
+            "label": "Other",
+            "description": "The client's reaction manifested in another way"
+          }
+        ]
+      },
+      "IMMZ.D.DE.107": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.107",
+        "label": "Type of reaction",
+        "description": "If the event resulted in a reaction, what is the type of reaction",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.174",
+            "label": "Non serious",
+            "description": "The reaction resulted in a mild or minor response and did not pose a significant threat to client's health"
+          },
+          {
+            "id": "IMMZ.D.DE.108",
+            "label": "Death",
+            "description": "The reaction resulted in the client's death"
+          },
+          {
+            "id": "IMMZ.D.DE.109",
+            "label": "Life threatening",
+            "description": "The reaction threatened the client's life"
+          },
+          {
+            "id": "IMMZ.D.DE.110",
+            "label": "Disability",
+            "description": "The reaction resulted in a disability"
+          },
+          {
+            "id": "IMMZ.D.DE.111",
+            "label": "Hospitalization",
+            "description": "The reaction resulted in a hospitalization"
+          },
+          {
+            "id": "IMMZ.D.DE.112",
+            "label": "Congenital anomaly",
+            "description": "The reaction was a congenital anomaly or birth defect"
+          },
+          {
+            "id": "IMMZ.D.DE.113",
+            "label": "Other important medical event (specify)",
+            "description": "There was another important reaction or medical event"
+          }
+        ]
+      },
+      "IMMZ.D.DE.115": {
+        "sheet": "IMMZ.D Administer vaccine",
+        "id": "IMMZ.D.DE.115",
+        "label": "Reaction outcome",
+        "description": "The outcome of the reaction (e.g. death, recovered, recovering)",
+        "multiple": false,
+        "options": [
+          {
+            "id": "IMMZ.D.DE.116",
+            "label": "Died",
+            "description": "The adverse event resulted in the client's death"
+          },
+          {
+            "id": "IMMZ.D.DE.117",
+            "label": "Recovered",
+            "description": "The client fully recovered"
+          },
+          {
+            "id": "IMMZ.D.DE.118",
+            "label": "Recovered with sequelae",
+            "description": "The client has recovered with sequelae as a consequence of the reaction/vaccination"
+          },
+          {
+            "id": "IMMZ.D.DE.119",
+            "label": "Recovering",
+            "description": "The client is recovering"
+          },
+          {
+            "id": "IMMZ.D.DE.120",
+            "label": "Not recovered",
+            "description": "The client has not recovered"
+          },
+          {
+            "id": "IMMZ.D.DE.121",
+            "label": "Unknown",
+            "description": "The client's reaction outcome is unknown"
+          }
+        ]
+      }
+    }
   }
 }
