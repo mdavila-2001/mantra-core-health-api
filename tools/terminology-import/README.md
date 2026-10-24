@@ -258,12 +258,3 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 Monografías por ATC 5 con las secciones literales de la ficha técnica de CIMA y de la etiqueta FDA
 (openFDA), cada una con su cita: `clinical-pharmacology/` (ver su `README.md` y `SOURCES.md`).
 Registro de pasadas: `docs/seed-research/clinical-pharmacology.md`.
-
-## Catálogo de enfermedades (2026-10-24)
-
-MONDO, Orphanet (castellano), DOID, NCIt (C2991), CIE-11 MMS 2026-01 y EFO, con
-jerarquía, alineamientos publicados y claves cruzadas (OMIM, CIE-10 OMS, CIE-11
-Fundación, MeSH, UMLS, DECIPHER). Importador en
-[`diseases/`](diseases/README.md); fuentes y licencias en
-[`diseases/SOURCES.md`](diseases/SOURCES.md); saturación, cobertura y claves para
-enlazar en [`docs/seed-research/diseases.md`](../../docs/seed-research/diseases.md).
