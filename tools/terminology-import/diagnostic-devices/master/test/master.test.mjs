@@ -701,3 +701,25 @@ test('decideRow: clase IVD del regulador y alcance publicado de la fuente', () =
     ['source-scope|cdc-livd-sars-cov-2'],
   );
 });
+
+test('suplemento del PCD: el código nuevo se decide por su regulación reconstruida', () => {
+  const sup = JSON.parse(
+    readFileSync(
+      join(FX, '..', '..', 'data', 'fda-pcd-supplement.json'),
+      'utf8',
+    ),
+  );
+  const sjd = sup.rows.find((r) => r.PRODUCTCODE === 'SJD');
+  assert.equal(sjd.REGULATIONNUMBER, '862.1354');
+  const n = pcdNode(sjd, { source: 'fda-pcd' }, new Set());
+  assert.equal(n.diagnostic, true);
+  assert.equal(n.branch, 'ivd');
+  assert.ok(
+    sup.rows.every(
+      (r) =>
+        r.REGULATIONNUMBER === null ||
+        /^\d{3}\.\d{4}$/.test(r.REGULATIONNUMBER),
+    ),
+    'sección a 4 dígitos',
+  );
+});
