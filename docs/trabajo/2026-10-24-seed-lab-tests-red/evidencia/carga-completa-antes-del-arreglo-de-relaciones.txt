@@ -1,0 +1,44 @@
+# Carga completa desde data/ (GLOSSARY_BUILD_DIR vacío), Postgres 16 desechable con DDL de database/SQL/03_terminology
+
+$ load-lab-tests.mjs --apply   # corrida 1
+=== Filas NUEVAS (0 en la segunda corrida = idempotente; `batches` es el registro de auditoría) ===
+{
+  "result": {
+    "sources": 10,
+    "codeSystems": 15,
+    "versions": 15,
+    "concepts": 158309,
+    "properties": 3864840,
+    "designations": 114065,
+    "relationships": 18178,
+    "valueSets": 313,
+    "valueSetVersions": 313,
+    "valueSetMembers": 511404,
+    "batches": 15
+  },
+  "segundos": 231
+}
+
+$ load-lab-tests.mjs --apply   # corrida 2
+=== Filas NUEVAS (0 en la segunda corrida = idempotente; `batches` es el registro de auditoría) ===
+{
+  "result": {
+    "sources": 0,
+    "codeSystems": 0,
+    "versions": 0,
+    "concepts": 0,
+    "properties": 0,
+    "designations": 0,
+    "relationships": 0,
+    "valueSets": 0,
+    "valueSetVersions": 0,
+    "valueSetMembers": 0,
+    "batches": 15
+  },
+  "segundos": 132
+}
+
+$ psql conteos
+ERROR:  UNION types bigint and text cannot be matched
+LINE 1: ...et_members union all select 'schema terminology', pg_size_pr...
+                                                             ^
