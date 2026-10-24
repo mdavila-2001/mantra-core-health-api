@@ -78,9 +78,10 @@
    "phenotypes": 413,
    "byAspect": {
     "not-phenotype:HP:0012823": 148,
-    "P": 815,
+    "P": 814,
     "not-phenotype:HP:0000005": 10,
-    "not-phenotype:HP:0032443": 1
+    "not-phenotype:HP:0032443": 1,
+    "non-human-disease": 1
    },
    "byEvidence": {
     "(vacío)": 691,
@@ -207,7 +208,8 @@
    },
    "phenotypes": 305,
    "byAspect": {
-    "(vacío)": 2268
+    "(vacío)": 2262,
+    "non-human-disease": 6
    },
    "byEvidence": {
     "(vacío)": 2268
@@ -227,9 +229,10 @@
    },
    "phenotypes": 4524,
    "byAspect": {
-    "P": 132277,
-    "not-phenotype:HP:0012823": 158,
-    "not-phenotype:HP:0032443": 165
+    "P": 132104,
+    "not-phenotype:HP:0012823": 157,
+    "not-phenotype:HP:0032443": 165,
+    "non-human-disease": 174
    },
    "byEvidence": {
     "IEA": 527,
@@ -240,6 +243,12 @@
     "(vacío)": 132600
    }
   }
+ },
+ "nonHumanDiseaseRows": {
+  "mondo": 1,
+  "doid": 6,
+  "hpoa": 0,
+  "hpo-common-disease": 174
  },
  "terms": {
   "hpo": {

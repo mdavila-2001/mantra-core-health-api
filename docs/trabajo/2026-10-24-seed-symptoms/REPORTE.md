@@ -17,8 +17,8 @@
 | H3.S2.M3 | Idempotente | idem, segunda vez | todos los contadores en 0 |
 | H3.S3.M1 | Extensión opcional al glosario | idem | `glossaryMembers: 37292` (18 646 términos × 2 value sets) |
 | H4.S1.M1–M4 | Corpus de relaciones: HPOA 286 651, Mondo 974, DOID 2 268, enfermedades comunes 132 600 | build + pruebas | 50/50 pruebas |
-| H4.S2.M1–M3 | Propuesta de tabla probada; cargador bloqueado sin ella; con ella 345 438 aristas + 373 108 evidencias (andamio Mondo), re-corrida 0 | ver log abajo | ver log abajo |
-| H4.S3.M2 | Contra el catálogo **real** de #688 (snapshot f7f84be1: omim 10 744, orphanet 11 645, decipher 61, mondo 27 185, doid 14 854, mesh 8 863 conceptos): HPOA 268 906/268 906, DOID 2 268/2 268, Mondo 814/815, enfermedades comunes 117 404/132 277 → 388 103 aristas + 389 361 evidencias; re-corrida 0 | `evidencia/andamio/integration-run.sh` → `evidencia/integracion-seed-diseases-688.txt` | 57 s; re-corrida 0/0 en 32 s |
+| H4.S2.M1–M3 | Propuesta de tabla probada; cargador bloqueado sin ella; con ella 345 258 aristas + 372 928 evidencias (andamio Mondo), re-corrida 0 | ver log abajo | ver log abajo |
+| H4.S3.M2 | Contra el catálogo **real** de #688 (snapshot 57f23f9c: omim 10 744, orphanet 11 645, decipher 61, mondo 27 185, doid 14 854, mesh 9 264 conceptos): HPOA 268 906/268 906, DOID 2 262/2 262, Mondo 814/814, enfermedades comunes 132 008/132 104 (sólo `DOID:5898` sin resolver) → 402 633 aristas + 403 959 evidencias; re-corrida 0 | `evidencia/andamio/integration-run.sh` → `evidencia/integracion-seed-diseases-688.txt` | 59 s; re-corrida 0/0 en 33 s |
 | H4.S3.M1 | Formatos de #688: HPOA resuelve 100 % directo | `load-disease-phenotypes.mjs --check --sources hpoa` | `diseaseUnresolved: 0`, `viaMondo: 0`, 268 306 aristas |
 | H5.S1.M1–M2 | 8 pasadas; 7 y 8 aportan 0 | `evidencia/saturation.json` + doc | ver `docs/seed-research/symptoms.md` |
 | H5.S2.M1 | Cobertura: 12 631 / 23 263 enfermedades de Mondo (54,3 %) con síntomas | build | `evidencia/coverage-resumen.json` |
@@ -66,20 +66,20 @@ Postgres 16 desechable (DDL `00_shared` + `03_terminology`; andamio descrito en 
 [load] {"codeSystem":"hpo",...,"concepts":19894,"designations":61927,"properties":309294,"isA":24436,"maps":0,"glossaryMembers":37292,...}
 [load] {"codeSystem":"symp",...,"concepts":895,"designations":1138,"properties":8892,"isA":898,...}
 [load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":3988,"designations":7682,"properties":48985,"isA":4094,...}
-(17 s)
+(19 s)
 ### terms run 2
 [load] {"codeSystem":"hpo",...,"concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,...}
 (13 s)
 ### relations without model
 BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (columnas ausentes: id, relationship_id, …)
 ### relations run 1
-    "relationships": 345438,
-    "evidence": 373108
-(55 s)
+    "relationships": 345258,
+    "evidence": 372928
+(52 s)
 ### relations run 2
     "relationships": 0,
     "evidence": 0
-(29 s)
+(31 s)
 ```
 
 `evidencia/postgres-desechable-check-formato-688.txt` (omim/orphanet/decipher con código sin prefijo):
@@ -106,6 +106,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 - **NCIt ampliado en la pasada 6.** Se sumaron los hallazgos clínicos por sistema (C36278, tipo semántico *Finding*) porque el pedido incluye «hallazgos clínicos».
 
 ## Riesgos residuales
+- **Equivalencia dudosa de Mondo.** `MESH:D005667` «Furunculosis» figura como equivalente a «furunculosis, fish»: 20 filas de enfermedades comunes, probablemente humanas, quedan fuera por la regla de enfermedades animales. Reportar a Mondo.
 - **Licencias de HPO y NCIt.** Su texto vigente no se pudo leer (hosts bloqueados). HPO: en la base queda lo que declara `hp.json`. NCIt: CC BY 4.0 según los términos de uso de NCI EVS registrados en `docs/terminology-expansion/SOURCE-REGISTER.md` en un corte anterior; reconfirmar. El code system no se llama «NCI Thesaurus» (marca de la edición oficial).
 - **Glosario.** Si se activa `--glossary` antes de traer P3841 de Wikidata, puede haber síntomas duplicados visibles (una ficha de Wikidata y otra de HPO).
 - **Enfermedades comunes.** Las 132 600 anotaciones son de 2015 y con evidencia `ITM`, es decir, minería de texto de la fuente. Quien las use tiene que poder filtrarlas por `evidence_code`.

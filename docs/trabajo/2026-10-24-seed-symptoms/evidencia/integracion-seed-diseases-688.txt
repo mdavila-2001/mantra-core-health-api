@@ -5,7 +5,7 @@ $ node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.
 decipher|61
 doid|14854
 mantra-core-internal|12
-mesh|8863
+mesh|9264
 mondo|27185
 omim|10744
 orphanet|11645
@@ -58,17 +58,15 @@ $ load-disease-phenotypes.mjs --check --sources mondo
   },
   "stats": {
     "read": 974,
-    "notPhenotype": 159,
+    "notPhenotype": 160,
     "negatedSkipped": 0,
-    "diseaseUnresolved": 1,
+    "diseaseUnresolved": 0,
     "phenotypeUnresolved": 0,
     "viaMondo": 0,
     "evidence": 814,
     "relationships": 814
   },
-  "unresolvedDiseasesByPrefix": {
-    "MONDO": 1
-  },
+  "unresolvedDiseasesByPrefix": {},
   "negatedNeeds": null
 }
 $ load-disease-phenotypes.mjs --check --sources doid
@@ -78,13 +76,13 @@ $ load-disease-phenotypes.mjs --check --sources doid
   },
   "stats": {
     "read": 2268,
-    "notPhenotype": 0,
+    "notPhenotype": 6,
     "negatedSkipped": 0,
     "diseaseUnresolved": 0,
     "phenotypeUnresolved": 0,
     "viaMondo": 0,
-    "evidence": 2268,
-    "relationships": 2268
+    "evidence": 2262,
+    "relationships": 2262
   },
   "unresolvedDiseasesByPrefix": {},
   "negatedNeeds": null
@@ -93,21 +91,20 @@ $ load-disease-phenotypes.mjs --check --sources hpo-common-disease
 {
   "loadedDiseaseSystems": {
     "doid": 2595,
-    "mesh": 645
+    "mesh": 1046
   },
   "stats": {
     "read": 132600,
-    "notPhenotype": 323,
+    "notPhenotype": 496,
     "negatedSkipped": 0,
-    "diseaseUnresolved": 14873,
+    "diseaseUnresolved": 96,
     "phenotypeUnresolved": 0,
     "viaMondo": 0,
-    "evidence": 117404,
-    "relationships": 116715
+    "evidence": 132008,
+    "relationships": 131251
   },
   "unresolvedDiseasesByPrefix": {
-    "DOID": 1,
-    "MESH": 401
+    "DOID": 1
   },
   "negatedNeeds": null
 }
@@ -115,12 +112,12 @@ $ load-disease-phenotypes.mjs --apply   (corrida 1)
 === RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
 {
   "inserted": {
-    "relationships": 388103,
-    "evidence": 389361
+    "relationships": 402633,
+    "evidence": 403959
   },
-  "segundos": 57
+  "segundos": 58
 }
-(57 s)
+(59 s)
 $ load-disease-phenotypes.mjs --apply   (corrida 2)
 === RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
 {
@@ -130,4 +127,4 @@ $ load-disease-phenotypes.mjs --apply   (corrida 2)
   },
   "segundos": 33
 }
-(32 s)
+(33 s)

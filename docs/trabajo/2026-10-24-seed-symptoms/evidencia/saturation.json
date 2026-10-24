@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T03:10:38.596Z",
+  "generatedAt": "2026-10-24T03:19:51.691Z",
   "passes": [
     {
       "pass": 1,
@@ -18,7 +18,7 @@
         "Human Disease Ontology (RO:0002452)"
       ],
       "newTerms": 895,
-      "newRelations": 2268
+      "newRelations": 2262
     },
     {
       "pass": 3,
@@ -28,7 +28,7 @@
       ],
       "newTerms": 1093,
       "overlapsByPublishedXref": 20,
-      "newRelations": 589
+      "newRelations": 588
     },
     {
       "pass": 4,
@@ -36,7 +36,7 @@
         "HPO common disease annotations (Groza 2015)"
       ],
       "newTerms": 0,
-      "newRelations": 124474
+      "newRelations": 124301
     },
     {
       "pass": 5,

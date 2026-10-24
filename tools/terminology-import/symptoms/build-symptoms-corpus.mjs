@@ -24,7 +24,7 @@ import { commonDiseaseRows, doidAltIds, doidIds, doidNormalizer, doidSymptomAxio
 import { coverageReport } from './lib/coverage.mjs';
 import { diseaseIdentity, mondoEquivalences, normalizeDiseaseCurie, termOverlaps } from './lib/crosswalk.mjs';
 import { hpoIdResolver, hpoRows } from './lib/hpo.mjs';
-import { readObo } from './lib/obo.mjs';
+import { childrenIndex, descendants, readObo } from './lib/obo.mjs';
 import { ncitRows, sympRows } from './lib/obo-sources.mjs';
 import { isPhenotypeRelation } from './lib/relations-plan.mjs';
 import { OUT_DIR, SOURCES_DIR, sourceByKey, sourcePath } from './lib/sources.mjs';
@@ -85,12 +85,14 @@ async function main() {
 
   // --- Relaciones -----------------------------------------------------------
   const hpoa = parseHpoa(readFileSync(sourcePath(sourceByKey('hpoa').file), 'utf8'), needSource('hpoa'));
-  await writeNdjson(nd('relations-hpoa'), hpoa.rows);
 
   const mondoSrc = await oboTerms(sourcePath(sourceByKey('mondo').file));
   const mondoRel = withAspect(mondoFeatureRows(mondoSrc.terms, mondoSrc.header, needSource('mondo')));
+  // Mondo también tiene enfermedades de animales (p. ej. MONDO:0005829 «louping
+  // ill», de ovejas) con rasgos HP: fuera. Criterio de la fuente: descendientes
+  // de MONDO:0005583 «non-human animal disease».
+  const animalDiseases = descendants(childrenIndex(new Map([...mondoSrc.terms].filter(([, t]) => !t.obsolete && t.id.startsWith('MONDO:')))), ['MONDO:0005583']);
   const { toMondo, mondoXrefs } = mondoEquivalences(mondoSrc.terms);
-  await writeNdjson(nd('relations-mondo'), mondoRel);
   // Equivalencias declaradas por Mondo (código → MONDO id): las usa el cargador
   // de relaciones cuando la enfermedad sólo está cargada como MONDO.
   await writeNdjson(nd('disease-equivalences'), [...toMondo].filter(([c, m]) => c !== m).map(([curie, mondo]) => ({ curie, mondo, via: 'MONDO:equivalentTo', version: mondoSrc.header.dataVersion })));
@@ -98,7 +100,6 @@ async function main() {
   const doidOwl = readFileSync(sourcePath(sourceByKey('doid-owl').file), 'utf8');
   const doid = doidSymptomAxioms(doidOwl, needSource('doid-owl'));
   const normalizeDoid = doidNormalizer(doidIds(doidOwl), doidAltIds(doidOwl));
-  await writeNdjson(nd('relations-doid'), doid);
 
   const cdProv = needSource('hpo-common-disease');
   const cdDir = join(SOURCES_DIR, 'monarch', 'common-diseases');
@@ -110,6 +111,21 @@ async function main() {
     common.push(...commonDiseaseRows(readFileSync(join(cdDir, f), 'utf8'), f, resolveHp, cdProv, cdStats, normalizeDoid));
   }
   withAspect(common);
+
+  // Enfermedades de animales, en cualquier fuente: el código o su MONDO
+  // equivalente (equivalentTo de Mondo) cuelga de «non-human animal disease».
+  const nonHuman = { mondo: 0, doid: 0, hpoa: 0, 'hpo-common-disease': 0 };
+  for (const r of [...hpoa.rows, ...mondoRel, ...doid, ...common]) {
+    if (animalDiseases.has(diseaseIdentity(r.disease.curie, toMondo))) {
+      r.aspect = 'non-human-disease';
+      nonHuman[r.source]++;
+    }
+  }
+
+  // Se escriben después de fijar el aspecto (fenotipo / no fenotipo / animal).
+  await writeNdjson(nd('relations-hpoa'), hpoa.rows);
+  await writeNdjson(nd('relations-mondo'), mondoRel);
+  await writeNdjson(nd('relations-doid'), doid);
   await writeNdjson(nd('relations-hpo-common-disease'), common);
 
   // Validación: todo fenotipo destino tiene que existir en el corpus de términos.
@@ -158,9 +174,9 @@ async function main() {
   passes.push({ pass: 6, sources: ['NCI Thesaurus — hallazgos clínicos por sitio o sistema (C36278, tipo semántico Finding)'], newTerms: termPass(ncitFindings, [...hpo.rows, ...symp.rows, ...ncitSigns]), newRelations: 0 });
 
   const coverage = coverageReport({ hpo, symp, ncit, relations: { hpoa: hpoa.rows, mondo: mondoRel, doid, 'hpo-common-disease': common }, toMondo, mondoXrefs, mondoTerms: mondoSrc.terms, hpoTerms: hpo.rows });
-  writeJson(join(OUT_DIR, 'coverage.json'), { generatedAt: nowIso(), ...coverage, dangling, commonDisease: cdStats, hpoaHeader: hpoa.header }, true);
+  writeJson(join(OUT_DIR, 'coverage.json'), { generatedAt: nowIso(), ...coverage, dangling, nonHumanDiseaseRows: nonHuman, commonDisease: cdStats, hpoaHeader: hpoa.header }, true);
   writeJson(join(OUT_DIR, 'saturation.json'), { generatedAt: nowIso(), passes }, true);
-  console.log(JSON.stringify({ terms: { hpo: hpo.stats, symp: symp.stats, ncit: ncit.stats }, relations: { hpoa: hpoa.rows.length, mondo: mondoRel.length, doid: doid.length, common: common.length, commonStats: cdStats }, dangling, passes, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));
+  console.log(JSON.stringify({ terms: { hpo: hpo.stats, symp: symp.stats, ncit: ncit.stats }, relations: { hpoa: hpoa.rows.length, mondo: mondoRel.length, doid: doid.length, common: common.length, commonStats: cdStats, nonHuman }, dangling, passes, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));
 }
 
 main().catch((err) => {

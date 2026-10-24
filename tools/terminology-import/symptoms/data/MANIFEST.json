@@ -18,28 +18,28 @@
     {
       "name": "relations-doid.ndjson",
       "rows": 2268,
-      "bytes": 1334222,
-      "sha256": "cd526fc7e4e8c52e6cdbcb2e52f351098bb3b0289be652ea710dc583ba79b1f6",
+      "bytes": 1334312,
+      "sha256": "bc22681f39d9eac2675ee9aec596ae7bc12a29d17e3219dd195c632d165d39ea",
       "parts": [
         {
           "file": "relations-doid.ndjson.gz",
           "rows": 2268,
-          "gzBytes": 81451,
-          "gzSha256": "9a4495f2e67e07559fe46af250b0e5faf9b00c93500f26ac4fb9e3ef4dce9231"
+          "gzBytes": 81485,
+          "gzSha256": "7b04ddb0fb8cea66bbed961a56fb42b8b766ec97f0e92d1f213d51c84759638b"
         }
       ]
     },
     {
       "name": "relations-hpo-common-disease.ndjson",
       "rows": 132600,
-      "bytes": 137527290,
-      "sha256": "bb41d8229818c5918b315cdab27fd030d4750000716f681cd5cba726bae70489",
+      "bytes": 137530051,
+      "sha256": "608ccb4da20df7cc54182f32dfc21585c00e1faaddfa1fcdd247b8ef0cfd7012",
       "parts": [
         {
           "file": "relations-hpo-common-disease.ndjson.gz",
           "rows": 132600,
-          "gzBytes": 9320881,
-          "gzSha256": "09b9903c74a6006426b5c682d5cd0f510e12b12e27dae1fa49c1a1760f2b5c94"
+          "gzBytes": 9321285,
+          "gzSha256": "4bb482c9bb198902e2ea03812d11b0119f338992b172c90ff43fad3df99895a8"
         }
       ]
     },
@@ -60,14 +60,14 @@
     {
       "name": "relations-mondo.ndjson",
       "rows": 974,
-      "bytes": 642168,
-      "sha256": "d27107d2b2aea61297e1310c30af29a52e3bd4429e925fe628a387e75c6ba876",
+      "bytes": 642184,
+      "sha256": "fdba1e7f9cc28dc0aea5931fc525e99b67e4895f965af8cbb90fbdd727c503b6",
       "parts": [
         {
           "file": "relations-mondo.ndjson.gz",
           "rows": 974,
-          "gzBytes": 47493,
-          "gzSha256": "3aa0ad4a568c3ad922e88afa97af70a7f8715ab2f5d8433ba90d1e3eb8a55b22"
+          "gzBytes": 47509,
+          "gzSha256": "a929bc42552b1d02d2696c23803ba2481efd4afbb1be429a4fa4cd466bc77508"
         }
       ]
     },
@@ -116,14 +116,14 @@
     {
       "name": "coverage.json",
       "rows": null,
-      "bytes": 31186,
-      "sha256": "3ab78eec4564e83c43ef68c9511a3e921c9913f0bd069b7c0cb9e7ea079eba56",
+      "bytes": 31392,
+      "sha256": "1e28aeadc891e3c50374279a81cecb1390deba5425500cbb9897de7f1e88c8e8",
       "parts": [
         {
           "file": "coverage.json.gz",
           "rows": null,
-          "gzBytes": 4833,
-          "gzSha256": "4637296751f27b2e92ac51e84ad22a37bebd41ab6895ab51d521974796795fa9"
+          "gzBytes": 4884,
+          "gzSha256": "30c563280793a250cd8b49ff60f860870c977dfbb0e30a9d012a7142df61fea8"
         }
       ]
     },
@@ -131,13 +131,13 @@
       "name": "saturation.json",
       "rows": null,
       "bytes": 1220,
-      "sha256": "7898d7e1ce51e64340a35e81d838e4fc67c9439ea80d80cd50a7f3b422e510af",
+      "sha256": "15f6ef7c67306fe102f4fafcd4f8990331079136fcaca650fc6f8c340d93fb14",
       "parts": [
         {
           "file": "saturation.json.gz",
           "rows": null,
           "gzBytes": 484,
-          "gzSha256": "573fef7ebd5682ec8a927ddfb3bec3821e9c78c1df823aaac3d58cccf32199f9"
+          "gzSha256": "17903e11bcc020c8529f15a5386263a7ea44c78c5450e4ecff658f480caf00e6"
         }
       ]
     }
