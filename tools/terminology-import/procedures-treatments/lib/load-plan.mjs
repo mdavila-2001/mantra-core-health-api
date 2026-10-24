@@ -134,6 +134,8 @@ export const PROVENANCE_SOURCE_CODE = {
   'pubmed-cochrane': 'NLM_PUBMED',
   'pubmed-guidelines': 'NLM_PUBMED',
   'pubmed-rct': 'NLM_PUBMED',
+  'pubmed-reviews': 'NLM_PUBMED',
+  'pubmed-trials': 'NLM_PUBMED',
 };
 
 /**

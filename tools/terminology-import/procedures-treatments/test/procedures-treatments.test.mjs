@@ -469,8 +469,16 @@ test('subconjuntos de MEDLINE: cada uno con su tipo literal registrado y sin afi
     assert.equal(t.kind, 'procedure-disease');
     assert.match(t.label, /no implica/);
   }
-  assert.equal(
-    RELATION_TYPES['pubmed-rct:co-indexed'].assertion,
-    'investigational',
+  // Los ensayos publicados son siempre «en estudio», nunca «indicado».
+  for (const code of ['pubmed-rct:co-indexed', 'pubmed-trial:co-indexed'])
+    assert.equal(RELATION_TYPES[code].assertion, 'investigational');
+  // Subconjuntos disjuntos: sin doble conteo de Cochrane ni de aleatorizados.
+  assert.match(
+    PUBMED_SUBSETS.reviews.term,
+    /NOT "Cochrane Database Syst Rev"\[Journal\]/,
+  );
+  assert.match(
+    PUBMED_SUBSETS.trials.term,
+    /NOT Randomized Controlled Trial\[pt\]/,
   );
 });
