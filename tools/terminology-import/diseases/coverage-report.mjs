@@ -23,6 +23,7 @@ import { BUILD_DIR, nowIso, readNdjson, writeJson } from '../lib/glossary-es/com
 import { SYSTEMS } from './lib/code-systems.mjs';
 import { measureGard, measureHetionet, measureMeshC, measureNando, measureOncotree } from './lib/measure.mjs';
 import { readObo } from './lib/obo.mjs';
+import { addToSnapshot } from './lib/snapshot.mjs';
 import { MEASURE_FILES, NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
 
 /**
@@ -248,6 +249,8 @@ async function main() {
   const coverage = computeCoverage(bySystem, citations, measured);
   writeJson(join(BUILD_DIR, 'diseases-coverage.json'), { generatedAt: nowIso(), ...coverage }, true);
   writeFileSync(join(BUILD_DIR, 'diseases-coverage.md'), toMarkdown(coverage));
+  addToSnapshot('diseases-coverage.json', join(BUILD_DIR, 'diseases-coverage.json'));
+  addToSnapshot('diseases-coverage.md', join(BUILD_DIR, 'diseases-coverage.md'));
   console.table(coverage.passes);
   console.log(JSON.stringify(coverage.vsMondo, null, 2));
 }

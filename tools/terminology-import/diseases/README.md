@@ -14,7 +14,8 @@ Sin DDL (ADR-0021): todo entra en las tablas existentes del módulo 03.
 |---|---|---|---|
 | 0 | `fetch-sources.mjs` | sí | Baja los archivos de `lib/sources.mjs` a `<GLOSSARY_BUILD_DIR>/diseases-sources/`, verifica los hashes esperados, descomprime y escribe `manifest.json`. Reanudable (`--force`, `--only <clave>`). |
 | 1 | `build-catalog.mjs` | no | Fuentes → `ndjson/diseases/<codeSystem>.ndjson` (un registro común por concepto), `_systems.json`, `diseases-build-stats.json`, `diseases-citations.json`. ~40 s; necesita más heap que el de Node por defecto (se corrió con `--max-old-space-size=8000`). |
-| 2 | `load-catalog.mjs` | no (base) | NDJSON → `terminology.*`. `--dry-run` no toca la base; `--systems a,b` acota. Idempotente. |
+| 2 | `load-catalog.mjs` | no (base) | NDJSON → `terminology.*`. `--dry-run` no toca la base; `--systems a,b` acota; `--from-snapshot` lee `diseases/data/` (verificando cada SHA-256), y es lo que usa si no hay build local. Idempotente. |
+| 1b | (dentro de `build-catalog.mjs`) | no | Escribe la **instantánea versionada** `diseases/data/`: un `<codeSystem>.part-NN.ndjson.gz` por sistema (gzip determinista, partes < 45 MB), `_systems.json`, estadísticas, citas, manifiesto de fuentes sin rutas locales y `MANIFEST.json` con el SHA-256 de cada archivo. Se sube a git: otras sesiones enlazan contra la rama y se puede cargar sin red ni fuentes. |
 | — | `coverage-report.mjs` | no | Pasadas de saturación, conceptos por sistema y por capítulo, cruces y cobertura contra MONDO → `diseases-coverage.{json,md}`. |
 
 ```sh
@@ -22,6 +23,7 @@ node tools/terminology-import/diseases/fetch-sources.mjs
 node --max-old-space-size=8000 tools/terminology-import/diseases/build-catalog.mjs
 node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --dry-run
 node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs   # .env DB_*; la API tiene que haber sembrado terminology
+node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # sin red ni fuentes: desde diseases/data/
 node --max-old-space-size=8000 tools/terminology-import/diseases/coverage-report.mjs
 node --test "tools/terminology-import/diseases/test/*.test.mjs"
 ```

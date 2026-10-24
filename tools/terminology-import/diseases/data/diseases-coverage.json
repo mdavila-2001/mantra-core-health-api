@@ -1,0 +1,680 @@
+{
+  "generatedAt": "2026-10-24T02:57:00.808Z",
+  "passes": [
+    {
+      "pass": 1,
+      "source": "mondo",
+      "kind": "ontología",
+      "version": "2026-10-06",
+      "items": 23264,
+      "newConcepts": 23264,
+      "newEntities": 20088
+    },
+    {
+      "pass": 2,
+      "source": "orphanet",
+      "kind": "ontología",
+      "version": "2026-06-23",
+      "items": 9757,
+      "newConcepts": 1551,
+      "newEntities": 1549
+    },
+    {
+      "pass": 3,
+      "source": "doid",
+      "kind": "ontología",
+      "version": "2026-09-30",
+      "items": 12335,
+      "newConcepts": 342,
+      "newEntities": 342
+    },
+    {
+      "pass": 4,
+      "source": "ncit-disease",
+      "kind": "ontología",
+      "version": "26.02d",
+      "items": 22379,
+      "newConcepts": 14515,
+      "newEntities": 14515
+    },
+    {
+      "pass": 5,
+      "source": "icd11-mms",
+      "kind": "ontología",
+      "version": "2026-01",
+      "items": 37052,
+      "newConcepts": 29310,
+      "newEntities": 23841,
+      "newByChapter": {
+        "10": 82,
+        "11": 291,
+        "12": 161,
+        "13": 343,
+        "14": 379,
+        "15": 291,
+        "16": 311,
+        "17": 71,
+        "18": 498,
+        "19": 533,
+        "20": 287,
+        "21": 1040,
+        "22": 1974,
+        "23": 987,
+        "24": 897,
+        "25": 15,
+        "26": 1246,
+        "01": 434,
+        "02": 424,
+        "03": 112,
+        "04": 59,
+        "05": 188,
+        "06": 437,
+        "07": 22,
+        "08": 281,
+        "09": 232,
+        "V": 159,
+        "X": 17556
+      }
+    },
+    {
+      "pass": 6,
+      "source": "efo-disease",
+      "kind": "ontología",
+      "version": "3.95.0",
+      "items": 1111,
+      "newConcepts": 472,
+      "newEntities": 472
+    },
+    {
+      "pass": 7,
+      "source": "hpo-annotations",
+      "kind": "claves citadas",
+      "version": null,
+      "items": 12880,
+      "newConcepts": 181,
+      "newEntities": 181
+    },
+    {
+      "pass": 8,
+      "source": "nando",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 2768,
+      "newConcepts": 693,
+      "newEntities": 693
+    },
+    {
+      "pass": 9,
+      "source": "phenopacket-store",
+      "kind": "claves citadas",
+      "version": null,
+      "items": 780,
+      "newConcepts": 1,
+      "newEntities": 1
+    },
+    {
+      "pass": 10,
+      "source": "oncotree",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 865,
+      "newConcepts": 189,
+      "newEntities": 189
+    },
+    {
+      "pass": 11,
+      "source": "hetionet",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 137,
+      "newConcepts": 0,
+      "newEntities": 0
+    },
+    {
+      "pass": 12,
+      "source": "who-icd10-to-icd11",
+      "kind": "claves citadas",
+      "version": null,
+      "items": 12597,
+      "newConcepts": 887,
+      "newEntities": 887
+    },
+    {
+      "pass": 13,
+      "source": "mesh-c",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 5067,
+      "newConcepts": 1585,
+      "newEntities": 1585
+    },
+    {
+      "pass": 14,
+      "source": "gard",
+      "kind": "medida (no se carga)",
+      "version": null,
+      "items": 6109,
+      "newConcepts": 2598,
+      "newEntities": 2598
+    }
+  ],
+  "systems": {
+    "decipher": {
+      "name": "DECIPHER — síndromes citados por las anotaciones HPO y por MONDO",
+      "keyOnly": true,
+      "concepts": 61,
+      "active": 61,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "doid": {
+      "name": "Human Disease Ontology (DOID)",
+      "keyOnly": false,
+      "concepts": 14854,
+      "active": 12335,
+      "withSpanishName": 0,
+      "withDefinition": 10684,
+      "withSpanishDefinition": 0
+    },
+    "efo-disease": {
+      "name": "Experimental Factor Ontology — enfermedades propias de EFO",
+      "keyOnly": false,
+      "concepts": 1111,
+      "active": 1111,
+      "withSpanishName": 0,
+      "withDefinition": 1086,
+      "withSpanishDefinition": 0
+    },
+    "icd10-who": {
+      "name": "CIE-10 (OMS) — claves citadas por MONDO y Orphanet",
+      "keyOnly": true,
+      "concepts": 12639,
+      "active": 12639,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "icd11-foundation": {
+      "name": "CIE-11 Fundación — entidades citadas por MONDO y Orphanet",
+      "keyOnly": true,
+      "concepts": 4630,
+      "active": 4630,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "icd11-mms": {
+      "name": "CIE-11 para Estadísticas de Mortalidad y Morbilidad (MMS), 2026-01",
+      "keyOnly": false,
+      "concepts": 37052,
+      "active": 37052,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "mesh": {
+      "name": "MeSH (NLM) — descriptores citados por MONDO, Orphanet y DOID",
+      "keyOnly": true,
+      "concepts": 8863,
+      "active": 8863,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "mondo": {
+      "name": "Mondo Disease Ontology (MONDO)",
+      "keyOnly": false,
+      "concepts": 27185,
+      "active": 23264,
+      "withSpanishName": 0,
+      "withDefinition": 16749,
+      "withSpanishDefinition": 0
+    },
+    "ncit-disease": {
+      "name": "Subconjunto C2991 «Disease or Disorder» de la NCIt OBO Edition",
+      "keyOnly": false,
+      "concepts": 22379,
+      "active": 22379,
+      "withSpanishName": 0,
+      "withDefinition": 22376,
+      "withSpanishDefinition": 0
+    },
+    "omim": {
+      "name": "OMIM — claves de fenotipo citadas por MONDO, Orphanet y DOID",
+      "keyOnly": true,
+      "concepts": 10744,
+      "active": 10744,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    },
+    "orphanet": {
+      "name": "Orphanet — nomenclatura de enfermedades raras (ORPHAcode)",
+      "keyOnly": false,
+      "concepts": 11645,
+      "active": 9757,
+      "withSpanishName": 11645,
+      "withDefinition": 6898,
+      "withSpanishDefinition": 6868
+    },
+    "umls": {
+      "name": "UMLS (NLM) — CUI citados por MONDO, Orphanet, DOID y NCIt",
+      "keyOnly": true,
+      "concepts": 32150,
+      "active": 32150,
+      "withSpanishName": 0,
+      "withDefinition": 0,
+      "withSpanishDefinition": 0
+    }
+  },
+  "chapters": {
+    "icd11-mms": {
+      "01 Certain infectious or parasitic diseases": {
+        "chapter": 1,
+        "block": 43,
+        "category": 1025,
+        "linkedToMondo": 630
+      },
+      "02 Neoplasms": {
+        "chapter": 1,
+        "block": 42,
+        "category": 1247,
+        "linkedToMondo": 862
+      },
+      "03 Diseases of the blood or blood-forming organs": {
+        "chapter": 1,
+        "block": 13,
+        "category": 262,
+        "linkedToMondo": 160
+      },
+      "04 Diseases of the immune system": {
+        "chapter": 1,
+        "block": 6,
+        "category": 257,
+        "linkedToMondo": 202
+      },
+      "05 Endocrine, nutritional or metabolic diseases": {
+        "chapter": 1,
+        "block": 25,
+        "category": 637,
+        "linkedToMondo": 467
+      },
+      "06 Mental, behavioural or neurodevelopmental disorders": {
+        "chapter": 1,
+        "block": 25,
+        "category": 858,
+        "linkedToMondo": 445
+      },
+      "07 Sleep-wake disorders": {
+        "chapter": 1,
+        "block": 6,
+        "category": 79,
+        "linkedToMondo": 64
+      },
+      "08 Diseases of the nervous system": {
+        "chapter": 1,
+        "block": 28,
+        "category": 842,
+        "linkedToMondo": 581
+      },
+      "09 Diseases of the visual system": {
+        "chapter": 1,
+        "block": 25,
+        "category": 703,
+        "linkedToMondo": 488
+      },
+      "10 Diseases of the ear or mastoid process": {
+        "chapter": 1,
+        "block": 13,
+        "category": 151,
+        "linkedToMondo": 79
+      },
+      "11 Diseases of the circulatory system": {
+        "chapter": 1,
+        "block": 24,
+        "category": 583,
+        "linkedToMondo": 306
+      },
+      "12 Diseases of the respiratory system": {
+        "chapter": 1,
+        "block": 8,
+        "category": 344,
+        "linkedToMondo": 190
+      },
+      "13 Diseases of the digestive system": {
+        "chapter": 1,
+        "block": 26,
+        "category": 970,
+        "linkedToMondo": 647
+      },
+      "14 Diseases of the skin": {
+        "chapter": 1,
+        "block": 77,
+        "category": 785,
+        "linkedToMondo": 469
+      },
+      "15 Diseases of the musculoskeletal system or connective tissue": {
+        "chapter": 1,
+        "block": 15,
+        "category": 426,
+        "linkedToMondo": 149
+      },
+      "16 Diseases of the genitourinary system": {
+        "chapter": 1,
+        "block": 19,
+        "category": 545,
+        "linkedToMondo": 243
+      },
+      "17 Conditions related to sexual health": {
+        "chapter": 1,
+        "block": 3,
+        "category": 68,
+        "linkedToMondo": 0
+      },
+      "18 Pregnancy, childbirth or the puerperium": {
+        "chapter": 1,
+        "block": 9,
+        "category": 522,
+        "linkedToMondo": 32
+      },
+      "19 Certain conditions originating in the perinatal period": {
+        "chapter": 1,
+        "block": 17,
+        "category": 625,
+        "linkedToMondo": 110
+      },
+      "20 Developmental anomalies": {
+        "chapter": 1,
+        "block": 30,
+        "category": 1323,
+        "linkedToMondo": 1049
+      },
+      "21 Symptoms, signs or clinical findings, not elsewhere classified": {
+        "chapter": 1,
+        "block": 47,
+        "category": 1241,
+        "linkedToMondo": 249
+      },
+      "22 Injury, poisoning or certain other consequences of external causes": {
+        "chapter": 1,
+        "block": 30,
+        "category": 1982,
+        "linkedToMondo": 39
+      },
+      "23 External causes of morbidity or mortality": {
+        "chapter": 1,
+        "block": 85,
+        "category": 909,
+        "linkedToMondo": 8
+      },
+      "24 Factors influencing health status or contact with health services": {
+        "chapter": 1,
+        "block": 45,
+        "category": 851,
+        "linkedToMondo": 0
+      },
+      "25 Codes for special purposes": {
+        "chapter": 1,
+        "block": 2,
+        "category": 20,
+        "linkedToMondo": 8
+      },
+      "26 Supplementary Chapter Traditional Medicine Conditions": {
+        "chapter": 1,
+        "block": 125,
+        "category": 1120,
+        "linkedToMondo": 0
+      },
+      "V Supplementary section for functioning assessment": {
+        "chapter": 1,
+        "block": 28,
+        "category": 130,
+        "linkedToMondo": 0
+      },
+      "X Extension Codes": {
+        "chapter": 1,
+        "block": 544,
+        "category": 17159,
+        "linkedToMondo": 145
+      }
+    },
+    "orphanet": {
+      "Orphanet classification of rare developmental anomalies during embryogenesis": 3654,
+      "Orphanet classification of rare genetic diseases": 6763,
+      "Orphanet classification of rare bone diseases": 904,
+      "Orphanet classification of rare neurological diseases": 3376,
+      "Orphanet classification of rare inborn errors of metabolism": 1123,
+      "Orphanet classification of rare ophthalmic disorders": 1282,
+      "Orphanet classification of rare skin diseases": 1048,
+      "Orphanet classification of rare transplant-related disorders": 1647,
+      "Orphanet classification of rare cardiac diseases": 241,
+      "Orphanet classification of rare hematological diseases": 627,
+      "Orphanet classification of rare renal diseases": 498,
+      "Orphanet classification of rare endocrine diseases": 700,
+      "Orphanet classification of rare hepatic diseases": 233,
+      "Orphanet classification of rare otorhinolaryngological diseases": 457,
+      "Orphanet classification of rare surgical maxillo-facial diseases": 214,
+      "Orphanet classification of rare neoplastic diseases": 1120,
+      "Orphanet classification of rare odontological diseases": 130,
+      "Orphanet classification of rare infectious diseases": 224,
+      "Orphanet classification of rare urogenital diseases": 222,
+      "Orphanet classification of rare circulatory system diseases": 369,
+      "Orphanet classification of rare infertility disorders": 160,
+      "Orphanet classification of rare gynecological and obstetric diseases": 308,
+      "Orphanet classification of rare gastroenterological diseases": 379,
+      "Orphanet classification of rare respiratory diseases": 289,
+      "Orphanet classification of rare abdominal surgical diseases": 236,
+      "Orphanet classification of rare disorders due to toxic effects": 65,
+      "Orphanet classification of rare cardiac malformations": 257,
+      "Orphanet classification of rare immunological diseases": 422,
+      "Orphanet classification of rare surgical thoracic diseases": 97,
+      "Orphanet classification of rare systemic and rheumatological diseases": 364,
+      "Classification of pediatric cancer (Functional)": 208,
+      "Orphanet classification of rare systemic or rheumatologic diseases of childhood": 128,
+      "Orphanet classification of rare teratologic disorders": 39,
+      "Orphanet classification of rare allergic disease": 14,
+      "Orphanet classification of rare disorder without a determined diagnosis": 1
+    },
+    "mondo": {
+      "MONDO:0002022 disorder of orbital region": 1584,
+      "MONDO:0002051 integumentary system disorder": 1710,
+      "MONDO:0002081 musculoskeletal system disorder": 3201,
+      "MONDO:0002118 urinary system disorder": 772,
+      "MONDO:0002254 syndromic disease": 3359,
+      "MONDO:0002409 auditory system disorder": 345,
+      "MONDO:0002657 breast disorder": 184,
+      "MONDO:0003900 connective tissue disorder": 914,
+      "MONDO:0004335 digestive system disorder": 1432,
+      "MONDO:0004995 cardiovascular disorder": 1629,
+      "MONDO:0005039 reproductive system disorder": 1485,
+      "MONDO:0005046 immune system disorder": 1589,
+      "MONDO:0005071 nervous system disorder": 5536,
+      "MONDO:0005087 respiratory system disorder": 804,
+      "MONDO:0005151 endocrine system disorder": 1629,
+      "MONDO:0005570 hematologic disorder": 1341,
+      "MONDO:0006858 mouth disorder": 296,
+      "MONDO:0024458 disorder of visual system": 1701,
+      "MONDO:0024623 otorhinolaryngologic disease": 355,
+      "MONDO:7770007 disease by developmental or physiological process": 7323,
+      "MONDO:7770008 disease by etiologic mechanism": 17811
+    },
+    "doid": {
+      "DOID:0014667 disease of metabolism": 901,
+      "DOID:0050117 disease by infectious agent": 547,
+      "DOID:0080015 physical disorder": 620,
+      "DOID:14566 disease of cellular proliferation": 2858,
+      "DOID:150 disease of mental health": 625,
+      "DOID:225 syndrome": 1069,
+      "DOID:630 genetic disease": 5236,
+      "DOID:7 disease of anatomical entity": 9234
+    },
+    "ncit-disease": {
+      "C26684 Radiation-Induced Disorder": 27,
+      "C27551 Disorder by Site": 18908,
+      "C28193 Syndrome": 1257,
+      "C2893 Psychiatric Disorder": 262,
+      "C3101 Genetic Disorder": 370,
+      "C3262 Neoplasm": 15356,
+      "C3340 Polyp": 110,
+      "C35470 Behavioral Disorder": 62,
+      "C4873 Rare Disorder": 1348,
+      "C53529 Non-Neoplastic Disorder": 5418,
+      "C8278 Cancer-Related Condition": 629,
+      "C89328 Pediatric Disorder": 1066
+    }
+  },
+  "crosses": {
+    "doid → mesh": {
+      "sin equivalencia declarada": 4100
+    },
+    "doid → ncit-disease": {
+      "sin equivalencia declarada": 4750
+    },
+    "doid → umls": {
+      "sin equivalencia declarada": 7218
+    },
+    "doid → orphanet": {
+      "sin equivalencia declarada": 2357
+    },
+    "doid → efo-disease": {
+      "sin equivalencia declarada": 5
+    },
+    "doid → omim": {
+      "sin equivalencia declarada": 6236
+    },
+    "efo-disease → omim": {
+      "sin equivalencia declarada": 164
+    },
+    "efo-disease → doid": {
+      "sin equivalencia declarada": 126
+    },
+    "efo-disease → mesh": {
+      "sin equivalencia declarada": 294
+    },
+    "efo-disease → ncit-disease": {
+      "sin equivalencia declarada": 223
+    },
+    "efo-disease → icd10-who": {
+      "sin equivalencia declarada": 120
+    },
+    "efo-disease → orphanet": {
+      "sin equivalencia declarada": 152
+    },
+    "efo-disease → umls": {
+      "sin equivalencia declarada": 82
+    },
+    "efo-disease → mondo": {
+      "sin equivalencia declarada": 16
+    },
+    "icd10-who → icd11-mms": {
+      "sin equivalencia declarada": 11649
+    },
+    "icd11-mms → icd11-foundation": {
+      "equivalent": 2192
+    },
+    "icd11-mms → icd10-who": {
+      "sin equivalencia declarada": 16831
+    },
+    "mondo → doid": {
+      "equivalent": 11881,
+      "sin equivalencia declarada": 111
+    },
+    "mondo → mesh": {
+      "equivalent": 8007,
+      "sin equivalencia declarada": 25,
+      "wider": 2,
+      "narrower": 1
+    },
+    "mondo → ncit-disease": {
+      "equivalent": 7104,
+      "sin equivalencia declarada": 4,
+      "narrower": 2,
+      "wider": 2,
+      "inexact": 1
+    },
+    "mondo → umls": {
+      "equivalent": 21204
+    },
+    "mondo → icd11-foundation": {
+      "equivalent": 4627,
+      "narrower": 2,
+      "wider": 2
+    },
+    "mondo → omim": {
+      "equivalent": 10235,
+      "sin equivalencia declarada": 134
+    },
+    "mondo → orphanet": {
+      "equivalent": 9740,
+      "sin equivalencia declarada": 707
+    },
+    "mondo → icd10-who": {
+      "equivalent": 208
+    },
+    "mondo → efo-disease": {
+      "equivalent": 9
+    },
+    "mondo → decipher": {
+      "sin equivalencia declarada": 1,
+      "equivalent": 60
+    },
+    "ncit-disease → umls": {
+      "sin equivalencia declarada": 13981
+    },
+    "orphanet → icd10-who": {
+      "wider": 7034,
+      "equivalent": 605,
+      "narrower": 800,
+      "inexact": 11
+    },
+    "orphanet → icd11-mms": {
+      "wider": 5156,
+      "equivalent": 1497,
+      "narrower": 206
+    },
+    "orphanet → mondo": {
+      "equivalent": 8899
+    },
+    "orphanet → omim": {
+      "equivalent": 3781,
+      "narrower": 4138,
+      "wider": 797,
+      "inexact": 29
+    },
+    "orphanet → umls": {
+      "equivalent": 9586
+    },
+    "orphanet → mesh": {
+      "equivalent": 3209
+    }
+  },
+  "vsMondo": {
+    "orphanet": {
+      "active": 9757,
+      "linkedToMondo": 8206,
+      "pct": 84.1
+    },
+    "doid": {
+      "active": 12335,
+      "linkedToMondo": 11980,
+      "pct": 97.1
+    },
+    "ncit-disease": {
+      "active": 22379,
+      "linkedToMondo": 7843,
+      "pct": 35
+    },
+    "icd11-mms": {
+      "active": 37052,
+      "linkedToMondo": 7670,
+      "pct": 20.7
+    },
+    "efo-disease": {
+      "active": 1111,
+      "linkedToMondo": 434,
+      "pct": 39.1
+    }
+  },
+  "mondoWithEquivalentInAnotherSystem": 17834
+}

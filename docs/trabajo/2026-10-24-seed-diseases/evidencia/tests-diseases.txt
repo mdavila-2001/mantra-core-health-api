@@ -2,94 +2,100 @@ TAP version 13
 # Subtest: readObo conserva nombre, definición con referencias, sinónimos y anotaciones de xref/is_a
 ok 1 - readObo conserva nombre, definición con referencias, sinónimos y anotaciones de xref/is_a
   ---
-  duration_ms: 109.49288
+  duration_ms: 15.306727
   type: 'test'
   ...
 # Subtest: normalizeCurie: prefijos de cada fuente al sistema del catálogo; SNOMED y MedDRA no se mapean
 ok 2 - normalizeCurie: prefijos de cada fuente al sistema del catálogo; SNOMED y MedDRA no se mapean
   ---
-  duration_ms: 0.819397
+  duration_ms: 0.773007
   type: 'test'
   ...
 # Subtest: MONDO: sólo enfermedad humana; animales no humanos y «disease characteristic» quedan fuera
 ok 3 - MONDO: sólo enfermedad humana; animales no humanos y «disease characteristic» quedan fuera
   ---
-  duration_ms: 43.625946
+  duration_ms: 7.974496
   type: 'test'
   ...
 # Subtest: DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED descartado
 ok 4 - DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED descartado
   ---
-  duration_ms: 7.814292
+  duration_ms: 5.210756
   type: 'test'
   ...
 # Subtest: NCIt: sólo el subárbol Disease or Disorder (C2991); hallazgos y fármacos fuera
 ok 5 - NCIt: sólo el subárbol Disease or Disorder (C2991); hallazgos y fármacos fuera
   ---
-  duration_ms: 52.302133
+  duration_ms: 4.501278
   type: 'test'
   ...
 # Subtest: Orphanet: nombre, sinónimos y definición en castellano; equivalencias tal como las declara Orphanet
 ok 6 - Orphanet: nombre, sinónimos y definición en castellano; equivalencias tal como las declara Orphanet
   ---
-  duration_ms: 14.299328
+  duration_ms: 9.379392
   type: 'test'
   ...
 # Subtest: claves cruzadas: un concepto por código citado, con el código como display; destinos ausentes = no resueltos
 ok 7 - claves cruzadas: un concepto por código citado, con el código como display; destinos ausentes = no resueltos
   ---
-  duration_ms: 7.967992
+  duration_ms: 11.013726
   type: 'test'
   ...
 # Subtest: plan: ids deterministas y únicos, vigentes antes que obsoletos, conceptos internos de la API
 ok 8 - plan: ids deterministas y únicos, vigentes antes que obsoletos, conceptos internos de la API
   ---
-  duration_ms: 6.548997
+  duration_ms: 8.654683
   type: 'test'
   ...
 # Subtest: tabulación simple CIE-11: filas residuales sin URI de Fundación y notas de codificación multilínea
 ok 9 - tabulación simple CIE-11: filas residuales sin URI de Fundación y notas de codificación multilínea
   ---
-  duration_ms: 96.018585
+  duration_ms: 1.865443
   type: 'test'
   ...
 # Subtest: buildIcd11Mms: jerarquía capítulo → bloque → categoría y correspondencia OMS 11→10
 ok 10 - buildIcd11Mms: jerarquía capítulo → bloque → categoría y correspondencia OMS 11→10
   ---
-  duration_ms: 3.241825
+  duration_ms: 2.100123
   type: 'test'
   ...
 # Subtest: OMS 10→11: un destino por código CIE-10; los destinos poscoordinados no se reducen
 ok 11 - OMS 10→11: un destino por código CIE-10; los destinos poscoordinados no se reducen
   ---
-  duration_ms: 0.829167
+  duration_ms: 0.587544
   type: 'test'
   ...
 # Subtest: citas: anotaciones HPO (OMIM, ORPHA, DECIPHER) y diagnósticos de phenopacket-store
 ok 12 - citas: anotaciones HPO (OMIM, ORPHA, DECIPHER) y diagnósticos de phenopacket-store
   ---
-  duration_ms: 48.130793
+  duration_ms: 1.661385
   type: 'test'
   ...
 # Subtest: resolveXrefs: citas → claves con `citedBy`; un ORPHA citado que no existe queda sin resolver
 ok 13 - resolveXrefs: citas → claves con `citedBy`; un ORPHA citado que no existe queda sin resolver
   ---
-  duration_ms: 0.820526
+  duration_ms: 0.620412
   type: 'test'
   ...
 # Subtest: saturación: deduplica por equivalencia o xref publicados; «más amplio/estrecho» no deduplica
 ok 14 - saturación: deduplica por equivalencia o xref publicados; «más amplio/estrecho» no deduplica
   ---
-  duration_ms: 1.871618
+  duration_ms: 1.475965
   type: 'test'
   ...
-1..14
-# tests 14
+# Subtest: instantánea versionada: gzip partido, SHA-256 en MANIFEST.json y lectura idéntica
+ok 15 - instantánea versionada: gzip partido, SHA-256 en MANIFEST.json y lectura idéntica
+  ---
+  duration_ms: 3.80125
+  type: 'test'
+  ...
+1..15
+# tests 15
 # suites 0
-# pass 14
+# pass 15
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 1016.643192
+# duration_ms 163.926257
 exit 0

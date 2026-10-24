@@ -21,6 +21,7 @@ import { KEY_VERSION, SYSTEMS } from './lib/code-systems.mjs';
 import { buildDoid, buildEfo, buildIcd11Mms, buildMondo, buildNcit, buildOrphanet, readOrphanet } from './lib/records.mjs';
 import { citeHpoAnnotations, citePhenopackets, icd10KeysFromWhoMap } from './lib/citations.mjs';
 import { resolveXrefs } from './lib/resolve.mjs';
+import { SNAPSHOT_DIR, writeSnapshot } from './lib/snapshot.mjs';
 import { NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
 
 function loadManifest() {
@@ -123,7 +124,23 @@ async function main() {
     seconds: Math.round((Date.now() - t0) / 1000),
   };
   writeJson(join(BUILD_DIR, 'diseases-build-stats.json'), stats, true);
+  // Instantánea versionada en git (gzip, partes < 45 MB): ver lib/snapshot.mjs.
+  // El manifiesto de fuentes va sin las rutas locales de esta máquina.
+  const sourcesManifest = JSON.parse(readFileSync(join(SOURCES_DIR, 'manifest.json'), 'utf8'));
+  sourcesManifest.sources = sourcesManifest.sources.map(({ path: _path, unzippedTo: _unzipped, ...rest }) => rest);
+  writeJson(join(BUILD_DIR, 'diseases-sources-manifest.json'), sourcesManifest, true);
+  const snapshot = writeSnapshot(
+    byCs,
+    {
+      '_systems.json': join(NDJSON_DIR, '_systems.json'),
+      'diseases-build-stats.json': join(BUILD_DIR, 'diseases-build-stats.json'),
+      'diseases-citations.json': join(BUILD_DIR, 'diseases-citations.json'),
+      'sources-manifest.json': join(BUILD_DIR, 'diseases-sources-manifest.json'),
+    },
+    stats.versions,
+  );
   console.log(JSON.stringify(stats, null, 2));
+  console.log(`[snapshot] ${snapshot.length} archivos en ${SNAPSHOT_DIR}`);
 }
 
 main().catch((err) => {

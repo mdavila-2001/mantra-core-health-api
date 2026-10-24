@@ -22,6 +22,7 @@
 //   node tools/terminology-import/diseases/load-catalog.mjs --dry-run      # sin base
 //   node tools/terminology-import/diseases/load-catalog.mjs                # carga real (.env DB_*)
 //   node tools/terminology-import/diseases/load-catalog.mjs --systems mondo,orphanet
+//   node tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # desde diseases/data/ (git), sin build
 // =============================================================================
 
 import 'dotenv/config';
@@ -32,10 +33,12 @@ import { join } from 'node:path';
 import { BUILD_DIR, nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { INTERNAL, planFor } from './lib/plan.mjs';
+import { SNAPSHOT_DIR, readSnapshot } from './lib/snapshot.mjs';
 import { NDJSON_DIR } from './lib/sources.mjs';
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
+const FROM_SNAPSHOT = args.includes('--from-snapshot');
 const ONLY = args.includes('--systems') ? new Set(args[args.indexOf('--systems') + 1].split(',')) : null;
 const BATCH = 1000;
 
@@ -121,14 +124,28 @@ const CONCEPT_CASTS = ['uuid', 'uuid', null, null, null, 'boolean', 'uuid', 'uui
 const MAP_COLS = ['id', 'source_concept_id', 'target_concept_id', 'equivalence_concept_id', 'context', 'version', 'state_concept_id'];
 const MAP_CASTS = ['uuid', 'uuid', 'uuid', 'uuid', null, null, 'uuid'];
 
-function readPlans() {
-  if (!existsSync(NDJSON_DIR)) throw new Error(`Falta ${NDJSON_DIR}. Corré primero build-catalog.mjs.`);
-  const files = JSON.parse(readFileSync(join(NDJSON_DIR, '_systems.json'), 'utf8'));
-  const plans = [];
+/**
+ * Registros por sistema: del NDJSON del build o, con `--from-snapshot` (o si no
+ * hay build en esta máquina), de la instantánea versionada `diseases/data/`.
+ */
+function readRecords() {
+  if (FROM_SNAPSHOT || !existsSync(NDJSON_DIR)) {
+    console.log(`Leyendo la instantánea versionada ${SNAPSHOT_DIR}`);
+    const { byCs } = readSnapshot(ONLY);
+    return { byCs, files: JSON.parse(readFileSync(join(SNAPSHOT_DIR, '_systems.json'), 'utf8')) };
+  }
+  const byCs = new Map();
   for (const f of readdirSync(NDJSON_DIR).filter((n) => n.endsWith('.ndjson')).sort()) {
     const cs = f.replace(/\.ndjson$/, '');
-    if (ONLY && !ONLY.has(cs)) continue;
-    const records = readNdjson(join(NDJSON_DIR, f));
+    if (!ONLY || ONLY.has(cs)) byCs.set(cs, readNdjson(join(NDJSON_DIR, f)));
+  }
+  return { byCs, files: JSON.parse(readFileSync(join(NDJSON_DIR, '_systems.json'), 'utf8')) };
+}
+
+function readPlans() {
+  const { byCs, files } = readRecords();
+  const plans = [];
+  for (const [cs, records] of [...byCs.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     const version = records[0]?.provenance.version;
     // `checksum`: SHA-256 de los archivos de origen, en el orden de `_systems.json`.
     plans.push({ ...planFor(cs, version, records), checksum: (files[cs] ?? []).map((f) => `${f.key}:sha256:${f.sha256}`).join(' ') || null });

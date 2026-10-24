@@ -18,6 +18,7 @@ Sin DDL: todo entra en las tablas existentes del módulo 03 `terminology`.
 | Propiedades | 491 228 |
 | Peso en Postgres 16 (tablas + índices del módulo 03) | 419 MB la base de prueba completa; `concept_properties` 158 MB |
 | Carga en base limpia / segunda corrida | 72 s / 43 s con **0 filas nuevas** (idempotente) |
+| Instantánea en git | `tools/terminology-import/diseases/data/` — 12 `*.ndjson.gz` (14 MB, la mayor 4,2 MB) + `MANIFEST.json`; `load-catalog.mjs --from-snapshot` carga desde ahí sin red: 85 s / 44 s con 0 nuevas, mismos 183 313 conceptos |
 | Saturación | **No alcanzada** con lo accesible: las últimas pasadas que aportan vienen de fuentes que no se pueden cargar (licencia sin declarar o sólo conversiones de terceros). Ver §5. |
 
 Todos los nombres, sinónimos y definiciones son **verbatim** de la fuente y
@@ -441,5 +442,6 @@ node --max-old-space-size=8000 tools/terminology-import/diseases/build-catalog.m
 node --max-old-space-size=8000 tools/terminology-import/diseases/coverage-report.mjs
 node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --dry-run
 node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs
+node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot   # sin red: desde diseases/data/
 node --test "tools/terminology-import/diseases/test/*.test.mjs"
 ```

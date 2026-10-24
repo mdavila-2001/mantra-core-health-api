@@ -1,0 +1,128 @@
+{
+  "generatedAt": "2026-10-24T02:57:53.514Z",
+  "versions": {
+    "mondo": "2026-10-06",
+    "orphanet": "2026-06-23",
+    "doid": "2026-09-30",
+    "ncit-disease": "26.02d",
+    "icd11-mms": "2026-01",
+    "efo-disease": "3.95.0",
+    "keys": "xref-keys"
+  },
+  "files": [
+    {
+      "file": "decipher.part-01.ndjson.gz",
+      "codeSystem": "decipher",
+      "records": 61,
+      "bytes": 968,
+      "sha256": "8e2fc69f12de299793ce999e819a6ebf2ad51b0c6d6303a0b8ea4716734043a9"
+    },
+    {
+      "file": "doid.part-01.ndjson.gz",
+      "codeSystem": "doid",
+      "records": 14854,
+      "bytes": 1647788,
+      "sha256": "481371b62eaa93d74cd368ce749a7f9023070e1c0caa36519806deeb46efe06f"
+    },
+    {
+      "file": "efo-disease.part-01.ndjson.gz",
+      "codeSystem": "efo-disease",
+      "records": 1111,
+      "bytes": 162442,
+      "sha256": "e3dcd2d35b03a3a20a87734ead839a5c6a604db7950e01e224f90099258b4179"
+    },
+    {
+      "file": "icd10-who.part-01.ndjson.gz",
+      "codeSystem": "icd10-who",
+      "records": 12639,
+      "bytes": 198985,
+      "sha256": "60c4abb7c74b451cf269d2ceeef6856c478d2c8b8b5aec1e9056c471fc8f5bb6"
+    },
+    {
+      "file": "icd11-foundation.part-01.ndjson.gz",
+      "codeSystem": "icd11-foundation",
+      "records": 4630,
+      "bytes": 98881,
+      "sha256": "64ca9a8a4d0be8434eec1f0e8c86d766185d50f579fc1d78cadeed158624da30"
+    },
+    {
+      "file": "icd11-mms.part-01.ndjson.gz",
+      "codeSystem": "icd11-mms",
+      "records": 37052,
+      "bytes": 1657847,
+      "sha256": "cf77a193b9ed05dfe12ac2b97d79a26dcde6fd8168d821048605215c79d1a05b"
+    },
+    {
+      "file": "mesh.part-01.ndjson.gz",
+      "codeSystem": "mesh",
+      "records": 8863,
+      "bytes": 149814,
+      "sha256": "1ed365aa3b35a0f2c6e9d0833b5df6b6d41d20fa5f17c05554180c892133f3df"
+    },
+    {
+      "file": "mondo.part-01.ndjson.gz",
+      "codeSystem": "mondo",
+      "records": 27185,
+      "bytes": 4162925,
+      "sha256": "a7063afd65a452b22676aaa62479040300a5a8fc65ca040e949d140e37f7d741"
+    },
+    {
+      "file": "ncit-disease.part-01.ndjson.gz",
+      "codeSystem": "ncit-disease",
+      "records": 22379,
+      "bytes": 2227717,
+      "sha256": "592920e725f13b0d39d4941c4a9a8c2f679b313f282077b9a1c212dc36922c7d"
+    },
+    {
+      "file": "omim.part-01.ndjson.gz",
+      "codeSystem": "omim",
+      "records": 10744,
+      "bytes": 161916,
+      "sha256": "5c5aa1cff09469557aa2d3ca7cf2a714d386328c38aa8161779bc11e832e16af"
+    },
+    {
+      "file": "orphanet.part-01.ndjson.gz",
+      "codeSystem": "orphanet",
+      "records": 11645,
+      "bytes": 2819088,
+      "sha256": "63913642eba02b387a1d1ceb1bbcb72fc3500efd5505c49c481b7e5905967a96"
+    },
+    {
+      "file": "umls.part-01.ndjson.gz",
+      "codeSystem": "umls",
+      "records": 32150,
+      "bytes": 558353,
+      "sha256": "ae2db7e0c89a32bf8081200791da0e9b70f55fcfaae01f2304801dc7f8903dfd"
+    },
+    {
+      "file": "_systems.json",
+      "bytes": 18287,
+      "sha256": "7f539d4d027eda6374bac25f6280ad4793245a98aa95dea5858063f1ebfb88bd"
+    },
+    {
+      "file": "diseases-build-stats.json",
+      "bytes": 3914,
+      "sha256": "7eb073e88360fd97f8c797c4c06978d27f36deb788b709e24be88406fb8efb92"
+    },
+    {
+      "file": "diseases-citations.json",
+      "bytes": 421693,
+      "sha256": "3dd3a749d25f3d55d0e635adc2bc10ba55300db5888d103fffe9b8df9ddd8bc9"
+    },
+    {
+      "file": "sources-manifest.json",
+      "bytes": 34859,
+      "sha256": "c4780e72c3d1d8239a7bd341152f9bf6e948385e216617ed882eb2f0e683ce26"
+    },
+    {
+      "file": "diseases-coverage.json",
+      "bytes": 18962,
+      "sha256": "086fb3fb1c7018971c19f3556b569b3829072c30fbe35f95dc7ce5cec4928af2"
+    },
+    {
+      "file": "diseases-coverage.md",
+      "bytes": 10943,
+      "sha256": "07edd6bc63f2c4f8888540929c6d2fd4185c4fe47b09a37dc08a53b9d0003e2c"
+    }
+  ]
+}

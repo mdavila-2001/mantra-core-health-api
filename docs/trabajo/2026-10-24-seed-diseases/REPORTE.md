@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/eager-pasteur-hxks7i` (la tarea pedía `justin/seed-diseases`) · PR: [#688](https://github.com/mdavila-2001/mantra-core-health-api/pull/688) contra `dev`, sin mergear
 - Peldaño de evidencia alcanzado: **VERIFIED — carga real en Postgres 16 desechable**: filas, tiempo, idempotencia y consultas del contrato ejercitadas. **No** `REGRESSION_VERIFIED`: no se corrieron `yarn build`, `yarn test`, `yarn docs:validate` ni `yarn docs:build`, y la carga no se hizo contra una base sembrada por la API real (los 12 conceptos internos se insertaron a mano en la base desechable).
-- Avance: **24 / 26 microtareas HECHO (92,3 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
+- Avance: **27 / 29 microtareas HECHO (93,1 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
 
 ## Completado
 
@@ -13,7 +13,7 @@
 | H1.S2.M1 | Registro de fuentes | `node -e "import('./tools/terminology-import/diseases/lib/sources.mjs')…"` | `47 5` |
 | H1.S2.M2 | Descarga + hash verificado | `node tools/terminology-import/diseases/fetch-sources.mjs` | `[ok] icd11-mms 4214980 B sha256=f1356588f409…` · `Manifiesto: … (52 archivos)` |
 | H1.S3.M1 | `SOURCES.md` | lectura | 13 fuentes cargadas, 5 medidas, 16 descartadas con motivo |
-| H2.S1.M1–H2.S3.M1 | Lectores, reglas, resolución y plan | `node --test "tools/terminology-import/diseases/test/*.test.mjs"` | `# pass 14` `# fail 0` |
+| H2.S1.M1–H2.S3.M1 | Lectores, reglas, resolución y plan | `node --test "tools/terminology-import/diseases/test/*.test.mjs"` | `# pass 15` `# fail 0` |
 | H2.S3.M2 | Mapeos condicionales | carga con 2 conceptos de prueba (`icd10cm-Q87.4`, `cie10es-Q87.4`) | `[load] mondo {…"externalMaps":2}`; 2.ª corrida `"externalMaps":0` |
 | H3.S1.M1 | Regla de deduplicación | test «saturación: …» | ok |
 | H3.S1.M2 | 14 pasadas | `coverage-report.mjs` | tabla de 14 filas (`evidencia/coverage.md`) |
@@ -25,6 +25,9 @@
 | H5.S1.M2 | typecheck | `NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck` | `exit 0` |
 | H5.S1.M3 | lint | `NODE_OPTIONS=--max-old-space-size=8192 corepack yarn lint` | `exit 0` |
 | H5.S1.M4 | PR | GitHub | #688 |
+| H6.S1.M1 | Instantánea versionada `diseases/data/` | `ls -la tools/terminology-import/diseases/data` | 12 `*.part-01.ndjson.gz`, mayor `mondo` 4 162 925 B; total 14 MB |
+| H6.S1.M2 | Gzip determinista | `sha256sum -c sha-before.txt` tras rebuild | `mondo.part-01.ndjson.gz: OK` |
+| H6.S1.M3 | Carga desde la instantánea | `load-catalog.mjs --from-snapshot` ×2 en base limpia | 1.ª `"segundos": 85`; 2.ª 0 nuevas, `"segundos": 44`; conteos `183325\|309745\|491228\|147251\|190313` = los del build (`evidencia/load-snapshot-*.txt`) |
 | H5.S1.M5 | PLAN + REPORTE | `ls docs/trabajo/2026-10-24-seed-diseases/` | `PLAN.md REPORTE.md evidencia` |
 
 ## A medias
@@ -53,8 +56,8 @@ Salidas completas en `evidencia/`. Extractos literales:
 
 ```
 $ node --test "tools/terminology-import/diseases/test/*.test.mjs"
-# tests 14
-# pass 14
+# tests 15
+# pass 15
 # fail 0
 exit 0
 
@@ -93,6 +96,7 @@ Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidenci
 - **`AGENTS.md` no se leyó al empezar** (el discovery buscó `CLAUDE.md` y `.claude/rules/`, que no existen). El `PLAN.md` se escribió **después** de implementar, y no antes como exige §2.1. Refleja lo ejecutado y no se usó para cambiar el alcance.
 - La rama: se pushea a `claude/eager-pasteur-hxks7i` (única permitida para esta sesión), no a `justin/seed-diseases`.
 - Fuentes de la tarea que cambiaron de vía por la red: Orphanet sale del espejo oficial en GitHub; la CIE-11 y las tablas OMS salen de copias de terceros con hash verificado. NCIt pasó de la edición 2024-05 a la 26.02d al encontrarse la publicación oficial más nueva.
+- **Datos en git**: el brief decía «fuentes fuera de git». Una orden posterior del propietario, recibida por la sesión coordinadora, pidió subir todo lo normalizado. Se versiona `diseases/data/` (14 MB gzip, partes < 45 MB). Las fuentes crudas (1,3 GB) siguen fuera y se reproducen con `fetch-sources.mjs` (URL, versión, SHA-256).
 - No se usó `/loop`: las 14 pasadas se iteraron en la propia sesión hasta agotar las fuentes accesibles.
 
 ## Riesgos residuales
@@ -102,6 +106,7 @@ Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidenci
 - Claves `umls` (32 150 conceptos, ~96 000 filas): hoy ninguna consulta de producto las lee; si no se van a usar, conviene omitirlas con `--systems`.
 - `ncit-disease` (esta sesión) y `ncit` (`seed-symptoms`) son code systems distintos: si `seed-symptoms` carga el subárbol C2991, habrá duplicados (avisado a esa sesión).
 - `concept_properties` es la tabla más pesada (158 MB).
+- La instantánea `diseases/data/` incluye los títulos de la CIE-11 sin modificar (CC BY-ND 3.0 IGO). Sólo cambia el formato, a NDJSON. Si el repo deja de ser privado, conviene revisar la redistribución con la licencia de la OMS.
 - Licencia de NCIt: el `.obo` no la declara. CC BY 4.0 sale de los términos de uso de NCI EVS citados en `docs/terminology-expansion/SOURCE-REGISTER.md`, y esa página no fue accesible desde esta red. Hay que reconfirmarla. El code system se nombra como subconjunto de la NCIt OBO Edition, no como la edición oficial.
 
 ## Decisiones y ambigüedades

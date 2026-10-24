@@ -96,3 +96,21 @@ test('saturación: deduplica por equivalencia o xref publicados; «más amplio/e
   assert.equal(p.doid, 0, 'mismo OMIM que MONDO por xref publicado');
   assert.equal(p['hpo-annotations'], 1, 'OMIM 200000 no lo cita ninguna ontología');
 });
+
+test('instantánea versionada: gzip partido, SHA-256 en MANIFEST.json y lectura idéntica', async () => {
+  const { mkdtempSync, readFileSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { readSnapshot, writeSnapshot } = await import('../lib/snapshot.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'diseases-snapshot-'));
+  const extra = join(dir, 'extra.json');
+  writeFileSync(extra, '{"a":1}\n');
+  const rows = [{ cs: 'omim', code: '154700', display: '154700' }, { cs: 'omim', code: '219700', display: '219700' }];
+  const files = writeSnapshot(new Map([['omim', rows]]), { 'extra-copy.json': extra }, { omim: 'xref-keys' }, dir);
+  assert.deepEqual(files.map((f) => f.file), ['omim.part-01.ndjson.gz', 'extra-copy.json']);
+  const { manifest, byCs } = readSnapshot(null, dir);
+  assert.deepEqual(byCs.get('omim'), rows);
+  assert.equal(manifest.versions.omim, 'xref-keys');
+  // Una parte alterada no se lee.
+  writeFileSync(join(dir, 'omim.part-01.ndjson.gz'), readFileSync(join(dir, 'omim.part-01.ndjson.gz')).subarray(1));
+  assert.throws(() => readSnapshot(null, dir), /SHA-256 distinto/);
+});

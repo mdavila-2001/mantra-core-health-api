@@ -81,6 +81,19 @@
 | H5.S1.M4 | PR contra `dev` | PR abierto, sin mergear | `mcp github create_pull_request` → #688 | HECHO |
 | H5.S1.M5 | PLAN.md + REPORTE.md | Existen con evidencia | `ls docs/trabajo/2026-10-24-seed-diseases/` | HECHO |
 
+## H6 — Datos normalizados versionados en la rama
+Orden del propietario recibida a mitad del trabajo por la sesión coordinadora («que terminen su trabajo y lo lleven todo a la nube»). Reemplaza la regla del brief de dejar los datos fuera de git, sólo para el resultado normalizado.
+
+**CA:** Dado un clon limpio de la rama sin fuentes ni build, cuando se carga desde `diseases/data/`, entonces se obtienen los mismos conceptos que desde el build, ningún archivo pasa de 50 MB y cada parte coincide con su SHA-256.
+**DoD:** `load-catalog.mjs --from-snapshot` ×2 en base limpia → mismos conteos que el build y 0 nuevas en la 2.ª; `ls -la diseases/data` → partes < 50 MB.
+**Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD | Estado |
+|---|---|---|---|---|
+| H6.S1.M1 | `lib/snapshot.mjs` + escritura en el build | Partes gzip < 45 MB con SHA-256 en `MANIFEST.json` | test «instantánea versionada …» ok; `ls -la tools/terminology-import/diseases/data` → mayor 4,2 MB | HECHO |
+| H6.S1.M2 | Gzip determinista | Rebuild = mismos bytes | `sha256sum -c` de `mondo.part-01.ndjson.gz` tras rebuild → `OK` | HECHO |
+| H6.S1.M3 | Carga `--from-snapshot` | Mismos conteos que desde el build; 2.ª corrida = 0 | `load-catalog.mjs --from-snapshot` ×2 → `183325\|309745\|491228\|147251\|190313`, 2.ª corrida en 0 | HECHO |
+
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
 |---|---|---|

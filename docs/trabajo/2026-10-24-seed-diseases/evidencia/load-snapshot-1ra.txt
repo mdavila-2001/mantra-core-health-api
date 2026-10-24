@@ -1,0 +1,137 @@
+=== Catálogo de enfermedades → terminology.*  ===
+Leyendo la instantánea versionada /home/user/mantra-core-health-api/tools/terminology-import/diseases/data
+Totales: {
+  concepts: 183313,
+  designations: 309745,
+  properties: 491228,
+  relationships: 147251,
+  maps: 190313,
+  externalMapsCandidates: 11806
+}
+[concepts] decipher +61
+[concepts] doid +14854
+[concepts] efo-disease +1111
+[concepts] icd10-who +12639
+[concepts] icd11-foundation +4630
+[concepts] icd11-mms +37052
+[concepts] mesh +8863
+[concepts] mondo +27185
+[concepts] ncit-disease +22379
+[concepts] omim +10744
+[concepts] orphanet +11645
+[concepts] umls +32150
+[load] decipher {"concepts":61,"designations":0,"properties":122,"relationships":0,"maps":0,"externalMaps":0}
+[load] doid {"concepts":14854,"designations":37793,"properties":49959,"relationships":17479,"maps":24666,"externalMaps":0}
+[load] efo-disease {"concepts":1111,"designations":2600,"properties":3693,"relationships":155,"maps":1177,"externalMaps":0}
+[load] icd10-who {"concepts":12639,"designations":0,"properties":25278,"relationships":0,"maps":11649,"externalMaps":0}
+[load] icd11-foundation {"concepts":4630,"designations":0,"properties":9260,"relationships":0,"maps":0,"externalMaps":0}
+[load] icd11-mms {"concepts":37052,"designations":37052,"properties":74739,"relationships":37024,"maps":19023,"externalMaps":0}
+[load] mesh {"concepts":8863,"designations":0,"properties":17726,"relationships":0,"maps":0,"externalMaps":0}
+[load] mondo {"concepts":27185,"designations":110080,"properties":108518,"relationships":35577,"maps":74069,"externalMaps":0}
+[load] ncit-disease {"concepts":22379,"designations":69326,"properties":67134,"relationships":37305,"maps":13981,"externalMaps":0}
+[load] omim {"concepts":10744,"designations":0,"properties":21488,"relationships":0,"maps":0,"externalMaps":0}
+[load] orphanet {"concepts":11645,"designations":52894,"properties":49011,"relationships":19711,"maps":45748,"externalMaps":0}
+[load] umls {"concepts":32150,"designations":0,"properties":64300,"relationships":0,"maps":0,"externalMaps":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "decipher": {
+      "concepts": 61,
+      "designations": 0,
+      "properties": 122,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "doid": {
+      "concepts": 14854,
+      "designations": 37793,
+      "properties": 49959,
+      "relationships": 17479,
+      "maps": 24666,
+      "externalMaps": 0
+    },
+    "efo-disease": {
+      "concepts": 1111,
+      "designations": 2600,
+      "properties": 3693,
+      "relationships": 155,
+      "maps": 1177,
+      "externalMaps": 0
+    },
+    "icd10-who": {
+      "concepts": 12639,
+      "designations": 0,
+      "properties": 25278,
+      "relationships": 0,
+      "maps": 11649,
+      "externalMaps": 0
+    },
+    "icd11-foundation": {
+      "concepts": 4630,
+      "designations": 0,
+      "properties": 9260,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "icd11-mms": {
+      "concepts": 37052,
+      "designations": 37052,
+      "properties": 74739,
+      "relationships": 37024,
+      "maps": 19023,
+      "externalMaps": 0
+    },
+    "mesh": {
+      "concepts": 8863,
+      "designations": 0,
+      "properties": 17726,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "mondo": {
+      "concepts": 27185,
+      "designations": 110080,
+      "properties": 108518,
+      "relationships": 35577,
+      "maps": 74069,
+      "externalMaps": 0
+    },
+    "ncit-disease": {
+      "concepts": 22379,
+      "designations": 69326,
+      "properties": 67134,
+      "relationships": 37305,
+      "maps": 13981,
+      "externalMaps": 0
+    },
+    "omim": {
+      "concepts": 10744,
+      "designations": 0,
+      "properties": 21488,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "orphanet": {
+      "concepts": 11645,
+      "designations": 52894,
+      "properties": 49011,
+      "relationships": 19711,
+      "maps": 45748,
+      "externalMaps": 0
+    },
+    "umls": {
+      "concepts": 32150,
+      "designations": 0,
+      "properties": 64300,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    }
+  },
+  "segundos": 85
+}

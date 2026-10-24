@@ -4,7 +4,7 @@ Registro de cada archivo que usa `tools/terminology-import/diseases/` (definido 
 `lib/sources.mjs`). Los archivos viven **fuera de git**, en
 `<GLOSSARY_BUILD_DIR>/diseases-sources/` (por defecto `../glossary-data-build/`),
 y `fetch-sources.mjs` deja su SHA-256 y fecha en `diseases-sources/manifest.json`.
-Descarga verificada el **2026-10-24**.
+Descarga verificada el **2026-10-24**. Las fuentes crudas (~1,3 GB) **no** se suben; el resultado normalizado sí: `diseases/data/` (gzip, 14 MB, `MANIFEST.json` con SHA-256 por parte; copia de `manifest.json` en `data/sources-manifest.json`).
 
 > **Red de la sesión que armó esto.** El proxy bloqueaba `www.orphadata.com`,
 > `icd.who.int`, `id.who.int`, `icdcdn.who.int`, `www.nlm.nih.gov`,

@@ -1,0 +1,180 @@
+{
+  "generatedAt": "2026-10-24T02:57:48.739Z",
+  "versions": {
+    "mondo": "2026-10-06",
+    "orphanet": "2026-06-23",
+    "doid": "2026-09-30",
+    "ncit-disease": "26.02d",
+    "icd11-mms": "2026-01",
+    "efo-disease": "3.95.0",
+    "keys": "xref-keys"
+  },
+  "excluded": {
+    "mondo": {
+      "nonHumanOrCharacteristic": 8870
+    },
+    "ncit-disease": {
+      "outsideDiseaseOrDisorder": 187531
+    },
+    "efo-disease": {
+      "notDiseaseOrImported": 93534
+    }
+  },
+  "bySystem": {
+    "mondo": {
+      "concepts": 27185,
+      "active": 23264,
+      "deprecated": 3921,
+      "withDefinition": 16749,
+      "designations": 110080,
+      "designationsEs": 0,
+      "isA": 35577,
+      "maps": 76270
+    },
+    "orphanet": {
+      "concepts": 11645,
+      "active": 9757,
+      "deprecated": 1888,
+      "withDefinition": 6898,
+      "designations": 52894,
+      "designationsEs": 25942,
+      "isA": 19859,
+      "maps": 45748
+    },
+    "doid": {
+      "concepts": 14854,
+      "active": 12335,
+      "deprecated": 2519,
+      "withDefinition": 10684,
+      "designations": 37793,
+      "designationsEs": 0,
+      "isA": 17479,
+      "maps": 28366
+    },
+    "ncit-disease": {
+      "concepts": 22379,
+      "active": 22379,
+      "deprecated": 0,
+      "withDefinition": 22376,
+      "designations": 69326,
+      "designationsEs": 0,
+      "isA": 37305,
+      "maps": 13981
+    },
+    "icd11-mms": {
+      "concepts": 37052,
+      "active": 37052,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 37052,
+      "designationsEs": 0,
+      "isA": 37024,
+      "maps": 19023
+    },
+    "efo-disease": {
+      "concepts": 1111,
+      "active": 1111,
+      "deprecated": 0,
+      "withDefinition": 1086,
+      "designations": 2600,
+      "designationsEs": 0,
+      "isA": 155,
+      "maps": 1179
+    },
+    "icd10-who": {
+      "concepts": 12639,
+      "active": 12639,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 0,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 11649
+    },
+    "mesh": {
+      "concepts": 8863,
+      "active": 8863,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 0,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 0
+    },
+    "umls": {
+      "concepts": 32150,
+      "active": 32150,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 0,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 0
+    },
+    "icd11-foundation": {
+      "concepts": 4630,
+      "active": 4630,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 0,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 0
+    },
+    "omim": {
+      "concepts": 10744,
+      "active": 10744,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 0,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 0
+    },
+    "decipher": {
+      "concepts": 61,
+      "active": 61,
+      "deprecated": 0,
+      "withDefinition": 0,
+      "designations": 0,
+      "designationsEs": 0,
+      "isA": 0,
+      "maps": 0
+    }
+  },
+  "unresolvedXrefs": {
+    "mondo→orphanet": 27,
+    "mondo→efo-disease": 2366,
+    "mondo→ncit-disease": 249,
+    "orphanet→mondo": 19,
+    "orphanet→icd11-mms": 9,
+    "doid→ncit-disease": 330,
+    "doid→efo-disease": 105,
+    "doid→orphanet": 8,
+    "efo-disease→ncit-disease": 62,
+    "efo-disease→efo-disease": 1,
+    "efo-disease→orphanet": 9,
+    "efo-disease→mondo": 1,
+    "efo-disease→doid": 13,
+    "icd10-who→icd11-mms": 24
+  },
+  "citations": {
+    "hpo-annotations": {
+      "cited": 12880,
+      "existing": 4355,
+      "keys": 8525,
+      "unresolved": 0
+    },
+    "phenopacket-store": {
+      "cited": 780,
+      "existing": 0,
+      "keys": 780,
+      "unresolved": 0
+    },
+    "who-icd10-to-icd11": {
+      "cited": 12597,
+      "postcoordinatedTargetsSkipped": 826
+    }
+  },
+  "seconds": 48
+}
