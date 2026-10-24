@@ -4,6 +4,7 @@ export {
   BLOCK_CANCELLABLE_STATES,
   BOOKINGS_REQUIRE_CONFIRMATION,
   PRESENT_BOOKING_STATES,
+  SCHEDULE_CHANGE_CANCELLATION_REASON,
   blockCancellationReason,
 } from './blocked-bookings-canceller';
 export type {

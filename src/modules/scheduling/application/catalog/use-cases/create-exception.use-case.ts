@@ -10,6 +10,7 @@ import {
   blockCancellationReason,
   type CancelledByBlock,
 } from '../support/blocked-bookings-canceller';
+import { CatalogAccess } from '../support/catalog-access';
 import {
   CreateExceptionDto,
   ExceptionResponseDto,
@@ -32,6 +33,7 @@ export class CreateExceptionUseCase {
     private readonly em: EntityManager,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly professionalTime: SchedulingProfessionalTimeService,
+    private readonly access: CatalogAccess,
     private readonly blockedBookings: BlockedBookingsCanceller,
     private readonly logger: PinoLogger,
   ) {
@@ -104,6 +106,11 @@ export class CreateExceptionUseCase {
           resourceId,
         });
       }
+      // Antes de mirar una sola cita: la vista previa trae nombres de
+      // pacientes, y sólo quien administra esta agenda puede verlos. Cerrar
+      // cupos (`CloseSlotsUseCase`) ya lo exigía; bloquear no, y hasta hoy no
+      // devolvía nada que lo hiciera grave.
+      this.access.assertActorResource(resource, actor);
 
       const isAvailable = dto.isAvailable ?? false;
 
@@ -113,7 +120,7 @@ export class CreateExceptionUseCase {
       ) {
         cancelled = await this.cancelBookingsOfBlock(
           tx,
-          resource.resourceRefId,
+          resource,
           resourceId,
           startAt,
           endAt,
@@ -170,7 +177,11 @@ export class CreateExceptionUseCase {
    */
   private async cancelBookingsOfBlock(
     tx: EntityManager,
-    practitionerProfileId: string,
+    resource: {
+      resourceRefType: string;
+      resourceRefId: string;
+      tenantId: string;
+    },
     resourceId: string,
     startAt: Date,
     endAt: Date,
@@ -183,14 +194,18 @@ export class CreateExceptionUseCase {
       startAt,
       endAt,
     );
-    const affected = await this.blockedBookings.describe(tx, slots);
+    // Con citas en el rato, sólo el dueño de la agenda o alguien de su
+    // organización las ve y las cancela — no cualquier administrador.
+    const affected = await this.blockedBookings.describe(tx, slots, () =>
+      this.access.assertMayReadAgendaBookings(resource, actor),
+    );
     this.blockedBookings.assertNobodyPresent(affected.present, resourceId);
 
     const ownBookingIds = new Set(affected.cancellable.map((b) => b.bookingId));
     const elsewhere = (
       await this.professionalTime.confirmedBookings(
         tx,
-        practitionerProfileId,
+        resource.resourceRefId,
         startAt,
         endAt,
       )
