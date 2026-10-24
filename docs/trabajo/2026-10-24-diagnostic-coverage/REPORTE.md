@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama(s): `itzan/diagnostic-coverage-dev`
 - Peldaño de evidencia alcanzado: `VERIFIED`. Faltan el PR y la entrega a `test` para `REGRESSION_VERIFIED`.
-- Avance: 15 / 16 microtareas HECHO (93,75 %). Falta `H3.S1.M2`, el PR, que se abre con este reporte.
+- Avance: 16 / 16 microtareas HECHO (100 %). PR a `dev`: #841.
 
 ## Completado
 
@@ -28,7 +28,7 @@ ninguna
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H3.S1.M2 | TODO | Se abre el PR a `dev` con este reporte |
+| H3.S1.M2 | HECHO | PR #841 a `dev`, mergeable |
 | — | TODO | La misma entrega a `test` (`itzan/diagnostic-coverage-test`): el código de `diagnostic_units/`, `pharmacy_inventory/` y `common/http/` es idéntico entre `dev` y `test` |
 
 ## Evidencia

@@ -144,12 +144,12 @@ sin `studyConceptIds`, la respuesta no cambió.
 
 **DoD:** suite unitaria completa, contrastando cualquier rojo contra `dev` sin el cambio, más el PR.
 
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H3.S1.M1 | Suite unitaria completa | sin rojos propios | `corepack yarn test` → resumen en `evidencia/` | HECHO |
-| H3.S1.M2 | PR a `dev` con este plan y su reporte | PR abierto y mergeable | `gh pr view <n> --json mergeable` | TODO |
+| H3.S1.M2 | PR a `dev` con este plan y su reporte | PR abierto y mergeable | `gh pr view <n> --json mergeable` | HECHO |
 
 ## Riesgos y bloqueos previstos
 
