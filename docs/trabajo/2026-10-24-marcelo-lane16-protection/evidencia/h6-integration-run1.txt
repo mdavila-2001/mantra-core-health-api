@@ -1,0 +1,487 @@
+(node:24052) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[33m[Nest] 24052  - [39m24/10/2026, 12:17:37 [33m   WARN[39m [38;5;3m[MikroORM] [39mObject(5) {
+  msg: [32m'consulta lenta'[39m,
+  tookMs: [33m420[39m,
+  thresholdMs: [33m200[39m,
+  rows: [33m1[39m,
+  query: [32m"select 1 from pg_database where datname = 'alovida'"[39m
+}
+  console.log
+    LANE16 limpieza: filas con la marca LANE16-f500cf48 restantes = 0
+
+      at Object.log (test/integration/lane16-patient-invoice-flow.int-spec.ts:469:15)
+
+FAIL test/integration/lane16-patient-invoice-flow.int-spec.ts
+  ● Protección al paciente en el cobro con seguro (DB real) › cotización previa (REQ-16-026) › 500 Bs, copago 50, 80 % → paciente 140 y aseguradora 360, y no escribe nada
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › cotización previa (REQ-16-026) › aprobación previa exigida y ausente: no se puede enviar, y el envío real lo rechaza con el mismo motivo
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › cotización previa (REQ-16-026) › un paciente no puede cotizar
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › factura al paciente (REQ-16-028 y 029) › reclamo → factura: exactamente 140, vinculada a la línea, con los totales de la factura
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › factura al paciente (REQ-16-028 y 029) › factura al paciente por el total de un servicio reclamado: 422 y no se crea nada
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › factura al paciente (REQ-16-028 y 029) › dos pedidos en paralelo para la misma línea: una factura y un 422 (5 rondas)
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › factura al paciente (REQ-16-028 y 029) › un escritor sin el lock choca con el índice único y el 409 se convierte en 422
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › factura al paciente (REQ-16-028 y 029) › reclamo de otra práctica, línea ajena e inexistente responden el mismo 403
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › factura al paciente (REQ-16-028 y 029) › reclamo revertido: 422
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › cobro particular y consentimiento (REQ-16-030) › servicio no cubierto sin aceptación del paciente: 422 y no se factura
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › cobro particular y consentimiento (REQ-16-030) › con aceptación previa por el mismo importe se factura el total (doble de la tabla futura)
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › cobro particular y consentimiento (REQ-16-030) › con aceptación por otro importe: 422
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › el titular objeta: queda una disputa de tipo objeción, iniciada por el paciente
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › el titular objeta: queda una disputa de tipo objeción, iniciada por el paciente
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › objetar de nuevo, aun en paralelo, devuelve la misma disputa
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › objetar de nuevo, aun en paralelo, devuelve la misma disputa
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › otro paciente recibe el mismo 403 que ante un reclamo inexistente
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › otro paciente recibe el mismo 403 que ante un reclamo inexistente
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › con la objeción abierta el cobro está en pausa: 422 y no se guarda ningún pago
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › con la objeción abierta el cobro está en pausa: 422 y no se guarda ningún pago
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › al resolver la disputa con la apelación existente, el cobro se libera
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › al resolver la disputa con la apelación existente, el cobro se libera
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › una factura sin objeción no se ve afectada por la de otra
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › una factura sin objeción no se ve afectada por la de otra
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › reclamo revertido: la objeción se rechaza con 422
+
+    MetadataError: Metadata for entity TerminologySources not found
+
+    [0m [90m 103 |[39m     [90m// porque hay dependencia FK encadenada entre ellos y, al ser columnas uuid[39m
+     [90m 104 |[39m     [90m// planas (no relaciones del ORM), MikroORM no ordena los inserts por sí mismo.[39m
+    [31m[1m>[22m[39m[90m 105 |[39m     [36mif[39m ([33m![39m([36mawait[39m em[33m.[39mfindOne([33mTerminologySources[39m[33m,[39m { id[33m:[39m [33mSEED[39m[33m.[39msourceId }))) {
+     [90m     |[39m                    [31m[1m^[22m[39m
+     [90m 106 |[39m       em[33m.[39mcreate(
+     [90m 107 |[39m         [33mTerminologySources[39m[33m,[39m
+     [90m 108 |[39m         {[0m
+
+      at MetadataError.missingMetadata (node_modules/@mikro-orm/core/errors.js:196:16)
+      at MetadataStorage.get (node_modules/@mikro-orm/core/metadata/MetadataStorage.js:59:33)
+      at PostgreSqlEntityManager.tryFlush (node_modules/@mikro-orm/core/EntityManager.js:1613:34)
+      at PostgreSqlEntityManager.findOne (node_modules/@mikro-orm/core/EntityManager.js:678:18)
+      at TerminologySeedService.findOne [as run] (src/common/seed/terminology-seed.service.ts:105:20)
+      at Object.run (test/integration/lane16-patient-invoice-flow.int-spec.ts:197:62)
+
+  ● Protección al paciente en el cobro con seguro (DB real) › objeción del paciente y pausa del cobro (REQ-16-032 y 033) › reclamo revertido: la objeción se rechaza con 422
+
+    TypeError: Cannot read properties of undefined (reading 'submitClaim')
+
+    [0m [90m 129 |[39m     extra[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m [33m=[39m {}[33m,[39m
+     [90m 130 |[39m   ) {
+    [31m[1m>[22m[39m[90m 131 |[39m     [36mconst[39m created [33m=[39m [36mawait[39m claims[33m.[39msubmitClaim(
+     [90m     |[39m                                  [31m[1m^[22m[39m
+     [90m 132 |[39m       {
+     [90m 133 |[39m         insuranceCarrierId[33m:[39m carrier[33m,[39m
+     [90m 134 |[39m         patientCoverageId[33m:[39m coverageId[33m,[39m[0m
+
+      at submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:131:34)
+      at Object.submitClaim (test/integration/lane16-patient-invoice-flow.int-spec.ts:859:31)
+
+Test Suites: 1 failed, 1 total
+Tests:       19 failed, 19 total
+Snapshots:   0 total
+Time:        4.305 s
+Ran all test suites matching lane16-patient-invoice-flow.
+exit=1

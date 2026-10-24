@@ -20,6 +20,7 @@ tests fail-closed disponen además de un token intencionalmente sin membresías.
 | `common.int-spec.ts`                       | API y persistencia del módulo Common       |
 | `document-store.int-spec.ts`               | MongoDB real y aislamiento por tenant      |
 | `iam.int-spec.ts`                          | Flujos IAM y sesiones                      |
+| `lane16-patient-invoice-flow.int-spec.ts`  | Cotización, factura al paciente, objeción y pausa del cobro con PostgreSQL real; concurrencia con dos conexiones. Crea sus propios padres y deja historial permanente en `audit.*`: correrlo contra una base desechable |
 | `observability.int-spec.ts`                | Trazas, privacidad y propagación outbox    |
 | `outbox-relay-race.int-spec.ts`            | Concurrencia PostgreSQL con dos conexiones |
 | `redis-runtime.int-spec.ts`                | Redis real, TTL, locks y namespacing       |

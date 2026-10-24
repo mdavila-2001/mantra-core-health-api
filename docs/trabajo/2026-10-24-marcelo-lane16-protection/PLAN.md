@@ -52,7 +52,7 @@
 |---|---|---|---|---|
 | H1.S2.M1 | `ClaimQuoteDto` y `ClaimQuoteResultDto` | validación y Swagger | `yarn typecheck` → 0 | HECHO |
 | H1.S2.M2 | `ClaimQuoteService` | autorización idéntica a submit; sin transacción | `yarn test src/modules/insurance/application/services/claim-quote.service.spec.ts` | HECHO |
-| H1.S2.M3 | Ruta con `@NotAudited` | responde 200 | spec de auditoría + int-spec | A MEDIAS — ruta y spec de auditoría verdes; falta el int-spec (H6.S1.M1) |
+| H1.S2.M3 | Ruta con `@NotAudited` | responde 200 | spec de auditoría + int-spec | HECHO — ruta con @NotAudited y @HttpCode(200) declarados; la cotización real no escribe nada (int-spec). El 200 no se ejercitó por HTTP: la capa HTTP no está cubierta |
 
 ## H2 — Factura al paciente exacta y sin doble cobro (REQ-16-028, 029)
 **CA:** Dado un reclamo enviado, cuando se emite la factura al paciente, entonces el servidor arma la línea con su parte y la vincula a la línea del reclamo; si el cliente declara otro monto, 422 `PATIENT_INVOICE_AMOUNT_MISMATCH`; la segunda emisión o la paralela, 422 `PATIENT_INVOICE_ALREADY_ISSUED` con una sola fila.
@@ -117,7 +117,7 @@
 |---|---|---|---|---|
 | H4.S2.M1 | `PatientChargeObjectionService` | propiedad por puerto; REVERSED a 422 | `yarn test src/modules/insurance/application/services/patient-charge-objection.service.spec.ts` | HECHO |
 | H4.S2.M2 | `openDispute` con tenant declarado | `@TenantAgnostic` sin romper la rama de práctica | `yarn test src/modules/insurance/application/services/claims.service.spec.ts` | DESCARTADO — reemplazado por `@PlatformTenantOptional('PATIENT')` y la resolución de tenant en el controlador para personal que también es paciente (ver Desvíos #2); lo decidí yo al descubrir el riesgo, el propietario no lo vio |
-| H4.S2.M3 | Ruta despacha por `isPatientOnlyActor` | PATIENT objeta, práctica apela | `yarn test src/modules/insurance/domain/actor-kind.spec.ts` + int-spec | A MEDIAS — despacho por actor y spec del controlador verdes; falta el int-spec (H6.S1.M1) |
+| H4.S2.M3 | Ruta despacha por `isPatientOnlyActor` | PATIENT objeta, práctica apela | `yarn test src/modules/insurance/domain/actor-kind.spec.ts` + int-spec | HECHO — despacho por actor en el spec del controlador y flujo real de objeción, idempotencia en paralelo y pausa contra PostgreSQL |
 
 ### H4.S3 — Pausa y aviso
 **CA:** el pago se rechaza con objeción abierta y se libera al resolverla. **DoD:** spec de billing. **Estado:** TODO
@@ -150,7 +150,7 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H6.S1.M1 | `lane16-patient-invoice-flow.int-spec.ts` | limpieza, sin TRUNCATE | `yarn test:integration --testPathPatterns=lane16-patient-invoice-flow` | TODO |
+| H6.S1.M1 | `lane16-patient-invoice-flow.int-spec.ts` | limpieza, sin TRUNCATE | `yarn test:integration --testPathPatterns=lane16-patient-invoice-flow` | HECHO — 19 de 19 pruebas contra PostgreSQL 18 desechable en 4 corridas seguidas (evidencia h6-integration-local-run*.txt); servicios reales y borde externo con dobles declarados |
 
 ### H6.S2 — Gates
 **CA:** los pasos de CI pasan en local. **DoD:** comandos del DoD del hito. **Estado:** TODO
