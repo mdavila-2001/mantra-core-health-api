@@ -129,7 +129,14 @@ export type NotificationDestinationType =
    * `scheduling-agenda-notices.service.ts` vía `RECURSO_CUPO` cuando
    * `scheduling-waitlist.service.ts` promueve la lista de espera.
    */
-  | 'scheduling.bookable_slots';
+  | 'scheduling.bookable_slots'
+  /**
+   * Un reclamo a la aseguradora (carril 16, REQ-16-032): el cobro que se le
+   * emitió al paciente por un servicio con seguro. El `id` es el del reclamo.
+   * Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su
+   * ruta al conectar.
+   */
+  | 'INSURANCE_CLAIM';
 
 /**
  * A dónde lleva la notificación al abrirla.

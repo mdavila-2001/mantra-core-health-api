@@ -21,3 +21,6 @@ export * from './insurer-context.service';
 export * from './insurer-received-claims.service';
 export * from './insurer-patients.service';
 export * from './claim-quote.service';
+export * from './claim-patient-invoice.service';
+export * from './patient-consent-validator';
+export * from './patient-charge-objection.service';

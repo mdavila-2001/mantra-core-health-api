@@ -145,7 +145,7 @@ function toLineResult(
 function sumOrNull(amounts: ReadonlyArray<string | null>): string | null {
   if (amounts.some((amount) => amount === null)) return null;
   try {
-    return sumarDecimales(amounts as string[]);
+    return sumarDecimales(amounts);
   } catch (error) {
     if (error instanceof RangeError) return null;
     throw error;

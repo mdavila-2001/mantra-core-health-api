@@ -88,6 +88,27 @@ savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
 | `GraphRuleHitDetected` | `graph-analytics.service.ts` |
 | `GraphRuleHitResolved` | `graph-analytics.service.ts` |
 
+### `insurance` (4 eventos de la protección al paciente)
+
+Carril 16, REQ-16-034. `audit.audit_log` no tiene columnas de motivo ni de importes, así que lo que
+la bitácora `@Audited` no puede guardar viaja en estos eventos. `aggregateType`:
+`insurance.insurance_claims`; `aggregateId`: el reclamo.
+
+| Evento | Servicio productor |
+|---|---|
+| `InsuranceClaimPatientChargeObjected` | `patient-charge-objection.service.ts` |
+| `InsuranceClaimPatientInvoiceIssued` | `claim-patient-invoice.service.ts` |
+| `InsuranceClaimPatientInvoiceRejected` | `claim-patient-invoice.service.ts` |
+| `InsuranceClaimPatientObjectionRejected` | `patient-charge-objection.service.ts` |
+
+Payload: sólo identificadores e importes (`claimId`, `claimLineId`, `invoiceId`, `patientProfileId`,
+`practiceId`, motivo tipificado, importes decimales como cadena). Nunca texto libre ni datos
+clínicos; la objeción del paciente viaja con un motivo cerrado, sin comentario. Los eventos de
+rechazo se publican en su propia transacción: la del intento rechazado no se confirma.
+
+> Este catálogo es previo al módulo de seguros y todavía no lista `InsuranceClaimDecided`
+> (`insurer-received-claims.service.ts`); se documenta como omisión, no se corrige aquí.
+
 ### `lakehouse` (12 eventos)
 
 | Evento | Servicio productor |

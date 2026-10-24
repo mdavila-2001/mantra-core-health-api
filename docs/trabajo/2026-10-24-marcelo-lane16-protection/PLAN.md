@@ -18,6 +18,8 @@
   7. Actores de `patient-invoice`: BILLING/FINANCE/SUPERADMIN con alcance de práctica.
   8. Con `RLS_ENFORCE=true`, la rama paciente y las tx `REQUIRES_NEW` no llevan tenant: se verifica en integración.
   9. `yarn test:module-layering` y `--include` no existen: se usa el spec de capas y `--testPathPatterns`.
+  10. Facturar al paciente una parte de cero: se rechaza (`NOTHING_TO_CHARGE_PATIENT`). Confirmar con el propietario.
+  11. Recotización de reclamos vinculados contra el tope de la aprobación previa: ver Desvíos #5.
 
 ## H0 — Arranque y baseline
 **CA:** Dado el worktree desde `origin/dev`, cuando se corre el baseline, entonces typecheck y los specs de insurance, arquitectura y auditoría están en verde antes de cualquier edición.
@@ -62,25 +64,25 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | `domain/patient-billing-enforcer.ts` + spec | tabulares del propietario y 20 000 casos | `yarn test src/modules/insurance/domain/patient-billing-enforcer.spec.ts` | TODO |
-| H2.S1.M2 | Puerto `PATIENT_BILLING_PORT` + adaptador | única importación de billing desde insurance | `yarn test src/architecture/module-layering.spec.ts` | TODO |
-| H2.S1.M3 | Export de `InvoicesRepository` e `insuranceClaimLineId` en `createLine` | línea con vínculo persistido | `yarn typecheck` | TODO |
+| H2.S1.M1 | `domain/patient-billing-enforcer.ts` + spec | tabulares del propietario y 20 000 casos | `yarn test src/modules/insurance/domain/patient-billing-enforcer.spec.ts` | HECHO |
+| H2.S1.M2 | Puerto `PATIENT_BILLING_PORT` + adaptador | única importación de billing desde insurance | `yarn test src/architecture/module-layering.spec.ts` | HECHO |
+| H2.S1.M3 | Export de `InvoicesRepository` e `insuranceClaimLineId` en `createLine` | línea con vínculo persistido | `yarn typecheck` | HECHO |
 
 ### H2.S2 — Caso de uso y ruta
 **CA:** un solo lock, primero, y 422 tipificado ante cada rechazo. **DoD:** spec del servicio. **Estado:** TODO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H2.S2.M1 | `ClaimPatientInvoiceService` | 403 idéntico en IDOR; lock antes de leer facturas | `yarn test src/modules/insurance/application/services/claim-patient-invoice.service.spec.ts` | TODO |
-| H2.S2.M2 | 23505 de la línea a 422, fuera de la tx | otra única se relanza | mismo spec | TODO |
-| H2.S2.M3 | Ruta y DTO `patient-invoice` | 201 y `@Audited` | spec de cobertura de auditoría | TODO |
+| H2.S2.M1 | `ClaimPatientInvoiceService` | 403 idéntico en IDOR; lock antes de leer facturas | `yarn test src/modules/insurance/application/services/claim-patient-invoice.service.spec.ts` | HECHO |
+| H2.S2.M2 | 23505 de la línea a 422, fuera de la tx | otra única se relanza | mismo spec | HECHO |
+| H2.S2.M3 | Ruta y DTO `patient-invoice` | 201 y `@Audited` | spec de cobertura de auditoría | HECHO |
 
 ### H2.S3 — Guard de billing
 **CA:** `issueFromEncounter` rechaza servicios ya reclamados. **DoD:** spec de invoices. **Estado:** TODO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H2.S3.M1 | Guard por `claimId` y por servicio reclamado | 422 con motivo propio | `yarn test src/modules/billing/services/invoices.service.spec.ts` | TODO |
+| H2.S3.M1 | Guard por `claimId` y por servicio reclamado | 422 con motivo propio | `yarn test src/modules/billing/services/invoices.service.spec.ts` | A MEDIAS — el rechazo por `claimId` está hecho y probado; el rechazo por concepto de servicio reclamado NO se implementó (ver Desvíos #1) |
 
 ## H3 — Consentimiento para cobro particular (REQ-16-030)
 **CA:** Dado un servicio no cubierto o sin aprobación previa válida, cuando se factura como particular sin aceptación previa por el mismo importe, entonces 422 `PATIENT_CONSENT_REQUIRED`.
@@ -92,8 +94,8 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Puerto y `PatientConsentValidator` | VALID, MISSING, AMOUNT_DIFFERS, NOT_BEFORE_CHARGE | `yarn test src/modules/insurance/application/services/patient-consent-validator.spec.ts` | TODO |
-| H3.S1.M2 | Adaptador fail-closed | siempre `null` | mismo spec | TODO |
+| H3.S1.M1 | Puerto y `PatientConsentValidator` | VALID, MISSING, AMOUNT_DIFFERS, NOT_BEFORE_CHARGE | `yarn test src/modules/insurance/application/services/patient-consent-validator.spec.ts` | HECHO |
+| H3.S1.M2 | Adaptador fail-closed | siempre `null` | mismo spec | HECHO |
 
 ## H4 — Objeción del paciente y pausa (REQ-16-032, 033)
 **CA:** Dado un PATIENT dueño del reclamo, cuando objeta, entonces 201 y repetirlo devuelve la misma disputa; otro paciente recibe el 403 de un id inexistente; mientras esté abierta, `payments-received:apply` sobre la factura vinculada da 422 `PAYMENT_RECEIVED_INVOICE_ON_HOLD`.
@@ -105,25 +107,25 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H4.S1.M1 | Conceptos de objeción | ids deterministas | `yarn typecheck` | TODO |
-| H4.S1.M2 | `findOpenDispute` con filtro de tipo | apelación y objeción no se pisan | `yarn test src/modules/insurance/application/services/claims.service.spec.ts` | TODO |
+| H4.S1.M1 | Conceptos de objeción | ids deterministas | `yarn typecheck` | HECHO |
+| H4.S1.M2 | `findOpenDispute` con filtro de tipo | apelación y objeción no se pisan | `yarn test src/modules/insurance/application/services/claims.service.spec.ts` | HECHO |
 
 ### H4.S2 — Servicio y ruta
 **CA:** el despacho es por actor, nunca por `initiatedBy`. **DoD:** specs. **Estado:** TODO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H4.S2.M1 | `PatientChargeObjectionService` | propiedad por puerto; REVERSED a 422 | `yarn test src/modules/insurance/application/services/patient-charge-objection.service.spec.ts` | TODO |
-| H4.S2.M2 | `openDispute` con tenant declarado | `@TenantAgnostic` sin romper la rama de práctica | `yarn test src/modules/insurance/application/services/claims.service.spec.ts` | TODO |
-| H4.S2.M3 | Ruta despacha por `isPatientOnlyActor` | PATIENT objeta, práctica apela | `yarn test src/modules/insurance/domain/actor-kind.spec.ts` + int-spec | TODO |
+| H4.S2.M1 | `PatientChargeObjectionService` | propiedad por puerto; REVERSED a 422 | `yarn test src/modules/insurance/application/services/patient-charge-objection.service.spec.ts` | HECHO |
+| H4.S2.M2 | `openDispute` con tenant declarado | `@TenantAgnostic` sin romper la rama de práctica | `yarn test src/modules/insurance/application/services/claims.service.spec.ts` | DESCARTADO — reemplazado por `@PlatformTenantOptional('PATIENT')` y la resolución de tenant en el controlador para personal que también es paciente (ver Desvíos #2); lo decidí yo al descubrir el riesgo, el propietario no lo vio |
+| H4.S2.M3 | Ruta despacha por `isPatientOnlyActor` | PATIENT objeta, práctica apela | `yarn test src/modules/insurance/domain/actor-kind.spec.ts` + int-spec | A MEDIAS — despacho por actor y spec del controlador verdes; falta el int-spec (H6.S1.M1) |
 
 ### H4.S3 — Pausa y aviso
 **CA:** el pago se rechaza con objeción abierta y se libera al resolverla. **DoD:** spec de billing. **Estado:** TODO
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H4.S3.M1 | Pausa derivada en `payments-received` | 422 con objeción abierta | `yarn test src/modules/billing/services/payments-received.service.spec.ts` | TODO |
-| H4.S3.M2 | Aviso in-app al paciente | nunca lanza | spec del servicio | TODO |
+| H4.S3.M1 | Pausa derivada en `payments-received` | 422 con objeción abierta | `yarn test src/modules/billing/services/payments-received.service.spec.ts` | HECHO |
+| H4.S3.M2 | Aviso in-app al paciente | nunca lanza | spec del servicio | HECHO |
 
 ## H5 — Auditoría y eventos (REQ-16-034)
 **CA:** Dado cualquier ruta nueva, entonces lleva `@Audited` (o `@NotAudited` con razón) y cada intento rechazado publica un evento tipificado con motivo e importes, sin texto clínico.
@@ -135,7 +137,7 @@
 
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H5.S1.M1 | Decoradores y baseline | 2 entradas menos | `yarn test src/common/audit-trail/audit-trail-coverage.spec.ts` | TODO |
+| H5.S1.M1 | Decoradores y baseline | 2 entradas menos | `yarn test src/common/audit-trail/audit-trail-coverage.spec.ts` | HECHO |
 | H5.S1.M2 | 4 eventos en asyncapi y catálogo | validan | `yarn docs:asyncapi:validate` | TODO |
 
 ## H6 — Integración, gates y entrega
@@ -164,6 +166,34 @@
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H6.S3.M1 | `REPORTE.md` y PR contra `dev` | mergeable, checks en verde | `gh pr view <n> --json isDraft,mergeable,mergeStateStatus` y `gh pr checks <n>` | TODO |
+
+## Desvíos del plan
+
+1. **H2.S3.M1, rechazo por concepto de servicio reclamado: no implementado.** Un guard que cruce el
+   `serviceId` de la línea de factura con las líneas de reclamos del mismo paciente y práctica daría
+   falsos positivos graves: los reclamos no guardan el encuentro y `invoice_lines.insurance_claim_line_id`
+   nunca se escribió, así que todo reclamo histórico sin factura vinculada bloquearía para siempre la
+   facturación particular de ese servicio a ese paciente. Quedó el rechazo por `claimId`, que es exacto.
+   Alternativas para el propietario: restringir por ventana de tiempo, o guardar el encuentro en el reclamo
+   (cambio de modelo). REQ-16-029, segundo punto, queda **A MEDIAS** por esto.
+2. **H4.S2.M2, tenant de la ruta de disputas.** El plan decía `@TenantAgnostic` y reconstruir el tenant del
+   prestador. Al leer los guards se vio que eso le quitaba a un SUPERADMIN el tenant que declara por
+   cabecera, ignoraba los roles acotados a organización y obligaba a replicar la transacción RLS. Se
+   reemplazó por `@PlatformTenantOptional('PATIENT')`: el paciente no necesita organización, y el personal
+   sin rol de paciente conserva la resolución de siempre. Para personal que además es paciente, el
+   controlador resuelve el tenant como lo haría el guard.
+3. **Sin texto libre en la objeción.** El diseño traía un comentario de hasta 500 caracteres en el evento.
+   Se quitó: lo que escriba una persona podría ser un dato de salud y viajaría a eventos del outbox. El
+   motivo cerrado deja el registro completo.
+4. **Facturar al paciente cuando su parte es 0 se rechaza** con `NOTHING_TO_CHARGE_PATIENT` (422): una
+   factura de cero no cobra nada y su índice único bloquearía la línea. Ambigüedad nueva, a confirmar.
+5. **Reclamos vinculados que se recotizan:** si la aprobación previa tiene un tope aprobado, la
+   recotización cuenta el propio reclamo contra ese tope y puede informar `AMOUNT_EXCEEDED`; en ese caso
+   la línea cae al cobro particular y, sin aceptación del paciente, responde 422 de consentimiento.
+   Falla cerrado (nunca cobra de más), pero el motivo es engañoso. A confirmar con el propietario.
+6. **Agregados no previstos, con su prueba:** specs de `PatientNoticeAdapter`, `BillingPatientInvoiceAdapter`
+   e `InvoicesRepository.hasOpenPatientObjection`; `domain/claim-scope.ts` (regla de pertenencia compartida
+   con `ClaimsService`); `domain/patient-protection-events.ts` (nombres de eventos).
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

@@ -93,6 +93,10 @@ import {
   // `transaction_id` en el documento de origen, idempotente por documento)
   // para que el asiento de un ingreso de consulta quede enlazado a la factura
   // pagada que lo originó, sin reimplementar esa guarda en otro módulo.
-  exports: [LedgerService],
+  //
+  // Carril 16 — `insurance` factura al paciente la parte calculada de un
+  // servicio reclamado: su adaptador de infraestructura necesita el repositorio
+  // de facturas, y sólo ese.
+  exports: [LedgerService, InvoicesRepository],
 })
 export class BillingModule {}

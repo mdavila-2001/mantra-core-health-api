@@ -114,6 +114,15 @@ export class PaymentsReceivedService {
             BillingErrorReason.PAYMENT_RECEIVED_INVOICE_NOT_FOUND,
           );
         }
+        // Carril 16, REQ-16-032: con una objeción abierta del paciente el
+        // cobro está en pausa; la disputa resuelta lo libera sola.
+        if (await this.invoicesRepo.hasOpenPatientObjection(tx, invoice.id)) {
+          throw new PreconditionFailedException(
+            'El cobro está en pausa mientras el paciente tenga una objeción abierta',
+            { invoiceId: invoice.id },
+            BillingErrorReason.PAYMENT_RECEIVED_INVOICE_ON_HOLD,
+          );
+        }
         const balanceCents = toCents(invoice.balance ?? '0');
         const allocCents = toCents(alloc.allocatedAmount);
         if (balanceCents <= 0) {
