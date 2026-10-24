@@ -1,6 +1,6 @@
 # Plan — Procedimientos y tratamientos no farmacológicos: fase 2 y pasadas con la red abierta
 
-- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` (rama `justin/seed-procedures-treatments`, reiniciada desde `dev` tras el merge de #689; PR nuevo contra `dev`) · Predecesor: PR #689 (fase 1, pasadas 1–4; su plan y reporte los borró la limpieza `268f43c7` de `dev`, siguen en el historial de git)
+- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` (rama `justin/seed-procedures-treatments`, reiniciada desde `dev` tras el merge de #689; #721 mergeó hasta la pasada 6, las pasadas 7+ van en un PR nuevo contra `dev` con la rama rebasada) · Predecesores: PR #721 (pasadas 5–6 y fase 2), PR #689 (fase 1, pasadas 1–4; su plan y reporte los borró la limpieza `268f43c7` de `dev`, siguen en el historial de git)
 - Resultado observable: el corpus de `tools/terminology-import/procedures-treatments/` suma las fuentes que estaban bloqueadas por la red (ClinicalTrials.gov + MeSH, ICD-10-PCS, NCIt oficial, …) con el mismo contrato, y la bitácora `docs/seed-research/procedures-treatments.md` trae la fase 2 medida contra lo que cargan las sesiones hermanas.
 - Kill-test: una relación de ClinicalTrials.gov con `relationType.assertion` distinto de `investigational`, o sin NCT en la evidencia.
 
@@ -40,8 +40,10 @@
 | H6.S1.M8 | Gates | typecheck y lint exit 0, tests dirigidos en verde | `corepack yarn typecheck`, `corepack yarn lint`, `node --test …` | TODO |
 | H6.S1.M9 | PR nuevo contra `dev`, listo para revisión, sin mergear | URL del PR | `mcp__github__create_pull_request` | HECHO |
 | H6.S2.M1 | Clasificación MeSH depurada (sin métodos de investigación ni conceptos de tiempo/estrategia) | «Control Groups», «Placebos», «Randomized Controlled Trials as Topic», «Operative Time» no son procedimientos; «Biopsy», «Laparoscopy» sí | `node --test …` | HECHO |
-| H6.S2.M2 | Pasada 6: revisiones Cochrane por la indexación MeSH de NLM | `literature-indexing`, PMID en la evidencia, retractadas fuera | `fetch-pubmed-cochrane.mjs` + `build.mjs` | HECHO |
-| H6.S2.M3 | Pasadas 7+ hasta dos seguidas con 0 | dos filas consecutivas con 0 en la tabla de pasadas | tabla de pasadas | EN CURSO |
+| H6.S2.M2 | Pasada 6: revisiones Cochrane por la indexación MeSH de NLM | `literature-indexing`, PMID en la evidencia, retractadas fuera | `fetch-pubmed.mjs --subset cochrane` + `build.mjs` | HECHO |
+| H6.S2.M4 | Pasada 7: guías de práctica clínica (MEDLINE) | `literature-indexing`, PMID en la evidencia, retractadas fuera, etiqueta «no implica recomendación» | `fetch-pubmed.mjs --subset guidelines` + `build.mjs` + `node --test …` | HECHO |
+| H6.S2.M5 | Pasada 8: ensayos controlados aleatorizados publicados (MEDLINE) | `investigational` («en estudio»), PMID en la evidencia | `fetch-pubmed.mjs --subset rct` + `build.mjs` | EN CURSO |
+| H6.S2.M3 | Pasadas 9+ hasta dos seguidas con 0 | dos filas consecutivas con 0 en la tabla de pasadas | tabla de pasadas | EN CURSO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

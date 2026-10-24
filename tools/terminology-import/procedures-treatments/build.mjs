@@ -36,7 +36,11 @@ import {
 import { readMeshDescriptors } from './lib/sources/mesh.mjs';
 import { readNcitOwlZip } from './lib/sources/ncit-owl.mjs';
 import { wikidataP924Corpus } from './lib/sources/wikidata.mjs';
-import { cochraneCorpus, cochraneRecords } from './lib/sources/cochrane.mjs';
+import {
+  PUBMED_SUBSETS,
+  pubmedRecords,
+  pubmedSubsetCorpus,
+} from './lib/sources/pubmed.mjs';
 import { execFileSync } from 'node:child_process';
 import { BLOCKED_SOURCES } from './lib/sources.mjs';
 import {
@@ -232,20 +236,20 @@ async function main() {
   );
   coverage.skipped['wikidata-p924'] = wd.skipped;
 
-  // --- Revisiones Cochrane (indexación MeSH de NLM) ----------------------------------
-  let cochrane = {
-    assertions: [],
-    procedures: [],
-    stats: {
-      pending:
-        'falta cache/pubmed-cochrane/meta.json: corra fetch-pubmed-cochrane.mjs',
-    },
-  };
-  let cochraneMeta = null;
-  if (existsSync(cacheDir('pubmed-cochrane', 'meta.json'))) {
-    const m = readJson(cacheDir('pubmed-cochrane', 'meta.json'));
-    cochraneMeta = {
-      source: 'pubmed-cochrane',
+  // --- Subconjuntos de MEDLINE (indexación MeSH de NLM) -------------------------------
+  // Revisiones Cochrane, guías de práctica clínica y ensayos aleatorizados: cada uno con su
+  // tipo de relación literal; un subconjunto sin descargar queda como pendiente.
+  const pubmed = { assertions: [], procedures: [], metas: [] };
+  for (const [key, sub] of Object.entries(PUBMED_SUBSETS)) {
+    if (!existsSync(cacheDir(sub.cache, 'meta.json'))) {
+      coverage.skipped[sub.cache] = {
+        pending: `falta cache/${sub.cache}/meta.json: corra fetch-pubmed.mjs --subset ${key}`,
+      };
+      continue;
+    }
+    const m = readJson(cacheDir(sub.cache, 'meta.json'));
+    const subMeta = {
+      source: sub.cache,
       version: `PubMed, consulta del ${m.retrievedAt} (${m.records} registros)`,
       retrievedAt: m.retrievedAt,
       license: m.license,
@@ -253,14 +257,18 @@ async function main() {
       sha256: null,
       pin: m.retrievedAt,
     };
-    cochrane = cochraneCorpus(
-      cochraneRecords(cacheDir('pubmed-cochrane', 'pages')),
+    const out = pubmedSubsetCorpus(
+      pubmedRecords(cacheDir(sub.cache, 'pages')),
       mesh,
-      cochraneMeta,
+      subMeta,
       meshMeta,
+      sub.typeCode,
     );
+    coverage.skipped[sub.cache] = out.stats;
+    pubmed.assertions.push(...out.assertions);
+    pubmed.procedures.push(...out.procedures);
+    pubmed.metas.push([sub.cache, subMeta]);
   }
-  coverage.skipped['pubmed-cochrane'] = cochrane.stats;
 
   const assertions = [
     ...poet.assertions,
@@ -271,7 +279,7 @@ async function main() {
     ...pcs.assertions,
     ...ctgov.assertions,
     ...wd.assertions,
-    ...cochrane.assertions,
+    ...pubmed.assertions,
   ];
   // La edición oficial de NCIt va primero: si un procedimiento está en las dos, se queda su nombre vigente.
   const procedures = uniqueById([
@@ -283,7 +291,7 @@ async function main() {
     ...pcs.sites,
     ...ctgov.procedures,
     ...wd.procedures,
-    ...cochrane.procedures,
+    ...pubmed.procedures,
   ]);
 
   // --- Equivalencias publicadas (solo para los códigos que se usan) ----------------
@@ -348,7 +356,7 @@ async function main() {
     ['mesh', meshMeta],
     ...(ctgovMeta ? [['ctgov', ctgovMeta]] : []),
     ['wikidata-p924', wdMeta],
-    ...(cochraneMeta ? [['pubmed-cochrane', cochraneMeta]] : []),
+    ...pubmed.metas,
     ['mondo', mondoMeta],
     ['uberon', uberonMeta],
   ]) {
