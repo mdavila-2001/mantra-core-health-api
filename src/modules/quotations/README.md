@@ -55,6 +55,18 @@ aislamiento por organización del RLS no la cubre: la organización se resuelve 
 través de la práctica (`PracticeTenantLookupService`). El listado se acota **en la
 consulta**, no después de leer.
 
+## Paciente y cita
+
+Alcanzar la práctica no habilita a cualquier paciente. Antes de crear y de
+listar, el servicio autoriza al actor sobre el paciente con la política de la
+historia clínica (`ClinicalReadService.assertCanReadHistory`: turno de hoy,
+relación asistencial vigente, acceso autorizado o titularidad). Si no la cumple,
+si el paciente no existe, o si la cita (`appointmentId`) no es de ese paciente ni
+de la organización de la práctica, la respuesta es el mismo `404` con
+`reason: QUOTATION_PATIENT_NOT_AVAILABLE` y no se escribe nada. La cuenta
+administradora sin rol clínico lista por las prácticas de su organización y no
+pasa por esa política.
+
 ## El plan de pagos (v4.2.18)
 
 Un consultorio no financia: reparte el precio de un tratamiento en las cuotas

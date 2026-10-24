@@ -3,6 +3,9 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { QuotationInstallments, Quotations } from '../billing/entities';
 import { ServiceCatalogRepository } from '../billing/repositories';
 import { PracticeModule } from '../practice/practice.module';
+import { ClinicalModule } from '../clinical/clinical.module';
+import { AppointmentsRepository } from '../clinical/repositories';
+import { PatientProfilesRepository } from '../profiles/infrastructure/repositories';
 import { QuotationsController } from './controllers';
 import {
   QuotationInstallmentsRepository,
@@ -28,11 +31,18 @@ import { QuotationsService } from './services';
  * es lo mismo que hace el `PATCH` del catálogo, y por lo mismo `BillingModule`
  * y `AccountingModule` ya lo importan. `practice` no importa `quotations`, así
  * que la dependencia va en un solo sentido y no cierra ciclo.
+ *
+ * `ClinicalModule` entra por `ClinicalReadService`: tener la práctica no
+ * habilita a cualquier paciente, y la política que decide quién trata con un
+ * paciente vive ahí (misma puerta que `MedicalGroupsModule`).
+ * `PatientProfilesRepository` y `AppointmentsRepository` se registran como
+ * clase —no guardan estado— por el mismo criterio que `ServiceCatalogRepository`.
  */
 @Module({
   imports: [
     MikroOrmModule.forFeature([Quotations, QuotationInstallments]),
     PracticeModule,
+    ClinicalModule,
   ],
   controllers: [QuotationsController],
   providers: [
@@ -40,6 +50,8 @@ import { QuotationsService } from './services';
     QuotationsRepository,
     QuotationInstallmentsRepository,
     ServiceCatalogRepository,
+    PatientProfilesRepository,
+    AppointmentsRepository,
     // Servicios
     QuotationsService,
   ],

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -11,6 +11,10 @@ import {
 import { ServiceCatalogRepository } from '../../billing/repositories';
 import type { Quotations, QuotationInstallments } from '../../billing/entities';
 import { PracticeTenantLookupService } from '../../practice/services';
+import { AppointmentsRepository } from '../../clinical/repositories';
+import { ClinicalReadService } from '../../clinical/services';
+import { PatientProfilesRepository } from '../../profiles/infrastructure/repositories';
+import { QuotationsErrorReason } from '../quotations.error-reasons';
 import {
   QuotationInstallmentsRepository,
   QuotationsRepository,
@@ -21,6 +25,11 @@ import type {
   QuotationResponseDto,
 } from '../dto/quotation-response.dto';
 import { assertPaymentPlanClosesOnPrice } from './payment-plan';
+
+/** Roles que atienden (y cotizan): los que pasan por la política clínica del paciente. */
+const ROLES_THAT_ATTEND: readonly string[] = ['PRACTITIONER', 'CLINICIAN'];
+
+const PATIENT_NOT_AVAILABLE_MESSAGE = 'Paciente no disponible para cotizar';
 
 /** Fecha (`date`) como `YYYY-MM-DD`, sin desplazamiento por huso horario. */
 function toIsoDate(date: Date): string {
@@ -42,6 +51,16 @@ function toIsoDate(date: Date): string {
  * `LedgerService.assertPractitionerOwnsPractice`—; leer una cotización de una
  * práctica ajena es el **mismo 404** que una inexistente; y el listado se acota
  * en la consulta a las prácticas alcanzables, no después de leer.
+ *
+ * **Paciente.** Alcanzar la práctica no habilita a cualquier paciente: antes de
+ * crear o de listar se resuelve el paciente con la misma política que la
+ * historia clínica (`ClinicalReadService.assertCanReadHistory`: turno de hoy,
+ * relación asistencial vigente, acceso autorizado o titularidad). Quien no la
+ * cumple recibe el mismo 404 (`QUOTATION_PATIENT_NOT_AVAILABLE`) que un paciente
+ * inexistente, y no se escribe nada. La cita, si viene, tiene que ser de ese
+ * paciente y de la organización de la práctica. La cuenta administradora sin
+ * rol clínico no pasa por esa política —no es historia clínica— y queda acotada
+ * por las prácticas de su organización.
  */
 @Injectable()
 export class QuotationsService {
@@ -53,6 +72,9 @@ export class QuotationsService {
    * @param installmentsRepo - Acceso a `billing.quotation_installments`.
    * @param serviceCatalogRepo - Acceso a `billing.service_catalog`, para el snapshot.
    * @param practiceTenantLookup - A qué prácticas llega el actor (vinculación u organización).
+   * @param clinicalRead - Política de lectura de la historia: decide si el actor puede tratar con el paciente.
+   * @param patientProfilesRepo - Acceso a `profiles.patient_profiles`, para resolver al paciente.
+   * @param appointmentsRepo - Acceso a `clinical.appointments`, para validar la cita.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -61,6 +83,9 @@ export class QuotationsService {
     private readonly installmentsRepo: QuotationInstallmentsRepository,
     private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
+    private readonly clinicalRead: ClinicalReadService,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly appointmentsRepo: AppointmentsRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(QuotationsService.name);
@@ -77,6 +102,9 @@ export class QuotationsService {
    * (ver `assertPaymentPlanClosesOnPrice`).
    * @throws ResourceNotFoundException si el servicio no existe en el catálogo
    * o pertenece a otra práctica (mismo 404, a propósito).
+   * @throws ResourceNotFoundException (`QUOTATION_PATIENT_NOT_AVAILABLE`) si el
+   * paciente no existe o el actor no tiene base clínica sobre él, o si la cita
+   * no es de ese paciente ni de la organización de la práctica. Nada se escribe.
    */
   async createQuotation(
     dto: CreateQuotationDto,
@@ -112,6 +140,14 @@ export class QuotationsService {
     }
 
     assertPaymentPlanClosesOnPrice(dto);
+
+    // Antes de tocar el catálogo o escribir: la práctica alcanzable no implica
+    // un paciente alcanzable, y la cita tiene que ser de ese mismo paciente.
+    await this.assertPatientAvailable(dto.patientProfileId, actor);
+    await this.assertPatientExists(dto.patientProfileId);
+    if (dto.appointmentId !== undefined) {
+      await this.assertAppointmentBelongs(dto);
+    }
 
     this.logger.info(
       {
@@ -212,11 +248,17 @@ export class QuotationsService {
    * Lista las cotizaciones de un paciente, más recientes primero, acotadas en
    * la consulta a las prácticas que el actor alcanza. Sin ninguna práctica
    * alcanzable no hay lectura: la lista es vacía sin ir a la base.
+   *
+   * @throws ResourceNotFoundException (`QUOTATION_PATIENT_NOT_AVAILABLE`) si el
+   * actor no tiene base clínica sobre ese paciente: no se enumera nada.
    */
   async listQuotationsByPatient(
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<QuotationResponseDto[]> {
+    if (!isAdministrativeOnly(actor)) {
+      await this.assertPatientAvailable(patientProfileId, actor);
+    }
     const practiceIds = await this.reachablePractices(actor);
     if (practiceIds.length === 0) {
       return [];
@@ -245,6 +287,64 @@ export class QuotationsService {
     return quotations.map((quotation) =>
       toResponseDto(quotation, byQuotation.get(quotation.id) ?? []),
     );
+  }
+
+  /**
+   * Autoriza al actor sobre el paciente con la política de la historia clínica
+   * y traduce su 403 al 404 del módulo: el cliente no distingue «no es tuyo» de
+   * «no existe».
+   */
+  private async assertPatientAvailable(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw patientNotAvailable({ patientProfileId });
+      }
+      throw error;
+    }
+  }
+
+  /** El paciente existe (la política clínica deja pasar a `SUPERADMIN` sin mirar). */
+  private async assertPatientExists(patientProfileId: string): Promise<void> {
+    const patient = await this.patientProfilesRepo.findById(
+      this.em.fork(),
+      patientProfileId,
+    );
+    if (patient === null) {
+      throw patientNotAvailable({ patientProfileId });
+    }
+  }
+
+  /**
+   * La cita es del paciente cotizado y de la organización de la práctica. Una
+   * cita ajena responde el mismo 404 que un paciente no disponible.
+   */
+  private async assertAppointmentBelongs(
+    dto: CreateQuotationDto,
+  ): Promise<void> {
+    const appointmentId = dto.appointmentId;
+    if (appointmentId === undefined) return;
+    const appointment = await this.appointmentsRepo.findById(
+      this.em.fork(),
+      appointmentId,
+    );
+    const tenantOfPractice =
+      await this.practiceTenantLookup.findTenantOfPractice(dto.practiceId);
+    if (
+      appointment === null ||
+      appointment.patientProfileId !== dto.patientProfileId ||
+      tenantOfPractice === null ||
+      appointment.tenantId !== tenantOfPractice
+    ) {
+      throw patientNotAvailable({
+        patientProfileId: dto.patientProfileId,
+        appointmentId,
+      });
+    }
   }
 
   /**
@@ -312,6 +412,25 @@ export class QuotationsService {
     }
     return [...ids];
   }
+}
+
+/** Cuenta administradora sin rol clínico: lista por organización, no por historia clínica. */
+function isAdministrativeOnly(actor: AuthenticatedUser): boolean {
+  return (
+    actor.roles.includes('SECURITY_ADMIN') &&
+    !actor.roles.some((role) => ROLES_THAT_ATTEND.includes(role))
+  );
+}
+
+/** 404 uniforme del paciente (o de su cita) no disponible. */
+function patientNotAvailable(
+  details: Record<string, unknown>,
+): ResourceNotFoundException {
+  return new ResourceNotFoundException(
+    PATIENT_NOT_AVAILABLE_MESSAGE,
+    details,
+    QuotationsErrorReason.QUOTATION_PATIENT_NOT_AVAILABLE,
+  );
 }
 
 /** Traduce cotización + cuotas a su forma pública de transporte. */
