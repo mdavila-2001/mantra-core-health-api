@@ -196,6 +196,37 @@ detiene con dos pasadas seguidas en 0.
 - **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada3.txt`).
 - **Descartadas**: ninguna nueva.
 
+### Pasada 4 (2026-10-24)
+
+- **Regiones**: las tres consolidadas.
+  - `us` @`3bea44dc`: 189 068 filas.
+  - `eu` @`2e7f6e46` (`claude/adoring-curie-xdkt83`): 716 filas.
+  - `row` @`4ab304c1` (`claude/inspiring-planck-xhpf4w`): **3 508 983 filas**, todas válidas:
+    - `anvisa-produtos`: 93 770
+    - `anvisa-produtos-modelos`: 1 027 762
+    - `pmda-approvals`: 35 298
+    - `hc-mdall`: 2 333 236
+    - `tga-daen`: 18 917
+  - `regions.mjs` prefiere ahora, por región, las ramas que avisaron las hermanas.
+- **Cambio en el formato común**: una nomenclatura puede ir con código, con nombre o con los dos. Antes se exigía el código, y eso rechazaba 1 156 830 filas legítimas de ANVISA y PMDA (el «nome técnico» y el 一般的名称 se publican sin código). El README y el validador ya lo dicen.
+- **Build en streaming**: tres pasadas sobre las filas, sin tenerlas en memoria. La primera valida y arma la taxonomía y las menciones de fabricantes. La segunda junta las filas de diagnóstico y las claves de sus modelos. La tercera suma las filas sin decisión que son del mismo modelo. Son unos 5 minutos para 3,7 millones de filas.
+- **Criterios nuevos** (publicados, sin palabras clave):
+  - Clase de riesgo de un esquema exclusivo de IVD: `eu-ivdr:*`, `eu-ivdd:*` y las clases «Class N - IVD» de la TGA. Así entran 424 filas de `tga-daen`.
+  - Registro del mismo modelo: una fila sin tipo decidible entra si es del mismo fabricante resuelto con la misma marca (no vacía) y el mismo modelo, o con la misma UDI-DI, que una fila de diagnóstico. Queda como otro registro de ese modelo, con `typeEvidence: 'same-model'`. Así entran 254 registros (BR, CA, US de LIVD y EU).
+- **Nuevos tras deduplicar** (contra la pasada 3):
+  - Registros: +678 (187 515).
+  - Fabricantes: +42 (19 020).
+  - Modelos: 117 628. El salto de +36 188 **no son modelos nuevos**: es el cambio de agrupación. Antes, las filas sin marca ni modelo de un fabricante caían todas en un mismo «modelo»; ahora se separan por tipo de dispositivo.
+  - **Modelos con registro en dos jurisdicciones: 239** (antes, 0).
+  - Jurisdicciones con modelos: US 116 797, EU 434, AU 405, BR 226, CA 5.
+  - Nodos: +2 785 «nome técnico» de ANVISA, +2 092 JMDN y +1 743 términos GMDN sin código (TGA). Todos quedan sin decisión.
+  - Listados del sector: 191 empresas cruzan con un fabricante (+38).
+- **Sin decisión: 3 510 405 filas.**
+  - 2 334 508 no traen ningún tipo (MDALL de Health Canada no publica nomenclatura).
+  - El resto trae nomenclaturas nacionales que no tienen un criterio publicado de «diagnóstico» que se pueda aplicar desde acá: el «nome técnico» de ANVISA y la JMDN sin su 類別. Quedan en `coverage.json` (`catalog.undeterminedTopTypes`) y no se fuerzan.
+- **Taxonomía cargada**: +6 620 conceptos de las nomenclaturas nacionales. La 2.ª corrida da 0 (`evidencia/load-postgres16-pasada4.txt`).
+- **Descartadas**: ninguna nueva.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`

@@ -54,7 +54,9 @@
 | H3.S1.M1 | Lector de regiones por git | Encuentra la rama acordada u otra rama con `out/manifest.json` y verifica el sha256 | test `regions` → pass | HECHO |
 | H3.S1.M2 | Consolidar `us` | Filas leídas y validadas; las inválidas, informadas | salida de build: `región us: 189072 filas` (4 inválidas de LIVD informadas) | HECHO |
 | H3.S1.M3 | Consolidar `eu` | Filas de `eudamed-udi` leídas y válidas | salida de build: `región eu: 716 filas` | HECHO |
-| H3.S1.M4 | Consolidar `row` | Filas de `row` leídas y válidas | salida de build | TODO |
+| H3.S1.M4 | Consolidar `row` | Filas de `row` leídas y válidas | salida de build: `región row: 3508983 filas`, 0 inválidas | HECHO |
+| H3.S1.M5 | Build en streaming | 3,7 M de filas sin agotar la memoria | `node --max-old-space-size=10000 …/build.mjs` → código 0 (`evidencia/build-pasada4.txt`) | HECHO |
+| H3.S2.M2 | Registros del mismo modelo | Una fila sin tipo entra solo si comparte fabricante + marca + modelo o UDI-DI con una de diagnóstico | build: `254 por ser del mismo modelo`; test `consolidate` → pass | HECHO |
 | H3.S2.M1 | Agrupación en modelos | Marca y modelo, más UDI-DI, agrupan registros de fuentes distintas | test `consolidate` → pass | HECHO |
 | H3.S3.M1 | Listados del sector | Las menciones con URL se cruzan con los fabricantes sin fusionar | build imprime menciones y cruces | HECHO |
 

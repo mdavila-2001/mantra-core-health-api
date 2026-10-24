@@ -81,7 +81,10 @@ registros, son cinco filas: `master/` las une.
 | `extra` | object | no | Todo lo demás que la fuente publique y sirva (otros códigos de tipo, Basic UDI-DI, dirección, descripción, GMDN además del product code, …). |
 
 Todos los campos obligatorios aparecen en todas las filas; si la fuente no da
-un valor, va `null`. Nunca se rellena con un valor deducido.
+un valor, va `null`. Nunca se rellena con un valor deducido. Si hay
+`deviceTypeSystem`, va con `deviceTypeCode`, con `deviceTypeName` o con los
+dos: hay nomenclaturas que se publican solo con nombre (GMDN en GUDID sin
+código, «nome técnico» de ANVISA, 一般的名称 de la JMDN).
 
 ### Valores de `deviceTypeSystem`
 

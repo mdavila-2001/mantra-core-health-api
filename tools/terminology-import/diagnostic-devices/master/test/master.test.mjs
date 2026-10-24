@@ -176,7 +176,21 @@ test('validateRow: acepta una fila completa y rechaza lo incompleto', () => {
   );
   assert.match(
     validateRow(row({ deviceTypeSystem: 'fda-product-code' })).join(),
-    /van juntos/,
+    /sin deviceTypeCode ni deviceTypeName/,
+  );
+  assert.match(
+    validateRow(row({ deviceTypeCode: 'JAK' })).join(),
+    /sin deviceTypeSystem/,
+  );
+  assert.deepEqual(
+    validateRow(
+      row({
+        deviceTypeSystem: 'jmdn',
+        deviceTypeName: '汎用超音波画像診断装置',
+      }),
+    ),
+    [],
+    'nomenclatura publicada solo con nombre',
   );
   assert.deepEqual(
     validateRow(

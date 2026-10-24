@@ -24,6 +24,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  readNdjsonGz,
   rowKey,
   validateActorRow,
   validateRow,
@@ -36,16 +37,20 @@ import {
   pcdNode,
 } from './lib/fda-pcd.mjs';
 import { aimlRows } from './lib/own-sources.mjs';
-import { MIRRORS, mirrorFilePath, mirrorVersion } from './lib/sources.mjs';
+import {
+  CACHE_DIR,
+  MIRRORS,
+  mirrorFilePath,
+  mirrorVersion,
+} from './lib/sources.mjs';
 import { Taxonomy } from './lib/taxonomy.mjs';
-import { resolveManufacturers } from './lib/manufacturers.mjs';
-import { consolidate } from './lib/consolidate.mjs';
+import { mentionIdOf, resolveManufacturers } from './lib/manufacturers.mjs';
+import { consolidate, labelKey } from './lib/consolidate.mjs';
 import {
   REGIONS,
   locateRegion,
-  readRegionFiles,
+  materializeRegionFile,
   readRegionManifest,
-  readRegionRows,
 } from './lib/regions.mjs';
 import { coverageReport } from './lib/coverage.mjs';
 import {
@@ -163,58 +168,20 @@ console.log(
   `taxonomía EMDN: ${emdn.nodes.length} términos (copia A ${emdnCheck.rowsA}, copia B ${emdnCheck.rowsB}; solo en A: ${emdnCheck.onlyA.join(', ') || '—'}; solo en B: ${emdnCheck.onlyB.join(', ') || '—'})`,
 );
 
-// --- 2. Filas ---------------------------------------------------------------
-const rows = [];
-const seen = new Set();
-const sourceStats = new Map();
-const stat = (source) => {
-  if (!sourceStats.has(source))
-    sourceStats.set(source, {
-      source,
-      region: null,
-      read: 0,
-      valid: 0,
-      invalid: 0,
-      duplicates: 0,
-      invalidSamples: [],
-    });
-  return sourceStats.get(source);
-};
-const accept = (row, region) => {
-  const s = stat(typeof row?.source === 'string' ? row.source : '(sin source)');
-  s.region ??= region;
-  s.read++;
-  const errors = validateRow(row);
-  if (errors.length) {
-    s.invalid++;
-    if (s.invalidSamples.length < 5)
-      s.invalidSamples.push({
-        sourceRecordId: row?.sourceRecordId ?? null,
-        errors,
-      });
-    return;
-  }
-  const k = rowKey(row);
-  if (seen.has(k)) {
-    s.duplicates++;
-    return;
-  }
-  seen.add(k);
-  s.valid++;
-  row._region = region;
-  rows.push(row);
-};
-
+// --- 2. Fuentes de filas ------------------------------------------------------
+// Las filas se recorren en streaming (varias pasadas) sin tenerlas todas en
+// memoria: una región puede traer millones.
 const own = aimlRows(
   readFileSync(mirrorFilePath('ej86-fda-ai', 'aiml'), 'utf8'),
   { retrievedAt },
 );
-for (const r of own.rows) accept(r, 'master');
 console.log(
   `fuente propia fda-ai-enabled-devices: ${own.rows.length} filas (${own.errors.length} descartadas al leer)`,
 );
 
+const REGION_CACHE = join(CACHE_DIR, '..', 'regions');
 const regionStatus = [];
+const regionInputs = [];
 // Filas de identidad de fabricantes (`manifest.actors`): solo para resolver.
 const actorRows = [];
 const actorStats = [];
@@ -234,25 +201,36 @@ for (const region of REGIONS) {
   }
   const manifest = readRegionManifest(loc, { repoDir: REPO });
   const files = [];
-  let n = 0;
-  for (const row of readRegionRows(loc, manifest, {
-    repoDir: REPO,
-    onFile: (f) => files.push(f),
-  })) {
-    accept(row, region);
-    n++;
+  const paths = [];
+  for (const f of manifest.files ?? []) {
+    const m = materializeRegionFile(loc, f, REGION_CACHE, { repoDir: REPO });
+    files.push({
+      path: f.path,
+      declaredRows: f.rows ?? null,
+      sha256: m.sha256,
+      ok: m.ok,
+    });
+    if (m.ok) paths.push(m.path);
   }
+  regionInputs.push({ region, paths });
   const actorFiles = [];
   let actorsValid = 0;
   let actorsInvalid = 0;
-  for (const a of readRegionFiles(loc, manifest.actors ?? [], {
-    repoDir: REPO,
-    onFile: (f) => actorFiles.push(f),
-  })) {
-    if (validateActorRow(a).length) actorsInvalid++;
-    else {
-      actorsValid++;
-      actorRows.push(a);
+  for (const f of manifest.actors ?? []) {
+    const m = materializeRegionFile(loc, f, REGION_CACHE, { repoDir: REPO });
+    actorFiles.push({
+      path: f.path,
+      declaredRows: f.rows ?? null,
+      sha256: m.sha256,
+      ok: m.ok,
+    });
+    if (!m.ok) continue;
+    for await (const a of readNdjsonGz(m.path)) {
+      if (validateActorRow(a).length) actorsInvalid++;
+      else {
+        actorsValid++;
+        actorRows.push(a);
+      }
     }
   }
   if (manifest.actors?.length)
@@ -272,25 +250,184 @@ for (const region of REGIONS) {
     alternatives: loc.alternatives ?? [],
     manifestGeneratedAt: manifest.generatedAt ?? null,
     files,
-    rowsRead: n,
+    rowsRead: 0,
     gaps: manifest.gaps ?? [],
   });
-  console.log(
-    `región ${region}: ${n} filas desde ${loc.ref ?? loc.dir} (${files.filter((f) => !f.ok).length} archivos con sha256 distinto, descartados)`,
-  );
 }
 
-// --- 3. Taxonomía de los registros, fabricantes y catálogo --------------------
-for (const row of rows) taxonomy.addFromRow(row);
+/** Todas las filas válidas y únicas, en el mismo orden en cada pasada. */
+async function* validRows(onRead) {
+  const seen = new Set();
+  const take = function* (row, region) {
+    const errors = validateRow(row);
+    onRead?.(row, region, errors, false);
+    if (errors.length) return;
+    const k = rowKey(row);
+    if (seen.has(k)) {
+      onRead?.(row, region, [], true);
+      return;
+    }
+    seen.add(k);
+    row._region = region;
+    yield row;
+  };
+  for (const r of own.rows) yield* take(r, 'master');
+  for (const { region, paths } of regionInputs)
+    for (const p of paths)
+      for await (const r of readNdjsonGz(p)) yield* take(r, region);
+}
+
+// --- 3a. Pasada A: validación, taxonomía de los registros y menciones ---------
+const sourceStats = new Map();
+const stat = (source, region) => {
+  if (!sourceStats.has(source))
+    sourceStats.set(source, {
+      source,
+      region,
+      read: 0,
+      valid: 0,
+      invalid: 0,
+      duplicates: 0,
+      diagnostic: 0,
+      attachedBySameModel: 0,
+      invalidSamples: [],
+    });
+  return sourceStats.get(source);
+};
+const lightById = new Map(); // mención + fuente → fila liviana con peso
+let validCount = 0;
+for await (const row of validRows((row, region, errors, dup) => {
+  const s = stat(
+    typeof row?.source === 'string' ? row.source : '(sin source)',
+    region,
+  );
+  if (dup) {
+    s.duplicates++;
+    s.valid--;
+    return;
+  }
+  s.read++;
+  if (errors.length) {
+    s.invalid++;
+    if (s.invalidSamples.length < 5)
+      s.invalidSamples.push({
+        sourceRecordId: row?.sourceRecordId ?? null,
+        errors,
+      });
+  } else s.valid++;
+})) {
+  validCount++;
+  taxonomy.addFromRow(row);
+  const k = `${mentionIdOf(row)}\u0000${row.source}`;
+  const l = lightById.get(k);
+  if (l) l._weight++;
+  else
+    lightById.set(k, {
+      source: row.source,
+      sourceRecordId: row.sourceRecordId,
+      sourceUrl: row.sourceUrl,
+      sourceVersion: row.sourceVersion,
+      retrievedAt: row.retrievedAt,
+      manufacturerName: row.manufacturerName,
+      manufacturerCountry: row.manufacturerCountry,
+      manufacturerRegistryId: row.manufacturerRegistryId,
+      extra: row.extra?.manufacturerIds
+        ? { manufacturerIds: row.extra.manufacturerIds }
+        : undefined,
+      _weight: 1,
+    });
+}
+for (const r of regionStatus)
+  if (r.status === 'consolidated')
+    r.rowsRead = [...sourceStats.values()]
+      .filter((s) => s.region === r.region)
+      .reduce((n, s) => n + s.read, 0);
+for (const r of regionStatus)
+  if (r.status === 'consolidated')
+    console.log(
+      `región ${r.region}: ${r.rowsRead} filas desde ${r.ref ?? r.dir} (${r.files.filter((f) => !f.ok).length} archivos con sha256 distinto, descartados)`,
+    );
 const propagated = taxonomy.propagateByCrosswalk();
-const resolution = resolveManufacturers([...rows, ...actorRows]);
+const resolution = resolveManufacturers([...lightById.values(), ...actorRows], {
+  trackRows: false,
+});
+lightById.clear();
 if (actorRows.length)
   console.log(
     `identidades de fabricantes publicadas (actores): ${actorRows.length}`,
   );
-const catalog = consolidate(rows, taxonomy, resolution);
+
+// --- 3b. Pasada B: filas de diagnóstico y claves de sus modelos ----------------
+const keep = [];
+const dxKeys = new Set();
+const modelKeys = (row) => {
+  const ent = resolution.entityOf(row);
+  const out = [];
+  if (labelKey(row.brandName) !== '')
+    out.push(
+      `${ent}\u0000${labelKey(row.brandName)}\u0000${labelKey(row.model)}`,
+    );
+  if (row.udiDi?.trim()) out.push(`${ent}\u0000udi\u0000${row.udiDi.trim()}`);
+  return out;
+};
+const slim = (row) => {
+  const { extra, ...rest } = row;
+  // `extra.deviceTypes` hace falta para decidir y `extra.manufacturerIds` para
+  // resolver el fabricante; el resto de `extra` no.
+  if (!extra?.deviceTypes && !extra?.manufacturerIds) return rest;
+  const e = {};
+  if (extra.deviceTypes) e.deviceTypes = extra.deviceTypes;
+  if (extra.manufacturerIds) e.manufacturerIds = extra.manufacturerIds;
+  return { ...rest, extra: e };
+};
+let notDiagnosticRows = 0;
+for await (const row of validRows()) {
+  const d = taxonomy.decideRow(row).diagnostic;
+  if (d === true) {
+    keep.push(slim(row));
+    for (const k of modelKeys(row)) dxKeys.add(k);
+  } else if (d === false) notDiagnosticRows++;
+}
+// --- 3c. Pasada C: filas sin decisión que son del mismo modelo ----------------
+let undeterminedSeen = 0;
+const undeterminedByType = new Map();
+let undeterminedNoType = 0;
+for await (const row of validRows()) {
+  const d = taxonomy.decideRow(row);
+  if (d.diagnostic !== null) continue;
+  undeterminedSeen++;
+  if (modelKeys(row).some((k) => dxKeys.has(k))) keep.push(slim(row));
+  else {
+    if (!d.types.length) undeterminedNoType++;
+    // Sin nodo en la taxonomía: se cuenta por nomenclatura declarada.
+    const ts = d.types.length
+      ? d.types
+      : [
+          row.deviceTypeSystem
+            ? `${row.deviceTypeSystem}|(sin criterio)`
+            : '(sin tipo)',
+        ];
+    for (const t of ts)
+      undeterminedByType.set(t, (undeterminedByType.get(t) ?? 0) + 1);
+  }
+}
+dxKeys.clear();
+const catalog = consolidate(keep, taxonomy, resolution);
+// Los conteos de excluidas salen de las pasadas (consolidate solo vio lo que se guardó).
+catalog.excluded.notDiagnostic =
+  notDiagnosticRows + catalog.excluded.notDiagnostic;
+catalog.excluded.undetermined =
+  undeterminedSeen - catalog.excluded.attachedBySameModel;
+catalog.excluded.noType = undeterminedNoType;
+catalog.excluded.undeterminedByType = undeterminedByType;
+for (const m of catalog.models)
+  for (const r of m.registrations) {
+    const s = sourceStats.get(r.source);
+    if (r.typeEvidence === 'own-type') s.diagnostic++;
+    else s.attachedBySameModel++;
+  }
 console.log(
-  `filas válidas ${rows.length}; de diagnóstico ${catalog.included}; fabricantes ${catalog.manufacturers.length}; modelos ${catalog.models.length}; nodos heredados por mapeo ${propagated}`,
+  `filas válidas ${validCount}; de diagnóstico ${catalog.included} (${catalog.excluded.attachedBySameModel} por ser del mismo modelo); fabricantes ${catalog.manufacturers.length}; modelos ${catalog.models.length}; nodos heredados por mapeo ${propagated}`,
 );
 
 const industryData = loadIndustryDirectories(

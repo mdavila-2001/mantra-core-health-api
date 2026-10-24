@@ -325,7 +325,16 @@ export function registryIdsOfRow(row) {
  *        relaciones publicadas entre ids (`lei:…` → `lei:…`).
  * @returns {{ entities: object[], entityOfRow: Map<string,string>, review: object[] }}
  */
-export function resolveManufacturers(rows, { groupLinks = [] } = {}) {
+/** Id de la mención (razón social verbatim + país + ids publicados) de una fila. */
+export function mentionIdOf(row) {
+  const ids = registryIdsOfRow(row).sort();
+  return `m:${row.manufacturerName.trim()}|${row.manufacturerCountry ?? ''}|${ids.join(',')}`;
+}
+
+export function resolveManufacturers(
+  rows,
+  { groupLinks = [], trackRows = true } = {},
+) {
   const uf = new UnionFind();
   const mentions = new Map(); // mentionId → { name, key, country, ids:Set, rows:[], sources:Set }
   const rowMention = new Map();
@@ -335,7 +344,7 @@ export function resolveManufacturers(rows, { groupLinks = [] } = {}) {
     const { key } = normalizeManufacturerName(row.manufacturerName);
     const country = row.manufacturerCountry ?? null;
     const ids = registryIdsOfRow(row);
-    const mid = `m:${row.manufacturerName.trim()}|${country ?? ''}|${ids.sort().join(',')}`;
+    const mid = mentionIdOf(row);
     if (!mentions.has(mid))
       mentions.set(mid, {
         id: mid,
@@ -348,7 +357,7 @@ export function resolveManufacturers(rows, { groupLinks = [] } = {}) {
         sample: null,
       });
     const m = mentions.get(mid);
-    m.rowCount++;
+    m.rowCount += row._weight ?? 1;
     m.sources.add(row.source);
     m.sample ??= {
       source: row.source,
@@ -357,7 +366,8 @@ export function resolveManufacturers(rows, { groupLinks = [] } = {}) {
       sourceVersion: row.sourceVersion,
       retrievedAt: row.retrievedAt,
     };
-    rowMention.set(`${row.source}\u0000${row.sourceRecordId}`, mid);
+    if (trackRows)
+      rowMention.set(`${row.source}\u0000${row.sourceRecordId}`, mid);
     uf.find(mid);
   }
 
@@ -586,7 +596,8 @@ export function resolveManufacturers(rows, { groupLinks = [] } = {}) {
     (a, b) =>
       b.rowCount - a.rowCount || a.displayName.localeCompare(b.displayName),
   );
-  return { entities, entityOfRow, review };
+  const entityOf = (row) => entityOfMention.get(mentionIdOf(row));
+  return { entities, entityOfRow, entityOfMention, entityOf, review };
 }
 
 function mentionLabel(m) {

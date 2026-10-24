@@ -25,6 +25,13 @@ export const EMDN_IVD_CATEGORY = 'W';
 export const EMDN_IVD_URL =
   'https://www.medtecheurope.org/wp-content/uploads/2025/05/250522_medtech-europe_emdn-booklet-final2.pdf';
 
+/**
+ * Esquemas de clase de riesgo exclusivos de IVD: Reglamento (UE) 2017/746
+ * (`eu-ivdr:A`…`D`), Directiva 98/79/CE (`eu-ivdd:…`) y las clases IVD de la
+ * TGA (`au:Class 1 - IVD` … `au:Class 4 - IVD`).
+ */
+export const IVD_RISK_CLASS = /^(eu-ivdr|eu-ivdd):|^au:.*\bIVD\b/;
+
 export const nodeKey = (system, code, name) =>
   `${system}|${code ?? `name:${(name ?? '').trim().toUpperCase()}`}`;
 
@@ -269,6 +276,14 @@ export class Taxonomy {
     if (dx.length) return { diagnostic: true, types: dx.map((n) => n.key) };
     if (nodes.length && nodes.every((n) => n.diagnostic === false))
       return { diagnostic: false, types: nodes.map((n) => n.key) };
+    // Clase de riesgo de un esquema que el regulador define solo para IVD
+    // (IVDR/IVDD de la UE, «Class N - IVD» de la TGA): es diagnóstico in vitro
+    // por definición del propio registro.
+    if (row.riskClass && IVD_RISK_CLASS.test(row.riskClass))
+      return {
+        diagnostic: true,
+        types: [...nodes.map((n) => n.key), `ivd-risk-class|${row.riskClass}`],
+      };
     return { diagnostic: null, types: nodes.map((n) => n.key) };
   }
 

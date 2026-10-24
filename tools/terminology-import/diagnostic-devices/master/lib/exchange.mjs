@@ -104,14 +104,17 @@ export function validateRow(row) {
     );
   if (row.deviceTypeSystem !== null && !SYSTEM_RE.test(row.deviceTypeSystem))
     errors.push(`deviceTypeSystem desconocido: ${row.deviceTypeSystem}`);
+  // Un tipo necesita su nomenclatura, y una nomenclatura necesita código o
+  // nombre (hay nomenclaturas que se publican solo con nombre: GMDN en GUDID
+  // sin código, «nome técnico» de ANVISA, 一般的名称 de la JMDN en PMDA).
+  if (row.deviceTypeCode !== null && row.deviceTypeSystem === null)
+    errors.push('deviceTypeCode sin deviceTypeSystem');
   if (
-    (row.deviceTypeCode === null) !== (row.deviceTypeSystem === null) &&
-    row.deviceTypeSystem !== 'gmdn-pt'
-  ) {
-    errors.push(
-      'deviceTypeCode y deviceTypeSystem van juntos (salvo gmdn-pt, que no tiene código)',
-    );
-  }
+    row.deviceTypeSystem !== null &&
+    row.deviceTypeCode === null &&
+    (row.deviceTypeName === null || row.deviceTypeName.trim() === '')
+  )
+    errors.push('deviceTypeSystem sin deviceTypeCode ni deviceTypeName');
   if (
     'extra' in row &&
     (row.extra === null ||

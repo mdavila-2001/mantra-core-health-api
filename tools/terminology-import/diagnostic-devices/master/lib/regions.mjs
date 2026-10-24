@@ -11,13 +11,22 @@
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 import { parseNdjsonGzBuffer } from './exchange.mjs';
 
 export const REGIONS = Object.freeze(['us', 'eu', 'row']);
 export const REGION_BRANCH = (region) => `justin/seed-dx-devices-${region}`;
+/**
+ * Ramas preferidas por región, en orden: la acordada y la que cada sesión
+ * hermana avisó que el entorno la obliga a usar (mensajes del 2026-10-24).
+ */
+export const REGION_BRANCHES = Object.freeze({
+  us: [REGION_BRANCH('us')],
+  eu: [REGION_BRANCH('eu'), 'claude/adoring-curie-xdkt83'],
+  row: [REGION_BRANCH('row'), 'claude/inspiring-planck-xhpf4w'],
+});
 export const REGION_OUT = (region) =>
   `tools/terminology-import/diagnostic-devices/${region}/out`;
 
@@ -51,7 +60,11 @@ export function locateRegion(region, { repoDir, dirOverride } = {}) {
         };
   const manifestPath = `${REGION_OUT(region)}/manifest.json`;
   const candidates = [];
-  const preferred = `origin/${REGION_BRANCH(region)}`;
+  const preferred = (REGION_BRANCHES[region] ?? [REGION_BRANCH(region)]).map(
+    (b) => `origin/${b}`,
+  );
+  const rank = (ref) =>
+    preferred.includes(ref) ? preferred.indexOf(ref) : preferred.length;
   const refs =
     tryGit(
       ['for-each-ref', '--format=%(refname:short)', 'refs/remotes/origin'],
@@ -72,7 +85,12 @@ export function locateRegion(region, { repoDir, dirOverride } = {}) {
       .toString()
       .trim()
       .split(' ');
-    candidates.push({ ref, commit, commitDate, preferred: ref === preferred });
+    candidates.push({
+      ref,
+      commit,
+      commitDate,
+      preferred: preferred.includes(ref),
+    });
   }
   if (!candidates.length)
     return {
@@ -82,8 +100,7 @@ export function locateRegion(region, { repoDir, dirOverride } = {}) {
     };
   candidates.sort(
     (a, b) =>
-      Number(b.preferred) - Number(a.preferred) ||
-      b.commitDate.localeCompare(a.commitDate),
+      rank(a.ref) - rank(b.ref) || b.commitDate.localeCompare(a.commitDate),
   );
   return {
     region,
@@ -130,4 +147,35 @@ export function* readRegionFiles(loc, files, { repoDir, onFile } = {}) {
 /** Filas de equipos de una región (`manifest.files`). */
 export function* readRegionRows(loc, manifest, opts = {}) {
   yield* readRegionFiles(loc, manifest.files, opts);
+}
+
+/**
+ * Copia un archivo de la región a disco (una vez por commit) y verifica su
+ * sha256 contra el manifest. Devuelve `{ path, sha256, ok }`; con `ok: false`
+ * el archivo no se usa. Leer desde disco permite recorrerlo en streaming
+ * varias veces sin cargarlo entero.
+ */
+export function materializeRegionFile(loc, f, cacheRoot, { repoDir } = {}) {
+  if (loc.kind === 'dir') {
+    const path = join(loc.dir, f.path);
+    const sha = createHash('sha256').update(readFileSync(path)).digest('hex');
+    return { path, sha256: sha, ok: !f.sha256 || f.sha256 === sha };
+  }
+  const path = join(cacheRoot, loc.region, loc.commit, f.path);
+  if (!existsSync(path)) {
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(
+      path,
+      git(
+        [
+          'cat-file',
+          'blob',
+          `${loc.commit}:${REGION_OUT(loc.region)}/${f.path}`,
+        ],
+        repoDir,
+      ),
+    );
+  }
+  const sha = createHash('sha256').update(readFileSync(path)).digest('hex');
+  return { path, sha256: sha, ok: !f.sha256 || f.sha256 === sha };
 }

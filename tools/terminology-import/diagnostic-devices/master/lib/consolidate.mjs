@@ -95,42 +95,57 @@ const mostCommon = (values) => {
 /**
  * @param {object[]} rows          filas válidas (con `_region` opcional)
  * @param {import('./taxonomy.mjs').Taxonomy} taxonomy
- * @param {{ entities: object[], entityOfRow: Map<string,string> }} resolution
+ * @param {{ entities: object[], entityOf?: Function, entityOfRow?: Map<string,string> }} resolution
+ *
+ * Una fila con tipo de diagnóstico abre (o se suma a) un modelo. Una fila **sin
+ * decisión** (registro sin nomenclatura decidible, p. ej. MDALL o ANVISA) solo
+ * entra si es del mismo modelo que una fila de diagnóstico: mismo fabricante
+ * resuelto y misma marca + modelo (con marca no vacía), o misma UDI-DI. Así
+ * queda como otro registro del mismo modelo en otra jurisdicción, con
+ * `typeEvidence: 'same-model'`. Una fila con tipo NO diagnóstico nunca entra.
  */
 export function consolidate(rows, taxonomy, resolution) {
   const entityById = new Map(resolution.entities.map((e) => [e.id, e]));
-  const included = [];
+  const entityOf =
+    resolution.entityOf ?? ((row) => resolution.entityOfRow.get(rowKey(row)));
+  const candidates = [];
   const excluded = {
     notDiagnostic: 0,
     undetermined: 0,
     undeterminedByType: new Map(),
     noType: 0,
+    attachedBySameModel: 0,
   };
   for (const row of rows) {
     const d = taxonomy.decideRow(row);
-    if (d.diagnostic === true) included.push({ row, types: d.types });
-    else if (d.diagnostic === false) excluded.notDiagnostic++;
-    else {
-      excluded.undetermined++;
-      if (!d.types.length) excluded.noType++;
-      for (const t of d.types)
-        excluded.undeterminedByType.set(
-          t,
-          (excluded.undeterminedByType.get(t) ?? 0) + 1,
-        );
+    if (d.diagnostic === false) {
+      excluded.notDiagnostic++;
+      continue;
     }
+    candidates.push({ row, types: d.types, diagnostic: d.diagnostic === true });
   }
 
-  // Agrupar en modelos.
-  const uf = new UF(included.length);
+  // Agrupar en modelos. Sin marca ni modelo, la clave suma el tipo para no
+  // juntar todo lo «sin etiqueta» de un fabricante.
+  const uf = new UF(candidates.length);
   const byLabel = new Map();
   const byUdi = new Map();
-  included.forEach((x, i) => {
-    const ent = resolution.entityOfRow.get(rowKey(x.row));
+  candidates.forEach((x, i) => {
+    const ent = entityOf(x.row);
     x.entityId = ent;
-    const k = `${ent}\u0000${labelKey(x.row.brandName)}\u0000${labelKey(x.row.model)}`;
-    if (byLabel.has(k)) uf.union(byLabel.get(k), i);
-    else byLabel.set(k, i);
+    const brand = labelKey(x.row.brandName);
+    const model = labelKey(x.row.model);
+    // Una fila sin decisión y sin marca no puede probar que es el mismo modelo.
+    const labelUsable = brand !== '' || (x.diagnostic && model !== '');
+    if (labelUsable) {
+      const k = `${ent}\u0000${brand}\u0000${model}`;
+      if (byLabel.has(k)) uf.union(byLabel.get(k), i);
+      else byLabel.set(k, i);
+    } else if (x.diagnostic) {
+      const k = `${ent}\u0000\u0000\u0000${x.types.join(',')}`;
+      if (byLabel.has(k)) uf.union(byLabel.get(k), i);
+      else byLabel.set(k, i);
+    }
     const udi = x.row.udiDi?.trim();
     if (udi) {
       const uk = `${ent}\u0000${udi}`;
@@ -139,15 +154,36 @@ export function consolidate(rows, taxonomy, resolution) {
     }
   });
   const groups = new Map();
-  included.forEach((_, i) => {
+  candidates.forEach((_, i) => {
     const r = uf.find(i);
     if (!groups.has(r)) groups.set(r, []);
     groups.get(r).push(i);
   });
+  const included = [];
+  for (const [r, idx] of groups) {
+    const hasDx = idx.some((i) => candidates[i].diagnostic);
+    if (hasDx) {
+      for (const i of idx) {
+        if (!candidates[i].diagnostic) excluded.attachedBySameModel++;
+        included.push(candidates[i]);
+      }
+    } else {
+      for (const i of idx) {
+        excluded.undetermined++;
+        if (!candidates[i].types.length) excluded.noType++;
+        for (const t of candidates[i].types)
+          excluded.undeterminedByType.set(
+            t,
+            (excluded.undeterminedByType.get(t) ?? 0) + 1,
+          );
+      }
+      groups.delete(r);
+    }
+  }
 
   const models = [];
   for (const idx of groups.values()) {
-    const xs = idx.map((i) => included[i]);
+    const xs = idx.map((i) => candidates[i]);
     const ent = entityById.get(xs[0].entityId);
     const brand = mostCommon(xs.map((x) => x.row.brandName));
     const model = mostCommon(xs.map((x) => x.row.model));
@@ -155,7 +191,8 @@ export function consolidate(rows, taxonomy, resolution) {
       `mantra:dx-devices:model:${ent.anchor}:${labelKey(brand)}:${labelKey(model)}:${mostCommon(xs.map((x) => x.row.udiDi)) ?? ''}`,
     );
     const registrations = xs
-      .map(({ row }) => ({
+      .map(({ row, diagnostic }) => ({
+        typeEvidence: diagnostic ? 'own-type' : 'same-model',
         source: row.source,
         sourceRecordId: row.sourceRecordId,
         sourceUrl: row.sourceUrl,
@@ -189,7 +226,9 @@ export function consolidate(rows, taxonomy, resolution) {
         ...new Set(xs.map((x) => x.row.model).filter(Boolean)),
       ].sort(),
       udiDis: [...new Set(xs.map((x) => x.row.udiDi).filter(Boolean))].sort(),
-      deviceTypes: [...new Set(xs.flatMap((x) => x.types))].sort(),
+      deviceTypes: [
+        ...new Set(xs.filter((x) => x.diagnostic).flatMap((x) => x.types)),
+      ].sort(),
       jurisdictions: [
         ...new Set(registrations.map((r) => r.jurisdiction).filter(Boolean)),
       ].sort(),

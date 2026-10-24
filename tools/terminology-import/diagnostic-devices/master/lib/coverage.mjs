@@ -68,6 +68,7 @@ export function coverageReport({
     catalog: {
       rowsIncluded: catalog.included,
       rowsNotDiagnostic: catalog.excluded.notDiagnostic,
+      rowsAttachedBySameModel: catalog.excluded.attachedBySameModel ?? 0,
       rowsUndetermined: catalog.excluded.undetermined,
       rowsWithoutType: catalog.excluded.noType,
       undeterminedTopTypes: Object.fromEntries(
@@ -175,6 +176,8 @@ export function coverageReport({
     table(
       {
         'Filas de diagnóstico consolidadas': json.catalog.rowsIncluded,
+        '… de ellas sin tipo propio, sumadas por ser del mismo modelo':
+          json.catalog.rowsAttachedBySameModel,
         'Filas no diagnósticas (descartadas)': json.catalog.rowsNotDiagnostic,
         'Filas sin decisión (tipo sin criterio publicado)':
           json.catalog.rowsUndetermined,
