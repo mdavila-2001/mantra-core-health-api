@@ -12,7 +12,7 @@ Prohibido escribir el primer `Edit`/`Write` de código antes de que exista el pl
 
 | Qué | Dónde |
 |---|---|
-| El plan | En el **issue** que origina el trabajo o en la **descripción del PR**. Si el trabajo dura más de una sesión, abrí el PR temprano como borrador y mantené el plan ahí. |
+| El plan | En el **issue** que origina el trabajo o en la **descripción del PR**. Si el trabajo dura más de una sesión, el plan vive en el issue de origen. Los PR nunca se abren en borrador: se abren listos y mergeables. |
 | El reporte | En la descripción del PR (ver regla 40) |
 | La evidencia | Salida literal en la *Verificación* del PR; capturas y traces adjuntos al PR o al issue |
 

@@ -40,7 +40,7 @@ issue por repo, enlazados entre sí (ver `github-issues-projects`).
 
 - Al cerrar el trabajo. Siempre.
 - Al cerrar la sesión aunque el trabajo **no** esté terminado — ese es el caso más importante:
-  el PR (en borrador si hace falta) y los issues son lo que permite retomarlo sin arqueología.
+  el PR (abierto como listo, nunca en borrador) y los issues son lo que permite retomarlo sin arqueología.
 - Al entregar el control por un bloqueo externo: el bloqueo es un issue.
 
 No existe "lo reporto cuando termine". Si la sesión termina, el reporte se escribe.
