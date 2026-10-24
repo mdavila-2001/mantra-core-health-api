@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical` (parte 2/2).
- * 28 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 29 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
@@ -19,6 +19,7 @@ export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
   ['service_requests', 'created_by_user_id', 'iam', 'users', 'id'],
   ['service_requests', 'custodian_tenant_id', 'directory', 'tenants', 'id'],
   ['service_requests', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['service_requests', 'form_instance_id', 'forms', 'form_instances', 'id'],
   ['service_requests', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_requests', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['service_requests', 'performer_tenant_id', 'directory', 'tenants', 'id'],

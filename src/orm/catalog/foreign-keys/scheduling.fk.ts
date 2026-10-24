@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `scheduling`.
- * 113 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 115 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
@@ -13,6 +13,8 @@ export const schedulingForeignKeys: readonly ForeignKeyTuple[] = [
   ['appointment_bookings', 'booking_channel_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['appointment_bookings', 'booking_policy_id', 'scheduling', 'booking_policies', 'id'],
   ['appointment_bookings', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['appointment_bookings', 'follow_up_of_booking_id', 'scheduling', 'appointment_bookings', 'id'],
+  ['appointment_bookings', 'form_instance_id', 'forms', 'form_instances', 'id'],
   ['appointment_bookings', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['appointment_bookings', 'practitioner_service_offering_id', 'scheduling', 'practitioner_service_offerings', 'id'],
   ['appointment_bookings', 'resource_id', 'scheduling', 'schedulable_resources', 'id'],

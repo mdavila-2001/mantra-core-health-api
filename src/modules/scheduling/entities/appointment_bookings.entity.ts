@@ -99,25 +99,6 @@ export class AppointmentBookings {
   bookingPolicyId?: string;
 
   /**
-   * P42: la consulta de la que sale esta reconsulta. El vínculo va en UN solo
-   * lado —la reconsulta apunta a su origen—; el sentido inverso
-   * (`followUpBookingId`) se deriva al leer.
-   */
-  @Property({
-    fieldName: 'follow_up_of_booking_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK → scheduling.appointment_bookings
-  followUpOfBookingId?: string;
-
-  /**
-   * P43: instancia (cerrada) del formulario médico de la consulta de origen de
-   * la que sale la reconsulta. Sólo tiene sentido con `followUpOfBookingId`.
-   */
-  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
-  formInstanceId?: string;
-
-  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
@@ -170,7 +151,7 @@ export class AppointmentBookings {
     fieldName: 'practitioner_service_offering_id',
     type: 'uuid',
     nullable: true,
-  }) // FK → scheduling.practitioner_service_offerings
+  }) // FK → scheduling.practitioner_service_offerings (inferida)
   practitionerServiceOfferingId?: string;
 
   /**
@@ -186,4 +167,23 @@ export class AppointmentBookings {
     nullable: true,
   })
   serviceSnapshot?: unknown;
+
+  /**
+   * P42: la consulta de la que sale esta reconsulta. El vínculo va en UN solo
+   * lado —la reconsulta apunta a su origen—; el sentido inverso
+   * (`followUpBookingId`) se deriva al leer.
+   */
+  @Property({
+    fieldName: 'follow_up_of_booking_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → scheduling.appointment_bookings
+  followUpOfBookingId?: string;
+
+  /**
+   * P43: instancia (cerrada) del formulario médico de la consulta de origen de
+   * la que sale la reconsulta. Sólo tiene sentido con `followUpOfBookingId`.
+   */
+  @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
+  formInstanceId?: string;
 }
