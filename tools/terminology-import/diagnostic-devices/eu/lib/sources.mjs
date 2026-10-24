@@ -17,11 +17,15 @@ export const SOURCES = {
       'https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en',
     probeUrl:
       'https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en',
+    // La página de la Comisión enlaza «download full list» a esta página de la
+    // aplicación EMDN, que a su vez enlaza el Excel oficial (verificado el
+    // 2026-10-24: build/EMDN v2026_EN..xlsx).
+    downloadPage: 'https://webgate.ec.europa.eu/dyna2/emdn/M90',
     access:
       'Descarga completa en Excel enlazada desde la página oficial (el enlace se descubre en la página, no se fija a mano). Navegador por código: https://webgate.ec.europa.eu/dyna2/emdn/',
     terms: {
-      verified: false,
-      text: 'La Comisión declara la EMDN accesible a todos y sin costo. Reutilización de documentos de la Comisión: Decisión 2011/833/UE (con atribución). Pendiente leer el aviso legal de la página al habilitar el host.',
+      verified: true,
+      text: 'Leído en vivo el 2026-10-24: la página oficial (webgate.ec.europa.eu/dyna2/emdn/M90) dice que la EMDN entera es accesible a todos y sin costo, y su pie enlaza el aviso legal de la Comisión (commission.europa.eu/legal-notice_en): salvo indicación en contrario, el contenido de la UE se licencia CC BY 4.0 bajo la Decisión 2011/833/UE; reutilización permitida con atribución e indicando cambios.',
     },
     autoFetch: true,
   },
@@ -36,7 +40,7 @@ export const SOURCES = {
       'GET /udi, /actors, /reference con filtros en mayúsculas (NOMENCLATURE_CODE, MF_SRN, …), format=json|csv, paginación por `nextLink`. Contrato verificado contra el OpenAPI v1.0 publicado por DG SANTE (copia en Arya012-UvA/Eudamed_Lookup@fe5bd47, docs/eudamed-public-openapi-v1.0.json) y contra el cliente @t4dhg/mcp-eudamed@0.1.1. Clave de suscripción opcional (EUDAMED_SUBSCRIPTION_KEY): un cliente reporta 200 sin clave, otro documenta la clave del portal de desarrolladores.',
     terms: {
       verified: false,
-      text: 'API pública oficial. Reutilización de datos de la Comisión: Decisión 2011/833/UE con atribución de la fuente. Pendiente leer las condiciones del portal de desarrolladores al habilitar el host.',
+      text: 'API pública oficial; se usó sin clave (200 verificado en vivo el 2026-10-24). Aviso legal general de la Comisión leído en vivo: CC BY 4.0 bajo la Decisión 2011/833/UE salvo indicación en contrario, y advierte que puede hacer falta despejar derechos cuando el contenido identifica a personas físicas (por eso no se publican PRRC, correos ni teléfonos de actores). El aviso propio de EUDAMED no se pudo leer: la página es una aplicación JavaScript que no devuelve texto sin navegador.',
     },
     autoFetch: true,
   },
@@ -64,8 +68,8 @@ export const SOURCES = {
     access:
       'Búsqueda pública por fabricante y tipo GMDN con botón «Download CSV» por resultado. No hay API ni descarga completa documentadas; el formato del CSV no se pudo ver desde esta sesión.',
     terms: {
-      verified: false,
-      text: 'Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.',
+      verified: true,
+      text: 'Leído en vivo el 2026-10-24: pard.mhra.gov.uk solo muestra «© Crown Copyright» y no declara la Open Government Licence; los términos de GOV.UK (gov.uk/help/terms-conditions) dicen que la mayoría, no todo, del contenido de GOV.UK va bajo OGL, y PARD no está en GOV.UK. Además, los nombres de tipo GMDN son propiedad de la GMDN Agency con uso comercial restringido. Sin licencia abierta explícita: no se descarga (hueco).',
     },
     autoFetch: false,
   },
@@ -78,8 +82,8 @@ export const SOURCES = {
     access:
       'POST /public/udi/basic-udis?page&size (cuerpo {}) → {values:[…]}; GET /public/udi/udi-dis/{id}/details; /public/act/actors y /public/act/mandates. Contrato verificado contra zdavatz/swissdamed2sqlite@45cd947 (GPL-3.0).',
     terms: {
-      verified: false,
-      text: 'Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).',
+      verified: true,
+      text: 'Leído en vivo el 2026-10-24: las condiciones de uso de Swissmedic prohíben reproducir la información del sitio sin autorización expresa e incluyen expresamente toda extracción y almacenamiento automatizado (scraping/data mining), salvo las áreas pensadas para eso (RSS). No hay términos de reutilización propios de swissdamed. Sin autorización de Swissmedic NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).',
     },
     autoFetch: false,
   },
@@ -91,10 +95,10 @@ export const SOURCES = {
       'https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/',
     probeUrl: 'https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/',
     access:
-      'CSV completo (más de un millón de filas, semanal) y variaciones semanales; diccionario de datos v2.0 en PDF. Clave del registro: progressivo_dm_ass + tipologia_dm.',
+      'ZIP semanal con el CSV completo (también en JSON y XML; se usa el CSV, separador «;», ~2,4 millones de filas al corte 2026-10-19) y diccionario de datos v2.0 en PDF. Clave del registro: tipologia_dm + progressivo_dm_ass.',
     terms: {
-      verified: false,
-      text: 'Italian Open Data License v2.0 según la ficha del conjunto (leída vía buscador). Pendiente confirmar en la ficha al habilitar el host.',
+      verified: true,
+      text: 'Italian Open Data Licence v2.0, leída en vivo en la ficha del conjunto el 2026-10-24 (campo «Licenza»). Atribución: Ministero della Salute.',
     },
     autoFetch: true,
   },
