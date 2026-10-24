@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/seed-procedures-treatments` (reiniciada desde `dev` tras el merge de #689; #721 mergeó hasta la pasada 6 y las pasadas 7+ van en un PR nuevo, con la rama rebasada sobre `dev`)
 - Peldaño de evidencia alcanzado: `TESTED` en el importador (20 tests dirigidos en verde, build determinista) y carga verificada en PostgreSQL 16 desechable con idempotencia medida. No `VERIFIED` de punta a punta: el modelo vigente no puede guardar la procedencia de las relaciones (las relaciones solo se cargaron en la base con la tabla propuesta).
-- Avance: 13 / 17 microtareas HECHO (76,5 %). Estado vivo: se reescribe en cada pasada.
+- Avance: 14 / 19 microtareas HECHO (73,7 %). Estado vivo: se reescribe en cada pasada.
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -16,6 +16,8 @@
 | H6.S2.M1 | Clasificación MeSH depurada | `node --test …` | 19/19; E05 y conceptos de tiempo/estrategia fuera |
 | H6.S2.M2 | Pasada 6: Cochrane (MEDLINE) | `fetch-pubmed.mjs --subset cochrane` (3 particiones por fecha, 17 554/17 554) + `build.mjs` | +171 procedimientos, +8 075 relaciones (5 610 pares nuevos) |
 | H6.S2.M4 | Pasada 7: guías de práctica clínica (MEDLINE) | `fetch-pubmed.mjs --subset guidelines` (47 particiones por fecha de alta, 42 934 artículos de revista de 44 031; los 1 097 restantes son libros de Bookshelf) + `build.mjs` | +240 procedimientos, +25 469 relaciones (19 404 pares nuevos) |
+| H6.S2.M5 | Pasada 8: ensayos controlados aleatorizados publicados (MEDLINE) | `fetch-pubmed.mjs --subset rct` (403 particiones, 673 366/673 366) + `build.mjs` | +303 procedimientos, +119 465 relaciones «en estudio» (92 173 pares nuevos); 0 con otro tipo de afirmación o sin PMID |
+| H5.S1.M3 (pasada 8) | Fase 2 sobre el corpus de la pasada 8 | `validate-siblings.mjs --keys` | enfermedad 135 369/187 387 (72,2 %; 890 MeSH de condición sin concepto); sitio 79 624/79 638 |
 | H5.S1.M3 (pasada 7) | Fase 2 sobre el corpus de la pasada 7 | `validate-siblings.mjs --keys` | enfermedad 52 913/67 922 (77,9 %; 754 MeSH de condición sin concepto); sitio 79 624/79 638 |
 | H6.S1.M4 | ICD-10-PCS → parte del cuerpo por definición | `build.mjs` | 79 256 códigos declarados = expandidos = válidos en el archivo de orden; 79 169 relaciones (87 de eje «Qualifier» fuera) |
 | H6.S1.M5 | NCIt oficial 26.09d | `build.mjs` | 450 roles (vs 438 de la OBO Edition), 16 relaciones nuevas, 0 R180 |
@@ -27,9 +29,9 @@
 
 ## A medias
 ### H6.S2.M3 — Saturación con la red abierta
-- Qué anda: pasadas 5 (fuentes grandes), 6 (Cochrane) y 7 (guías de práctica clínica) registradas y respaldadas; ICHI, ICD-11, NNAC, CUPS, NICE, CIE-10-ES y MRCOC evaluadas con motivo.
+- Qué anda: pasadas 5 (fuentes grandes), 6 (Cochrane), 7 (guías de práctica clínica) y 8 (ensayos aleatorizados) registradas y respaldadas; registros de ensayos fuera de ClinicalTrials.gov evaluados (texto libre o solo medicamentos); ICHI, ICD-11, NNAC, CUPS, NICE, CIE-10-ES y MRCOC evaluadas con motivo.
 - Qué no anda: todavía no hay dos pasadas seguidas con 0 desde que se abrió la red.
-- Qué falta exactamente: pasada 8 (ensayos controlados aleatorizados publicados en MEDLINE, descarga en curso: 673 366 registros) y pasadas con registros de ensayos fuera de ClinicalTrials.gov, hasta dos con 0.
+- Qué falta exactamente: pasadas 9 (revisiones sistemáticas y metaanálisis fuera de Cochrane, 423 482) y 10 (ensayos clínicos no aleatorizados, 389 365), con descarga en cola, y las que sigan hasta dos con 0.
 - Dónde quedó: tabla de pasadas de `docs/seed-research/procedures-treatments.md`.
 
 ## Pendiente
@@ -40,6 +42,10 @@
 
 ## Evidencia
 ```
+validate-siblings.mjs --keys (corpus de la pasada 8)
+procedure-disease: relationships 187387 · resolved 135369 · unresolved 52018 · objectsWithoutConcept 890
+procedure-site:    relationships 79638 · resolved 79624 · viaPublishedSiteMap 440 · unresolved 14
+
 validate-siblings.mjs --keys (corpus de la pasada 7)
 procedure-disease: relationships 67922 · resolved 52913 · unresolved 15009 · objectsWithoutConcept 754
 procedure-site:    relationships 79638 · resolved 79624 · viaPublishedSiteMap 440 · unresolved 14
@@ -59,6 +65,7 @@ load.mjs --apply, base con tabla propuesta y claves de las hermanas
 
 ## Desvíos del plan
 - La clasificación MeSH de la pasada 5 contaba métodos de investigación (E05) y conceptos de tiempo/estrategia como procedimientos; se depuró en la pasada 6 y las cifras de la 5 quedaron corregidas (ClinicalTrials.gov: 41 094 → 34 083).
+- Pasada 8: `snapshot.mjs` se quedaba sin memoria (`assertions.ndjson` pasó a 330 MB y se leía entero); ahora lo lee en streaming. Regresión: el snapshot nuevo sobre el corpus de la pasada 7 reproduce `data/` byte a byte (`git status` sin cambios). Los crudos de PubMed de más de 10 MB comprimidos (ensayos aleatorizados: 51 MB) ya no se suben, igual que los demás crudos pesados: `MANIFEST.json` → `omittedRaw` guarda la búsqueda y el comando para repetirla.
 - Pasada 8: el primer intento de descarga de ensayos aleatorizados lo frenó el chequeo de suma de particiones (435 206 contra 673 366): los tramos mensuales terminaban en el día 31 y PubMed responde 0 («No items found») a una fecha inexistente como `2015/04/31`. Se corrigió con el último día real del mes; el chequeo cumplió su función.
 - Pasada 7: `fetch-pubmed-cochrane.mjs` se generalizó a `fetch-pubmed.mjs --subset <cochrane|guidelines|rct>`; las particiones pasaron de `[PDAT]` (se solapaban: 47 122 contra 44 031) a `[EDAT]` (fecha de alta, única por registro), y bajan a mes y día cuando un año supera 10 000.
 - Cochrane entra por MEDLINE (indexación MeSH de NLM) porque el sitio de Cochrane responde 403; solo metadatos, sin texto de las revisiones.
@@ -67,7 +74,8 @@ load.mjs --apply, base con tabla propuesta y claves de las hermanas
 
 ## Riesgos residuales
 - ClinicalTrials.gov relaciona intervención y condición **del mismo estudio**, no de la misma intervención: un estudio con varias intervenciones produce pares con cada una. El tipo lo dice («registrados juntos») y nunca es «indicado».
-- 754 MeSH de condición quedan sin concepto hasta que `seed-diseases` (o la sesión de síntomas) los cargue.
+- En las relaciones de MEDLINE la evidencia cuenta los artículos en `evidence.reviewCount` aunque sean guías o ensayos (nombre heredado de la pasada 6, cuando solo había revisiones Cochrane). El contenido es correcto: la lista completa de PMID. No se renombró para no tocar el formato ya mergeado; se anota para quien consuma el NDJSON.
+- 890 MeSH de condición quedan sin concepto hasta que `seed-diseases` (o la sesión de síntomas) los cargue.
 
 ## Decisiones y ambigüedades
 - ICD-10-PCS y MeSH de procedimiento se crean desde esta sesión (nadie los cargó), resolviendo por `internal_code`. A confirmar con Justin.

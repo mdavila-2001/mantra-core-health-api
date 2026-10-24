@@ -42,7 +42,7 @@
 | H6.S2.M1 | Clasificación MeSH depurada (sin métodos de investigación ni conceptos de tiempo/estrategia) | «Control Groups», «Placebos», «Randomized Controlled Trials as Topic», «Operative Time» no son procedimientos; «Biopsy», «Laparoscopy» sí | `node --test …` | HECHO |
 | H6.S2.M2 | Pasada 6: revisiones Cochrane por la indexación MeSH de NLM | `literature-indexing`, PMID en la evidencia, retractadas fuera | `fetch-pubmed.mjs --subset cochrane` + `build.mjs` | HECHO |
 | H6.S2.M4 | Pasada 7: guías de práctica clínica (MEDLINE) | `literature-indexing`, PMID en la evidencia, retractadas fuera, etiqueta «no implica recomendación» | `fetch-pubmed.mjs --subset guidelines` + `build.mjs` + `node --test …` | HECHO |
-| H6.S2.M5 | Pasada 8: ensayos controlados aleatorizados publicados (MEDLINE) | `investigational` («en estudio»), PMID en la evidencia | `fetch-pubmed.mjs --subset rct` + `build.mjs` | EN CURSO |
+| H6.S2.M5 | Pasada 8: ensayos controlados aleatorizados publicados (MEDLINE) | `investigational` («en estudio»), PMID en la evidencia | `fetch-pubmed.mjs --subset rct` + `build.mjs` | HECHO |
 | H6.S2.M6 | Pasada 9: revisiones sistemáticas y metaanálisis fuera de Cochrane (MEDLINE) | `literature-indexing`, PMID en la evidencia, sin doble conteo con Cochrane | `fetch-pubmed.mjs --subset reviews` + `build.mjs` + `node --test …` | EN CURSO |
 | H6.S2.M7 | Pasada 10: ensayos clínicos no aleatorizados (MEDLINE) | `investigational` («en estudio»), sin doble conteo con los aleatorizados | `fetch-pubmed.mjs --subset trials` + `build.mjs` + `node --test …` | EN CURSO |
 | H6.S2.M3 | Pasadas 11+ hasta dos seguidas con 0 | dos filas consecutivas con 0 en la tabla de pasadas | tabla de pasadas | EN CURSO |
