@@ -92,6 +92,7 @@ Orden del propietario recibida a mitad del trabajo por la sesión coordinadora (
 |---|---|---|---|---|
 | H6.S1.M1 | `lib/snapshot.mjs` + escritura en el build | Partes gzip < 45 MB con SHA-256 en `MANIFEST.json` | test «instantánea versionada …» ok; `ls -la tools/terminology-import/diseases/data` → mayor 4,2 MB | HECHO |
 | H6.S1.M2 | Gzip determinista | Rebuild = mismos bytes | `sha256sum -c` de `mondo.part-01.ndjson.gz` tras rebuild → `OK` | HECHO |
+| H6.S1.M4 | Carga parcial con `--systems` | Sin violación de FK; al completar converge a los mismos conteos | `--systems orphanet,omim`, `--systems mondo`, completo ×2 → `183325\|190313` y 0 nuevas | HECHO |
 | H6.S1.M3 | Carga `--from-snapshot` | Mismos conteos que desde el build; 2.ª corrida = 0 | `load-catalog.mjs --from-snapshot` ×2 → `183325\|309745\|491228\|147251\|190313`, 2.ª corrida en 0 | HECHO |
 
 ## Riesgos y bloqueos previstos

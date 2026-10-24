@@ -197,7 +197,8 @@ async function main() {
       r.designations = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], p.designations, ['uuid', 'uuid', 'uuid', 'uuid', null, 'boolean']);
       r.properties = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], p.properties, ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
       r.relationships = await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], p.relationships, ['uuid', 'uuid', 'uuid', 'uuid', 'int']);
-      r.maps = await insertMany(client, 'concept_maps', MAP_COLS, p.maps, MAP_CASTS);
+      // Con --systems parcial el destino puede ser de un sistema no cargado: sólo se inserta si existe.
+      r.maps = await insertMany(client, 'concept_maps', MAP_COLS, p.maps, MAP_CASTS, { guardColumn: 'target_concept_id' });
       r.externalMaps = await insertMany(client, 'concept_maps', MAP_COLS, p.externalMaps, MAP_CASTS, { guardColumn: 'target_concept_id' });
       const { sourceId, versionId } = ctx.get(cs);
       const inserted = Object.values(r).reduce((a, b) => a + b, 0);

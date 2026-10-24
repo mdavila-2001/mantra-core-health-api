@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/eager-pasteur-hxks7i` (la tarea pedía `justin/seed-diseases`) · PR: [#688](https://github.com/mdavila-2001/mantra-core-health-api/pull/688) contra `dev`, sin mergear
 - Peldaño de evidencia alcanzado: **VERIFIED — carga real en Postgres 16 desechable**: filas, tiempo, idempotencia y consultas del contrato ejercitadas. **No** `REGRESSION_VERIFIED`: no se corrieron `yarn build`, `yarn test`, `yarn docs:validate` ni `yarn docs:build`, y la carga no se hizo contra una base sembrada por la API real (los 12 conceptos internos se insertaron a mano en la base desechable).
-- Avance: **27 / 29 microtareas HECHO (93,1 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
+- Avance: **28 / 30 microtareas HECHO (93,3 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
 
 ## Completado
 
@@ -28,6 +28,7 @@
 | H6.S1.M1 | Instantánea versionada `diseases/data/` | `ls -la tools/terminology-import/diseases/data` | 12 `*.part-01.ndjson.gz`, mayor `mondo` 4 162 925 B; total 14 MB |
 | H6.S1.M2 | Gzip determinista | `sha256sum -c sha-before.txt` tras rebuild | `mondo.part-01.ndjson.gz: OK` |
 | H6.S1.M3 | Carga desde la instantánea | `load-catalog.mjs --from-snapshot` ×2 en base limpia | 1.ª `"segundos": 85`; 2.ª 0 nuevas, `"segundos": 44`; conteos `183325\|309745\|491228\|147251\|190313` = los del build (`evidencia/load-snapshot-*.txt`) |
+| H6.S1.M4 | Carga parcial `--systems` (bug encontrado y corregido: FK de `concept_maps` hacia sistemas no cargados) | `fresh-db.sh` + `--from-snapshot --systems orphanet,omim`, luego `--systems mondo`, luego completo ×2 | parcial sin error (`orphanet maps 8745`); completo converge a `183325\|190313`; corrida siguiente 0 nuevas |
 | H5.S1.M5 | PLAN + REPORTE | `ls docs/trabajo/2026-10-24-seed-diseases/` | `PLAN.md REPORTE.md evidencia` |
 
 ## A medias
@@ -84,6 +85,8 @@ $ psql … -c "select count(*) …"
 Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidencia/build-stats.json`. Pasadas y cobertura: `evidencia/coverage.md`.
 
 ## No cubierto
+
+- Scripts de la base desechable: ahora versionados en `tools/terminology-import/diseases/test/disposable-db/` (`fresh-db.sh`, `seed-internal.mjs`); sólo para bases de prueba.
 
 - La carga contra una base sembrada por la API real (`seed:boot`): se probó con el esquema del repo y los 12 conceptos internos insertados a mano con los mismos ids deterministas.
 - Las rutas HTTP (`GET /terminology/concepts`, `CodeSystem/$lookup`, `ConceptMap/$translate`) contra estos datos: se verificó por SQL, no levantando la API.
