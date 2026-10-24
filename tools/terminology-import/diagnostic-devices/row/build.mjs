@@ -33,6 +33,7 @@ import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
 import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
 import { invimaRows } from './lib/invima.mjs';
 import { whoPqRows } from './lib/who-pq.mjs';
+import { hsaClassARows, smdrRows } from './lib/hsa.mjs';
 import { tfdaRows, tudidRows } from './lib/tfda.mjs';
 import { daenDate, daenRows } from './lib/tga-daen.mjs';
 import {
@@ -499,6 +500,71 @@ async function buildWhoPq() {
   };
 }
 
+function hsaFile(id) {
+  const url = `https://data.gov.sg/datasets/${id}/view`;
+  const meta = officialRetrieved[url];
+  if (meta === undefined)
+    throw new Error('HSA: falta correr fetch-official.mjs --only hsa');
+  return { path: join(OFFICIAL_DIR, meta.path), url, meta };
+}
+
+async function buildHsaSmdr() {
+  const { path, url, meta } = hsaFile('d_8cfe111e0a5a5cf5b598e78851e58ad4');
+  const lines = parseCsv(readFileSync(path, 'utf8'));
+  const sourceVersion = `Listing of Registered Medical Devices (data.gov.sg) lastUpdatedAt ${meta.lastUpdatedAt}, coverage to ${meta.coverageEnd}`;
+  const { rows, stats } = smdrRows(lines, {
+    sourceUrl: url,
+    sourceVersion,
+    retrievedAt: meta.retrievedAt,
+    officialFile: {
+      dataset: url,
+      lastUpdatedAt: meta.lastUpdatedAt,
+      bytes: meta.bytes,
+      sha256: meta.sha256,
+    },
+    officialPortal: 'https://www.hsa.gov.sg/medical-devices',
+  });
+  return {
+    files: await writeSource('hsa-smdr', sourceVersion, rows),
+    stats: { inputLines: lines.length, rows: rows.length, ...stats },
+  };
+}
+
+async function buildHsaClassA() {
+  const { path, url, meta } = hsaFile('d_55a59f68de9275077a642024f13f7c3b');
+  const lines = parseCsv(readFileSync(path, 'utf8'));
+  const sourceVersion = `Class A Medical Devices (data.gov.sg) lastUpdatedAt ${meta.lastUpdatedAt}, coverage to ${meta.coverageEnd}`;
+  const stats = {};
+  const files = await writeSource(
+    'hsa-class-a',
+    sourceVersion,
+    hsaClassARows(
+      lines,
+      {
+        sourceUrl: url,
+        sourceVersion,
+        retrievedAt: meta.retrievedAt,
+        officialFile: {
+          dataset: url,
+          lastUpdatedAt: meta.lastUpdatedAt,
+          bytes: meta.bytes,
+          sha256: meta.sha256,
+        },
+        officialPortal: 'https://www.hsa.gov.sg/medical-devices',
+      },
+      stats,
+    ),
+  );
+  return {
+    files,
+    stats: {
+      inputLines: lines.length,
+      rows: files.reduce((n, f) => n + f.rows, 0),
+      ...stats,
+    },
+  };
+}
+
 const BUILDERS = {
   'anvisa-produtos': buildAnvisaProdutos,
   'anvisa-produtos-modelos': buildAnvisaModelos,
@@ -510,6 +576,8 @@ const BUILDERS = {
   'tfda-tudid': buildTfdaTudid,
   'invima-dispositivos': buildInvima,
   'who-pq-ivd': buildWhoPq,
+  'hsa-smdr': buildHsaSmdr,
+  'hsa-class-a': buildHsaClassA,
 };
 
 async function main() {

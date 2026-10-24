@@ -111,6 +111,22 @@ export const OFFICIAL = Object.freeze({
  */
 const ANVISA_DADOS = 'https://dados.anvisa.gov.br/dados/';
 export const OFFICIAL_DOWNLOADS = Object.freeze({
+  hsa: [
+    {
+      name: 'smdr-listing-of-registered-medical-devices.csv',
+      datagovsg: {
+        id: 'd_8cfe111e0a5a5cf5b598e78851e58ad4',
+        url: 'https://data.gov.sg/datasets/d_8cfe111e0a5a5cf5b598e78851e58ad4/view',
+      },
+    },
+    {
+      name: 'class-a-medical-devices.csv',
+      datagovsg: {
+        id: 'd_55a59f68de9275077a642024f13f7c3b',
+        url: 'https://data.gov.sg/datasets/d_55a59f68de9275077a642024f13f7c3b/view',
+      },
+    },
+  ],
   'who-pq': [
     {
       name: 'who-pq-ivd.csv',
@@ -200,11 +216,6 @@ export const GAPS = Object.freeze([
     reason:
       '403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales',
     url: 'https://cdsco.gov.in/',
-  },
-  {
-    source: 'hsa-smdr',
-    reason: '403 del proxy (data.gov.sg)',
-    url: 'https://data.gov.sg/',
   },
   {
     source: 'amar-devices',

@@ -36,6 +36,7 @@ import {
 } from '../lib/row.mjs';
 import { invimaDate, invimaRows, invimaText } from '../lib/invima.mjs';
 import { whoPqRows } from '../lib/who-pq.mjs';
+import { hsaClassARows, hsaDate, hsaText, smdrRows } from '../lib/hsa.mjs';
 import {
   splitTfdaCategory,
   tfdaDate,
@@ -521,4 +522,35 @@ test('OMS PQ: una fila por código de producto, formato de ensayo y patógeno', 
   assert.equal(first.extra.target, 'Syphilis');
   assert.equal(first.extra.inVitroDiagnostic, true);
   assert.equal(first.authorizationDate, null, 'la lista solo publica el año');
+});
+
+test('HSA SMDR: área de especialidad, clase y titular; «NOT_GENERATED» no es un número de registro', () => {
+  const { rows, stats } = smdrRows(parseCsv(fixture('hsa-smdr.csv')), CTX);
+  assert.equal(stats.withoutRegistration, 1);
+  assert.equal(rows.length, 2);
+  const [eye, chem] = rows;
+  assert.equal(eye.sourceRecordId, 'MDPR260520Z0003');
+  assert.equal(eye.riskClass, 'sg:B');
+  assert.equal(eye.authorizationDate, '2026-05-20');
+  assert.equal(eye.manufacturerName, 'PPM Medical Pte Ltd');
+  assert.equal(eye.extra.registrant.name, 'PPM MEDICAL PTE. LTD.');
+  assert.ok(eye.extra.modelNames.startsWith('Stallard scissors'));
+  assert.equal(chem.deviceTypeSystem, 'sg:hsa-speciality');
+  assert.equal(chem.deviceTypeName, 'Clinical chemistry');
+  assert.equal(hsaDate('9/3/2018 14:38'), '2018-03-09');
+});
+
+test('HSA clase A: una notificación con varios dispositivos da una fila por dispositivo', () => {
+  const rows = [...hsaClassARows(parseCsv(fixture('hsa-class-a.csv')), CTX)];
+  assert.equal(rows.length, 4);
+  const ids = new Set(rows.map((r) => r.sourceRecordId));
+  assert.equal(ids.size, 4);
+  assert.equal(
+    rows.filter((r) => r.authorizationId === 'MDES00011792979').length,
+    2,
+  );
+  assert.equal(rows[0].riskClass, 'sg:A');
+  assert.equal(rows[0].manufacturerName, 'Bionic Medizintechnik GmbH');
+  assert.equal(rows[0].extra.dealer.name, 'JMS SINGAPORE PTE LTD');
+  assert.equal(hsaText('NA'), null);
 });

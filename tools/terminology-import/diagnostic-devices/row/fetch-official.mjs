@@ -97,6 +97,77 @@ async function fetchSocrata(dir, group, file) {
   };
 }
 
+/**
+ * Dataset de data.gov.sg: `poll-download` devuelve una URL firmada del archivo;
+ * los metadatos (`lastUpdatedAt`, cobertura, tamaño) se guardan al lado.
+ */
+async function fetchDataGovSg(dir, group, file) {
+  const { id } = file.datagovsg;
+  const metaPath = join(dir, `${file.name}.meta.json`);
+  execFileSync('curl', [
+    '-sS',
+    '--fail',
+    '-L',
+    '--retry',
+    '4',
+    '-m',
+    '300',
+    '-o',
+    metaPath,
+    `https://api-production.data.gov.sg/v2/public/api/datasets/${id}/metadata`,
+  ]);
+  const poll = JSON.parse(
+    execFileSync(
+      'curl',
+      [
+        '-sS',
+        '--fail',
+        '-L',
+        '--retry',
+        '4',
+        '-m',
+        '300',
+        `https://api-open.data.gov.sg/v1/public/api/datasets/${id}/poll-download`,
+      ],
+      { encoding: 'utf8' },
+    ),
+  );
+  if (poll?.data?.status !== 'DOWNLOAD_SUCCESS')
+    throw new Error(
+      `${id}: poll-download ${JSON.stringify(poll).slice(0, 200)}`,
+    );
+  const path = join(dir, file.name);
+  execFileSync('curl', [
+    '-sS',
+    '--fail',
+    '-L',
+    '--retry',
+    '4',
+    '--retry-delay',
+    '5',
+    '-m',
+    '3600',
+    '-o',
+    path,
+    poll.data.url,
+  ]);
+  const meta = readJson(metaPath).data ?? {};
+  const entry = {
+    group,
+    path: join(group, file.name),
+    dataset: file.datagovsg.url,
+    lastUpdatedAt: meta.lastUpdatedAt ?? null,
+    coverageEnd: meta.coverageEnd ?? null,
+    bytes: statSync(path).size,
+    sha256: await sha256File(path),
+    retrievedAt: new Date().toISOString(),
+  };
+  console.log(
+    `${group}  ${file.name}  ${entry.bytes} B  ${entry.lastUpdatedAt}  ${entry.sha256.slice(0, 12)}…`,
+  );
+  return entry;
+}
+
 async function main() {
   const retrieved = existsSync(OFFICIAL_RETRIEVED)
     ? readJson(OFFICIAL_RETRIEVED)
@@ -105,6 +176,10 @@ async function main() {
     if (only !== null && !only.has(group)) continue;
     const dir = ensureDir(join(OFFICIAL_DIR, group));
     for (const file of files) {
+      if (file.datagovsg) {
+        retrieved[file.datagovsg.url] = await fetchDataGovSg(dir, group, file);
+        continue;
+      }
       if (file.socrata) {
         retrieved[file.socrata.url] = await fetchSocrata(dir, group, file);
         continue;

@@ -28,6 +28,8 @@ const REGISTRY_COUNTRY = {
   'tfda-tudid': 'TW',
   'invima-dispositivos': 'CO',
   'who-pq-ivd': 'WHO',
+  'hsa-smdr': 'SG',
+  'hsa-class-a': 'SG',
 };
 
 const TOP = 25;

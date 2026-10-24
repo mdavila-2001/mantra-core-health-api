@@ -1,6 +1,6 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T17:25:08.933Z",
+  "generatedAt": "2026-10-24T17:47:17.307Z",
   "formatVersion": 1,
   "files": [
     {
@@ -122,6 +122,30 @@
       "rows": 435,
       "bytes": 13731,
       "sha256": "c2939c84dcc0a6b152dd64fc969e34c871e85c59e156ff0691a06028445781e9"
+    },
+    {
+      "path": "hsa-smdr.ndjson.gz",
+      "source": "hsa-smdr",
+      "sourceVersion": "Listing of Registered Medical Devices (data.gov.sg) lastUpdatedAt 2026-06-08T10:07:41+08:00, coverage to 2026-04-30T23:59:59+08:00",
+      "rows": 20857,
+      "bytes": 10828315,
+      "sha256": "0c280452b36425fecdd5560c439a4e21be3a5897e54aff8f6830a3aade4b85a3"
+    },
+    {
+      "path": "hsa-class-a-0001.ndjson.gz",
+      "source": "hsa-class-a",
+      "sourceVersion": "Class A Medical Devices (data.gov.sg) lastUpdatedAt 2026-06-08T10:52:14+08:00, coverage to 2026-04-30T23:59:59+08:00",
+      "rows": 1008047,
+      "bytes": 47103549,
+      "sha256": "351c7705894290b1ba13ef9b26b8a223649a7446a4a059b0eb3cc9c7ffa8e0c6"
+    },
+    {
+      "path": "hsa-class-a-0002.ndjson.gz",
+      "source": "hsa-class-a",
+      "sourceVersion": "Class A Medical Devices (data.gov.sg) lastUpdatedAt 2026-06-08T10:52:14+08:00, coverage to 2026-04-30T23:59:59+08:00",
+      "rows": 119478,
+      "bytes": 5265695,
+      "sha256": "af604185b4b9e7dd72744d110486768e55554ed9ce21b4bf110042f2fc68d3a1"
     }
   ],
   "nomenclatures": [
@@ -256,6 +280,19 @@
       "inputLines": 435,
       "rows": 435,
       "duplicates": 0
+    },
+    "hsa-smdr": {
+      "inputLines": 20860,
+      "rows": 20857,
+      "withoutRegistration": 3,
+      "withoutOwner": 0,
+      "duplicates": 0
+    },
+    "hsa-class-a": {
+      "inputLines": 1127580,
+      "rows": 1127525,
+      "withoutOwner": 54,
+      "duplicates": 0
     }
   },
   "gaps": [
@@ -283,11 +320,6 @@
       "source": "cdsco-devices",
       "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
       "url": "https://cdsco.gov.in/"
-    },
-    {
-      "source": "hsa-smdr",
-      "reason": "403 del proxy (data.gov.sg)",
-      "url": "https://data.gov.sg/"
     },
     {
       "source": "amar-devices",

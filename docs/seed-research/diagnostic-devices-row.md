@@ -213,3 +213,12 @@ paginada por la API Socrata, ordenada por `:id`. Licencia CC BY-SA 4.0.
 | Fuente | Archivo oficial | Filas nuevas |
 |---|---|--:|
 | `who-pq-ivd` | export CSV de la lista de IVD precalificados (125 productos, 40 fabricantes) | 435 |
+
+## Pasada 10 — Singapur HSA (2026-10-24)
+
+| Fuente | Archivo oficial | Filas nuevas |
+|---|---|--:|
+| `hsa-smdr` | data.gov.sg, Listing of Registered Medical Devices (Apr 2026, CSV) | 20 857 |
+| `hsa-class-a` | data.gov.sg, Class A Medical Devices (Apr 2026, CSV) | 1 127 525 |
+
+Licencia: Singapore Open Data Licence.

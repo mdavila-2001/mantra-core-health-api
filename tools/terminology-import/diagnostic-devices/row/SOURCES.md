@@ -40,6 +40,8 @@ normalizadores leen el mismo formato).
 | `tfda-tudid`              | TFDA (TW)             | 醫療器材單一識別碼 (TUDID), data.gov.tw 151955 (export 197)                                                         | — (descarga oficial)                                                                                                                                                           | `modifiedDate` 2026-10-12                                     |   688 258 |
 | `invima-dispositivos`     | INVIMA (CO)           | Registros sanitarios de dispositivos médicos y otras tecnologías, datos.gov.co `y4qt-w6tk` (API Socrata, 9 páginas) | — (descarga oficial)                                                                                                                                                           | `rowsUpdatedAt` 2026-10-16                                    |    71 434 |
 | `who-pq-ivd`              | OMS (precalificación) | Lista de IVD precalificados, export CSV de extranet.who.int                                                         | — (descarga oficial)                                                                                                                                                           | export 2026-10-24                                             |       435 |
+| `hsa-smdr`                | HSA (SG)              | Listing of Registered Medical Devices (SMDR, clases B–D), data.gov.sg `d_8cfe111e…`                                 | — (descarga oficial)                                                                                                                                                           | `lastUpdatedAt` 2026-06-08 (cobertura hasta 2026-04-30)       |    20 857 |
+| `hsa-class-a`             | HSA (SG)              | Class A Medical Devices, data.gov.sg `d_55a59f68…`                                                                  | — (descarga oficial)                                                                                                                                                           | `lastUpdatedAt` 2026-06-08 (cobertura hasta 2026-04-30)       | 1 127 525 |
 
 Conteos exactos y por archivo: `out/manifest.json`. Cobertura: `COVERAGE.md`.
 
@@ -56,6 +58,7 @@ Conteos exactos y por archivo: `out/manifest.json`. Cobertura: `COVERAGE.md`.
 | PMDA (maestro JMDN) | Contenido del sitio de PMDA (医療機器基準データベース). Los términos de reutilización del sitio no se pudieron confirmar: **por verificar**. Solo se usan nombre, código, clase y clasificación de cada 一般的名称. | —                                                                                                        |
 | INVIMA              | Creative Commons Attribution-ShareAlike 4.0 International (declarado en la ficha de datos.gov.co): exige atribución a INVIMA y que las obras derivadas se compartan con la misma licencia.                          | —                                                                                                        |
 | OMS PQ              | Contenido de la OMS; la lista es pública y se ofrece para descarga. Términos de reutilización del sitio **por verificar**.                                                                                          | —                                                                                                        |
+| HSA                 | Singapore Open Data Licence (data.gov.sg): uso libre, también comercial, con atribución a la fuente.                                                                                                                | —                                                                                                        |
 
 Ninguna fuente se usó para algo distinto de catalogar dispositivos. No se
 eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
@@ -183,6 +186,23 @@ eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
   precalificado; todos son diagnóstico in vitro (`extra.inVitroDiagnostic: true`).
   Tipo: formato del ensayo → `who:assay-format`; patógeno en `extra.target`;
   versión regulatoria y año de precalificación en `extra`.
+
+### `hsa-smdr` y `hsa-class-a` (Singapur)
+
+- SMDR: una fila por número de registro. Tipo: área de especialidad de HSA →
+  `sg:hsa-speciality` («Clinical chemistry», «Immunology», «Microbiology»,
+  «Hematology», «Pathology», «Clinical toxicology» son las de laboratorio;
+  «Radiology / Imaging», …). Clase → `sg:B`…`sg:D`. Fabricante: el titular del
+  producto (_product owner_); el registrante local en `extra.registrant`. Los
+  modelos vienen en listas dentro de un texto y quedan verbatim en
+  `extra.modelNames` y `extra.modelIdentifiers`. 3 filas sin número de registro
+  («NOT_GENERATED») no salen.
+- Clase A: una fila por dispositivo notificado (notificación + nombre + UDI-DI;
+  una notificación puede cubrir varios dispositivos), con titular,
+  distribuidor (`extra.dealer`) y UDI-DI. `riskClass: sg:A`. El campo
+  `device_identifier` va verbatim en `extra.deviceIdentifier` (no se presenta
+  como GMDN porque la fuente no lo declara).
+- El país del titular solo está dentro de la dirección: queda en null.
 
 ## Filtro «diagnóstico»
 
