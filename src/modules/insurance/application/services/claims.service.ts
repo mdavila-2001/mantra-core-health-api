@@ -28,6 +28,7 @@ import {
   PriorAuthorizationRequests,
 } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
+import { claimBelongsToPractices } from '../../domain/claim-scope';
 import {
   CreateClaimDto,
   CreatedClaimDto,
@@ -640,6 +641,7 @@ export class ClaimsService {
         claimId,
         dto.claimAdjudicationVersionId,
         INS.DISPUTE_OPEN,
+        INS.DISPUTE_TYPE_APPEAL,
       );
       if (existing) {
         return {
@@ -712,11 +714,7 @@ export class ClaimsService {
     },
     practiceIds: readonly string[],
   ): boolean {
-    return (
-      claim.billingProviderTypeConceptId ===
-        INS.BILLING_PROVIDER_TYPE_PRACTICE &&
-      practiceIds.includes(claim.billingProviderEntityId)
-    );
+    return claimBelongsToPractices(claim, practiceIds);
   }
 
   /**

@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { commonDiseaseRows, doidNormalizer, doidSymptomAxioms, mondoFeatureRows, parseFrequency, parseHpoa } from '../lib/annotations.mjs';
 import { mondoEquivalences, normalizeDiseaseCurie, termOverlaps } from '../lib/crosswalk.mjs';
 import { hpoIdResolver, hpoRows, parseBabelon } from '../lib/hpo.mjs';
-import { conceptId, designationsFor, displayOf, glossaryFor, isGlossaryTerm, propertiesFor } from '../lib/load-plan.mjs';
+import { conceptId, designationsFor, displayOf, glossaryEnabled, glossaryFor, isGlossaryTerm, propertiesFor } from '../lib/load-plan.mjs';
 import { applyTag, readObo } from '../lib/obo.mjs';
 import { ncitRows, sympRows } from '../lib/obo-sources.mjs';
 import { REL, phenotypeResolver, relationsPlan } from '../lib/relations-plan.mjs';
@@ -218,4 +218,11 @@ test('pack-data: partición por líneas en gzip válidos que reconstruyen el ori
   assert.ok(parts.every((p) => p.gz.length <= 600));
   assert.equal(Buffer.concat(parts.map((p) => gunzipSync(p.gz))).toString('utf8'), lines.join('\n') + '\n');
   assert.equal(splitByLines(text).length, 1, 'bajo el límite real queda en un archivo');
+});
+
+test('glosario activado por defecto; --no-glossary lo apaga', () => {
+  assert.equal(glossaryEnabled([]), true);
+  assert.equal(glossaryEnabled(['--apply']), true);
+  assert.equal(glossaryEnabled(['--apply', '--glossary']), true);
+  assert.equal(glossaryEnabled(['--apply', '--no-glossary']), false);
 });

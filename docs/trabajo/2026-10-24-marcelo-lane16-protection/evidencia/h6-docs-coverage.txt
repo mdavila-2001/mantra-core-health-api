@@ -1,0 +1,4 @@
+
+Verificados: 469 páginas de docs/, 70 módulos reales.
+Cobertura documental OK: sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar, contratos presentes.
+exit=0

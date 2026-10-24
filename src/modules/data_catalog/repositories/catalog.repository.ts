@@ -5,6 +5,7 @@ import type { AnnotationContent } from '../catalog/annotation.rules';
 import {
   CONNECTOR_VERSION,
   SOURCE_CODE,
+  type AnnotationOrigin,
   type ReviewStatus,
 } from '../catalog/catalog.constants';
 import type {
@@ -26,7 +27,7 @@ export interface AnnotationRow {
   object_id: string;
   column_id: string | null;
   review_status: ReviewStatus;
-  origin: string;
+  origin: AnnotationOrigin;
   current_revision_no: number;
   approved_revision_no: number | null;
   approved_by_user_id: string | null;
@@ -72,6 +73,13 @@ export interface ColumnRow {
   last_seen_at: string;
 }
 
+/** Lo mínimo de una columna para colgarle una ficha o evidencia. */
+export interface ColumnRef {
+  id: string;
+  object_id: string;
+  column_name: string;
+}
+
 export interface EvidenceRow {
   id: string;
   object_id: string;
@@ -84,9 +92,28 @@ export interface EvidenceRow {
   created_at: string;
 }
 
+/** Lo que la clasificación automática deja en `content_json.classification` de su revisión. */
+export interface ClassificationRecord {
+  confidence: number;
+  classifiedBy: string;
+  ruleId: string;
+  basis: string;
+}
+
+/** Columna observada con lo que el clasificador necesita para decidir. */
+export interface ClassifiableColumnRow {
+  id: string;
+  object_id: string;
+  column_name: string;
+  native_type: string;
+  schema_name: string;
+  object_name: string;
+}
+
 export interface RevisionRow {
   revision_no: number;
   origin: string;
+  classification: ClassificationRecord | null;
   submitted_status: string;
   change_reason: string | null;
   author_user_id: string | null;
@@ -344,6 +371,81 @@ export class CatalogRepository {
     return filas[0] ?? null;
   }
 
+  /** Ficha de una columna, si la tiene (índice único `ux_data_catalog_annotations_column`). */
+  async annotationOfColumn(
+    em: EntityManager,
+    columnId: string,
+  ): Promise<AnnotationRow | null> {
+    const filas = await this.q<AnnotationRow[]>(
+      em,
+      `select ${ANOTACION} from data_catalog.catalog_annotations a where a.target_kind = 'COLUMN' and a.column_id = ?`,
+      [columnId],
+    );
+    return filas[0] ?? null;
+  }
+
+  /** Fichas de columna de un conjunto de columnas, por id de columna. */
+  async annotationsOfColumns(
+    em: EntityManager,
+    columnIds: string[],
+  ): Promise<Map<string, AnnotationRow>> {
+    if (!columnIds.length) return new Map();
+    const filas = await this.q<AnnotationRow[]>(
+      em,
+      `select ${ANOTACION} from data_catalog.catalog_annotations a
+        where a.target_kind = 'COLUMN' and a.column_id in (select value::uuid from jsonb_array_elements_text(?::jsonb))`,
+      [JSON.stringify(columnIds)],
+    );
+    return new Map(filas.map((f) => [f.column_id as string, f]));
+  }
+
+  /**
+   * Columnas observadas que la clasificación debe mirar, en orden de id (paginación por clave).
+   * Con `scanId`: las que ese escaneo vio por primera vez o cambió; sin él: todas, o las de un schema.
+   */
+  columnsToClassify(
+    em: EntityManager,
+    f: { scanId?: string; schema?: string; afterId?: string; limit: number },
+  ): Promise<ClassifiableColumnRow[]> {
+    const where = [
+      'o.source_code = ?',
+      "o.observation_status = 'OBSERVED'",
+      "c.observation_status = 'OBSERVED'",
+    ];
+    const params: unknown[] = [SOURCE_CODE];
+    if (f.scanId) {
+      where.push(`(c.first_seen_scan_id = ? or c.id in (
+          select ce.column_id from data_catalog.catalog_change_events ce
+           where ce.scan_run_id = ? and ce.column_id is not null and ce.change_kind in ('ADDED', 'CHANGED', 'REAPPEARED')))`);
+      params.push(f.scanId, f.scanId);
+    }
+    if (f.schema) {
+      where.push('o.schema_name = ?');
+      params.push(f.schema);
+    }
+    if (f.afterId) {
+      where.push('c.id > ?::uuid');
+      params.push(f.afterId);
+    }
+    params.push(f.limit);
+    return this.q(
+      em,
+      `select c.id, c.object_id, c.column_name, c.native_type, o.schema_name, o.object_name
+         from data_catalog.catalog_columns c join data_catalog.catalog_objects o on o.id = c.object_id
+        where ${where.join(' and ')} order by c.id limit ?`,
+      params,
+    );
+  }
+
+  async columnById(em: EntityManager, id: string): Promise<ColumnRef | null> {
+    const filas = await this.q<ColumnRef[]>(
+      em,
+      'select id, object_id, column_name from data_catalog.catalog_columns where id = ?',
+      [id],
+    );
+    return filas[0] ?? null;
+  }
+
   // ---- columnas, evidencia, historial y cambios ------------------------------------------
 
   columns(em: EntityManager, objectId: string): Promise<ColumnRow[]> {
@@ -370,20 +472,42 @@ export class CatalogRepository {
     );
   }
 
+  /** Evidencia del objeto mismo; la de sus columnas va por {@link columnEvidence}. */
   evidence(em: EntityManager, objectId: string): Promise<EvidenceRow[]> {
     return this.q(
       em,
       `select id, object_id, column_id, kind, reference, excerpt, source_revision, added_by_user_id, created_at
-         from data_catalog.catalog_evidence_items where object_id = ? order by created_at desc, id`,
+         from data_catalog.catalog_evidence_items where object_id = ? and column_id is null order by created_at desc, id`,
       [objectId],
+    );
+  }
+
+  columnEvidence(em: EntityManager, columnId: string): Promise<EvidenceRow[]> {
+    return this.q(
+      em,
+      `select id, object_id, column_id, kind, reference, excerpt, source_revision, added_by_user_id, created_at
+         from data_catalog.catalog_evidence_items where column_id = ? order by created_at desc, id`,
+      [columnId],
     );
   }
 
   async evidenceCount(em: EntityManager, objectId: string): Promise<number> {
     const [fila] = await this.q<{ n: number }[]>(
       em,
-      'select count(*)::int as n from data_catalog.catalog_evidence_items where object_id = ?',
+      'select count(*)::int as n from data_catalog.catalog_evidence_items where object_id = ? and column_id is null',
       [objectId],
+    );
+    return fila?.n ?? 0;
+  }
+
+  async columnEvidenceCount(
+    em: EntityManager,
+    columnId: string,
+  ): Promise<number> {
+    const [fila] = await this.q<{ n: number }[]>(
+      em,
+      'select count(*)::int as n from data_catalog.catalog_evidence_items where column_id = ?',
+      [columnId],
     );
     return fila?.n ?? 0;
   }
@@ -392,6 +516,8 @@ export class CatalogRepository {
     em: EntityManager,
     e: {
       objectId: string;
+      /** `null`: evidencia del objeto; un id: de esa columna. */
+      columnId?: string | null;
       kind: string;
       reference: string;
       excerpt: string | null;
@@ -402,12 +528,13 @@ export class CatalogRepository {
     const id = randomUUID();
     const [fila] = await this.q<EvidenceRow[]>(
       em,
-      `insert into data_catalog.catalog_evidence_items (id, object_id, kind, reference, excerpt, source_revision, added_by_user_id, created_at)
-       values (?, ?, ?, ?, ?, ?, ?, ?)
+      `insert into data_catalog.catalog_evidence_items (id, object_id, column_id, kind, reference, excerpt, source_revision, added_by_user_id, created_at)
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?)
        returning id, object_id, column_id, kind, reference, excerpt, source_revision, added_by_user_id, created_at`,
       [
         id,
         e.objectId,
+        e.columnId ?? null,
         e.kind,
         e.reference,
         e.excerpt,
@@ -422,7 +549,7 @@ export class CatalogRepository {
   revisions(em: EntityManager, annotationId: string): Promise<RevisionRow[]> {
     return this.q(
       em,
-      `select revision_no, origin, submitted_status, change_reason, author_user_id, created_at
+      `select revision_no, origin, content_json->'classification' as classification, submitted_status, change_reason, author_user_id, created_at
          from data_catalog.catalog_annotation_revisions where annotation_id = ? order by revision_no desc`,
       [annotationId],
     );
@@ -567,13 +694,16 @@ export class CatalogRepository {
 
   // ---- ficha: escritura ------------------------------------------------------------------
 
-  /** Crea la ficha de un objeto. Falla con violación de unicidad si otra petición la creó antes. */
+  /** Crea la ficha de un objeto o de una columna. Falla con violación de unicidad si otra petición la creó antes. */
   async insertAnnotation(
     em: EntityManager,
     a: {
       objectId: string;
+      /** `null`: ficha del objeto; un id: ficha de esa columna. */
+      columnId?: string | null;
       content: AnnotationContent;
       reviewStatus: string;
+      origin?: AnnotationOrigin;
       userId: string;
     },
   ): Promise<AnnotationRow> {
@@ -582,15 +712,17 @@ export class CatalogRepository {
     const t = ahora();
     await this.q(
       em,
-      `insert into data_catalog.catalog_annotations (id, target_kind, object_id, business_name, definition, purpose,
+      `insert into data_catalog.catalog_annotations (id, target_kind, object_id, column_id, business_name, definition, purpose,
          existence_rationale, row_grain, alternatives_rationale, process_supported, source_of_truth, producers, consumers,
          deletion_impact, business_owner, data_steward, technical_owner, unit, value_domain, null_semantics, sensitivity,
          open_questions, review_status, origin, current_revision_no, approved_revision_no, created_at, updated_at,
          created_by_user_id, updated_by_user_id, row_version)
-       values (?, 'OBJECT', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, 'MANUAL', 1, null, ?, ?, ?, ?, 1)`,
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?, ?, 1, null, ?, ?, ?, ?, 1)`,
       [
         id,
+        a.columnId ? 'COLUMN' : 'OBJECT',
         a.objectId,
+        a.columnId ?? null,
         c.businessName,
         c.definition,
         c.purpose,
@@ -611,6 +743,7 @@ export class CatalogRepository {
         c.sensitivity,
         JSON.stringify(c.openQuestions),
         a.reviewStatus,
+        a.origin ?? 'MANUAL',
         t,
         t,
         a.userId,
@@ -632,6 +765,7 @@ export class CatalogRepository {
       content: AnnotationContent;
       reviewStatus: string;
       revisionNo: number;
+      origin?: AnnotationOrigin;
       userId: string;
     },
   ): Promise<boolean> {
@@ -642,7 +776,7 @@ export class CatalogRepository {
          row_grain = ?, alternatives_rationale = ?, process_supported = ?, source_of_truth = ?, producers = ?::jsonb,
          consumers = ?::jsonb, deletion_impact = ?, business_owner = ?, data_steward = ?, technical_owner = ?, unit = ?,
          value_domain = ?, null_semantics = ?, sensitivity = ?, open_questions = ?::jsonb, review_status = ?,
-         current_revision_no = ?, updated_at = ?, updated_by_user_id = ?, row_version = row_version + 1
+         origin = ?, current_revision_no = ?, updated_at = ?, updated_by_user_id = ?, row_version = row_version + 1
        where id = ? and row_version = ? returning id`,
       [
         c.businessName,
@@ -665,6 +799,7 @@ export class CatalogRepository {
         c.sensitivity,
         JSON.stringify(c.openQuestions),
         a.reviewStatus,
+        a.origin ?? 'MANUAL',
         a.revisionNo,
         ahora(),
         a.userId,
@@ -685,19 +820,27 @@ export class CatalogRepository {
       submittedStatus: string;
       changeReason: string | null;
       authorId: string;
+      origin?: AnnotationOrigin;
+      /** Sólo la clasificación automática: queda dentro de `content_json`, sin columna nueva. */
+      classification?: ClassificationRecord;
     },
   ): Promise<unknown> {
     return this.q(
       em,
       `insert into data_catalog.catalog_annotation_revisions (id, annotation_id, revision_no, content_json, content_hash, origin,
          submitted_status, change_reason, author_user_id, created_at)
-       values (?, ?, ?, ?::jsonb, ?, 'MANUAL', ?, ?, ?, ?)`,
+       values (?, ?, ?, ?::jsonb, ?, ?, ?, ?, ?, ?)`,
       [
         randomUUID(),
         r.annotationId,
         r.revisionNo,
-        JSON.stringify(r.content),
+        JSON.stringify(
+          r.classification
+            ? { ...r.content, classification: r.classification }
+            : r.content,
+        ),
         r.contentHash,
+        r.origin ?? 'MANUAL',
         r.submittedStatus,
         r.changeReason,
         r.authorId,
@@ -883,25 +1026,30 @@ export class CatalogRepository {
     return fila ?? null;
   }
 
+  /**
+   * Cierra el escaneo como `SUCCEEDED` **sólo si sigue `RUNNING` y con el lease de `owner`**
+   * (fencing). Devuelve `false` si otro proceso lo cerró o lo retomó: quien llama no debe pisarlo.
+   */
   async finishScan(
     em: EntityManager,
     id: string,
+    owner: string,
     r: {
       counters: ScanCounters;
       snapshotHash: string;
       engineVersion: string;
       limitations: { code: string; detail: string }[];
     },
-  ): Promise<void> {
+  ): Promise<boolean> {
     const t = ahora();
     const c = r.counters;
-    await this.q(
+    const filas = await this.q<{ id: string }[]>(
       em,
       `update data_catalog.catalog_scan_runs set status = 'SUCCEEDED', finished_at = ?, lease_owner = null, lease_expires_at = null,
               engine_version = ?, limitations = ?::jsonb, objects_observed = ?, columns_observed = ?, objects_added = ?, objects_changed = ?,
               objects_not_observed = ?, objects_reappeared = ?, columns_added = ?, columns_changed = ?, columns_not_observed = ?,
               snapshot_hash = ?, updated_at = ?, row_version = row_version + 1
-        where id = ?`,
+        where id = ? and status = 'RUNNING' and lease_owner = ? returning id`,
       [
         t,
         r.engineVersion,
@@ -918,23 +1066,43 @@ export class CatalogRepository {
         r.snapshotHash,
         t,
         id,
+        owner,
       ],
     );
+    return filas.length === 1;
   }
 
+  /** Cierra el escaneo como `FAILED` con el mismo fencing que {@link finishScan}. */
   async failScan(
     em: EntityManager,
     id: string,
+    owner: string,
     code: string,
     message: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const t = ahora();
-    await this.q(
+    const filas = await this.q<{ id: string }[]>(
       em,
       `update data_catalog.catalog_scan_runs set status = 'FAILED', finished_at = ?, lease_owner = null, lease_expires_at = null,
-              error_code = ?, error_message = ?, updated_at = ?, row_version = row_version + 1 where id = ?`,
-      [t, code, message.slice(0, 1000), t, id],
+              error_code = ?, error_message = ?, updated_at = ?, row_version = row_version + 1
+        where id = ? and status = 'RUNNING' and lease_owner = ? returning id`,
+      [t, code, message.slice(0, 1000), t, id, owner],
     );
+    return filas.length === 1;
+  }
+
+  /**
+   * Cuándo terminó por última vez un escaneo que llegó a ejecutarse (`SUCCEEDED` o `FAILED`):
+   * desde ahí corre el intervalo de la sonda. Un cancelado no cuenta: nunca observó nada.
+   */
+  async lastFinishedScanAt(em: EntityManager): Promise<string | null> {
+    const [fila] = await this.q<{ finished_at: string | null }[]>(
+      em,
+      `select max(finished_at) as finished_at from data_catalog.catalog_scan_runs
+        where source_code = ? and status in ('SUCCEEDED', 'FAILED') and started_at is not null`,
+      [SOURCE_CODE],
+    );
+    return fila?.finished_at ?? null;
   }
 
   /** Objetos y columnas que el catálogo ya conoce, para compararlos con lo observado. */

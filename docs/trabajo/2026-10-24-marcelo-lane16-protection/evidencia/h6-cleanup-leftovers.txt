@@ -1,0 +1,5 @@
+{"claimsTotal":17,"keepClaims":9,"dropClaims":8,"invoicesTotal":10,"keepInvoicesWithHistory":9,"dropInvoices":1,"disputesDropped":0,"benefitsToDelete":2}
+invoice_lines (sin historial) 1
+invoices (sin historial) 1
+benefits 2
+residuo {"claims":17,"claim_lines":17,"coverages":1,"invoices":9,"invoice_lines":9,"disputes":1,"decisions":1,"payments":0,"benefits":0}

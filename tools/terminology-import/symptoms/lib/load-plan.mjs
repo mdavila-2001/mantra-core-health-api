@@ -164,6 +164,12 @@ export function mapsFor(row, codesBySystem) {
 
 export const GLOSSARY_VALUE_SETS = ['glossary-all-terms', 'glossary-category-signs-symptoms'];
 
+/**
+ * El glosario está activado por defecto (decisión del propietario, 2026-10-24);
+ * `--no-glossary` lo apaga. `--glossary` se sigue aceptando y no cambia nada.
+ */
+export const glossaryEnabled = (args) => !args.includes('--no-glossary');
+
 /** ¿Entra al glosario? Fenotipos de HPO con nombre OFICIAL en castellano. */
 export const isGlossaryTerm = (row) => row.codeSystem === 'hpo' && row.subontology === 'HP:0000118' && Boolean(row.esName);
 

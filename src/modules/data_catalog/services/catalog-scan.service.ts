@@ -3,10 +3,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ConflictException } from '../../../common/errors/domain.exception';
 import {
+  PROBE_INTERVAL_MS,
+  SCAN_FAILED_CODE,
   SCAN_LEASE_SECONDS,
   SCAN_LIMITATIONS,
   SOURCE_CODE,
 } from '../catalog/catalog.constants';
+import { iso } from '../catalog/timestamps';
 import {
   planScan,
   type ForeignKeyInfo,
@@ -24,9 +27,27 @@ import {
   CatalogRepository,
   type ScanRow,
 } from '../repositories/catalog.repository';
+import { CatalogClassificationService } from './catalog-classification.service';
+
+/** `true` si pasó el intervalo de la sonda desde `ultimo` (texto `timestamptz` del driver). */
+function intervaloVencido(ultimo: string | Date, now: Date): boolean {
+  return now.getTime() - new Date(iso(ultimo)).getTime() >= PROBE_INTERVAL_MS;
+}
 
 /** Schemas que el escaneo no mira: los del sistema y los de extensiones con prefijo `_`. */
 export const EXCLUDED_SCHEMAS = ['pg_*', 'information_schema', '_*'];
+
+/** Lo que la sonda informa al worker tras un tick. `claimed` es 0 o 1. */
+export interface RunNextResult {
+  claimed: 0 | 1;
+  scanId?: string;
+  status?: string;
+  /** `true` si el lease se perdió: otro proceso cerró o retomó el escaneo y no se pisó. */
+  fenced?: boolean;
+}
+
+/** Interna: el cierre del escaneo no es nuestro; revierte lo aplicado en la misma transacción. */
+class ScanFenced extends Error {}
 
 /** Resultado de pedir un escaneo. */
 export interface ScanRequest {
@@ -52,6 +73,7 @@ export class CatalogScanService {
   constructor(
     private readonly em: EntityManager,
     private readonly repo: CatalogRepository,
+    private readonly classification: CatalogClassificationService,
   ) {}
 
   /** Espera a que terminen los escaneos en vuelo de este proceso. Existe para las pruebas y el cierre ordenado. */
@@ -127,8 +149,56 @@ export class CatalogScanService {
     this.enCurso.add(trabajo);
   }
 
+  /**
+   * Un tick de la sonda, en este orden: (1) cierra lo abandonado, (2) retoma el escaneo activo si
+   * está en cola, (3) si no hay ninguno y venció el intervalo, pide uno y lo ejecuta.
+   * `claimed: 0` si no había nada que hacer o si otro proceso ya lo tomó.
+   */
+  async runNext(
+    actorId: string,
+    now: Date = new Date(),
+  ): Promise<RunNextResult> {
+    const activo = await this.em.fork().transactional(async (tx) => {
+      await this.repo.failAbandoned(tx, now, SCAN_LEASE_SECONDS);
+      return this.repo.activeScan(tx);
+    });
+    if (activo) {
+      if (activo.status !== 'QUEUED') return { claimed: 0 };
+      return this.runClaimed(activo.id);
+    }
+    const ultimo = await this.repo.lastFinishedScanAt(this.em.fork());
+    if (ultimo && !intervaloVencido(ultimo, now)) return { claimed: 0 };
+    try {
+      const { scan } = await this.request(actorId, null, { autorun: false });
+      return this.runClaimed(scan.id);
+    } catch (error) {
+      // otro proceso pidió un escaneo entre el `activeScan` y el insert: lo decide el índice único
+      if (error instanceof ConflictException) return { claimed: 0 };
+      throw error;
+    }
+  }
+
+  private async runClaimed(scanId: string): Promise<RunNextResult> {
+    const { scan, claimed, fenced } = await this.execute(scanId);
+    if (!claimed) return { claimed: 0 };
+    return {
+      claimed: 1,
+      scanId,
+      status: scan?.status,
+      ...(fenced ? { fenced: true } : {}),
+    };
+  }
+
   /** Ejecuta un escaneo ya aceptado. Nunca lanza: un fallo deja el escaneo en `FAILED` con su causa. */
   async run(scanId: string): Promise<ScanRow | null> {
+    return (await this.execute(scanId)).scan;
+  }
+
+  private async execute(scanId: string): Promise<{
+    scan: ScanRow | null;
+    claimed: boolean;
+    fenced: boolean;
+  }> {
     const owner = `${hostname()}:${process.pid}`;
     const tomado = await this.repo.claimScan(
       this.em.fork(),
@@ -136,7 +206,14 @@ export class CatalogScanService {
       owner,
       SCAN_LEASE_SECONDS,
     );
-    if (!tomado) return this.repo.scanById(this.em.fork(), scanId);
+    if (!tomado)
+      return {
+        scan: await this.repo.scanById(this.em.fork(), scanId),
+        claimed: false,
+        fenced: false,
+      };
+    let fenced = false;
+    let exito = false;
     try {
       const { observed, engineVersion } = await this.observe();
       await this.em.fork().transactional(async (tx) => {
@@ -147,22 +224,62 @@ export class CatalogScanService {
           tomado.requested_by_user_id,
           plan,
         );
-        await this.repo.finishScan(tx, scanId, {
+        const cerrado = await this.repo.finishScan(tx, scanId, owner, {
           counters: plan.counters,
           snapshotHash: plan.snapshotHash,
           engineVersion,
           limitations: [...SCAN_LIMITATIONS],
         });
+        // sin el lease no se confirma nada: se revierte lo aplicado en esta transacción
+        if (!cerrado) throw new ScanFenced();
       });
+      exito = true;
     } catch (error) {
-      const mensaje = error instanceof Error ? error.message : String(error);
-      this.logger.error(
-        { scanId, err: mensaje },
-        'El escaneo del catálogo falló',
-      );
-      await this.repo.failScan(this.em.fork(), scanId, 'SCAN_FAILED', mensaje);
+      if (error instanceof ScanFenced) fenced = true;
+      else {
+        const mensaje = error instanceof Error ? error.message : String(error);
+        this.logger.error(
+          { scanId, err: mensaje },
+          'El escaneo del catálogo falló',
+        );
+        fenced = !(await this.repo.failScan(
+          this.em.fork(),
+          scanId,
+          owner,
+          SCAN_FAILED_CODE,
+          mensaje,
+        ));
+      }
     }
-    return this.repo.scanById(this.em.fork(), scanId);
+    // columnas nuevas o cambiadas: se clasifican fuera de esta llamada, para no alargar el tick
+    if (exito) this.classifyInBackground(scanId);
+    if (fenced)
+      this.logger.warn(
+        { scanId },
+        'El escaneo perdió su lease: otro proceso lo cerró; no se pisó',
+      );
+    return {
+      scan: await this.repo.scanById(this.em.fork(), scanId),
+      claimed: true,
+      fenced,
+    };
+  }
+
+  /** La clasificación nunca hace fallar al escaneo: un error se registra y se sigue. */
+  private classifyInBackground(scanId: string): void {
+    const trabajo = this.classification
+      .classifyScan(scanId)
+      .catch((error: unknown) =>
+        this.logger.error(
+          {
+            scanId,
+            err: error instanceof Error ? error.message : String(error),
+          },
+          'La clasificación automática del escaneo falló',
+        ),
+      )
+      .finally(() => this.enCurso.delete(trabajo));
+    this.enCurso.add(trabajo);
   }
 
   /** Lee `pg_catalog` en una transacción de sólo lectura. */

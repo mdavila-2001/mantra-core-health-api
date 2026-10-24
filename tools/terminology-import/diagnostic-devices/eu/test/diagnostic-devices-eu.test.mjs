@@ -7,12 +7,16 @@
 // citan los adaptadores. Nada de esto es un dispositivo real.
 
 import assert from 'node:assert/strict';
-import { mkdtempSync, readdirSync } from 'node:fs';
+import { mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { buildCorpus, scopeOf } from '../lib/build-corpus.mjs';
+import {
+  buildCorpus,
+  scopeOf,
+  withCertificates,
+} from '../lib/build-corpus.mjs';
 import {
   DEVICE_FIELDS,
   RowError,
@@ -36,12 +40,15 @@ import {
   levelFromCode,
   parentFromCode,
   parseEmdnRows,
+  readFirstSheet,
 } from '../lib/sources/emdn.mjs';
 import {
   assertSafeNext,
   buildReferenceIndex,
   buildUrl,
   countryFromSrn,
+  deviceDetailUrl,
+  normalizeDatalakeActor,
   normalizeUdiRow,
   parsePage,
   riskClassWithScheme,
@@ -70,7 +77,10 @@ import {
 import { MIRRORS } from '../lib/mirrors.mjs';
 import {
   assertColumnMap,
+  bdrdmManufacturerIds,
+  loadColumnMap,
   normalizeBdrdmRow,
+  readBdrdmCsv,
 } from '../lib/sources/it-bdrdm.mjs';
 import { normalizeBasicUdi } from '../lib/sources/swissdamed.mjs';
 
@@ -999,4 +1009,245 @@ test('réplicas: cada una fija commit completo, licencia y fuente oficial', () =
     assert.ok(m.license && m.upstream && m.data, m.id);
     assert.ok(m.paths.length, m.id);
   }
+});
+
+// --- pasada 7: fuentes oficiales con la red abierta ---------------------------
+
+test('dedupe: dos UDI-DI distintos con el mismo modelo se conservan los dos', () => {
+  const mk = (id, p) => makeDeviceRecord({ ...PROV, sourceRecordId: id, ...p });
+  const { kept, duplicates } = dedupe([
+    mk('a', { udiDi: '000SINTETICO1', model: 'M1', brandName: 'B' }),
+    mk('b', { udiDi: '000SINTETICO2', model: 'M1', brandName: 'B' }),
+    // Sin UDI-DI: cae por fabricante + modelo + marca contra las de arriba.
+    mk('c', { model: 'm1', brandName: 'b' }),
+  ]);
+  assert.deepEqual(
+    kept.map((k) => k.sourceRecordId),
+    ['a', 'b'],
+  );
+  assert.deepEqual(
+    duplicates.map((x) => x.key),
+    ['mf+model'],
+  );
+});
+
+test('Data Lake: el filtro NOMENCLATURE_CODE conserva el espacio inicial y $after no rompe nextLink', () => {
+  const first = buildUrl('udi', { NOMENCLATURE_CODE: ' W0101' });
+  assert.match(first, /NOMENCLATURE_CODE=(%20|\+)W0101/);
+  const next = `${first}&$after=abc`;
+  assert.equal(assertSafeNext(next, first), next);
+  const page2 = `${first}&$after=def`;
+  assert.equal(assertSafeNext(page2, next), page2);
+  assert.throws(() =>
+    assertSafeNext(
+      buildUrl('udi', { NOMENCLATURE_CODE: ' W0102' }) + '&$after=x',
+      first,
+    ),
+  );
+});
+
+test('Data Lake: sourceUrl de cada UDI es la ficha pública por UUID', () => {
+  assert.equal(
+    deviceDetailUrl('00000000-0000-0000-0000-000000000001'),
+    'https://ec.europa.eu/tools/eudamed/api/devices/udiDiData/00000000-0000-0000-0000-000000000001?languageIso2Code=en',
+  );
+});
+
+test('Data Lake: actor → solo datos de la organización; nunca PRRC, correo ni teléfono', () => {
+  const a = normalizeDatalakeActor(
+    {
+      ACTOR_ID: 'DE-MF-000000001',
+      VERSION: 3,
+      NAME: 'SINTETICO GmbH',
+      ACTOR_TYPE: 'Manufacturer',
+      STATUS: 'ACTIVE',
+      ACT_COUNTRY_ISO2_CODE: 'de',
+      ACT_ADDR_CITY_NAME: 'Sintetica',
+      ACT_EMAIL: 'persona@example.invalid',
+      ACT_PHONE: '+00 000',
+      PRRC_NAME: 'Persona Sintetica',
+      PRRC_EMAIL: 'prrc@example.invalid',
+    },
+    { sourceUrl: 'https://example.invalid/a', retrievedAt: T },
+  );
+  assert.equal(a.manufacturerRegistryId, 'srn:DE-MF-000000001');
+  assert.equal(a.manufacturerCountry, 'DE');
+  const text = JSON.stringify(a);
+  for (const leak of ['persona@', 'prrc@', '+00 000', 'Persona Sintetica'])
+    assert.ok(!text.includes(leak), `se filtró ${leak}`);
+  assert.equal(
+    normalizeDatalakeActor(
+      { ACTOR_ID: 'no-es-srn' },
+      { sourceUrl: 'x', retrievedAt: T },
+    ),
+    null,
+  );
+});
+
+test('withCertificates: copia el certificado de la réplica por UUID sin pisar uno propio', () => {
+  const certs = new Map([
+    [
+      'uuid-1',
+      {
+        authorizationId: 'CERT-SINTETICO-1',
+        authorizationDate: '2024-01-02',
+        certificates: [{ number: 'CERT-SINTETICO-1' }],
+        mirror: 'replica@abc',
+      },
+    ],
+  ]);
+  const base = makeDeviceRecord({ ...PROV, sourceRecordId: 'uuid-1' });
+  const r = withCertificates(base, certs);
+  assert.equal(r.authorizationId, 'CERT-SINTETICO-1');
+  assert.equal(r.extra.certificatesSource, 'replica@abc');
+  const own = { ...base, authorizationId: 'PROPIO' };
+  assert.equal(withCertificates(own, certs), own);
+  const other = makeDeviceRecord({ ...PROV, sourceRecordId: 'uuid-2' });
+  assert.equal(withCertificates(other, certs), other);
+});
+
+test('EMDN: el Excel oficial con fila de título y sufijo de versión se lee', async () => {
+  const XLSX = (await import('xlsx')).default;
+  const dir = mkdtempSync(join(tmpdir(), 'emdn-'));
+  const file = join(dir, 'EMDN_sintetico.xlsx');
+  const ws = XLSX.utils.aoa_to_sheet([
+    ['EMDN_v.2026'],
+    ['CODE', 'TERM EMDN (v.2026)', 'LEVEL', 'terminal level yes/no'],
+    ['W', 'SINTETICO W', '1', 'NO'],
+    ['W01', 'SINTETICO W01', '2', 'YES'],
+  ]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'EMDN');
+  XLSX.writeFile(wb, file);
+  const { header, records } = await readFirstSheet(file);
+  assert.equal(header[0], 'CODE');
+  assert.equal(records.length, 2);
+  const concepts = parseEmdnRows(header, records, {
+    sourceUrl: 'https://example.invalid/emdn.xlsx',
+    sourceVersion: 'test',
+    retrievedAt: T,
+  });
+  assert.deepEqual(
+    concepts.map((c) => [c.code, c.display]),
+    [
+      ['W', 'SINTETICO W'],
+      ['W01', 'SINTETICO W01'],
+    ],
+  );
+});
+
+test('BD/RDM: el mapeo verificado coincide con el encabezado oficial y normaliza fechas y ids', () => {
+  const header = [
+    'tipologia_dm',
+    'progressivo_dm_ass',
+    'data_prima_pubblicazione',
+    'dm_riferimento',
+    'gruppo_dm_simili',
+    'iscrizione_repertorio',
+    'data_inizio_validita',
+    'data_fine_validita',
+    'fabbricante_assemblatore',
+    'cod_fiscale',
+    'PARTITAIVA_VATNUMBER_MAND',
+    'cod_catalogo_fabbr_ass',
+    'denominazione_commerciale',
+    'classificazione_cnd',
+    'descrizione_cnd',
+    'data_fine_commercio',
+    '',
+  ];
+  const map = loadColumnMap();
+  assert.equal(map.verified, true);
+  assertColumnMap(map, header);
+  const ctx = {
+    sourceUrl: 'https://example.invalid/rdm_csv.zip',
+    sourceVersion: 'test',
+    retrievedAt: T,
+  };
+  const row = {
+    tipologia_dm: '1',
+    progressivo_dm_ass: '42',
+    data_prima_pubblicazione: '2010-02-03 00:00:00',
+    data_inizio_validita: '2011-04-05 00:00:00',
+    data_fine_validita: '9999-12-31 00:00:00',
+    iscrizione_repertorio: 'S',
+    fabbricante_assemblatore: 'SINTETICO SRL',
+    cod_fiscale: '00000000001',
+    PARTITAIVA_VATNUMBER_MAND: '00000000001',
+    cod_catalogo_fabbr_ass: 'CAT-1',
+    denominazione_commerciale: 'SINTETICO TEST',
+    classificazione_cnd: 'W0101',
+    descrizione_cnd: 'SINTETICO',
+    data_fine_commercio: '',
+  };
+  const r = normalizeBdrdmRow(row, map, ctx);
+  assert.equal(r.sourceRecordId, '1:42');
+  assert.equal(r.authorizationDate, '2010-02-03');
+  assert.equal(r.manufacturerRegistryId, 'it-cf:00000000001');
+  assert.deepEqual(r.extra.manufacturerIds, ['vat:00000000001']);
+  assert.equal(r.model, 'CAT-1');
+  assert.equal(r.brandName, 'SINTETICO TEST');
+  assert.equal(r.extra.versionStartDate, '2011-04-05');
+  assert.equal(
+    r.extra.versionEndDate,
+    undefined,
+    '9999-12-31 es «vigente», no una fecha',
+  );
+  const cancelled = normalizeBdrdmRow(
+    { ...row, data_fine_validita: '2020-01-01 00:00:00' },
+    map,
+    ctx,
+  );
+  assert.equal(cancelled.extra.versionEndDate, '2020-01-01');
+});
+
+test('BD/RDM: el código fiscal de persona física (16 caracteres) nunca se publica', () => {
+  assert.deepEqual(bdrdmManufacturerIds('RSSMRA00A01H501U', ''), []);
+  assert.deepEqual(bdrdmManufacturerIds('RSSMRA00A01H501U', '00000000001'), [
+    'vat:00000000001',
+  ]);
+  assert.deepEqual(bdrdmManufacturerIds('00000000001', null), [
+    'it-cf:00000000001',
+  ]);
+});
+
+test('BD/RDM: lectura en streaming por lotes, con BOM, `;` final y comillas multilínea', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'bdrdm-'));
+  const file = join(dir, 'rdm.csv');
+  writeFileSync(file, '\uFEFFa;b;\n1;x;\n2;"y\nz";\n3;"w;v";\n');
+  const batches = [];
+  for await (const b of readBdrdmCsv(file, { batchLines: 2 })) batches.push(b);
+  assert.equal(batches.length, 2);
+  assert.deepEqual(batches[0].header.slice(0, 2), ['a', 'b']);
+  const rows = batches.flatMap((b) => b.records);
+  assert.deepEqual(
+    rows.map((r) => [r.a, r.b]),
+    [
+      ['1', 'x'],
+      ['2', 'y\nz'],
+      ['3', 'w;v'],
+    ],
+  );
+});
+
+test('makeDeviceRecord: un correo en un campo descriptivo no se publica; «Easy@Home» sí', () => {
+  const r = makeDeviceRecord({
+    ...PROV,
+    model: 'SINTETICO B.V. Calle 1, Ciudad. E-mail:persona@example.invalid',
+    brandName: 'Easy@Home SINTETICO',
+    extra: { reference: 'contacto: persona@example.invalid', deviceName: 'X' },
+  });
+  assert.equal(r.model, null);
+  assert.equal(r.brandName, 'Easy@Home SINTETICO');
+  assert.equal(r.extra.reference, undefined);
+  assert.deepEqual(r.extra.redactedFields, ['model', 'extra.reference']);
+  assert.ok(!JSON.stringify(r).includes('persona@'));
+  assert.throws(
+    () =>
+      makeDeviceRecord({
+        ...PROV,
+        manufacturerName: 'persona@example.invalid',
+      }),
+    /contiene un correo/,
+  );
 });
