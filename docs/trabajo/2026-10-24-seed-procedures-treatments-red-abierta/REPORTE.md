@@ -20,7 +20,7 @@
 | H6.S1.M4 | ICD-10-PCS → parte del cuerpo por definición | `build.mjs` | 79 256 códigos declarados = expandidos = válidos en el archivo de orden; 79 169 relaciones (87 de eje «Qualifier» fuera) |
 | H6.S1.M5 | NCIt oficial 26.09d | `build.mjs` | 450 roles (vs 438 de la OBO Edition), 16 relaciones nuevas, 0 R180 |
 | H6.S1.M7 | Cargador con los code systems nuevos | `load.mjs --apply` ×2 en dos bases (corpus de la pasada 6) | DDL canónico: 84 414 conceptos + 590 802 propiedades, 2.ª corrida 0. Con tabla propuesta + claves reales de las hermanas: 113 052 relaciones + 113 095 procedencias, 2.ª corrida 0 |
-| H6.S1.M9 | PR contra `dev`, listo para revisión, sin mergear | `mcp__github__create_pull_request` | https://github.com/mdavila-2001/mantra-core-health-api/pull/721 |
+| H6.S1.M9 | PR contra `dev`, listo para revisión, sin mergear | `mcp__github__create_pull_request` | #721 (pasadas 5–6, mergeado) y https://github.com/mdavila-2001/mantra-core-health-api/pull/723 (pasadas 7+, abierto) |
 | Gate | `corepack yarn lint` | `NODE_OPTIONS=--max-old-space-size=8192` | exit 0 |
 | Gate | tests dirigidos | `node --test tools/terminology-import/procedures-treatments/test/*.test.mjs` | 20/20 |
 | Gate | determinismo | `build.mjs` ×2 + `sha256sum -c`; `snapshot.mjs` ×2 | idéntico |
