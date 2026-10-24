@@ -12,3 +12,7 @@ en el servicio. Rutas de acción con `:` literal escapado (`\\:`).
 
 Tests unitarios en `*.controller.spec.ts` (mockean el servicio; verifican delegación
 con los argumentos correctos).
+
+## Lecturas de colección
+
+`BillingCollectionsController` (`billing-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /billing/documents` (V17-02). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

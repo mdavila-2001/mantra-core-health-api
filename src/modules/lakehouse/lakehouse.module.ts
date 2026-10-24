@@ -7,11 +7,16 @@ import {
 } from '../health_data/entities';
 import { DataReleaseRepository } from '../health_data/repositories';
 import { MessagingModule } from '../messaging/messaging.module';
-import { LakehouseController, ResearchController } from './controllers';
+import {
+  LakehouseController,
+  ResearchController,
+  LakehouseCollectionsController,
+} from './controllers';
 import {
   LakehouseCatalogService,
   TransformationService,
   ResearchReleaseService,
+  LakehouseCollectionsService,
 } from './services';
 import {
   LakehouseCatalogRepository,
@@ -39,8 +44,13 @@ import {
     ]),
     MessagingModule,
   ],
-  controllers: [LakehouseController, ResearchController],
+  controllers: [
+    LakehouseController,
+    ResearchController,
+    LakehouseCollectionsController,
+  ],
   providers: [
+    LakehouseCollectionsService,
     LakehouseCatalogRepository,
     LakehouseRuntimeRepository,
     ResearchRepository,

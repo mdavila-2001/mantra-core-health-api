@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { TrackingController } from './controllers';
-import { TrackingService } from './services';
+import {
+  TrackingController,
+  TrackingCollectionsController,
+} from './controllers';
+import { TrackingService, TrackingCollectionsService } from './services';
 import { TrackingRepository } from './repositories';
 
 /**
@@ -12,7 +15,7 @@ import { TrackingRepository } from './repositories';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [TrackingController],
-  providers: [TrackingRepository, TrackingService],
+  controllers: [TrackingController, TrackingCollectionsController],
+  providers: [TrackingCollectionsService, TrackingRepository, TrackingService],
 })
 export class TrackingModule {}

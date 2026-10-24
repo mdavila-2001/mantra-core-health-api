@@ -15,6 +15,7 @@ import {
   AccountingExchangeRateController,
   AccountingPractitionerController,
   AccountingCockpitController,
+  AccountingCollectionsController,
 } from './controllers';
 import {
   LedgerReadService,
@@ -28,6 +29,7 @@ import {
   PostingHelper,
   PractitionerAccountingService,
   AccountingReadService,
+  AccountingCollectionsService,
 } from './services';
 import {
   JournalRepository,
@@ -69,8 +71,10 @@ import {
     AccountingExchangeRateController,
     AccountingPractitionerController,
     AccountingCockpitController,
+    AccountingCollectionsController,
   ],
   providers: [
+    AccountingCollectionsService,
     // Repositorios
     JournalRepository,
     AccountsRepository,

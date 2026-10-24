@@ -79,3 +79,7 @@ POST /education/attempts/{id}/submit
 
 `score` está ponderado por los puntos de cada pregunta, así que puede no coincidir con
 `correctAnswers / totalQuestions`.
+
+## Lecturas de colección
+
+`education-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

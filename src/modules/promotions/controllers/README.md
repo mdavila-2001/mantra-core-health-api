@@ -55,3 +55,7 @@ parámetro en cualquier posición del segmento, de modo que `coupons:batch` qued
 `promotions.controller.spec.ts` cubre ambos controladores con los servicios mockeados: delegación,
 argumentos (incluido el actor y los ids de ruta), la validación que va sin actor y propagación de
 errores.
+
+## Lecturas de colección
+
+`PromotionsCollectionsController` (`promotions-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /promotions` (V51-08). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

@@ -44,6 +44,7 @@ import {
   CommunityPublicController,
   CommunitySearchIndexController,
   CommunityVerificationController,
+  CommunityCollectionsController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -79,6 +80,7 @@ import {
   CommunitySearchIndexService,
   CommunityVerificationService,
   CommunityProfileStatsService,
+  CommunityCollectionsService,
 } from './services';
 import { CommunityMessagingGateway } from './gateways';
 import {
@@ -157,8 +159,10 @@ import {
     CommunityPublicController,
     CommunitySearchIndexController,
     CommunityVerificationController,
+    CommunityCollectionsController,
   ],
   providers: [
+    CommunityCollectionsService,
     // Repositorios
     PublicProfilesRepository,
     PostsRepository,

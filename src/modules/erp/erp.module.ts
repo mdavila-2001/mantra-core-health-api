@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { ErpController } from './controllers';
-import { ErpContractsService, ErpOperationsService } from './services';
+import { ErpController, ErpCollectionsController } from './controllers';
+import {
+  ErpContractsService,
+  ErpOperationsService,
+  ErpCollectionsService,
+} from './services';
 import {
   ErpContractsRepository,
   ErpOperationsRepository,
@@ -15,8 +19,9 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [ErpController],
+  controllers: [ErpController, ErpCollectionsController],
   providers: [
+    ErpCollectionsService,
     ErpContractsRepository,
     ErpOperationsRepository,
     ErpContractsExtRepository,

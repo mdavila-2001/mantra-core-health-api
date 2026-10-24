@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { LoyaltyController, PromotionsController } from './controllers';
+import {
+  LoyaltyController,
+  PromotionsController,
+  PromotionsCollectionsController,
+} from './controllers';
 import {
   PromotionsLoyaltyService,
   PromotionsDiscountsService,
   PromotionsReadService,
+  PromotionsCollectionsService,
 } from './services';
 import {
   PromotionsLoyaltyRepository,
@@ -20,8 +25,13 @@ import { PaymentsModule } from '../payments/payments.module';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities)), PaymentsModule],
-  controllers: [LoyaltyController, PromotionsController],
+  controllers: [
+    LoyaltyController,
+    PromotionsController,
+    PromotionsCollectionsController,
+  ],
   providers: [
+    PromotionsCollectionsService,
     PromotionsLoyaltyRepository,
     PromotionsDiscountsRepository,
     PromotionsLoyaltyService,

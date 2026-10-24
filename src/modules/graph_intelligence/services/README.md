@@ -90,3 +90,7 @@ propósito no admitido, nodo fuera de alcance, arista entre tenants y extremos s
 
 `operation: 'graph.<área>.<acción>'`. `warn` en hallazgo de regla, purga y reconciliación de un
 borrado. No se loguean etiquetas de nodo, identificadores ni explicaciones de riesgo.
+
+## Lecturas de colección
+
+`GraphIntelligenceCollectionsService` (`graph-intelligence-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

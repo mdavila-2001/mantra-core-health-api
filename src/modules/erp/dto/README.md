@@ -63,3 +63,7 @@ POST /erp/bills/{billId}/invoice-match-runs
 
 `matched: false` indica que la diferencia excede la tolerancia: la factura queda registrada con
 desviación y no debería pagarse sin revisión.
+
+## Lecturas de colección
+
+`erp-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

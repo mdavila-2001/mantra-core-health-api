@@ -83,3 +83,7 @@ referido ya calificado, imposible generar un código libre).
 `promotions-loyalty.service.spec.ts` (39) y `promotions-discounts.service.spec.ts` (32):
 idempotencia en ambos sentidos, multiplicador de nivel, ascenso, tope por periodo, expiración
 acotada al saldo, selección de la mejor regla, topes y presupuesto, y compensación de la reversa.
+
+## Lecturas de colección
+
+`PromotionsCollectionsService` (`promotions-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

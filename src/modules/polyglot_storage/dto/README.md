@@ -41,3 +41,7 @@ fija el servicio, no el cliente.
 Las `*ResponseDto` exponen id, código, estado y las marcas de tiempo relevantes. No exponen
 `keyReference` de los perfiles de cifrado ni `rowFilterExpression` de las políticas de acceso: son
 los dos campos con los que un lector de la respuesta podría deducir qué se está protegiendo y cómo.
+
+## Lecturas de colección
+
+`polyglot-storage-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

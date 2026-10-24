@@ -99,3 +99,7 @@ verificación prematura, objetivos sin verificar y manifiesto frío ausente.
 `operation: 'xstore.<área>.<acción>'`. `warn` en entrega fallida, cola muerta, deriva detectada,
 solicitud de borrado, ejecución, referencias residuales, cierre y archivado — en este módulo casi
 todo lo que pasa merece atención. No se loguean payloads ni localizadores.
+
+## Lecturas de colección
+
+`CrossStoreConsistencyCollectionsService` (`cross-store-consistency-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

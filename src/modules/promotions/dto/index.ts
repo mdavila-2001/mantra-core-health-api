@@ -57,3 +57,4 @@ export type {
   ReverseReason,
   QualifyingEvent,
 } from './promotions.dto';
+export * from './promotions-collections.dto';

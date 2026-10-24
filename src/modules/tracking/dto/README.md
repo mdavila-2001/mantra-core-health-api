@@ -82,3 +82,7 @@ POST /tracking/webhooks/carriers/DHL
 
 `duplicate: true` con el mismo `eventId` de antes es la respuesta a una reentrega: el transportista
 recibe 200 y deja de reintentar, sin que el timeline haya cambiado.
+
+## Lecturas de colección
+
+`tracking-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

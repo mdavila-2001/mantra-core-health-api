@@ -11,3 +11,7 @@ records de `community.concepts.ts`.
 - Response: `responses.dto.ts` (`IdResponseDto`, `PostResponseDto`,
   `CommentResponseDto`, `ReactionResponseDto`, `ModerationDecisionResponseDto`,
   `ReviewResponseDto`, etc.).
+
+## Lecturas de colección
+
+`community-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

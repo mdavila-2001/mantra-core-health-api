@@ -75,3 +75,7 @@ registrado en cada cambio de política, hallazgo y purga.
 ## Pruebas
 
 15 pruebas de delegación en `graph-controllers.spec.ts`.
+
+## Lecturas de colección
+
+`GraphIntelligenceCollectionsController` (`graph-intelligence-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /graph/access-scopes` (V61-02), `GET /graph/deletion-jobs` (V61-05), `GET /graph/projection-definitions/{id}/runs` (V61-08), `GET /graph/projection-runs` (V61-09), `GET /graph/rule-hits` (V61-11). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

@@ -102,3 +102,7 @@ DICOM.
   dos guardas del borrado con sus dos excepciones.
 - `dicom-catalog.service.spec.ts` (14): catálogo reentrante, instancias ya presentes, modalidades
   deducidas, objeto inexistente, y los cinco caminos de denegación del acceso DICOMweb.
+
+## Lecturas de colección
+
+`ObjectStorageCollectionsService` (`object-storage-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

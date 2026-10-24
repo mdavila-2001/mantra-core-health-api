@@ -83,3 +83,7 @@ poder decir quién lo pidió.
 ## Pruebas
 
 14 pruebas de delegación en `cross-store-controllers.spec.ts`.
+
+## Lecturas de colección
+
+`CrossStoreConsistencyCollectionsController` (`cross-store-consistency-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /admin/data-movement-jobs` (V62-02), `GET /admin/deletion-requests` (V62-03), `GET /admin/projections/dead-letters` (V62-04), `GET /admin/projections/drift/{id}/repair-jobs` (V62-06), `GET /workers/cache/invalidations` (V62-08), `GET /workers/deletion-requests` (V62-09), `GET /workers/projections/dead-letters` (V62-14). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

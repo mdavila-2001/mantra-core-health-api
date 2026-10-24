@@ -48,3 +48,7 @@ Las `*ResponseDto` devuelven ids, estados y contadores. `TransitionEventResponse
 distingue una transición aplicada de una clave repetida cuyo resultado previo se está devolviendo —el
 llamante necesita saber cuál de las dos cosas pasó—. No se expone `expression_json` de las guardas ni
 `action_spec_json` de los efectos.
+
+## Lecturas de colección
+
+`workflow-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

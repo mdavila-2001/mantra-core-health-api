@@ -89,3 +89,7 @@ resuelven.
 `operation: 'workflow.<área>.<acción>'`. `info` en registro, publicación, disparo, creación de
 instancia y completado de tarea. `warn` en compensación, reintento y escalado. No se loguean
 expresiones de guarda ni `payloadJson`.
+
+## Lecturas de colección
+
+`WorkflowCollectionsService` (`workflow-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

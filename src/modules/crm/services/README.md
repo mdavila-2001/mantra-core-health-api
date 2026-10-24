@@ -56,3 +56,7 @@ contenido de notas y comentarios.
 
 `crm-sales.service.spec.ts` (19) y `crm-service.service.spec.ts` (17): camino feliz, precondiciones,
 conflictos y casos límite de cada caso de uso.
+
+## Lecturas de colección
+
+`CrmCollectionsService` (`crm-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

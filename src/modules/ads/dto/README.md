@@ -88,3 +88,7 @@ POST /ads/datasets/{id}/events
 
 `transformedFields` enumera lo que la política obligó a hashear: quien envía puede comprobar que el
 cortafuegos actuó sobre lo que esperaba.
+
+## Lecturas de colección
+
+`ads-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

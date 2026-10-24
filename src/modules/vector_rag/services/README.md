@@ -103,3 +103,7 @@ no resuelven.
 `operation: 'vector.<área>.<acción>'`. `warn` en retirada de modelo, re-embedding, sellado, borrado
 propagado, deriva detectada y problema de seguridad. No se loguean textos de chunk, consultas ni
 citas.
+
+## Lecturas de colección
+
+`VectorRagCollectionsService` (`vector-rag-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

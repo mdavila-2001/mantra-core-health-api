@@ -1,8 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { SystemContextController } from './controllers';
-import { DynamicEnumsService, SystemContextsService } from './services';
+import {
+  SystemContextController,
+  SystemContextCollectionsController,
+} from './controllers';
+import {
+  DynamicEnumsService,
+  SystemContextsService,
+  SystemContextCollectionsService,
+} from './services';
 import { SystemContextRepository } from './repositories';
 
 /**
@@ -13,8 +20,9 @@ import { SystemContextRepository } from './repositories';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [SystemContextController],
+  controllers: [SystemContextController, SystemContextCollectionsController],
   providers: [
+    SystemContextCollectionsService,
     SystemContextRepository,
     DynamicEnumsService,
     SystemContextsService,

@@ -106,3 +106,7 @@ loguea el contenido de las notificaciones.
 - `notifications.service.spec.ts` (21): supresión por opt-in y por horas de silencio —incluido el
   rango que cruza medianoche—, rebote, numeración de intentos, bandeja in-app, los tres tipos de
   acuse y conservación de la primera lectura.
+
+## Lecturas de colección
+
+`MessagingCollectionsService` (`messaging-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

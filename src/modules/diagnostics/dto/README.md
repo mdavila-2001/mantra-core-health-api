@@ -10,3 +10,7 @@ validan tipos, uuids, longitudes y anidados (`@ValidateNested` + `@Type`). Los
 - `imaging.dto.ts`: CreateImagingEndpoint, StoreImagingStudy (+ StowSeries/StowInstance), RecordDoseEvent.
 - `media-quality.dto.ts`: AttachClinicalMedia (+ MediaAnnotationItem), CreateDataQualityEvent.
 - `responses.dto.ts`: ResourceCreated, OperationResult, AccessionCreated, WorkOrderCreated, ImagingStudyStored.
+
+## Lecturas de colección
+
+`diagnostics-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

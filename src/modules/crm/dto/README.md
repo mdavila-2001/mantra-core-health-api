@@ -65,3 +65,7 @@ POST /crm/leads/{id}/convert
 
 Reintentar la conversión del mismo lead devuelve `409` con el id de la oportunidad ya creada, en vez
 de generar una segunda.
+
+## Lecturas de colección
+
+`crm-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

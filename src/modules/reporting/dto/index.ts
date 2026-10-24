@@ -36,3 +36,4 @@ export type {
   WidgetType,
   Visualization,
 } from './reporting.dto';
+export * from './reporting-collections.dto';

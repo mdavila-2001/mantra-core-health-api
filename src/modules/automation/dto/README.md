@@ -63,3 +63,7 @@ adivinando.
 que **no** debe ejecutar la herramienta y que hay una aprobación esperando.
 
 No se exponen `promptTemplate` ni `contentText` de la memoria en las respuestas.
+
+## Lecturas de colección
+
+`automation-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

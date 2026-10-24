@@ -33,3 +33,4 @@ export {
   LeaseValuationResponseDto,
 } from './erp.dto';
 export type { PartnerCategory, ContractType } from './erp.dto';
+export * from './erp-collections.dto';

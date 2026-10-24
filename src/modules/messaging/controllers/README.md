@@ -65,3 +65,7 @@ sesión. La ruta verifica la firma HMAC antes de conciliar (ver README del módu
 - `messaging.controller.spec.ts` (4)
 - `messaging-internal.controller.spec.ts` (7)
 - `provider-webhooks.controller.spec.ts` (2)
+
+## Lecturas de colección
+
+`MessagingCollectionsController` (`messaging-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /queues/jobs` (V35-04). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

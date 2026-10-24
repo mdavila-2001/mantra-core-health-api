@@ -7,3 +7,4 @@ export * from './dispatch-message.dto';
 export * from './inbound-webhook.dto';
 export * from './webhook-subscription.dto';
 export * from './responses.dto';
+export * from './integrations-collections.dto';

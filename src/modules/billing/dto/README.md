@@ -21,3 +21,7 @@ Contratos de entrada/salida con `class-validator` + `class-transformer` +
 Las referencias cross-módulo (paciente, práctica, tenant, encuentro, reclamo) se
 reciben por DTO como uuid; el `tenantId` opcional habilita el registro del vínculo
 de documento correspondiente.
+
+## Lecturas de colección
+
+`billing-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

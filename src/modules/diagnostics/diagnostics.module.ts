@@ -26,6 +26,7 @@ import {
   DiagnosticsOrdersController,
   DiagnosticsPatientResultsController,
   DiagnosticsReceptionController,
+  DiagnosticsCollectionsController,
 } from './controllers';
 import {
   DiagnosticsSpecimensService,
@@ -36,6 +37,7 @@ import {
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
+  DiagnosticsCollectionsService,
 } from './services';
 import {
   SpecimensRepository,
@@ -74,8 +76,10 @@ import {
     DiagnosticsOrdersController,
     DiagnosticsPatientResultsController,
     DiagnosticsReceptionController,
+    DiagnosticsCollectionsController,
   ],
   providers: [
+    DiagnosticsCollectionsService,
     // Repositorios
     SpecimensRepository,
     LabWorkRepository,

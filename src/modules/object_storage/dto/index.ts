@@ -25,3 +25,4 @@ export {
   RequestDeletionDto,
   DeletionMarkerResponseDto,
 } from './object-storage.dto';
+export * from './object-storage-collections.dto';

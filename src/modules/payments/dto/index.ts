@@ -46,3 +46,4 @@ export {
   ReconciliationRunResponseDto,
 } from './payment-operations.dto';
 export type { FeeMethod } from './payment-operations.dto';
+export * from './payments-collections.dto';

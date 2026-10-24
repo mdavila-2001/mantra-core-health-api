@@ -12,3 +12,7 @@ Delegan en el servicio de dominio y devuelven un DTO de respuesta.
 | `OrgextDataBoundariesController` | `/orgext/data-boundaries` | 08 |
 
 Tests unitarios en `*.controller.spec.ts` (mockean los servicios).
+
+## Lecturas de colección
+
+`OrganizationExtensionsCollectionsController` (`organization-extensions-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /orgext/facility-licenses` (V22-02), `GET /orgext/hospitals` (V22-03), `GET /orgext/data-boundaries` (V22-05). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

@@ -16,3 +16,7 @@ Capa fina bajo `@Controller('accounting')`: `@ApiTags` + `@ApiBearerAuth`,
 
 Specs (`*.spec.ts`) verifican la delegación al servicio con los argumentos
 correctos, mockeando el servicio por completo.
+
+## Lecturas de colección
+
+`AccountingCollectionsController` (`accounting-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /accounting/clearing-documents` (V16-08). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

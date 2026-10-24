@@ -14,3 +14,7 @@ Poseen la unidad de trabajo (`em.transactional`), validan precondiciones y hacen
 Tests unitarios `*.service.spec.ts` mockean repos y `EntityManager`
 (`transactional: (cb) => cb(tx)`): happy, not-found (404), conflict (409) y
 precondición (422).
+
+## Lecturas de colección
+
+`DiagnosticsCollectionsService` (`diagnostics-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

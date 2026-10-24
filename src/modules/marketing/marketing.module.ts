@@ -4,10 +4,12 @@ import * as entities from './entities';
 import {
   MarketingController,
   TrackedLinkRedirectController,
+  MarketingCollectionsController,
 } from './controllers';
 import {
   MarketingCampaignsService,
   MarketingJourneysService,
+  MarketingCollectionsService,
 } from './services';
 import {
   MarketingCampaignsRepository,
@@ -21,8 +23,13 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [MarketingController, TrackedLinkRedirectController],
+  controllers: [
+    MarketingController,
+    TrackedLinkRedirectController,
+    MarketingCollectionsController,
+  ],
   providers: [
+    MarketingCollectionsService,
     MarketingCampaignsRepository,
     MarketingJourneysRepository,
     MarketingCampaignsService,

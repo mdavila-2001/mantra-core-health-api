@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { AdsController } from './controllers';
+import { AdsController, AdsCollectionsController } from './controllers';
 import {
   AdsAccountsService,
   AdsCampaignsService,
   AdsDataService,
   AdsOptimizationService,
+  AdsCollectionsService,
 } from './services';
 import {
   AdsAccountsRepository,
@@ -24,8 +25,9 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [AdsController],
+  controllers: [AdsController, AdsCollectionsController],
   providers: [
+    AdsCollectionsService,
     AdsAccountsRepository,
     AdsCampaignsRepository,
     AdsDataRepository,

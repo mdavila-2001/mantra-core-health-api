@@ -65,3 +65,7 @@ Ninguna ruta es `@Public()`.
 - `object-storage.controller.spec.ts` (12): una por endpoint, comprobando que delega en el servicio
   correcto y que pasa los ids de ruta, el cuerpo y el actor.
 - `dicomweb.controller.spec.ts` (2): los tres UID y el propósito de uso, presente y ausente.
+
+## Lecturas de colección
+
+`ObjectStorageCollectionsController` (`object-storage-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /object-storage/large-payloads` (V60-04), `GET /object-storage/uploads` (V60-08, V60-05). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

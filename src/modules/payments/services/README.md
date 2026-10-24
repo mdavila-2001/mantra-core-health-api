@@ -62,3 +62,7 @@ loguean tokens, secretos del gateway ni datos del pagador.
 `payments-intents.service.spec.ts`, `payments-transactions.service.spec.ts` y
 `payments-operations.service.spec.ts` (incluye `PaymentsCheckoutService`) con los repositorios
 mockeados: camino feliz, precondiciones, conflictos, idempotencia y casos límite.
+
+## Lecturas de colección
+
+`PaymentsCollectionsService` (`payments-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

@@ -6,8 +6,14 @@ import {
   MessagingController,
   MessagingInternalController,
   ProviderWebhooksController,
+  MessagingCollectionsController,
 } from './controllers';
-import { OutboxService, QueuesService, NotificationsService } from './services';
+import {
+  OutboxService,
+  QueuesService,
+  NotificationsService,
+  MessagingCollectionsService,
+} from './services';
 import {
   OutboxRepository,
   QueuesRepository,
@@ -32,8 +38,10 @@ import { NotificationsGateway } from './gateways';
     MessagingController,
     MessagingInternalController,
     ProviderWebhooksController,
+    MessagingCollectionsController,
   ],
   providers: [
+    MessagingCollectionsService,
     OutboxRepository,
     QueuesRepository,
     NotificationsRepository,

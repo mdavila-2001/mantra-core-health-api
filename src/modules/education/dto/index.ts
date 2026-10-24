@@ -42,3 +42,4 @@ export type {
   AssessmentType,
   QuestionType,
 } from './education.dto';
+export * from './education-collections.dto';

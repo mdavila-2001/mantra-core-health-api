@@ -83,3 +83,7 @@ parámetros de ejecución ni direcciones de destinatarios.
 la fuente, numeración de parámetros y columnas, congelado de la versión, resolución y descarte de
 parámetros, deduplicación por contenido, SKIP LOCKED del tick con avance de ventana, no duplicación
 de distribuciones, reactivación de suscripciones y arrastre de la deprecación.
+
+## Lecturas de colección
+
+`ReportingCollectionsService` (`reporting-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

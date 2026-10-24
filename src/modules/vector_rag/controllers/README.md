@@ -84,3 +84,7 @@ dejaría de significar nada.
 ## Pruebas
 
 15 pruebas de delegación en `vector-rag-controllers.spec.ts`.
+
+## Lecturas de colección
+
+`VectorRagCollectionsController` (`vector-rag-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /vector-rag/collections` (V59-01), `GET /vector-rag/collections/{id}/embedding-jobs` (V59-02), `GET /vector-rag/collections/{id}/reconciliation` (V59-04), `GET /vector-rag/rag-access-policies` (V59-06), `GET /vector-rag/deletion-jobs` (V59-10), `GET /vector-rag/embedding-jobs` (V59-11). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

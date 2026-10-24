@@ -8,3 +8,4 @@ export * from './backup.dto';
 export * from './framework.dto';
 export * from './assessment.dto';
 export * from './draft.dto';
+export * from './system-ops-collections.dto';

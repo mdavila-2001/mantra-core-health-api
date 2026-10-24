@@ -51,3 +51,7 @@ interpreta `:` como inicio de parámetro en cualquier posición del segmento.
 
 `education.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta), el endpoint sin cuerpo y propagación de errores.
+
+## Lecturas de colección
+
+`EducationCollectionsController` (`education-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /education/courses` (V47-08). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

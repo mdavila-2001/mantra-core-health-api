@@ -18,3 +18,7 @@ como `@IsDateString`. Los DTOs de respuesta exponen solo campos seguros.
 Reglas de validación relevantes: `PostJournalDto.lines` exige `@ArrayMinSize(2)`
 (el balance debe=haber se valida en el servicio); `CreateFiscalYearDto.periods`
 exige `@ArrayMinSize(1)`; `CreateAccrualObjectDto.schedule` exige `@ArrayMinSize(1)`.
+
+## Lecturas de colección
+
+`accounting-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

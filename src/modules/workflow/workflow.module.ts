@@ -6,11 +6,13 @@ import {
   WorkflowDefinitionsController,
   WorkflowTransitionsController,
   WorkflowInstancesController,
+  WorkflowCollectionsController,
 } from './controllers';
 import {
   StateMachineDefinitionService,
   TransitionExecutionService,
   WorkflowInstancesService,
+  WorkflowCollectionsService,
 } from './services';
 import {
   StateMachinesRepository,
@@ -34,8 +36,10 @@ import {
     WorkflowDefinitionsController,
     WorkflowTransitionsController,
     WorkflowInstancesController,
+    WorkflowCollectionsController,
   ],
   providers: [
+    WorkflowCollectionsService,
     StateMachinesRepository,
     WorkflowRuntimeRepository,
     AggregateStateRepository,

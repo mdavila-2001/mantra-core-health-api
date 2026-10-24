@@ -38,3 +38,4 @@ export type {
   DefectSeverity,
   DefectStatus,
 } from './qa-lab.dto';
+export * from './qa-lab-collections.dto';

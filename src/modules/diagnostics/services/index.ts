@@ -6,3 +6,4 @@ export * from './diagnostics-media-quality.service';
 export * from './diagnostics-orders.service';
 export * from './diagnostics-patient-results.service';
 export * from './diagnostics-reception.service';
+export * from './diagnostics-collections.service';

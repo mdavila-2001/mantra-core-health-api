@@ -78,3 +78,7 @@ aunque él sólo pidiera evaluar la calidad.
 
 `supersededVersionId` dice qué contrato dejó de regir, que es lo que un consumidor del producto tiene
 que mirar.
+
+## Lecturas de colección
+
+`lakehouse-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

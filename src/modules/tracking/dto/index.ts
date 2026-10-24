@@ -31,3 +31,4 @@ export type {
   EtaMethod,
   ProofType,
 } from './tracking.dto';
+export * from './tracking-collections.dto';

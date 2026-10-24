@@ -12,3 +12,4 @@ export * from './community-search-index.controller';
 export * from './community-verification.controller';
 export * from './community-topics.controller';
 export * from './party-ratings.controller';
+export * from './community-collections.controller';

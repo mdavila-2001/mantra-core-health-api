@@ -7,12 +7,14 @@ import {
   IntegrationsConnectionsController,
   IntegrationsMessagesController,
   IntegrationsWebhooksController,
+  IntegrationsCollectionsController,
 } from './controllers';
 import {
   IntegrationsProvidersService,
   IntegrationsConnectionsService,
   IntegrationsMessagingService,
   IntegrationsWebhooksService,
+  IntegrationsCollectionsService,
 } from './services';
 import {
   ExternalProvidersRepository,
@@ -40,8 +42,10 @@ import {
     IntegrationsConnectionsController,
     IntegrationsMessagesController,
     IntegrationsWebhooksController,
+    IntegrationsCollectionsController,
   ],
   providers: [
+    IntegrationsCollectionsService,
     // Repositorios
     ExternalProvidersRepository,
     ProviderConnectionsRepository,

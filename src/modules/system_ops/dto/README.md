@@ -8,3 +8,7 @@ uuid del cliente y en runtime provienen de `SYSOPS.*` / `CONCEPTS.*`.
 Agrupados por área: `governance-catalog`, `governance-policy`, `retention-execution`,
 `residency`, `legal-hold`, `backup`, `framework`, `assessment`, `draft` y
 `common-response` (`IdResultDto`, `StatusResultDto`).
+
+## Lecturas de colección
+
+`system-ops-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

@@ -57,3 +57,7 @@ segmento.
 
 `ads.controller.spec.ts` con los cuatro servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta, con los dos de la corrida de feed) y propagación de errores.
+
+## Lecturas de colección
+
+`AdsCollectionsController` (`ads-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /ads/event-data-policies` (V43-13), `GET /ads/platform-connections` (V43-16). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

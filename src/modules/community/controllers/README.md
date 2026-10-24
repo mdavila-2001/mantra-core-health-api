@@ -13,3 +13,7 @@ con `ParseUUIDPipe`, `@CurrentUser`, delegación al servicio. Admin/worker con
 | `CommunityGroupsController`     | `/community/groups`, `/community/groups/:id/members`                                                                                                                            |
 | `CommunityPollsController`      | `/community/posts/:id/polls`, `/community/polls/:id/votes`                                                                                                                      |
 | `CommunityFeedController`       | `/internal/community/feed/rebuild`                                                                                                                                              |
+
+## Lecturas de colección
+
+`CommunityCollectionsController` (`community-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /community/public-profiles` (V19-15). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

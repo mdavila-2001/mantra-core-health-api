@@ -5,3 +5,4 @@ export * from './legal-hold.service';
 export * from './backup.service';
 export * from './assessment.service';
 export * from './draft.service';
+export * from './system-ops-collections.service';

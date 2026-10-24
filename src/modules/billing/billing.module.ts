@@ -9,6 +9,7 @@ import {
   BillingOperationsController,
   BillingServiceCatalogController,
   BillingSimulatedController,
+  BillingCollectionsController,
 } from './controllers';
 import {
   InvoicesService,
@@ -24,6 +25,7 @@ import {
   BillingServiceCatalogService,
   ProcedureNomenclatureService,
   BillingSimulatedService,
+  BillingCollectionsService,
 } from './services';
 import {
   InvoicesRepository,
@@ -61,8 +63,10 @@ import {
     BillingOperationsController,
     BillingServiceCatalogController,
     BillingSimulatedController,
+    BillingCollectionsController,
   ],
   providers: [
+    BillingCollectionsService,
     // Repositorios
     InvoicesRepository,
     BillsRepository,

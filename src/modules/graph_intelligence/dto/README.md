@@ -73,3 +73,7 @@ nada, y devolver `2xx` sin decirlo dejaría al worker sin saber si tiene que rei
 pasó son los contadores de `GraphDeletionResponseDto`: `nodesDeleted`, `edgesDeleted`,
 `identifiersDeleted`, `riskScoresDeleted`, `communitiesUpdated` e `invalidatedPaths`. Los seis
 juntos son la prueba de borrado que el módulo 62 espera.
+
+## Lecturas de colección
+
+`graph-intelligence-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

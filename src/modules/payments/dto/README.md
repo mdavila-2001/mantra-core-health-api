@@ -71,3 +71,7 @@ POST /payments/intents
 
 `POST /payments/checkout-sessions` devuelve `sessionToken` **una sola vez**; la base guarda
 únicamente su hash SHA-256. No se repite en ninguna lectura posterior ni aparece en logs.
+
+## Lecturas de colección
+
+`payments-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

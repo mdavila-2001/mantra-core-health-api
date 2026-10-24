@@ -5,6 +5,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 import {
   CrossStoreAdminController,
   CrossStoreWorkerController,
+  CrossStoreConsistencyCollectionsController,
 } from './controllers';
 import {
   ProjectionDeliveryService,
@@ -12,6 +13,7 @@ import {
   DeletionService,
   StorageMaintenanceService,
   ObjectStoreReconciliationService,
+  CrossStoreConsistencyCollectionsService,
 } from './services';
 import {
   OBJECT_CONTENT_READER,
@@ -39,8 +41,13 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     MessagingModule,
   ],
-  controllers: [CrossStoreAdminController, CrossStoreWorkerController],
+  controllers: [
+    CrossStoreAdminController,
+    CrossStoreWorkerController,
+    CrossStoreConsistencyCollectionsController,
+  ],
   providers: [
+    CrossStoreConsistencyCollectionsService,
     ProjectionRepository,
     ReconciliationRepository,
     DeletionRepository,

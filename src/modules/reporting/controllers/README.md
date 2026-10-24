@@ -53,3 +53,7 @@ del segmento.
 
 `reporting.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta) y propagación de errores.
+
+## Lecturas de colección
+
+`ReportingCollectionsController` (`reporting-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /reporting/definitions` (V39-01), `GET /reporting/definitions/{id}/executions` (V39-02), `GET /reporting/definitions/{id}/schedules` (V39-03), `GET /reporting/executions` (V39-05), `GET /reporting/dashboards` (V39-07), `GET /reporting/data-sources` (V39-08). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

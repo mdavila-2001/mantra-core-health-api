@@ -71,3 +71,7 @@ expresiones de filtro de fila.
 `ConflictException` para códigos duplicados y estados que ya no permiten la transición.
 `BadRequestException` para las contradicciones de política y para el rechazo de residencia.
 `NotFoundException` para referencias que no resuelven.
+
+## Lecturas de colección
+
+`PolyglotStorageCollectionsService` (`polyglot-storage-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

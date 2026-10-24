@@ -92,3 +92,7 @@ ventana ética caducada, PHI sin perfil y hallazgo que cita una regla inactiva.
 
 `operation: 'lakehouse.<área>.<acción>'`. `warn` en cuarentena de dataset, materialización de release
 y su cierre. No se loguean valores de partición, contratos ni expresiones de cohorte.
+
+## Lecturas de colección
+
+`LakehouseCollectionsService` (`lakehouse-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

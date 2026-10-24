@@ -3,3 +3,4 @@ export * from './reconciliation.service';
 export * from './deletion.service';
 export * from './storage-maintenance.service';
 export { ObjectStoreReconciliationService } from './object-store-reconciliation.service';
+export * from './cross-store-consistency-collections.service';

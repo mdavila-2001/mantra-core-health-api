@@ -6,12 +6,14 @@ import {
   OrgextFacilityLicensesController,
   OrgextAffiliationsController,
   OrgextDataBoundariesController,
+  OrganizationExtensionsCollectionsController,
 } from './controllers';
 import {
   OrgextHospitalsService,
   OrgextFacilityLicensesService,
   OrgextAffiliationsService,
   OrgextDataBoundariesService,
+  OrganizationExtensionsCollectionsService,
 } from './services';
 import {
   HospitalsRepository,
@@ -34,8 +36,10 @@ import {
     OrgextFacilityLicensesController,
     OrgextAffiliationsController,
     OrgextDataBoundariesController,
+    OrganizationExtensionsCollectionsController,
   ],
   providers: [
+    OrganizationExtensionsCollectionsService,
     // Repositorios
     HospitalsRepository,
     HospitalServiceLinesRepository,

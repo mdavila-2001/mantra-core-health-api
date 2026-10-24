@@ -64,3 +64,7 @@ punto donde el sentido de la operación es que la tomó un humano.
 ## Pruebas
 
 16 pruebas de delegación en `automation-controllers.spec.ts`.
+
+## Lecturas de colección
+
+`AutomationCollectionsController` (`automation-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /automation/agents` (V48-04), `GET /automation/triggers` (V48-13), `GET /automation/workflows` (V48-15). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

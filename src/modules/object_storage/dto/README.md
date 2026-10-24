@@ -63,3 +63,7 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 
 Sin suite propia: los DTOs se validan por el `ValidationPipe` global y se ejercitan desde las
 pruebas de servicio y de controlador.
+
+## Lecturas de colección
+
+`object-storage-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

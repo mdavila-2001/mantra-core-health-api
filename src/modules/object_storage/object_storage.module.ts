@@ -2,11 +2,16 @@ import { Module } from '@nestjs/common';
 import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { ObjectStorageController, DicomWebController } from './controllers';
+import {
+  ObjectStorageController,
+  DicomWebController,
+  ObjectStorageCollectionsController,
+} from './controllers';
 import {
   ObjectStorageService,
   DicomCatalogService,
   ObjectGovernanceService,
+  ObjectStorageCollectionsService,
 } from './services';
 import {
   ObjectStorageRepository,
@@ -37,8 +42,13 @@ import { AuditModule } from '../audit/audit.module';
     ClinicalModule,
     AuditModule,
   ],
-  controllers: [ObjectStorageController, DicomWebController],
+  controllers: [
+    ObjectStorageController,
+    DicomWebController,
+    ObjectStorageCollectionsController,
+  ],
   providers: [
+    ObjectStorageCollectionsService,
     ObjectStorageRepository,
     ObjectGovernanceRepository,
     DicomRepository,

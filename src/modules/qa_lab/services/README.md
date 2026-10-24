@@ -95,3 +95,7 @@ payloads ni valores capturados.
 validación de aserciones, activación en bloque al publicar, numeración secuencial, enmascarado con
 hash del original, consolidación de totales con omitidos, deduplicación y reapertura de defectos,
 transiciones de triage y sello de evidencia.
+
+## Lecturas de colección
+
+`QaLabCollectionsService` (`qa-lab-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

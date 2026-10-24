@@ -12,3 +12,7 @@ guard JWT global (401 sin token).
 | `DiagnosticsImagingController` | /diagnostics/imaging-endpoints, /dicomweb/studies, /diagnostics/imaging-studies/{id}/dose-events, /diagnostics/clinical-media, /diagnostics/data-quality-events |
 
 Tests unitarios `*.controller.spec.ts` verifican la delegación (servicio mockeado).
+
+## Lecturas de colección
+
+`DiagnosticsCollectionsController` (`diagnostics-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /diagnostics/imaging-endpoints` (V20-09). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

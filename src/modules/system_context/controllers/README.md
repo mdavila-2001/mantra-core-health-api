@@ -60,3 +60,7 @@ sesión.
 
 `system-context.controller.spec.ts` (11): una por endpoint, comprobando que delega en el servicio
 correcto y que pasa el id, el número de versión, el cuerpo y el actor.
+
+## Lecturas de colección
+
+`SystemContextCollectionsController` (`system-context-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /system-context/contexts` (V45-01), `GET /system-context/dynamic-enums/definitions` (V45-05). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

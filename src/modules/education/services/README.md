@@ -85,3 +85,7 @@ de evaluación ni datos del aprendiz más allá del identificador.
 la duración y del progreso, estado vigente de la lección, numeración de intentos, corrección
 ponderada y por conjunto, idempotencia del certificado y del crédito CME, y arrastre de la
 revocación.
+
+## Lecturas de colección
+
+`EducationCollectionsService` (`education-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

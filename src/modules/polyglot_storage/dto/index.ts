@@ -36,3 +36,4 @@ export {
   VerifyIntegrityDto,
   VerifyIntegrityResponseDto,
 } from './polyglot-storage.dto';
+export * from './polyglot-storage-collections.dto';

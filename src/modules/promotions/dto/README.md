@@ -79,3 +79,7 @@ POST /loyalty/memberships/{id}/points/earn
 
 `points` puede no coincidir con lo que declara la regla: el multiplicador del nivel actual ya está
 aplicado.
+
+## Lecturas de colección
+
+`promotions-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

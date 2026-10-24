@@ -53,3 +53,7 @@ triage y enlazar el release.
 `qa-lab.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el actor
 y los ids de ruta, con los dos de la ejecución de caso), los endpoints sin cuerpo y propagación de
 errores.
+
+## Lecturas de colección
+
+`QaLabCollectionsController` (`qa-lab-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /qa/schedules` (V36-07). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

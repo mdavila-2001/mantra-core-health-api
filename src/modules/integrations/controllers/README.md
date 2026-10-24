@@ -22,3 +22,7 @@ Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la ló
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+
+## Lecturas de colección
+
+`IntegrationsCollectionsController` (`integrations-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /integrations/connections` (V12-08), `GET /integrations/providers/{id}/connections` (V12-11), `GET /integrations/providers/{id}/webhook-subscriptions` (V12-13). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

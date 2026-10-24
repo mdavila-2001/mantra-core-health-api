@@ -5,6 +5,7 @@ import {
   PaymentsIntentsController,
   PaymentsTransactionsController,
   PaymentsOperationsController,
+  PaymentsCollectionsController,
 } from './controllers';
 import {
   PaymentsIntentsService,
@@ -12,6 +13,7 @@ import {
   PaymentsTransactionsService,
   PaymentsOperationsService,
   WalletsService,
+  PaymentsCollectionsService,
 } from './services';
 import {
   PaymentIntentsRepository,
@@ -32,8 +34,10 @@ import {
     PaymentsIntentsController,
     PaymentsTransactionsController,
     PaymentsOperationsController,
+    PaymentsCollectionsController,
   ],
   providers: [
+    PaymentsCollectionsService,
     // Repositorios
     PaymentIntentsRepository,
     PaymentFlowRepository,

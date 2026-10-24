@@ -4,3 +4,4 @@ export { PaymentsTransactionsService } from './payments-transactions.service';
 export { PaymentsOperationsService } from './payments-operations.service';
 export { WalletsService } from './wallets.service';
 export type { CreditWalletInput, CreditWalletResult } from './wallets.service';
+export * from './payments-collections.service';

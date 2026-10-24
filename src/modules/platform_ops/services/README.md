@@ -139,3 +139,7 @@ go", runbook que no completa y ejercicio que incumple su objetivo.
   política, y guardrail de capacidad con y sin recomputación.
 - `ops-practices.service.spec.ts` (29): hallazgo bloqueante frente a "go", paso al backlog, numeración
   de versiones, timeline sólo dentro de incidente, y comparación exacta de RTO/RPO con `BigInt`.
+
+## Lecturas de colección
+
+`PlatformOpsCollectionsService` (`platform-ops-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

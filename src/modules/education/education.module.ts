@@ -1,8 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { EducationController } from './controllers';
-import { EducationCatalogService, EducationLearningService } from './services';
+import {
+  EducationController,
+  EducationCollectionsController,
+} from './controllers';
+import {
+  EducationCatalogService,
+  EducationLearningService,
+  EducationCollectionsService,
+} from './services';
 import {
   EducationCatalogRepository,
   EducationLearningRepository,
@@ -15,8 +22,9 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [EducationController],
+  controllers: [EducationController, EducationCollectionsController],
   providers: [
+    EducationCollectionsService,
     EducationCatalogRepository,
     EducationLearningRepository,
     EducationCatalogService,

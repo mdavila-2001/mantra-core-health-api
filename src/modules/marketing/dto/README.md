@@ -80,3 +80,7 @@ POST /marketing/attribution/compute
 ```
 
 El tercer peso lleva el resto de la división para que la suma dé exactamente 1.
+
+## Lecturas de colección
+
+`marketing-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

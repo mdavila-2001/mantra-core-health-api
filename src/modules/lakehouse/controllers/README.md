@@ -75,3 +75,7 @@ investigador.
 ## Pruebas
 
 11 pruebas de delegación en `lakehouse-controllers.spec.ts`.
+
+## Lecturas de colección
+
+`LakehouseCollectionsController` (`lakehouse-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /research/dataset-releases` (V63-01), `GET /lakehouse/datasets` (V63-05), `GET /lakehouse/datasets/{id}/quality-runs` (V63-06), `GET /lakehouse/transformations/{defId}/runs` (V63-08). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

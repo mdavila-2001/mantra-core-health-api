@@ -32,3 +32,4 @@ export type {
   ActivityType,
   ActivitySubject,
 } from './crm.dto';
+export * from './crm-collections.dto';

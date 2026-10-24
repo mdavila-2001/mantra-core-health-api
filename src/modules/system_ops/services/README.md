@@ -12,3 +12,7 @@ fija `row_version`. Excepciones de dominio (`ResourceNotFoundException`,
 - `backup.service.ts` — UC-11-09/10.
 - `assessment.service.ts` — UC-11-11..14.
 - `draft.service.ts` — UC-11-15.
+
+## Lecturas de colección
+
+`SystemOpsCollectionsService` (`system-ops-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

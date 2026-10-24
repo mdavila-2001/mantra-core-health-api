@@ -5,12 +5,14 @@ import { MessagingModule } from '../messaging/messaging.module';
 import {
   AgentCatalogController,
   AutomationOrchestrationController,
+  AutomationCollectionsController,
 } from './controllers';
 import {
   AgentCatalogService,
   AutomationDefinitionService,
   AutomationExecutionService,
   RecordAutomationService,
+  AutomationCollectionsService,
 } from './services';
 import {
   AgentsRepository,
@@ -31,8 +33,13 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     MessagingModule,
   ],
-  controllers: [AgentCatalogController, AutomationOrchestrationController],
+  controllers: [
+    AgentCatalogController,
+    AutomationOrchestrationController,
+    AutomationCollectionsController,
+  ],
   providers: [
+    AutomationCollectionsService,
     AgentsRepository,
     AutomationGovernanceRepository,
     AutomationRunsRepository,

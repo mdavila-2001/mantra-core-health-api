@@ -5,11 +5,13 @@ import {
   StorageGovernanceController,
   StorageOperationsController,
   StorageFinOpsController,
+  PolyglotStorageCollectionsController,
 } from './controllers';
 import {
   StorageGovernanceService,
   DatasetGovernanceService,
   StorageOperationsService,
+  PolyglotStorageCollectionsService,
 } from './services';
 import {
   StorageBackendsRepository,
@@ -30,8 +32,10 @@ import {
     StorageGovernanceController,
     StorageOperationsController,
     StorageFinOpsController,
+    PolyglotStorageCollectionsController,
   ],
   providers: [
+    PolyglotStorageCollectionsService,
     StorageBackendsRepository,
     DatasetsRepository,
     PlacementsRepository,

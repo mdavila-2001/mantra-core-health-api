@@ -13,3 +13,7 @@ Poseen la unidad de trabajo (`em.transactional`) y aplican las reglas de negocio
 | `CommunityGroupsService`     | grupo (bootstrap), UC-13                                     |
 | `CommunityPollsService`      | encuesta (bootstrap), UC-12                                  |
 | `CommunityFeedService`       | UC-15                                                        |
+
+## Lecturas de colección
+
+`CommunityCollectionsService` (`community-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

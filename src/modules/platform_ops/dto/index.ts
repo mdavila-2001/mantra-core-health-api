@@ -55,3 +55,4 @@ export type {
   ExecutionMode,
   ExecutionResult,
 } from './platform-ops.dto';
+export * from './platform-ops-collections.dto';

@@ -5,8 +5,14 @@ import {
   QaLabController,
   QaLabInternalController,
   QaLabReadController,
+  QaLabCollectionsController,
 } from './controllers';
-import { QaCatalogService, QaLabReadService, QaRunsService } from './services';
+import {
+  QaCatalogService,
+  QaLabReadService,
+  QaRunsService,
+  QaLabCollectionsService,
+} from './services';
 import { QaFlowsService } from './services/qa-flows.service';
 import { RouteIndexModule } from '../../observability/route-index/route-index.module';
 import { QaCatalogRepository, QaRunsRepository } from './repositories';
@@ -21,8 +27,14 @@ import { QaCatalogRepository, QaRunsRepository } from './repositories';
     MikroOrmModule.forFeature(Object.values(entities)),
     RouteIndexModule,
   ],
-  controllers: [QaLabController, QaLabInternalController, QaLabReadController],
+  controllers: [
+    QaLabController,
+    QaLabInternalController,
+    QaLabReadController,
+    QaLabCollectionsController,
+  ],
   providers: [
+    QaLabCollectionsService,
     QaCatalogRepository,
     QaRunsRepository,
     QaCatalogService,

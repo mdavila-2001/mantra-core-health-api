@@ -110,3 +110,7 @@ referencias gobernadas que no tienen por qué acabar en un log.
 - `system-contexts.service.spec.ts` (29): contexto y versión 1 en una transacción, hash estable ante
   el orden de claves, idempotencia del refresco, corrida fallida y *unchanged*, activación con y sin
   hash esperado, solape de ventanas —incluido el encadenamiento sin conflicto— y rollback completo.
+
+## Lecturas de colección
+
+`SystemContextCollectionsService` (`system-context-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

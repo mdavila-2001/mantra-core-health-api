@@ -103,3 +103,7 @@ respuestas de leads ni identificadores de usuario.
 y feeds, delta del gasto al reingerir, deduplicación navegador/servidor, bloqueo y descarte por
 política, cierre de vigencias, reparto de experimento, agregación de la factura y reinicio del
 aprendizaje.
+
+## Lecturas de colección
+
+`AdsCollectionsService` (`ads-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

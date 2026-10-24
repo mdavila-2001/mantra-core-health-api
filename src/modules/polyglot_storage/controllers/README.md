@@ -64,3 +64,7 @@ en esta misma llamada y no hay ningún id que poner en la ruta. Detallado en el 
 ## Pruebas
 
 15 pruebas de delegación, una por endpoint, en los tres `*.controller.spec.ts`.
+
+## Lecturas de colección
+
+`PolyglotStorageCollectionsController` (`polyglot-storage-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /finops/storage-cost-snapshots` (V54-02), `GET /governance/tenants/{tenantId}/storage-bindings` (V54-11). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

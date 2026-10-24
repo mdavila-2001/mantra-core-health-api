@@ -46,3 +46,7 @@ tratamiento especial que Nest da a los `:` dentro de un path.
 
 `erp.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el actor y
 los ids de ruta) y propagación de errores.
+
+## Lecturas de colección
+
+`ErpCollectionsController` (`erp-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /erp/business-partners` (V38-02), `GET /erp/contracts` (V38-04), `GET /erp/purchase-orders` (V38-13), `GET /erp/purchase-orders/{id}/goods-receipts` (V38-14), `GET /erp/purchase-orders/{id}/service-entry-sheets` (V38-15), `GET /erp/sales-orders` (V38-16). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

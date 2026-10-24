@@ -89,3 +89,7 @@ incumplimientos del barrido. Nunca se loguea qué se transporta ni datos del des
 terminal, idempotencia del webhook, código sin mapear como excepción, webhook tardío sobre envío
 cerrado, aplicación condicional del ETA, acreditación de la entrega, escalada de prioridad y
 elección del hito en el barrido de SLA.
+
+## Lecturas de colección
+
+`TrackingCollectionsService` (`tracking-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

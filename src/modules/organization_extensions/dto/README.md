@@ -14,3 +14,7 @@ Las respuestas exponen sólo campos seguros (ids, estado como concepto, fechas).
 | `CreateAffiliationDto` | `POST /orgext/affiliations` (UC-22-07) |
 | `CreateDataBoundaryDto` | `POST /orgext/data-boundaries` (UC-22-08) |
 | `*ResponseDto`, `StatusResultDto` | Respuestas (`responses.dto.ts`) |
+
+## Lecturas de colección
+
+`organization-extensions-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

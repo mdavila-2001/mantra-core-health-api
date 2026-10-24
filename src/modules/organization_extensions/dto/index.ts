@@ -6,3 +6,4 @@ export * from './verify-license.dto';
 export * from './create-affiliation.dto';
 export * from './create-data-boundary.dto';
 export * from './responses.dto';
+export * from './organization-extensions-collections.dto';

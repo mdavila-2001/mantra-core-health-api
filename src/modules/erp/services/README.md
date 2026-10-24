@@ -59,3 +59,7 @@ identificadores bancarios, salarios ni datos personales del empleado.
 
 `erp-contracts.service.spec.ts` (22) y `erp-operations.service.spec.ts` (19): camino feliz,
 precondiciones, conflictos, idempotencia y casos límite.
+
+## Lecturas de colección
+
+`ErpCollectionsService` (`erp-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

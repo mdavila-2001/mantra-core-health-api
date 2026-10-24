@@ -67,3 +67,7 @@ documentos que faltan y uno huérfano" — que es lo que decide qué reparación
 `CloseDeletionResponseDto` devuelve los tres contadores (`verifiedTargets`, `blockedTargets`,
 `pendingTargets`) porque juntos son la prueba de cumplimiento: cuántos se borraron de verdad y
 cuántos siguen ahí porque la ley lo exige.
+
+## Lecturas de colección
+
+`cross-store-consistency-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

@@ -60,3 +60,7 @@ autor no se puede reconstruir después.
 ## Pruebas
 
 11 pruebas de delegación, una por endpoint, en `workflow-controllers.spec.ts`.
+
+## Lecturas de colección
+
+`WorkflowCollectionsController` (`workflow-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /workflow/instances` (V32-05). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

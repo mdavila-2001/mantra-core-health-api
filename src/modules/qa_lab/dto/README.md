@@ -79,3 +79,7 @@ POST /qa/runs/{runId}/cases/{caseId}/execute
 
 `masked: true` avisa de que el entorno no era seguro: lo guardado conserva las claves del cuerpo,
 no los valores. El hash sigue siendo el del cuerpo original.
+
+## Lecturas de colección
+
+`qa-lab-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

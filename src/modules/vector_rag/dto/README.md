@@ -74,3 +74,7 @@ que convierte "faltan documentos" en "faltan tres por consentimiento y uno por e
 
 `DeletionResponseDto.verified` es la prueba de borrado que el módulo 62 espera para cerrar la
 solicitud.
+
+## Lecturas de colección
+
+`vector-rag-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

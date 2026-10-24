@@ -42,3 +42,7 @@ caso de uso 13 sobre la misma transición, no una regla aparte.
 
 `crm.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el actor y
 los ids de ruta) y propagación de errores.
+
+## Lecturas de colección
+
+`CrmCollectionsController` (`crm-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /crm/leads` (V49-01), `GET /crm/opportunities` (V49-02), `GET /crm/cases` (V49-03), `GET /crm/accounts` (V49-06), `GET /crm/activities` (V49-09), `GET /crm/partnerships` (V49-11). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

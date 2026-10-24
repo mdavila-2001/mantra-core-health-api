@@ -5,12 +5,14 @@ import { MessagingModule } from '../messaging/messaging.module';
 import {
   VectorGovernanceController,
   VectorRuntimeController,
+  VectorRagCollectionsController,
 } from './controllers';
 import {
   VectorGovernanceService,
   EmbeddingPipelineService,
   RetrievalService,
   VectorMaintenanceService,
+  VectorRagCollectionsService,
 } from './services';
 import {
   VectorCatalogRepository,
@@ -36,8 +38,13 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     MessagingModule,
   ],
-  controllers: [VectorGovernanceController, VectorRuntimeController],
+  controllers: [
+    VectorGovernanceController,
+    VectorRuntimeController,
+    VectorRagCollectionsController,
+  ],
   providers: [
+    VectorRagCollectionsService,
     VectorCatalogRepository,
     VectorCorpusRepository,
     RetrievalRepository,

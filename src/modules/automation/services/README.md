@@ -98,3 +98,7 @@ abierta y se enlista en ella.
 
 `operation: 'automation.<área>.<acción>'`. `warn` en pausa por guardrail y decisión de aprobación.
 No se loguean `payloadJson`, `thought_text` ni el contenido de la memoria.
+
+## Lecturas de colección
+
+`AutomationCollectionsService` (`automation-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

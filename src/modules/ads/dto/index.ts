@@ -70,3 +70,4 @@ export type {
   ObjectiveMetric,
   PolicyCategory,
 } from './ads.dto';
+export * from './ads-collections.dto';

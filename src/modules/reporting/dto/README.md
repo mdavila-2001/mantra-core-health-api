@@ -77,3 +77,7 @@ POST /reporting/definitions/{id}/executions
 
 `reportVersionId` es la versión con la que se ejecutará: si la definición cambia mañana, esta
 corrida seguirá dando lo mismo.
+
+## Lecturas de colección
+
+`reporting-collections.dto.ts` declara, por recurso, la query del listado (extiende `PaginationQueryDto`), el DTO de fila y su página (`pageResponseOf`).

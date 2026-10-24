@@ -2,11 +2,16 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { MessagingModule } from '../messaging/messaging.module';
-import { GraphProjectionController, GraphQueryController } from './controllers';
+import {
+  GraphProjectionController,
+  GraphQueryController,
+  GraphIntelligenceCollectionsController,
+} from './controllers';
 import {
   GraphProjectionService,
   GraphTraversalService,
   GraphAnalyticsService,
+  GraphIntelligenceCollectionsService,
 } from './services';
 import {
   GraphProjectionRepository,
@@ -26,8 +31,13 @@ import {
     MikroOrmModule.forFeature(Object.values(entities)),
     MessagingModule,
   ],
-  controllers: [GraphProjectionController, GraphQueryController],
+  controllers: [
+    GraphProjectionController,
+    GraphQueryController,
+    GraphIntelligenceCollectionsController,
+  ],
   providers: [
+    GraphIntelligenceCollectionsService,
     GraphProjectionRepository,
     GraphAnalyticsRepository,
     GraphProjectionService,

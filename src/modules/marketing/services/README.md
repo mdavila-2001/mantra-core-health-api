@@ -78,3 +78,7 @@ allá del identificador.
 `marketing-campaigns.service.spec.ts` (25) y `marketing-journeys.service.spec.ts` (33): camino
 feliz, precondiciones, conflictos, idempotencia, reingreso al segmento, ramas del journey y suma
 exacta de los pesos de atribución.
+
+## Lecturas de colección
+
+`MarketingCollectionsService` (`marketing-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

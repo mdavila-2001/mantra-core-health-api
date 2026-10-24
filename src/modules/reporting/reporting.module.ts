@@ -1,8 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
-import { ReportingController } from './controllers';
-import { ReportingDefinitionsService, ReportingRunsService } from './services';
+import {
+  ReportingController,
+  ReportingCollectionsController,
+} from './controllers';
+import {
+  ReportingDefinitionsService,
+  ReportingRunsService,
+  ReportingCollectionsService,
+} from './services';
 import {
   ReportingDefinitionsRepository,
   ReportingRunsRepository,
@@ -15,8 +22,9 @@ import {
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [ReportingController],
+  controllers: [ReportingController, ReportingCollectionsController],
   providers: [
+    ReportingCollectionsService,
     ReportingDefinitionsRepository,
     ReportingRunsRepository,
     ReportingDefinitionsService,

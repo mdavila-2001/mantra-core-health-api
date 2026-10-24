@@ -12,6 +12,7 @@ import {
   RestoreTestController,
   AssessmentController,
   DraftController,
+  SystemOpsCollectionsController,
 } from './controllers';
 import {
   GovernanceCatalogService,
@@ -21,6 +22,7 @@ import {
   BackupService,
   AssessmentService,
   DraftService,
+  SystemOpsCollectionsService,
 } from './services';
 import {
   GovernanceRepository,
@@ -55,8 +57,10 @@ import {
     RestoreTestController,
     AssessmentController,
     DraftController,
+    SystemOpsCollectionsController,
   ],
   providers: [
+    SystemOpsCollectionsService,
     // Repositorios
     GovernanceRepository,
     RetentionExecutionRepository,

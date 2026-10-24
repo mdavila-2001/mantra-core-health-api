@@ -49,3 +49,7 @@ literal `members` seguido de un parámetro llamado `materialize`, y la ruta capt
 
 `marketing.controller.spec.ts` con ambos servicios mockeados: delegación, argumentos (incluido el
 actor y los ids de ruta), la variante anónima de la redirección y propagación de errores.
+
+## Lecturas de colección
+
+`MarketingCollectionsController` (`marketing-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /marketing/journeys` (V50-02), `GET /marketing/segments` (V50-04), `GET /marketing/campaigns` (V50-06). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

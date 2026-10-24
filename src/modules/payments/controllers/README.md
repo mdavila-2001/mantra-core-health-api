@@ -44,3 +44,7 @@ del intent pero su lógica pertenece al dominio de transacciones.
 
 `payments-intents.controller.spec.ts` cubre los tres controladores con los servicios mockeados:
 verifica la delegación, los argumentos (incluido el actor autenticado) y la propagación de errores.
+
+## Lecturas de colección
+
+`PaymentsCollectionsController` (`payments-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /payments/checkout-sessions` (V42-02), `GET /payments/fee-schedules` (V42-03), `GET /payments/intents` (V42-04), `GET /payments/payouts` (V42-09), `GET /payments/reconciliation-runs` (V42-10). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

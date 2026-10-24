@@ -24,3 +24,7 @@ excepciones de dominio (`ResourceNotFoundException` 404, `ConflictException` 409
 Tests unit en `*.spec.ts` (mockean repos, `em` y `PostingHelper`): cubren happy
 path, no-encontrado, conflicto y al menos un rechazo de regla (incluido el 422 de
 partida doble no balanceada y el 422 de periodo bloqueado).
+
+## Lecturas de colección
+
+`AccountingCollectionsService` (`accounting-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

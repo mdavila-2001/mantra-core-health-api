@@ -44,3 +44,4 @@ export type {
   ConversionRefType,
   AttributionModel,
 } from './marketing.dto';
+export * from './marketing-collections.dto';

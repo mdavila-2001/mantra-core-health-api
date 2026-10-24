@@ -28,3 +28,4 @@ export {
   ListDynamicEnumBindingsResponseDto,
 } from './system-context.dto';
 export type { ValidationMode, RefreshTrigger } from './system-context.dto';
+export * from './system-context-collections.dto';

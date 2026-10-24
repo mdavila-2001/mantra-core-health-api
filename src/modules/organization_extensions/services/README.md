@@ -12,3 +12,7 @@ excepciones de dominio (`ResourceNotFoundException` 404, `ConflictException` 409
 | `OrgextDataBoundariesService` | 08 | Definir frontera de datos (residencia/RLS) |
 
 Tests unitarios en `*.service.spec.ts` (mockean repositorios y `em`).
+
+## Lecturas de colección
+
+`OrganizationExtensionsCollectionsService` (`organization-extensions-collections.service.ts`) arma cada página con `listTenantCollection` (`src/common/pagination/tenant-collection.ts`): tenant del contexto, filtros compuestos con `$and`, orden con allowlist y mapeo explícito a la fila publicada.

@@ -54,3 +54,7 @@ enrutador de Nest 11 interpreta `:` como inicio de parámetro en cualquier posic
 
 `tracking.controller.spec.ts` con el servicio mockeado: delegación, argumentos (incluido el actor y
 los ids de ruta), el webhook sin actor y propagación de errores.
+
+## Lecturas de colección
+
+`TrackingCollectionsController` (`tracking-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /tracking/shipments` (V37-01), `GET /tracking/milestone-definitions` (V37-06), `GET /tracking/trackable-subjects` (V37-07). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.

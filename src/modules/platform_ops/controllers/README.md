@@ -64,3 +64,7 @@ Ninguna ruta es `@Public()`: incluso las que llama un worker pasan por sesión d
 
 `platform-ops.controller.spec.ts` (15): una por endpoint, comprobando que delega en el servicio
 correcto y que pasa el id de la ruta, el cuerpo y el actor.
+
+## Lecturas de colección
+
+`PlatformOpsCollectionsController` (`platform-ops-collections.controller.ts`) expone los `GET` de colección que pedía el catálogo de vistas: `GET /ops/deployments` (V46-01), `GET /ops/artifacts` (V46-02), `GET /ops/change-requests` (V46-04), `GET /ops/incidents` (V46-08), `GET /ops/resilience-exercises` (V46-11). Cada handler declara el mismo `@Roles(...)` que las escrituras del recurso; la página la acota al tenant del contexto el servicio.
