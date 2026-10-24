@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 58 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 59 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda`
 - **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`, `SchedulingServiceOfferingsController`, `TenantAgendaController`
@@ -65,10 +65,11 @@ Referencia exhaustiva de 58 operación(es) del módulo `scheduling`, derivada de
 52. [DELETE /scheduling/templates/{id}](#52-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
 53. [PATCH /scheduling/templates/{id}](#53-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
 54. [POST /scheduling/templates/{id}/generate-slots](#54-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-55. [POST /scheduling/templates/{id}/reactivate](#55-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
-56. [GET /scheduling/waitlist](#56-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
-57. [POST /scheduling/waitlist](#57-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
-58. [GET /tenants/{tenantId}/agenda](#58-get-tenants-tenantid-agenda) — La agenda de la organización
+55. [GET /scheduling/templates/{id}/live-bookings](#55-get-scheduling-templates-id-live-bookings) — Listar las citas vivas de una plantilla antes de retirarla
+56. [POST /scheduling/templates/{id}/reactivate](#56-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
+57. [GET /scheduling/waitlist](#57-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
+58. [POST /scheduling/waitlist](#58-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+59. [GET /tenants/{tenantId}/agenda](#59-get-tenants-tenantid-agenda) — La agenda de la organización
 
 ---
 
@@ -5036,6 +5037,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
 | 404 | `NOT_FOUND` | Ninguno de esos cupos es de esta agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
@@ -5462,6 +5464,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
@@ -7254,7 +7258,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.
+La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Por omisión las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds. Con ?affectedBookings=cancel se cancelan con el motivo «cambio de horario» y se avisa a cada paciente (cancelledBookings).
 
 Contexto declarado en el controlador: Retirar un horario publicado (TAREA-10, punto 6). `DELETE` y no `PATCH` porque para quien lo usa **es** el botón de dar de baja el horario; lo que cambia es qué significa dar de baja acá, y eso lo dice el cuerpo de la respuesta. No es `@HttpCode(NO_CONTENT)` como el borrado de una excepción: éste devuelve cuánto soltó y cuánto conservó. Con citas comprometidas **también retira** (M4 · H1.S2.M2): conserva sus cupos, no toca ninguna cita, y devuelve cuántas siguen vivas y sus ids.
 
@@ -7267,6 +7271,7 @@ NestJS resuelve `DELETE /scheduling/templates/{id}` en `SchedulingController_ret
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affectedBookings` | query | No | `string` | valores: `cancel`, `keep` | cancel: cancela las citas vivas del horario y avisa a cada paciente. keep o ausente: las conserva, como siempre. | `cancel` |
 
 ### Payload mínimo aceptable
 
@@ -7293,7 +7298,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-DELETE /scheduling/templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+DELETE /scheduling/templates/00000000-0000-4000-8000-000000000001?affectedBookings=cancel HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -7324,7 +7329,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "liveBookingIds": [
     "valor-ejemplo"
   ],
-  "truncated": true
+  "truncated": true,
+  "cancelledBookings": 1
 }
 ```
 
@@ -7339,6 +7345,7 @@ Campos de la respuesta:
 | `liveBookings` | Sí | `number` | Sin restricción adicional declarada | Citas confirmadas o presentadas que siguen vivas en cupos conservados | `1` |
 | `liveBookingIds` | Sí | `array<string>` | formato `uuid` | Ids (nunca nombres) de esas citas, hasta un tope. | `["valor-ejemplo"]` |
 | `truncated` | Sí | `boolean` | Sin restricción adicional declarada | `true` si hay más citas vivas que las listadas en `liveBookingIds`. | `true` |
+| `cancelledBookings` | Sí | `number` | Sin restricción adicional declarada | Citas canceladas por este retiro, con aviso al paciente. Sólo es mayor que 0 cuando se pidió `?affectedBookings=cancel` (24/10/2026). | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -7350,8 +7357,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/retire-template.use-case.ts |
 | 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/retire-template.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7663,7 +7676,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /scheduling/templates/{id}/reactivate
+## 55. GET /scheduling/templates/{id}/live-bookings
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Listar las citas vivas de una plantilla antes de retirarla
+- **Operation ID:** `SchedulingController_listTemplateLiveBookings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingController.listTemplateLiveBookings](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
+
+### Descripción de negocio
+
+Las citas confirmadas o pendientes que un retiro con affectedBookings=cancel cancelaría, y las de pacientes ya recibidos, que lo frenan. Sólo para quien administra la agenda.
+
+Contexto declarado en el controlador: La vista previa del retiro: a quién alcanza, con nombre y hora, para que el profesional elija entre cancelar y avisar o conservar. Sólo para quien administra la agenda (trae nombres de pacientes).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/templates/{id}/live-bookings` en `SchedulingController_listTemplateLiveBookings`. El controlador delega en `SchedulingCatalogService.listTemplateLiveBookings`. No recibe body. El tipo de retorno estático es `Promise<TemplateLiveBookingsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/templates/00000000-0000-4000-8000-000000000001/live-bookings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/templates/00000000-0000-4000-8000-000000000001/live-bookings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateLiveBookingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "templateId": "00000000-0000-4000-8000-000000000001",
+  "total": 1,
+  "bookings": [
+    {
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "patientName": "Nombre de ejemplo",
+      "pending": true
+    }
+  ],
+  "present": [
+    {
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "patientName": "Nombre de ejemplo",
+      "pending": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `templateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Citas vivas en total: las cancelables y las de pacientes ya recibidos. | `1` |
+| `bookings` | Sí | `array<AffectedBookingDto>` | Sin restricción adicional declarada | Las que un retiro con `affectedBookings=cancel` cancelaría (o rechazaría). | `[{"bookingId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","patientName":"Nombre de ejemplo","pending":true}]` |
+| `bookings[].bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `bookings[].startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bookings[].endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bookings[].patientName` | Sí | `string` | admite null | El nombre del paciente; `null` si no se pudo resolver. | `Nombre de ejemplo` |
+| `bookings[].pending` | Sí | `boolean` | Sin restricción adicional declarada | Solicitud sin responder: se rechaza en vez de cancelarse. | `true` |
+| `present` | Sí | `array<AffectedBookingDto>` | Sin restricción adicional declarada | Pacientes ya recibidos: frenan el retiro con cancelación (422). | `[{"bookingId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","patientName":"Nombre de ejemplo","pending":true}]` |
+| `present[].bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `present[].startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `present[].endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `present[].patientName` | Sí | `string` | admite null | El nombre del paciente; `null` si no se pudo resolver. | `Nombre de ejemplo` |
+| `present[].pending` | Sí | `boolean` | Sin restricción adicional declarada | Solicitud sin responder: se rechaza en vez de cancelarse. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-template-live-bookings.use-case.ts |
+| 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-template-live-bookings.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/templates/{id}/live-bookings"
+}
+```
+
+---
+
+## 56. POST /scheduling/templates/{id}/reactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7779,7 +7935,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. GET /scheduling/waitlist
+## 57. GET /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7910,7 +8066,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. POST /scheduling/waitlist
+## 58. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8045,7 +8201,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. GET /tenants/{tenantId}/agenda
+## 59. GET /tenants/{tenantId}/agenda
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-tenant-agenda`
