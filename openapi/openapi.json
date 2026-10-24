@@ -2932,12 +2932,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
@@ -2958,7 +2952,8 @@
         "tags": [
           "iam-auth"
         ],
-        "description": "Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Pre-cargar una imagen de firma o sello para el registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/iam/auth/upload-registration-document": {
@@ -73732,12 +73727,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -73751,7 +73740,8 @@
         "summary": "Servicios que ofrece una organización, desde su ficha pública",
         "tags": [
           "public-catalog"
-        ]
+        ],
+        "security": []
       }
     },
     "/public/profiles/f/{slug}/products": {
@@ -73795,12 +73785,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -73814,7 +73798,8 @@
         "summary": "Productos que ofrece una farmacia, desde su ficha pública",
         "tags": [
           "public-catalog"
-        ]
+        ],
+        "security": []
       }
     },
     "/qa/environments": {
@@ -106713,7 +106698,7 @@
         "type": "object",
         "properties": {
           "contactPhone": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "maxLength": 40,
             "example": "+591 72123456"

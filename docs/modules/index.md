@@ -24,8 +24,8 @@
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 17 |
-| [`practice`](practice.md) | 6 | 10 | 12 | 11 | 17 |
-| [`billing`](billing.md) | 5 | 13 | 10 | 22 | 14 |
+| [`practice`](practice.md) | 6 | 11 | 12 | 11 | 17 |
+| [`billing`](billing.md) | 5 | 13 | 10 | 24 | 14 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 8 | 12 | 10 | 13 |
 | [`profiles`](profiles.md) | 5 | 11 | 14 | 19 | 30 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **275** | **420** | **414** | **1263** | **518** |
+| **Total** | **275** | **421** | **414** | **1265** | **518** |

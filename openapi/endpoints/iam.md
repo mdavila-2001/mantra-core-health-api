@@ -2297,7 +2297,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Pre-cargar una imagen de firma o sello para el registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: Precarga de firma o sello: máximo 2 MB y sin lectura pública.
 
@@ -2354,8 +2354,6 @@ Content-Type: multipart/form-data
 |---:|---|---|---|
 | 201 | Recurso creado o acción registrada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 400 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
