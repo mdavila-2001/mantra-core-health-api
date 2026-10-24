@@ -1,0 +1,101 @@
+# Carga del corpus de la pasada 9 (granularidad por vía, todas las fuentes) en Postgres 16 DESECHABLE (base nueva cp_p9; DDL tal cual; nunca una base viva)
+
+$ load-clinical-pharmacology.mjs   (corrida 1)
+=== Farmacología clínica → terminology.*  ===
+{
+  "codeSystem": "clinical-pharmacology",
+  "version": "1",
+  "monographs": 2883,
+  "concepts": 3959,
+  "designations": 3943,
+  "properties": 101033,
+  "relationships": 3945,
+  "uniqueIds": 112880
+}
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 3959,
+    "designations": 3943,
+    "relationships": 3945,
+    "prunedProperties": 0,
+    "properties": 101033,
+    "vademecumMaps": 429,
+    "vademecumMapsPlanned": 429
+  },
+  "segundos": 32
+}
+
+$ load-clinical-pharmacology.mjs   (corrida 2: idempotencia)
+
+=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "concepts": 0,
+    "designations": 0,
+    "relationships": 0,
+    "prunedProperties": 0,
+    "properties": 0,
+    "vademecumMaps": 0,
+    "vademecumMapsPlanned": 429
+  },
+  "segundos": 18
+}
+
+$ psql: tamaño de concept_properties
+374 MB
+$ psql: secciones por fuente
+aemps-cima|41998
+openfda-label|27583
+nlm-lactmed|4586
+(coverage)|2827
+niddk-livertox|1836
+who-eeml|1568
+ema-epar|1401
+$ psql: secciones con textSha256 ≠ sha256(texto)
+0
+$ psql: filas LactMed/LiverTox sin «Courtesy of the U.S. National Library of Medicine» en licencia y cita
+0
+$ psql: punteros DailyMed con texto
+0
+
+$ validate-links.mjs
+{
+  "generatedAt": "2026-10-24T19:07:18.260Z",
+  "monographConcepts": 2883,
+  "vademecum": {
+    "atc5": 483,
+    "withMonograph": 429,
+    "withMap": 429,
+    "withoutMonograph": [
+      "A01AB11",
+      "A06AC07",
+      "A06AD04",
+      "A06AG06",
+      "A12CD01",
+      "B01AX06",
+      "B02BX01",
+      "B03AC02",
+      "B03AE10",
+      "B05CB01",
+      "B05CB04",
+      "B05CB10",
+      "B05CX04",
+      "C01CA01",
+      "C02AB02",
+      "C03AX01",
+      "D01AA01",
+      "D01AA20",
+      "D01AC06",
+      "D01AE02",
+      "… (54)"
+    ]
+  },
+  "productCatalog": {},
+  "relationshipsTouchingAtc5": {},
+  "rxnorm": {
+    "rxcuis": 2124,
+    "presentInRxnormCodeSystems": 0
+  }
+}

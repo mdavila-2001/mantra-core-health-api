@@ -1,0 +1,12 @@
+$ python3 -I 22-enlace-drug-treatments.py out/monographs.ndjson (pasada 9) tools/terminology-import/drug-treatments/data  (dev e98a94ee)
+{
+ "drugs": 4842,
+ "rows": 18032,
+ "withRxcui": 4242,
+ "withUnii": 4536,
+ "linkedByRxcuiIN": 3113,
+ "linkedByUnii": 2182,
+ "linkedAny": 3240,
+ "rowsLinked": 12657,
+ "atc5Reached": 1465
+}
