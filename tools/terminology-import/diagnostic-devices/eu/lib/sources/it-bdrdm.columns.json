@@ -1,0 +1,21 @@
+{
+  "verified": false,
+  "note": "Completar mirando el encabezado real del CSV (build.mjs lo imprime) y pasar verified a true. Solo progressivo_dm_ass y tipologia_dm están confirmados por el diccionario v2.0; el resto queda en null hasta verlo.",
+  "columns": {
+    "recordNumber": "progressivo_dm_ass",
+    "recordType": "tipologia_dm",
+    "cndCode": null,
+    "cndName": null,
+    "manufacturerName": null,
+    "manufacturerCountry": null,
+    "manufacturerRegistryId": null,
+    "brandName": null,
+    "model": null,
+    "udiDi": null,
+    "riskClass": null,
+    "registrationDate": null,
+    "status": null,
+    "repertorio": null,
+    "endOfMarketingDate": null
+  }
+}
