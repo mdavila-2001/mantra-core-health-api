@@ -188,3 +188,13 @@ separan MATERIAL (44 922), IVD (13 744) y EQUIPAMENTO (11 306).
 
 Licencia: 政府資料開放授權條款 — 第1版. Era hueco hasta la pasada 4 (la copia
 estaba en una release de GitHub que no se pudo bajar).
+
+## Pasada 7 — Japón: maestro JMDN (2026-10-24)
+
+| Fuente | Archivo oficial | Aporte |
+|---|---|---|
+| `pmda-approvals` (enriquecida) | 医療機器基準データベース, `std.pmda.go.jp` (4496 一般的名称 al 2026-09-30) | 33 498 de 35 298 filas con código JMDN, clase y 類別 (`extra.deviceTypes`, unión por nombre exacto) |
+| `out/nomenclature-jmdn.json.gz` | idem | maestro completo, 4496 términos, para `master/` |
+
+0 filas de dispositivos nuevas (es enriquecimiento). La base no tiene descarga
+masiva: se recorre por clase y por lotes, con pausa.

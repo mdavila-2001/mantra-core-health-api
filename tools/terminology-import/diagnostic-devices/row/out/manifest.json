@@ -1,6 +1,6 @@
 {
   "region": "row",
-  "generatedAt": "2026-10-24T17:00:10.967Z",
+  "generatedAt": "2026-10-24T17:12:06.410Z",
   "formatVersion": 1,
   "files": [
     {
@@ -56,8 +56,8 @@
       "source": "pmda-approvals",
       "sourceVersion": "承認品目一覧・認証品目リスト hasta 2026-02-27 (espejo zoefcuk/pmda-medical-devices@d829883b)",
       "rows": 35298,
-      "bytes": 2696929,
-      "sha256": "7c77504106d2974f67c4173f24716b9ebbbde27d66c3d60ce290c97c433794b1"
+      "bytes": 3391120,
+      "sha256": "f719ceb4c47b589459dcd13cdb8690bbf9269ff772d773f22a42a25e1f14b70f"
     },
     {
       "path": "hc-mdall-0001.ndjson.gz",
@@ -108,6 +108,14 @@
       "sha256": "86e9ee6af3951fb76222f5976760094ab2c062be2a29c4593fc4b62df66dd473"
     }
   ],
+  "nomenclatures": [
+    {
+      "path": "nomenclature-jmdn.json.gz",
+      "system": "jmdn",
+      "entries": 4496,
+      "sha256": "f482c8be924825f75425d22c0018f0514b0a68f27c2926164ffa46c92f406a5c"
+    }
+  ],
   "stats": {
     "anvisa-produtos": {
       "inputLines": 116008,
@@ -137,7 +145,9 @@
       "inputRows": 36116,
       "rows": 35298,
       "duplicates": 815,
-      "withoutManufacturer": 3
+      "withoutManufacturer": 3,
+      "rowsWithJmdn": 33498,
+      "jmdnEntries": 4496
     },
     "hc-mdall": {
       "licences": 62087,

@@ -43,14 +43,15 @@ Conteos exactos y por archivo: `out/manifest.json`. Cobertura: `COVERAGE.md`.
 
 ## Licencias y términos de uso
 
-| Fuente        | Datos (autoridad)                                                                                                                                                                            | Espejo                                                                                                   |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| ANVISA        | Datos abiertos del Poder Ejecutivo federal de Brasil (Decreto nº 8.777/2016). La licencia exacta del conjunto no se pudo leer desde la nube: **por verificar** en la ficha del conjunto.     | g.stec: sin licencia publicada. DHsys: MIT (cubre el código del repo; los CSV son datos de ANVISA).      |
-| PMDA          | Listados públicos de PMDA. Los términos de reutilización del sitio de PMDA no se pudieron leer desde la nube: **por verificar**.                                                             | Sin licencia publicada; el propio espejo se declara «参考用» (de referencia) y remite al Excel oficial.  |
-| Health Canada | MDALL figura en el Portal de Gobierno Abierto de Canadá (Open Government Licence – Canada según el portal; **por verificar** la ficha).                                                      | Sin licencia publicada.                                                                                  |
-| TGA           | Contenido de la TGA, con el aviso de DAEN de que una notificación no prueba que el dispositivo causó el evento. Términos de reutilización **por verificar**.                                 | Sin licencia publicada.                                                                                  |
-| CDSCO         | Lista pública de CDSCO. Términos de reutilización **por verificar**.                                                                                                                         | El repo declara que los archivos de datos conservan la licencia de su fuente original; el código es MIT. |
-| TFDA          | 政府資料開放授權條款 — 第1版 (Open Government Data License, Taiwán; `license: 1` en la ficha de data.gov.tw), compatible con CC BY 4.0: exige citar al proveedor (衛生福利部食品藥物管理署). | —                                                                                                        |
+| Fuente              | Datos (autoridad)                                                                                                                                                                                                   | Espejo                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| ANVISA              | Datos abiertos del Poder Ejecutivo federal de Brasil (Decreto nº 8.777/2016). La licencia exacta del conjunto no se pudo leer desde la nube: **por verificar** en la ficha del conjunto.                            | g.stec: sin licencia publicada. DHsys: MIT (cubre el código del repo; los CSV son datos de ANVISA).      |
+| PMDA                | Listados públicos de PMDA. Los términos de reutilización del sitio de PMDA no se pudieron leer desde la nube: **por verificar**.                                                                                    | Sin licencia publicada; el propio espejo se declara «参考用» (de referencia) y remite al Excel oficial.  |
+| Health Canada       | MDALL figura en el Portal de Gobierno Abierto de Canadá (Open Government Licence – Canada según el portal; **por verificar** la ficha).                                                                             | Sin licencia publicada.                                                                                  |
+| TGA                 | Contenido de la TGA, con el aviso de DAEN de que una notificación no prueba que el dispositivo causó el evento. Términos de reutilización **por verificar**.                                                        | Sin licencia publicada.                                                                                  |
+| CDSCO               | Lista pública de CDSCO. Términos de reutilización **por verificar**.                                                                                                                                                | El repo declara que los archivos de datos conservan la licencia de su fuente original; el código es MIT. |
+| TFDA                | 政府資料開放授權條款 — 第1版 (Open Government Data License, Taiwán; `license: 1` en la ficha de data.gov.tw), compatible con CC BY 4.0: exige citar al proveedor (衛生福利部食品藥物管理署).                        | —                                                                                                        |
+| PMDA (maestro JMDN) | Contenido del sitio de PMDA (医療機器基準データベース). Los términos de reutilización del sitio no se pudieron confirmar: **por verificar**. Solo se usan nombre, código, clase y clasificación de cada 一般的名称. | —                                                                                                        |
 
 Ninguna fuente se usó para algo distinto de catalogar dispositivos. No se
 eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
@@ -88,6 +89,17 @@ eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
   p. ej. «Kit para 90 testes»); el id de fila es `registro|modelo`.
 
 ### `pmda-approvals` (Japón)
+
+- Desde la pasada 7, cuando el 一般的名称 es letra por letra un nombre del maestro
+  JMDN de PMDA (医療機器基準データベース, `std.pmda.go.jp`, 4496 nombres al
+  2026-09-30), `extra.deviceTypes` lleva código JMDN de 8 dígitos, clase (Ⅰ–Ⅳ),
+  類別 (p. ej. `器16` 体温計) y 中分類, con `joinedBy: exact-name`. Cruza el 95 %
+  (33 498 de 35 298). `deviceTypeCode` y `riskClass` siguen en null: la clase y el
+  código salen del nombre, no del trámite. El maestro completo va aparte en
+  `out/nomenclature-jmdn.json.gz` (listado en `manifest.nomenclatures`).
+  La base no tiene descarga masiva ni robots.txt: `fetch-pmda-jmdn.mjs` busca
+  por clase (Ⅰ–Ⅳ suman las 4496) y pide las fichas en 45 lotes de 100, con 2 s
+  de pausa; las páginas crudas quedan con su sha256 en `official/pmda-jmdn/index.json`.
 
 - Clasificación: **一般的名称** (término JMDN, sin código en la fuente) → `jmdn`.
   Nombres en japonés, sin traducir.

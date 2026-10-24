@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { TextDecoder } from 'node:util';
 import { gunzipSync } from 'node:zlib';
 
 import { parseCsv } from '../../../lib/medicine-catalog/common.mjs';
@@ -24,6 +25,7 @@ import { readDelimitedRows } from '../lib/lines.mjs';
 import { cdscoRows, expandShowMore, parseCdscoLicence } from '../lib/cdsco.mjs';
 import { indexMdall, mdallRows } from '../lib/hc-mdall.mjs';
 import { PartWriter } from '../lib/out.mjs';
+import { parseJmdnHeadline, parseJmdnPage } from '../lib/jmdn.mjs';
 import { pmdaRows } from '../lib/pmda.mjs';
 import {
   REQUIRED_FIELDS,
@@ -442,4 +444,39 @@ test('TUDID: una fila por UDI-DI y modelo; fabricante y clase de la licencia; li
   assert.equal(first.riskClass, 'tw:2');
   assert.equal(first.extra.udiIssuingAgency, 'GS1');
   assert.equal(first.extra.licenceFrom, 'tfda-devices');
+});
+
+test('JMDN: la ficha de PMDA (Shift_JIS) se parte en código, clase, 類別, 中分類 y definición', () => {
+  const html = new TextDecoder('shift_jis').decode(
+    readFileSync(new URL('pmda-jmdn-resr.html', FIXTURES)),
+  );
+  const entries = parseJmdnPage(html);
+  assert.equal(entries.length, 2);
+  const [probe] = entries;
+  assert.equal(probe.name, '中枢神経・中心循環系手術向け超音波診断用プローブ');
+  assert.equal(probe.code, '40770004');
+  assert.equal(probe.class, 'Ⅳ');
+  assert.equal(probe.annex, '別表1-1');
+  assert.deepEqual(probe.category, { code: '器12', name: '理学診療用器具' });
+  assert.equal(probe.subcategory, '超音波画像診断装置');
+  assert.equal(probe.maintenance.qms, '該当');
+  assert.ok(probe.productGroups.length > 1);
+  assert.deepEqual(
+    parseJmdnHeadline(
+      '　　 別表2-160, クラスⅡ, コード：14032010, GHTFルール：10-③',
+    ),
+    {
+      annex: '別表2-160',
+      class: 'Ⅱ',
+      code: '14032010',
+      ghtfRule: '10-③',
+    },
+  );
+  const dataset = JSON.parse(fixture('pmda-dataset.json'));
+  const byName = new Map(entries.map((e) => [e.name, e]));
+  const { rows } = pmdaRows(dataset, { ...CTX, jmdnByName: byName });
+  assert.ok(
+    rows.every((r) => r.riskClass === null && r.deviceTypeCode === null),
+    'la unión por nombre no rellena campos principales',
+  );
 });

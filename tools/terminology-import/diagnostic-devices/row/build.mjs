@@ -11,7 +11,10 @@
 // =============================================================================
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
+import { TextDecoder } from 'node:util';
+import { gzipSync } from 'node:zlib';
 
 import { parseCsv } from '../../lib/medicine-catalog/common.mjs';
 import {
@@ -25,6 +28,7 @@ import { cdscoRows } from './lib/cdsco.mjs';
 import { indexMdall, mdallRows } from './lib/hc-mdall.mjs';
 import { readDelimitedRows } from './lib/lines.mjs';
 import { PartWriter } from './lib/out.mjs';
+import { parseJmdnPage } from './lib/jmdn.mjs';
 import { extractPmdaDataset, pmdaRows } from './lib/pmda.mjs';
 import { BUILD_DIR, OUT_DIR, ensureDir, readJson } from './lib/row.mjs';
 import { tfdaRows, tudidRows } from './lib/tfda.mjs';
@@ -209,11 +213,14 @@ async function buildPmda() {
     .sort()
     .pop();
   const sourceVersion = `承認品目一覧・認証品目リスト hasta ${lastDate} (espejo ${short(repo)})`;
+  const jmdn = loadJmdn();
   const { rows, duplicates, withoutManufacturer } = pmdaRows(dataset, {
     sourceUrl: OFFICIAL.pmdaApprovals,
     sourceVersion,
     retrievedAt: retrievedAt(repo),
     mirror: mirrorRef(repo, 'index.html'),
+    jmdnByName:
+      jmdn === null ? null : new Map(jmdn.entries.map((e) => [e.name, e])),
   });
   return {
     files: await writeSource('pmda-approvals', sourceVersion, rows),
@@ -222,7 +229,54 @@ async function buildPmda() {
       rows: rows.length,
       duplicates,
       withoutManufacturer,
+      rowsWithJmdn: rows.filter((r) => r.extra.deviceTypes).length,
+      jmdnEntries: jmdn?.entries.length ?? 0,
     },
+  };
+}
+
+/** Maestro JMDN de `fetch-pmda-jmdn.mjs`, o null si no se bajó. */
+function loadJmdn() {
+  const dir = join(OFFICIAL_DIR, 'pmda-jmdn');
+  if (!existsSync(join(dir, 'index.json'))) return null;
+  const index = readJson(join(dir, 'index.json'));
+  const decoder = new TextDecoder('shift_jis');
+  const entries = index.pages.flatMap((p) =>
+    parseJmdnPage(decoder.decode(readFileSync(join(dir, p.name)))),
+  );
+  if (entries.length !== index.total)
+    throw new Error(
+      `JMDN: ${entries.length} fichas, se esperaban ${index.total}`,
+    );
+  entries.sort((a, b) => a.code.localeCompare(b.code));
+  return {
+    entries,
+    index,
+    meta: officialRetrieved[
+      'https://www.std.pmda.go.jp/scripts/stdDB/JMDN/stdDB_jmdn_resr.cgi'
+    ],
+  };
+}
+
+/** Escribe el maestro JMDN como nomenclatura (no son filas de dispositivos). */
+function writeJmdnNomenclature() {
+  const jmdn = loadJmdn();
+  if (jmdn === null) return null;
+  const path = join(OUT_DIR, 'nomenclature-jmdn.json.gz');
+  const body = {
+    system: 'jmdn',
+    source: 'https://www.std.pmda.go.jp/',
+    retrievedAt: jmdn.meta?.retrievedAt ?? null,
+    total: jmdn.entries.length,
+    pages: jmdn.index.pages.map((p) => ({ name: p.name, sha256: p.sha256 })),
+    entries: jmdn.entries,
+  };
+  writeFileSync(path, gzipSync(JSON.stringify(body) + '\n', { level: 9 }));
+  return {
+    path: 'nomenclature-jmdn.json.gz',
+    system: 'jmdn',
+    entries: jmdn.entries.length,
+    sha256: createHash('sha256').update(readFileSync(path)).digest('hex'),
   };
 }
 
@@ -428,11 +482,13 @@ async function main() {
       `${source}: ${JSON.stringify(result.stats)} → ${result.files.map((f) => f.path).join(', ')} (${((Date.now() - started) / 1000).toFixed(1)} s)`,
     );
   }
+  const nomenclatures = [writeJmdnNomenclature()].filter(Boolean);
   const manifest = {
     region: 'row',
     generatedAt: new Date().toISOString(),
     formatVersion: 1,
     files,
+    nomenclatures,
     stats,
     gaps: GAPS,
   };
