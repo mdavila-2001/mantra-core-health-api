@@ -115,3 +115,15 @@ test('pack-data: parte el NDJSON en trozos gzip bajo el tope sin perder ni reord
   const back = parts.flatMap((p) => gunzipSync(p.gz).toString('utf8').split('\n').filter(Boolean));
   assert.deepEqual(back, rows);
 });
+
+test('ndjsonLines: líneas y caracteres multibyte partidos entre bloques se reconstruyen exactos', async () => {
+  const { mkdtempSync, writeFileSync: write } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join: j } = await import('node:path');
+  const { ndjsonLines, readNdjsonLarge } = await import('../lib/cli.mjs');
+  const rows = [{ t: 'Posología y forma de administración — niños' }, { t: 'ß∑€ ñ' }, { t: 'x'.repeat(50) }];
+  const path = j(mkdtempSync(j(tmpdir(), 'cp-ndjson-')), 'm.ndjson');
+  write(path, rows.map((r) => JSON.stringify(r)).join('\n') + '\n\n' + JSON.stringify({ t: 'sin salto final' }));
+  assert.deepEqual([...ndjsonLines(path, 7)].map((l) => JSON.parse(l)), [...rows, { t: 'sin salto final' }]);
+  assert.deepEqual(readNdjsonLarge(path), [...rows, { t: 'sin salto final' }]);
+});
