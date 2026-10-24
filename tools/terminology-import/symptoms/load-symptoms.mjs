@@ -12,8 +12,11 @@
 //   concept_relationships   jerarquía is-a declarada por la fuente (REL_IS_A)
 //   concept_maps            xrefs HPO → NCIt declarados por HPO
 //   catalog_import_batches  un lote por sistema
-// Con `--glossary`: además, los fenotipos de HPO con nombre oficial en castellano
-// entran al glosario (value sets glossary-all-terms + glossary-category-signs-symptoms).
+// Glosario (activado por defecto desde 2026-10-24, decisión del propietario): los
+// fenotipos de HPO con nombre oficial en castellano entran al glosario (value sets
+// glossary-all-terms + glossary-category-signs-symptoms). `--no-glossary` lo apaga.
+// Riesgo aceptado: pueden duplicar fichas `wikidata-sintoma-*`, que no declaran
+// su id HPO (ver docs/seed-research/symptoms.md § Glosario).
 //
 // Las relaciones enfermedad → síntoma NO van acá: ver load-disease-phenotypes.mjs.
 //
@@ -22,7 +25,7 @@
 //   node tools/terminology-import/symptoms/load-symptoms.mjs                 # dry-run (sin base)
 //   node tools/terminology-import/symptoms/load-symptoms.mjs --apply         # carga (.env DB_*)
 //   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --systems hpo
-//   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --glossary
+//   node tools/terminology-import/symptoms/load-symptoms.mjs --apply --no-glossary   # sin glosario
 // =============================================================================
 
 import 'dotenv/config';
@@ -33,14 +36,14 @@ import { nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { valueSetVersionId } from '../lib/glossary-es/load-plan.mjs';
 import { DB_CONFIG, conceptIdsByCode, ensureCodeSystem, insertMany } from './lib/db.mjs';
 import {
-  CONCEPT, GLOSSARY_VALUE_SETS, codeSystemPlan, conceptId, conceptTuple, designationsFor, displayOf, glossaryFor, isARelationships, isGlossaryTerm, mapsFor, md5uuid, propertiesFor,
+  CONCEPT, GLOSSARY_VALUE_SETS, codeSystemPlan, glossaryEnabled, conceptId, conceptTuple, designationsFor, displayOf, glossaryFor, isARelationships, isGlossaryTerm, mapsFor, md5uuid, propertiesFor,
 } from './lib/load-plan.mjs';
 import { OUT_DIR, SOURCE_FILES } from './lib/sources.mjs';
 
 const args = process.argv.slice(2);
 if (args.includes('--dry-run') && args.includes('--apply')) throw new Error('Use --dry-run o --apply, no ambos.');
 const DRY_RUN = !args.includes('--apply');
-const GLOSSARY = args.includes('--glossary');
+const GLOSSARY = glossaryEnabled(args);
 const SYSTEMS = args.includes('--systems') ? args[args.indexOf('--systems') + 1].split(',') : ['hpo', 'symp', 'ncit'];
 const LICENSE = { hpo: SOURCE_FILES.find((s) => s.key === 'hpo-json').license, symp: SOURCE_FILES.find((s) => s.key === 'symp').license, ncit: SOURCE_FILES.find((s) => s.key === 'ncit').license };
 
