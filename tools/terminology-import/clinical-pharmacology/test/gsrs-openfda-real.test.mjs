@@ -138,3 +138,20 @@ test('EMA real: sólo uso humano autorizado, ATC 5 asignado por la EMA, indicaci
   assert.match(s.citation, /^European Medicines Agency \(EMA\)\. Voriconazole Hikma/);
   assert.equal(emaDate('2026-10-23'), null, 'otra forma de fecha: no se adivina');
 });
+
+// --- DailyMed real: SPL de ZEGFROVY (set_id 349fa84e…, versión 1, effective 2026-09-16) ---------
+import { readFileSync as readRaw } from 'node:fs';
+import { dailyMedSections, splIdentity, topSections } from '../lib/dailymed.mjs';
+
+test('DailyMed real: identidad, UNII del principio activo y secciones LOINC de primer nivel, literales', () => {
+  const xml = readRaw(join(HERE, 'fixtures', 'dailymed-spl-349fa84e.xml'), 'utf8');
+  const id = splIdentity(xml);
+  assert.deepEqual([id.setId, id.version, id.effectiveDate, id.docType, id.unii, id.routes], ['349fa84e-1fdb-4976-b1bb-689b80eac8ad', '1', '2026-09-16', '34391-3', ['L1Q2K5JYO8'], ['ORAL']]);
+  const rows = dailyMedSections(xml, { criterion: 'prueba', group: {} }, WHEN).map(assertSection);
+  assert.deepEqual(rows.map((r) => r.section.number), ['34067-9', '34068-7', '43678-2', '34070-3', '43685-7', '34084-4', '34073-7', '43684-0', '34089-3', '34090-1', '43680-8']);
+  const tops = topSections(xml).filter((s) => s.code === '34067-9');
+  assert.equal(tops.length, 1, 'una sola sección de indicaciones de primer nivel');
+  assert.match(rows[0].text, /^1\. INDICATIONS AND USAGE\n\nZEGFROVY is indicated for the treatment of adult patients/);
+  assert.ok(rows.find((r) => r.key === 'adverse_reactions').tables.length > 0);
+  assert.match(rows[0].citation, /set_id 349fa84e-1fdb-4976-b1bb-689b80eac8ad, versión 1 \(effective_time 2026-09-16\), sección LOINC 34067-9/);
+});

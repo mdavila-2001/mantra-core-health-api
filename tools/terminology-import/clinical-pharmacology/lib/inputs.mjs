@@ -82,3 +82,23 @@ export function readEma() {
   const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null });
   return { rows, retrievedAt: statSync(path).mtime.toISOString() };
 }
+
+/**
+ * set_id de openFDA → si la etiqueta trae UNII (`openfda.unii`). Recorre las
+ * particiones bajadas en streaming. Vacío si openFDA no se bajó.
+ */
+export async function openFdaSetIndex() {
+  const { readdirSync } = await import('node:fs');
+  const { zipResults } = await import('./json-stream.mjs');
+  const dir = join(cpCache('openfda'), 'label');
+  const out = new Map();
+  if (!existsSync(dir)) return out;
+  for (const zip of readdirSync(dir).filter((n) => n.endsWith('.zip')).sort()) {
+    for await (const l of zipResults(join(dir, zip))) {
+      if (!l.set_id) continue;
+      const has = Array.isArray(l.openfda?.unii) && l.openfda.unii.length > 0;
+      out.set(l.set_id, (out.get(l.set_id) ?? false) || has);
+    }
+  }
+  return out;
+}
