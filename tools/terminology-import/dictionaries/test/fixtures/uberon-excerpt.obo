@@ -1,0 +1,176 @@
+format-version: 1.2
+ontology: uberon/core
+
+[Typedef]
+id: part_of
+name: part of
+xref: BFO:0000050
+
+[Typedef]
+id: develops_from
+name: develops from
+xref: RO:0002202
+
+[Typedef]
+id: in_taxon
+name: in taxon
+xref: RO:0002162
+
+[Typedef]
+id: never_in_taxon
+name: never in taxon
+xref: RO:0002161
+is_metadata_tag: true
+is_class_level: true
+
+[Term]
+id: UBERON:0000948
+name: heart
+def: "A myogenic muscular circulatory organ found in the vertebrate cardiovascular system composed of chambers of cardiac muscle. It is the primary circulatory organ." [http://orcid.org/0000-0002-6601-2165, Wikipedia:Heart]
+comment: Taxon notes:" the ascidian tube-like heart lacks chambers....The ascidian heart is formed after metamorphosis as a simple tube-like structure with a single-layered myoepithelium that is continuous with a single-layered pericar- dial wall. It lacks chambers and endocardium.... The innovation of the chambered heart was a key event in vertebrate evolution, because the chambered heart generates one-way blood flow with high pressure, a critical requirement for the efficient blood supply of large-body vertebrates... all extant vertebrates have hearts with two or more chambers (Moorman and Christoffels 2003)" DOI:10.1101/gad.1485706
+subset: efo_slim
+subset: major_organ
+subset: organ_slim
+subset: pheno_slim
+subset: uberon_slim
+subset: vertebrate_core
+synonym: "branchial heart" NARROW SENSU []
+synonym: "cardium" RELATED [EMAPA:16105]
+synonym: "chambered heart" EXACT [https://orcid.org/0000-0002-6601-2165]
+synonym: "vertebrate heart" EXACT []
+xref: AAO:0010210
+xref: BILA:0000020
+xref: BTO:0000562
+xref: CALOHA:TS-0445
+xref: EFO:0000815
+xref: EHDAA2:0000738
+xref: EHDAA:420
+xref: EMAPA:16105
+xref: EV:0100018
+xref: FMA:7088
+xref: GAID:174
+xref: galen:Heart
+xref: MA:0000072
+xref: MAT:0000036
+xref: MESH:D006321
+xref: MIAA:0000036
+xref: NCIT:C12727
+xref: SCTID:302509004
+xref: TAO:0000114
+xref: UMLS:C0018787 {source="ncithesaurus:Heart"}
+xref: VHOG:0000276
+xref: Wikipedia:Heart
+xref: XAO:0000064
+xref: ZFA:0000114
+intersection_of: UBERON:0007100 ! primary circulatory organ
+intersection_of: has_part UBERON:0004151 ! cardiac chamber
+relationship: contributes_to_morphology_of UBERON:0004535 ! cardiovascular system
+relationship: develops_from UBERON:0004141 ! heart tube
+relationship: has_developmental_contribution_from UBERON:0002342 {source="https://github.com/obophenotype/uberon/wiki/The-neural-crest"} ! neural crest
+relationship: in_taxon NCBITaxon:7742 ! Vertebrata <vertebrates>
+relationship: never_in_taxon NCBITaxon:6239 ! Caenorhabditis elegans
+relationship: never_in_taxon NCBITaxon:7227 ! Drosophila melanogaster
+relationship: part_of UBERON:0015410 {source="MA"} ! heart plus pericardium
+property_value: axiom_lost_from_external_ontology "relationship type change: differentiates_from lateral plate mesoderm (AAO:0010574) CHANGED TO: develops_from lateral plate mesoderm (UBERON:0003081)[AAO]" xsd:string {date_retrieved="2012-06-20", external_class="AAO:0010210", ontology="AAO"}
+property_value: external_definition "Blood pumping organ composed of four chambers: sinus venosus, atrium, cardiac ventricle and bulbus arteriosus.[TAO]" xsd:string {date_retrieved="2012-08-14", external_class="TAO:0000114", ontology="TAO", source="ZFIN:curator"}
+property_value: external_definition "Part of the circulatory system responsible for pumping blood; composed of three chambers--two atria and one ventricle.[AAO]" xsd:string {date_retrieved="2012-06-20", external_class="AAO:0010210", ontology="AAO", source="AAO:BJB"}
+property_value: has_relational_adjective "cardiac" xsd:string
+property_value: homology_notes "As noted, the hearts of birds and mammals have four chambers that arises from the two chambers (atrium and ventricle) of the fish heart.[well established][VHOG]" xsd:string {date_retrieved="2012-09-17", external_class="VHOG:0000276", ontology="VHOG", source="ISBN:978-0072528305 Kardong KV, Vertebrates: Comparative Anatomy, Function, Evolution (2006) p.481", source="http://bgee.unil.ch/"}
+
+[Term]
+id: UBERON:0004535
+name: cardiovascular system
+def: "Anatomical system that has as its parts the heart and blood vessels." [BTO:0000088]
+subset: efo_slim
+subset: pheno_slim
+subset: uberon_slim
+subset: vertebrate_core
+synonym: "CV system" RELATED [BTO:0000088]
+synonym: "Herz und Gefaesssystem" RELATED [BTO:0000088]
+xref: AAO:0011001
+xref: BILA:0000016
+xref: BTO:0000088
+xref: CALOHA:TS-1297
+xref: EFO:0000791
+xref: EHDAA:394
+xref: EMAPA:16104
+xref: EV:0100017
+xref: FMA:7161
+xref: GAID:467
+xref: MA:0000010
+xref: MAT:0000016
+xref: MESH:D002319
+xref: MIAA:0000016
+xref: NCIT:C12686
+xref: SCTID:278198007
+xref: TAO:0000010
+xref: UMLS:C0007226 {source="ncithesaurus:Cardiovascular_System"}
+xref: VHOG:0000302
+xref: WikipediaCategory:Cardiovascular_system
+xref: XAO:0000100
+xref: XAO:0001010
+xref: ZFA:0000010
+intersection_of: UBERON:0000467 ! anatomical system
+intersection_of: has_part UBERON:0000948 ! heart
+intersection_of: has_part UBERON:0001981 ! blood vessel
+intersection_of: part_of UBERON:0001009 ! circulatory system
+property_value: curator_notes "we treat cardiovascular as part of circulatory system, with the latter including other kinds of circulation, including lymph." xsd:string
+property_value: homology_notes "The vessels of the cardiovascular system are as varied as the diverse organs they supply. However, these variations are based on modifications of a fundamental plan of organization common to vertebrates.[well established][VHOG]" xsd:string {date_retrieved="2012-09-17", external_class="VHOG:0000302", ontology="VHOG", source="ISBN:978-0072528305 Kardong KV, Vertebrates: Comparative Anatomy, Function, Evolution (2006) p.451", source="http://bgee.unil.ch/"}
+
+[Term]
+id: UBERON:0002100
+name: trunk
+def: "Organism subdivision which is the part of the body posterior to the cervical region (or head, when cervical region not present) and anterior to the caudal region. Includes the sacrum when present." [TAO:0001115, UBERONREF:0000006, Wikipedia:Torso]
+subset: efo_slim
+subset: pheno_slim
+subset: uberon_slim
+subset: vertebrate_core
+synonym: "Rumpf" RELATED [BTO:0001493]
+synonym: "thoracolumbar region" EXACT []
+synonym: "torso" EXACT []
+synonym: "trunk region" EXACT [XAO:0000054]
+xref: AAO:0010339
+xref: BILA:0000116
+xref: BTO:0001493
+xref: CALOHA:TS-1071
+xref: EFO:0000966
+xref: EMAPA:31857
+xref: FMA:7181
+xref: galen:Trunk
+xref: MA:0000004
+xref: MAT:0000296
+xref: MIAA:0000296
+xref: NCIT:C33816
+xref: SCTID:262225004
+xref: TAO:0001115
+xref: UMLS:C0460005 {source="ncithesaurus:Trunk"}
+xref: Wikipedia:Torso
+xref: XAO:0000054
+xref: XAO:0003025
+xref: ZFA:0001115
+is_a: UBERON:0011676 ! subdivision of organism along main body axis
+disjoint_from: UBERON:0002464 ! nerve trunk
+disjoint_from: UBERON:0014479 ! elephant trunk
+relationship: has_part UBERON:0000915 {gci_relation="part_of", gci_filler="NCBITaxon:7742"} ! thoracic segment of trunk
+relationship: has_part UBERON:0000916 {gci_relation="part_of", gci_filler="NCBITaxon:7742"} ! abdomen
+relationship: mutually_spatially_disjoint_with UBERON:0000026 {exceptions="ZFA", source="https://github.com/obophenotype/uberon/issues/378", status="pending"} ! appendage
+relationship: mutually_spatially_disjoint_with UBERON:0000033 ! head
+relationship: part_of UBERON:0013702 ! body proper
+property_value: external_definition "Organism subdivision that is the part of the body posterior to the head and anterior to the tail.[AAO]" xsd:string {date_retrieved="2012-06-20", external_class="AAO:0010339", ontology="AAO", source="AAO:BJB"}
+property_value: external_definition "Organism subdivision which is the part of the body posterior to the head and anterior to the tail.[TAO]" xsd:string {date_retrieved="2012-08-14", external_class="TAO:0001115", ontology="TAO", source="ZFIN:curator"}
+
+[Term]
+id: UBERON:0002535
+name: gill
+def: "Anatomical surface structure found in many aquatic organisms. It is a respiration organ whose function is the extraction of oxygen from water and the excretion of carbon dioxide. The microscopic structure of a gill is such that it presents a very large surface area to the external environment. Gills usually consist of thin filaments of tissue, branches, or slender tufted processes which have a highly folded surface to increase surface area. A high surface area is crucial to the gas exchange of aquatic organisms as water contains only 1/20 parts dissolved Oxygen compared to air. With the exception of some aquatic insects, the filaments and lamellae (folds) contain blood or coelomic fluid, from which gases are exchanged through the thin walls. Oxygen is carried by the blood to other parts of the body. Carbon dioxide passes from the blood through the thin gill tissue into the water. Gills or gill-like organs, located in different parts of the body, are found in various groups of aquatic animals, including mollusks, crustaceans, insects, fish, and amphibians." [Wikipedia:Gill]
+comment: this term potentially applicable across multiple metazoa - see also the subclass 'pharyngeal arch derived gill'
+subset: functional_classification
+xref: AAO:0010171
+xref: MESH:D005880
+xref: Wikipedia:Gill
+is_a: UBERON:0000062 ! organ
+relationship: confers_advantage_in ENVO:00002030
+relationship: in_taxon NCBITaxon:33213 ! Bilateria
+relationship: never_in_taxon NCBITaxon:32524 ! Amniota
+relationship: part_of UBERON:0001004 ! respiratory system
+

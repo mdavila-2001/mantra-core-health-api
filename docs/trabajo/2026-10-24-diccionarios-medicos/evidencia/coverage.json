@@ -1,0 +1,2510 @@
+{
+  "generatedAt": "2026-10-24T01:23:20.675Z",
+  "seconds": 37,
+  "totals": {
+    "sources": 43,
+    "concepts": 496272,
+    "conceptsLoadedByDefault": 111389,
+    "exactSynonyms": 693588,
+    "relationsTyped": 386969,
+    "relationsResolvedInCorpus": 377880,
+    "otherRelations": 165516,
+    "xrefs": 353047,
+    "diseaseAgentEdges": 1367,
+    "missingSources": []
+  },
+  "perDomain": {
+    "microbiology": {
+      "name": "Microbiología y parasitología",
+      "concepts": 13858,
+      "conceptsLoadedByDefault": 10774,
+      "sources": [
+        "ncbitaxon-medical",
+        "aro",
+        "opl",
+        "omp",
+        "ohpi",
+        "ohmi",
+        "taxrank"
+      ]
+    },
+    "anatomy": {
+      "name": "Anatomía",
+      "concepts": 113706,
+      "conceptsLoadedByDefault": 26086,
+      "sources": [
+        "uberon",
+        "aeo",
+        "caro",
+        "fma"
+      ]
+    },
+    "histology": {
+      "name": "Histología y tipos celulares",
+      "concepts": 48599,
+      "conceptsLoadedByDefault": 3070,
+      "sources": [
+        "cl",
+        "bto",
+        "clo"
+      ]
+    },
+    "embryology": {
+      "name": "Embriología y desarrollo",
+      "concepts": 2695,
+      "conceptsLoadedByDefault": 2695,
+      "sources": [
+        "ehdaa2",
+        "hsapdv"
+      ]
+    },
+    "genetics": {
+      "name": "Genética",
+      "concepts": 47908,
+      "conceptsLoadedByDefault": 47908,
+      "sources": [
+        "so",
+        "geno",
+        "hgnc"
+      ]
+    },
+    "general-medicine": {
+      "name": "Conceptos generales de medicina",
+      "concepts": 119,
+      "conceptsLoadedByDefault": 119,
+      "sources": [
+        "ogms"
+      ]
+    },
+    "public-health": {
+      "name": "Salud pública y epidemiología",
+      "concepts": 1594,
+      "conceptsLoadedByDefault": 901,
+      "sources": [
+        "ido",
+        "trans",
+        "apollo_sv",
+        "hancestro",
+        "hso"
+      ]
+    },
+    "professions": {
+      "name": "Profesiones, roles y organizaciones sanitarias",
+      "concepts": 2011,
+      "conceptsLoadedByDefault": 288,
+      "sources": [
+        "omrse",
+        "occo"
+      ]
+    },
+    "statistics": {
+      "name": "Estadística y métodos de investigación",
+      "concepts": 1082,
+      "conceptsLoadedByDefault": 1082,
+      "sources": [
+        "stato",
+        "obcs"
+      ]
+    },
+    "exposures": {
+      "name": "Exposiciones ambientales",
+      "concepts": 8849,
+      "conceptsLoadedByDefault": 163,
+      "sources": [
+        "ecto",
+        "exo",
+        "envo",
+        "rbo"
+      ]
+    },
+    "physiology": {
+      "name": "Fisiología y procesos biológicos",
+      "concepts": 67262,
+      "conceptsLoadedByDefault": 0,
+      "sources": [
+        "oba",
+        "nbo",
+        "mf",
+        "mfoem",
+        "pw",
+        "go"
+      ]
+    },
+    "pharmacology": {
+      "name": "Farmacología general (clases, mecanismos y farmacocinética)",
+      "concepts": 858,
+      "conceptsLoadedByDefault": 858,
+      "sources": [
+        "pbpko"
+      ]
+    },
+    "biochemistry": {
+      "name": "Bioquímica",
+      "concepts": 1971,
+      "conceptsLoadedByDefault": 0,
+      "sources": [
+        "mod"
+      ]
+    },
+    "qualities": {
+      "name": "Cualidades fenotípicas (PATO)",
+      "concepts": 1943,
+      "conceptsLoadedByDefault": 0,
+      "sources": [
+        "pato"
+      ]
+    },
+    "abbreviations": {
+      "name": "Abreviaturas clínicas",
+      "concepts": 183817,
+      "conceptsLoadedByDefault": 17445,
+      "sources": [
+        "abbreviations-metainventory"
+      ]
+    }
+  },
+  "perSource": [
+    {
+      "source": "ncbitaxon-medical",
+      "codeSystem": "ncbitaxon",
+      "domain": "microbiology",
+      "load": "default",
+      "license": "CC0 1.0 (NCBI Taxonomy: dominio público; OBO NCBITaxon CC0)",
+      "productQuery": "Organismo identificado en un cultivo, PCR o serología (resultado de microbiología); agente causal y vector de enfermedades notificables.",
+      "concepts": 1331,
+      "conceptsLoadedByDefault": 1331,
+      "withDefinition": 0,
+      "exactSynonyms": 610,
+      "otherSynonyms": 264,
+      "relationsByType": {
+        "IS_A": 1330
+      },
+      "relationsResolvedInCorpus": 1330,
+      "relationsUnresolved": 0,
+      "otherRelations": 0,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "taxaAvailable": 1666,
+        "selected": 1331,
+        "edges": 1367,
+        "edgesMondo": 1057,
+        "edgesDoid": 310,
+        "targetsWithoutLabel": [
+          "NCBITaxon:102285",
+          "NCBITaxon:10273",
+          "NCBITaxon:10320",
+          "NCBITaxon:10326",
+          "NCBITaxon:10331",
+          "NCBITaxon:10334",
+          "NCBITaxon:10371",
+          "NCBITaxon:1046713",
+          "NCBITaxon:1046728",
+          "NCBITaxon:10786",
+          "NCBITaxon:10788",
+          "NCBITaxon:108470",
+          "NCBITaxon:108472",
+          "NCBITaxon:11047",
+          "NCBITaxon:11099",
+          "NCBITaxon:11128",
+          "NCBITaxon:1133363",
+          "NCBITaxon:115981",
+          "NCBITaxon:1172830",
+          "NCBITaxon:11768",
+          "NCBITaxon:11976",
+          "NCBITaxon:11978",
+          "NCBITaxon:12456",
+          "NCBITaxon:124612",
+          "NCBITaxon:125367",
+          "NCBITaxon:12657",
+          "NCBITaxon:129954",
+          "NCBITaxon:130329",
+          "NCBITaxon:1319",
+          "NCBITaxon:132389",
+          "NCBITaxon:1336",
+          "NCBITaxon:135588",
+          "NCBITaxon:13567",
+          "NCBITaxon:136241",
+          "NCBITaxon:1402",
+          "NCBITaxon:1463546",
+          "NCBITaxon:1493",
+          "NCBITaxon:1498",
+          "NCBITaxon:1504",
+          "NCBITaxon:1505",
+          "NCBITaxon:1511895",
+          "NCBITaxon:1524",
+          "NCBITaxon:1542",
+          "NCBITaxon:155493",
+          "NCBITaxon:1562943",
+          "NCBITaxon:1653395",
+          "NCBITaxon:1661",
+          "NCBITaxon:170896",
+          "NCBITaxon:1719",
+          "NCBITaxon:173566",
+          "NCBITaxon:174715",
+          "NCBITaxon:176",
+          "NCBITaxon:179871",
+          "NCBITaxon:180792",
+          "NCBITaxon:186203",
+          "NCBITaxon:1863",
+          "NCBITaxon:195944",
+          "NCBITaxon:2051728",
+          "NCBITaxon:209364",
+          "NCBITaxon:224536",
+          "NCBITaxon:242446",
+          "NCBITaxon:2587430",
+          "NCBITaxon:264913",
+          "NCBITaxon:283734",
+          "NCBITaxon:28903",
+          "NCBITaxon:291612",
+          "NCBITaxon:29176",
+          "NCBITaxon:29501",
+          "NCBITaxon:298333",
+          "NCBITaxon:3052223",
+          "NCBITaxon:3052342",
+          "NCBITaxon:3052343",
+          "NCBITaxon:3110",
+          "NCBITaxon:31660",
+          "NCBITaxon:321374",
+          "NCBITaxon:321387",
+          "NCBITaxon:321389",
+          "NCBITaxon:328185",
+          "NCBITaxon:3344853",
+          "NCBITaxon:34085",
+          "NCBITaxon:34641",
+          "NCBITaxon:35557",
+          "NCBITaxon:35612",
+          "NCBITaxon:39637",
+          "NCBITaxon:39709",
+          "NCBITaxon:39710",
+          "NCBITaxon:397342",
+          "NCBITaxon:40350",
+          "NCBITaxon:412127",
+          "NCBITaxon:42890",
+          "NCBITaxon:435716",
+          "NCBITaxon:43767",
+          "NCBITaxon:44276",
+          "NCBITaxon:451377",
+          "NCBITaxon:451379",
+          "NCBITaxon:46244",
+          "NCBITaxon:46579",
+          "NCBITaxon:47000",
+          "NCBITaxon:474161",
+          "NCBITaxon:4754",
+          "NCBITaxon:480692",
+          "NCBITaxon:518",
+          "NCBITaxon:53435",
+          "NCBITaxon:5476",
+          "NCBITaxon:54845",
+          "NCBITaxon:56625",
+          "NCBITaxon:57372",
+          "NCBITaxon:6192",
+          "NCBITaxon:6205",
+          "NCBITaxon:6207",
+          "NCBITaxon:6256",
+          "NCBITaxon:62968",
+          "NCBITaxon:65465",
+          "NCBITaxon:696863",
+          "NCBITaxon:699426",
+          "NCBITaxon:704026",
+          "NCBITaxon:70427",
+          "NCBITaxon:708293",
+          "NCBITaxon:73365",
+          "NCBITaxon:7388",
+          "NCBITaxon:7561",
+          "NCBITaxon:77521",
+          "NCBITaxon:80341",
+          "NCBITaxon:83555",
+          "NCBITaxon:83911",
+          "NCBITaxon:84524",
+          "NCBITaxon:85432",
+          "NCBITaxon:859",
+          "NCBITaxon:86280",
+          "NCBITaxon:870",
+          "NCBITaxon:90371",
+          "NCBITaxon:908926",
+          "NCBITaxon:93349",
+          "NCBITaxon:94034",
+          "NCBITaxon:94035",
+          "NCBITaxon:94638",
+          "NCBITaxon:94812",
+          "NCBITaxon:98360"
+        ],
+        "labelConflicts": [
+          {
+            "id": "NCBITaxon:1",
+            "kept": "ncbitaxon",
+            "other": "root",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:10245",
+            "kept": "Orthopoxvirus vaccinia",
+            "other": "Vaccinia virus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:10376",
+            "kept": "human gammaherpesvirus 4",
+            "other": "Human gammaherpesvirus 4",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:11053",
+            "kept": "dengue virus type 1",
+            "other": "Dengue virus 1",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:11080",
+            "kept": "St. Louis encephalitis virus",
+            "other": "Saint Louis encephalitis virus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:11102",
+            "kept": "Orthohepacivirus",
+            "other": "Hepacivirus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:11250",
+            "kept": "human respiratory syncytial virus",
+            "other": "Human orthopneumovirus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:11292",
+            "kept": "Lyssavirus rabies",
+            "other": "Rabies lyssavirus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:12080",
+            "kept": "Poliovirus 1",
+            "other": "Human poliovirus 1",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:12083",
+            "kept": "Poliovirus 2",
+            "other": "Human poliovirus 2",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:12086",
+            "kept": "Poliovirus 3",
+            "other": "Human poliovirus 3",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:12090",
+            "kept": "enterovirus D70",
+            "other": "Enterovirus D70",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1224",
+            "kept": "Pseudomonadota",
+            "other": "Proteobacteria",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1239",
+            "kept": "Bacillota",
+            "other": "Firmicutes",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1385",
+            "kept": "Caryophanales",
+            "other": "Bacillales",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:147553",
+            "kept": "Pneumocystomycetes",
+            "other": "Pneumocystidomycetes",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1678143",
+            "kept": "Paslahepevirus balayani",
+            "other": "Orthohepevirus A",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1760",
+            "kept": "Actinomycetes",
+            "other": "Actinomycetia",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1783272",
+            "kept": "Bacillati",
+            "other": "Terrabacteria group",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1891762",
+            "kept": "Betapolyomavirus hominis",
+            "other": "Human polyomavirus 1",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:1980456",
+            "kept": "Orthohantavirus andesense",
+            "other": "Andes orthohantavirus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:201174",
+            "kept": "Actinomycetota",
+            "other": "Actinobacteria",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:203691",
+            "kept": "Spirochaetota",
+            "other": "Spirochaetes",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:204428",
+            "kept": "Chlamydiota",
+            "other": "Chlamydiae",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:2104",
+            "kept": "Mycoplasmoides pneumoniae",
+            "other": "Mycoplasma pneumoniae",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:2169991",
+            "kept": "Mammarenavirus juninense",
+            "other": "Argentinian mammarenavirus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:226665",
+            "kept": "Rickettsia conorii subsp. heilongjiangensis",
+            "other": "Rickettsia heilongjiangensis",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:2560319",
+            "kept": "avian paramyxovirus 1",
+            "other": "Avian orthoavulavirus 1",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:2731342",
+            "kept": "Floreoviria",
+            "other": "Monodnaviria",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:28314",
+            "kept": "Aleutian mink disease parvovirus",
+            "other": "Aleutian mink disease virus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:29547",
+            "kept": "Campylobacterota",
+            "other": "Epsilonproteobacteria",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:32066",
+            "kept": "Fusobacteriota",
+            "other": "Fusobacteria",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:37987",
+            "kept": "Pneumocystales",
+            "other": "Pneumocystidales",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:418103",
+            "kept": "Plasmodium <subgenus>",
+            "other": "Plasmodium (Plasmodium)",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:418107",
+            "kept": "Laverania",
+            "other": "Plasmodium (Laverania)",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:44281",
+            "kept": "Pneumocystaceae",
+            "other": "Pneumocystidaceae",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:5052",
+            "kept": "Aspergillus <genus>",
+            "other": "Aspergillus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:544448",
+            "kept": "Mycoplasmatota",
+            "other": "Tenericutes",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:5600",
+            "kept": "Phialophora",
+            "other": "Phialophora <family Herpotrichiellaceae>",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:565995",
+            "kept": "Bundibugyo virus",
+            "other": "Bundibugyo ebolavirus",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:5740",
+            "kept": "Giardia",
+            "other": "Giardia <diplomonads>",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:5820",
+            "kept": "Plasmodium <genus>",
+            "other": "Plasmodium",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:63672",
+            "kept": "Turbo",
+            "other": "Turbo <genus>",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:85007",
+            "kept": "Mycobacteriales",
+            "other": "Corynebacteriales",
+            "otherOrigin": "mondoTaxa"
+          },
+          {
+            "id": "NCBITaxon:951",
+            "kept": "Ehrlichia sennetsu",
+            "other": "Neorickettsia sennetsu",
+            "otherOrigin": "mondoTaxa"
+          }
+        ],
+        "relations": {
+          "resolved": 1330,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "uberon",
+      "codeSystem": "uberon",
+      "domain": "anatomy",
+      "load": "default",
+      "license": "CC BY 3.0",
+      "productQuery": "Sitio corporal (bodySite) de observaciones, procedimientos y hallazgos; jerarquía parte-de para buscar «todo lo que está en el tórax».",
+      "concepts": 13412,
+      "conceptsLoadedByDefault": 13412,
+      "withDefinition": 10885,
+      "exactSynonyms": 24123,
+      "otherSynonyms": 12966,
+      "relationsByType": {
+        "IS_A": 8801,
+        "PART_OF": 7167,
+        "DEVELOPS_FROM": 1353,
+        "LOCATED_IN": 116
+      },
+      "relationsResolvedInCorpus": 17411,
+      "relationsUnresolved": 26,
+      "otherRelations": 7920,
+      "xrefs": 40035,
+      "xrefPrefixesTop": {
+        "FMA": 6053,
+        "EMAPA": 4326,
+        "Wikipedia": 3334,
+        "MA": 3039,
+        "NCIT": 2549,
+        "ZFA": 1906,
+        "BAMS": 1472,
+        "EHDAA2": 1460,
+        "BTO": 1302,
+        "neuronames": 1192,
+        "VHOG": 1112,
+        "BIRNLEX": 1093
+      },
+      "stats": {
+        "terms": 15714,
+        "own": 15714,
+        "obsolete": 1096,
+        "unnamed": 80,
+        "nonHuman": 1126,
+        "nonHumanDirect": 563,
+        "droppedXrefs": {
+          "SCTID": 4067,
+          "UMLS": 3070
+        },
+        "rows": 13412,
+        "dataVersion": null,
+        "relations": {
+          "resolved": 17411,
+          "unresolved": 26,
+          "unresolvedByPrefix": {
+            "BFO": 5,
+            "UBERON": 21
+          }
+        }
+      }
+    },
+    {
+      "source": "cl",
+      "codeSystem": "cl",
+      "domain": "histology",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Tipos celulares de informes de anatomía patológica, hematología y citometría (p. ej. «linfocito T CD4»).",
+      "concepts": 3070,
+      "conceptsLoadedByDefault": 3070,
+      "withDefinition": 2972,
+      "exactSynonyms": 2634,
+      "otherSynonyms": 986,
+      "relationsByType": {
+        "IS_A": 4531,
+        "DEVELOPS_FROM": 391,
+        "PART_OF": 952,
+        "LOCATED_IN": 16
+      },
+      "relationsResolvedInCorpus": 5668,
+      "relationsUnresolved": 222,
+      "otherRelations": 2587,
+      "xrefs": 1927,
+      "xrefPrefixesTop": {
+        "FMA": 680,
+        "ZFA": 410,
+        "BTO": 255,
+        "CALOHA": 155,
+        "KUPO": 123,
+        "MESH": 83,
+        "FBbt": 61,
+        "ILX": 32,
+        "WBbt": 21,
+        "VHOG": 19,
+        "EFO": 13,
+        "EMAPA": 11
+      },
+      "stats": {
+        "terms": 18914,
+        "own": 3531,
+        "obsolete": 196,
+        "unnamed": 0,
+        "nonHuman": 265,
+        "nonHumanDirect": 92,
+        "droppedXrefs": {
+          "SCTID": 1
+        },
+        "rows": 3070,
+        "dataVersion": "releases/2026-06-08",
+        "relations": {
+          "resolved": 5668,
+          "unresolved": 222,
+          "unresolvedByPrefix": {
+            "BFO": 183,
+            "CL": 10,
+            "UBERON": 29
+          }
+        }
+      }
+    },
+    {
+      "source": "ehdaa2",
+      "codeSystem": "ehdaa2",
+      "domain": "embryology",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Estructuras embrionarias en ecografías obstétricas y diagnóstico prenatal; vínculo desarrolla-de con la anatomía adulta (Uberon).",
+      "concepts": 2456,
+      "conceptsLoadedByDefault": 2456,
+      "withDefinition": 0,
+      "exactSynonyms": 1,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 2783,
+        "PART_OF": 2958,
+        "DEVELOPS_FROM": 2125,
+        "LOCATED_IN": 166
+      },
+      "relationsResolvedInCorpus": 7925,
+      "relationsUnresolved": 107,
+      "otherRelations": 3537,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 2734,
+        "own": 2459,
+        "obsolete": 3,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 2456,
+        "dataVersion": "releases/2024-01-11",
+        "relations": {
+          "resolved": 7925,
+          "unresolved": 107,
+          "unresolvedByPrefix": {
+            "CARO": 107
+          }
+        }
+      }
+    },
+    {
+      "source": "aeo",
+      "codeSystem": "aeo",
+      "domain": "anatomy",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Clases superiores (tejido, órgano, cavidad…) de las que cuelga EHDAA2 por is-a: sin ellas, 1 731 aristas de EHDAA2 quedan sin destino.",
+      "concepts": 133,
+      "conceptsLoadedByDefault": 133,
+      "withDefinition": 133,
+      "exactSynonyms": 0,
+      "otherSynonyms": 6,
+      "relationsByType": {
+        "IS_A": 140,
+        "PART_OF": 19
+      },
+      "relationsResolvedInCorpus": 156,
+      "relationsUnresolved": 3,
+      "otherRelations": 76,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 250,
+        "own": 134,
+        "obsolete": 1,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 133,
+        "dataVersion": "releases/2022-09-13",
+        "relations": {
+          "resolved": 156,
+          "unresolved": 3,
+          "unresolvedByPrefix": {
+            "CARO": 3
+          }
+        }
+      }
+    },
+    {
+      "source": "caro",
+      "codeSystem": "caro",
+      "domain": "anatomy",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Raíz común de anatomía («entidad anatómica», «estructura anatómica») de la que cuelgan EHDAA2 y AEO por is-a.",
+      "concepts": 84,
+      "conceptsLoadedByDefault": 84,
+      "withDefinition": 81,
+      "exactSynonyms": 3,
+      "otherSynonyms": 1,
+      "relationsByType": {
+        "IS_A": 97,
+        "PART_OF": 9
+      },
+      "relationsResolvedInCorpus": 99,
+      "relationsUnresolved": 7,
+      "otherRelations": 23,
+      "xrefs": 2,
+      "xrefPrefixesTop": {
+        "CL": 1,
+        "GO": 1
+      },
+      "stats": {
+        "terms": 716,
+        "own": 90,
+        "obsolete": 6,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 84,
+        "dataVersion": "releases/2023-03-15",
+        "relations": {
+          "resolved": 99,
+          "unresolved": 7,
+          "unresolvedByPrefix": {
+            "BFO": 7
+          }
+        }
+      }
+    },
+    {
+      "source": "hsapdv",
+      "codeSystem": "hsapdv",
+      "domain": "embryology",
+      "load": "default",
+      "license": "CC BY 3.0",
+      "productQuery": "Estadio del desarrollo (Carnegie, fetal, neonatal, adulto) de una muestra o de un hallazgo prenatal.",
+      "concepts": 239,
+      "conceptsLoadedByDefault": 239,
+      "withDefinition": 239,
+      "exactSynonyms": 36,
+      "otherSynonyms": 14,
+      "relationsByType": {
+        "IS_A": 238,
+        "PART_OF": 237
+      },
+      "relationsResolvedInCorpus": 475,
+      "relationsUnresolved": 0,
+      "otherRelations": 226,
+      "xrefs": 224,
+      "xrefPrefixesTop": {
+        "EV": 115,
+        "FMA": 28,
+        "XUO": 28,
+        "EHDAA2": 23,
+        "UBERON": 19,
+        "HP": 11
+      },
+      "stats": {
+        "terms": 260,
+        "own": 260,
+        "obsolete": 21,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 239,
+        "dataVersion": null,
+        "relations": {
+          "resolved": 475,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "so",
+      "codeSystem": "sequence-ontology",
+      "domain": "genetics",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Tipo y consecuencia de variante en informes genéticos (missense_variant, frameshift_variant); es el vocabulario que exige FHIR Genomics.",
+      "concepts": 2409,
+      "conceptsLoadedByDefault": 2409,
+      "withDefinition": 2404,
+      "exactSynonyms": 3807,
+      "otherSynonyms": 509,
+      "relationsByType": {
+        "IS_A": 2517,
+        "PART_OF": 185
+      },
+      "relationsResolvedInCorpus": 2702,
+      "relationsUnresolved": 0,
+      "otherRelations": 445,
+      "xrefs": 501,
+      "xrefPrefixesTop": {
+        "http": 353,
+        "RNAMOD": 106,
+        "MOD": 21,
+        "loinc": 13,
+        "https": 4,
+        "PMID": 2,
+        "wikipedia": 1,
+        "doi": 1
+      },
+      "stats": {
+        "terms": 2620,
+        "own": 2620,
+        "obsolete": 211,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 2409,
+        "dataVersion": "2026-08-07",
+        "relations": {
+          "resolved": 2702,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "ogms",
+      "codeSystem": "ogms",
+      "domain": "general-medicine",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Conceptos generales del encuentro clínico (diagnóstico, curso clínico, hallazgo, pronóstico) con definición formal.",
+      "concepts": 119,
+      "conceptsLoadedByDefault": 119,
+      "withDefinition": 111,
+      "exactSynonyms": 0,
+      "otherSynonyms": 1,
+      "relationsByType": {
+        "IS_A": 119
+      },
+      "relationsResolvedInCorpus": 78,
+      "relationsUnresolved": 41,
+      "otherRelations": 0,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 131,
+        "own": 120,
+        "obsolete": 1,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 119,
+        "dataVersion": null,
+        "relations": {
+          "resolved": 78,
+          "unresolved": 41,
+          "unresolvedByPrefix": {
+            "IAO": 6,
+            "BFO": 27,
+            "OBI": 8
+          }
+        }
+      }
+    },
+    {
+      "source": "ido",
+      "codeSystem": "ido",
+      "domain": "public-health",
+      "load": "default",
+      "license": "CC BY 3.0",
+      "productQuery": "Vocabulario de enfermedades infecciosas en vigilancia: patógeno, huésped, reservorio, vector, infección, portador, colonización.",
+      "concepts": 253,
+      "conceptsLoadedByDefault": 253,
+      "withDefinition": 253,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 255,
+        "LOCATED_IN": 1,
+        "PART_OF": 3
+      },
+      "relationsResolvedInCorpus": 167,
+      "relationsUnresolved": 92,
+      "otherRelations": 102,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 518,
+        "own": 425,
+        "obsolete": 172,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 253,
+        "dataVersion": "http://purl.obolibrary.org/obo/ido/2017-11-03/ido.owl",
+        "relations": {
+          "resolved": 167,
+          "unresolved": 92,
+          "unresolvedByPrefix": {
+            "BFO": 76,
+            "OBI": 12,
+            "CHEBI": 4
+          }
+        }
+      }
+    },
+    {
+      "source": "omrse",
+      "codeSystem": "omrse",
+      "domain": "professions",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Roles y organizaciones del sistema de salud (rol de paciente, de profesional, centro de salud, aseguradora) con definición formal.",
+      "concepts": 288,
+      "conceptsLoadedByDefault": 288,
+      "withDefinition": 229,
+      "exactSynonyms": 23,
+      "otherSynonyms": 5,
+      "relationsByType": {
+        "IS_A": 279
+      },
+      "relationsResolvedInCorpus": 183,
+      "relationsUnresolved": 96,
+      "otherRelations": 90,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 409,
+        "own": 354,
+        "obsolete": 66,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 288,
+        "dataVersion": null,
+        "relations": {
+          "resolved": 183,
+          "unresolved": 96,
+          "unresolvedByPrefix": {
+            "IAO": 33,
+            "BFO": 40,
+            "OBI": 7,
+            "http": 1,
+            "COB": 10,
+            "OBIB": 3,
+            "APOLLO": 1,
+            "GEO": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "trans",
+      "codeSystem": "pathogen-transmission",
+      "domain": "public-health",
+      "load": "default",
+      "license": "CC0 1.0",
+      "productQuery": "Vía de transmisión de una enfermedad notificable (vectorial, fecal-oral, aérea…) en vigilancia epidemiológica.",
+      "concepts": 32,
+      "conceptsLoadedByDefault": 32,
+      "withDefinition": 32,
+      "exactSynonyms": 4,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 31
+      },
+      "relationsResolvedInCorpus": 31,
+      "relationsUnresolved": 0,
+      "otherRelations": 0,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 35,
+        "own": 35,
+        "obsolete": 3,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 32,
+        "dataVersion": "releases/2026-03-13/trans.obo",
+        "relations": {
+          "resolved": 31,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "apollo_sv",
+      "codeSystem": "apollo-sv",
+      "domain": "public-health",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Vocabulario de salud pública: brote, tasa de ataque, número reproductivo, control de vectores, intervenciones no farmacológicas.",
+      "concepts": 616,
+      "conceptsLoadedByDefault": 616,
+      "withDefinition": 539,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 615,
+        "PART_OF": 8
+      },
+      "relationsResolvedInCorpus": 379,
+      "relationsUnresolved": 244,
+      "otherRelations": 95,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 1697,
+        "own": 648,
+        "obsolete": 32,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 616,
+        "dataVersion": "releases/2026-07-19",
+        "relations": {
+          "resolved": 379,
+          "unresolved": 244,
+          "unresolvedByPrefix": {
+            "BFO": 34,
+            "OBI": 49,
+            "IAO": 141,
+            "COB": 4,
+            "UO": 4,
+            "GEO": 3,
+            "PCO": 2,
+            "OAE": 1,
+            "BCIO": 3,
+            "OMIABIS": 1,
+            "FBcv": 1,
+            "DOID": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "stato",
+      "codeSystem": "stato",
+      "domain": "statistics",
+      "load": "default",
+      "license": "CC BY 3.0",
+      "productQuery": "Medidas epidemiológicas y estadísticas (odds ratio, riesgo relativo, intervalo de confianza, sensibilidad) en indicadores y reportes.",
+      "concepts": 712,
+      "conceptsLoadedByDefault": 712,
+      "withDefinition": 710,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 860,
+        "PART_OF": 20
+      },
+      "relationsResolvedInCorpus": 586,
+      "relationsUnresolved": 294,
+      "otherRelations": 635,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 1053,
+        "own": 712,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 712,
+        "dataVersion": "stato/releases/2026-04-20/stato.owl",
+        "relations": {
+          "resolved": 586,
+          "unresolved": 294,
+          "unresolvedByPrefix": {
+            "IAO": 84,
+            "OBI": 203,
+            "BFO": 7
+          }
+        }
+      }
+    },
+    {
+      "source": "ecto",
+      "codeSystem": "ecto",
+      "domain": "exposures",
+      "load": "opt-in",
+      "license": "CC0 1.0",
+      "productQuery": "Exposición ambiental u ocupacional del antecedente del paciente. Mayormente exposiciones a sustancias químicas concretas: sin consulta propia hoy.",
+      "concepts": 4487,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 4487,
+      "exactSynonyms": 4500,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 7240
+      },
+      "relationsResolvedInCorpus": 7240,
+      "relationsUnresolved": 0,
+      "otherRelations": 4230,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 4532,
+        "own": 4532,
+        "obsolete": 45,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 4487,
+        "dataVersion": "ecto/releases/2026-07-28/ecto-base.owl",
+        "relations": {
+          "resolved": 7240,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "exo",
+      "codeSystem": "exo",
+      "domain": "exposures",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Esqueleto de la exposición en salud ambiental y ocupacional (receptor, estresor, vía, evento de exposición).",
+      "concepts": 163,
+      "conceptsLoadedByDefault": 163,
+      "withDefinition": 160,
+      "exactSynonyms": 8,
+      "otherSynonyms": 89,
+      "relationsByType": {
+        "IS_A": 146,
+        "PART_OF": 28
+      },
+      "relationsResolvedInCorpus": 173,
+      "relationsUnresolved": 1,
+      "otherRelations": 13,
+      "xrefs": 58,
+      "xrefPrefixesTop": {
+        "https": 57,
+        "CTD": 1
+      },
+      "stats": {
+        "terms": 167,
+        "own": 163,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 163,
+        "dataVersion": "releases/2025-08-29",
+        "relations": {
+          "resolved": 173,
+          "unresolved": 1,
+          "unresolvedByPrefix": {
+            "BFO": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "geno",
+      "codeSystem": "geno",
+      "domain": "genetics",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Cigosidad y tipo de alelo de un informe genético (heterocigoto, homocigoto, hemicigoto, alelo de referencia).",
+      "concepts": 222,
+      "conceptsLoadedByDefault": 222,
+      "withDefinition": 173,
+      "exactSynonyms": 0,
+      "otherSynonyms": 1,
+      "relationsByType": {
+        "IS_A": 237,
+        "PART_OF": 4
+      },
+      "relationsResolvedInCorpus": 222,
+      "relationsUnresolved": 19,
+      "otherRelations": 66,
+      "xrefs": 23,
+      "xrefPrefixesTop": {
+        "http": 19,
+        "VMC": 2,
+        "OBI": 1,
+        "SO": 1
+      },
+      "stats": {
+        "terms": 265,
+        "own": 265,
+        "obsolete": 43,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 222,
+        "dataVersion": "geno/releases/2026-02-02/geno-base.owl",
+        "relations": {
+          "resolved": 222,
+          "unresolved": 19,
+          "unresolvedByPrefix": {
+            "BFO": 11,
+            "OBI": 1,
+            "PCO": 1,
+            "CHEBI": 1,
+            "IAO": 2,
+            "UPHENO": 1,
+            "RO": 1,
+            "http": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "oba",
+      "codeSystem": "oba",
+      "domain": "physiology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Rasgo fisiológico medible (presión arterial, nivel de un metabolito) para GWAS y fenotipado; ningún flujo clínico lo codifica hoy. Queda construido y descargable.",
+      "concepts": 25364,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 25348,
+      "exactSynonyms": 57843,
+      "otherSynonyms": 37,
+      "relationsByType": {
+        "IS_A": 43389,
+        "PART_OF": 9101
+      },
+      "relationsResolvedInCorpus": 52489,
+      "relationsUnresolved": 1,
+      "otherRelations": 12353,
+      "xrefs": 11680,
+      "xrefPrefixesTop": {
+        "PMID": 11662,
+        "http": 5,
+        "wikipedia": 4,
+        "LIPIDMAPS": 3,
+        "NCIT": 3,
+        "https": 2,
+        "Wikipedia": 1
+      },
+      "stats": {
+        "terms": 83548,
+        "own": 25462,
+        "obsolete": 98,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 25364,
+        "dataVersion": "releases/2026-10-10",
+        "relations": {
+          "resolved": 52489,
+          "unresolved": 1,
+          "unresolvedByPrefix": {
+            "HP": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "nbo",
+      "codeSystem": "nbo",
+      "domain": "physiology",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Ninguna directa: procesos de comportamiento (sueño, alimentación, memoria) para anotación. Queda construido y descargable.",
+      "concepts": 932,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 764,
+      "exactSynonyms": 401,
+      "otherSynonyms": 8,
+      "relationsByType": {
+        "IS_A": 1000,
+        "PART_OF": 3
+      },
+      "relationsResolvedInCorpus": 1003,
+      "relationsUnresolved": 0,
+      "otherRelations": 62,
+      "xrefs": 163,
+      "xrefPrefixesTop": {
+        "GO": 71,
+        "HP": 53,
+        "MP": 37,
+        "NBO": 1,
+        "https": 1
+      },
+      "stats": {
+        "terms": 934,
+        "own": 934,
+        "obsolete": 2,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 932,
+        "dataVersion": "nbo/releases/2023-07-04/nbo-base.owl",
+        "relations": {
+          "resolved": 1003,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "envo",
+      "codeSystem": "envo",
+      "domain": "exposures",
+      "load": "opt-in",
+      "license": "CC0 1.0",
+      "productQuery": "Ambiente de procedencia de una muestra o exposición (agua de pozo, hospital); sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 4007,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 3801,
+      "exactSynonyms": 1738,
+      "otherSynonyms": 1908,
+      "relationsByType": {
+        "IS_A": 4635,
+        "PART_OF": 379,
+        "LOCATED_IN": 53
+      },
+      "relationsResolvedInCorpus": 4951,
+      "relationsUnresolved": 116,
+      "otherRelations": 1816,
+      "xrefs": 2693,
+      "xrefPrefixesTop": {
+        "FTT": 723,
+        "https": 524,
+        "Geonames": 340,
+        "TGN": 327,
+        "EcoLexicon": 274,
+        "SWEETRealm": 211,
+        "http": 118,
+        "LTER": 64,
+        "SPIRE": 44,
+        "CMECS": 26,
+        "NLCD": 20,
+        "NCIT": 8
+      },
+      "stats": {
+        "terms": 7073,
+        "own": 4454,
+        "obsolete": 447,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 4007,
+        "dataVersion": "releases/2026-10-23",
+        "relations": {
+          "resolved": 4951,
+          "unresolved": 116,
+          "unresolvedByPrefix": {
+            "RO": 14,
+            "BFO": 61,
+            "PCO": 3,
+            "PATO": 5,
+            "PO": 4,
+            "OBI": 13,
+            "FAO": 2,
+            "NCBITaxon": 2,
+            "CHEBI": 8,
+            "FOODON": 2,
+            "IAO": 1,
+            "UBERON": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "bto",
+      "codeSystem": "bto",
+      "domain": "histology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Tejido o línea celular de origen de una muestra; multiespecie (plantas, hongos, animales) y sin restricciones de taxón publicadas: Uberon y CL ya cubren lo humano. Queda construido y descargable.",
+      "concepts": 6511,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 5460,
+      "exactSynonyms": 2,
+      "otherSynonyms": 6156,
+      "relationsByType": {
+        "IS_A": 4623,
+        "PART_OF": 1842
+      },
+      "relationsResolvedInCorpus": 6465,
+      "relationsUnresolved": 0,
+      "otherRelations": 1225,
+      "xrefs": 1,
+      "xrefPrefixesTop": {
+        "From_Merriam-Webster's_Online_Dictionary_at_www.Merriam-Webster.com": 1
+      },
+      "stats": {
+        "terms": 6566,
+        "own": 6566,
+        "obsolete": 55,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 6511,
+        "dataVersion": "bto/releases/2021-10-26/bto-base.owl",
+        "relations": {
+          "resolved": 6465,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "occo",
+      "codeSystem": "occo",
+      "domain": "professions",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Ocupación del paciente o del profesional según la SOC de EE. UU.; en Bolivia el catálogo de ocupaciones y profesiones ya es local (bo-occupations, bo-professions). Queda construido y descargable.",
+      "concepts": 1723,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 1143,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 2646
+      },
+      "relationsResolvedInCorpus": 2636,
+      "relationsUnresolved": 10,
+      "otherRelations": 9061,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 1801,
+        "own": 1726,
+        "obsolete": 3,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 1723,
+        "dataVersion": "http://purl.obolibrary.org/obo/occo/releases/2025-10-06/occo.owl",
+        "relations": {
+          "resolved": 2636,
+          "unresolved": 10,
+          "unresolvedByPrefix": {
+            "NCBITaxon": 2,
+            "BFO": 2,
+            "IAO": 3,
+            "OBI": 2,
+            "https": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "aro",
+      "codeSystem": "aro",
+      "domain": "microbiology",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Mecanismo y gen de resistencia antimicrobiana y clase de antibiótico en un antibiograma o un informe de genotipificación (blaKPC, mecA, carbapenemasa).",
+      "concepts": 9030,
+      "conceptsLoadedByDefault": 9030,
+      "withDefinition": 9030,
+      "exactSynonyms": 2111,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 9149,
+        "PART_OF": 240
+      },
+      "relationsResolvedInCorpus": 9386,
+      "relationsUnresolved": 3,
+      "otherRelations": 6564,
+      "xrefs": 2195,
+      "xrefPrefixesTop": {
+        "PubChem": 703,
+        "CHEBI": 529,
+        "ChEMBL": 523,
+        "CAS": 393,
+        "PDB": 47
+      },
+      "stats": {
+        "terms": 9051,
+        "own": 9030,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 9030,
+        "dataVersion": null,
+        "relations": {
+          "resolved": 9386,
+          "unresolved": 3,
+          "unresolvedByPrefix": {
+            "NCIT": 3
+          }
+        }
+      }
+    },
+    {
+      "source": "pbpko",
+      "codeSystem": "pbpko",
+      "domain": "pharmacology",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Farmacología general: parámetros y procesos farmacocinéticos (absorción, distribución, aclaramiento, volumen de distribución) sin ser productos.",
+      "concepts": 858,
+      "conceptsLoadedByDefault": 858,
+      "withDefinition": 705,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 858
+      },
+      "relationsResolvedInCorpus": 852,
+      "relationsUnresolved": 6,
+      "otherRelations": 3853,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 858,
+        "own": 858,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 858,
+        "dataVersion": "pbpko/releases/2026-07-15/pbpko-base.owl",
+        "relations": {
+          "resolved": 852,
+          "unresolved": 6,
+          "unresolvedByPrefix": {
+            "IAO": 2,
+            "OBI": 2,
+            "BFO": 2
+          }
+        }
+      }
+    },
+    {
+      "source": "opl",
+      "codeSystem": "opl",
+      "domain": "microbiology",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Parasitología: estadios del ciclo de vida de parásitos (trofozoíto, esporozoíto, ooquiste) que aparecen en informes de laboratorio parasitológico.",
+      "concepts": 413,
+      "conceptsLoadedByDefault": 413,
+      "withDefinition": 413,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 601,
+        "LOCATED_IN": 129
+      },
+      "relationsResolvedInCorpus": 691,
+      "relationsUnresolved": 39,
+      "otherRelations": 282,
+      "xrefs": 11,
+      "xrefPrefixesTop": {
+        "FMA": 11
+      },
+      "stats": {
+        "terms": 560,
+        "own": 415,
+        "obsolete": 2,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 413,
+        "dataVersion": "http://purl.obolibrary.org/obo/opl/2023-08-28/opl.owl",
+        "relations": {
+          "resolved": 691,
+          "unresolved": 39,
+          "unresolvedByPrefix": {
+            "NCBITaxon": 38,
+            "OBI": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "obcs",
+      "codeSystem": "obcs",
+      "domain": "statistics",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Métodos y medidas de estadística clínica (análisis de supervivencia, razón de riesgos) complementarios de STATO.",
+      "concepts": 370,
+      "conceptsLoadedByDefault": 370,
+      "withDefinition": 297,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 375
+      },
+      "relationsResolvedInCorpus": 283,
+      "relationsUnresolved": 92,
+      "otherRelations": 62,
+      "xrefs": 14,
+      "xrefPrefixesTop": {
+        "STATO": 13,
+        "STATO_0000036": 1
+      },
+      "stats": {
+        "terms": 1210,
+        "own": 370,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 370,
+        "dataVersion": "http://purl.obolibrary.org/obo/obcs/2023-12-08/obcs.owl",
+        "relations": {
+          "resolved": 283,
+          "unresolved": 92,
+          "unresolvedByPrefix": {
+            "OBI": 55,
+            "IAO": 27,
+            "BFO": 8,
+            "APOLLO": 2
+          }
+        }
+      }
+    },
+    {
+      "source": "hancestro",
+      "codeSystem": "hancestro",
+      "domain": "public-health",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Ancestría y región geográfica de poblaciones para estudios genéticos; Bolivia registra pertenencia étnica con su propio catálogo. Queda construido y descargable.",
+      "concepts": 589,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 328,
+      "exactSynonyms": 391,
+      "otherSynonyms": 1,
+      "relationsByType": {
+        "IS_A": 1002,
+        "PART_OF": 2
+      },
+      "relationsResolvedInCorpus": 993,
+      "relationsUnresolved": 11,
+      "otherRelations": 588,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 633,
+        "own": 632,
+        "obsolete": 43,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 589,
+        "dataVersion": "hancestro/releases/2025-10-14/hancestro-base.owl",
+        "relations": {
+          "resolved": 993,
+          "unresolved": 11,
+          "unresolvedByPrefix": {
+            "GAZ": 2,
+            "OBI": 4,
+            "http": 1,
+            "BFO": 3,
+            "AfPO": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "hso",
+      "codeSystem": "hso",
+      "domain": "public-health",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Vigilancia sanitaria, centrada en sanidad animal; sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 104,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 61,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 104
+      },
+      "relationsResolvedInCorpus": 83,
+      "relationsUnresolved": 21,
+      "otherRelations": 0,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 446,
+        "own": 104,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 104,
+        "dataVersion": "http://purl.obolibrary.org/obo/hso/2021-12-13/hso.owl",
+        "relations": {
+          "resolved": 83,
+          "unresolved": 21,
+          "unresolvedByPrefix": {
+            "OBI": 3,
+            "BFO": 3,
+            "GENEPIO": 3,
+            "IAO": 11,
+            "waiting": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "mf",
+      "codeSystem": "mental-functioning",
+      "domain": "physiology",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Funciones mentales normales (percepción, memoria, cognición); sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 95,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 88,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 96
+      },
+      "relationsResolvedInCorpus": 89,
+      "relationsUnresolved": 7,
+      "otherRelations": 14,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 400,
+        "own": 95,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 95,
+        "dataVersion": "&obo;MF/2025-07-08/MF.owl",
+        "relations": {
+          "resolved": 89,
+          "unresolved": 7,
+          "unresolvedByPrefix": {
+            "BFO": 6,
+            "GO": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "mfoem",
+      "codeSystem": "emotion-ontology",
+      "domain": "physiology",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Emociones y afectos; sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 219,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 195,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 220
+      },
+      "relationsResolvedInCorpus": 218,
+      "relationsUnresolved": 2,
+      "otherRelations": 70,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 624,
+        "own": 219,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 219,
+        "dataVersion": "http://purl.obolibrary.org/obo/MFOEM/2025-07-31/MFOEM.owl",
+        "relations": {
+          "resolved": 218,
+          "unresolved": 2,
+          "unresolvedByPrefix": {
+            "BFO": 2
+          }
+        }
+      }
+    },
+    {
+      "source": "pw",
+      "codeSystem": "pathway-ontology",
+      "domain": "physiology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Vías bioquímicas y de acción de fármacos para anotación; sin flujo clínico que las codifique hoy. Queda construido y descargable.",
+      "concepts": 2704,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 2516,
+      "exactSynonyms": 521,
+      "otherSynonyms": 2071,
+      "relationsByType": {
+        "IS_A": 3234,
+        "PART_OF": 154
+      },
+      "relationsResolvedInCorpus": 3388,
+      "relationsUnresolved": 0,
+      "otherRelations": 1,
+      "xrefs": 3,
+      "xrefPrefixesTop": {
+        "CHEBI": 1,
+        "MESH": 1,
+        "MIM": 1
+      },
+      "stats": {
+        "terms": 2739,
+        "own": 2739,
+        "obsolete": 35,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 2704,
+        "dataVersion": "releases/2026-05-16",
+        "relations": {
+          "resolved": 3388,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "omp",
+      "codeSystem": "omp",
+      "domain": "microbiology",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Fenotipos microbianos de laboratorio de investigación (morfología, crecimiento); sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 2006,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 1804,
+      "exactSynonyms": 145,
+      "otherSynonyms": 360,
+      "relationsByType": {
+        "IS_A": 2413
+      },
+      "relationsResolvedInCorpus": 2412,
+      "relationsUnresolved": 1,
+      "otherRelations": 93,
+      "xrefs": 168,
+      "xrefPrefixesTop": {
+        "GO": 69,
+        "FYPO": 36,
+        "APO": 30,
+        "CHEBI": 12,
+        "PATO": 9,
+        "SNOMED": 6,
+        "FAO": 3,
+        "PMID": 1,
+        "OBI": 1,
+        "CMPO": 1
+      },
+      "stats": {
+        "terms": 2309,
+        "own": 2059,
+        "obsolete": 53,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {
+          "SNOMEDCT": 20
+        },
+        "rows": 2006,
+        "dataVersion": "releases/2024-03-25",
+        "relations": {
+          "resolved": 2412,
+          "unresolved": 1,
+          "unresolvedByPrefix": {
+            "PATO": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "ohpi",
+      "codeSystem": "ohpi",
+      "domain": "microbiology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Interacciones huésped-patógeno y factores de virulencia para investigación; sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 105,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 4,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 103
+      },
+      "relationsResolvedInCorpus": 103,
+      "relationsUnresolved": 0,
+      "otherRelations": 0,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 105,
+        "own": 105,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 105,
+        "dataVersion": "ohpi/releases/2019-09-30/ohpi-base.obo",
+        "relations": {
+          "resolved": 103,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "ohmi",
+      "codeSystem": "ohmi",
+      "domain": "microbiology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Interacciones huésped-microbioma para investigación; sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 896,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 890,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 901,
+        "LOCATED_IN": 32,
+        "PART_OF": 12
+      },
+      "relationsResolvedInCorpus": 917,
+      "relationsUnresolved": 28,
+      "otherRelations": 1025,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "terms": 1724,
+        "own": 899,
+        "obsolete": 3,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 896,
+        "dataVersion": "http://purl.obolibrary.org/obo/ohmi/releases/2026-05-14/ohmi.owl",
+        "relations": {
+          "resolved": 917,
+          "unresolved": 28,
+          "unresolvedByPrefix": {
+            "INO": 1,
+            "NCBITaxon": 12,
+            "OBI": 1,
+            "BFO": 5,
+            "COB": 2,
+            "UPHENO": 1,
+            "PCO": 3,
+            "IAO": 1,
+            "DRON": 1,
+            "OGG": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "mod",
+      "codeSystem": "psi-mod",
+      "domain": "biochemistry",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Modificaciones postraduccionales de proteínas (fosforilación, glicosilación) para proteómica; sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 1971,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 1971,
+      "exactSynonyms": 4914,
+      "otherSynonyms": 1687,
+      "relationsByType": {
+        "IS_A": 3520,
+        "PART_OF": 1
+      },
+      "relationsResolvedInCorpus": 3521,
+      "relationsUnresolved": 0,
+      "otherRelations": 155,
+      "xrefs": 16880,
+      "xrefPrefixesTop": {
+        "Origin": 1852,
+        "TermSpec": 1780,
+        "Source": 1779,
+        "MassMono": 1687,
+        "DiffAvg": 1686,
+        "DiffFormula": 1686,
+        "DiffMono": 1686,
+        "Formula": 1686,
+        "MassAvg": 1686,
+        "Unimod": 756,
+        "uniprot.ptm": 468,
+        "FormalCharge": 86
+      },
+      "stats": {
+        "terms": 2116,
+        "own": 2116,
+        "obsolete": 145,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 1971,
+        "dataVersion": "1.039.0",
+        "relations": {
+          "resolved": 3521,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "rbo",
+      "codeSystem": "rbo",
+      "domain": "exposures",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Exposición a radiaciones y sus efectos biológicos para investigación; sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 192,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 137,
+      "exactSynonyms": 15,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 195
+      },
+      "relationsResolvedInCorpus": 157,
+      "relationsUnresolved": 38,
+      "otherRelations": 1,
+      "xrefs": 13,
+      "xrefPrefixesTop": {
+        "NCIT": 9,
+        "GO": 2,
+        "obo": 1,
+        "MESH": 1
+      },
+      "stats": {
+        "terms": 196,
+        "own": 192,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 192,
+        "dataVersion": "rbo/releases/2021-08-30/rbo-base.owl",
+        "relations": {
+          "resolved": 157,
+          "unresolved": 38,
+          "unresolvedByPrefix": {
+            "BFO": 6,
+            "CHEBI": 7,
+            "UO": 3,
+            "IAO": 7,
+            "OBI": 11,
+            "CHMO": 2,
+            "PATO": 2
+          }
+        }
+      }
+    },
+    {
+      "source": "taxrank",
+      "codeSystem": "taxrank",
+      "domain": "microbiology",
+      "load": "opt-in",
+      "license": "CC0 1.0",
+      "productQuery": "Rangos (especie, género, familia); los taxones cargados ya traen su rango como texto de NCBI. sin consulta propia hoy. Queda construido y descargable.",
+      "concepts": 77,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 3,
+      "exactSynonyms": 8,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 75
+      },
+      "relationsResolvedInCorpus": 75,
+      "relationsUnresolved": 0,
+      "otherRelations": 0,
+      "xrefs": 96,
+      "xrefPrefixesTop": {
+        "http": 53,
+        "NCBITaxon": 43
+      },
+      "stats": {
+        "terms": 77,
+        "own": 77,
+        "obsolete": 0,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 77,
+        "dataVersion": "releases/2025-09-24",
+        "relations": {
+          "resolved": 75,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "clo",
+      "codeSystem": "clo",
+      "domain": "histology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Líneas celulares de laboratorio de investigación (HeLa, HEK293); ningún flujo clínico las codifica. Queda construido y descargable.",
+      "concepts": 39018,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 2846,
+      "exactSynonyms": 0,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 41540,
+        "PART_OF": 6646
+      },
+      "relationsResolvedInCorpus": 42448,
+      "relationsUnresolved": 5738,
+      "otherRelations": 13373,
+      "xrefs": 2,
+      "xrefPrefixesTop": {
+        "BTO": 2
+      },
+      "stats": {
+        "terms": 40851,
+        "own": 39084,
+        "obsolete": 65,
+        "unnamed": 1,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 39018,
+        "dataVersion": "http://purl.obolibrary.org/obo/clo/releases/2026-06-19/clo.owl",
+        "relations": {
+          "resolved": 42448,
+          "unresolved": 5738,
+          "unresolvedByPrefix": {
+            "OBI": 5,
+            "COB": 12,
+            "BFO": 5,
+            "NCBITaxon": 5710,
+            "UBERON": 3,
+            "CLO": 2,
+            "DOID": 1
+          }
+        }
+      }
+    },
+    {
+      "source": "go",
+      "codeSystem": "gene-ontology",
+      "domain": "physiology",
+      "load": "opt-in",
+      "license": "CC BY 4.0",
+      "productQuery": "Ninguna hoy: 48 mil procesos/funciones moleculares en inglés para anotación de genes; ningún flujo clínico los codifica. Queda construido y descargable.",
+      "concepts": 37948,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 37948,
+      "exactSynonyms": 57172,
+      "otherSynonyms": 42314,
+      "relationsByType": {
+        "IS_A": 30964,
+        "PART_OF": 7271
+      },
+      "relationsResolvedInCorpus": 36566,
+      "relationsUnresolved": 1669,
+      "otherRelations": 2609,
+      "xrefs": 22549,
+      "xrefPrefixesTop": {
+        "RHEA": 8091,
+        "MetaCyc": 5805,
+        "EC": 5169,
+        "KEGG_REACTION": 1777,
+        "Wikipedia": 738,
+        "UM-BBD_reactionID": 258,
+        "NIF_Subcellular": 222,
+        "VZ": 142,
+        "RESID": 98,
+        "TC": 72,
+        "UM-BBD_pathwayID": 66,
+        "UM-BBD_enzymeID": 61
+      },
+      "stats": {
+        "terms": 48413,
+        "own": 48413,
+        "obsolete": 10465,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 37948,
+        "dataVersion": null,
+        "relations": {
+          "resolved": 36566,
+          "unresolved": 1669,
+          "unresolvedByPrefix": {
+            "neverin": 735,
+            "onlyin": 931,
+            "PO": 3
+          }
+        }
+      }
+    },
+    {
+      "source": "pato",
+      "codeSystem": "pato",
+      "domain": "qualities",
+      "load": "opt-in",
+      "license": "CC BY 3.0",
+      "productQuery": "Ninguna directa: cualidades (aumentado, hinchado, opaco) que usan otras ontologías para definir fenotipos. Queda construido y descargable.",
+      "concepts": 1943,
+      "conceptsLoadedByDefault": 0,
+      "withDefinition": 1927,
+      "exactSynonyms": 689,
+      "otherSynonyms": 309,
+      "relationsByType": {
+        "IS_A": 2274
+      },
+      "relationsResolvedInCorpus": 2274,
+      "relationsUnresolved": 0,
+      "otherRelations": 36,
+      "xrefs": 53,
+      "xrefPrefixesTop": {
+        "ilxtr": 16,
+        "ILX": 15,
+        "Image": 8,
+        "SAO": 5,
+        "nifext": 3,
+        "OBO_REL": 2,
+        "GO": 1,
+        "ENVO": 1,
+        "thefreedictionary.": 1,
+        "NLX": 1
+      },
+      "stats": {
+        "terms": 2848,
+        "own": 2847,
+        "obsolete": 904,
+        "unnamed": 0,
+        "nonHuman": 0,
+        "nonHumanDirect": 0,
+        "droppedXrefs": {},
+        "rows": 1943,
+        "dataVersion": "pato/releases/2026-10-01/pato-base.owl",
+        "relations": {
+          "resolved": 2274,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "fma",
+      "codeSystem": "fma",
+      "domain": "anatomy",
+      "load": "default",
+      "license": "Licencia abierta de la Universidad de Washington (2006: licencia perpetua, mundial, no exclusiva y sin regalías para reproducir, modificar y distribuir); Bioregistry la registra como CC BY 3.0",
+      "productQuery": "Anatomía humana fina con nombre latino TA98 y, cuando FMA lo trae, castellano; es el puente publicado Uberon → FMA → TA98 → anatomía del glosario en castellano.",
+      "concepts": 100077,
+      "conceptsLoadedByDefault": 12457,
+      "withDefinition": 1598,
+      "exactSynonyms": 56160,
+      "otherSynonyms": 0,
+      "relationsByType": {
+        "IS_A": 100076,
+        "PART_OF": 61134
+      },
+      "relationsResolvedInCorpus": 161055,
+      "relationsUnresolved": 155,
+      "otherRelations": 92228,
+      "xrefs": 7441,
+      "xrefPrefixesTop": {
+        "TA98": 7441
+      },
+      "stats": {
+        "classes": 100077,
+        "rows": 100077,
+        "withTa98": 7050,
+        "spanish": 486,
+        "latin": 6744,
+        "eponyms": 267,
+        "partOfPredicates": [
+          "branch_of",
+          "constitutional_part_of",
+          "member_of",
+          "part_of",
+          "regional_part_of",
+          "tributary_of"
+        ],
+        "core": 12460,
+        "relations": {
+          "resolved": 161055,
+          "unresolved": 155,
+          "unresolvedByPrefix": {
+            "FMA": 155
+          }
+        }
+      }
+    },
+    {
+      "source": "hgnc",
+      "codeSystem": "hgnc",
+      "domain": "genetics",
+      "load": "default",
+      "license": "CC0 1.0 (HGNC: «freely available … no restrictions on their use»)",
+      "productQuery": "Gen estudiado en un informe genético o panel (FHIR Genomics exige HGNC); sinónimos para encontrar «BRCA1» por su nombre o alias.",
+      "concepts": 45277,
+      "conceptsLoadedByDefault": 45277,
+      "withDefinition": 0,
+      "exactSynonyms": 101796,
+      "otherSynonyms": 52890,
+      "relationsByType": {},
+      "relationsResolvedInCorpus": 0,
+      "relationsUnresolved": 0,
+      "otherRelations": 0,
+      "xrefs": 246315,
+      "xrefPrefixesTop": {
+        "NCBIGene": 44497,
+        "RefSeq": 42708,
+        "ENSEMBL": 42590,
+        "MANE": 38632,
+        "CCDS": 35504,
+        "UniProtKB": 20377,
+        "OMIM": 17589,
+        "Orphanet": 4418
+      },
+      "stats": {
+        "docs": 45277,
+        "notApproved": 0,
+        "rows": 45277,
+        "relations": {
+          "resolved": 0,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    },
+    {
+      "source": "abbreviations-metainventory",
+      "codeSystem": "medical-abbreviations-metainventory",
+      "domain": "abbreviations",
+      "load": "default",
+      "license": "CC BY 4.0",
+      "productQuery": "Expandir una sigla de una nota o informe importado («CABG», «HTN») a sus sentidos documentados.",
+      "concepts": 183817,
+      "conceptsLoadedByDefault": 17445,
+      "withDefinition": 0,
+      "exactSynonyms": 373933,
+      "otherSynonyms": 0,
+      "relationsByType": {},
+      "relationsResolvedInCorpus": 0,
+      "relationsUnresolved": 0,
+      "otherRelations": 0,
+      "xrefs": 0,
+      "xrefPrefixesTop": {},
+      "stats": {
+        "records": 405543,
+        "groups": 183817,
+        "rows": 183817,
+        "literatureOnly": 166372,
+        "relations": {
+          "resolved": 0,
+          "unresolved": 0,
+          "unresolvedByPrefix": {}
+        }
+      }
+    }
+  ]
+}

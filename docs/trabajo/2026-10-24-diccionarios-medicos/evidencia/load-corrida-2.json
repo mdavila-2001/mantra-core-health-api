@@ -1,0 +1,274 @@
+{
+  "finishedAt": "2026-10-24T01:22:17.951Z",
+  "seconds": 28,
+  "include": [],
+  "result": [
+    {
+      "source": "ncbitaxon-medical",
+      "codeSystem": "ncbitaxon",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "uberon",
+      "codeSystem": "uberon",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "cl",
+      "codeSystem": "cl",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "ehdaa2",
+      "codeSystem": "ehdaa2",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "aeo",
+      "codeSystem": "aeo",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "caro",
+      "codeSystem": "caro",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "hsapdv",
+      "codeSystem": "hsapdv",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "so",
+      "codeSystem": "sequence-ontology",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "ogms",
+      "codeSystem": "ogms",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "ido",
+      "codeSystem": "ido",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "omrse",
+      "codeSystem": "omrse",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "trans",
+      "codeSystem": "pathogen-transmission",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "apollo_sv",
+      "codeSystem": "apollo-sv",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "stato",
+      "codeSystem": "stato",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "exo",
+      "codeSystem": "exo",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "geno",
+      "codeSystem": "geno",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "aro",
+      "codeSystem": "aro",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "pbpko",
+      "codeSystem": "pbpko",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "opl",
+      "codeSystem": "opl",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "obcs",
+      "codeSystem": "obcs",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "fma",
+      "codeSystem": "fma",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "hgnc",
+      "codeSystem": "hgnc",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "abbreviations-metainventory",
+      "codeSystem": "medical-abbreviations-metainventory",
+      "reusedCodeSystem": null,
+      "concepts": 0,
+      "conceptsReused": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0,
+      "conceptMaps": 0
+    },
+    {
+      "source": "disease-agents",
+      "edges": 1367,
+      "withOrganism": 1204,
+      "resolvedDisease": 0,
+      "unresolvedDisease": 1204,
+      "relationships": 0,
+      "inserted": 0,
+      "lookups": {
+        "codes": 0,
+        "mesh": 0,
+        "ta98": 0
+      }
+    }
+  ]
+}

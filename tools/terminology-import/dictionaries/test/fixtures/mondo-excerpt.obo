@@ -1,0 +1,74 @@
+format-version: 1.2
+ontology: mondo
+
+[Typedef]
+id: disease_has_infectious_agent
+name: disease has infectious agent
+xref: RO:0014001
+
+[Typedef]
+id: MONDO:0100332
+name: disease has primary infectious agent
+property_value: http://purl.org/dc/terms/creator https://orcid.org/0000-0001-5208-3432
+is_a: disease_has_infectious_agent ! disease has infectious agent
+
+[Typedef]
+id: transmitted_by
+name: transmitted by
+xref: RO:0002451
+
+[Typedef]
+id: in_taxon
+name: in taxon
+xref: RO:0002162
+
+[Term]
+id: MONDO:0005737
+name: Ebola hemorrhagic fever
+def: "A viral hemorrhagic fever that is caused by the Ebola virus, which is transmitted by contact with infected animals or humans; it is characterized by high fever, unexplained bleeding, and a high mortality rate." [NCIT:P378]
+subset: doid {source="DOID:4325"}
+subset: doid_rare {source="DOID:4325"}
+subset: gard_rare {source="GARD:0002035", source="MONDO:GARD"}
+subset: ncit {source="NCIT:C36171"}
+subset: nord_rare {source="MONDO:NORD"}
+subset: ordo_disorder {source="Orphanet:319218"}
+subset: orphanet {source="Orphanet:319218"}
+subset: orphanet_rare {source="Orphanet:319218"}
+subset: otar {source="MONDO:OTAR"}
+subset: rare
+synonym: "Ebola" EXACT [DOID:4325, NCIT:C36171]
+synonym: "Ebola fever" EXACT [Orphanet:319218]
+synonym: "Ebola virus disease" EXACT [DOID:4325, ICD10CM:A98.4, icd11.foundation:792755706, Orphanet:319218]
+synonym: "Ebolavirus caused disease or disorder" EXACT [MONDO:patterns/specific_infectious_disease_by_agent]
+synonym: "Ebolavirus disease or disorder" EXACT []
+synonym: "Ebolavirus infectious disease" EXACT []
+synonym: "EHF" EXACT ABBREVIATION [Orphanet:319218]
+xref: DOID:4325 {source="MONDO:equivalentTo", source="EFO:0007243"}
+xref: EFO:0007243 {source="MONDO:equivalentTo", source="MONDO:EFO"}
+xref: GARD:0002035 {source="MONDO:GARD"}
+xref: ICD10CM:A98.4 {source="Orphanet:319218", source="https://orcid.org/0009-0001-6494-4831", source="DOID:4325", source="MONDO:equivalentTo", source="Orphanet:319218/e", source="https://orcid.org/0000-0002-5002-8648"}
+xref: icd11.foundation:792755706 {source="Orphanet:319218", source="MONDO:equivalentTo", source="https://orcid.org/0000-0002-4142-7153"}
+xref: MedDRA:10014071 {source="Orphanet:319218", source="Orphanet:319218/e"}
+xref: MEDGEN:129219 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: MESH:D019142 {source="DOID:4325", source="MONDO:equivalentTo", source="EFO:0007243"}
+xref: NCIT:C36171 {source="DOID:4325", source="MONDO:equivalentTo"}
+xref: Orphanet:319218 {source="MONDO:equivalentTo"}
+xref: SCTID:123323003 {source="DOID:4325"}
+xref: SCTID:186746000 {source="DOID:4325"}
+xref: SCTID:37109004 {source="DOID:4325", source="MONDO:equivalentTo"}
+xref: UMLS:C0282687 {source="MEDGEN:129219", source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+is_a: MONDO:0018087 {source="MESH:D019142", source="NCIT:C36171", source="Orphanet:319218"} ! viral hemorrhagic fever
+intersection_of: MONDO:0005550 ! infectious disease
+intersection_of: MONDO:0100332 NCBITaxon:3044781 ! disease has primary infectious agent Orthoebolavirus
+relationship: disease_has_feature HP:0000509 {source="MONDO:Wikidata"} ! Conjunctivitis
+relationship: disease_has_feature HP:0002013 {source="MONDO:Wikidata"} ! Vomiting
+relationship: disease_has_feature HP:0002315 {source="MONDO:Wikidata"} ! Headache
+relationship: disease_has_feature MONDO:0001517 {source="MONDO:Wikidata"} ! dysentery
+relationship: disease_has_feature MONDO:0003799 {source="MONDO:Wikidata"} ! conjunctivitis
+relationship: disease_has_infectious_agent NCBITaxon:186538 ! Zaire ebolavirus
+relationship: disease_has_infectious_agent NCBITaxon:186540 ! Sudan ebolavirus
+relationship: disease_has_infectious_agent NCBITaxon:565995 ! Bundibugyo virus
+relationship: excluded_from_qc_check http://purl.obolibrary.org/obo/mondo/sparql/qc/general/qc-single-child.sparql
+property_value: curated_content_resource "https://www.malacards.org/card/ebola_hemorrhagic_fever" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/9097" xsd:anyURI
+

@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: parseObo: def con xrefs, sinónimos con alcance, xrefs con calificadores y relaciones
+ok 1 - parseObo: def con xrefs, sinónimos con alcance, xrefs con calificadores y relaciones
+  ---
+  duration_ms: 5.689156
+  type: 'test'
+  ...
+# Subtest: typedefs: nombre corto → id RO/BFO canónico; SO sin xref usa el mapa de nombres cortos
+ok 2 - typedefs: nombre corto → id RO/BFO canónico; SO sin xref usa el mapa de nombres cortos
+  ---
+  duration_ms: 4.872169
+  type: 'test'
+  ...
+# Subtest: un typedef con nombre inesperado aborta (id equivocado = relaciones falsas)
+ok 3 - un typedef con nombre inesperado aborta (id equivocado = relaciones falsas)
+  ---
+  duration_ms: 2.468347
+  type: 'test'
+  ...
+# Subtest: linaje humano real: 9606 llega a la raíz por is_a
+ok 4 - linaje humano real: 9606 llega a la raíz por is_a
+  ---
+  duration_ms: 3.057094
+  type: 'test'
+  ...
+# Subtest: Uberon: corazón entra, branquia (never_in_taxon Amniota) queda afuera; SNOMED/UMLS no se copian
+ok 5 - Uberon: corazón entra, branquia (never_in_taxon Amniota) queda afuera; SNOMED/UMLS no se copian
+  ---
+  duration_ms: 7.635801
+  type: 'test'
+  ...
+# Subtest: CL: sólo términos CL propios (no los GO/UBERON importados)
+ok 6 - CL: sólo términos CL propios (no los GO/UBERON importados)
+  ---
+  duration_ms: 3.164666
+  type: 'test'
+  ...
+# Subtest: Mondo: aristas enfermedad → agente infeccioso con sus xrefs de identidad
+ok 7 - Mondo: aristas enfermedad → agente infeccioso con sus xrefs de identidad
+  ---
+  duration_ms: 20.971421
+  type: 'test'
+  ...
+# Subtest: DOID: has material basis in + taxón = agente; transmitted by = vector
+ok 8 - DOID: has material basis in + taxón = agente; transmitted by = vector
+  ---
+  duration_ms: 1.440484
+  type: 'test'
+  ...
+# Subtest: selección de taxones: destino + linaje; los destinos sin etiqueta se reportan
+ok 9 - selección de taxones: destino + linaje; los destinos sin etiqueta se reportan
+  ---
+  duration_ms: 2.763205
+  type: 'test'
+  ...
+# Subtest: HGNC: símbolo como display, alias como designación, símbolos previos aparte
+ok 10 - HGNC: símbolo como display, alias como designación, símbolos previos aparte
+  ---
+  duration_ms: 1.804592
+  type: 'test'
+  ...
+# Subtest: Metainventario: un concepto por sentido; lo de literatura no entra por defecto
+ok 11 - Metainventario: un concepto por sentido; lo de literatura no entra por defecto
+  ---
+  duration_ms: 1.559778
+  type: 'test'
+  ...
+# Subtest: plan de carga: ids deterministas, conceptos del backend reusados, relaciones sólo hacia lo cargado
+ok 12 - plan de carga: ids deterministas, conceptos del backend reusados, relaciones sólo hacia lo cargado
+  ---
+  duration_ms: 2.997394
+  type: 'test'
+  ...
+# Subtest: lookupKeys: sólo códigos idénticos hacia lo que ya cargó el glosario
+ok 13 - lookupKeys: sólo códigos idénticos hacia lo que ya cargó el glosario
+  ---
+  duration_ms: 0.35686
+  type: 'test'
+  ...
+# Subtest: splitXrefs: MedDRA, SNOMED y UMLS se descartan y se cuentan
+ok 14 - splitXrefs: MedDRA, SNOMED y UMLS se descartan y se cuentan
+  ---
+  duration_ms: 0.192558
+  type: 'test'
+  ...
+# Subtest: OWL funcional (OGMS): etiqueta, definición e is_a; mismas filas que un .obo
+ok 15 - OWL funcional (OGMS): etiqueta, definición e is_a; mismas filas que un .obo
+  ---
+  duration_ms: 1.557986
+  type: 'test'
+  ...
+# Subtest: RDF/XML (IDO): clase con definición IAO e is_a; declaraciones de una línea no se tragan el archivo
+ok 16 - RDF/XML (IDO): clase con definición IAO e is_a; declaraciones de una línea no se tragan el archivo
+  ---
+  duration_ms: 1.138671
+  type: 'test'
+  ...
+# Subtest: Wikidata ES: el valor del identificador se lleva al código del corpus
+ok 17 - Wikidata ES: el valor del identificador se lleva al código del corpus
+  ---
+  duration_ms: 0.263924
+  type: 'test'
+  ...
+# Subtest: registro: cada fuente tiene prefijo → code system (las aristas y xrefs entre fuentes se resuelven por ahí)
+ok 18 - registro: cada fuente tiene prefijo → code system (las aristas y xrefs entre fuentes se resuelven por ahí)
+  ---
+  duration_ms: 0.714479
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 172.238599
