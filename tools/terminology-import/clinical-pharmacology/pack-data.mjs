@@ -21,7 +21,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
-import { ensureDir } from '../lib/glossary-es/common.mjs';
+import { ensureDir, sha256File } from '../lib/glossary-es/common.mjs';
+import { ndjsonLines } from './lib/cli.mjs';
 import { cpCache, cpOut, openFdaDir } from './lib/paths.mjs';
 
 const DATA_DIR = ensureDir(join(dirname(fileURLToPath(import.meta.url)), 'data'));
@@ -30,7 +31,8 @@ const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
 /** Parte un NDJSON por líneas en trozos cuyo gzip queda bajo el tope. Devuelve los buffers comprimidos. */
 export function splitNdjson(text, maxBytes = MAX_PART_BYTES) {
-  const lines = text.split('\n').filter((l) => l.trim() !== '');
+  // Acepta el texto entero o un iterable de líneas (archivos > 512 MB no caben en un string).
+  const lines = typeof text === 'string' ? text.split('\n').filter((l) => l.trim() !== '') : text;
   const parts = [];
   let chunk = [];
   let rawBytes = 0;
@@ -68,10 +70,9 @@ function main() {
   for (const name of ['monographs', 'gsrs-entries']) {
     const ndjson = cpOut(`${name}.ndjson`);
     if (!existsSync(ndjson)) continue;
-    const text = readFileSync(ndjson, 'utf8');
-    const parts = splitNdjson(text);
+    const parts = splitNdjson(ndjsonLines(ndjson));
     parts.forEach((p, i) => add(`${name}.part-${String(i + 1).padStart(3, '0')}.ndjson.gz`, p.gz, p.rows, `out/${name}.ndjson`));
-    manifest.ndjson[name] = { sha256: sha256(Buffer.from(text, 'utf8')), rows: parts.reduce((n, p) => n + p.rows, 0), parts: parts.length };
+    manifest.ndjson[name] = { sha256: sha256File(ndjson), rows: parts.reduce((n, p) => n + p.rows, 0), parts: parts.length };
   }
   const small = [
     ['out/monographs.meta.json', cpOut('monographs.meta.json')],

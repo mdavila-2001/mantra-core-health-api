@@ -17,7 +17,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { BUILD_DIR, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
-import { readJsonIfExists } from './lib/cli.mjs';
+import { readJsonIfExists, readNdjsonLarge } from './lib/cli.mjs';
 import { readAllInputs } from './lib/inputs.mjs';
 import { COVERAGE_JSON, MONOGRAPHS_META, MONOGRAPHS_NDJSON, cpOut } from './lib/paths.mjs';
 import { REQUIRED_SECTIONS, SECTION_KEYS } from './lib/sections.mjs';
@@ -122,7 +122,7 @@ function markdown(c) {
 }
 
 function main() {
-  const monographs = existsSync(MONOGRAPHS_NDJSON()) ? readNdjson(MONOGRAPHS_NDJSON()) : [];
+  const monographs = existsSync(MONOGRAPHS_NDJSON()) ? readNdjsonLarge(MONOGRAPHS_NDJSON()) : [];
   const meta = readJsonIfExists(MONOGRAPHS_META());
   const { universe, liname } = readAllInputs();
   // El universo medido incluye lo que el armado agregó (ATC 5 enlazados por openFDA/GSRS) y todo ATC 5 que el GSRS conoce.
