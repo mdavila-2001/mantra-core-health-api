@@ -1,0 +1,137 @@
+TAP version 13
+# Subtest: makeDeviceRecord: todos los campos presentes, vacíos → null, id estable
+ok 1 - makeDeviceRecord: todos los campos presentes, vacíos → null, id estable
+  ---
+  duration_ms: 1.955007
+  type: 'test'
+  ...
+# Subtest: makeDeviceRecord: sin procedencia o con país no ISO falla
+ok 2 - makeDeviceRecord: sin procedencia o con país no ISO falla
+  ---
+  duration_ms: 0.583182
+  type: 'test'
+  ...
+# Subtest: dedupe: exacto por UDI-DI y por fabricante+modelo, nunca difuso
+ok 3 - dedupe: exacto por UDI-DI y por fabricante+modelo, nunca difuso
+  ---
+  duration_ms: 1.152581
+  type: 'test'
+  ...
+# Subtest: writeNdjsonGzParts: orden determinista, partes chicas, borra partes viejas
+ok 4 - writeNdjsonGzParts: orden determinista, partes chicas, borra partes viejas
+  ---
+  duration_ms: 7.546096
+  type: 'test'
+  ...
+# Subtest: parseCsv: comillas, separador y BOM
+ok 5 - parseCsv: comillas, separador y BOM
+  ---
+  duration_ms: 0.487801
+  type: 'test'
+  ...
+# Subtest: resolveHeaders: alias exactos; si falta uno muestra los encabezados reales
+ok 6 - resolveHeaders: alias exactos; si falta uno muestra los encabezados reales
+  ---
+  duration_ms: 0.377056
+  type: 'test'
+  ...
+# Subtest: EMDN: nivel y padre salen de la estructura del código
+ok 7 - EMDN: nivel y padre salen de la estructura del código
+  ---
+  duration_ms: 0.274768
+  type: 'test'
+  ...
+# Subtest: EMDN: parsea jerarquía, deduce terminal si falta y marca el alcance
+ok 8 - EMDN: parsea jerarquía, deduce terminal si falta y marca el alcance
+  ---
+  duration_ms: 0.926988
+  type: 'test'
+  ...
+# Subtest: EMDN: huérfanos, nivel incoherente y repetidos fallan
+ok 9 - EMDN: huérfanos, nivel incoherente y repetidos fallan
+  ---
+  duration_ms: 0.613229
+  type: 'test'
+  ...
+# Subtest: EMDN: descubre enlaces a Excel en la página oficial
+ok 10 - EMDN: descubre enlaces a Excel en la página oficial
+  ---
+  duration_ms: 0.678255
+  type: 'test'
+  ...
+# Subtest: alcance: W entera; fuera de W solo tipos explícitos; excluidas con motivo
+ok 11 - alcance: W entera; fuera de W solo tipos explícitos; excluidas con motivo
+  ---
+  duration_ms: 0.321935
+  type: 'test'
+  ...
+# Subtest: Data Lake: URL con parámetros ordenados, format y api-version
+ok 12 - Data Lake: URL con parámetros ordenados, format y api-version
+  ---
+  duration_ms: 0.321499
+  type: 'test'
+  ...
+# Subtest: Data Lake: sobre {value,nextLink} validado y nextLink sin cambiar la consulta
+ok 13 - Data Lake: sobre {value,nextLink} validado y nextLink sin cambiar la consulta
+  ---
+  duration_ms: 0.46827
+  type: 'test'
+  ...
+# Subtest: Data Lake: fila /udi → registro común con decodificación y país por SRN
+ok 14 - Data Lake: fila /udi → registro común con decodificación y país por SRN
+  ---
+  duration_ms: 0.661031
+  type: 'test'
+  ...
+# Subtest: Data Lake: fila /actors → fabricante
+ok 15 - Data Lake: fila /actors → fabricante
+  ---
+  duration_ms: 0.205055
+  type: 'test'
+  ...
+# Subtest: portal: certificados deduplicados por número+revisión y enriquecimiento
+ok 16 - portal: certificados deduplicados por número+revisión y enriquecimiento
+  ---
+  duration_ms: 0.368649
+  type: 'test'
+  ...
+# Subtest: swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés
+ok 17 - swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés
+  ---
+  duration_ms: 0.461849
+  type: 'test'
+  ...
+# Subtest: BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real
+ok 18 - BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real
+  ---
+  duration_ms: 0.41047
+  type: 'test'
+  ...
+# Subtest: buildCorpus: filtra por alcance, deduplica y solo trae fabricantes de equipos en alcance
+ok 19 - buildCorpus: filtra por alcance, deduplica y solo trae fabricantes de equipos en alcance
+  ---
+  duration_ms: 1.327386
+  type: 'test'
+  ...
+# Subtest: plan de carga: ids estables y propiedades sin nulos
+ok 20 - plan de carga: ids estables y propiedades sin nulos
+  ---
+  duration_ms: 0.347807
+  type: 'test'
+  ...
+# Subtest: fuentes: cada una declara términos y los hosts requeridos incluyen EUDAMED
+ok 21 - fuentes: cada una declara términos y los hosts requeridos incluyen EUDAMED
+  ---
+  duration_ms: 0.26455
+  type: 'test'
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 21
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 137.474581
+exit 0
