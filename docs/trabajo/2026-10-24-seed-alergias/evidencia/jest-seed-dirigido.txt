@@ -1,0 +1,11 @@
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "/home/user/mantra-core-health-api/src/common/seed/data/allergies/fhir-allergy-enum-codes.json" (from /home/user/mantra-core-health-api/src/common/seed/data/allergies/allergy-enums.spec.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:638) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:637) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 5 passed, 5 total
+Tests:       37 passed, 37 total
+Snapshots:   0 total
+Time:        11.071 s
+Ran all test suites matching src/common/seed/data/allergies|src/common/seed/dynamic-enum-catalog.spec.ts|src/common/seed/terminology-designations.es.spec.ts|src/common/seed/concept-codes.spec.ts|src/common/seed/dynamic-enum-seed.service.spec.ts.

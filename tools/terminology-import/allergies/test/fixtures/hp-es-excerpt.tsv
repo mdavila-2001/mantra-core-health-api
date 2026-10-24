@@ -1,0 +1,7 @@
+source_language	translation_language	subject_id	source_value	predicate_id	translation_value	translation_status
+en	es	HP:0000118	Phenotypic abnormality	rdfs:label	Anomalía fenotípica	OFFICIAL
+en	es	HP:0001025	Urticaria	rdfs:label	Urticaria	OFFICIAL
+en	es	HP:0002715	Abnormality of the immune system	rdfs:label	Alteración del sistema inmune	OFFICIAL
+en	es	HP:0012393	Allergy	rdfs:label	Alergia	OFFICIAL
+en	es	HP:0012395	Seasonal allergy	rdfs:label	Alergia estacional	OFFICIAL
+en	es	HP:0000008	Abnormality of female internal genitalia	rdfs:label	Anormalidad de los genitales internos femeninos	OFFICIAL

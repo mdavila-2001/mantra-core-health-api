@@ -1,0 +1,117 @@
+┌─────────┬────┬────────────────────────────────┬───────┬───────┬────────────┐
+│ (index) │ n  │ key                            │ read  │ added │ duplicates │
+├─────────┼────┼────────────────────────────────┼───────┼───────┼────────────┤
+│ 0       │ 1  │ 'hl7-enums'                    │ 50    │ 50    │ 0          │
+│ 1       │ 2  │ 'rxnorm-ingredients'           │ 21923 │ 21923 │ 0          │
+│ 2       │ 3  │ 'ndfrt-classes'                │ 12994 │ 12994 │ 0          │
+│ 3       │ 4  │ 'cvx-vsac'                     │ 235   │ 235   │ 0          │
+│ 4       │ 5  │ 'cvx-others'                   │ 846   │ 40    │ 806        │
+│ 5       │ 6  │ 'rxnorm-medicinal-ingredients' │ 21923 │ 0     │ 21923      │
+│ 6       │ 7  │ 'vsac-allergy-groupings'       │ 0     │ 0     │ 0          │
+│ 7       │ 8  │ 'hpo'                          │ 19178 │ 19178 │ 0          │
+│ 8       │ 9  │ 'doid'                         │ 176   │ 176   │ 0          │
+│ 9       │ 10 │ 'mondo'                        │ 15    │ 15    │ 0          │
+│ 10      │ 11 │ 'off-allergens'                │ 26    │ 26    │ 0          │
+│ 11      │ 12 │ 'off-additives'                │ 725   │ 725   │ 0          │
+│ 12      │ 13 │ 'lexical-sweep'                │ 0     │ 0     │ 0          │
+│ 13      │ 14 │ 'phinvads-allergy-types'       │ 12    │ 0     │ 12         │
+│ 14      │ 15 │ 'chebi-allergens'              │ 86    │ 86    │ 0          │
+│ 15      │ 16 │ 'oae-allergy'                  │ 35    │ 35    │ 0          │
+│ 16      │ 17 │ 'foodon-labelling'             │ 20    │ 20    │ 0          │
+│ 17      │ 18 │ 'national-fhir-igs'            │ 0     │ 0     │ 0          │
+│ 18      │ 19 │ 'symptom-ontology'             │ 0     │ 0     │ 0          │
+│ 19      │ 20 │ 'ecto-exposures'               │ 0     │ 0     │ 0          │
+└─────────┴────┴────────────────────────────────┴───────┴───────┴────────────┘
+{
+  "totals": {
+    "concepts": 55503,
+    "withSpanishDisplay": 17510,
+    "byCodeSystem": {
+      "allergy-hl7-fhir": 50,
+      "allergy-rxnorm-ingredients": 21923,
+      "allergy-ndfrt-drug-classes": 12994,
+      "allergy-cvx-vaccines": 275,
+      "allergy-hpo": 19178,
+      "allergy-doid": 176,
+      "allergy-mondo": 15,
+      "allergy-off-allergens": 26,
+      "allergy-off-additives": 725,
+      "allergy-chebi": 86,
+      "allergy-oae": 35,
+      "allergy-foodon": 20
+    },
+    "byValueSet": {
+      "allergy-substances": 36029,
+      "allergy-substances-medication-ingredient": 21923,
+      "allergy-substances-rxnorm-allergenic-extract": 702,
+      "allergy-substances-rxnorm-pollen": 323,
+      "allergy-substances-rxnorm-animal-epithelia": 53,
+      "allergy-substances-rxnorm-house-dust-mite": 5,
+      "allergy-substances-rxnorm-venom": 36,
+      "allergy-substances-drug-class": 12994,
+      "allergy-substances-vaccine": 275,
+      "allergy-manifestations": 19178,
+      "allergy-conditions": 221,
+      "allergy-substances-food-allergen": 26,
+      "allergy-substances-food-additive": 725,
+      "allergy-substances-chemical-allergen": 86,
+      "allergy-adverse-event-types": 35,
+      "allergy-food-allergen-labelling": 20
+    }
+  },
+  "discarded": [
+    {
+      "pass": "rxnorm-ingredients",
+      "reason": "marca comercial (TTY=BN según el value set VSAC 1237.18): la alergia se registra al ingrediente",
+      "count": 5096
+    },
+    {
+      "pass": "cvx-others",
+      "reason": "código CVX administrativo («no vaccine administered», «unknown», «RESERVED»)",
+      "count": 3
+    },
+    {
+      "pass": "cvx-others",
+      "reason": "código CVX sólo presente en value sets de PHIN VADS que no son de vacunas administradas (códigos nunca activos)",
+      "count": 1
+    },
+    {
+      "pass": "vsac-allergy-groupings",
+      "reason": "código RxNorm de producto (no ingrediente): no es una sustancia",
+      "count": 10240
+    },
+    {
+      "pass": "mondo",
+      "reason": "Mondo lo declara equivalentTo un DOID ya cargado (se anota como external_id)",
+      "count": 21
+    },
+    {
+      "pass": "off-additives",
+      "reason": "entrada de la taxonomía sin número E (clase o agrupador, no aditivo)",
+      "count": 17
+    },
+    {
+      "pass": "lexical-sweep",
+      "reason": "nombre con «allerg…» pero fuera del subárbol de alergia de su ontología: no se carga (ver lista en meta)",
+      "count": 13
+    },
+    {
+      "pass": "national-fhir-igs",
+      "reason": "recursos de alergia de CL Core / EU Base sin códigos propios fuera de SNOMED CT",
+      "count": 0
+    },
+    {
+      "pass": "symptom-ontology",
+      "reason": "manifestación ya cubierta por la HPO (con castellano oficial); SYMP no declara equivalencia",
+      "count": 3
+    },
+    {
+      "pass": "ecto-exposures",
+      "reason": "clase de exposición (ECTO), no sustancia: la sustancia ya está en la pasada 15",
+      "count": 3
+    }
+  ],
+  "hpoStaleTranslations": 2131,
+  "lexicalSweep": 13
+}
+→ /home/user/glossary-data-build/ndjson/allergy-catalog.ndjson

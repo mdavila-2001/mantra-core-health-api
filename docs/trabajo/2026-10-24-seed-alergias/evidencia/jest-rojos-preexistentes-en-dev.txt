@@ -1,0 +1,7 @@
+00a07330 Merge pull request #678 from mdavila-2001/claude/adoring-fermat-cfc4zb
+FAIL src/common/seed/glossary-articles.catalog.spec.ts
+  ● Artículos enciclopédicos de autoría propia del glosario › cada artículo llega al piso de 2.000 palabras
+FAIL src/modules/terminology/import/xlsx-parser.spec.ts
+  ● XlsxParser · celda-numerica (sólo XLSX, sin gemelo CSV) › reporta un problema cuando la fórmula no tiene valor cacheado
+Test Suites: 2 failed, 2 total
+Tests:       2 failed, 23 passed, 25 total
