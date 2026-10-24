@@ -1,0 +1,19 @@
+{
+ "resumen": {
+  "entidadesBoveda": 1357,
+  "conjuntosDeIndicesBoveda": 1246,
+  "entidadesMapeadas": 1264,
+  "entidadesFaltantes": 3,
+  "entidadesSobrantes": 55,
+  "columnasFaltantes": 6,
+  "columnasSobrantes": 28,
+  "tiposDivergentes": 0,
+  "obligatoriedadDivergente": 23,
+  "vistasNoMaterializadas": 78,
+  "indicesDeclarados": 7873,
+  "indicesEnCatalogo": 7805,
+  "fkDeclaradas": 6772,
+  "fkEnCatalogo": 6772
+ }
+}
+identifiers: owner_kind_concept_id sin deriva; único sobrante preexistente holder_name (no es de este trabajo)

@@ -55,6 +55,8 @@ export const commonIndexes: readonly IndexTuple[] = [
   ['identifiers', 'ix_identifiers_type_concept_id_value', ['type_concept_id', 'value'], false, 'btree'],
   ['identifiers', 'ix_identifiers_issuer_country_concept_id', ['issuer_country_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_issuer_administrative_area_concept_id', ['issuer_administrative_area_concept_id'], false, 'btree'],
+  ['identifiers', 'ix_identifiers_owner_kind_concept_id', ['owner_kind_concept_id'], false, 'btree'],
+  ['identifiers', 'ux_identifiers_document_owner_kind', ['type_concept_id', 'value', 'issuer_administrative_area_concept_id', 'owner_kind_concept_id'], true, 'btree', 'state_concept_id = \'38a1d301-f40d-5b17-a695-5e6d605f8b19\' AND owner_kind_concept_id IN (\'ff9ab690-d4ae-5d5e-9784-76d8e9e1ff37\', \'64e1ccaf-e90d-5255-8af0-9d8362817ea9\')'],
   ['identifiers', 'ix_identifiers_assigner_tenant_id', ['assigner_tenant_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_state_concept_id', ['state_concept_id'], false, 'btree'],
   ['identifiers', 'ix_identifiers_created_by_user_id', ['created_by_user_id'], false, 'btree'],

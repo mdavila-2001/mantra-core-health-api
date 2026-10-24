@@ -18,6 +18,7 @@ export interface ContactPersonRepos {
         value: string;
         useConceptId: string;
         stateConceptId: string;
+        ownerKindConceptId?: string;
         actorUserId: string;
       },
     ): { id: string };
@@ -55,6 +56,12 @@ export interface ContactPersonData extends DeclaredPersonName {
   readonly phone?: string;
   /** Documento de identidad, si el formulario lo pide (el representante legal). */
   readonly nationalId?: string;
+  /**
+   * Con qué rol queda titulado el documento (`common:document-holder-kind`).
+   * Un representante no entra en la unicidad paciente/médico: una misma
+   * persona puede representar a varias empresas.
+   */
+  readonly ownerKindConceptId?: string;
   /** Quién escribe las filas, para la auditoría. */
   readonly actorUserId: string;
 }
@@ -142,6 +149,7 @@ export function createContactPerson(
       value: data.nationalId,
       useConceptId: CONCEPTS.USE_OFFICIAL,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
+      ownerKindConceptId: data.ownerKindConceptId,
       actorUserId: data.actorUserId,
     });
     identifierId = identifier.id;

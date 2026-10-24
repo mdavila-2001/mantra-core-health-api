@@ -49,6 +49,7 @@ export const commonForeignKeys: readonly ForeignKeyTuple[] = [
   ['identifiers', 'assigner_tenant_id', 'directory', 'tenants', 'id'],
   ['identifiers', 'created_by_user_id', 'iam', 'users', 'id'],
   ['identifiers', 'issuer_administrative_area_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['identifiers', 'owner_kind_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'issuer_country_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'owner_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['identifiers', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],

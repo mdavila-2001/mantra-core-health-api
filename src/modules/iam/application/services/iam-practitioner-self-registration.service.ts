@@ -1,3 +1,8 @@
+import {
+  assertDocumentAvailable,
+  DOCUMENT_HOLDER_CONCEPT,
+  rethrowDocumentRace,
+} from './document-uniqueness';
 import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -456,533 +461,546 @@ export class IamPractitionerSelfRegistrationService {
       dto.profilePhotoBase64,
     );
 
-    const created = await this.em.transactional(async (tx) => {
-      // El correo es la identidad de login: comprobarlo antes de escribir nada
-      // convierte una violación de constraint (500) en un 409 explicativo.
-      const clash = await this.credentialsRepo.findLivePasswordBySubject(
-        tx,
-        dto.email,
-      );
-      if (clash) {
-        this.logger.warn(
-          {
-            operation: 'iam.auth.register-practitioner',
-            reason: 'email-in-use',
-          },
-          'Rejected self-registration: email already registered',
-        );
-        throw new ConflictException('Ya existe una cuenta con ese correo');
-      }
-
-      const practitionerCode = `PRC-${randomUUID()}`;
-      const clashCode = await this.practitionersRepo.findByCode(
-        tx,
-        practitionerCode,
-      );
-      if (clashCode) {
-        throw new ConflictException('El practitioner_code ya está en uso', {
-          practitionerCode,
-        });
-      }
-
-      // El CI y su departamento emisor son requisitos del alta médica. Se
-      // comprueba el catálogo también acá para proteger a llamadores que no
-      // pasen por el ValidationPipe HTTP. Ocurre antes de cualquier escritura.
-      await this.assertIssuerDepartment(
-        tx,
-        dto.issuerAdministrativeAreaConceptId,
-      );
-
-      // El nombre para mostrar sale de las partes; si el cliente mandó la forma
-      // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
-      // -la cuenta y la persona- para que no puedan divergir.
-      const displayName = composeAccountDisplayName(dto);
-
-      // 1) La cuenta. En el autorregistro nace ACTIVA porque el titular está
-      // presente y fija su propia contraseña. En el alta administrativa nace
-      // PENDIENTE: quien la crea no puede elegir la clave de otro, así que se
-      // emite un token de activación y el titular la fija al entrar.
-      const user = this.usersRepo.create(tx, {
-        displayName,
-        statusConceptId: assisted
-          ? CONCEPTS.STATE_PENDING
-          : CONCEPTS.USER_ACTIVE,
-        mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
-        timeZone: dto.timeZone,
-        ...(assisted ? { mustChangePassword: true } : {}),
-      });
-      // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
-      await tx.flush();
-
-      if (assisted) {
-        // Reserva el login sin secreto: nadie puede entrar hasta que el titular
-        // consuma el token y elija su contraseña.
-        this.credentialsRepo.createPendingPassword(tx, {
-          userId: user.id,
-          externalSubject: dto.email,
-          actorUserId: assisted.actor.id,
-        });
-      } else {
-        this.credentialsRepo.createPassword(tx, {
-          userId: user.id,
-          externalSubject: dto.email,
-          secretHash: await argon2.hash(
-            (dto as RegisterPractitionerDto).password,
-          ),
-          actorUserId: user.id,
-        });
-      }
-      this.rolesRepo.create(tx, {
-        userId: user.id,
-        roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
-        actorUserId: user.id,
-      });
-      // `PRACTITIONER` en la misma transacción: quien entra por esta vía **es**
-      // un profesional, y sin el rol su propia agenda le responde 403 —
-      // `GET /scheduling/resources` lo exige—. Era el mismo agujero que tenía
-      // `PATIENT`: sin concedérselo, el claim `roles` nunca podía contenerlo.
-      //
-      // `CLINICIAN` **no** se concede acá, y la diferencia importa: abre el
-      // expediente de un paciente, que es PHI. La matrícula nace `PENDING` y
-      // declararla no es probarla, así que ese rol lo concede un administrador
-      // — el acto que sí la verifica.
-      this.rolesRepo.create(tx, {
-        userId: user.id,
-        roleConceptId: ROLE_CONCEPT_BY_CODE.PRACTITIONER,
-        actorUserId: user.id,
-      });
-
-      // 1.5) Foto de perfil, ya subida: pasa a ser de la cuenta nueva.
-      const photoFileId = uploadedPhotoId
-        ? await this.claimProfilePhoto(tx, uploadedPhotoId, user.id)
-        : undefined;
-
-      // 2) Persona con sus datos demográficos. El código legible del DTO se
-      // traduce aquí al concepto de terminología que persiste la columna.
-      const person = this.personsRepo.create(tx, {
-        personStatusConceptId: PROF.PERSON_ACTIVE,
-        vitalStatusConceptId: PROF.VITAL_ALIVE,
-        name: dto.name,
-        middleName: dto.middleName,
-        lastName: dto.lastName,
-        motherLastName: dto.motherLastName,
-        displayName,
-        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
-        administrativeGenderConceptId: dto.gender
-          ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender]
-          : undefined,
-        sexAtBirthConceptId: dto.sexAtBirth
-          ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
-          : undefined,
-        photoFileId,
-        occupationConceptId: dto.occupationConceptId,
-        occupationFreeText: dto.occupationConceptId
-          ? undefined
-          : dto.occupationFreeText,
-        workEmployerConceptId: dto.workEmployerConceptId,
-        workEmployerFreeText: dto.workEmployerConceptId
-          ? undefined
-          : dto.workEmployerFreeText,
-        actorUserId: user.id,
-      });
-      await tx.flush();
-
-      this.personProfilesRepo.create(tx, {
-        personId: person.id,
-        profileTypeConceptId: PROF.PROFILE_TYPE_PRACTITIONER,
-        statusConceptId: PROF.PROFILE_ACTIVE,
-        actorUserId: user.id,
-      });
-      await tx.flush();
-
-      // Reclamar dentro del alta: un fallo revierte cuenta, propiedad y perfil.
-      for (const fileId of [dto.signatureFileId, dto.sealFileId]) {
-        if (fileId == null) continue;
-        const { file, version } =
-          await this.attachableFiles.claimAnonymousUpload(
-            tx,
-            fileId,
-            { ownerUserId: user.id, tenantId: SEED.tenantId },
-            {
-              allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
-              allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
-              operation: 'iam.auth.register-practitioner.signature-assets',
-            },
-          );
-        if (
-          file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
-          BigInt(version.sizeBytes) > BigInt(2 * 1024 * 1024)
-        ) {
-          throw new PreconditionFailedException(
-            'La firma y el sello requieren una imagen privada de hasta 2 MB',
-          );
-        }
-      }
-
-      // 3) Perfil profesional. `health_practitioner_profiles.profile_id` ES
-      // `persons.id` (ver ProfilesPractitionersService), no un id propio.
-      const practitioner = this.practitionersRepo.create(tx, {
-        profileId: person.id,
-        practitionerCode,
-        practitionerCategoryConceptId:
-          dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
-        professionalTitle: dto.professionalTitle,
-        photoFileId,
-        signatureFileId: dto.signatureFileId,
-        sealFileId: dto.sealFileId,
-        // PENDIENTE de verificación: el alta declara la matrícula, no la prueba.
-        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
-        practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
-        acceptsNewPatients: dto.acceptsNewPatients ?? false,
-        actorUserId: user.id,
-      });
-      await tx.flush();
-
-      // 4) Licencia y título, ambos pendientes de validación.
-      const license = this.authorizationsRepo.create(tx, {
-        practitionerProfileId: person.id,
-        jurisdictionConceptId:
-          dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
-        licenseNumber: dto.licenseNumber,
-        regulatoryAuthority: dto.regulatoryAuthority,
-        // Desde cuándo vale la habilitación. Que la matrícula nazca PENDIENTE
-        // de verificación no contradice la fecha: una cosa es desde cuándo la
-        // declara el profesional y otra desde cuándo la plataforma la dio por
-        // buena, que es lo que resuelve `stateConceptId`.
-        validFrom: dto.licenseIssueDate
-          ? new Date(dto.licenseIssueDate)
-          : undefined,
-        stateConceptId: PROF.AUTH_PENDING,
-        actorUserId: user.id,
-      });
-      // El registro del SEDES es una SEGUNDA habilitación, no un título. El
-      // SEDES autoriza a ejercer en su departamento igual que la matrícula del
-      // Ministerio autoriza en todo el país, así que va en la misma tabla y el
-      // perfil las muestra juntas. Antes entraba por `credentialNumber` y se
-      // archivaba como `CREDENTIAL_TYPE_DEGREE`: el padrón real cargaba ahí su
-      // «T.I. 538/14» y el perfil lo anunciaba como «Título universitario».
-      const sitesLicense =
-        dto.sedesLicenseNumber === undefined
-          ? undefined
-          : this.authorizationsRepo.create(tx, {
-              practitionerProfileId: person.id,
-              jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
-              licenseNumber: dto.sedesLicenseNumber,
-              stateConceptId: PROF.AUTH_PENDING,
-              actorUserId: user.id,
-            });
-      // La credencial sólo nace si se declara un título de verdad. Dejó de ser
-      // obligatoria junto con `credentialNumber`.
-      const credential =
-        dto.credentialNumber === undefined
-          ? undefined
-          : this.professionalCredentialsRepo.create(tx, {
-              practitionerProfileId: person.id,
-              credentialTypeConceptId:
-                dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
-              number: dto.credentialNumber,
-              stateConceptId: PROF.CRED_PENDING,
-              actorUserId: user.id,
-            });
-
-      // 4a) Los títulos declarados EN el alta (subtarea 1.6). El modelo admite N
-      // filas por profesional desde siempre; lo que faltaba era una vía para
-      // declararlas al registrarse, porque `POST /me/credentials` exige sesión y
-      // el alta termina en el login. Nacen PENDIENTES por lo mismo que la de
-      // arriba: declarar un título no es haberlo acreditado.
-      //
-      // Van en esta misma transacción, así que si una falla no queda ninguna a
-      // medias: o entra el alta entera o no entra nada.
-      for (const declared of dto.credentials ?? []) {
-        // La FK acepta CUALQUIER concepto del catálogo, así que sin esta
-        // comprobación alguien podría archivar como «título» el concepto de un
-        // idioma. Quién decide cuáles son tipos de credencial es la enumeración
-        // `professional-credential-type`, la misma que valida `addOwnCredential`.
-        if (!CREDENTIAL_TYPES.includes(declared.credentialTypeConceptId)) {
-          throw new PreconditionFailedException(
-            'Ese concepto no es un tipo de credencial profesional',
-            { credentialTypeConceptId: declared.credentialTypeConceptId },
-          );
-        }
-        // El DTO ya lo exige, y se comprueba acá también por lo mismo que el
-        // departamento emisor: un llamador que no pase por el `ValidationPipe`
-        // podría saltárselo, y una credencial sin número no se puede verificar.
-        const registrationNumber = declared.number.trim();
-        if (registrationNumber === '') {
-          throw new PreconditionFailedException(
-            'El número del título no puede estar vacío',
-            { credentialTypeConceptId: declared.credentialTypeConceptId },
-          );
-        }
-        // Mismo criterio que el tipo: la FK acepta cualquier concepto, y quién
-        // decide qué es una profesión es VS_BO_PROFESSION (COB-2023).
-        if (
-          declared.professionConceptId !== undefined &&
-          !BO_PROFESSION_CONCEPT_IDS.has(declared.professionConceptId)
-        ) {
-          throw new PreconditionFailedException(
-            'Esa profesión no está en la Clasificación de Ocupaciones de Bolivia',
-            { professionConceptId: declared.professionConceptId },
-          );
-        }
-        if (declared.fileId) {
-          await this.attachableFiles.claimAnonymousUpload(
-            tx,
-            declared.fileId,
-            { tenantId: SEED.tenantId, ownerUserId: user.id },
-            {
-              allowedMimeTypes: ['application/pdf'],
-              allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
-              operation: 'iam.practitioner.self-register.credential',
-            },
-            {
-              subject: 'El título académico',
-              notFound: 'El título académico no fue encontrado',
-            },
-          );
-        }
-        this.professionalCredentialsRepo.create(tx, {
-          practitionerProfileId: person.id,
-          credentialTypeConceptId: declared.credentialTypeConceptId,
-          number: registrationNumber,
-          issuingInstitutionText: declared.issuingInstitutionText?.trim(),
-          issuingCityText: optionalText(declared.issuingCityText),
-          issuingCountryText: optionalText(declared.issuingCountryText),
-          professionConceptId: declared.professionConceptId,
-          titleText: optionalText(declared.titleText),
-          fileId: declared.fileId,
-          stateConceptId: PROF.CRED_PENDING,
-          actorUserId: user.id,
-        });
-      }
-      this.languagesRepo.create(tx, {
-        practitionerProfileId: person.id,
-        languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
-        proficiencyConceptId: PROF.LANG_PROFICIENCY_NATIVE,
-        clinicalInterpretationAllowed: true,
-        actorUserId: user.id,
-      });
-
-      // 4b) Las especialidades, elegidas EN el alta (registro del cliente,
-      // módulo Médico §1.4.2). Misma semántica que el alta administrativa: la
-      // primera es la principal, nacen pendientes de verificación, y cada
-      // concepto se valida contra el value set — la FK acepta cualquier
-      // concepto del catálogo y quién decide cuáles son especialidades es
-      // `VS_MEDICAL_SPECIALTY`, no el formato del uuid. Repetir una no crea
-      // dos filas: quien pega dos veces la misma opción declara una.
-      const specialties = [...new Set(dto.specialtyConceptIds ?? [])];
-      for (const [order, specialtyConceptId] of specialties.entries()) {
-        await this.specialtyCatalog.assertIsMedicalSpecialty(
+    const created = await this.em
+      .transactional(async (tx) => {
+        // El correo es la identidad de login: comprobarlo antes de escribir nada
+        // convierte una violación de constraint (500) en un 409 explicativo.
+        const clash = await this.credentialsRepo.findLivePasswordBySubject(
           tx,
-          specialtyConceptId,
+          dto.email,
         );
-        this.specialtiesRepo.create(tx, {
+        if (clash) {
+          this.logger.warn(
+            {
+              operation: 'iam.auth.register-practitioner',
+              reason: 'email-in-use',
+            },
+            'Rejected self-registration: email already registered',
+          );
+          throw new ConflictException('Ya existe una cuenta con ese correo');
+        }
+
+        // C-10 / MD-01: el mismo CI con la misma terminación no puede ser de dos
+        // médicos. Un paciente con ese CI sí puede existir (otro tipo de usuario).
+        await assertDocumentAvailable(this.identifiersRepo, tx, {
+          value: dto.nationalId,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+          kind: 'PRACTITIONER',
+        });
+
+        const practitionerCode = `PRC-${randomUUID()}`;
+        const clashCode = await this.practitionersRepo.findByCode(
+          tx,
+          practitionerCode,
+        );
+        if (clashCode) {
+          throw new ConflictException('El practitioner_code ya está en uso', {
+            practitionerCode,
+          });
+        }
+
+        // El CI y su departamento emisor son requisitos del alta médica. Se
+        // comprueba el catálogo también acá para proteger a llamadores que no
+        // pasen por el ValidationPipe HTTP. Ocurre antes de cualquier escritura.
+        await this.assertIssuerDepartment(
+          tx,
+          dto.issuerAdministrativeAreaConceptId,
+        );
+
+        // El nombre para mostrar sale de las partes; si el cliente mandó la forma
+        // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
+        // -la cuenta y la persona- para que no puedan divergir.
+        const displayName = composeAccountDisplayName(dto);
+
+        // 1) La cuenta. En el autorregistro nace ACTIVA porque el titular está
+        // presente y fija su propia contraseña. En el alta administrativa nace
+        // PENDIENTE: quien la crea no puede elegir la clave de otro, así que se
+        // emite un token de activación y el titular la fija al entrar.
+        const user = this.usersRepo.create(tx, {
+          displayName,
+          statusConceptId: assisted
+            ? CONCEPTS.STATE_PENDING
+            : CONCEPTS.USER_ACTIVE,
+          mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
+          timeZone: dto.timeZone,
+          ...(assisted ? { mustChangePassword: true } : {}),
+        });
+        // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
+        await tx.flush();
+
+        if (assisted) {
+          // Reserva el login sin secreto: nadie puede entrar hasta que el titular
+          // consuma el token y elija su contraseña.
+          this.credentialsRepo.createPendingPassword(tx, {
+            userId: user.id,
+            externalSubject: dto.email,
+            actorUserId: assisted.actor.id,
+          });
+        } else {
+          this.credentialsRepo.createPassword(tx, {
+            userId: user.id,
+            externalSubject: dto.email,
+            secretHash: await argon2.hash(
+              (dto as RegisterPractitionerDto).password,
+            ),
+            actorUserId: user.id,
+          });
+        }
+        this.rolesRepo.create(tx, {
+          userId: user.id,
+          roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
+          actorUserId: user.id,
+        });
+        // `PRACTITIONER` en la misma transacción: quien entra por esta vía **es**
+        // un profesional, y sin el rol su propia agenda le responde 403 —
+        // `GET /scheduling/resources` lo exige—. Era el mismo agujero que tenía
+        // `PATIENT`: sin concedérselo, el claim `roles` nunca podía contenerlo.
+        //
+        // `CLINICIAN` **no** se concede acá, y la diferencia importa: abre el
+        // expediente de un paciente, que es PHI. La matrícula nace `PENDING` y
+        // declararla no es probarla, así que ese rol lo concede un administrador
+        // — el acto que sí la verifica.
+        this.rolesRepo.create(tx, {
+          userId: user.id,
+          roleConceptId: ROLE_CONCEPT_BY_CODE.PRACTITIONER,
+          actorUserId: user.id,
+        });
+
+        // 1.5) Foto de perfil, ya subida: pasa a ser de la cuenta nueva.
+        const photoFileId = uploadedPhotoId
+          ? await this.claimProfilePhoto(tx, uploadedPhotoId, user.id)
+          : undefined;
+
+        // 2) Persona con sus datos demográficos. El código legible del DTO se
+        // traduce aquí al concepto de terminología que persiste la columna.
+        const person = this.personsRepo.create(tx, {
+          personStatusConceptId: PROF.PERSON_ACTIVE,
+          vitalStatusConceptId: PROF.VITAL_ALIVE,
+          name: dto.name,
+          middleName: dto.middleName,
+          lastName: dto.lastName,
+          motherLastName: dto.motherLastName,
+          displayName,
+          birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+          administrativeGenderConceptId: dto.gender
+            ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender]
+            : undefined,
+          sexAtBirthConceptId: dto.sexAtBirth
+            ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
+            : undefined,
+          photoFileId,
+          occupationConceptId: dto.occupationConceptId,
+          occupationFreeText: dto.occupationConceptId
+            ? undefined
+            : dto.occupationFreeText,
+          workEmployerConceptId: dto.workEmployerConceptId,
+          workEmployerFreeText: dto.workEmployerConceptId
+            ? undefined
+            : dto.workEmployerFreeText,
+          actorUserId: user.id,
+        });
+        await tx.flush();
+
+        this.personProfilesRepo.create(tx, {
+          personId: person.id,
+          profileTypeConceptId: PROF.PROFILE_TYPE_PRACTITIONER,
+          statusConceptId: PROF.PROFILE_ACTIVE,
+          actorUserId: user.id,
+        });
+        await tx.flush();
+
+        // Reclamar dentro del alta: un fallo revierte cuenta, propiedad y perfil.
+        for (const fileId of [dto.signatureFileId, dto.sealFileId]) {
+          if (fileId == null) continue;
+          const { file, version } =
+            await this.attachableFiles.claimAnonymousUpload(
+              tx,
+              fileId,
+              { ownerUserId: user.id, tenantId: SEED.tenantId },
+              {
+                allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+                allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+                operation: 'iam.auth.register-practitioner.signature-assets',
+              },
+            );
+          if (
+            file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
+            BigInt(version.sizeBytes) > BigInt(2 * 1024 * 1024)
+          ) {
+            throw new PreconditionFailedException(
+              'La firma y el sello requieren una imagen privada de hasta 2 MB',
+            );
+          }
+        }
+
+        // 3) Perfil profesional. `health_practitioner_profiles.profile_id` ES
+        // `persons.id` (ver ProfilesPractitionersService), no un id propio.
+        const practitioner = this.practitionersRepo.create(tx, {
+          profileId: person.id,
+          practitionerCode,
+          practitionerCategoryConceptId:
+            dto.practitionerCategoryConceptId ?? PROF.PRACT_CATEGORY_GENERAL,
+          professionalTitle: dto.professionalTitle,
+          photoFileId,
+          signatureFileId: dto.signatureFileId,
+          sealFileId: dto.sealFileId,
+          // PENDIENTE de verificación: el alta declara la matrícula, no la prueba.
+          verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+          practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
+          acceptsNewPatients: dto.acceptsNewPatients ?? false,
+          actorUserId: user.id,
+        });
+        await tx.flush();
+
+        // 4) Licencia y título, ambos pendientes de validación.
+        const license = this.authorizationsRepo.create(tx, {
           practitionerProfileId: person.id,
-          specialtyConceptId,
-          isPrimary: order === 0,
-          boardCertified: false,
-          verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+          jurisdictionConceptId:
+            dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
+          licenseNumber: dto.licenseNumber,
+          regulatoryAuthority: dto.regulatoryAuthority,
+          // Desde cuándo vale la habilitación. Que la matrícula nazca PENDIENTE
+          // de verificación no contradice la fecha: una cosa es desde cuándo la
+          // declara el profesional y otra desde cuándo la plataforma la dio por
+          // buena, que es lo que resuelve `stateConceptId`.
+          validFrom: dto.licenseIssueDate
+            ? new Date(dto.licenseIssueDate)
+            : undefined,
+          stateConceptId: PROF.AUTH_PENDING,
+          actorUserId: user.id,
+        });
+        // El registro del SEDES es una SEGUNDA habilitación, no un título. El
+        // SEDES autoriza a ejercer en su departamento igual que la matrícula del
+        // Ministerio autoriza en todo el país, así que va en la misma tabla y el
+        // perfil las muestra juntas. Antes entraba por `credentialNumber` y se
+        // archivaba como `CREDENTIAL_TYPE_DEGREE`: el padrón real cargaba ahí su
+        // «T.I. 538/14» y el perfil lo anunciaba como «Título universitario».
+        const sitesLicense =
+          dto.sedesLicenseNumber === undefined
+            ? undefined
+            : this.authorizationsRepo.create(tx, {
+                practitionerProfileId: person.id,
+                jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+                licenseNumber: dto.sedesLicenseNumber,
+                stateConceptId: PROF.AUTH_PENDING,
+                actorUserId: user.id,
+              });
+        // La credencial sólo nace si se declara un título de verdad. Dejó de ser
+        // obligatoria junto con `credentialNumber`.
+        const credential =
+          dto.credentialNumber === undefined
+            ? undefined
+            : this.professionalCredentialsRepo.create(tx, {
+                practitionerProfileId: person.id,
+                credentialTypeConceptId:
+                  dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
+                number: dto.credentialNumber,
+                stateConceptId: PROF.CRED_PENDING,
+                actorUserId: user.id,
+              });
+
+        // 4a) Los títulos declarados EN el alta (subtarea 1.6). El modelo admite N
+        // filas por profesional desde siempre; lo que faltaba era una vía para
+        // declararlas al registrarse, porque `POST /me/credentials` exige sesión y
+        // el alta termina en el login. Nacen PENDIENTES por lo mismo que la de
+        // arriba: declarar un título no es haberlo acreditado.
+        //
+        // Van en esta misma transacción, así que si una falla no queda ninguna a
+        // medias: o entra el alta entera o no entra nada.
+        for (const declared of dto.credentials ?? []) {
+          // La FK acepta CUALQUIER concepto del catálogo, así que sin esta
+          // comprobación alguien podría archivar como «título» el concepto de un
+          // idioma. Quién decide cuáles son tipos de credencial es la enumeración
+          // `professional-credential-type`, la misma que valida `addOwnCredential`.
+          if (!CREDENTIAL_TYPES.includes(declared.credentialTypeConceptId)) {
+            throw new PreconditionFailedException(
+              'Ese concepto no es un tipo de credencial profesional',
+              { credentialTypeConceptId: declared.credentialTypeConceptId },
+            );
+          }
+          // El DTO ya lo exige, y se comprueba acá también por lo mismo que el
+          // departamento emisor: un llamador que no pase por el `ValidationPipe`
+          // podría saltárselo, y una credencial sin número no se puede verificar.
+          const registrationNumber = declared.number.trim();
+          if (registrationNumber === '') {
+            throw new PreconditionFailedException(
+              'El número del título no puede estar vacío',
+              { credentialTypeConceptId: declared.credentialTypeConceptId },
+            );
+          }
+          // Mismo criterio que el tipo: la FK acepta cualquier concepto, y quién
+          // decide qué es una profesión es VS_BO_PROFESSION (COB-2023).
+          if (
+            declared.professionConceptId !== undefined &&
+            !BO_PROFESSION_CONCEPT_IDS.has(declared.professionConceptId)
+          ) {
+            throw new PreconditionFailedException(
+              'Esa profesión no está en la Clasificación de Ocupaciones de Bolivia',
+              { professionConceptId: declared.professionConceptId },
+            );
+          }
+          if (declared.fileId) {
+            await this.attachableFiles.claimAnonymousUpload(
+              tx,
+              declared.fileId,
+              { tenantId: SEED.tenantId, ownerUserId: user.id },
+              {
+                allowedMimeTypes: ['application/pdf'],
+                allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+                operation: 'iam.practitioner.self-register.credential',
+              },
+              {
+                subject: 'El título académico',
+                notFound: 'El título académico no fue encontrado',
+              },
+            );
+          }
+          this.professionalCredentialsRepo.create(tx, {
+            practitionerProfileId: person.id,
+            credentialTypeConceptId: declared.credentialTypeConceptId,
+            number: registrationNumber,
+            issuingInstitutionText: declared.issuingInstitutionText?.trim(),
+            issuingCityText: optionalText(declared.issuingCityText),
+            issuingCountryText: optionalText(declared.issuingCountryText),
+            professionConceptId: declared.professionConceptId,
+            titleText: optionalText(declared.titleText),
+            fileId: declared.fileId,
+            stateConceptId: PROF.CRED_PENDING,
+            actorUserId: user.id,
+          });
+        }
+        this.languagesRepo.create(tx, {
+          practitionerProfileId: person.id,
+          languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
+          proficiencyConceptId: PROF.LANG_PROFICIENCY_NATIVE,
+          clinicalInterpretationAllowed: true,
+          actorUserId: user.id,
+        });
+
+        // 4b) Las especialidades, elegidas EN el alta (registro del cliente,
+        // módulo Médico §1.4.2). Misma semántica que el alta administrativa: la
+        // primera es la principal, nacen pendientes de verificación, y cada
+        // concepto se valida contra el value set — la FK acepta cualquier
+        // concepto del catálogo y quién decide cuáles son especialidades es
+        // `VS_MEDICAL_SPECIALTY`, no el formato del uuid. Repetir una no crea
+        // dos filas: quien pega dos veces la misma opción declara una.
+        const specialties = [...new Set(dto.specialtyConceptIds ?? [])];
+        for (const [order, specialtyConceptId] of specialties.entries()) {
+          await this.specialtyCatalog.assertIsMedicalSpecialty(
+            tx,
+            specialtyConceptId,
+          );
+          this.specialtiesRepo.create(tx, {
+            practitionerProfileId: person.id,
+            specialtyConceptId,
+            isPrimary: order === 0,
+            boardCertified: false,
+            verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
+            validFrom: new Date(),
+            actorUserId: user.id,
+          });
+        }
+        await tx.flush();
+
+        // 5) Vínculo cuenta-persona: el titular es él mismo.
+        this.accountLinksRepo.create(tx, {
+          personId: person.id,
+          userId: user.id,
+          linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+          verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
+          statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
           validFrom: new Date(),
           actorUserId: user.id,
         });
-      }
-      await tx.flush();
 
-      // 5) Vínculo cuenta-persona: el titular es él mismo.
-      this.accountLinksRepo.create(tx, {
-        personId: person.id,
-        userId: user.id,
-        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
-        verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
-        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
-        validFrom: new Date(),
-        actorUserId: user.id,
-      });
-
-      // El departamento emisor ya se comprobó semánticamente
-      // (VS_BO_DEPARTMENT) al principio de esta transacción.
-      this.identifiersRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-        ownerId: person.id,
-        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-        value: dto.nationalId,
-        useConceptId: CONCEPTS.USE_OFFICIAL,
-        stateConceptId: CONCEPTS.STATE_ACTIVE,
-        issuerAdministrativeAreaConceptId:
-          dto.issuerAdministrativeAreaConceptId,
-        actorUserId: user.id,
-      });
-
-      // Domicilio: municipio, calle y coordenadas elegidas en el alta (P19).
-      // El departamento lo deriva el ayudante del código del INE, no viene
-      // del cliente. Mismos tres campos y mismo destino que en el alta de
-      // paciente (`IamPatientSelfRegistrationService`).
-      await createResidenceAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          municipalityConceptId: dto.residenceMunicipalityConceptId,
-          lines: dto.homeAddressLines,
-          latitude: dto.homeLatitude,
-          longitude: dto.homeLongitude,
-          actorUserId: user.id,
-        },
-      );
-
-      // Dirección y punto de trabajo (MED-03): fila distinta de HOME y del
-      // consultorio propio opcional. El registro sólo tiene líneas y GPS; no
-      // selecciona municipio laboral, que queda sin derivación administrativa.
-      await createWorkAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          lines: dto.workAddressLines,
-          latitude: dto.workLatitude,
-          longitude: dto.workLongitude,
-          actorUserId: user.id,
-        },
-      );
-
-      // 6) Contacto: el correo de trabajo siempre —es el de login—, y los
-      // demás si los aportó. Cada uno es una fila propia de
-      // `common.contact_points`, distinguida por el par sistema/uso: el modelo
-      // ya admitía N contactos por persona, lo que faltaba era pedirlos.
-      for (const contact of declaredContacts(dto)) {
-        this.contactPointsRepo.create(tx, {
+        // El departamento emisor ya se comprobó semánticamente
+        // (VS_BO_DEPARTMENT) al principio de esta transacción.
+        this.identifiersRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
-          systemConceptId: contact.systemConceptId,
-          value: contact.value,
-          useConceptId: contact.useConceptId,
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
+          useConceptId: CONCEPTS.USE_OFFICIAL,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+          ownerKindConceptId: DOCUMENT_HOLDER_CONCEPT.PRACTITIONER,
           actorUserId: user.id,
         });
-      }
 
-      // 7) Membresía en el tenant por defecto. Sin esta fila,
-      // `TenantContextInterceptor` rechaza con 403 cualquier request posterior
-      // del profesional: la cuenta quedaría inutilizable más allá del login.
-      // Cuando se incorpore a una organización real, esa alta le dará su propia
-      // membresía; ésta es el mínimo para que la cuenta funcione desde el día 1.
-      this.tenantMembershipsRepo.create(tx, {
-        userId: user.id,
-        tenantId: SEED.tenantId,
-        tenantRoleConceptId: DIR.ROLE_STAFF,
-        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
-        accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
-        startDate: new Date(),
-        actorUserId: user.id,
-      });
+        // Domicilio: municipio, calle y coordenadas elegidas en el alta (P19).
+        // El departamento lo deriva el ayudante del código del INE, no viene
+        // del cliente. Mismos tres campos y mismo destino que en el alta de
+        // paciente (`IamPatientSelfRegistrationService`).
+        await createResidenceAddress(
+          this.addressesRepo,
+          tx,
+          this.catalogConceptsRepo,
+          {
+            personId: person.id,
+            municipalityConceptId: dto.residenceMunicipalityConceptId,
+            lines: dto.homeAddressLines,
+            latitude: dto.homeLatitude,
+            longitude: dto.homeLongitude,
+            actorUserId: user.id,
+          },
+        );
 
-      // 7b) Consultorio propio, si lo declaró (ALV-005/006 · P20). Va después
-      // de la membresía porque la práctica nace en el mismo tenant que ella,
-      // y antes del token de verificación para que un fallo acá no deje un
-      // token de verificación emitido sin que la transacción avance más.
-      // En el alta asistida el autor de las filas es el administrador que la
-      // ejecuta (trazabilidad C-18), igual que la credencial y la activación;
-      // en el autorregistro es el propio profesional.
-      const ownSite = dto.ownSite
-        ? await this.ownSiteProvisioning.provision(
-            tx,
-            {
-              tenantId: SEED.tenantId,
-              userId: user.id,
-              practitionerProfileId: person.id,
-            },
-            dto.ownSite,
-            assisted?.actor.id ?? user.id,
-          )
-        : null;
+        // Dirección y punto de trabajo (MED-03): fila distinta de HOME y del
+        // consultorio propio opcional. El registro sólo tiene líneas y GPS; no
+        // selecciona municipio laboral, que queda sin derivación administrativa.
+        await createWorkAddress(
+          this.addressesRepo,
+          tx,
+          this.catalogConceptsRepo,
+          {
+            personId: person.id,
+            lines: dto.workAddressLines,
+            latitude: dto.workLatitude,
+            longitude: dto.workLongitude,
+            actorUserId: user.id,
+          },
+        );
 
-      // 8) Verificación del correo. No condiciona el acceso.
-      const { raw, hash } = this.tokenService.issueRefreshToken();
-      this.emailVerificationsRepo.create(tx, {
-        userId: user.id,
-        email: dto.email,
-        tokenHash: hash,
-        expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
-        actorUserId: user.id,
-      });
-
-      // Roles asistenciales del alta administrativa. Van dentro de la misma
-      // transacción que la cuenta: un rol concedido a un alta que después se
-      // deshace sería un privilegio sin sujeto detrás. El autorregistro no pasa
-      // por aquí (`asistido` es nulo) porque nadie ha validado quién solicita.
-      const rolesGranted: string[] = [];
-      const rolesRejected: string[] = [];
-      if (assisted) {
-        for (const code of assisted.clinicalRoles) {
-          const ok = await this.effectiveRoles.ensureRoleByCode(
-            tx,
-            user.id,
-            code,
-            { tenantId: SEED.tenantId, actorUserId: assisted.actor.id },
-          );
-          (ok ? rolesGranted : rolesRejected).push(code);
+        // 6) Contacto: el correo de trabajo siempre —es el de login—, y los
+        // demás si los aportó. Cada uno es una fila propia de
+        // `common.contact_points`, distinguida por el par sistema/uso: el modelo
+        // ya admitía N contactos por persona, lo que faltaba era pedirlos.
+        for (const contact of declaredContacts(dto)) {
+          this.contactPointsRepo.create(tx, {
+            ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+            ownerId: person.id,
+            systemConceptId: contact.systemConceptId,
+            value: contact.value,
+            useConceptId: contact.useConceptId,
+            actorUserId: user.id,
+          });
         }
-        if (rolesRejected.length > 0) {
-          // Fallar el alta entera es lo correcto: devolver 201 con la mitad de
-          // los roles deja al administrador creyendo que el profesional quedó
-          // operativo, y el fallo aparecería mucho más tarde como un 403 suelto.
-          throw new PreconditionFailedException(
-            'Alguno de los roles indicados no existe o no es asignable',
-            { roles: rolesRejected },
-          );
+
+        // 7) Membresía en el tenant por defecto. Sin esta fila,
+        // `TenantContextInterceptor` rechaza con 403 cualquier request posterior
+        // del profesional: la cuenta quedaría inutilizable más allá del login.
+        // Cuando se incorpore a una organización real, esa alta le dará su propia
+        // membresía; ésta es el mínimo para que la cuenta funcione desde el día 1.
+        this.tenantMembershipsRepo.create(tx, {
+          userId: user.id,
+          tenantId: SEED.tenantId,
+          tenantRoleConceptId: DIR.ROLE_STAFF,
+          statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+          accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+          startDate: new Date(),
+          actorUserId: user.id,
+        });
+
+        // 7b) Consultorio propio, si lo declaró (ALV-005/006 · P20). Va después
+        // de la membresía porque la práctica nace en el mismo tenant que ella,
+        // y antes del token de verificación para que un fallo acá no deje un
+        // token de verificación emitido sin que la transacción avance más.
+        // En el alta asistida el autor de las filas es el administrador que la
+        // ejecuta (trazabilidad C-18), igual que la credencial y la activación;
+        // en el autorregistro es el propio profesional.
+        const ownSite = dto.ownSite
+          ? await this.ownSiteProvisioning.provision(
+              tx,
+              {
+                tenantId: SEED.tenantId,
+                userId: user.id,
+                practitionerProfileId: person.id,
+              },
+              dto.ownSite,
+              assisted?.actor.id ?? user.id,
+            )
+          : null;
+
+        // 8) Verificación del correo. No condiciona el acceso.
+        const { raw, hash } = this.tokenService.issueRefreshToken();
+        this.emailVerificationsRepo.create(tx, {
+          userId: user.id,
+          email: dto.email,
+          tokenHash: hash,
+          expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
+          actorUserId: user.id,
+        });
+
+        // Roles asistenciales del alta administrativa. Van dentro de la misma
+        // transacción que la cuenta: un rol concedido a un alta que después se
+        // deshace sería un privilegio sin sujeto detrás. El autorregistro no pasa
+        // por aquí (`asistido` es nulo) porque nadie ha validado quién solicita.
+        const rolesGranted: string[] = [];
+        const rolesRejected: string[] = [];
+        if (assisted) {
+          for (const code of assisted.clinicalRoles) {
+            const ok = await this.effectiveRoles.ensureRoleByCode(
+              tx,
+              user.id,
+              code,
+              { tenantId: SEED.tenantId, actorUserId: assisted.actor.id },
+            );
+            (ok ? rolesGranted : rolesRejected).push(code);
+          }
+          if (rolesRejected.length > 0) {
+            // Fallar el alta entera es lo correcto: devolver 201 con la mitad de
+            // los roles deja al administrador creyendo que el profesional quedó
+            // operativo, y el fallo aparecería mucho más tarde como un 403 suelto.
+            throw new PreconditionFailedException(
+              'Alguno de los roles indicados no existe o no es asignable',
+              { roles: rolesRejected },
+            );
+          }
         }
-      }
 
-      this.eventsRepo.record(tx, {
-        eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
-        outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
-        userId: user.id,
-        recordedByUserId: user.id,
-        ip,
-        detailJson: {
-          flow: assisted
-            ? 'practitioner-assisted-registration'
-            : 'practitioner-self-registration',
-          ...(rolesGranted.length > 0 ? { clinicalRoles: rolesGranted } : {}),
-        },
-      });
+        this.eventsRepo.record(tx, {
+          eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
+          outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+          userId: user.id,
+          recordedByUserId: user.id,
+          ip,
+          detailJson: {
+            flow: assisted
+              ? 'practitioner-assisted-registration'
+              : 'practitioner-self-registration',
+            ...(rolesGranted.length > 0 ? { clinicalRoles: rolesGranted } : {}),
+          },
+        });
 
-      // Token de activación de un solo uso, sólo en el alta administrativa: es
-      // lo único que el administrador entrega al titular. Del lado del servidor
-      // vive únicamente su hash.
-      const activation = assisted
-        ? (() => {
-            const par = this.tokenService.issueRefreshToken();
-            const expiresAt = new Date(Date.now() + ACTIVATION_TTL_MS);
-            this.activationsRepo.create(tx, {
-              userId: user.id,
-              tokenHash: par.hash,
-              expiresAt,
-              reason: assisted.reason,
-              actorUserId: assisted.actor.id,
-            });
-            return { token: par.raw, expiresAt };
-          })()
-        : null;
+        // Token de activación de un solo uso, sólo en el alta administrativa: es
+        // lo único que el administrador entrega al titular. Del lado del servidor
+        // vive únicamente su hash.
+        const activation = assisted
+          ? (() => {
+              const par = this.tokenService.issueRefreshToken();
+              const expiresAt = new Date(Date.now() + ACTIVATION_TTL_MS);
+              this.activationsRepo.create(tx, {
+                userId: user.id,
+                tokenHash: par.hash,
+                expiresAt,
+                reason: assisted.reason,
+                actorUserId: assisted.actor.id,
+              });
+              return { token: par.raw, expiresAt };
+            })()
+          : null;
 
-      return {
-        userId: user.id,
-        personId: person.id,
-        practitionerProfileId: practitioner.profileId,
-        practitionerCode,
-        licenseId: license.id,
-        credentialId: credential?.id,
-        sedesLicenseId: sitesLicense?.id,
-        photoFileId,
-        emailVerificationToken: raw,
-        activacion: activation,
-        clinicalRoles: rolesGranted,
-        ownSite: ownSite
-          ? { practiceId: ownSite.practiceId, siteId: ownSite.siteId }
-          : null,
-      };
-    });
+        return {
+          userId: user.id,
+          personId: person.id,
+          practitionerProfileId: practitioner.profileId,
+          practitionerCode,
+          licenseId: license.id,
+          credentialId: credential?.id,
+          sedesLicenseId: sitesLicense?.id,
+          photoFileId,
+          emailVerificationToken: raw,
+          activacion: activation,
+          clinicalRoles: rolesGranted,
+          ownSite: ownSite
+            ? { practiceId: ownSite.practiceId, siteId: ownSite.siteId }
+            : null,
+        };
+      })
+      // Dos altas simultáneas con el mismo CI: la base decide, el cliente ve el mismo 409.
+      .catch(rethrowDocumentRace);
 
     // El correo se encola FUERA de la transacción: si la mensajería falla, la
     // cuenta ya creada no debe deshacerse — el profesional puede entrar igual.

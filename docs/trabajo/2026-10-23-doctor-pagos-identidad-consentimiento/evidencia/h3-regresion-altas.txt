@@ -1,0 +1,5 @@
+FAIL test/integration/practitioner-registration.int-spec.ts (24.762 s)
+  ● registro de profesional (integración) › P19 · domicilio particular › con calle y coordenadas: crea la fila HOME con departamento derivado
+  ● registro de profesional (integración) › P19 · domicilio particular › sólo con municipio: retrocompatible, sin calle ni coordenadas
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       2 failed, 38 passed, 40 total

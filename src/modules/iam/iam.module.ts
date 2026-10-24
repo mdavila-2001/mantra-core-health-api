@@ -37,6 +37,7 @@ import {
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
   IamEmailVerificationService,
+  IamDocumentAvailabilityService,
   IamAccountSecurityService,
 } from './application/services';
 import {
@@ -115,6 +116,7 @@ import {
     IamPractitionerSelfRegistrationService,
     IamPasswordResetService,
     IamEmailVerificationService,
+    IamDocumentAvailabilityService,
     IamAccountSecurityService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que

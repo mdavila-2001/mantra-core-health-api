@@ -1,0 +1,12 @@
+# H3.S1.M3 — siembra de conceptos common:document-holder-kind (idempotencia)
+
+Primer arranque tras agregar los conceptos (2026-10-24):
+  "catálogo de conceptos","inserted":3   → Seeds: 28/28 ok · 3 filas
+Arranque siguiente (misma base):
+  "name":"catálogo de conceptos","inserted":0
+  "msg":"Seeds: 28/28 ok · 0 filas · 4081 ms"
+
+# H3.S1.M2 — patch v4248 aplicado dos veces (salida literal)
+  NOTICE: v4248 relleno: 29 médico · 39 paciente · 0 sin tipo
+  NOTICE: v4248 medición: 0 documentos duplicados por tipo de usuario
+  segunda corrida: COMMIT, sin cambios (índices ya existentes: skipping)

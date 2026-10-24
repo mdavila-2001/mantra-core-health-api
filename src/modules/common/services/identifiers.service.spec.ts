@@ -36,6 +36,7 @@ describe('IdentifiersService', () => {
       findActiveDuplicate: fn(),
       findByIds: fn(),
       findCurrentByOwner: fn(),
+      findDocumentHolder: fn(),
       create: fn(),
     };
     const service = new IdentifiersService(em as never, repo, logger as never);

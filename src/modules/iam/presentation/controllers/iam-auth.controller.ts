@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Ip,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -45,8 +47,11 @@ import {
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
   IamEmailVerificationService,
+  IamDocumentAvailabilityService,
 } from '../../application/services';
 import {
+  DocumentAvailabilityQueryDto,
+  DocumentAvailabilityResponseDto,
   LoginDto,
   RefreshTokenDto,
   TokenResponseDto,
@@ -92,6 +97,7 @@ export class IamAuthController {
     private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
     private readonly passwordResetService: IamPasswordResetService,
     private readonly emailVerificationService: IamEmailVerificationService,
+    private readonly documentAvailabilityService: IamDocumentAvailabilityService,
   ) {}
 
   /**
@@ -312,6 +318,23 @@ export class IamAuthController {
     @Ip() ip: string,
   ): Promise<ActivationResultDto> {
     return this.assistedRegistrationService.activateAccount(dto, ip);
+  }
+
+  /**
+   * C-10 / MD-01: el formulario de alta pregunta si el CI está libre para ese
+   * tipo de usuario antes de enviar. Responde sólo `available`, nunca a quién
+   * pertenece; el límite por IP frena el barrido de números.
+   */
+  @Get('document-availability')
+  @Public()
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
+  @ApiOperation({
+    summary: 'Saber si un documento está libre para un tipo de usuario',
+  })
+  documentAvailability(
+    @Query() query: DocumentAvailabilityQueryDto,
+  ): Promise<DocumentAvailabilityResponseDto> {
+    return this.documentAvailabilityService.check(query);
   }
 
   /** UC-01-04. */

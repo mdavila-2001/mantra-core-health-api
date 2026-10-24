@@ -71,6 +71,17 @@ export class Identifiers {
   issuerAdministrativeAreaConceptId?: string;
 
   /**
+   * Para qué tipo de usuario se registró el documento (C-10): paciente, médico o
+   * representante de organización. `NULL` en filas anteriores sin tipo conocido.
+   */
+  @Property({
+    fieldName: 'owner_kind_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  ownerKindConceptId?: string;
+
+  /**
    * Identificador asociado a assigner tenant.
    */
   @Property({ fieldName: 'assigner_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants

@@ -88,7 +88,10 @@ describe('IamPatientSelfRegistrationService', () => {
       create: fn(() => ({ profileId: 'person-1' })),
     };
     const accountLinksRepo = { create: fn() };
-    const identifiersRepo = { create: fn() };
+    const identifiersRepo = {
+      create: fn(),
+      findDocumentHolder: fn(async () => null),
+    };
     const contactPointsRepo = { create: fn() };
     const addressesRepo = { create: fn() };
     // El municipio del `dto` por defecto (Sacaba, Cochabamba) es el único
@@ -563,6 +566,45 @@ describe('IamPatientSelfRegistrationService', () => {
       await expect(d.service.registerPatient(dto)).rejects.toBeInstanceOf(
         ConflictException,
       );
+      expect(d.usersRepo.create).not.toHaveBeenCalled();
+    });
+
+    // C-10 / MD-01: un médico con el mismo CI no impide ser paciente; otro
+    // paciente con el mismo CI y departamento, sí.
+    it('busca el documento sólo entre pacientes y lo titula como de paciente', async () => {
+      const d = build();
+
+      await d.service.registerPatient(dto);
+
+      expect(d.identifiersRepo.findDocumentHolder).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          value: dto.nationalId,
+          ownerKindConceptId: CONCEPTS.DOC_HOLDER_PATIENT,
+        }),
+      );
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          ownerKindConceptId: CONCEPTS.DOC_HOLDER_PATIENT,
+        }),
+      );
+    });
+
+    it('rechaza con 409 y motivo estable el CI de otro paciente', async () => {
+      const d = build();
+      d.identifiersRepo.findDocumentHolder.mockResolvedValue({ id: 'ident-1' });
+
+      const error = await d.service
+        .registerPatient(dto)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).details).toEqual({
+        reason: 'DOCUMENT_ALREADY_REGISTERED',
+        field: 'nationalId',
+      });
       expect(d.usersRepo.create).not.toHaveBeenCalled();
     });
 

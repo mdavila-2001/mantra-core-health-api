@@ -117,6 +117,7 @@ export async function createWalkInPatient(
     useConceptId: CONCEPTS.USE_OFFICIAL,
     stateConceptId: CONCEPTS.STATE_ACTIVE,
     issuerAdministrativeAreaConceptId: data.issuerAdministrativeAreaConceptId,
+    ownerKindConceptId: CONCEPTS.DOC_HOLDER_PATIENT,
     actorUserId: data.actorUserId,
   });
 

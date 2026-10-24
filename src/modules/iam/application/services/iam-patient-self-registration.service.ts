@@ -1,3 +1,9 @@
+import {
+  assertDocumentAvailable,
+  DOCUMENT_HOLDER_CONCEPT,
+  documentAlreadyRegistered,
+  rethrowDocumentRace,
+} from './document-uniqueness';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -10,7 +16,6 @@ import * as argon2 from 'argon2';
 import { randomUUID } from 'node:crypto';
 import {
   CONCEPTS,
-  ConflictException,
   SEED,
   TokenService,
   touch,
@@ -184,323 +189,338 @@ export class IamPatientSelfRegistrationService {
       'Patient self-registration',
     );
 
-    const created = await this.em.transactional(async (tx) => {
-      // Primero el cerrojo por documento y después la comprobación: así dos
-      // altas simultáneas con la misma cédula no pasan las dos (7.1).
-      await this.credentialsRepo.lockSubjectForRegistration(tx, dto.nationalId);
-      const existing = await this.credentialsRepo.findLivePasswordBySubject(
-        tx,
-        dto.nationalId,
-      );
-      if (existing) {
-        this.logger.warn(
-          {
-            operation: 'iam.auth.register-patient',
-            reason: 'identifier-in-use',
-          },
-          'Rejected self-registration: national id already registered',
+    const created = await this.em
+      .transactional(async (tx) => {
+        // Primero el cerrojo por documento y después la comprobación: así dos
+        // altas simultáneas con la misma cédula no pasan las dos (7.1).
+        await this.credentialsRepo.lockSubjectForRegistration(
+          tx,
+          dto.nationalId,
         );
-        throw new ConflictException(
-          'Ya existe una cuenta con ese documento de identidad',
+        const existing = await this.credentialsRepo.findLivePasswordBySubject(
+          tx,
+          dto.nationalId,
         );
-      }
+        if (existing) {
+          this.logger.warn(
+            {
+              operation: 'iam.auth.register-patient',
+              reason: 'identifier-in-use',
+            },
+            'Rejected self-registration: national id already registered',
+          );
+          // Mismo código estable que el resto de las altas (C-10): el formulario
+          // marca el campo por `reason`, no por el texto.
+          throw documentAlreadyRegistered();
+        }
 
-      // El departamento emisor es obligatorio en el DTO, pero la columna que
-      // lo recibe (`identifiers.issuer_administrative_area_concept_id`) es una
-      // FK plana a `terminology.catalog_concepts`: la base aceptaría CUALQUIER
-      // concepto (un municipio, una especialidad) como si fuera un
-      // departamento. Se comprueba antes de escribir nada.
-      await this.administrativeAreas.assertIsAdministrativeArea(
-        tx,
-        dto.issuerAdministrativeAreaConceptId,
-      );
+        // C-10 / MD-01: el documento por tipo de usuario. Un médico con ese CI no
+        // impide el alta del paciente (otro tipo de usuario).
+        await assertDocumentAvailable(this.identifiersRepo, tx, {
+          value: dto.nationalId,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+          kind: 'PATIENT',
+        });
 
-      // 1) Cuenta ACTIVA con su contraseña definitiva.
-      // El nombre para mostrar sale de las partes; si el cliente mandó la forma
-      // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
-      // -la cuenta y la persona- para que no puedan divergir.
-      const displayName = composeAccountDisplayName(dto);
-
-      const user = this.usersRepo.create(tx, {
-        displayName,
-        statusConceptId: CONCEPTS.USER_ACTIVE,
-        mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
-        timeZone: dto.timeZone,
-      });
-      // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
-      await tx.flush();
-
-      this.credentialsRepo.createPassword(tx, {
-        userId: user.id,
-        externalSubject: dto.nationalId,
-        secretHash: await argon2.hash(dto.password),
-        actorUserId: user.id,
-      });
-      this.rolesRepo.create(tx, {
-        userId: user.id,
-        roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
-        actorUserId: user.id,
-      });
-      // `PATIENT` es lo que exigen los endpoints de autoservicio del portal
-      // (reserva de turnos, entre otros). `USER` sigue siendo el rol base de
-      // toda cuenta; este se suma porque quien se auto-registra por esta vía es,
-      // por definición, el titular de su propio perfil de paciente.
-      this.rolesRepo.create(tx, {
-        userId: user.id,
-        roleConceptId: ROLE_CONCEPT_BY_CODE.PATIENT,
-        actorUserId: user.id,
-      });
-
-      // 2) Persona + clasificación + perfil de paciente.
-      const person = this.personsRepo.create(tx, {
-        personStatusConceptId: PROF.PERSON_ACTIVE,
-        vitalStatusConceptId: PROF.VITAL_ALIVE,
-        name: dto.name,
-        middleName: dto.middleName,
-        lastName: dto.lastName,
-        motherLastName: dto.motherLastName,
-        displayName,
-        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
-        // El concepto explícito gana sobre el código: es el escape hatch para
-        // clientes que ya manejan el catálogo de terminología.
-        administrativeGenderConceptId:
-          dto.administrativeGenderConceptId ??
-          (dto.gender ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender] : undefined),
-        sexAtBirthConceptId:
-          dto.sexAtBirthConceptId ??
-          (dto.sexAtBirth
-            ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
-            : undefined),
-        // El catálogo gana sobre el texto libre: si ambos vienen, el texto
-        // libre sólo tenía sentido para cuando el paciente no encontró la
-        // suya en el catálogo (T-02).
-        occupationConceptId: dto.occupationConceptId,
-        occupationFreeText: dto.occupationConceptId
-          ? undefined
-          : dto.occupationFreeText,
-        // La empresa sigue exactamente la misma regla, y por el mismo motivo:
-        // el texto libre sólo tenía sentido para quien no encontró la suya en
-        // el catálogo, así que con el concepto elegido sobra.
-        workEmployerConceptId: dto.workEmployerConceptId,
-        workEmployerFreeText: dto.workEmployerConceptId
-          ? undefined
-          : dto.workEmployerFreeText,
-        actorUserId: user.id,
-      });
-      await tx.flush();
-
-      this.personProfilesRepo.create(tx, {
-        personId: person.id,
-        profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
-        statusConceptId: PROF.PROFILE_ACTIVE,
-        actorUserId: user.id,
-      });
-      await tx.flush();
-
-      // `patient_profiles.profile_id` ES `persons.id` (ver ProfilesPatientsService).
-      const patientCode = `PAT-${randomUUID()}`;
-      const patient = this.patientProfilesRepo.create(tx, {
-        profileId: person.id,
-        patientCode,
-        recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
-        actorUserId: user.id,
-      });
-
-      // 3) Vínculo cuenta-persona: el titular es él mismo.
-      this.accountLinksRepo.create(tx, {
-        personId: person.id,
-        userId: user.id,
-        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
-        // El vínculo es "verificado" en el sentido de que no hay duda de a quién
-        // pertenece la cuenta: la creó el propio titular. Es independiente de
-        // que su identidad esté probada, que es lo que resuelve identity_assurance.
-        verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
-        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
-        validFrom: new Date(),
-        actorUserId: user.id,
-      });
-
-      // 4) El documento también como identificador oficial de la persona, que es
-      // donde el resto del sistema lo busca (`common.identifiers`).
-      this.identifiersRepo.create(tx, {
-        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-        ownerId: person.id,
-        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-        value: dto.nationalId,
-        useConceptId: CONCEPTS.USE_OFFICIAL,
-        stateConceptId: CONCEPTS.STATE_ACTIVE,
-        issuerAdministrativeAreaConceptId:
+        // El departamento emisor es obligatorio en el DTO, pero la columna que
+        // lo recibe (`identifiers.issuer_administrative_area_concept_id`) es una
+        // FK plana a `terminology.catalog_concepts`: la base aceptaría CUALQUIER
+        // concepto (un municipio, una especialidad) como si fuera un
+        // departamento. Se comprueba antes de escribir nada.
+        await this.administrativeAreas.assertIsAdministrativeArea(
+          tx,
           dto.issuerAdministrativeAreaConceptId,
-        actorUserId: user.id,
-      });
+        );
 
-      // El NIT con el que quiere que le facturen. Va como identificador oficial
-      // de tipo tributario junto con su razón social (holderName).
-      if (dto.billingTaxId) {
+        // 1) Cuenta ACTIVA con su contraseña definitiva.
+        // El nombre para mostrar sale de las partes; si el cliente mandó la forma
+        // anterior, manda esa. Se calcula UNA vez y se usa en las dos filas
+        // -la cuenta y la persona- para que no puedan divergir.
+        const displayName = composeAccountDisplayName(dto);
+
+        const user = this.usersRepo.create(tx, {
+          displayName,
+          statusConceptId: CONCEPTS.USER_ACTIVE,
+          mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
+          timeZone: dto.timeZone,
+        });
+        // Las FK son columnas uuid planas: persistir el padre antes de los hijos.
+        await tx.flush();
+
+        this.credentialsRepo.createPassword(tx, {
+          userId: user.id,
+          externalSubject: dto.nationalId,
+          secretHash: await argon2.hash(dto.password),
+          actorUserId: user.id,
+        });
+        this.rolesRepo.create(tx, {
+          userId: user.id,
+          roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
+          actorUserId: user.id,
+        });
+        // `PATIENT` es lo que exigen los endpoints de autoservicio del portal
+        // (reserva de turnos, entre otros). `USER` sigue siendo el rol base de
+        // toda cuenta; este se suma porque quien se auto-registra por esta vía es,
+        // por definición, el titular de su propio perfil de paciente.
+        this.rolesRepo.create(tx, {
+          userId: user.id,
+          roleConceptId: ROLE_CONCEPT_BY_CODE.PATIENT,
+          actorUserId: user.id,
+        });
+
+        // 2) Persona + clasificación + perfil de paciente.
+        const person = this.personsRepo.create(tx, {
+          personStatusConceptId: PROF.PERSON_ACTIVE,
+          vitalStatusConceptId: PROF.VITAL_ALIVE,
+          name: dto.name,
+          middleName: dto.middleName,
+          lastName: dto.lastName,
+          motherLastName: dto.motherLastName,
+          displayName,
+          birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+          // El concepto explícito gana sobre el código: es el escape hatch para
+          // clientes que ya manejan el catálogo de terminología.
+          administrativeGenderConceptId:
+            dto.administrativeGenderConceptId ??
+            (dto.gender ? ADMIN_GENDER_CONCEPT_BY_CODE[dto.gender] : undefined),
+          sexAtBirthConceptId:
+            dto.sexAtBirthConceptId ??
+            (dto.sexAtBirth
+              ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
+              : undefined),
+          // El catálogo gana sobre el texto libre: si ambos vienen, el texto
+          // libre sólo tenía sentido para cuando el paciente no encontró la
+          // suya en el catálogo (T-02).
+          occupationConceptId: dto.occupationConceptId,
+          occupationFreeText: dto.occupationConceptId
+            ? undefined
+            : dto.occupationFreeText,
+          // La empresa sigue exactamente la misma regla, y por el mismo motivo:
+          // el texto libre sólo tenía sentido para quien no encontró la suya en
+          // el catálogo, así que con el concepto elegido sobra.
+          workEmployerConceptId: dto.workEmployerConceptId,
+          workEmployerFreeText: dto.workEmployerConceptId
+            ? undefined
+            : dto.workEmployerFreeText,
+          actorUserId: user.id,
+        });
+        await tx.flush();
+
+        this.personProfilesRepo.create(tx, {
+          personId: person.id,
+          profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
+          statusConceptId: PROF.PROFILE_ACTIVE,
+          actorUserId: user.id,
+        });
+        await tx.flush();
+
+        // `patient_profiles.profile_id` ES `persons.id` (ver ProfilesPatientsService).
+        const patientCode = `PAT-${randomUUID()}`;
+        const patient = this.patientProfilesRepo.create(tx, {
+          profileId: person.id,
+          patientCode,
+          recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
+          actorUserId: user.id,
+        });
+
+        // 3) Vínculo cuenta-persona: el titular es él mismo.
+        this.accountLinksRepo.create(tx, {
+          personId: person.id,
+          userId: user.id,
+          linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+          // El vínculo es "verificado" en el sentido de que no hay duda de a quién
+          // pertenece la cuenta: la creó el propio titular. Es independiente de
+          // que su identidad esté probada, que es lo que resuelve identity_assurance.
+          verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
+          statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+          validFrom: new Date(),
+          actorUserId: user.id,
+        });
+
+        // 4) El documento también como identificador oficial de la persona, que es
+        // donde el resto del sistema lo busca (`common.identifiers`).
         this.identifiersRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
-          typeConceptId: CONCEPTS.ID_TYPE_TAX,
-          value: dto.billingTaxId,
-          holderName: dto.billingLegalName,
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
           useConceptId: CONCEPTS.USE_OFFICIAL,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
-          actorUserId: user.id,
-        });
-      }
-
-      // 5) Membresía en el tenant por defecto (`SEED.tenantId`): sin esta fila
-      // en `directory.tenant_memberships`, `TenantContextInterceptor` —global,
-      // corre en TODA ruta autenticada no `@Public()`— rechaza con 403 "no
-      // pertenece a ningún tenant" absolutamente cualquier request posterior
-      // del paciente (subir un archivo, pedir su verificación de identidad, ver
-      // su propio perfil): la cuenta recién creada quedaría inutilizable más
-      // allá del login. `ROLE_STAFF`/`SCOPE_ALL_TENANT` son un default
-      // pragmático — el catálogo de roles de tenant (`DIR.ROLE_*`) sólo modela
-      // personal de una clínica, no hay un rol "paciente"; qué tenant/rol le
-      // corresponde a un paciente directo-al-consumidor es una decisión de
-      // producto pendiente, no algo que este fix deba inventar. El status es
-      // `DIR.MEMBERSHIP_ACTIVE`, el concepto propio de directory: antes se
-      // escribía el de promotions porque era el único que
-      // `IamAuthService.loadActiveTenantIds` consultaba — ese método ya acepta
-      // ambos, así que la fila puede llevar por fin el concepto que le toca.
-      this.tenantMembershipsRepo.create(tx, {
-        userId: user.id,
-        tenantId: SEED.tenantId,
-        tenantRoleConceptId: DIR.ROLE_STAFF,
-        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
-        accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
-        startDate: new Date(),
-        actorUserId: user.id,
-      });
-
-      // Domicilio: el municipio elegido en el alta. El departamento lo deriva
-      // el ayudante del código del INE, no viene del cliente.
-      await createResidenceAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          municipalityConceptId: dto.residenceMunicipalityConceptId,
-          lines: dto.homeAddressLines,
-          latitude: dto.homeLatitude,
-          longitude: dto.homeLongitude,
-          actorUserId: user.id,
-        },
-      );
-
-      // El trabajo es una segunda dirección de la misma persona, distinguida
-      // por su uso: quien lleva un medicamento necesita saber a cuál ir.
-      await createWorkAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          municipalityConceptId: dto.workMunicipalityConceptId,
-          lines: dto.workAddressLines,
-          latitude: dto.workLatitude,
-          longitude: dto.workLongitude,
-          actorUserId: user.id,
-        },
-      );
-
-      // El tutor o persona autorizada, si lo declaró.
-      await createGuardianRelatedPerson(
-        {
-          persons: this.personsRepo,
-          relatedPersons: this.relatedPersonsRepo,
-          contactPoints: this.contactPointsRepo,
-        },
-        tx,
-        {
-          patientProfileId: patient.profileId,
-          name: dto.guardianName,
-          phone: dto.guardianPhone,
-          relationshipConceptId: dto.guardianRelationshipConceptId,
-          actorUserId: user.id,
-        },
-      );
-
-      // Los seguros declarados. Privado y público conviven: una persona puede
-      // estar afiliada a la Caja y tener además una póliza.
-      const coverageRepos = {
-        catalog: this.insuranceCatalogRepo,
-        coverage: this.coverageRepo,
-      };
-      if (dto.privateInsurancePlanId) {
-        await createDeclaredCoverage(coverageRepos, tx, {
-          patientProfileId: patient.profileId,
-          insurancePlanId: dto.privateInsurancePlanId,
-          expectedSector: 'private',
-          coverageOrder: 1,
-          memberIdentifier: dto.nationalId,
-          actorUserId: user.id,
-        });
-      }
-      if (dto.publicInsurancePlanId) {
-        await createDeclaredCoverage(coverageRepos, tx, {
-          patientProfileId: patient.profileId,
-          insurancePlanId: dto.publicInsurancePlanId,
-          expectedSector: 'public',
-          coverageOrder: 2,
-          memberIdentifier: dto.nationalId,
-          actorUserId: user.id,
-        });
-      }
-
-      // El teléfono es independiente del correo: se guarda aunque no haya email.
-      if (dto.phone) {
-        this.contactPointsRepo.create(tx, {
-          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-          ownerId: person.id,
-          systemConceptId: CONCEPTS.CONTACT_PHONE,
-          value: dto.phone,
-          useConceptId: CONCEPTS.CONTACT_USE_HOME,
-          actorUserId: user.id,
-        });
-      }
-
-      let emailVerificationToken: string | undefined;
-      if (dto.email) {
-        this.contactPointsRepo.create(tx, {
-          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-          ownerId: person.id,
-          systemConceptId: CONCEPTS.CONTACT_EMAIL,
-          value: dto.email,
-          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+          ownerKindConceptId: DOCUMENT_HOLDER_CONCEPT.PATIENT,
           actorUserId: user.id,
         });
 
-        const { raw, hash } = this.tokenService.issueRefreshToken();
-        this.emailVerificationsRepo.create(tx, {
+        // El NIT con el que quiere que le facturen. Va como identificador oficial
+        // de tipo tributario junto con su razón social (holderName).
+        if (dto.billingTaxId) {
+          this.identifiersRepo.create(tx, {
+            ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+            ownerId: person.id,
+            typeConceptId: CONCEPTS.ID_TYPE_TAX,
+            value: dto.billingTaxId,
+            holderName: dto.billingLegalName,
+            useConceptId: CONCEPTS.USE_OFFICIAL,
+            stateConceptId: CONCEPTS.STATE_ACTIVE,
+            actorUserId: user.id,
+          });
+        }
+
+        // 5) Membresía en el tenant por defecto (`SEED.tenantId`): sin esta fila
+        // en `directory.tenant_memberships`, `TenantContextInterceptor` —global,
+        // corre en TODA ruta autenticada no `@Public()`— rechaza con 403 "no
+        // pertenece a ningún tenant" absolutamente cualquier request posterior
+        // del paciente (subir un archivo, pedir su verificación de identidad, ver
+        // su propio perfil): la cuenta recién creada quedaría inutilizable más
+        // allá del login. `ROLE_STAFF`/`SCOPE_ALL_TENANT` son un default
+        // pragmático — el catálogo de roles de tenant (`DIR.ROLE_*`) sólo modela
+        // personal de una clínica, no hay un rol "paciente"; qué tenant/rol le
+        // corresponde a un paciente directo-al-consumidor es una decisión de
+        // producto pendiente, no algo que este fix deba inventar. El status es
+        // `DIR.MEMBERSHIP_ACTIVE`, el concepto propio de directory: antes se
+        // escribía el de promotions porque era el único que
+        // `IamAuthService.loadActiveTenantIds` consultaba — ese método ya acepta
+        // ambos, así que la fila puede llevar por fin el concepto que le toca.
+        this.tenantMembershipsRepo.create(tx, {
           userId: user.id,
-          email: dto.email,
-          tokenHash: hash,
-          expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
+          tenantId: SEED.tenantId,
+          tenantRoleConceptId: DIR.ROLE_STAFF,
+          statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+          accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+          startDate: new Date(),
           actorUserId: user.id,
         });
-        emailVerificationToken = raw;
-      }
 
-      this.eventsRepo.record(tx, {
-        eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
-        outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
-        userId: user.id,
-        recordedByUserId: user.id,
-        ip,
-        detailJson: { flow: 'patient-self-registration' },
-      });
+        // Domicilio: el municipio elegido en el alta. El departamento lo deriva
+        // el ayudante del código del INE, no viene del cliente.
+        await createResidenceAddress(
+          this.addressesRepo,
+          tx,
+          this.catalogConceptsRepo,
+          {
+            personId: person.id,
+            municipalityConceptId: dto.residenceMunicipalityConceptId,
+            lines: dto.homeAddressLines,
+            latitude: dto.homeLatitude,
+            longitude: dto.homeLongitude,
+            actorUserId: user.id,
+          },
+        );
 
-      return {
-        userId: user.id,
-        personId: person.id,
-        patientProfileId: patient.profileId,
-        patientCode,
-        emailVerificationToken,
-      };
-    });
+        // El trabajo es una segunda dirección de la misma persona, distinguida
+        // por su uso: quien lleva un medicamento necesita saber a cuál ir.
+        await createWorkAddress(
+          this.addressesRepo,
+          tx,
+          this.catalogConceptsRepo,
+          {
+            personId: person.id,
+            municipalityConceptId: dto.workMunicipalityConceptId,
+            lines: dto.workAddressLines,
+            latitude: dto.workLatitude,
+            longitude: dto.workLongitude,
+            actorUserId: user.id,
+          },
+        );
+
+        // El tutor o persona autorizada, si lo declaró.
+        await createGuardianRelatedPerson(
+          {
+            persons: this.personsRepo,
+            relatedPersons: this.relatedPersonsRepo,
+            contactPoints: this.contactPointsRepo,
+          },
+          tx,
+          {
+            patientProfileId: patient.profileId,
+            name: dto.guardianName,
+            phone: dto.guardianPhone,
+            relationshipConceptId: dto.guardianRelationshipConceptId,
+            actorUserId: user.id,
+          },
+        );
+
+        // Los seguros declarados. Privado y público conviven: una persona puede
+        // estar afiliada a la Caja y tener además una póliza.
+        const coverageRepos = {
+          catalog: this.insuranceCatalogRepo,
+          coverage: this.coverageRepo,
+        };
+        if (dto.privateInsurancePlanId) {
+          await createDeclaredCoverage(coverageRepos, tx, {
+            patientProfileId: patient.profileId,
+            insurancePlanId: dto.privateInsurancePlanId,
+            expectedSector: 'private',
+            coverageOrder: 1,
+            memberIdentifier: dto.nationalId,
+            actorUserId: user.id,
+          });
+        }
+        if (dto.publicInsurancePlanId) {
+          await createDeclaredCoverage(coverageRepos, tx, {
+            patientProfileId: patient.profileId,
+            insurancePlanId: dto.publicInsurancePlanId,
+            expectedSector: 'public',
+            coverageOrder: 2,
+            memberIdentifier: dto.nationalId,
+            actorUserId: user.id,
+          });
+        }
+
+        // El teléfono es independiente del correo: se guarda aunque no haya email.
+        if (dto.phone) {
+          this.contactPointsRepo.create(tx, {
+            ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+            ownerId: person.id,
+            systemConceptId: CONCEPTS.CONTACT_PHONE,
+            value: dto.phone,
+            useConceptId: CONCEPTS.CONTACT_USE_HOME,
+            actorUserId: user.id,
+          });
+        }
+
+        let emailVerificationToken: string | undefined;
+        if (dto.email) {
+          this.contactPointsRepo.create(tx, {
+            ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+            ownerId: person.id,
+            systemConceptId: CONCEPTS.CONTACT_EMAIL,
+            value: dto.email,
+            useConceptId: CONCEPTS.CONTACT_USE_HOME,
+            actorUserId: user.id,
+          });
+
+          const { raw, hash } = this.tokenService.issueRefreshToken();
+          this.emailVerificationsRepo.create(tx, {
+            userId: user.id,
+            email: dto.email,
+            tokenHash: hash,
+            expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS),
+            actorUserId: user.id,
+          });
+          emailVerificationToken = raw;
+        }
+
+        this.eventsRepo.record(tx, {
+          eventTypeConceptId: CONCEPTS.SEC_ROLE_GRANT,
+          outcomeConceptId: CONCEPTS.OUTCOME_SUCCESS,
+          userId: user.id,
+          recordedByUserId: user.id,
+          ip,
+          detailJson: { flow: 'patient-self-registration' },
+        });
+
+        return {
+          userId: user.id,
+          personId: person.id,
+          patientProfileId: patient.profileId,
+          patientCode,
+          emailVerificationToken,
+        };
+      })
+      .catch(rethrowDocumentRace);
 
     // El correo se encola FUERA de la transacción del registro: si la mensajería
     // falla, la cuenta ya creada no debe deshacerse — el usuario puede entrar

@@ -30,6 +30,7 @@ function build() {
   const registrationDocumentUploadService = { upload: mockFn() };
   const practitionerRegistrationService = { registerPractitioner: mockFn() };
   const emailVerificationService = { resend: mockFn() };
+  const documentAvailabilityService = { check: mockFn() };
   const passwordResetService = {
     requestReset: mockFn(),
     resetPassword: mockFn(),
@@ -43,9 +44,11 @@ function build() {
     practitionerRegistrationService as any,
     passwordResetService as any,
     emailVerificationService as any,
+    documentAvailabilityService as any,
   );
   return {
     controller,
+    documentAvailabilityService,
     authService,
     assistedRegistrationService,
     selfRegistrationService,

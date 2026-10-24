@@ -43,6 +43,8 @@ export interface CreateIdentifierData {
    * documentos bolivianos; el resto de tipos de identificador lo dejan vacío.
    */
   issuerAdministrativeAreaConceptId?: string;
+  /** Tipo de usuario para el que se registra el documento (C-10). */
+  ownerKindConceptId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -82,6 +84,35 @@ export class IdentifiersRepository {
       typeConceptId: params.typeConceptId,
       system: params.system ?? null,
       value: params.value,
+    });
+  }
+
+  /**
+   * C-10 / MD-01 · ¿Ya hay un documento vigente igual para ese tipo de usuario?
+   *
+   * La unicidad es por (tipo, número, departamento emisor, tipo de usuario): el
+   * mismo número con otra terminación no colisiona, y un médico que además es
+   * paciente tampoco. La base la respalda con `ux_identifiers_document_owner_kind`;
+   * esto existe para responder un 409 claro antes de intentar el insert.
+   * El número se compara tal cual, igual que el índice: los DTO del alta ya
+   * rechazan espacios.
+   */
+  findDocumentHolder(
+    em: EntityManager,
+    params: {
+      typeConceptId: string;
+      value: string;
+      issuerAdministrativeAreaConceptId: string | null;
+      ownerKindConceptId: string;
+    },
+  ): Promise<Identifiers | null> {
+    return em.findOne(Identifiers, {
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      typeConceptId: params.typeConceptId,
+      value: params.value,
+      issuerAdministrativeAreaConceptId:
+        params.issuerAdministrativeAreaConceptId,
+      ownerKindConceptId: params.ownerKindConceptId,
     });
   }
 
@@ -141,6 +172,7 @@ export class IdentifiersRepository {
         stateConceptId: data.stateConceptId,
         issuerAdministrativeAreaConceptId:
           data.issuerAdministrativeAreaConceptId,
+        ownerKindConceptId: data.ownerKindConceptId,
         ...createdBy(data.actorUserId),
         // `partial: true` relaja el tipado estricto de `em.create`: la columna
         // `row_version` (version: true) tiene DEFAULT en BD y MikroORM la gestiona,

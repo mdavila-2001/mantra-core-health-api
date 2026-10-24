@@ -439,6 +439,26 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
 
   // --- Common: identificadores oficiales ---
+  // C-10 / MD-01 (v4.2.48): para qué tipo de usuario se registró el documento.
+  // La unicidad del CI es por (tipo, número, departamento emisor, tipo de
+  // usuario); `owner_type` dice qué tabla es el dueño y no alcanza, porque un
+  // médico y un paciente son los dos personas. No reusar OWNER_*: ese espacio
+  // ya significa «tipo de entidad dueña».
+  DOC_HOLDER_PATIENT: def(
+    'common:document-holder-kind:patient',
+    'DOC_HOLDER_PATIENT',
+    'Document registered for a patient account',
+  ),
+  DOC_HOLDER_PRACTITIONER: def(
+    'common:document-holder-kind:practitioner',
+    'DOC_HOLDER_PRACTITIONER',
+    'Document registered for a practitioner account',
+  ),
+  DOC_HOLDER_ORGANIZATION_REP: def(
+    'common:document-holder-kind:organization-representative',
+    'DOC_HOLDER_ORGANIZATION_REP',
+    'Document of an organization representative',
+  ),
   ID_TYPE_NATIONAL: def(
     'common:id-type:national',
     'NATIONAL_ID',

@@ -91,7 +91,10 @@ describe('IamPractitionerSelfRegistrationService', () => {
       assertIsMedicalSpecialty: fn().mockResolvedValue(undefined),
     };
     const accountLinksRepo = { create: fn() };
-    const identifiersRepo = { create: fn() };
+    const identifiersRepo = {
+      create: fn(),
+      findDocumentHolder: fn(async () => null),
+    };
     const contactPointsRepo = { create: fn() };
     const addressesRepo = { create: fn() };
     // El municipio no se valida contra el catálogo estático: se busca en la
@@ -988,6 +991,44 @@ describe('IamPractitionerSelfRegistrationService', () => {
         value: '4821993',
       }),
     );
+  });
+
+  // C-10 / MD-01: el CI se titula como de médico, y un médico con el mismo CI
+  // y el mismo departamento corta el alta antes de escribir nada.
+  it('titula el documento como de médico', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        ownerKindConceptId: CONCEPTS.DOC_HOLDER_PRACTITIONER,
+      }),
+    );
+  });
+
+  it('rechaza con 409 el CI que ya es de otro médico, sin crear la cuenta', async () => {
+    const d = build();
+    d.identifiersRepo.findDocumentHolder.mockResolvedValue({ id: 'ident-1' });
+
+    const error = await d.service
+      .registerPractitioner(dto)
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ConflictException);
+    expect((error as ConflictException).details).toEqual({
+      reason: 'DOCUMENT_ALREADY_REGISTERED',
+      field: 'nationalId',
+    });
+    expect(d.identifiersRepo.findDocumentHolder).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        ownerKindConceptId: CONCEPTS.DOC_HOLDER_PRACTITIONER,
+      }),
+    );
+    expect(d.usersRepo.create).not.toHaveBeenCalled();
   });
 
   it('guarda los cinco contactos del registro, cada uno con su sistema y su uso', async () => {

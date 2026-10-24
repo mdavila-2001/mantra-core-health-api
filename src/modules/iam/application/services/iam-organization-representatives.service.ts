@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
+import { CONCEPTS } from '../../../../common';
 import {
   ContactPointsRepository,
   IdentifiersRepository,
@@ -120,6 +121,7 @@ export class IamOrganizationRepresentativesService {
           email: legalRepresentative.email,
           phone: legalRepresentative.phone,
           nationalId: legalRepresentative.idNumber,
+          ownerKindConceptId: CONCEPTS.DOC_HOLDER_ORGANIZATION_REP,
           actorUserId: input.ownerUserId,
         })
       : undefined;
