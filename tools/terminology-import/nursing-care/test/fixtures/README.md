@@ -1,6 +1,7 @@
 # Fixtures del importador de enfermería
 
-Archivos REALES de las fuentes, copiados sin cambios salvo lo indicado. Se usan sólo en
+Archivos REALES de las fuentes, copiados sin cambios salvo lo indicado y el fin de línea (git
+normaliza CRLF → LF; los SHA-256 citados son de los originales). Se usan sólo en
 `../nursing-care.test.mjs`.
 
 | Archivo | Origen | Licencia | Cambio |
