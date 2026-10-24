@@ -1,29 +1,31 @@
 # 20 — Plan obligatorio por hitos, subtareas y microtareas
 
-**Ningún trabajo empieza sin plan escrito en disco.** No hay excepción por tamaño, urgencia ni
+**Ningún trabajo empieza sin plan escrito.** No hay excepción por tamaño, urgencia ni
 obviedad. Si el pedido es tan chico que el plan parece ridículo, el plan es de un hito con una
 microtarea y se escribe igual: cuesta treinta segundos y es lo que hace auditable el trabajo.
 
-Prohibido escribir el primer `Edit`/`Write` de código antes de que exista el archivo de plan.
+Prohibido escribir el primer `Edit`/`Write` de código antes de que exista el plan escrito.
 
 ## 1. Dónde vive
 
-```
-docs/trabajo/<AAAA-MM-DD>-<slug>/PLAN.md       ← el plan (se crea primero)
-docs/trabajo/<AAAA-MM-DD>-<slug>/REPORTE.md    ← el reporte (ver regla 40)
-docs/trabajo/<AAAA-MM-DD>-<slug>/evidencia/    ← salidas, capturas, traces
-```
+**Fuera del repo.** El repo describe lo que existe; el plan es estado del trabajo y no se versiona.
 
-La ruta exacta puede redefinirla el `CLAUDE.md` del proyecto. Lo que no es negociable es que
-**el plan y el reporte sean archivos versionados**, no mensajes de chat.
+| Qué | Dónde |
+|---|---|
+| El plan | En el **issue** que origina el trabajo o en la **descripción del PR**. Si el trabajo dura más de una sesión, abrí el PR temprano como borrador y mantené el plan ahí. |
+| El reporte | En la descripción del PR (ver regla 40) |
+| La evidencia | Salida literal en la *Verificación* del PR; capturas y traces adjuntos al PR o al issue |
 
-> [!important] Si el trabajo es un carril con estructura propia
-> Cuando el proyecto organiza el trabajo en carriles y esa estructura ya define sus documentos
-> (requisitos, plan de implementación, plan de prueba, checklist de QA), **el plan vive dentro de
-> la estructura del carril** y no se duplica en `docs/trabajo/`. Lo que esta regla exige en ese
-> caso no es un archivo más, sino que el plan del carril **cumpla igual** las tres capas (§2), los
-> CA y DoD (§3) y los estados (§5). Un plan de implementación sin microtareas verificables no
-> satisface esta regla por más que se llame plan. Ver `lane-authoring`.
+Lo que no es negociable es que **el plan y el reporte queden escritos donde el equipo los lee**,
+no solo en el chat. Prohibido crear `docs/trabajo/`, `PLAN.md`, `REPORTE.md` o cualquier otro
+archivo de plan o de estado en el repo.
+
+> [!important] Si el trabajo es un carril
+> Un carril que cruza repos se documenta en su **issue padre** y sus sub-issues (ver
+> `lane-authoring` y `github-issues-projects`). El plan vive ahí y no se duplica en otro lado. Lo
+> que esta regla exige en ese caso es que el plan del carril **cumpla igual** las tres capas (§2),
+> los CA y DoD (§3) y los estados (§5). Un plan de implementación sin microtareas verificables no
+> satisface esta regla por más que se llame plan.
 
 ## 2. Las tres capas
 
@@ -58,19 +60,19 @@ No son lo mismo y hay que escribir los dos. Confundirlos es el error más común
 Un CA sin DoD es una intención. Un DoD sin CA es un checklist sin propósito. Faltando cualquiera
 de los dos, la microtarea **no está lista para ejecutarse**.
 
-## 4. Formato del PLAN.md
+## 4. Formato del plan
 
 ```markdown
-# Plan — <título>
+## Plan — <título>
 
-- Fecha: <AAAA-MM-DD> · Repos afectados: <lista> · Predecesor: <trabajo previo o "ninguno">
+- Repos afectados: <lista> · Issue: #<n> o "ninguno" · Predecesor: <trabajo previo o "ninguno">
 - Resultado observable: <una frase: quién ve o puede hacer qué, dónde>
 - Kill-test: <la comprobación más barata que demostraría que esto NO está hecho>
 
 ## Alcance
 - IN: <lista explícita>
 - OUT: <lista explícita — lo que NO se toca aunque se vea roto>
-- Ambigüedades registradas: <pregunta abierta + supuesto que se tomó + a quién confirmar>
+- Ambigüedades registradas: <pregunta abierta + supuesto que se tomó + issue donde se confirma>
 
 ## H1 — <nombre del hito>
 **CA:** Dado … cuando … entonces …
@@ -110,8 +112,8 @@ Una microtarea cuyo DoD no se ejecutó nunca es `HECHO`, aunque el código esté
 ## 6. Reglas de ejecución
 
 1. **Una microtarea a la vez.** No se abren dos en `EN CURSO` simultáneamente.
-2. **El plan se actualiza en el momento**, no al final. El archivo es la verdad del estado.
-3. **Cerrar una microtarea exige ejecutar su DoD** y pegar la salida en `evidencia/`. Sin eso, `A MEDIAS`.
+2. **El plan se actualiza en el momento**, no al final. El plan del issue o del PR es la verdad del estado.
+3. **Cerrar una microtarea exige ejecutar su DoD** y pegar la salida en la *Verificación* del PR. Sin eso, `A MEDIAS`.
 4. **Una subtarea es `HECHO`** solo si todas sus microtareas son `HECHO` o `DESCARTADO` con razón.
 5. **Un hito es `HECHO`** solo si además pasan los gates aplicables (regla 30 y regla 80).
 6. **Descubrimiento a mitad de camino:** si aparece trabajo no previsto, se **agrega al plan** como
@@ -121,7 +123,8 @@ Una microtarea cuyo DoD no se ejecutó nunca es `HECHO`, aunque el código esté
 
 ## 7. Prohibiciones
 
-- Empezar a codear sin `PLAN.md` en disco.
+- Empezar a codear sin el plan escrito en el issue o en el PR.
+- Versionar el plan, su estado o lo que quedó sin hacer en un archivo del repo.
 - Planes de un solo nivel ("hacer el endpoint") sin descomposición en microtareas.
 - Microtareas sin comando de verificación en el DoD.
 - Marcar `HECHO` sin haber corrido el DoD.

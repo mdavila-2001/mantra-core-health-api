@@ -55,7 +55,7 @@ Si no hay evidencia, la frase correcta es "sin verificar".
 | "Aprovecho y refactorizo." | Fuera de alcance: anotá la observación y seguí (ver `scope-discipline`). |
 | "Esta abstracción va a servir después." | Sin segundo uso real o patrón existente, no se crea. |
 | "El backend lo hago después." | Entonces no es full-stack: declaralo parcial, con qué falta. |
-| "Dejo un TODO y sigo." | Un TODO no es implementación (ver `finish-your-turn`). Hacelo o declaralo pendiente. |
+| "Dejo un TODO y sigo." | Un TODO no es implementación y no entra al repo (ver `finish-your-turn`). Hacelo, o abrí un issue y enlazalo desde el PR. |
 | "La seguridad / accesibilidad no es parte de este ticket." | En lo que tocás, autorización, validación y a11y base son condición de corrección, no extra. |
 
 ### Testing
