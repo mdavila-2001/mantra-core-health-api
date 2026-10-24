@@ -33,7 +33,7 @@
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H3.S1.M1 | Docs: decisiones resueltas | README e investigación sin «pendiente» para estas dos decisiones | `grep` | HECHO |
-| H3.S1.M2 | PR contra `dev` | PR abierto, listo (no draft), sin merge | link | TODO |
+| H3.S1.M2 | PR contra `dev` | PR abierto, listo (no draft), sin merge | mdavila-2001/mantra-core-health-api#726 | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

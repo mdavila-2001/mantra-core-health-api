@@ -4,7 +4,7 @@
 - Peldaño de evidencia alcanzado:
   - **VERIFIED** en una base desechable: el glosario por defecto y la carga de relaciones con las anotaciones comunes, con el catálogo real de `seed-diseases` (ya en `dev`).
   - No es REGRESSION_VERIFIED: no se arrancó la API, así que no se vio el glosario en pantalla.
-- Avance: 6 HECHO / 7 microtareas = **85,7 %** (falta H3.S1.M2, el PR, que se abre al final de esta entrega)
+- Avance: 7 HECHO / 7 microtareas = **100 %** (PR mdavila-2001/mantra-core-health-api#726, listo para revisión, sin mergear)
 
 ## Completado
 | ID | Qué se logró | Comando | Resultado |
@@ -13,6 +13,7 @@
 | H1.S1.M2 | Una carga sin flags suma los fenotipos HPO con nombre ES oficial al glosario | `load-symptoms.mjs --apply` | `"glossaryMembers":37292`; `glossary-all-terms` 18 646 y `glossary-category-signs-symptoms` 18 646 |
 | H1.S1.M3 | Idempotencia | idem, segunda corrida | todos los contadores en 0 |
 | H2.S1.M1 | Las anotaciones comunes entran en la carga por defecto | `load-disease-phenotypes.mjs --apply` (sin `--sources`) + `psql` | `hpo-common-disease`: 132 008 evidencias en 131 251 aristas; total 402 633 aristas y 403 959 evidencias; segunda corrida 0/0 |
+| H3.S1.M2 | PR contra `dev`, listo (no draft) | — | mdavila-2001/mantra-core-health-api#726 |
 | H3.S1.M1 | Decisiones documentadas como resueltas | `tools/terminology-import/symptoms/README.md`, `docs/seed-research/symptoms.md` | ya no figuran como pendientes |
 
 ## A medias
@@ -21,7 +22,7 @@ ninguna
 ## Pendiente
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H3.S1.M2 | TODO | Abrir el PR contra `dev`, listo para revisión (no draft) |
+| — | — | ninguna microtarea pendiente en este plan; fuera de él siguen la tabla de evidencia en el modelo y las licencias de HPO/NCIt |
 
 ## Evidencia
 Salidas completas en `evidencia/` de este directorio: `integracion.txt`, `glosario-fiebre.txt` y `node-test.txt`. El andamio de la base desechable está en `evidencia/andamio/`. Recortes literales de `integracion.txt`:
