@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -18,6 +18,7 @@ import {
 import { ConditionsRepository } from '../../clinical/repositories';
 import { ClinicalReadService } from '../../clinical/services';
 import { CatalogConcepts } from '../../terminology/entities';
+import { MedicalGroupsErrorReason } from '../medical_groups.error-reasons';
 import {
   MedicalGroupMembersRepository,
   MedicalGroupsRepository,
@@ -116,23 +117,21 @@ export class MedicalGroupsService {
       }
 
       if (dto.patientProfileId !== undefined) {
+        // MG-01 — el mismo gate que `/clinical/patients/:id/summary`, SIEMPRE
+        // que haya paciente (no sólo con diagnóstico) y antes de persistir: el
+        // solicitante tiene que poder leer la historia de este paciente para
+        // asociarlo al grupo —que lo expone al equipo invitado— y para
+        // referenciar uno de sus diagnósticos (AC-21-06/07). Sin base clínica y
+        // paciente inexistente responden el mismo 404 catalogado.
+        await this.assertPatientAvailable(dto.patientProfileId, actor);
         const patient = await this.patientProfilesRepo.findById(
           tx,
           dto.patientProfileId,
         );
         if (patient === null) {
-          throw new ResourceNotFoundException('Paciente no encontrado', {
-            patientProfileId: dto.patientProfileId,
-          });
+          throw patientNotAvailable(dto.patientProfileId);
         }
         if (dto.conditionId !== undefined) {
-          // El mismo gate que `/clinical/patients/:id/summary`: el solicitante
-          // tiene que poder leer la historia de este paciente para poder
-          // referenciar uno de sus diagnósticos (AC-21-06/07).
-          await this.clinicalRead.assertCanReadHistory(
-            dto.patientProfileId,
-            actor,
-          );
           const condition = await this.conditionsRepo.findById(
             tx,
             dto.conditionId,
@@ -241,6 +240,25 @@ export class MedicalGroupsService {
         await this.membersRepo.findByGroup(tx, group.id),
       );
     });
+  }
+
+  /**
+   * Autoriza al actor sobre el paciente con la política de la historia clínica
+   * y traduce su 403 al 404 catalogado del módulo: el cliente no distingue «no
+   * es tuyo» de «no existe».
+   */
+  private async assertPatientAvailable(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw patientNotAvailable(patientProfileId);
+      }
+      throw error;
+    }
   }
 
   /* ==================== lectura =========================================== */
@@ -672,6 +690,17 @@ export class MedicalGroupsService {
       })),
     };
   }
+}
+
+/** 404 uniforme del paciente no disponible para asociarlo a un grupo. */
+function patientNotAvailable(
+  patientProfileId: string,
+): ResourceNotFoundException {
+  return new ResourceNotFoundException(
+    'Paciente no disponible para el grupo médico',
+    { patientProfileId },
+    MedicalGroupsErrorReason.MEDICAL_GROUP_PATIENT_NOT_AVAILABLE,
+  );
 }
 
 /* ==================== helpers derivados (puros) =============================

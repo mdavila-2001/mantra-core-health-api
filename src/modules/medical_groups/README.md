@@ -71,17 +71,19 @@ profesional.
 
 - **El servicio tiene que ser de una práctica propia.** Un servicio de otra
   práctica responde `404`, nunca `403`, para no revelar que existe.
-- **El diagnóstico exige poder leer la historia del paciente**, con el mismo
-  control que `GET /clinical/patients/:id/summary`. Elegir un diagnóstico sin
-  paciente responde `422`.
+- **Asociar un paciente exige poder leer su historia**, con el mismo control que
+  `GET /clinical/patients/:id/summary`, con o sin diagnóstico y antes de
+  persistir. Sin esa base clínica, o si el paciente no existe, la respuesta es
+  el mismo `404` con `reason: MEDICAL_GROUP_PATIENT_NOT_AVAILABLE`. Elegir un
+  diagnóstico sin paciente responde `422`.
 - **Quien no es el invitado** recibe `404` al responder una invitación, para que
   no distinga «no es tuya» de «no existe».
 - Sólo el creador resuelve un cambio de horario.
 
-## Auditoría vigente
+## Pruebas
 
-La creación aplica la política clínica al paciente sólo en la rama con
-diagnóstico; sin condición, no la aplica.
-
-No existen specs bajo `src/modules/medical_groups` en la base auditada; la
-ejecución dirigida termina con `No tests found`.
+`services/medical-groups.service.spec.ts` cubre cada operación del servicio
+(alta, lectura, listado por pestaña con cursor, diagnósticos del paciente,
+respuesta a invitaciones, cambio de horario, notas del ejercicio e
+inmutabilidad) con el caso correcto, el límite y el error. No hay pruebas de
+integración contra base con dos prácticas u organizaciones.
