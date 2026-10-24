@@ -1,0 +1,169 @@
+TAP version 13
+# Subtest: scope: subpartes diagnósticas dentro, terapéuticas y prostéticas fuera
+ok 1 - scope: subpartes diagnósticas dentro, terapéuticas y prostéticas fuera
+  ---
+  duration_ms: 2.603709
+  type: 'test'
+  ...
+# Subtest: scope: helpers
+ok 2 - scope: helpers
+  ---
+  duration_ms: 1.447625
+  type: 'test'
+  ...
+# Subtest: format: clase, fechas, claves
+ok 3 - format: clase, fechas, claves
+  ---
+  duration_ms: 1.235893
+  type: 'test'
+  ...
+# Subtest: format: makeRecord exige procedencia y las 18 claves
+ok 4 - format: makeRecord exige procedencia y las 18 claves
+  ---
+  duration_ms: 1.553409
+  type: 'test'
+  ...
+# Subtest: 510(k) espejo: filas reales → formato común, sólo las de alcance diagnóstico
+ok 5 - 510(k) espejo: filas reales → formato común, sólo las de alcance diagnóstico
+  ---
+  duration_ms: 3.241191
+  type: 'test'
+  ...
+# Subtest: io: streamOpenFdaResults recorre `results` sin cargar el archivo entero
+ok 6 - io: streamOpenFdaResults recorre `results` sin cargar el archivo entero
+  ---
+  duration_ms: 9.727183
+  type: 'test'
+  ...
+# Subtest: io: readPipeDelimited con cabecera
+ok 7 - io: readPipeDelimited con cabecera
+  ---
+  duration_ms: 2.468144
+  type: 'test'
+  ...
+# Subtest: io: writeNdjsonParts es determinista y parte por tamaño
+ok 8 - io: writeNdjsonParts es determinista y parte por tamaño
+  ---
+  duration_ms: 12.655098
+  type: 'test'
+  ...
+# Subtest: GUDID: openFDA device/udi y AccessGUDID delimitado → formato común
+ok 9 - GUDID: openFDA device/udi y AccessGUDID delimitado → formato común
+  ---
+  duration_ms: 2.037465
+  type: 'test'
+  ...
+# Subtest: tabla de product codes: la clasificación oficial pisa lo observado
+ok 10 - tabla de product codes: la clasificación oficial pisa lo observado
+  ---
+  duration_ms: 0.952079
+  type: 'test'
+  ...
+# Subtest: clasificación: foiclass real y fdadata (regulación numérica con 4 decimales)
+ok 11 - clasificación: foiclass real y fdadata (regulación numérica con 4 decimales)
+  ---
+  duration_ms: 2.422233
+  type: 'test'
+  ...
+# Subtest: fdadata pmn real: país ISO, estado verbatim, dirección
+ok 12 - fdadata pmn real: país ISO, estado verbatim, dirección
+  ---
+  duration_ms: 2.550531
+  type: 'test'
+  ...
+# Subtest: fdadata pma real: una fila por PMA y nombre comercial, suplementos contados
+ok 13 - fdadata pma real: una fila por PMA y nombre comercial, suplementos contados
+  ---
+  duration_ms: 9.736053
+  type: 'test'
+  ...
+# Subtest: GUDID XML real (Full Release, espejo dental): UDI-DI, modelo, GMDN con código
+ok 14 - GUDID XML real (Full Release, espejo dental): UDI-DI, modelo, GMDN con código
+  ---
+  duration_ms: 3.975084
+  type: 'test'
+  ...
+# Subtest: cargador: plan determinista, sin product codes sin nombre
+not ok 15 - cargador: plan determinista, sin product codes sin nombre
+  ---
+  duration_ms: 4.090951
+  type: 'test'
+  location: '/home/user/mantra-core-health-api/tools/terminology-import/diagnostic-devices/us/test/dx-devices-us.test.mjs:270:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot find package 'dotenv' imported from /home/user/mantra-core-health-api/tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs"
+  code: 'ERR_MODULE_NOT_FOUND'
+  stack: |-
+    Object.getPackageJSONURL (node:internal/modules/package_json_reader:314:9)
+    packageResolve (node:internal/modules/esm/resolve:767:81)
+    moduleResolve (node:internal/modules/esm/resolve:853:18)
+    defaultResolve (node:internal/modules/esm/resolve:983:11)
+    #cachedDefaultResolve (node:internal/modules/esm/loader:731:20)
+    ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+    ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:310:38)
+    ModuleJob._link (node:internal/modules/esm/module_job:182:49)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+  ...
+# Subtest: Registration & Listing (archivos planos reales 2024): una fila por registro, listado y product code
+ok 16 - Registration & Listing (archivos planos reales 2024): una fila por registro, listado y product code
+  ---
+  duration_ms: 0.819594
+  type: 'test'
+  ...
+# Subtest: LIVD SARS-CoV-2 real: un kit por Testkit Name ID; UDI-DI sólo si el tipo es DIT
+ok 17 - LIVD SARS-CoV-2 real: un kit por Testkit Name ID; UDI-DI sólo si el tipo es DIT
+  ---
+  duration_ms: 13.834868
+  type: 'test'
+  ...
+# Subtest: MAUDE real: una fila por product code + fabricante + marca + modelo, id = informe más antiguo
+ok 18 - MAUDE real: una fila por product code + fabricante + marca + modelo, id = informe más antiguo
+  ---
+  duration_ms: 2.242612
+  type: 'test'
+  ...
+# Subtest: retiros reales (enforcement y recall): una fila por número Z, estado verbatim
+ok 19 - retiros reales (enforcement y recall): una fila por número Z, estado verbatim
+  ---
+  duration_ms: 1.342897
+  type: 'test'
+  ...
+# Subtest: MAUDE aplanado como mapa de texto: sólo corta en claves conocidas
+ok 20 - MAUDE aplanado como mapa de texto: sólo corta en claves conocidas
+  ---
+  duration_ms: 0.544936
+  type: 'test'
+  ...
+# Subtest: openFDA device/510k real: K y De Novo en alcance, fuera de alcance → null
+ok 21 - openFDA device/510k real: K y De Novo en alcance, fuera de alcance → null
+  ---
+  duration_ms: 17.247601
+  type: 'test'
+  ...
+# Subtest: openFDA device/pma real: misma clave que el espejo, suplemento sin product code hereda el del PMA
+ok 22 - openFDA device/pma real: misma clave que el espejo, suplemento sin product code hereda el del PMA
+  ---
+  duration_ms: 18.644021
+  type: 'test'
+  ...
+# Subtest: openFDA device/registrationlisting real: nombres y K a nivel del listado; sin registro ni FEI usa owner/operator
+ok 23 - openFDA device/registrationlisting real: nombres y K a nivel del listado; sin registro ni FEI usa owner/operator
+  ---
+  duration_ms: 6.699316
+  type: 'test'
+  ...
+# Subtest: openFDA device/udi y AccessGUDID delimitado reales: el mismo UDI-DI da la misma fila
+ok 24 - openFDA device/udi y AccessGUDID delimitado reales: el mismo UDI-DI da la misma fila
+  ---
+  duration_ms: 9.579917
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 23
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 196.614109
+exit=1
