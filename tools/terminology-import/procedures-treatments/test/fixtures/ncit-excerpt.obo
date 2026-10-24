@@ -1,0 +1,770 @@
+format-version: 1.2
+data-version: releases/2024-05-07
+ontology: ncit
+property_value: owl:versionInfo "24.04e" xsd:string
+
+[Term]
+id: NCIT:C15256
+name: Hysterectomy
+def: "A surgical procedure to remove the uterine body (partial hysterectomy) or the uterine body and cervix (total hysterectomy)." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C156952
+subset: NCIT:C157711
+subset: NCIT:C158036
+subset: NCIT:C158037
+subset: NCIT:C158520
+subset: NCIT:C177536
+subset: NCIT:C177537
+synonym: "Hysterectomy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Hysterectomy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Hysterectomy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Hysterectomy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "hysterectomy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000045718", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Hysterectomy NOS" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC", http://purl.obolibrary.org/obo/NCIT_P385="PV"}
+synonym: "hysterectomy type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "hysterectomy_type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+is_a: NCIT:C15332 ! Gynecological Surgical Procedure
+relationship: NCIT:R167 NCIT:C12405 ! Uterus
+property_value: NCIT:A31 NCIT:C141477
+property_value: NCIT:A31 NCIT:C15256
+property_value: NCIT:A31 NCIT:C15701
+property_value: NCIT:A31 NCIT:C17998
+property_value: NCIT:A31 NCIT:C43234
+property_value: NCIT:A31 NCIT:C94470
+property_value: NCIT:A32 NCIT:C15256
+property_value: NCIT:A32 NCIT:C70700
+property_value: NCIT:NHC0 "C15256" xsd:string
+property_value: NCIT:P106 "Therapeutic or Preventive Procedure" xsd:string
+property_value: NCIT:P107 "Hysterectomy" xsd:string
+property_value: NCIT:P108 "Hysterectomy" xsd:string
+property_value: NCIT:P207 "C0020699" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P325 "Surgery to remove the uterus and, sometimes, the cervix. When the uterus and the cervix are removed, it is called a total hysterectomy. When only the uterus is removed, it is called a partial hysterectomy." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P366 "Hysterectomy" xsd:string
+property_value: NCIT:P375 "Hysterectomy NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="method_of_sample_procurement", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Hysterectomy, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="hysterectomy_type", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C15332
+name: Gynecological Surgical Procedure
+def: "Surgery performed on the female reproductive system." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C90259
+synonym: "gynecologic surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Gynecologic Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "gynecologic surgical procedures" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "gynecological surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Gynecological Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Gynecological Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+is_a: NCIT:C15333 ! Urogenital Surgical Procedure
+relationship: NCIT:R163 NCIT:C12402 ! Female Reproductive System
+property_value: NCIT:NHC0 "C15332" xsd:string
+property_value: NCIT:P106 "Therapeutic or Preventive Procedure" xsd:string
+property_value: NCIT:P107 "Gynecological Surgical Procedure" xsd:string
+property_value: NCIT:P108 "Gynecological Surgical Procedure" xsd:string
+property_value: NCIT:P207 "C0038902" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P366 "Gynecological_Surgical_Procedure" xsd:string
+
+[Term]
+id: NCIT:C15333
+name: Urogenital Surgical Procedure
+def: "Any surgery to the reproductive or urinary system or its parts." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+synonym: "Genitourinary System Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Surgery, Genitourinary" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Urogenital Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Urogenital Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C49163 ! Surgical Procedure by Site or System
+relationship: NCIT:R163 NCIT:C12810 ! Genitourinary System
+property_value: NCIT:NHC0 "C15333" xsd:string
+property_value: NCIT:P106 "Therapeutic or Preventive Procedure" xsd:string
+property_value: NCIT:P108 "Urogenital Surgical Procedure" xsd:string
+property_value: NCIT:P207 "C0038912" xsd:string
+property_value: NCIT:P366 "Urogenital_Surgical_Procedure" xsd:string
+
+[Term]
+id: NCIT:C49163
+name: Surgical Procedure by Site or System
+synonym: "Surgical Procedure by Site or System" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C15329 ! Surgical Procedure
+property_value: NCIT:NHC0 "C49163" xsd:string
+property_value: NCIT:P106 "Classification" xsd:string
+property_value: NCIT:P108 "Surgical Procedure by Site or System" xsd:string
+property_value: NCIT:P207 "C1710259" xsd:string
+property_value: NCIT:P310 "Header_Concept" xsd:string
+property_value: NCIT:P366 "Surgical_Procedure_by_Site_or_System" xsd:string
+
+[Term]
+id: NCIT:C15329
+name: Surgical Procedure
+def: "A diagnostic or treatment procedure performed by manual and/or instrumental means, often involving an incision and the removal or replacement of a diseased organ or tissue; of or relating to or involving or used in surgery or requiring or amenable to treatment by surgery." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C156952
+subset: NCIT:C156953
+subset: NCIT:C156954
+subset: NCIT:C157524
+subset: NCIT:C157526
+subset: NCIT:C157527
+subset: NCIT:C157528
+subset: NCIT:C157529
+subset: NCIT:C157530
+subset: NCIT:C157532
+subset: NCIT:C157533
+subset: NCIT:C157534
+subset: NCIT:C157711
+subset: NCIT:C159412
+subset: NCIT:C171094
+subset: NCIT:C174237
+subset: NCIT:C174241
+subset: NCIT:C174253
+subset: NCIT:C177383
+subset: NCIT:C177402
+subset: NCIT:C177410
+subset: NCIT:C177537
+subset: NCIT:C178113
+subset: NCIT:C178115
+subset: NCIT:C179478
+subset: NCIT:C179482
+subset: NCIT:C183077
+subset: NCIT:C183085
+subset: NCIT:C183087
+subset: NCIT:C186337
+subset: NCIT:C186341
+subset: NCIT:C186764
+subset: NCIT:C62596
+subset: NCIT:C90259
+synonym: "Operation" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "SURGERY" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="OS"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P386="EWS", http://purl.obolibrary.org/obo/NCIT_P384="PCDC"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="OS"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P386="GCT", http://purl.obolibrary.org/obo/NCIT_P384="PCDC"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P386="ALL", http://purl.obolibrary.org/obo/NCIT_P384="PCDC"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="HL"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="DIPG/DMG"}
+synonym: "Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000045570", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Surgery Type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="DIPG/DMG"}
+synonym: "Surgery, NOS" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "Surgical" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Surgical" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Surgical Intervention" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P386="CDRH", http://purl.obolibrary.org/obo/NCIT_P384="FDA", http://purl.obolibrary.org/obo/NCIT_P385="4624"}
+synonym: "Surgical Interventions" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Surgical Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Surgical Procedures" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Surgically" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Type of Surgery" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+xref: IMDRF:F19
+is_a: NCIT:C25218 ! Intervention or Procedure
+property_value: NCIT:A23 NCIT:C25162
+property_value: NCIT:A28 NCIT:C161601
+property_value: NCIT:A28 NCIT:C175041
+property_value: NCIT:A32 NCIT:C177637
+property_value: NCIT:A32 NCIT:C25218
+property_value: NCIT:A33 NCIT:C161601
+property_value: NCIT:A33 NCIT:C177376
+property_value: NCIT:A35 NCIT:C175041
+property_value: NCIT:A38 NCIT:C17998
+property_value: NCIT:A38 NCIT:C43234
+property_value: NCIT:A38 NCIT:C49487
+property_value: NCIT:A38 NCIT:C49488
+property_value: NCIT:A40 NCIT:C17998
+property_value: NCIT:A40 NCIT:C48660
+property_value: NCIT:NHC0 "C15329" xsd:string
+property_value: NCIT:P106 "Health Care Activity" xsd:string
+property_value: NCIT:P107 "Surgical Procedure" xsd:string
+property_value: NCIT:P108 "Surgical Procedure" xsd:string
+property_value: NCIT:P207 "C0543467" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "DIPG/DMG" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "A procedure to remove or repair a part of the body or to find out whether disease is present. An operation." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "One or more surgical procedures, including percutaneous or minimally invasive procedures, were required, or an existing procedure changed." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="FDA", http://purl.obolibrary.org/obo/NCIT_P381="CDRH"}
+property_value: NCIT:P366 "Surgical_Procedure" xsd:string
+property_value: NCIT:P375 "Surgery, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="treatment_type", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Surgically Treated" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="reflux_treatment_type", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C25218
+name: Intervention or Procedure
+def: "An activity that produces an effect, or that is intended to alter the course of a disease in a patient or population. This is a general term that encompasses the medical, social, behavioral, and environmental acts that can have preventive, therapeutic, or palliative effects." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C157711
+subset: NCIT:C159501
+subset: NCIT:C159502
+subset: NCIT:C165451
+subset: NCIT:C166373
+subset: NCIT:C177536
+subset: NCIT:C192234
+subset: NCIT:C203912
+subset: NCIT:C61410
+subset: NCIT:C67497
+subset: NCIT:C90259
+subset: NCIT:C99147
+synonym: "Intervention" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "intervention" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC-GLOSS"}
+synonym: "intervention" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000454757", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Intervention or Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Intervention or Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Intervention or Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Intervention Strategies" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Interventional" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Interventional Procedure Type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="OORO", http://purl.obolibrary.org/obo/NCIT_P386="PC"}
+synonym: "interventionDescription" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="BRIDG 5.3"}
+synonym: "interventionDescription" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="BRIDG 3.0.3"}
+synonym: "Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P386="ICDC", http://purl.obolibrary.org/obo/NCIT_P384="ICDC"}
+synonym: "study intervention" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="MRCT-Ctr"}
+synonym: "treatment type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "treatment_type" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+is_a: NCIT:C16203 ! Clinical or Research Activity
+property_value: NCIT:A31 NCIT:C104914
+property_value: NCIT:A31 NCIT:C116466
+property_value: NCIT:A31 NCIT:C116643
+property_value: NCIT:A31 NCIT:C126391
+property_value: NCIT:A31 NCIT:C138187
+property_value: NCIT:A31 NCIT:C141342
+property_value: NCIT:A31 NCIT:C15195
+property_value: NCIT:A31 NCIT:C152055
+property_value: NCIT:A31 NCIT:C15215
+property_value: NCIT:A31 NCIT:C15230
+property_value: NCIT:A31 NCIT:C15262
+property_value: NCIT:A31 NCIT:C15289
+property_value: NCIT:A31 NCIT:C15313
+property_value: NCIT:A31 NCIT:C15329
+property_value: NCIT:A31 NCIT:C15340
+property_value: NCIT:A31 NCIT:C15356
+property_value: NCIT:A31 NCIT:C15358
+property_value: NCIT:A31 NCIT:C15370
+property_value: NCIT:A31 NCIT:C15382
+property_value: NCIT:A31 NCIT:C15385
+property_value: NCIT:A31 NCIT:C15386
+property_value: NCIT:A31 NCIT:C15393
+property_value: NCIT:A31 NCIT:C15431
+property_value: NCIT:A31 NCIT:C15445
+property_value: NCIT:A31 NCIT:C15470
+property_value: NCIT:A31 NCIT:C15533
+property_value: NCIT:A31 NCIT:C15632
+property_value: NCIT:A31 NCIT:C15651
+property_value: NCIT:A31 NCIT:C15666
+property_value: NCIT:A31 NCIT:C15696
+property_value: NCIT:A31 NCIT:C15747
+property_value: NCIT:A31 NCIT:C15751
+property_value: NCIT:A31 NCIT:C15752
+property_value: NCIT:A31 NCIT:C157968
+property_value: NCIT:A31 NCIT:C15986
+property_value: NCIT:A31 NCIT:C16035
+property_value: NCIT:A31 NCIT:C16039
+property_value: NCIT:A31 NCIT:C16135
+property_value: NCIT:A31 NCIT:C162449
+property_value: NCIT:A31 NCIT:C165189
+property_value: NCIT:A31 NCIT:C165192
+property_value: NCIT:A31 NCIT:C165194
+property_value: NCIT:A31 NCIT:C172727
+property_value: NCIT:A31 NCIT:C17649
+property_value: NCIT:A31 NCIT:C178422
+property_value: NCIT:A31 NCIT:C17998
+property_value: NCIT:A31 NCIT:C198584
+property_value: NCIT:A31 NCIT:C20985
+property_value: NCIT:A31 NCIT:C43234
+property_value: NCIT:A31 NCIT:C443
+property_value: NCIT:A31 NCIT:C46089
+property_value: NCIT:A31 NCIT:C51647
+property_value: NCIT:A31 NCIT:C62714
+property_value: NCIT:A31 NCIT:C62726
+property_value: NCIT:A31 NCIT:C64172
+property_value: NCIT:A31 NCIT:C66891
+property_value: NCIT:A31 NCIT:C66897
+property_value: NCIT:A31 NCIT:C66899
+property_value: NCIT:A31 NCIT:C67444
+property_value: NCIT:A31 NCIT:C70840
+property_value: NCIT:A31 NCIT:C76243
+property_value: NCIT:A31 NCIT:C798
+property_value: NCIT:A31 NCIT:C85254
+property_value: NCIT:A31 NCIT:C92991
+property_value: NCIT:A31 NCIT:C93196
+property_value: NCIT:A31 NCIT:C93340
+property_value: NCIT:A31 NCIT:C95484
+property_value: NCIT:A42 NCIT:C15189
+property_value: NCIT:A42 NCIT:C15275
+property_value: NCIT:A42 NCIT:C15288
+property_value: NCIT:A42 NCIT:C15307
+property_value: NCIT:A42 NCIT:C15343
+property_value: NCIT:A42 NCIT:C17649
+property_value: NCIT:A42 NCIT:C192440
+property_value: NCIT:A42 NCIT:C192567
+property_value: NCIT:A42 NCIT:C192609
+property_value: NCIT:A42 NCIT:C192610
+property_value: NCIT:A42 NCIT:C192623
+property_value: NCIT:A42 NCIT:C38065
+property_value: NCIT:A42 NCIT:C52008
+property_value: NCIT:A42 NCIT:C62742
+property_value: NCIT:A42 NCIT:C93088
+property_value: NCIT:A42 NCIT:C94461
+property_value: NCIT:NHC0 "C25218" xsd:string
+property_value: NCIT:P106 "Health Care Activity" xsd:string
+property_value: NCIT:P107 "Intervention or Procedure" xsd:string
+property_value: NCIT:P108 "Intervention or Procedure" xsd:string
+property_value: NCIT:P207 "C0184661" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CDISC-GLOSS" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "ICDC" xsd:string
+property_value: NCIT:P322 "MRCT-Ctr" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "OORO" xsd:string
+property_value: NCIT:P325 "A treatment given to the participants in a study. (https://mrctcenter.org/glossaryterm/study-intervention/)" xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="MRCT-Ctr"}
+property_value: NCIT:P325 "An activity that produces an effect, or that is intended to alter the course of a disease in a patient or population. This is a general term that encompasses the medical, social, behavioral, and environmental acts that can have preventive, therapeutic, or palliative effects. (NCI) See also investigational product, experimental intervention, vaccine, medical device, diagnostic device." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC-GLOSS"}
+property_value: NCIT:P325 "In medicine, a treatment or action taken to prevent or treat disease, or improve health in other ways." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "The type of interventional procedure performed." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="OORO", http://purl.obolibrary.org/obo/NCIT_P381="PC"}
+property_value: NCIT:P366 "Procedure" xsd:string
+
+[Term]
+id: NCIT:C16203
+name: Clinical or Research Activity
+def: "Any specific activity undertaken during the course of a clinical study or research protocol." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+synonym: "Clinical or Research Activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Clinical or Research Activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+is_a: NCIT:C43431 ! Activity
+property_value: NCIT:NHC0 "C16203" xsd:string
+property_value: NCIT:P106 "Activity" xsd:string
+property_value: NCIT:P107 "Clinical or Research Activity" xsd:string
+property_value: NCIT:P108 "Clinical or Research Activity" xsd:string
+property_value: NCIT:P207 "C1516654" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P366 "Clinical_or_Research_Activity" xsd:string
+
+[Term]
+id: NCIT:C43431
+name: Activity
+def: "An active process; excludes processes and mechanisms which fulfill biological functions." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C105551
+subset: NCIT:C159501
+subset: NCIT:C159503
+synonym: "Activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="BRIDG 5.3"}
+synonym: "Activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="BRIDG 3.0.3"}
+synonym: "General activity" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+disjoint_from: NCIT:C7057 ! Disease, Disorder or Finding
+disjoint_from: NCIT:C97325 ! Manufactured Object
+property_value: NCIT:NHC0 "C43431" xsd:string
+property_value: NCIT:P106 "Activity" xsd:string
+property_value: NCIT:P108 "Activity" xsd:string
+property_value: NCIT:P207 "C0441655" xsd:string
+property_value: NCIT:P322 "BRIDG" xsd:string
+property_value: NCIT:P325 "Any action that can, in the context of a study or a post-marketing investigation, be defined, planned, scheduled or performed. EXAMPLE(S): surgical procedure, laboratory test, administration of a drug." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="BRIDG 3.0.3"}
+property_value: NCIT:P325 "Any action that can, in the context of a study, experiment, post-marketing investigation, or disease registry, be defined, planned, scheduled or performed.    EXAMPLE(S): Administrative activities such as subject registration or informed consent Clinical activities such as surgical procedure, laboratory test, administration of a drug   OTHER NAME(S):   NOTE(S):" xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="BRIDG 5.3"}
+property_value: NCIT:P366 "Activity" xsd:string
+
+[Term]
+id: NCIT:C51685
+name: Gastric Biopsy
+def: "Removal of tissue from the stomach for microscopic examination, using an endoscope." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+synonym: "Biopsy of Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endoscopic Biopsy of Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Gastric Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C15389 ! Endoscopic Biopsy
+relationship: NCIT:R169 NCIT:C12391 ! Stomach
+property_value: NCIT:NHC0 "C51685" xsd:string
+property_value: NCIT:P106 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P108 "Gastric Biopsy" xsd:string
+property_value: NCIT:P207 "C0192472" xsd:string
+property_value: NCIT:P366 "Gastric_Biopsy" xsd:string
+
+[Term]
+id: NCIT:C15389
+name: Endoscopic Biopsy
+def: "The removal of tissue specimens or fluid from the living body for microscopic examination, performed to establish a diagnosis. In the case of an endoscopic biopsy, an endoscope is used to obtain the sample." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C157711
+subset: NCIT:C177537
+synonym: "Endoscopic Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "Endoscopic Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Endoscopic Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Endoscopic Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endoscopy and Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C15189 ! Biopsy
+is_a: NCIT:C64940 ! Diagnostic Endoscopic Procedure
+relationship: NCIT:R167 NCIT:C13018 ! Organ
+property_value: NCIT:A32 NCIT:C70700
+property_value: NCIT:NHC0 "C15389" xsd:string
+property_value: NCIT:P106 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P107 "Endoscopic Biopsy" xsd:string
+property_value: NCIT:P108 "Endoscopic Biopsy" xsd:string
+property_value: NCIT:P207 "C0184980" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P366 "Endoscopic_Biopsy" xsd:string
+property_value: NCIT:P375 "Endoscopic Biopsy" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="method_of_sample_procurement", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C15189
+name: Biopsy
+def: "The removal of tissue specimens or fluid from the living body for microscopic examination, performed to establish a diagnosis." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C101858
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C132314
+subset: NCIT:C157711
+subset: NCIT:C171094
+subset: NCIT:C174237
+subset: NCIT:C174239
+subset: NCIT:C174241
+subset: NCIT:C177383
+subset: NCIT:C177402
+subset: NCIT:C177537
+subset: NCIT:C179478
+subset: NCIT:C179482
+subset: NCIT:C183105
+subset: NCIT:C183107
+subset: NCIT:C186317
+subset: NCIT:C186320
+subset: NCIT:C186321
+subset: NCIT:C186341
+subset: NCIT:C186342
+subset: NCIT:C186764
+subset: NCIT:C192234
+subset: NCIT:C61410
+subset: NCIT:C62596
+subset: NCIT:C66830
+subset: NCIT:C85492
+synonym: "BIOPSY" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="OS"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="OORO", http://purl.obolibrary.org/obo/NCIT_P386="PC"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P386="GCT", http://purl.obolibrary.org/obo/NCIT_P384="PCDC"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="HL"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="DIPG/DMG"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="4637", http://purl.obolibrary.org/obo/NCIT_P386="CDRH", http://purl.obolibrary.org/obo/NCIT_P384="FDA"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="AV", http://purl.obolibrary.org/obo/NCIT_P386="EWS", http://purl.obolibrary.org/obo/NCIT_P384="PCDC"}
+synonym: "Biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "biopsy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P385="CDR0000045164", http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "BIOPSY_TYPE" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="HL"}
+synonym: "BIOPSY_TYPE" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P386="EWS", http://purl.obolibrary.org/obo/NCIT_P384="PCDC"}
+synonym: "BIOPSY_TYPE" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="VAR", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="OS"}
+synonym: "Bx" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AB", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+xref: IMDRF:F2201
+is_a: NCIT:C18020 ! Diagnostic Procedure
+relationship: NCIT:R167 NCIT:C13018 ! Organ
+property_value: NCIT:A23 NCIT:C25162
+property_value: NCIT:A28 NCIT:C161601
+property_value: NCIT:A29 NCIT:C15385
+property_value: NCIT:A29 NCIT:C15386
+property_value: NCIT:A29 NCIT:C15680
+property_value: NCIT:A29 NCIT:C17649
+property_value: NCIT:A29 NCIT:C17998
+property_value: NCIT:A29 NCIT:C43234
+property_value: NCIT:A32 NCIT:C177576
+property_value: NCIT:A32 NCIT:C70700
+property_value: NCIT:A33 NCIT:C161601
+property_value: NCIT:A38 NCIT:C15385
+property_value: NCIT:A38 NCIT:C15386
+property_value: NCIT:A38 NCIT:C15680
+property_value: NCIT:A38 NCIT:C17649
+property_value: NCIT:A38 NCIT:C17998
+property_value: NCIT:A38 NCIT:C43234
+property_value: NCIT:A39 NCIT:C15386
+property_value: NCIT:A39 NCIT:C15680
+property_value: NCIT:A39 NCIT:C17649
+property_value: NCIT:A39 NCIT:C32765
+property_value: NCIT:NHC0 "C15189" xsd:string
+property_value: NCIT:P106 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P107 "Biopsy" xsd:string
+property_value: NCIT:P108 "Biopsy" xsd:string
+property_value: NCIT:P207 "C0005558" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "DIPG/DMG" xsd:string
+property_value: NCIT:P322 "FDA" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "OORO" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P325 "Patient required removal of tissue or fluid specimen to establish a diagnosis." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="FDA", http://purl.obolibrary.org/obo/NCIT_P381="CDRH"}
+property_value: NCIT:P325 "The removal of cells or tissues for examination by a pathologist. The pathologist may study the tissue under a microscope or perform other tests on the cells or tissue. There are many different types of biopsy procedures. The most common types include: (1) incisional biopsy, in which only a sample of tissue is removed; (2) excisional biopsy, in which an entire lump or suspicious area is removed; and (3) needle biopsy, in which a sample of tissue or fluid is removed with a needle." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "The removal of tissue specimens or fluid from the living body for microscopic examination, performed to establish a diagnosis." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+property_value: NCIT:P366 "Biopsy" xsd:string
+property_value: NCIT:P375 "Biopsy" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="method_of_diagnosis", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Biopsy" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="method_of_sample_procurement", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C18020
+name: Diagnostic Procedure
+def: "Any procedure or test to diagnose a disease or disorder." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C132298
+subset: NCIT:C192234
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C90259
+subset: NCIT:C99078
+synonym: "Diagnostic Method" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Diagnostic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Diagnostic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Diagnostic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NICHD"}
+synonym: "Diagnostic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "diagnostic procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P385="CDR0000045959", http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Diagnostic Technique" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "diagnostic technique" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000635290"}
+synonym: "DIAGNOSTIC TEST" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC"}
+synonym: "Diagnostic Test" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Evaluation Basis of Disease Status" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="OORO", http://purl.obolibrary.org/obo/NCIT_P386="PC"}
+is_a: NCIT:C25218 ! Intervention or Procedure
+property_value: NCIT:A42 NCIT:C148230
+property_value: NCIT:A42 NCIT:C16809
+property_value: NCIT:A42 NCIT:C17204
+property_value: NCIT:A42 NCIT:C17634
+property_value: NCIT:A42 NCIT:C17646
+property_value: NCIT:A42 NCIT:C17649
+property_value: NCIT:A42 NCIT:C179332
+property_value: NCIT:A42 NCIT:C20989
+property_value: NCIT:A42 NCIT:C38101
+property_value: NCIT:A42 NCIT:C63333
+property_value: NCIT:A42 NCIT:C93201
+property_value: NCIT:NHC0 "C18020" xsd:string
+property_value: NCIT:P106 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P107 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P108 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P208 "CL1642967" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "NICHD" xsd:string
+property_value: NCIT:P322 "OORO" xsd:string
+property_value: NCIT:P325 "A specific test or series of steps done to help diagnose a disease or condition. Mammograms and colonscopies are examples of diagnostic procedures." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "Any procedure or test used to diagnose a disease or disorder." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+property_value: NCIT:P325 "In determining the disease site status, what measures were used in the determination of  the disease status" xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="OORO", http://purl.obolibrary.org/obo/NCIT_P381="PC"}
+property_value: NCIT:P366 "Diagnostic_Procedure" xsd:string
+property_value: NCIT:P375 "Other diagnostic procedures on breast" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="85.19", http://purl.obolibrary.org/obo/NCIT_P396="ICD9CM 2014"}
+property_value: NCIT:P375 "Other diagnostic procedures on rectum, rectosigmoid and perirectal tissue" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="48.29", http://purl.obolibrary.org/obo/NCIT_P396="ICD9CM 2014"}
+
+[Term]
+id: NCIT:C64940
+name: Diagnostic Endoscopic Procedure
+subset: NCIT:C116977
+subset: NCIT:C118169
+synonym: "Diagnostic Endoscopic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Diagnostic Endoscopic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+is_a: NCIT:C16546 ! Endoscopic Procedure
+is_a: NCIT:C18020 ! Diagnostic Procedure
+property_value: NCIT:NHC0 "C64940" xsd:string
+property_value: NCIT:P106 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P107 "Diagnostic Endoscopic Procedure" xsd:string
+property_value: NCIT:P108 "Diagnostic Endoscopic Procedure" xsd:string
+property_value: NCIT:P207 "C1880300" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P366 "Diagnostic_Endoscopic_Procedure" xsd:string
+
+[Term]
+id: NCIT:C16546
+name: Endoscopic Procedure
+def: "A diagnostic or therapeutic procedure in which an endoscope is inserted in a tubular organ to examine the structural architecture and/or remove abnormal tissues." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C116977
+subset: NCIT:C118169
+subset: NCIT:C156952
+subset: NCIT:C157711
+subset: NCIT:C158037
+subset: NCIT:C158520
+subset: NCIT:C177537
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C85492
+synonym: "Endoscopic" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endoscopic Examination" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endoscopic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTRP", http://purl.obolibrary.org/obo/NCIT_P383="DN"}
+synonym: "Endoscopic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Endoscopic Procedure" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "ENDOSCOPY" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC"}
+synonym: "Endoscopy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "Endoscopy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Endoscopy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Endoscopy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "endoscopy" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000045678", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "ES" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+is_a: NCIT:C25218 ! Intervention or Procedure
+relationship: NCIT:R163 NCIT:C13018 ! Organ
+property_value: NCIT:A32 NCIT:C93431
+property_value: NCIT:NHC0 "C16546" xsd:string
+property_value: NCIT:P106 "Diagnostic Procedure" xsd:string
+property_value: NCIT:P106 "Therapeutic or Preventive Procedure" xsd:string
+property_value: NCIT:P107 "Endoscopic Procedure" xsd:string
+property_value: NCIT:P108 "Endoscopic Procedure" xsd:string
+property_value: NCIT:P207 "C0014245" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "CTRP" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P325 "A procedure that uses an endoscope to examine the inside of the body. An endoscope is a thin, tube-like instrument with a light and a lens for viewing. It may also have a tool to remove tissue to be checked under a microscope for signs of disease." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "An examination of the body using an endoscope." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+property_value: NCIT:P366 "Endoscopy" xsd:string
+property_value: NCIT:P375 "Endoscopy" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="procedures_performed", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C12401
+name: Eye
+def: "The organ of sight or vision." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C157711
+subset: NCIT:C168655
+subset: NCIT:C168656
+subset: NCIT:C168659
+subset: NCIT:C168660
+subset: NCIT:C168663
+subset: NCIT:C168664
+subset: NCIT:C177537
+subset: NCIT:C193006
+subset: NCIT:C193234
+subset: NCIT:C198975
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C74456
+subset: NCIT:C77526
+subset: NCIT:C77529
+subset: oncotree_slim
+synonym: "EYE" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC"}
+synonym: "Eye" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Eye" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Eye" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "eye" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="UBERON"}
+synonym: "Eye, NOS" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "Eyeball" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="CDISC"}
+synonym: "Eyeball" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Ocular" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Ophthalmic" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "ophthalmic" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000350235", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "Optic" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Structure of eye proper (body structure)" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P386="SNOMED CT", http://purl.obolibrary.org/obo/NCIT_P384="mCode", http://purl.obolibrary.org/obo/NCIT_P385="81745001"}
+xref: IMDRF:E08
+xref: UBERON:0000970
+is_a: NCIT:C33224 ! Organ of Special Sense
+relationship: NCIT:R81 NCIT:C12347 ! Orbit
+property_value: NCIT:A32 NCIT:C156421
+property_value: NCIT:A32 NCIT:C156422
+property_value: NCIT:A32 NCIT:C171435
+property_value: NCIT:A32 NCIT:C173263
+property_value: NCIT:A32 NCIT:C177570
+property_value: NCIT:A32 NCIT:C70729
+property_value: NCIT:NHC0 "C12401" xsd:string
+property_value: NCIT:P106 "Body Part, Organ, or Organ Component" xsd:string
+property_value: NCIT:P107 "Eye" xsd:string
+property_value: NCIT:P108 "Eye" xsd:string
+property_value: NCIT:P207 "C0015392" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "mCode" xsd:string
+property_value: NCIT:P322 "UBERON" xsd:string
+property_value: NCIT:P325 "An organ that detects light." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="UBERON"}
+property_value: NCIT:P325 "Having to do with the eye." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "The sensory organ of vision." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+property_value: NCIT:P366 "Eye" xsd:string
+property_value: NCIT:P375 "Eye" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="sites_of_involvement", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Eye" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="biospecimen_anatomic_site", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Eye" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="treatment_anatomic_sites", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Eye, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="progression_or_recurrence_anatomic_site", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Eye, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="C69.9", http://purl.obolibrary.org/obo/NCIT_P396="ICDO3", http://purl.obolibrary.org/obo/NCIT_P397="3.2"}
+property_value: NCIT:P375 "Eye, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="C69.9", http://purl.obolibrary.org/obo/NCIT_P396="ICDO3", http://purl.obolibrary.org/obo/NCIT_P397="3.1"}
+property_value: NCIT:P375 "Eye, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="tissue_or_organ_of_origin", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Eye, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="site_of_resection_or_biopsy", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+
+[Term]
+id: NCIT:C12391
+name: Stomach
+def: "The primary organ of food digestion. It is located under the diaphragm, between the liver and the spleen as well as between the esophagus and the small intestine." [] {http://purl.obolibrary.org/obo/NCIT_P378="NCI"}
+subset: NCIT:C156952
+subset: NCIT:C156953
+subset: NCIT:C157711
+subset: NCIT:C159414
+subset: NCIT:C168655
+subset: NCIT:C168656
+subset: NCIT:C168659
+subset: NCIT:C168660
+subset: NCIT:C168663
+subset: NCIT:C168664
+subset: NCIT:C173073
+subset: NCIT:C177537
+subset: NCIT:C179478
+subset: NCIT:C179481
+subset: NCIT:C179482
+subset: NCIT:C179483
+subset: NCIT:C193006
+subset: NCIT:C193234
+subset: NCIT:C198975
+subset: NCIT:C61410
+subset: NCIT:C66830
+subset: NCIT:C74456
+subset: NCIT:C77526
+subset: NCIT:C77529
+subset: oncotree_slim
+synonym: "Gastric" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="AD", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Gastrointestinal Tract, Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "STOMACH" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CDISC"}
+synonym: "Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="CPTAC"}
+synonym: "Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="caDSR"}
+synonym: "Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="PCDC", http://purl.obolibrary.org/obo/NCIT_P386="OS"}
+synonym: "Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="NCI"}
+synonym: "Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P384="CTDC", http://purl.obolibrary.org/obo/NCIT_P383="PT"}
+synonym: "Stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+synonym: "stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P385="CDR0000046604", http://purl.obolibrary.org/obo/NCIT_P384="NCI-GLOSS"}
+synonym: "stomach" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P384="UBERON"}
+synonym: "Stomach structure (body structure)" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="PT", http://purl.obolibrary.org/obo/NCIT_P386="SNOMED CT", http://purl.obolibrary.org/obo/NCIT_P384="mCode", http://purl.obolibrary.org/obo/NCIT_P385="69695003"}
+synonym: "Stomach, NOS" EXACT [] {http://purl.obolibrary.org/obo/NCIT_P383="SY", http://purl.obolibrary.org/obo/NCIT_P384="GDC"}
+xref: UBERON:0000945
+is_a: NCIT:C13018 ! Organ
+relationship: NCIT:R81 NCIT:C12664 ! Abdomen
+relationship: NCIT:R82 NCIT:C12378 ! Digestive System
+property_value: NCIT:A32 NCIT:C156421
+property_value: NCIT:A32 NCIT:C156422
+property_value: NCIT:A32 NCIT:C158874
+property_value: NCIT:A32 NCIT:C171435
+property_value: NCIT:A32 NCIT:C173263
+property_value: NCIT:A32 NCIT:C177570
+property_value: NCIT:A32 NCIT:C188396
+property_value: NCIT:A32 NCIT:C70729
+property_value: NCIT:NHC0 "C12391" xsd:string
+property_value: NCIT:P106 "Body Part, Organ, or Organ Component" xsd:string
+property_value: NCIT:P107 "Stomach" xsd:string
+property_value: NCIT:P108 "Stomach" xsd:string
+property_value: NCIT:P207 "C0038351" xsd:string
+property_value: NCIT:P322 "CDISC" xsd:string
+property_value: NCIT:P322 "CPTAC" xsd:string
+property_value: NCIT:P322 "CTDC" xsd:string
+property_value: NCIT:P322 "GDC" xsd:string
+property_value: NCIT:P322 "mCode" xsd:string
+property_value: NCIT:P322 "PCDC" xsd:string
+property_value: NCIT:P322 "UBERON" xsd:string
+property_value: NCIT:P325 "An expanded region of the vertebrate alimentary tract that serves as a food storage compartment and digestive organ. A stomach is lined, in whole or in part by a glandular epithelium." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="UBERON"}
+property_value: NCIT:P325 "An organ that is part of the digestive system. It helps in the digestion of food by mixing it with digestive juices and churning it into a thin liquid." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="NCI-GLOSS"}
+property_value: NCIT:P325 "The portion of the gastrointestinal tract located between the esophagus and the proximal duodenum." xsd:string {http://purl.obolibrary.org/obo/NCIT_P378="CDISC"}
+property_value: NCIT:P366 "Stomach" xsd:string
+property_value: NCIT:P375 "Stomach" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="max_tumor_bulk_site", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="sites_of_involvement", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="treatment_anatomic_sites", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="biospecimen_anatomic_site", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="primary_site", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="site_of_resection_or_biopsy", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="C16.9", http://purl.obolibrary.org/obo/NCIT_P396="ICDO3", http://purl.obolibrary.org/obo/NCIT_P397="3.2"}
+property_value: NCIT:P375 "Stomach, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Related To", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="C16.9", http://purl.obolibrary.org/obo/NCIT_P396="ICDO3", http://purl.obolibrary.org/obo/NCIT_P397="3.1"}
+property_value: NCIT:P375 "Stomach, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="progression_or_recurrence_anatomic_site", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
+property_value: NCIT:P375 "Stomach, NOS" xsd:string {http://purl.obolibrary.org/obo/NCIT_P393="Has Synonym", http://purl.obolibrary.org/obo/NCIT_P394="PT", http://purl.obolibrary.org/obo/NCIT_P395="tissue_or_organ_of_origin", http://purl.obolibrary.org/obo/NCIT_P396="GDC"}
