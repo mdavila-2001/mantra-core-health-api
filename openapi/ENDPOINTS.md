@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1526 de 1526 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1529 de 1529 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -46,7 +46,7 @@ Se documentan **1526 de 1526 endpoints** en **72 módulos**. La referencia compl
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 14 | [Abrir referencia](endpoints/marketing.md) |
 | `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
-| `messaging` | 17 | [Abrir referencia](endpoints/messaging.md) |
+| `messaging` | 20 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
 | `ops_console` | 9 | [Abrir referencia](endpoints/ops-console.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
