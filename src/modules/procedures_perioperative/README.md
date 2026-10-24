@@ -110,7 +110,7 @@ Se escriben 26 tablas de `procedures_perioperative.*`: `procedure_cases`,
 
 `surgical_safety_items` se lee (catálogo de ítems del checklist). `instrument_sets`,
 `sterilization_loads`, `sterility_verification_checks`, `procedure_outcomes` y
-`procedure_performers` no se tocan (ver *Pendiente*).
+`procedure_performers` no se tocan (ver *Fuera de este módulo*).
 
 ## Flujo general
 
@@ -251,20 +251,18 @@ El quirófano que exige `POST /procedure-cases` se resuelve con las lecturas de
 
 ## Pruebas
 
-`corepack yarn test src/modules/procedures_perioperative --runInBand --silent` — 6 suites y 149 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). El detalle por UUID debe recibir el mismo alcance de tenant que la agenda; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/procedures_perioperative.md).
+`corepack yarn test src/modules/procedures_perioperative --runInBand --silent` — 6 suites y 149 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). El detalle por UUID no aplica el alcance de tenant que sí aplica la agenda.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Esterilización**: `instrument_sets`, `sterilization_loads` y `sterility_verification_checks`
   pertenecen al circuito de central de esterilización, que el caso de uso no cubre en este módulo.
-- **Resultados a largo plazo**: `procedure_outcomes` se poblará desde el seguimiento clínico, no
-  desde el acto quirúrgico.
+- **Resultados a largo plazo**: `procedure_outcomes` no lo escribe el acto quirúrgico; sale del
+  seguimiento clínico.
 - **`procedure_performers`**: el modelo distingue el equipo del **caso** (que sí se registra) del
-  ejecutante del **procedimiento** codificado; lo segundo se poblará al consolidar el procedimiento
-  en la historia clínica.
-- **Conciliación de cargos**: `billing_claim_line_id` e `invoice_line_id` quedan sin poblar; los
-  fija facturación al consolidar, igual que el `journal_transaction_id` de ERP.
+  ejecutante del **procedimiento** codificado; lo segundo corresponde a la consolidación del
+  procedimiento en la historia clínica.
+- **Conciliación de cargos**: `billing_claim_line_id` e `invoice_line_id` los fija facturación al
+  consolidar, igual que el `journal_transaction_id` de ERP.
 - **Cronómetro del quirófano**: los eventos de utilización se registran, pero el cálculo agregado de
   ocupación y recambio por sala vive en reportes.
-- **Outbox**: `CaseScheduled`, `TimeOutCompleted`, `ImplantRecorded`, `OperativeReportSigned`,
-  `CaseCancelled` se emitirán cuando exista el módulo 35.

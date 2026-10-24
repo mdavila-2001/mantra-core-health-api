@@ -90,8 +90,7 @@ en el servicio (`LedgerService.assertBalanced` / `PostingHelper.post`) y, si no
 balancea, lanza `PreconditionFailedException` → **HTTP 422**, sin persistir nada
 (todo dentro de una única `em.transactional`). Los importes se comparan en
 centésimas enteras (`services/money.ts`) para evitar ruido de coma flotante. La
-conversión de entrada sigue pasando por `Number`; los límites de precisión y de
-alcance por práctica están documentados en la [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md).
+conversión de entrada sigue pasando por `Number`, con sus límites de precisión.
 
 ## Endpoints por caso de uso (UC-16-01..14, subconjunto)
 
@@ -193,8 +192,7 @@ Guard global de auth, sin `@Public()`. Los comandos administrativos exigen
 `SECURITY_ADMIN`; el flujo de borrador, clasificación y adjuntos admite además
 `PRACTITIONER`, y la aprobación admite `ACCOUNTING_APPROVER`. El servicio
 comprueba la vinculación activa del profesional para esas rutas. Los comandos
-administrativos todavía requieren la política de alcance por práctica y
-recurso descrita en la revisión.
+administrativos no aplican una política de alcance por práctica y recurso.
 
 ## Logs
 
@@ -217,8 +215,7 @@ secretos ni PHI.
 
 ## Límites conocidos
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/accounting.md)
-registra pendiente la validación de práctica/tenant y de recursos relacionados
-en writes, la clave de número de asiento, la aritmética decimal exacta y los
-topes de lotes. Las pruebas unitarias no sustituyen integración con PostgreSQL,
+Los writes no validan práctica/tenant ni los recursos relacionados; la clave de
+número de asiento, la aritmética decimal exacta y los topes de lotes tampoco
+están resueltos. Las pruebas unitarias no sustituyen integración con PostgreSQL,
 dos tenants ni pruebas de concurrencia.

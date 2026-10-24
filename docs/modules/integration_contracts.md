@@ -124,5 +124,4 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `contract_webhook_subscr
 
 ## Revisión ALOVIDA
 
-Los recursos resueltos por UUID aún no se comparan contra el tenant activo; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/integration_contracts.md).
+Los recursos resueltos por UUID no se comparan contra el tenant activo.

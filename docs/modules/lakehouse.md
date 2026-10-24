@@ -221,10 +221,10 @@ persistencia real de los payloads mínimos frente al DDL.
 
 - Las consultas por UUID de producto, dataset, definición, proyecto y release no reciben el tenant
   resuelto ni lo filtran. Los roles y el interceptor que compara `tenantId` de entrada no sustituyen
-  esa comprobación; ver [informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants).
+  esa comprobación.
 - Varios DTO permiten omitir campos que las tablas del lakehouse declaran `NOT NULL`; el payload
-  aceptado por validación puede fallar al persistir. Ver [LAKE-02](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-02--alta--contratos-opcionales-contra-columnas-not-null-producen-errores-de-orm).
-- Las respuestas de error usan códigos genéricos sin `reason` estable. Ver [LAKE-03](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-03--media--el-módulo-no-expone-reasons-estables-por-fallo-de-negocio).
+  aceptado por validación puede fallar al persistir.
+- Las respuestas de error usan códigos genéricos sin `reason` estable.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -232,17 +232,16 @@ persistencia real de los payloads mínimos frente al DDL.
   y así está: el linaje se registra dentro de `runTransformation`.
 - **UC-63-03 y UC-63-09 crean el agregado si no existe.** Ver "El upsert con id en la ruta".
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real de la transformación y de la de-identificación**: las hacen los workers. Este
   módulo registra lo que ya ocurrió.
 - **`authz.resource_scope_grants` (UC-63-10) y `authz.clinical_access_grants` (UC-63-11, 12)**: el
-  caso de uso pide crear y revocar el permiso temporal del investigador. Se publica por outbox —
-  `DatasetReleaseMaterialized` lleva `grantToUserId` y `expiresAt`, y `DatasetReleaseRevoked` lleva el
-  manifiesto— pero el alta y la baja del permiso son del módulo 05, que es de la parte de Pablo.
-- **`health_data.health_ingestion_batches` (UC-63-07)**: el caso de uso lo toma con `SKIP LOCKED`
-  para saber qué lote de-identificar. Aquí el worker lo indica; encadenarlo al batch pendiente exige
-  coordinar con el módulo 52.
+  permiso temporal del investigador se publica por outbox —`DatasetReleaseMaterialized` lleva
+  `grantToUserId` y `expiresAt`, y `DatasetReleaseRevoked` lleva el manifiesto—; el alta y la baja
+  del permiso son del módulo 05.
+- **`health_data.health_ingestion_batches` (UC-63-07)**: el worker indica qué lote de-identificar; el
+  módulo no lo toma de `health_ingestion_batches`.
 - **Barrido de releases vencidos (UC-63-12)**: el índice por `expires_at` está pensado para que un
   worker cierre los caducados. El endpoint existe y es idempotente; quien lo llama en bucle es el
   worker.

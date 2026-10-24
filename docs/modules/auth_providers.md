@@ -168,7 +168,7 @@ referencia al vault, nunca el secreto.
 `corepack yarn test src/modules/auth_providers --runInBand --silent` — 96 pruebas (84 de servicio + 12 de delegación del
 controlador).
 
-## Pendiente
+## Fuera de este módulo
 
 - **Descubrimiento remoto del JWKS**: el endpoint acepta las claves ya descubiertas
   (`discoveredKeys`); traerlas del `jwks_uri` o del documento de descubrimiento corresponde al
@@ -179,14 +179,8 @@ controlador).
   tokens es de `iam`.
 - **Aprovisionamiento del usuario local**: `auto_provision` y `default_role_concept_id` quedan
   declarados en el vínculo; crear el usuario y asignarle el rol es de `iam`.
-- **Proyección `read_models.provider_mapping_v`**: la nota del caso de uso la declara eventual vía
-  outbox; se poblará con el módulo 35.
-- **Outbox**: `ProviderRegistered`, `SigningKeyRotated`, `FederatedLoginSucceeded`,
-  `IdentityUnlinked` se emitirán cuando exista el módulo 35.
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 detectó que las URL de protocolo se validan sólo
-como texto y deben restringirse antes de configurarlas o entregarlas al conector
-de red. El detalle y la matriz de pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/auth_providers.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/auth_providers.md).
+Las URL de protocolo se validan sólo como texto: no se restringen antes de
+configurarlas o entregarlas al conector de red.

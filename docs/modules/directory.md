@@ -103,8 +103,7 @@ entidad legal reutilizan conceptos transversales (`CONCEPTS.*`).
 - Guard global de auth; administración interna decidida por membresía activa de
   tenant y plataformas; el ownership exige OWNER.
 - Logs Pino estructurados por operación (`directory.*`), sin secretos ni PHI.
-- La falta de `reason` estable en varias denegaciones está documentada en la
-  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/directory.md).
+- Varias denegaciones no llevan `reason` estable.
 
 ## Tests
 

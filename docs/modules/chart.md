@@ -89,8 +89,7 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_plan_activities`
   antes de llegar al controlador; el servicio no lo repite.
 - **Relación paciente–encuentro.** Las altas que reciben ambos UUID requieren
   validación explícita de que el encuentro pertenece al paciente antes de
-  persistirlos. Esa validación no está completa todavía; ver la
-  [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/chart.md).
+  persistirlos, y esa validación no está completa.
 - **Lectura (`GET /charts/patients/:id/chart`).** Cada documento trae
   `files[]` — `fileId`, `contentRole` (`PRIMARY`/`ATTACHMENT`) y `ordinal` —,
   ordenados por `ordinal`, resueltos en una sola consulta por lote para todos

@@ -15,7 +15,7 @@
 
 # `clinical_ext` — coordinación y soporte clínico
 
-El módulo implementa equipos de cuidado, reglas CDS, alertas, interacciones, plantillas de órdenes, referencias, brechas de cuidado, calendario de inmunización, encuentros virtuales y favoritos de prescripción. Tiene ocho controladores y **27 endpoints**. La [revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical_ext.md) documenta los hallazgos y las pruebas pendientes; este README describe el código de la rama actual.
+El módulo implementa equipos de cuidado, reglas CDS, alertas, interacciones, plantillas de órdenes, referencias, brechas de cuidado, calendario de inmunización, encuentros virtuales y favoritos de prescripción. Tiene ocho controladores y **27 endpoints**. Este README describe el código de la rama actual.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -164,7 +164,7 @@ Las dependencias externas incluyen perfiles de paciente y profesional, `clinical
 - Encuentro virtual: creación para un encuentro, unión de participantes y finalización; el servicio verifica relación del actor con el encuentro.
 - Favorito: listado, creación y borrado vinculados al perfil profesional de la cuenta.
 
-Las comprobaciones de duplicado mediante lectura previa carecen de índices únicos para brechas, referencias y encuentros virtuales en el DDL versionado. Esta y las demás limitaciones, con evidencia y plan, constan en la [revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical_ext.md).
+Las comprobaciones de duplicado mediante lectura previa carecen de índices únicos para brechas, referencias y encuentros virtuales en el DDL versionado.
 
 ## Pruebas y estado de revisión
 

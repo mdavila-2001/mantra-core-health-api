@@ -38,7 +38,7 @@ El mapa refleja archivos y scripts de esta rama; no significa que los 24 proceso
 - `run-tick.util.ts`: evita que se solape el mismo tick en un proceso, limita su duración y registra su resultado. El job debe diseñar idempotencia y exclusión entre réplicas según su recurso.
 - `system-api-client.service.ts`: obtiene token `SYSTEM` para la API; `GET` se puede reintentar, `POST` sólo cuando el job declara `idempotent: true`.
 - `worker-lifecycle.service.ts`: al apagar, deja de admitir ticks raíz y espera los existentes hasta `WORKER_DRAIN_TIMEOUT_MS`.
-- `worker-health.server.ts`: `GET /health`/`liveness`, `/readiness` y `/status` en `WORKER_HEALTH_PORT` (9100 por defecto; 0 deshabilita). La sonda escucha en todas las interfaces por defecto y `/status` no exige autenticación: revisá el [riesgo documentado](../../docs/revision-backend-2026-10-04/workers/worker-framework.md#wf-01--alto-status-entrega-mensajes-de-error-no-saneados-por-una-sonda-abierta) antes de exponer ese puerto.
+- `worker-health.server.ts`: `GET /health`/`liveness`, `/readiness` y `/status` en `WORKER_HEALTH_PORT` (9100 por defecto; 0 deshabilita). La sonda escucha en todas las interfaces por defecto y `/status` no exige autenticación y entrega mensajes de error sin sanear: no conviene exponer ese puerto.
 - `worker.env.ts`: esquema Joi y defaults de URL de API, plazos, salud, reintentos, concurrencia y proveedores. Los esquemas específicos se agregan desde el entrypoint cuando corresponde.
 
 ## Pruebas
@@ -47,4 +47,4 @@ El mapa refleja archivos y scripts de esta rama; no significa que los 24 proceso
 corepack yarn test --runInBand --silent src/worker
 ```
 
-El comando sólo prueba el marco y specs bajo `src/worker`, no ejecuta los 24 jobs de punta a punta. Consultá [la revisión del marco](../../docs/revision-backend-2026-10-04/workers/worker-framework.md) y la [revisión de los 24 jobs](../../docs/revision-backend-2026-10-04/workers/jobs-24.md) para límites, hallazgos y correcciones.
+El comando sólo prueba el marco y specs bajo `src/worker`, no ejecuta los 24 jobs de punta a punta.

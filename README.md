@@ -89,4 +89,3 @@ La API y los workers tienen bootstrap de telemetría y pueden exportar trazas po
 - Imagen y stack: [`Dockerfile`](Dockerfile), [`docker-compose.yml`](docker-compose.yml), [`docker-compose.coolify.yml`](docker-compose.coolify.yml).
 - Despliegue, rollback, salud y mantenimiento: [operaciones](docs/operations/deployment.md) y [runbooks](docs/operations/runbooks/index.md).
 - Contratos: [`openapi/`](openapi/), [`asyncapi/`](asyncapi/) y sitio MkDocs (`mkdocs.yml`).
-- Hallazgos y plan de corrección: [revisión del backend](docs/revision-backend-2026-10-04/README.md).

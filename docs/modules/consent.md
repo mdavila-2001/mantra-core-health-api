@@ -130,7 +130,6 @@ NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/consent   # verde
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/consent.md)
-registra pendientes de alcance para decisiones, retiro y revocación de
-consentimiento, además del fallback al tenant seed. La corrida dirigida pasó
-13 suites y 54 tests; faltan pruebas de dos tenants y de titularidad del paciente.
+Las decisiones, el retiro y la revocación de consentimiento no acotan el alcance
+del actor, y existe el fallback al tenant seed. La corrida dirigida pasó 13
+suites y 54 tests; no hay pruebas de dos tenants ni de titularidad del paciente.

@@ -16,8 +16,7 @@
 # IAM
 
 Identidad y acceso de ALOVIDA: cuentas, credenciales, sesiones y refresh tokens,
-MFA, dispositivos, roles globales, bloqueos y eventos de seguridad. La revisión de
-esta unidad está en [el informe de IAM](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/iam.md).
+MFA, dispositivos, roles globales, bloqueos y eventos de seguridad.
 
 ## Rutas HTTP y alcance (medido)
 

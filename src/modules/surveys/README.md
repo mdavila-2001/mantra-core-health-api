@@ -95,18 +95,16 @@ por dominio propio.
   una `scheduling.appointment_bookings` en `BOOKING_COMPLETED`; sin invitación no
   hay forma de responder. Es la regla que ALOVIDA fija explícitamente.
 - **Emisión secuencialmente idempotente.** El servicio detecta una invitación ya
-  emitida por `(reserva, versión)`, pero el DDL aún no impone la unicidad: dos
-  solicitudes concurrentes pueden duplicarla. Ver la revisión
-  [`SURV-02`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
+  emitida por `(reserva, versión)`, pero el DDL no impone la unicidad: dos
+  solicitudes concurrentes pueden duplicarla.
 - **Ventana congelada al emitir.** `expires_at` se deriva de
   `response_window_days` en el momento de la emisión; cambiar el plazo después no
   mueve una ventana ya prometida.
 - **Envío único y atómico.** Todas las obligatorias o ninguna; una invitación
   respondida no admite un segundo envío.
 - **`value[x]` exclusivo en servicio**, igual que `forms.field_values`: el
-  servicio normaliza una única columna `value_*` por fila. Falta el `CHECK` de
-  respaldo en la base; ver
-  [`SURV-02`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-02--alta--idempotencia-y-unicidad-dependen-de-comprobaciones-en-memoria-sin-respaldo-del-ddl).
+  servicio normaliza una única columna `value_*` por fila. La base no tiene un
+  `CHECK` de respaldo.
 - **Desactivar ≠ borrar.** Corta las emisiones nuevas; lo ya emitido sigue siendo
   contestable y lo ya respondido, legible.
 
@@ -123,9 +121,8 @@ Cómo se sostiene acá:
    visibilidad pública. No hay estado que alguien pueda fijar por error.
 2. **El paciente no se identifica por parámetro.** Las rutas `/surveys/me/*` no
    aceptan `patientProfileId`: sale del claim `pid` de la sesión. Este filtro no
-   incorpora todavía el tenant de la sesión, por lo que no aísla a un paciente
-   que atiende en más de una organización; ver
-   [`SURV-01`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md#surv-01--crítica--el-autoservicio-de-paciente-no-limita-invitaciones-al-tenant-activo).
+   incorpora el tenant de la sesión, por lo que no aísla a un paciente que
+   atiende en más de una organización.
 3. **La autorización de lectura es por dueño, no por rol.** Dos profesionales de
    la misma organización comparten roles y no comparten instrumentos; las
    respuestas se leen colgando de `GET /surveys/templates/:id/responses`, que
@@ -145,19 +142,15 @@ vistas de paciente de M41 scheduling.
 - Unit: `corepack yarn test src/modules/surveys --runInBand --silent` — 3 suites
   y 65 pruebas aprobadas el 2026-10-05. Cubre propiedad de plantilla,
   invitación ajena, sesión sin perfil y validación por tipo; no cubre aislamiento
-  de tenant en autoservicio ni carreras de persistencia. Ver la
-  [revisión backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/surveys.md).
+  de tenant en autoservicio ni carreras de persistencia.
 
 ## Notas de integración
 
-### 1. Emisión automática al cerrar la cita — PENDIENTE, coordinar con C07/C08
+### 1. La emisión es un comando explícito
 
-Hoy la emisión es un comando explícito (`POST /surveys/invitations`). Lo natural
-es encadenarla al cierre de la cita, pero ese cierre vive en `scheduling`, que es
-dominio de otro carril, y el protocolo prohíbe invadirlo a ciegas.
-
-Cuando se coordine: `SurveysAssignmentsService.issueForBooking` es idempotente y
-seguro de llamar desde el cierre; no hace falta ninguna guarda extra del lado de
+La invitación se emite con `POST /surveys/invitations`; el cierre de la cita en
+`scheduling` no la dispara. `SurveysAssignmentsService.issueForBooking` es
+idempotente y seguro de llamar desde ese cierre sin guardas extra del lado de
 `scheduling`.
 
 ### 2. Claim `pid` expuesto en `AuthenticatedUser` — cambio en contrato compartido
@@ -167,20 +160,17 @@ ningún servicio podía saber de qué paciente era la sesión. Se agregó
 `AuthenticatedUser.patientProfileId` de forma **aditiva**: nada que dependa del
 contrato anterior cambia de comportamiento.
 
-### 3. Tipo de atención sin resolver desde la reserva — DEUDA
+### 3. Asignación por tipo de atención rechazada
 
 El modelo admite asignar por `CARE_TYPE` porque ALOVIDA lo pide, pero ni
 `scheduling.appointment_bookings` ni `scheduling.bookable_slots` llevan
 referencia al tipo de atención (solo `service_concept_id`). Una asignación así
 nunca emitiría nada, así que **se rechaza al crearla**, con el motivo explícito,
-en vez de aceptarla y fallar en silencio. Se habilita en cuanto `scheduling`
-incorpore el campo.
+en vez de aceptarla y fallar en silencio.
 
-### 4. Indicadores agregados y exportación anonimizada — FUERA DE ALCANCE
+### 4. Sin indicadores agregados ni exportación anonimizada
 
-ALOVIDA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero la decisión **D-13**
-—cuál es el umbral mínimo de participantes para publicar un agregado— está
-**abierta**, y `alovida-blocked-decisions` dice literalmente que congela la parte
-de agregación: *«se puede modelar la encuesta sin el umbral, pero no se puede
-publicar ningún agregado sin él»*. El carril 10 ya lo acota a «si ya existe
-soporte». Se implementa cuando D-13 se resuelva.
+ALOVIDA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero publicar un agregado exige
+el umbral mínimo de participantes (decisión **D-13**), que no está definido: *«se
+puede modelar la encuesta sin el umbral, pero no se puede publicar ningún
+agregado sin él»*. El módulo no los ofrece.

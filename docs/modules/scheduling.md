@@ -207,15 +207,13 @@ tenants ni nada contra una base real.
 - Los veredictos del vínculo (`'sin-vinculos'`, `'aprobado'`, `'pendiente'`, `'ausente'`,
   `'no-vigente'`) viajan en `details.vinculo` de los 422; por eso no se tradujeron.
 
-## Pendiente
+## Límites de la estructura
 
-- Separar el modelo de dominio de la entidad ORM (A3): `application/` aún usa las entidades
-  generadas y los repositorios propios (única excepción de capas, declarada en el spec de
-  arquitectura).
-- `dto/` sigue en archivos de 1 100+ líneas por área.
-- La proyección vía `messaging.outbox_events` (recordatorios reales) depende del módulo 35.
+- `application/` usa las entidades generadas y los repositorios propios como puerto de
+  persistencia (decisión A3: única excepción de capas, declarada en el spec de arquitectura).
+- `dto/` está en archivos de 1 100+ líneas por área.
 
-### `generateSlots` respeta la zona horaria del recurso
+## `generateSlots` respeta la zona horaria del recurso
 
 `schedulable_resources.time_zone` se usa para materializar cupos: las reglas de una plantilla
 declaran **hora de pared de la sede** («los lunes de 08:00 a 12:00» son las ocho de la mañana
@@ -240,7 +238,5 @@ Tres cosas que el arreglo tuvo que resolver, y que conviene no deshacer:
 Como el barrido de días locales se ensancha un día por lado, los cupos se recortan a la ventana
 pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día anterior.
 
-**Pendiente relacionado:** `tools/alovida/seed-dev-data.mjs` declara sus franjas ya convertidas con
-`horaUtcDeLocal`, una compensación deliberada de cuando el generador era incorrecto. Ahora que
-`generateSlots` lee `time_zone`, esa función sobra y las franjas deberían volver a declararse en
-hora local — vive en `salud-db`/`tools`, fuera del alcance de este cambio.
+`tools/alovida/seed-dev-data.mjs` declara sus franjas en hora local de la sede (`08:00`–`12:00`)
+y crea el recurso con `timeZone: 'America/La_Paz'`; la conversión a UTC la hace `generateSlots`.

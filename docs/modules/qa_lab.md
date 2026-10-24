@@ -80,7 +80,7 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `assertion_results`, `
 `test_case_results`, `assertion_results`, `request_payloads`, `response_payloads`, `run_artifacts`,
 `test_defects`, `test_schedules`.
 
-`test_fixtures` existe en el modelo pero no se escribe desde aquí (ver *Pendiente*).
+`test_fixtures` existe en el modelo pero no se escribe desde aquí (ver *Fuera de este módulo*).
 
 ## Flujo general
 
@@ -152,24 +152,16 @@ loguean payloads ni valores capturados.
 `corepack yarn test src/modules/qa_lab --runInBand --silent` — 5 suites y 99 pruebas
 aprobadas durante la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real de la petición**: este módulo captura y consolida evidencia, pero no llama al
   sistema bajo prueba. El runner lo hace y envía lo capturado a
   `POST /runs/:runId/cases/:caseId/execute`.
-- **Evaluación real de la aserción**: `evaluateResult` consolida el veredicto por aserción y decide
-  el estado del caso; comparar el valor real contra el esperado corresponde al runner, que conoce la
-  respuesta. Aquí se marca como aprobada la aserción cuyo valor esperado está declarado — es lo que
-  el modelo permite decidir sin ejecutar la petición.
-- **Fixtures**: `test_fixtures` (datos de preparación de casos) se poblará cuando el runner los
-  necesite; hoy `setup_json` y `teardown_json` del caso cubren el escenario simple.
-- **Disparo programado**: `test_schedules` guarda cron y `next_run_at`; el tick que las dispara
-  vivirá donde el planificador, igual que en reportes.
+- **Fixtures**: `test_fixtures` (datos de preparación de casos) no se escribe desde aquí;
+  `setup_json` y `teardown_json` del caso cubren el escenario simple.
 - **Enmascarado por registro de campos**: el caso de uso apunta a `system_ops.field_registry` para
   decidir qué campo es sensible. Aquí se enmascara **todo** el cuerpo cuando el entorno no es
-  seguro, que es la opción conservadora; afinar por campo llegará con ese registro.
-- **Outbox**: `TestRunQueued`, `TestCaseFailed`, `ReleaseEvidenceLinked` se emitirán cuando exista
-  el módulo 35.
+  seguro, que es la opción conservadora.
 
 ## Ejecución en el servidor y evaluación real (2026-09-18)
 
@@ -184,8 +176,7 @@ aprobadas durante la revisión.
 
 ## Revisión ALOVIDA
 
-Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_lab.md).
+Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo.
 
 ## Catálogo de flujos (2026-10-17)
 

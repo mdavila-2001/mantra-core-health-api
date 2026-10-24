@@ -81,7 +81,7 @@ lo cierra limpiamente en `onModuleDestroy` (`quit()`). Exporta
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 detectó que el consumo de challenges usa `GET` y `DEL` separados, por lo que debe hacerse atómico antes de usarlo para OTP o confirmaciones. El plan y las pruebas están en [`docs/revision-backend-2026-10-04/modulos/redis_runtime.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/redis_runtime.md).
+El consumo de challenges usa `GET` y `DEL` separados: no es atómico, así que no sirve para OTP ni confirmaciones.
 
 ```bash
 corepack yarn test src/modules/redis_runtime --runInBand --silent
@@ -89,8 +89,6 @@ corepack yarn test src/modules/redis_runtime --runInBand --silent
 
 ## Gancho de integración (bonus, no implementado aquí)
 
-`common/services/contact-points.service.ts` marca hoy `verified=true` a ciegas.
-Con este módulo puede exigir un OTP real: emitir con `putChallenge(tenant,
-'contact:{contactPointId}', otp, ttl)` y confirmar con `verifyChallenge(...)`
-antes de marcar verificado. La modificación de `contact-points` queda para otra
-fase.
+`common/services/contact-points.service.ts` marca `verified=true` a ciegas: no usa
+este módulo. Un OTP real se emitiría con `putChallenge(tenant,
+'contact:{contactPointId}', otp, ttl)` y se confirmaría con `verifyChallenge(...)`.

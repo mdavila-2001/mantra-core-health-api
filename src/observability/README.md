@@ -14,9 +14,7 @@ credenciales ni datos clínicos.
 | `http-sli/` | Medición de peticiones HTTP para el portal de superadministración (ver abajo). |
 
 Ejecutar `corepack yarn test --runInBand --silent src/observability`. Los spans
-usan atributos técnicos, nunca contenido clínico o payloads. El informe de
-bootstrap, readiness y persistencia está
-[aquí](../../docs/revision-backend-2026-10-04/nucleo/app-persistencia-observabilidad.md).
+usan atributos técnicos, nunca contenido clínico o payloads.
 
 ## Medición de peticiones HTTP (`http-sli/`)
 

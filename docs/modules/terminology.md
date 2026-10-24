@@ -206,11 +206,8 @@ NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/terminology
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 detectó que la escritura de políticas de catálogo
-por tenant requiere una comprobación de ámbito organizacional adicional. También
-registró límites que faltan en colecciones de entrada. El plan de corrección y la
-matriz de pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/terminology.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/terminology.md).
+La escritura de políticas de catálogo por tenant no comprueba el ámbito
+organizacional, y algunas colecciones de entrada no tienen límite.
 
 ```bash
 corepack yarn test src/modules/terminology --runInBand --silent

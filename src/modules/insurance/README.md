@@ -295,7 +295,7 @@ Reglas que no se deducen del código:
   están** `POST …/:id/invoice` ni `POST …/:id/invoice/annulment`, y `invoice`
   viaja siempre `null`: el modelo no declara dónde vive la factura del prestador
   a la aseguradora (`billing.invoices` exige práctica y paciente y no tiene
-  anulación). Es una decisión de modelo pendiente (ADR-0021).
+  anulación).
 
 ## Contenido
 
@@ -324,9 +324,5 @@ Reglas que no se deducen del código:
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/insurance.md)
-identificó pendientes en el camino legacy de reclamos, conciliación, roles de
-lectura, cálculo de varianza y límites de lotes. La corrida dirigida actual
-deja 37 suites y 626 tests pasando, con un test rojo que espera una matriz de
-roles distinta de la que hoy declara el controlador. Esa discrepancia debe
-resolverse con una decisión de acceso y pruebas HTTP por tenant.
+El camino legacy de reclamos, la conciliación, los roles de lectura, el cálculo
+de varianza y los límites de lotes tienen alcance incompleto.

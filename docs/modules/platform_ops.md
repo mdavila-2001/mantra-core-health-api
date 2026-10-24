@@ -206,14 +206,9 @@ aprobadas durante la revisión.
 - **Guardrail de capacidad**: `capacity_plans.cost_guardrails_json` es JSON libre; el módulo lee de
   él la clave `maxUtilizationPercent`. La convención está documentada en `services/`.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Outbox** (módulo 35): `ChangeRequestOpened`, `ChangeApproved`, `ArtifactPublished`,
-  `DeploymentStarted/Succeeded/RolledBack`, `HealthCheckFailed`, `IncidentOpened`,
-  `IncidentStatusChanged`, `PostmortemOpened`, `SloMeasured`, `ErrorBudgetBurn`,
-  `DeploymentFreezeActivated`, `CapacityMeasured`, `ReadinessReviewCompleted`,
-  `RunbookVersionPublished`, `RunbookExecuted`, `ResilienceExerciseCompleted`.
-- **Proyecciones**: `read_models.*` e índices de `search_platform` los alimenta el outbox.
+- **Proyecciones**: `read_models.*` e índices de `search_platform` se alimentan desde el outbox.
 - **Series temporales**: `deployment_frequency_series`, `change_failure_rate_series` (DORA),
   `health_check_latency_series`, `slo_attainment_series`, `error_budget_burn_series`,
   `capacity_utilization_series`, `mttr_series`, `dr_rto_series` viven en `time_series` (módulo 49).
@@ -222,10 +217,8 @@ aprobadas durante la revisión.
 - **Cálculo del burn rate**: se registra el ritmo, no se calcula. El evaluador de SLO lo computa
   fuera y lo reporta aquí.
 - **Guardia y escalado**: `operational_teams`, `on_call_schedules`, `on_call_shifts` y
-  `escalation_policies` están en el esquema pero ningún caso de uso del módulo los opera; su gestión
-  llegará con los casos de uso que los declaren.
+  `escalation_policies` están en el esquema pero ningún caso de uso del módulo los opera.
 
 ## Revisión ALOVIDA
 
-Los recursos operativos resueltos por UUID aún no se acotan al tenant activo; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/platform_ops.md).
+Los recursos operativos resueltos por UUID no se acotan al tenant activo.
