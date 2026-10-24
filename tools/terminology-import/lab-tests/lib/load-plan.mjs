@@ -125,7 +125,9 @@ export function designationTuples(r) {
 export function relationshipTuples(r) {
   return r.relations.map((x) => {
     const target = conceptIdFor(x.targetCodeSystem, x.targetCode);
-    return [md5uuid(`mantra:lab-tests:rel:${x.type}:${r.id}:${target}`), r.id, target, RELATION[x.type], x.ordinal ?? null];
+    // El orden entra al id: un formulario LOINC puede repetir el mismo miembro en dos posiciones.
+    const position = x.ordinal == null ? '' : `:${x.ordinal}`;
+    return [md5uuid(`mantra:lab-tests:rel:${x.type}:${r.id}:${target}${position}`), r.id, target, RELATION[x.type], x.ordinal ?? null];
   });
 }
 

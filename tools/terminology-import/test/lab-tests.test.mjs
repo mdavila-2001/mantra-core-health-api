@@ -16,7 +16,7 @@ import { md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { loincDomain } from '../lab-tests/lib/domains.mjs';
 import { TEST_VERSION_COLUMNS, conditionGeneMap, gtrRecords, methodCategoryMap, parseTsv } from '../lab-tests/lib/gtr.mjs';
 import { thoRecords } from '../lab-tests/lib/hl7-tho.mjs';
-import { RELATION, buildPlan, planSummary } from '../lab-tests/lib/load-plan.mjs';
+import { RELATION, buildPlan, planSummary, relationshipTuples } from '../lab-tests/lib/load-plan.mjs';
 import { loincRecords, parseLinguisticIndex, parseLinguisticVariant, parseLoincTable, parsePanels } from '../lab-tests/lib/loinc.mjs';
 import { assertRecord, conceptIdFor, propertyIdFor } from '../lab-tests/lib/records.mjs';
 import { addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pamiOfficialItems, pcsAxisNames, pcsItems, pcsOrderFile, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
@@ -122,6 +122,19 @@ test('dominios: reglas por CLASS/CLASSTYPE; lo no reconocido queda sin dominio',
   assert.equal(loincDomain('PULM', '2').domain, 'functional');
   assert.equal(loincDomain('H&P.HX', '2').domain, null);
   assert.equal(loincDomain('SURVEY.X', '4').domain, null);
+});
+
+test('relaciones: un miembro repetido en el mismo panel conserva cada posición (NLM 41200-7 repite 50546-1 en 273 y 274)', () => {
+  const r = { id: conceptIdFor('loinc', '50546-1'), relations: [
+    { type: 'part-of', targetCodeSystem: 'loinc', targetCode: '41200-7', ordinal: 273 },
+    { type: 'part-of', targetCodeSystem: 'loinc', targetCode: '41200-7', ordinal: 274 },
+  ] };
+  const t = relationshipTuples(r);
+  assert.equal(new Set(t.map((x) => x[0])).size, 2);
+  assert.deepEqual(t.map((x) => x[4]), [273, 274]);
+  // Sin orden (jerarquía «es un» de HL7), el id no cambia respecto de la versión anterior.
+  const isA = { id: conceptIdFor('hl7-v2-0487', 'ABS'), relations: [{ type: 'is-a', targetCodeSystem: 'hl7-v2-0487', targetCode: 'X' }] };
+  assert.equal(relationshipTuples(isA)[0][0], md5uuid(`mantra:lab-tests:rel:is-a:${isA.id}:${conceptIdFor('hl7-v2-0487', 'X')}`));
 });
 
 test('plan de carga: relaciones dentro del plan, value sets y conteos deterministas', () => {

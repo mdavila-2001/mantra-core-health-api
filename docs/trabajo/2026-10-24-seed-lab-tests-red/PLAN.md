@@ -28,42 +28,61 @@
 **CA:** Dado tx.fhir.org y NLM accesibles, cuando corre el build, entonces la capa `loinc` tiene
 cada término con clase, CLASSTYPE, estado, ORDER_OBS, nombres es-MX / es-AR cuando existen, y los
 paneles tienen sus miembros.
-**DoD:** `build-lab-tests.mjs --loinc-txfhir` → capa `lab-tests-loinc` con su conteo; tests verdes.
-**Estado:** TODO
+**DoD:** `build-lab-tests.mjs` (usa tx.fhir.org + NLM si no hay zip; el flag `--loinc-txfhir` no hizo falta) → capa `lab-tests-loinc` con su conteo; tests verdes.
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H5.S1.M1 | Descubrir todas las clases LOINC (regex por inicial + exclusión de las halladas) | Ninguna inicial devuelve códigos fuera de las clases halladas | `fetch-loinc-txfhir.mjs` → «clases: N, residuo 0» | TODO |
-| H5.S1.M2 | Enumerar los términos de cada clase con designaciones | Clase > 3 000 se parte por `COMPONENT` sin perder códigos | log por clase: «códigos = suma de particiones» | TODO |
-| H5.S1.M3 | Estado y ORDER_OBS por clase | Cada término lleva STATUS y ORDER_OBS o queda en el valor por omisión documentado | conteos por valor en el meta | TODO |
-| H5.S2.M1 | NLM: COMPONENT, PROPERTY, METHOD_TYP, unidades (con rango si la fuente lo trae) | Prefijos con total ≤ 7 500 | `fetch-loinc-ctss.mjs` → total = suma de hojas | TODO |
-| H5.S2.M2 | NLM: miembros de paneles (`loinc_form_definitions`) | Cada panel incluido tiene su definición o queda registrado sin ella | conteo en el meta | TODO |
-| H5.S3.M1 | Adaptador tx.fhir.org + NLM → filas de `loincRecords` | Test con recorte real | `node --test …` → ok | TODO |
-| H5.S3.M2 | Carga en Postgres desechable, 2 corridas | 2.ª = 0 | `evidencia/` | TODO |
+| H5.S1.M1 | Descubrir todas las clases LOINC (regex por inicial + exclusión de las halladas) | Ninguna inicial devuelve códigos fuera de las clases halladas | `fetch-loinc-txfhir.mjs` → «clases: N, residuo 0» | HECHO |
+| H5.S1.M2 | Enumerar los términos de cada clase con designaciones | Clase > 3 000 se parte por `COMPONENT` sin perder códigos | log por clase: «códigos = suma de particiones» | HECHO |
+| H5.S1.M3 | Estado y ORDER_OBS por clase | Cada término lleva STATUS y ORDER_OBS o queda en el valor por omisión documentado | conteos por valor en el meta | HECHO |
+| H5.S2.M1 | NLM: COMPONENT, PROPERTY, METHOD_TYP, unidades (con rango si la fuente lo trae) | Prefijos con total ≤ 7 500 | `fetch-loinc-ctss.mjs` → total = suma de hojas | HECHO |
+| H5.S2.M2 | NLM: miembros de paneles (`loinc_form_definitions`) | Cada panel incluido tiene su definición o queda registrado sin ella | conteo en el meta | HECHO |
+| H5.S3.M1 | Adaptador tx.fhir.org + NLM → filas de `loincRecords` | Test con recorte real | `node --test …` → ok | HECHO |
+| H5.S3.M2 | Carga en Postgres desechable, 2 corridas | 2.ª = 0 | `evidencia/` | HECHO |
 
 ## H6 — NCBI Genetic Testing Registry
 **CA:** Dado `test_version.gz` del FTP de GTR, cuando corre el build, entonces cada test vigente
 es un concepto con laboratorio, país, métodos, categorías de método, genes y condiciones.
 **DoD:** capa `lab-tests-gtr` con su conteo; test con filas reales; carga idempotente.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H6.S1.M1 | Descargar GTR con SHA-256 | Archivo y hash en el manifiesto | `fetch-gtr.mjs` | TODO |
-| H6.S1.M2 | Parser por cabecera; sólo la versión vigente de cada test | Un test aparece una vez | test con filas reales | TODO |
-| H6.S1.M3 | Categoría = categoría mayor de método (archivo oficial `tests_by_method_category.txt`) | Sin categorías inventadas | test | TODO |
+| H6.S1.M1 | Descargar GTR con SHA-256 | Archivo y hash en el manifiesto | `fetch-gtr.mjs` | HECHO |
+| H6.S1.M2 | Parser por cabecera; sólo la versión vigente de cada test | Un test aparece una vez | test con filas reales | HECHO |
+| H6.S1.M3 | Categoría = categoría mayor de método (archivo oficial `tests_by_method_category.txt`) | Sin categorías inventadas | test | HECHO |
 
 ## H7 — Entrega por pasada
 **CA:** Dada cada pasada, cuando termina, entonces está commiteada y empujada, y `data/` y el
 registro de pasadas están al día.
 **DoD:** `git push` por pasada; PR contra `dev` (no draft, sin mergear); REPORTE.md.
-**Estado:** TODO
+**Estado:** EN CURSO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H7.S1.M1 | Push tras H5 | rama remota = local | `git rev-parse HEAD origin/<rama>` | TODO |
-| H7.S1.M2 | Push tras H6 | idem | idem | TODO |
-| H7.S1.M3 | PR y REPORTE | PR abierto, no draft | link | TODO |
+| H7.S1.M1 | Push tras H5 | rama remota = local | `git rev-parse HEAD origin/<rama>` | HECHO |
+| H7.S1.M2 | Push tras H6 | idem | idem | HECHO |
+| H7.S1.M3 | PR y REPORTE | PR abierto, no draft | link | EN CURSO |
+
+## H8 — Trabajo no previsto, agregado al plan (§1.3)
+**CA:** Dado el catálogo con la red abierta, cuando se cotejan las redistribuciones y se agregan las
+fuentes oficiales alcanzables, entonces cada fuente es la oficial o está cotejada, o el no-cotejo queda
+declarado; y una carga completa desde `data/` es idempotente con el conteo exacto del plan.
+**DoD:** tests verdes; dos cargas completas en Postgres 16 desechable (2.ª = 0) con relaciones = plan.
+**Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
+|---|---|---|---|---|
+| H8.S1.M1 | Pasada 11: CUPS (datos.gov.co) como capa | Capa `cups-co` con conteo | `build-lab-tests.mjs` → `cups-co: 2158` | HECHO |
+| H8.S1.M2 | Pasada 11: designaciones CIE-10-ES para ICD-10-PCS | Cada código PCS con traducción oficial la lleva | test `addCie10esDesignations` | HECHO |
+| H8.S2.M1 | Pasada 12: TUSS cotejado con el ZIP de la ANS | 0 diferencias | registro de la pasada 12 | HECHO |
+| H8.S2.M2 | Pasada 12: PAMI desde el CSV oficial | Nombres verbatim | test `pamiOfficialItems` | HECHO |
+| H8.S2.M3 | Pasada 12: ICD-10-PCS FY2027 desde CMS | 4 402 incluidos | test `pcsOrderFile` + build | HECHO |
+| H8.S3.M1 | Pasadas 14 y 15 registradas | Filas en `docs/seed-research/lab-tests.md` | lectura del doc | HECHO |
+| H8.S4.M1 | Relación de panel con miembro repetido conserva cada posición | 2 ids distintos para 2 posiciones | `node --test` → test «miembro repetido» ok | HECHO |
+| H8.S4.M2 | Carga completa desde `data/`, 2 corridas, base nueva | corrida 1 = plan (18 236 relaciones); corrida 2 = 0 | `evidencia/carga-completa-desde-data-postgres16.txt` | HECHO |
+| H8.S5.M1 | Merge de `dev` sin regresiones | typecheck, lint y tests verdes tras el merge | `corepack yarn typecheck`, `corepack yarn lint`, `node --test` | HECHO |
 
 ## Riesgos y bloqueos previstos
 
