@@ -84,6 +84,9 @@ function main() {
     ['cache/cima/fetch.meta.json', cpCache('cima', 'fetch.meta.json')],
     ['cache/rxnav/fetch.meta.json', cpCache('rxnav', 'fetch.meta.json')],
     ['cache/openfda/fetch.meta.json', join(openFdaDir(), 'fetch.meta.json')],
+    ['cache/ema/fetch.meta.json', cpCache('ema', 'fetch.meta.json')],
+    ['cache/eml/fetch.meta.json', cpCache('eml', 'fetch.meta.json')],
+    ['cache/dailymed/fetch.meta.json', cpCache('dailymed', 'fetch.meta.json')],
   ];
   for (const [from, path] of small) {
     if (!existsSync(path)) continue;
