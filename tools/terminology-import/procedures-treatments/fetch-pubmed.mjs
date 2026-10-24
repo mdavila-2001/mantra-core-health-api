@@ -133,21 +133,19 @@ if (sum !== total)
   );
 const retrievedAt = nowIso();
 let saved = 0;
-for (const part of parts) {
-  const term = part.range ? `${subset.term} AND (${part.range})` : subset.term;
-  const s = esearch(term, true);
-  const n = Number(s.count);
-  for (let start = 0; start < n; start += BATCH) {
-    const file = join(
-      DIR,
-      `${part.tag}-p${String(start / BATCH + 1).padStart(4, '0')}.json.gz`,
-    );
-    if (existsSync(file)) {
-      saved += JSON.parse(
-        gunzipSync(readFileSync(file)).toString('utf8'),
-      ).length;
-      continue;
-    }
+let booksSkipped = 0;
+// Páginas con libros de Bookshelf (`PubmedBookArticle`): se cuentan, no se guardan
+// (no traen indexación MeSH de artículo). Sin esto, una página corta por un
+// corte de E-utilities (HTTP 200 con el cuerpo truncado) pasa por «libros».
+const BOOKS_FILE = join(DIR, '..', 'books.json');
+const books = existsSync(BOOKS_FILE)
+  ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
+  : {};
+const countRecords = (file) =>
+  JSON.parse(gunzipSync(readFileSync(file)).toString('utf8')).length;
+
+function fetchPage(s, start, expected) {
+  for (let attempt = 1; ; attempt++) {
     const xml = get(
       `${EUTILS}/efetch.fcgi?db=pubmed&query_key=${s.querykey}&WebEnv=${s.webenv}&retstart=${start}&retmax=${BATCH}&retmode=xml`,
     );
@@ -156,11 +154,51 @@ for (const part of parts) {
     ]
       .map((m) => parsePubmedArticle(m[1]))
       .filter(Boolean);
-    writeFileSync(file, gzipSync(JSON.stringify(records)));
-    saved += records.length;
+    const bookCount = (xml.match(/<PubmedBookArticle>/g) ?? []).length;
+    if (records.length + bookCount === expected) return { records, bookCount };
+    if (attempt >= 5)
+      throw new Error(
+        `Página ${start} de ${expected} esperados: llegaron ${records.length} artículos y ${bookCount} libros tras ${attempt} intentos`,
+      );
+    execFileSync('sleep', [String(4 * attempt)]);
   }
-  console.log(`[pubmed-${subsetKey}] ${part.tag}: ${saved}/${total}`);
 }
+
+for (const part of parts) {
+  const term = part.range ? `${subset.term} AND (${part.range})` : subset.term;
+  const s = esearch(term, true);
+  const n = Number(s.count);
+  for (let start = 0; start < n; start += BATCH) {
+    const expected = Math.min(BATCH, n - start);
+    const name = `${part.tag}-p${String(start / BATCH + 1).padStart(4, '0')}.json.gz`;
+    const file = join(DIR, name);
+    if (existsSync(file)) {
+      const have = countRecords(file);
+      if (have + (books[name] ?? 0) === expected) {
+        saved += have;
+        booksSkipped += books[name] ?? 0;
+        continue;
+      }
+      console.log(
+        `[pubmed-${subsetKey}] ${name}: ${have} guardados de ${expected}; se vuelve a pedir`,
+      );
+    }
+    const { records, bookCount } = fetchPage(s, start, expected);
+    writeFileSync(file, gzipSync(JSON.stringify(records)));
+    if (bookCount) books[name] = bookCount;
+    else delete books[name];
+    writeFileSync(BOOKS_FILE, JSON.stringify(books, null, 1));
+    saved += records.length;
+    booksSkipped += bookCount;
+  }
+  console.log(
+    `[pubmed-${subsetKey}] ${part.tag}: ${saved + booksSkipped}/${total}`,
+  );
+}
+if (saved + booksSkipped !== total)
+  throw new Error(
+    `Guardados ${saved} + libros ${booksSkipped} = ${saved + booksSkipped}; la búsqueda completa dice ${total}`,
+  );
 
 writeJson(cacheDir(subset.cache, 'meta.json'), {
   source: subset.cache,
@@ -175,8 +213,15 @@ writeJson(cacheDir(subset.cache, 'meta.json'), {
   partitions: parts.map((p) => p.range),
   esearchCount: total,
   records: saved,
+  booksSkipped,
   retrievedAt,
 });
 console.log(
-  JSON.stringify({ subset: subsetKey, total, saved, partitions: parts.length }),
+  JSON.stringify({
+    subset: subsetKey,
+    total,
+    saved,
+    booksSkipped,
+    partitions: parts.length,
+  }),
 );
