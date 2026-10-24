@@ -6,6 +6,10 @@ import { PreconditionFailedException, runWithTenant } from '../../src/common';
 import { TerminologySeedService } from '../../src/common/seed/terminology-seed.service';
 import { CONCEPTS, SEED } from '../../src/common/constants/concepts';
 import { buildOrmConfig } from '../../src/orm/config/orm.config';
+import {
+  assertPermanentResidueTarget,
+  resolveResetTarget,
+} from './disposable-database';
 import { BILL } from '../../src/modules/billing/billing.concepts';
 import { InvoicesRepository } from '../../src/modules/billing/repositories';
 import { PaymentsReceivedRepository } from '../../src/modules/billing/repositories/payments-received.repository';
@@ -52,6 +56,9 @@ import {
  * de mejor esfuerzo, informa lo que quedó y nunca falla. Por eso conviene
  * correrla contra una base desechable (la de CI); en una compartida cada corrida
  * deja un conjunto sintético completo y marcado. Nada se trunca ni se toca `audit.*`.
+ * Por eso `beforeAll` se niega a correr (`assertPermanentResidueTarget`) si el host
+ * no es local o la base no se declara descartable: por nombre (`test`, `ci`, `tmp`,
+ * `scratch`, `smoke` o `disposable` como palabra) o con `ALLOW_PERMANENT_TEST_RESIDUE=yes`.
  */
 describe('Protección al paciente en el cobro con seguro (DB real)', () => {
   let orm: MikroORM;
@@ -197,6 +204,11 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
   const reasonOf = (error: any) => error?.details?.reason;
 
   beforeAll(async () => {
+    // Antes de abrir una sola conexión: esta prueba deja historial que no se puede
+    // borrar (`audit.*` es de sólo inserción), así que no corre contra una base
+    // compartida de desarrollo (#827). No envía SQL.
+    assertPermanentResidueTarget(resolveResetTarget(process.env), process.env);
+
     // Sin entidades descubiertas no hay prueba: las globs apuntan a `dist/`, así
     // que hace falta `yarn build` antes (como el resto de los specs con servicios).
     orm = await MikroORM.init(buildOrmConfig());

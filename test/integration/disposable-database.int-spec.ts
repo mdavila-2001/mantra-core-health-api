@@ -1,8 +1,10 @@
 import {
   ALLOWED_HOSTS_VARIABLE,
   DESTRUCTIVE_RESET_FLAG,
+  PERMANENT_RESIDUE_FLAG,
   UnsafeResetTargetError,
   assertDisposableResetTarget,
+  assertPermanentResidueTarget,
   assertServerIdentity,
   isDisposableDatabaseName,
   resolveResetTarget,
@@ -97,6 +99,92 @@ describe('SP-01 — preflight del reset destructivo', () => {
     try {
       assertDisposableResetTarget(resolveResetTarget(env), env);
       throw new Error('debía rechazar');
+    } catch (error) {
+      expect((error as Error).message).not.toContain('s3cr3t-value');
+    }
+  });
+});
+
+describe('Residuo permanente — preflight de pruebas que escriben historial de sólo inserción (#827)', () => {
+  const env = (extra: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
+    DB_HOST: '127.0.0.1',
+    DB_PORT: '55434',
+    DB_NAME: 'mantra_lane16_test',
+    ...extra,
+  });
+
+  it('Correcto: host local y base descartable por nombre pasan sin bandera', () => {
+    const e = env();
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).not.toThrow();
+  });
+
+  it('Error: la base de desarrollo compartida (nombre por defecto) se rechaza', () => {
+    const e = env({ DB_NAME: 'mantra_redesa_health' });
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).toThrow(UnsafeResetTargetError);
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).toThrow(/historial de sólo inserción/);
+  });
+
+  it('Error: sin DB_NAME cae en el nombre por defecto y se rechaza', () => {
+    const e = env();
+    delete e.DB_NAME;
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).toThrow(/no se declara descartable/);
+  });
+
+  it('Límite: la bandera explícita habilita una base no descartable por nombre (CI)', () => {
+    const e = env({
+      DB_NAME: 'mantra_redesa_health',
+      [PERMANENT_RESIDUE_FLAG]: 'yes',
+    });
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).not.toThrow();
+  });
+
+  it('Error: cualquier valor de la bandera distinto de yes se rechaza', () => {
+    const e = env({
+      DB_NAME: 'mantra_redesa_health',
+      [PERMANENT_RESIDUE_FLAG]: 'true',
+    });
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).toThrow(UnsafeResetTargetError);
+  });
+
+  it('Error: un host remoto no declarado se rechaza aunque la bandera esté puesta', () => {
+    const e = env({
+      DB_HOST: 'shared.neon.tech',
+      [PERMANENT_RESIDUE_FLAG]: 'yes',
+    });
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).toThrow(/no es local/);
+  });
+
+  it('Límite: un host remoto declarado en la lista permitida pasa', () => {
+    const e = env({
+      DB_HOST: 'ci-db.internal',
+      [ALLOWED_HOSTS_VARIABLE]: 'ci-db.internal',
+    });
+    expect(() =>
+      assertPermanentResidueTarget(resolveResetTarget(e), e),
+    ).not.toThrow();
+  });
+
+  it('No filtra credenciales en el mensaje', () => {
+    const e = env({
+      DB_NAME: 'mantra_redesa_health',
+      DB_PASSWORD: 's3cr3t-value',
+    });
+    try {
+      assertPermanentResidueTarget(resolveResetTarget(e), e);
     } catch (error) {
       expect((error as Error).message).not.toContain('s3cr3t-value');
     }

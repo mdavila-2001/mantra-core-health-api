@@ -22,6 +22,13 @@
 /** Variable que autoriza un reset destructivo; sólo vale el literal `yes`. */
 export const DESTRUCTIVE_RESET_FLAG = 'ALLOW_DESTRUCTIVE_DB_RESET';
 
+/**
+ * Variable que autoriza una prueba que deja historial permanente (`audit.*` es de
+ * sólo inserción) en una base cuyo nombre no se declara descartable, como la
+ * `mantra_redesa_health` del Postgres efímero de CI. Sólo vale el literal `yes`.
+ */
+export const PERMANENT_RESIDUE_FLAG = 'ALLOW_PERMANENT_TEST_RESIDUE';
+
 /** Variable con hosts extra (separados por coma) donde se admite el reset. */
 export const ALLOWED_HOSTS_VARIABLE = 'TEST_DB_ALLOWED_HOSTS';
 
@@ -133,6 +140,46 @@ export function assertServerIdentity(
     throw new UnsafeResetTargetError(
       `Reset destructivo rechazado: el servidor informa la base ` +
         `"${serverDatabase}", distinta de la configurada o no descartable.`,
+    );
+  }
+}
+
+/**
+ * Preflight de una prueba que escribe historial que no se puede borrar.
+ *
+ * No trunca nada, pero cada corrida deja filas sintéticas en tablas de sólo
+ * inserción (`audit.invoices_history`, `audit.insurance_claims_history`) y en
+ * `insurance.claim_appeal_decisions` (inmutable por trigger): en una base
+ * compartida esas filas quedan para siempre y aparecen en los listados de quien
+ * la use. Exige un host local (o declarado en `TEST_DB_ALLOWED_HOSTS`) y que la
+ * base se declare descartable por su nombre, o por `ALLOW_PERMANENT_TEST_RESIDUE=yes`
+ * cuando el operador sabe que lo es aunque el nombre no lo diga. No envía SQL; el
+ * mensaje nunca incluye credenciales.
+ *
+ * @param target - Destino configurado.
+ * @param env - Variables de entorno.
+ * @throws UnsafeResetTargetError si el destino no se prueba descartable.
+ */
+export function assertPermanentResidueTarget(
+  target: ResetTarget,
+  env: NodeJS.ProcessEnv,
+): void {
+  if (!allowedHosts(env).has(target.host.toLowerCase())) {
+    throw new UnsafeResetTargetError(
+      `Prueba con residuo permanente rechazada: el host "${target.host}" no es ` +
+        `local ni figura en ${ALLOWED_HOSTS_VARIABLE}.`,
+    );
+  }
+  if (
+    !isDisposableDatabaseName(target.database) &&
+    env[PERMANENT_RESIDUE_FLAG] !== 'yes'
+  ) {
+    throw new UnsafeResetTargetError(
+      `Prueba con residuo permanente rechazada: la base "${target.database}" no ` +
+        'se declara descartable. Deja historial de sólo inserción que no se ' +
+        'puede borrar; usá una base desechable (el nombre debe contener test, ' +
+        `smoke, ci, tmp, scratch o disposable como palabra) o, si lo es aunque ` +
+        `el nombre no lo diga, ${PERMANENT_RESIDUE_FLAG}=yes.`,
     );
   }
 }

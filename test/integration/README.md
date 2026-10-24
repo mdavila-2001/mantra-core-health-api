@@ -14,23 +14,23 @@ tests fail-closed disponen además de un token intencionalmente sin membresías.
 
 ## Cobertura base
 
-| Spec                                       | Dependencia ejercida                       |
-| ------------------------------------------ | ------------------------------------------ |
-| `audit-worm.int-spec.ts`                   | Triggers WORM de PostgreSQL                |
-| `common.int-spec.ts`                       | API y persistencia del módulo Common       |
-| `document-store.int-spec.ts`               | MongoDB real y aislamiento por tenant      |
-| `iam.int-spec.ts`                          | Flujos IAM y sesiones                      |
-| `lane16-patient-invoice-flow.int-spec.ts`  | Cotización, factura al paciente, objeción y pausa del cobro con PostgreSQL real; concurrencia con dos conexiones. Crea sus propios padres y deja historial permanente en `audit.*`: correrlo contra una base desechable |
-| `observability.int-spec.ts`                | Trazas, privacidad y propagación outbox    |
-| `outbox-relay-race.int-spec.ts`            | Concurrencia PostgreSQL con dos conexiones |
-| `redis-runtime.int-spec.ts`                | Redis real, TTL, locks y namespacing       |
-| `search-platform.int-spec.ts`              | OpenSearch real y aislamiento por tenant   |
-| `seed.int-spec.ts`                         | Seeds idempotentes mínimos                 |
-| `terminology.int-spec.ts`                  | API y persistencia de Terminology          |
-| `vademecum.int-spec.ts`                    | Seed SQL versionado de vademécum           |
-| `worker-provider-adapter-swap.int-spec.ts` | Adapter fallback sin proveedor configurado |
-| `hardening/mch-003.int-spec.ts`            | Pagos sin gateway: estados y doble cargo   |
-| `hardening/mch-005.int-spec.ts`            | Refresh concurrente: un único sucesor      |
+| Spec                                       | Dependencia ejercida                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `audit-worm.int-spec.ts`                   | Triggers WORM de PostgreSQL                                                                                                                                                                                                                                                                                                           |
+| `common.int-spec.ts`                       | API y persistencia del módulo Common                                                                                                                                                                                                                                                                                                  |
+| `document-store.int-spec.ts`               | MongoDB real y aislamiento por tenant                                                                                                                                                                                                                                                                                                 |
+| `iam.int-spec.ts`                          | Flujos IAM y sesiones                                                                                                                                                                                                                                                                                                                 |
+| `lane16-patient-invoice-flow.int-spec.ts`  | Cotización, factura al paciente, objeción y pausa del cobro con PostgreSQL real; concurrencia con dos conexiones. Crea sus propios padres y deja historial permanente en `audit.*`: se niega a correr si la base no es desechable (nombre con `test`/`ci`/`tmp`/`scratch`/`smoke`/`disposable`, o `ALLOW_PERMANENT_TEST_RESIDUE=yes`) |
+| `observability.int-spec.ts`                | Trazas, privacidad y propagación outbox                                                                                                                                                                                                                                                                                               |
+| `outbox-relay-race.int-spec.ts`            | Concurrencia PostgreSQL con dos conexiones                                                                                                                                                                                                                                                                                            |
+| `redis-runtime.int-spec.ts`                | Redis real, TTL, locks y namespacing                                                                                                                                                                                                                                                                                                  |
+| `search-platform.int-spec.ts`              | OpenSearch real y aislamiento por tenant                                                                                                                                                                                                                                                                                              |
+| `seed.int-spec.ts`                         | Seeds idempotentes mínimos                                                                                                                                                                                                                                                                                                            |
+| `terminology.int-spec.ts`                  | API y persistencia de Terminology                                                                                                                                                                                                                                                                                                     |
+| `vademecum.int-spec.ts`                    | Seed SQL versionado de vademécum                                                                                                                                                                                                                                                                                                      |
+| `worker-provider-adapter-swap.int-spec.ts` | Adapter fallback sin proveedor configurado                                                                                                                                                                                                                                                                                            |
+| `hardening/mch-003.int-spec.ts`            | Pagos sin gateway: estados y doble cargo                                                                                                                                                                                                                                                                                              |
+| `hardening/mch-005.int-spec.ts`            | Refresh concurrente: un único sucesor                                                                                                                                                                                                                                                                                                 |
 
 ## Suites opt-in
 
@@ -43,7 +43,7 @@ CI/staging que posea esos recursos debe activar y conservar su propia evidencia.
 | `TERMINOLOGY_DATASET_TESTS=1`      | `loinc`, `ndc`, `hcpcs`, `icd10cm`, `nucc`, `rxterms`, `rxnorm-full` | Todos los importadores correspondientes ya ejecutados contra la misma DB; salida a NLM/openFDA para los spot-checks en vivo |
 | `MOCK_PROVIDER_INTEGRATION_TEST=1` | llamada HTTP real de `worker-provider-adapter-swap`                  | `mock-provider-server` escuchando en `localhost:4100`, con tasa de fallo 0                                                  |
 | Credenciales Google completas      | `google-email-provider.int-spec.ts`                                  | OAuth/client id, secret, refresh token y destinatario de prueba                                                             |
-| `DATA_CATALOG_IT_DB_URL`           | `data-catalog.int-spec.ts`                                           | PostgreSQL **desechable** (crea schemas de fixtures, aplica el patch v4.2.19 y altera tablas); ver cabecera del spec         |
+| `DATA_CATALOG_IT_DB_URL`           | `data-catalog.int-spec.ts`                                           | PostgreSQL **desechable** (crea schemas de fixtures, aplica el patch v4.2.19 y altera tablas); ver cabecera del spec        |
 | `RLS_TEST=1`                       | `rls.int-spec.ts`                                                    | rol runtime real sin `BYPASSRLS`; modifica políticas del esquema                                                            |
 
 Para una base local desechable, RLS puede crear temporalmente el login de prueba
