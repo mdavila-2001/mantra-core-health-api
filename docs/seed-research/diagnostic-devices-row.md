@@ -117,3 +117,25 @@ Candidatos descartados:
 Sin espejo encontrado (siguen como hueco en `manifest.gaps`): NMPA, MFDS,
 TFDA, INVIMA, COFEPRIS, ANMAT, ISP, DIGEMID, AGEMED, HSA, SFDA, AMAR, Thai FDA,
 MDA, SAHPRA, OMS PQ, UNICEF, ARTG completo.
+
+## Pasada 3 — más países y compras públicas (2026-10-24)
+
+Búsquedas: Rusia (Росздравнадзор), China (UDI de NMPA), Filipinas (FDA CMDR),
+Indonesia (AKL de Kemenkes), Turquía (TİTUBB/ÜTS), Vietnam (DMEC), Corea
+(UDI de MFDS), Colombia (INVIMA en datos.gov.co), Global Fund, Health Canada
+reciente y ANVISA reciente.
+
+**Aporte: 0 filas nuevas** (total sin cambios: 3 534 775).
+
+Candidatos revisados y descartados:
+
+| Candidato | Motivo |
+|---|---|
+| robsonaamerico/projeto-de-compras-do-ministerio-da-saude `1465b402` (Banco de Preços em Saúde 2020–2026, CSV anuales crudos) | Compras públicas del Ministerio da Saúde (BR): de 76 681 compras de dispositivos solo 63 traen `registro_anvisa`, y no hay marca ni modelo (solo descripción CATMAT y fabricante). Sin registro ni modelo no hay equipo identificable con el criterio de deduplicación. Otros repos con el BPS (lf-vampre, waldineilameira-lab, ClaudiaRamos-Git, AnaysaLopes) traen versiones procesadas del mismo dato. |
+| openpalliative/pal-devices-data | Trae la nomenclatura rusa НКМИ (tipos de dispositivo) y normas de dotación; no trae registros con fabricante. |
+| Looffeeuu/SilverGuard (índice offline del UDI de NMPA) | El índice se arma en tiempo de ejecución; no hay datos en el repo. |
+| 8023Ginger/medreg-hub, ahmedbins/fda_device | Herramientas de consulta, sin datos de registros fuera de EE. UU. |
+| devladpopov/gosreestry-data, severin-d/opendata | Catálogos de registros rusos, no sus datos. |
+| ihcstandardisasi/scrapKFA (Indonesia) | Descargador del catálogo KFA de SATUSEHAT; no publica los datos. |
+
+Sin espejo nuevo: Rusia, Turquía, Vietnam, Filipinas, Indonesia, Global Fund.
