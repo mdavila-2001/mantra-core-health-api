@@ -226,6 +226,37 @@ describe('C-10 · un CI por tipo de usuario, de punta a punta', () => {
     );
   });
 
+  it('8b · el NIT de facturación no entra en la regla: dos pacientes facturan al mismo NIT (v4249)', async () => {
+    // Sólo dígitos, como exige el DTO; sintético y distinto en cada corrida.
+    const nit = `9${Date.now()}`;
+    const alta = async (nombre: string, ci: string) => {
+      const campos = await camposObligatoriosDePaciente(ctx);
+      return http()
+        .post('/iam/auth/register-patient')
+        .send({
+          ...campos,
+          nationalId: ci,
+          issuerAdministrativeAreaConceptId: SC,
+          password: PASSWORD,
+          email: `c10-nit-${nombre}-${sufijo}@example.test`.toLowerCase(),
+          name: nombre,
+          lastName: 'C10',
+          billingTaxId: nit,
+          billingLegalName: 'Empresa Sintética C10',
+        });
+    };
+    expect((await alta('Hugo', `C10H${sufijo}`)).status).toBe(201);
+    expect((await alta('Ines', `C10I${sufijo}`)).status).toBe(201);
+    const filas = await ctx.orm.em
+      .getConnection()
+      .execute<{ con_tipo: string; total: string }[]>(
+        `select count(owner_kind_concept_id)::text as con_tipo, count(*)::text as total
+           from common.identifiers where value = ?`,
+        [nit],
+      );
+    expect(filas[0]).toEqual({ con_tipo: '0', total: '2' });
+  });
+
   it('9 · la consulta valida su entrada: tipo desconocido, documento con espacios o sin departamento → 400', async () => {
     await disponibilidad(CI, SC, 'ADMIN' as never).expect(400);
     await disponibilidad('12 34', SC, 'PATIENT').expect(400);

@@ -1,5 +1,5 @@
 Test Suites: 1 passed, 1 total
-Tests:       11 passed, 11 total
+Tests:       12 passed, 12 total
 Snapshots:   0 total
-Time:        28.042 s
+Time:        23.251 s, estimated 24 s
 Ran all test suites matching test/integration/c10-ci-unico.int-spec.ts.
