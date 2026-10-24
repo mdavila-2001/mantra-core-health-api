@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: classifyRegulation: subpartes diagnósticas, de monitoreo e IVD
+ok 1 - classifyRegulation: subpartes diagnósticas, de monitoreo e IVD
+  ---
+  duration_ms: 1.992644
+  type: 'test'
+  ...
+# Subtest: classifyRegulation: lo no diagnóstico y lo que no se puede decidir
+ok 2 - classifyRegulation: lo no diagnóstico y lo que no se puede decidir
+  ---
+  duration_ms: 0.367847
+  type: 'test'
+  ...
+# Subtest: parsePcd + pcdNode sobre el recorte real de foiclass
+ok 3 - parsePcd + pcdNode sobre el recorte real de foiclass
+  ---
+  duration_ms: 3.185051
+  type: 'test'
+  ...
+# Subtest: ivdPanelsFrom exige que TODOS los códigos con regulación del panel estén en 862/864/866
+ok 4 - ivdPanelsFrom exige que TODOS los códigos con regulación del panel estén en 862/864/866
+  ---
+  duration_ms: 0.299013
+  type: 'test'
+  ...
+# Subtest: validateRow: acepta una fila completa y rechaza lo incompleto
+ok 5 - validateRow: acepta una fila completa y rechaza lo incompleto
+  ---
+  duration_ms: 1.034217
+  type: 'test'
+  ...
+# Subtest: writeNdjsonGzSharded parte sin cortar líneas y se relee igual
+ok 6 - writeNdjsonGzSharded parte sin cortar líneas y se relee igual
+  ---
+  duration_ms: 100.168281
+  type: 'test'
+  ...
+# Subtest: parseCsv respeta comillas con comas y saltos de línea
+ok 7 - parseCsv respeta comillas con comas y saltos de línea
+  ---
+  duration_ms: 0.405461
+  type: 'test'
+  ...
+# Subtest: aimlRows convierte el recorte real al formato común
+ok 8 - aimlRows convierte el recorte real al formato común
+  ---
+  duration_ms: 0.97887
+  type: 'test'
+  ...
+# Subtest: emdnParent sigue la estructura publicada del código
+ok 9 - emdnParent sigue la estructura publicada del código
+  ---
+  duration_ms: 0.486391
+  type: 'test'
+  ...
+# Subtest: Taxonomy: EMDN W es IVD; los ancestros estructurales no reciben nombre inventado
+ok 10 - Taxonomy: EMDN W es IVD; los ancestros estructurales no reciben nombre inventado
+  ---
+  duration_ms: 0.870783
+  type: 'test'
+  ...
+# Subtest: Taxonomy: un mapeo publicado (misma fila con dos tipos) propaga la decisión solo si es unánime
+ok 11 - Taxonomy: un mapeo publicado (misma fila con dos tipos) propaga la decisión solo si es unánime
+  ---
+  duration_ms: 1.240847
+  type: 'test'
+  ...
+# Subtest: normalizeManufacturerName quita sufijos societarios y conserva el núcleo
+ok 12 - normalizeManufacturerName quita sufijos societarios y conserva el núcleo
+  ---
+  duration_ms: 2.12239
+  type: 'test'
+  ...
+# Subtest: resolveManufacturers: fusiona por id publicado y por nombre+país; lo dudoso va a revisión
+ok 13 - resolveManufacturers: fusiona por id publicado y por nombre+país; lo dudoso va a revisión
+  ---
+  duration_ms: 10.233698
+  type: 'test'
+  ...
+# Subtest: resolveManufacturers: grupos solo por relaciones publicadas
+ok 14 - resolveManufacturers: grupos solo por relaciones publicadas
+  ---
+  duration_ms: 0.396646
+  type: 'test'
+  ...
+# Subtest: consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registro
+ok 15 - consolidate: agrupa por marca+modelo y por UDI-DI, y conserva cada registro
+  ---
+  duration_ms: 2.906595
+  type: 'test'
+  ...
+# Subtest: regions: lee una carpeta out/ local y descarta el archivo cuyo sha256 no coincide
+ok 16 - regions: lee una carpeta out/ local y descarta el archivo cuyo sha256 no coincide
+  ---
+  duration_ms: 2.361793
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 221.5989

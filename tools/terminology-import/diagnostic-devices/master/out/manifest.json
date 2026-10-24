@@ -1,7 +1,7 @@
 {
   "region": "master",
   "formatVersion": 1,
-  "generatedAt": "2026-10-24T03:10:32Z",
+  "generatedAt": "2026-10-24T03:17:39Z",
   "regions": [
     {
       "region": "us",
@@ -42,7 +42,7 @@
       "path": "models.ndjson.gz",
       "rows": 1192,
       "bytes": 113761,
-      "sha256": "de94779d61ee5e3ce260b4867b83784d4f06458134891268b1220a178bb2faa3"
+      "sha256": "1d76bbce701a66e6966b5f3d47407ecae295baa41958cebefc4da021119aba39"
     },
     {
       "path": "review-manufacturers.ndjson.gz",

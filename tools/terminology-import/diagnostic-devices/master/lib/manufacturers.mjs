@@ -31,7 +31,7 @@ const LEGAL_SUFFIXES = [
   'GMBH CO KG', 'GMBH AND CO KG', 'AG CO KG', 'GMBH CO KGAA', 'CO KG', 'KGAA',
   'SP Z O O', 'SP ZOO', 'S R O', 'A S', 'S A S', 'S A U', 'S L U', 'S P A', 'S R L', 'S A R L', 'S L', 'S A', 'S C',
   'CO LTD', 'CO LIMITED', 'COMPANY LIMITED', 'CO INC', 'CO LLC', 'PTY LTD', 'PTY LIMITED', 'PVT LTD', 'PRIVATE LIMITED', 'PTE LTD', 'SDN BHD',
-  'L L C', 'L P', 'L L P', 'P L C', 'N V', 'B V', 'K K',
+  'L L C', 'L P', 'L L P', 'P L C', 'N V', 'B V', 'K K', 'G M B H', 'A G', 'I N C',
   'INCORPORATED', 'INC', 'CORPORATION', 'CORP', 'COMPANY', 'CO', 'LIMITED', 'LTD', 'LTDA', 'LLC', 'LLP', 'LP', 'PLC', 'PLLC',
   'GMBH', 'MBH', 'AG', 'KG', 'OHG', 'EV', 'SE', 'SAS', 'SARL', 'SRL', 'SPA', 'SA', 'SAU', 'SL', 'SLU', 'BV', 'NV', 'BVBA', 'SPRL',
   'AB', 'AS', 'ASA', 'APS', 'OY', 'OYJ', 'KFT', 'ZRT', 'DOO', 'D O O', 'SRO', 'JSC', 'PJSC', 'OJSC', 'CJSC', 'OOO', 'ZAO', 'AO', 'PAO',

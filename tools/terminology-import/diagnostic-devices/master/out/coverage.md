@@ -1,6 +1,6 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T03:10:32Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T03:17:39Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 

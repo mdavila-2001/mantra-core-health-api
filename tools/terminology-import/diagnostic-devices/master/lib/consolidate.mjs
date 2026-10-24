@@ -53,9 +53,10 @@ export function jurisdictionOf(source, region = null) {
 /** Clave de comparación de marca o modelo (no se muestra; se guarda el verbatim). */
 export function labelKey(s) {
   if (s === null || s === undefined) return '';
+  // Los símbolos van antes de NFKC, que convierte ™ en «TM».
   return s
-    .normalize('NFKC')
     .replace(/[™®©℠]/g, '')
+    .normalize('NFKC')
     .toUpperCase()
     .replace(/\s+/g, ' ')
     .trim();
