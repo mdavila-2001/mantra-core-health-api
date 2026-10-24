@@ -206,13 +206,21 @@ async function main() {
     }
   }
 
-  const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
+  const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, cimaDuplicateSections: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
     const cimaProducts = byAtc.get(code) ?? [];
     const sections = [];
     const safetyNotes = [];
-    for (const ref of referenceDocuments(cimaProducts, GRANULARITY)) {
+    // Fichas de referencia primero; con `--granularity product`, después el resto de las fichas segmentadas.
+    // Una sección cuyo texto ya está publicado para este ATC (misma clave y misma huella) no se repite:
+    // se anota el nº de registro en `document.alsoIn` de la que quedó.
+    const routeRefs = referenceDocuments(cimaProducts, 'route');
+    const routeSet = new Set(routeRefs.map((r) => r.product.nregistro));
+    const cimaRefs = GRANULARITY === 'product' ? [...routeRefs, ...referenceDocuments(cimaProducts, 'product').filter((r) => !routeSet.has(r.product.nregistro))] : routeRefs;
+    const seenText = new Map();
+    const seenNotes = new Set();
+    for (const ref of cimaRefs) {
       const nreg = ref.product.nregistro;
       const read = readCimaDoc(nreg);
       if (!read) {
@@ -224,10 +232,25 @@ async function main() {
           stats.cimaSectionsWithoutVersion++;
           continue;
         }
+        const dupKey = `${s.key}|${s.textSha256}`;
+        if (seenText.has(dupKey)) {
+          const kept = seenText.get(dupKey);
+          kept.document.alsoIn = [...(kept.document.alsoIn ?? []), s.document.id];
+          stats.cimaDuplicateSections++;
+          continue;
+        }
         if (s.document.versionUnpublished) stats.cimaSectionsVersionUnpublished++;
+        seenText.set(dupKey, s);
         sections.push(assertSection(s));
       }
-      if (existsSync(notesPath(nreg))) safetyNotes.push(...cimaSafetyNotes(readJsonIfExists(notesPath(nreg)), ref.product, retrievedAtOf(notesPath(nreg))));
+      if (existsSync(notesPath(nreg))) {
+        for (const n of cimaSafetyNotes(readJsonIfExists(notesPath(nreg)), ref.product, retrievedAtOf(notesPath(nreg)))) {
+          const k = `${n.number ?? ''}|${n.reference ?? ''}|${n.url ?? ''}`;
+          if (seenNotes.has(k)) continue;
+          seenNotes.add(k);
+          safetyNotes.push(n);
+        }
+      }
     }
     const bridge = bridges.get(code);
     const fdaPharmClasses = [];
