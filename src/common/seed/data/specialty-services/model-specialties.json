@@ -1,0 +1,326 @@
+{
+  "_nota": "Foto de VS_MEDICAL_SPECIALTY tal como la declara el paquete de seeds del modelo. Sirve para validar que cada regla de evidencia apunte a una especialidad que existe; el cargador NO usa estos ids: resuelve la especialidad por código contra la base.",
+  "source": {
+    "repository": "mantra-core-technologies/mantra-core-health-model",
+    "commit": "eceb98f26cd76a84c866f4f95e918fa88111e12b",
+    "path": "seedsGenerales/modules/03_terminology.seeds.json",
+    "valueSet": "VS_MEDICAL_SPECIALTY"
+  },
+  "specialties": [
+    {
+      "code": "MEDICINA_GENERAL",
+      "display": "Medicina General",
+      "conceptId": "2a52700a-3cf0-5f06-9c58-afff7041875f"
+    },
+    {
+      "code": "MEDICINA_FAMILIAR",
+      "display": "Medicina Familiar",
+      "conceptId": "a6cb3915-98a6-5cd4-a5a3-b90a337487ba"
+    },
+    {
+      "code": "MEDICINA_INTERNA",
+      "display": "Medicina Interna",
+      "conceptId": "30c26aa8-1827-5a8e-a742-7f4d628114d4"
+    },
+    {
+      "code": "PEDIATRIA",
+      "display": "Pediatría",
+      "conceptId": "bd0484b1-8959-5ba5-bb65-ca9305eedb30"
+    },
+    {
+      "code": "GINECOLOGIA_OBSTETRICIA",
+      "display": "Ginecología y Obstetricia",
+      "conceptId": "6a6c6007-01b1-5811-8331-353b20a359dc"
+    },
+    {
+      "code": "CARDIOLOGIA",
+      "display": "Cardiología",
+      "conceptId": "7218acbc-5098-56ae-980a-9345961ced89"
+    },
+    {
+      "code": "NEUROLOGIA",
+      "display": "Neurología",
+      "conceptId": "6602d29b-65b8-56c5-8647-1578c4ed2c4a"
+    },
+    {
+      "code": "DERMATOLOGIA",
+      "display": "Dermatología",
+      "conceptId": "9058b052-fe76-5c76-9195-eb94efb431d4"
+    },
+    {
+      "code": "ENDOCRINOLOGIA",
+      "display": "Endocrinología",
+      "conceptId": "b283bc9b-b1e3-5164-8a16-18e0b3689499"
+    },
+    {
+      "code": "GASTROENTEROLOGIA",
+      "display": "Gastroenterología",
+      "conceptId": "e841da06-5884-5f3e-ac56-30ee244c95a7"
+    },
+    {
+      "code": "NEUMOLOGIA",
+      "display": "Neumología",
+      "conceptId": "4326b351-7739-56a3-b39f-b143cdd6577a"
+    },
+    {
+      "code": "NEFROLOGIA",
+      "display": "Nefrología",
+      "conceptId": "072ae20f-1f94-5f66-b850-44519975b0c9"
+    },
+    {
+      "code": "UROLOGIA",
+      "display": "Urología",
+      "conceptId": "a7dcba7e-b153-5afe-8018-ad15fdccdfdb"
+    },
+    {
+      "code": "TRAUMATOLOGIA",
+      "display": "Traumatología y Ortopedia",
+      "conceptId": "2865f3dc-071d-5192-838c-81e342398eac"
+    },
+    {
+      "code": "CIRUGIA_GENERAL",
+      "display": "Cirugía General",
+      "conceptId": "56f97c74-1fc1-55d0-a207-c061ab306b52"
+    },
+    {
+      "code": "OFTALMOLOGIA",
+      "display": "Oftalmología",
+      "conceptId": "25a49917-7801-5a73-86a4-88a3f8fa7590"
+    },
+    {
+      "code": "OTORRINOLARINGOLOGIA",
+      "display": "Otorrinolaringología",
+      "conceptId": "291915d1-2518-542c-8744-9e7baf7647de"
+    },
+    {
+      "code": "PSIQUIATRIA",
+      "display": "Psiquiatría",
+      "conceptId": "67b6a8db-d05e-5308-8ccb-a8f82c251776"
+    },
+    {
+      "code": "PSICOLOGIA_CLINICA",
+      "display": "Psicología Clínica",
+      "conceptId": "de8e1dc8-1b7f-52b1-9efe-bb8ea0c6f0f5"
+    },
+    {
+      "code": "ONCOLOGIA",
+      "display": "Oncología",
+      "conceptId": "1fb830f7-959a-59a3-a40c-85a09872498a"
+    },
+    {
+      "code": "HEMATOLOGIA",
+      "display": "Hematología",
+      "conceptId": "3c3473a4-f18e-5456-9aeb-cb640f931acf"
+    },
+    {
+      "code": "REUMATOLOGIA",
+      "display": "Reumatología",
+      "conceptId": "2fea8eec-10a6-554f-96b7-568828198cfb"
+    },
+    {
+      "code": "INFECTOLOGIA",
+      "display": "Infectología",
+      "conceptId": "dc942937-2333-5ffb-8513-da2c25f2c48a"
+    },
+    {
+      "code": "GERIATRIA",
+      "display": "Geriatría",
+      "conceptId": "e5643751-9134-58d5-93a7-96591939bd32"
+    },
+    {
+      "code": "ANESTESIOLOGIA",
+      "display": "Anestesiología",
+      "conceptId": "898f0d2a-0d0d-557a-b904-75fde36d2654"
+    },
+    {
+      "code": "RADIOLOGIA",
+      "display": "Radiología e Imagenología",
+      "conceptId": "b91f0d41-84b7-532b-a3d4-d6bc2b4b29a9"
+    },
+    {
+      "code": "PATOLOGIA_CLINICA",
+      "display": "Patología Clínica",
+      "conceptId": "920b8599-5ad0-51e7-9a8a-90e31b536f94"
+    },
+    {
+      "code": "MEDICINA_EMERGENCIA",
+      "display": "Medicina de Emergencia",
+      "conceptId": "6f2d80de-37be-51e3-b5c3-de32c20d87a4"
+    },
+    {
+      "code": "MEDICINA_INTENSIVA",
+      "display": "Medicina Intensiva",
+      "conceptId": "d80b68b3-ca9c-5d72-8b38-d8e93b9b0fd3"
+    },
+    {
+      "code": "NUTRICION",
+      "display": "Nutrición y Dietética",
+      "conceptId": "f3beddfe-4d84-595e-8141-1c4393ae3991"
+    },
+    {
+      "code": "ODONTOLOGIA",
+      "display": "Odontología",
+      "conceptId": "22703c83-58d3-589f-8ab6-1f6d1f543cde"
+    },
+    {
+      "code": "FISIOTERAPIA",
+      "display": "Fisioterapia y Rehabilitación",
+      "conceptId": "590a704f-c472-5684-87fe-5bf3dce07304"
+    },
+    {
+      "code": "ENFERMERIA",
+      "display": "Enfermería",
+      "conceptId": "d79f7c87-1f31-502e-b01b-327fdace1de2"
+    },
+    {
+      "code": "BIOQUIMICA_CLINICA",
+      "display": "Bioquímica Clínica",
+      "conceptId": "71b531fc-0312-5d6c-ae52-ee55d608d55b"
+    },
+    {
+      "code": "OBSTETRICIA",
+      "display": "Obstetricia",
+      "conceptId": "9cceba14-b1d0-57b1-835a-1f08addec37d"
+    },
+    {
+      "code": "MEDICINA_DEPORTIVA",
+      "display": "Medicina Deportiva",
+      "conceptId": "f1d7ab16-bb79-5ba4-b3b8-d4be0b7a372b"
+    },
+    {
+      "code": "ANATOMIA_PATOLOGICA",
+      "display": "Anatomía Patológica",
+      "conceptId": "4c1cc395-e302-5954-9335-33a0462e9213"
+    },
+    {
+      "code": "CIRUGIA_BUCOMAXILOFACIAL",
+      "display": "Cirugía Bucomaxilofacial",
+      "conceptId": "33aab7c6-6ec5-55dc-8b61-b434e99a12f8"
+    },
+    {
+      "code": "CIRUGIA_PEDIATRICA",
+      "display": "Cirugía Pediátrica",
+      "conceptId": "1fe378b8-51bc-5c5f-8a65-4c44d9ff84b2"
+    },
+    {
+      "code": "MEDICINA_DEL_TRABAJO",
+      "display": "Medicina del Trabajo",
+      "conceptId": "34357c72-91db-53eb-b7ee-f9ce62cf78b1"
+    },
+    {
+      "code": "MEDICINA_FISICA_REHABILITACION",
+      "display": "Medicina Física y Rehabilitación",
+      "conceptId": "b6dfc399-681d-5638-8799-3d5f7336a4c3"
+    },
+    {
+      "code": "SALUD_FAMILIAR_COMUNITARIA_INTERCULTURAL",
+      "display": "Salud Familiar Comunitaria Intercultural",
+      "conceptId": "879cf045-0230-5a9b-b97e-8ae0e2bd10d2"
+    },
+    {
+      "code": "CIRUGIA_ONCOLOGICA",
+      "display": "Cirugía Oncológica",
+      "conceptId": "5de84e8c-7740-58a3-9c53-e96a389a88d0"
+    },
+    {
+      "code": "COLOPROCTOLOGIA",
+      "display": "Coloproctología",
+      "conceptId": "612ae01f-5c20-5614-be7f-10d286547850"
+    },
+    {
+      "code": "CARDIOLOGIA_PEDIATRICA",
+      "display": "Cardiología Pediátrica",
+      "conceptId": "d56d9d12-3400-5185-a5a0-935b5664672e"
+    },
+    {
+      "code": "INFECTOLOGIA_PEDIATRICA",
+      "display": "Infectología Pediátrica",
+      "conceptId": "4213c3d6-634b-548c-8f05-aaffa954d2a4"
+    },
+    {
+      "code": "MEDICINA_DEL_DOLOR",
+      "display": "Medicina del Dolor",
+      "conceptId": "c075009d-e19c-50e0-ad98-8572397e63fe"
+    },
+    {
+      "code": "MEDICINA_MATERNO_FETAL",
+      "display": "Medicina Materno Fetal",
+      "conceptId": "c4e6e4bc-9e35-5786-aa98-56c23f59d1af"
+    },
+    {
+      "code": "NEONATOLOGIA",
+      "display": "Neonatología",
+      "conceptId": "9515a7c6-11bd-58d0-903f-9647f8bb9da8"
+    },
+    {
+      "code": "NEUROLOGIA_PEDIATRICA",
+      "display": "Neurología Pediátrica",
+      "conceptId": "20d973bb-7e1c-5e6f-9979-dd92a5d2c827"
+    },
+    {
+      "code": "ONCOLOGIA_GINECOLOGICA",
+      "display": "Oncología Ginecológica",
+      "conceptId": "58a6fbb3-2be3-50dd-82c8-def8f0e570ef"
+    },
+    {
+      "code": "ONCOLOGIA_PEDIATRICA",
+      "display": "Oncología Pediátrica",
+      "conceptId": "0f40adba-a4c9-5455-acbf-e4da70722739"
+    },
+    {
+      "code": "ORTOPEDIA_PEDIATRICA",
+      "display": "Ortopedia Pediátrica",
+      "conceptId": "b9f54f85-7d5b-559d-99fa-863bba86d503"
+    },
+    {
+      "code": "TERAPIA_INTENSIVA_PEDIATRICA",
+      "display": "Terapia Intensiva Pediátrica",
+      "conceptId": "f008c91f-9e3f-5066-8fa8-7e0e9346ef4b"
+    },
+    {
+      "code": "ENDODONCIA",
+      "display": "Endodoncia",
+      "conceptId": "9433c18e-52aa-5466-85ed-32a5593fd054"
+    },
+    {
+      "code": "ORTODONCIA",
+      "display": "Ortodoncia",
+      "conceptId": "1ac3fd02-674e-55b8-a111-97da1b43b2cb"
+    },
+    {
+      "code": "PERIODONCIA",
+      "display": "Periodoncia",
+      "conceptId": "f508888c-4363-521f-bbed-c2fb2172fcf9"
+    },
+    {
+      "code": "ESTETICA_DENTAL",
+      "display": "Estética Dental",
+      "conceptId": "82f2d8db-1acf-5ffc-b788-87ed150be3be"
+    },
+    {
+      "code": "REHABILITACION_ORAL",
+      "display": "Rehabilitación Oral",
+      "conceptId": "b608c454-2bb6-5845-b099-607425e4b5cd"
+    },
+    {
+      "code": "CIRUGIA_ORAL_MAXILOFACIAL",
+      "display": "Cirugía Oral y Maxilofacial",
+      "conceptId": "1817292e-df05-5370-9c20-020d78f3d7c3"
+    },
+    {
+      "code": "ODONTOPEDIATRIA",
+      "display": "Odontopediatría",
+      "conceptId": "d3230db6-b17e-5c8d-aaf8-a4f0e65d8a2e"
+    },
+    {
+      "code": "IMPLANTOLOGIA_ORAL",
+      "display": "Implantología Oral",
+      "conceptId": "b546451e-68e3-5fa8-97af-16a8924c34ce"
+    },
+    {
+      "code": "ARMONIZACION_OROFACIAL",
+      "display": "Armonización Orofacial",
+      "conceptId": "adad9d44-509a-5e1e-8338-13858fd5cc54"
+    }
+  ]
+}

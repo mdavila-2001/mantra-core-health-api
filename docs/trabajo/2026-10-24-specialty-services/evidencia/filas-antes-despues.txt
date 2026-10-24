@@ -1,0 +1,7 @@
+concepts|6153 concepts|7301 concepts|7301
+designations|1618 designations|2766 designations|2766
+properties|0 properties|7139 properties|7139
+relationships|0 relationships|4923 relationships|4923
+value_sets|50 value_sets|102 value_sets|102
+vs_members|888 vs_members|5811 vs_members|5811
+batches|0 batches|3 batches|3

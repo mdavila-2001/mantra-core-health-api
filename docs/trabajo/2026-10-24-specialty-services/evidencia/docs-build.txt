@@ -1,0 +1,375 @@
+$ corepack yarn docs:build   # mkdocs build --strict con docs/requirements.txt — exit 1 (aviso previo a este PR)
+
+[31m │  ⚠  Warning from the Material for MkDocs team[0m
+[31m │[0m
+[31m │[0m  MkDocs 2.0, the underlying framework of Material for MkDocs,
+[31m │[0m  will introduce backward-incompatible changes, including:
+[31m │[0m
+[31m │  × [0mAll plugins will stop working – the plugin system has been removed
+[31m │  × [0mAll theme overrides will break – the theming system has been rewritten
+[31m │  × [0mNo migration path exists – existing projects cannot be upgraded
+[31m │  × [0mClosed contribution model – community members can't report bugs
+[31m │  × [0mCurrently unlicensed – unsuitable for production use
+[31m │[0m
+[31m │[0m  Our full analysis:
+[31m │[0m
+[31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
+[0m
+INFO    -  MERMAID2  - Initialization arguments: {}
+INFO    -  MERMAID2  - Using javascript library (10.4.0):
+   https://unpkg.com/mermaid@10.4.0/dist/mermaid.esm.min.mjs
+INFO    -  Cleaning site directory
+INFO    -  Building documentation to directory: site
+WARNING -  Doc file 'architecture/module-layout.md' contains a link '../../src/modules/scheduling/README.md', but the target '../src/modules/scheduling/README.md' is not found among documentation files.
+INFO    -  MERMAID2  - Found superfences config: {'custom_fences': [{'name': 'mermaid', 'class': 'mermaid', 'format': functools.partial(<function fence_mermaid at 0x106a69170>, custom=True)}]}
+INFO    -  MERMAID2  - Found 'fence_mermaid_custom' function: activate custom loader for superfences
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Inicio': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Procesamiento en segundo plano': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Componentes (C4 nivel 3) — dominios críticos': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Contenedores (C4 nivel 2)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Mapa de integraciones': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Ciclo de vida de una request': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Contexto del sistema (C4 nivel 1)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Rutas de lectura y escritura': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Eventos — visión general': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Accounting': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Ads': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Auth providers': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Authz': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Automation': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Billing': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Chart': found 4 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Clinical': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Clinical ext': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Common': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Community': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Consent': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Crm': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Data catalog': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Delegated access': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Diagnostic units': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Diagnostics': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Directory': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Education': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Erp': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Forms': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Geo': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Health context': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Health data': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Iam': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Identity assurance': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Insurance': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Integration contracts': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Integrations': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Marketing': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Medical groups': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Messaging': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Organization extensions': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Payments': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Pharma lab': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Pharmacy': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Pharmacy inventory': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Platform ops': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Polyglot storage': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Practice': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Procedures perioperative': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Profiles': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Promotions': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Qa execution': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Qa lab': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Read models': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Reporting': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Scheduling': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Surveys': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'System context': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'System ops': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Telemetry': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Terminology': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Tracking': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Workflow': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Accounting': found 49 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Admin catalog': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Ads': found 19 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'App': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Audio assets': found 10 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Audit': found 12 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Auth providers': found 13 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Authz': found 25 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Automation': found 18 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Billing': found 34 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Chart': found 23 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Clinical': found 39 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Clinical ext': found 24 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Common': found 17 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Community': found 94 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Consent': found 18 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Content packs': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Crm': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Cross store consistency': found 15 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Data catalog': found 30 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Delegated access': found 12 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Diagnostic units': found 21 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Diagnostics': found 29 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Directory': found 23 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Document store': found 4 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Education': found 15 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Erp': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Forms': found 24 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Geo': found 11 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Graph intelligence': found 17 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Health context': found 14 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Health data': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Iam': found 32 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Identity assurance': found 27 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Insurance campaigns': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Insurance': found 56 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Integration contracts': found 13 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Integrations': found 14 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Lakehouse': found 13 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Marketing': found 15 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Medical groups': found 9 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Messaging': found 17 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Object storage': found 14 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Ops console': found 4 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Organization extensions': found 10 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Payments': found 15 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Pharma lab': found 77 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Pharmacy': found 21 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Pharmacy inventory': found 30 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Platform ops': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Polyglot storage': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Practice': found 30 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Procedures perioperative': found 31 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Profiles': found 55 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Promotions': found 20 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Public': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Qa execution': found 8 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Qa lab': found 19 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Quotations': found 4 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Read models': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Redis runtime': found 7 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Reporting': found 13 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Scheduling': found 57 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Search platform': found 5 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Surveys': found 18 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'System context': found 13 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'System ops': found 24 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Telemetry': found 20 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Terminology': found 22 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Time series': found 15 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Tracking': found 12 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Vector rag': found 16 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Workflow': found 12 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '00 · Auditoría del estado actual (previa a OpenTelemetry)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '01 · Diseño de la arquitectura de observabilidad': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '03 · Topología de trazas para producción': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Trazas': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Auditoría Técnica a Profundidad: Rama mockup (Frontend) vs mantra-core-health-api (Backend)': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '🚀 INFORME DE ACTUALIZACIÓN DE AUDITORÍA Y ROADMAP TRAS PULL DE dev': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'INFORME DE AVANCE GLOBAL Y PLAN DE ACCIÓN DE INTEGRACIÓN (ACTUALIZADO)': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'INFORME DE NUEVA AUDITORÍA TÉCNICA Y VISUAL E2E A PROFUNDIDAD (RAMA MOCKUP ACTUALIZADA)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'INFORME PERICIAL DE REVISIÓN EN VIVO Y SINCRONIZACIÓN BACKEND': found 2 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '👥 PLAN DE REPARTO DE TAREAS: ENDER e ITZAN': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'TASK PROMPT: Subtarea 1.5 — Alta de Organizaciones para Centros de Imagenología y Diagnóstico (DIAGNOSTIC_CENTER)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'TASK PROMPT: Subtarea 1.6 — Ingesta de Universidad, Lugar de Estudio y Credenciales Académicas Múltiples (Médico y Paciente)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Arquitectura de seguridad': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  Doc file 'inventario/flujos/clinical.md' contains a link '#rutas-http-y-alcance-medido', but there is no such anchor on this page.
+INFO    -  Doc file 'operations/google-analytics-setup.md' contains a link '#diagnóstico', but there is no such anchor on this page.
+INFO    -  Doc file 'operations/runbooks/restore-from-backup.md' contains a link '#ensayo-local-lo-único-que-sí-se-ejecutó', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/costo-infraestructura-y-operacion-2026-08-07.md' contains a link '#parte-3--tres-topologías-completas-con-costo-total', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/mensajeria-whatsapp-vs-sms-costos-2026-08-07.md' contains a link '#cómo-verificar-antes-de-presupuestar', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/mensajeria-whatsapp-vs-sms-costos-2026-08-07.md' contains a link '#restricciones-no-monetarias-que-condicionan-el-diseño', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/mensajeria-whatsapp-vs-sms-costos-2026-08-07.md' contains a link '#parte-4--aristas-de-contexto-boliviano-y-de-operación', but there is no such anchor on this page.
+INFO    -  Doc file 'resilience/01-matriz-de-riesgos.md' contains a link '00-auditoria.md#a-10--rate-limiting-en-memoria-por-instancia-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-10--rate-limiting-en-memoria-por-instancia-'.
+INFO    -  Doc file 'resilience/03-fmea-y-arbol-de-fallos.md' contains a link '00-auditoria.md#a-12--no-hay-métricas-prometheus-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-12--no-hay-métricas-prometheus-'.
+INFO    -  Doc file 'resilience/06-checklists.md' contains a link '00-auditoria.md#a-12--no-hay-métricas-prometheus-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-12--no-hay-métricas-prometheus-'.
+INFO    -  Doc file 'resilience/07-manual-de-incidentes.md' contains a link '00-auditoria.md#a-12--no-hay-métricas-prometheus-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-12--no-hay-métricas-prometheus-'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './transversal/authz-transversal.md#authz-t01--crítica--webhook-de-transportista-sin-autenticación', but the doc 'revision-backend-2026-10-04/transversal/authz-transversal.md' does not contain an anchor '#authz-t01--crítica--webhook-de-transportista-sin-autenticación'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './transversal/authz-transversal.md#authz-t02--crítica--aplicación-de-plantilla-crea-órdenes-para-pacienteencuentro-arbitrarios', but the doc 'revision-backend-2026-10-04/transversal/authz-transversal.md' does not contain an anchor '#authz-t02--crítica--aplicación-de-plantilla-crea-órdenes-para-pacienteencuentro-arbitrarios'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/clinical_ext.md#ce-01--crítica--autorización-por-id-clínico-incompleta', but the doc 'revision-backend-2026-10-04/modulos/clinical_ext.md' does not contain an anchor '#ce-01--crítica--autorización-por-id-clínico-incompleta'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './transversal/suite-pruebas.md#sp-01--crítico-el-reset-del-smoke-admite-una-base-no-descartable', but the doc 'revision-backend-2026-10-04/transversal/suite-pruebas.md' does not contain an anchor '#sp-01--crítico-el-reset-del-smoke-admite-una-base-no-descartable'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/accounting.md#acc-01--crítica--los-writes-y-referencias-financieras-no-validan-el-alcance-de-prácticatenant', but the doc 'revision-backend-2026-10-04/modulos/accounting.md' does not contain an anchor '#acc-01--crítica--los-writes-y-referencias-financieras-no-validan-el-alcance-de-prácticatenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/insurance.md#ins-01--crítica--alta-legacy-de-reclamos-sin-alcance-de-cobertura-ni-práctica', but the doc 'revision-backend-2026-10-04/modulos/insurance.md' does not contain an anchor '#ins-01--crítica--alta-legacy-de-reclamos-sin-alcance-de-cobertura-ni-práctica'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/health_data.md#hd-01--crítica--everything-no-comprueba-acceso-del-actor-al-paciente-ni-al-custodio', but the doc 'revision-backend-2026-10-04/modulos/health_data.md' does not contain an anchor '#hd-01--crítica--everything-no-comprueba-acceso-del-actor-al-paciente-ni-al-custodio'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/consent.md#con-01--crítica--decisiones-de-privacidad-no-atan-paciente-y-tenant-al-actor', but the doc 'revision-backend-2026-10-04/modulos/consent.md' does not contain an anchor '#con-01--crítica--decisiones-de-privacidad-no-atan-paciente-y-tenant-al-actor'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/delegated_access.md#dlg-01--crítica--se-pueden-componer-delegaciones-y-grants-de-ámbitos-distintos', but the doc 'revision-backend-2026-10-04/modulos/delegated_access.md' does not contain an anchor '#dlg-01--crítica--se-pueden-componer-delegaciones-y-grants-de-ámbitos-distintos'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/scheduling.md#sched-01--crítica--el-listado-por-recurso-no-autoriza-al-actor-ni-acota-el-tenant', but the doc 'revision-backend-2026-10-04/modulos/scheduling.md' does not contain an anchor '#sched-01--crítica--el-listado-por-recurso-no-autoriza-al-actor-ni-acota-el-tenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/pharmacy_inventory.md#pinv-01--crítica--los-writes-de-inventario-no-atan-actor-farmacia-sede-ubicación-lote-y-producto', but the doc 'revision-backend-2026-10-04/modulos/pharmacy_inventory.md' does not contain an anchor '#pinv-01--crítica--los-writes-de-inventario-no-atan-actor-farmacia-sede-ubicación-lote-y-producto'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/pharmacy.md#pharm-01--crítica--administración-global-sin-alcance-de-farmacia-o-tenant', but the doc 'revision-backend-2026-10-04/modulos/pharmacy.md' does not contain an anchor '#pharm-01--crítica--administración-global-sin-alcance-de-farmacia-o-tenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/identity_assurance.md#ida-01--crítica--casos-y-evidencia-de-identidad-se-operan-por-uuid-sin-alcance-de-tenant-o-sujeto', but the doc 'revision-backend-2026-10-04/modulos/identity_assurance.md' does not contain an anchor '#ida-01--crítica--casos-y-evidencia-de-identidad-se-operan-por-uuid-sin-alcance-de-tenant-o-sujeto'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/diagnostics.md#diag-01--crítica--escrituras-diagnósticas-sin-autorización-de-tenant-paciente-o-recurso', but the doc 'revision-backend-2026-10-04/modulos/diagnostics.md' does not contain an anchor '#diag-01--crítica--escrituras-diagnósticas-sin-autorización-de-tenant-paciente-o-recurso'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/terminology.md#term-01--crítica--política-de-catálogo-de-tenant-sin-autorización-de-ámbito', but the doc 'revision-backend-2026-10-04/modulos/terminology.md' does not contain an anchor '#term-01--crítica--política-de-catálogo-de-tenant-sin-autorización-de-ámbito'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/medical_groups.md#mg-01--crítica--crear-un-grupo-con-paciente-no-aplica-la-política-clínica-si-no-llega-condición', but the doc 'revision-backend-2026-10-04/modulos/medical_groups.md' does not contain an anchor '#mg-01--crítica--crear-un-grupo-con-paciente-no-aplica-la-política-clínica-si-no-llega-condición'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/quotations.md#quote-01--crítica--alta-de-cotización-sin-política-de-paciente-ni-validación-de-referencias-clínicas', but the doc 'revision-backend-2026-10-04/modulos/quotations.md' does not contain an anchor '#quote-01--crítica--alta-de-cotización-sin-política-de-paciente-ni-validación-de-referencias-clínicas'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/practice.md#prac-01--crítica--escrituras-administrativas-por-uuid-no-se-acotan-al-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/practice.md' does not contain an anchor '#prac-01--crítica--escrituras-administrativas-por-uuid-no-se-acotan-al-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/diagnostic_units.md#dunit-01--crítica--las-mutaciones-administrativas-resuelven-unidades-y-recursos-por-uuid-sin-alcance-de-tenant', but the doc 'revision-backend-2026-10-04/modulos/diagnostic_units.md' does not contain an anchor '#dunit-01--crítica--las-mutaciones-administrativas-resuelven-unidades-y-recursos-por-uuid-sin-alcance-de-tenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/graph_intelligence.md#graph-01--crítica--las-mutaciones-por-uuid-no-comparan-el-tenant-de-la-sesión-con-el-recurso-cargado', but the doc 'revision-backend-2026-10-04/modulos/graph_intelligence.md' does not contain an anchor '#graph-01--crítica--las-mutaciones-por-uuid-no-comparan-el-tenant-de-la-sesión-con-el-recurso-cargado'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/telemetry.md#tel-01--crítica--un-usuario-puede-otorgar-aceptar-o-retirar-consentimiento-por-otra-persona', but the doc 'revision-backend-2026-10-04/modulos/telemetry.md' does not contain an anchor '#tel-01--crítica--un-usuario-puede-otorgar-aceptar-o-retirar-consentimiento-por-otra-persona'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/vector_rag.md#vec-01--crítica--colecciones-sesiones-y-jobs-cargados-por-uuid-no-se-acotan-al-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/vector_rag.md' does not contain an anchor '#vec-01--crítica--colecciones-sesiones-y-jobs-cargados-por-uuid-no-se-acotan-al-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/vector_rag.md#vec-02--crítica--el-borrado-de-embeddings-no-filtra-documentos-por-tenant', but the doc 'revision-backend-2026-10-04/modulos/vector_rag.md' does not contain an anchor '#vec-02--crítica--el-borrado-de-embeddings-no-filtra-documentos-por-tenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/marketing.md#mkt-01--crítico--recursos-y-altas-no-se-vinculan-al-tenant-autenticado', but the doc 'revision-backend-2026-10-04/modulos/marketing.md' does not contain an anchor '#mkt-01--crítico--recursos-y-altas-no-se-vinculan-al-tenant-autenticado'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/integration_contracts.md#icon-01--crítica--contratos-y-recursos-hijos-se-cargan-por-uuid-sin-comprobar-el-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/integration_contracts.md' does not contain an anchor '#icon-01--crítica--contratos-y-recursos-hijos-se-cargan-por-uuid-sin-comprobar-el-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/reporting.md#rep-01--crítica--definiciones-ejecuciones-y-programaciones-se-resuelven-por-uuid-sin-alcance-de-tenant', but the doc 'revision-backend-2026-10-04/modulos/reporting.md' does not contain an anchor '#rep-01--crítica--definiciones-ejecuciones-y-programaciones-se-resuelven-por-uuid-sin-alcance-de-tenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/education.md#edu-01--crítica--las-mutaciones-por-uuid-no-verifican-que-el-recurso-pertenezca-al-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/education.md' does not contain an anchor '#edu-01--crítica--las-mutaciones-por-uuid-no-verifican-que-el-recurso-pertenezca-al-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants', but the doc 'revision-backend-2026-10-04/modulos/lakehouse.md' does not contain an anchor '#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/surveys.md#surv-01--crítica--las-invitaciones-y-respuestas-de-paciente-no-se-acotan-al-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/surveys.md' does not contain an anchor '#surv-01--crítica--las-invitaciones-y-respuestas-de-paciente-no-se-acotan-al-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/platform_ops.md#pops-01--crítica--recursos-operativos-se-cargan-por-uuid-y-el-tenant-de-dto-se-confía-sin-alcance-del-recurso', but the doc 'revision-backend-2026-10-04/modulos/platform_ops.md' does not contain an anchor '#pops-01--crítica--recursos-operativos-se-cargan-por-uuid-y-el-tenant-de-dto-se-confía-sin-alcance-del-recurso'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/qa_lab.md#qalab-01--crítica--suites-corridas-y-evidencia-se-cargan-por-uuid-sin-comparar-el-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/qa_lab.md' does not contain an anchor '#qalab-01--crítica--suites-corridas-y-evidencia-se-cargan-por-uuid-sin-comparar-el-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/promotions.md#prom-01--crítica--programas-promociones-membresías-reglas-y-redenciones-se-resuelven-por-uuid-sin-alcance-de-tenant', but the doc 'revision-backend-2026-10-04/modulos/promotions.md' does not contain an anchor '#prom-01--crítica--programas-promociones-membresías-reglas-y-redenciones-se-resuelven-por-uuid-sin-alcance-de-tenant'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/integrations.md#int-01--crítica--recursos-de-tenant-se-resuelven-por-uuid-sin-cotejar-el-tenant-activo', but the doc 'revision-backend-2026-10-04/modulos/integrations.md' does not contain an anchor '#int-01--crítica--recursos-de-tenant-se-resuelven-por-uuid-sin-cotejar-el-tenant-activo'.
+INFO    -  Doc file 'revision-backend-2026-10-04/README.md' contains a link './modulos/authz.md#authz-m01--crítica--las-relaciones-de-acceso-clínico-se-persisten-y-evalúan-sin-comprobar-custodia', but the doc 'revision-backend-2026-10-04/modulos/authz.md' does not contain an anchor '#authz-m01--crítica--las-relaciones-de-acceso-clínico-se-persisten-y-evalúan-sin-comprobar-custodia'.
+INFO    -  Doc file 'revision-backend-2026-10-04/modulos/clinical_ext.md' contains a link '../transversal/authz-transversal.md#authz-t02--crítica--aplicación-de-plantilla-crea-órdenes-para-pacienteencuentro-arbitrarios', but the doc 'revision-backend-2026-10-04/transversal/authz-transversal.md' does not contain an anchor '#authz-t02--crítica--aplicación-de-plantilla-crea-órdenes-para-pacienteencuentro-arbitrarios'.
+
+Aborted with 1 warnings in strict mode!

@@ -1,0 +1,36 @@
+$ NODE_OPTIONS=--max-old-space-size=8192 corepack yarn test --maxWorkers=50% --ci   # 2026-10-24, Mac local, rama en 7e4268b3
+
+FAIL common/seed/glossary-articles.catalog.spec.ts
+FAIL src/common/seed/glossary-articles.catalog.spec.ts
+
+  ● Artículos enciclopédicos de autoría propia del glosario › cada artículo llega al piso de 2.000 palabras
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 6
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "slug": "hipertension-arterial",
+    +     "words": 1892,
+    +   },
+    + ]
+
+      118 |       ),
+      119 |     })).filter((entry) => entry.words < 2000);
+    > 120 |     expect(short).toEqual([]);
+          |                   ^
+      121 |   });
+      122 |
+      123 |   it('no redacta dosis, contraindicaciones ni interacciones sin fuente (regla 97.5.4)', () => {
+
+      at Object.toEqual (common/seed/glossary-articles.catalog.spec.ts:120:19)
+
+
+Snapshots:   0 total
+Test Suites: 1 failed, 1 skipped, 872 passed, 873 of 874 total
+Tests:       1 failed, 1 skipped, 10717 passed, 10719 total
+Time:        91.134 s
+NODE_OPTIONS=--max-old-space-size=8192 corepack yarn test --maxWorkers=50%   455.45s user 88.62s system 583% cpu 1:33.22 total

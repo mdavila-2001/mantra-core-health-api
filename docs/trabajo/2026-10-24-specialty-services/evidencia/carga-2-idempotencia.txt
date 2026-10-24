@@ -1,0 +1,22 @@
+=== Servicios por especialidad → terminology.*  ===
+{
+  "skippedBoConceptsMissing": 0,
+  "concepts": 1148,
+  "designations": 1148,
+  "properties": 7139,
+  "relationships": 4923,
+  "valueSets": 52,
+  "valueSetMembers": 4923,
+  "unresolvedSpecialties": {},
+  "inserted": {
+    "concepts": 0,
+    "designations": 0,
+    "properties": 0,
+    "relationships": 0,
+    "valueSets": 0,
+    "valueSetVersions": 0,
+    "valueSetMembers": 0,
+    "batches": 0
+  },
+  "segundos": 1
+}
