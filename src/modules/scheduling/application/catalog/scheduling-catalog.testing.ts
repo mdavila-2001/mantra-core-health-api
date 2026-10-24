@@ -2,6 +2,7 @@ import { SchedulingCatalogService } from './scheduling-catalog.service';
 import { AgendaOverlapGuard, CatalogAccess, SlotMoveNotifier } from './support';
 import { BlockedBookingsCanceller } from './support/blocked-bookings-canceller';
 import { CloseSlotsUseCase } from './use-cases/close-slots.use-case';
+import { ListTemplateLiveBookingsUseCase } from './use-cases/list-template-live-bookings.use-case';
 import { CreateBookingPolicyUseCase } from './use-cases/create-booking-policy.use-case';
 import { CreateExceptionUseCase } from './use-cases/create-exception.use-case';
 import { CreateResourceUseCase } from './use-cases/create-resource.use-case';
@@ -71,7 +72,7 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     new CreateTemplateUseCase(em, catalogRepo, access, overlapGuard, logger),
     new UpdateTemplateUseCase(em, catalogRepo, access, logger),
     new ReactivateTemplateUseCase(em, catalogRepo, access, logger),
-    new RetireTemplateUseCase(em, catalogRepo, access, logger),
+    new RetireTemplateUseCase(em, catalogRepo, access, blockedBookings, logger),
     new GenerateSlotsUseCase(em, catalogRepo, professionalTime, access, logger),
     new CloseSlotsUseCase(em, catalogRepo, access, blockedBookings, logger),
     new ShiftSlotsUseCase(em, catalogRepo, access, moveNotifier, logger),
@@ -89,5 +90,11 @@ export function createCatalogService(d: CatalogServiceDoubles) {
     new ListExceptionsUseCase(em, catalogRepo, access),
     new GetResourceAgendaUseCase(em, catalogRepo),
     new ListCatalogLookupsUseCase(),
+    new ListTemplateLiveBookingsUseCase(
+      em,
+      catalogRepo,
+      access,
+      blockedBookings,
+    ),
   );
 }

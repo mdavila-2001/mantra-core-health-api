@@ -1112,4 +1112,28 @@ export class SchedulingCatalogRepository {
       { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
     );
   }
+
+  /** Todos los cupos de una plantilla, para describir sus citas vivas. */
+  findSlotsOfTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { orderBy: { startAt: 'ASC' } },
+    );
+  }
+
+  /** Los mismos, bloqueados para escribir: el retiro que cancela sus citas. */
+  findSlotsOfTemplateForUpdate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
+    );
+  }
 }
