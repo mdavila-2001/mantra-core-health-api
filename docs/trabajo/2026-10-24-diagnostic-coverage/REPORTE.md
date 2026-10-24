@@ -103,6 +103,11 @@ ejemplo `Av. Beni 320, Equipetrol Norte, Santa Cruz de la Sierra, SCZ-EQP-320`, 
 - **La función de distancia se llama `straightLineKm` y no `haversineKm`**, para no confundirla con
   las tres copias locales que ya existen.
 - **`findOfferedConcepts` tiene un spec propio.** El repositorio no tenía specs.
+- **Commit aparte con el índice de endpoints de `scheduling`.** Al regenerar sobre `dev` actualizado
+  (`27b5bdf5`) cambiaron `openapi/ENDPOINTS.md`, `openapi/endpoints/README.md` y
+  `openapi/endpoints/scheduling.md`. `dev` trae cambios de `scheduling` en el controller y el DTO sin
+  esos índices regenerados. Sin ellos, el paso «artefactos generados al día» del workflow de
+  documentación fallaría en este PR por algo ajeno. No se tocó código de `scheduling`.
 
 ## Riesgos residuales
 
