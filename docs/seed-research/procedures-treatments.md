@@ -1,7 +1,7 @@
 # Procedimientos y tratamientos no farmacológicos — por enfermedad y por parte del cuerpo
 
 Rama `justin/seed-procedures-treatments` · importador en `tools/terminology-import/procedures-treatments/`
-· fuentes y licencias en [`SOURCES.md`](../../tools/terminology-import/procedures-treatments/SOURCES.md)
+· fuentes y licencias en `tools/terminology-import/procedures-treatments/SOURCES.md`
 · plan en [`docs/trabajo/2026-10-24-seed-procedures-treatments/PLAN.md`](../trabajo/2026-10-24-seed-procedures-treatments/PLAN.md).
 
 Es una base de **relaciones publicadas**, no un recomendador. Cada fila conserva el predicado literal
