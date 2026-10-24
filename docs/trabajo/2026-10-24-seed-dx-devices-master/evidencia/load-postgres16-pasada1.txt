@@ -1,0 +1,41 @@
+# load-taxonomy.mjs contra PostgreSQL 16 desechable (DDL de database/SQL/00_* y 03_terminology; conceptos internos sembrados a mano solo en esa base), 2026-10-24
+## 1.ª corrida
+=== Taxonomía de equipos de diagnóstico → terminology.*  ===
+┌─────────┬────────────────────┬──────────────────────────────────────────────────────────────────────┬──────────┬──────────────┬────────────┬───────────────┐
+│ (index) │ system             │ version                                                              │ concepts │ designations │ properties │ relationships │
+├─────────┼────────────────────┼──────────────────────────────────────────────────────────────────────┼──────────┼──────────────┼────────────┼───────────────┤
+│ 0       │ 'fda-product-code' │ 'git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28)' │ 7088     │ 7088         │ 21264      │ 0             │
+└─────────┴────────────────────┴──────────────────────────────────────────────────────────────────────┴──────────┴──────────────┴────────────┴───────────────┘
+mapeos publicados: 0; miembros del value set diagnostic-equipment-types: 3122
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "fda-product-code": {
+      "concepts": 7088,
+      "designations": 7088,
+      "properties": 21264,
+      "relationships": 0
+    },
+    "maps": 0,
+    "valueSetMembers": 3122
+  },
+  "segundos": 2
+}
+## 2.ª corrida (idempotencia)
+mapeos publicados: 0; miembros del value set diagnostic-equipment-types: 3122
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "fda-product-code": {
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "relationships": 0
+    },
+    "maps": 0,
+    "valueSetMembers": 0
+  },
+  "segundos": 2
+}

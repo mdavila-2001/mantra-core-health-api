@@ -1,0 +1,255 @@
+{
+  "region": "master",
+  "formatVersion": 1,
+  "generatedAt": "2026-10-24T04:35:02Z",
+  "regions": [
+    {
+      "region": "us",
+      "status": "consolidated",
+      "ref": "origin/justin/seed-dx-devices-us",
+      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
+      "commitDate": "2026-10-24T04:13:39+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/compassionate-brown-tr71nn"
+      ],
+      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
+      "rowsRead": 204096,
+      "gaps": [
+        {
+          "source": "fda-gudid",
+          "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+          "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
+        }
+      ]
+    },
+    {
+      "region": "eu",
+      "status": "consolidated",
+      "ref": "origin/claude/adoring-curie-xdkt83",
+      "commit": "2e7f6e46f8db8d41c87d91aa4fb27c5d94464d6a",
+      "commitDate": "2026-10-24T03:59:33+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/adoring-curie-xdkt83-test"
+      ],
+      "manifestGeneratedAt": "2026-10-24T03:48:44Z",
+      "rowsRead": 716,
+      "gaps": [
+        {
+          "source": "ec-emdn",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        },
+        {
+          "source": "eudamed-udi",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://developer.datalake.sante.service.ec.europa.eu/"
+        },
+        {
+          "source": "eudamed-certificates",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "url": "https://ec.europa.eu/tools/eudamed/"
+        },
+        {
+          "source": "mhra-pard",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
+          "url": "https://pard.mhra.gov.uk/"
+        },
+        {
+          "source": "swissmedic-swissdamed",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "url": "https://swissdamed.ch/"
+        },
+        {
+          "source": "it-salute-bdrdm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
+        },
+        {
+          "source": "it-salute-cnd",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/"
+        },
+        {
+          "source": "ec-nando",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+        },
+        {
+          "source": "de-bfarm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+        },
+        {
+          "source": "es-aemps-ccps",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.aemps.gob.es/"
+        },
+        {
+          "source": "fr-ansm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No aplica.",
+          "url": "https://ansm.sante.fr/"
+        }
+      ]
+    },
+    {
+      "region": "row",
+      "status": "consolidated",
+      "ref": "origin/claude/inspiring-planck-xhpf4w",
+      "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
+      "commitDate": "2026-10-24T04:21:10+00:00",
+      "dir": null,
+      "alternatives": [],
+      "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
+      "rowsRead": 3534775,
+      "gaps": [
+        {
+          "source": "anvisa-produtos",
+          "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
+          "url": "https://dados.anvisa.gov.br/dados/"
+        },
+        {
+          "source": "hc-mdall",
+          "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
+          "url": "https://health-products.canada.ca/mdall-limh/"
+        },
+        {
+          "source": "tga-artg",
+          "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+          "url": "https://www.tga.gov.au/resources/artg"
+        },
+        {
+          "source": "nmpa-udi",
+          "reason": "403 del proxy (udi.nmpa.gov.cn)",
+          "url": "https://udi.nmpa.gov.cn/"
+        },
+        {
+          "source": "mfds-devices",
+          "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
+          "url": "https://www.data.go.kr/"
+        },
+        {
+          "source": "tfda-devices",
+          "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
+          "url": "https://data.gov.tw/dataset/9576"
+        },
+        {
+          "source": "cdsco-devices",
+          "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
+          "url": "https://cdsco.gov.in/"
+        },
+        {
+          "source": "hsa-smdr",
+          "reason": "403 del proxy (data.gov.sg)",
+          "url": "https://data.gov.sg/"
+        },
+        {
+          "source": "amar-devices",
+          "reason": "403 del proxy (data.gov.il)",
+          "url": "https://data.gov.il/"
+        },
+        {
+          "source": "sfda-mdma",
+          "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+          "url": "https://medicaldevice.sfda.gov.sa/"
+        },
+        {
+          "source": "thai-fda-devices",
+          "reason": "403 del proxy (open.fda.moph.go.th)",
+          "url": "https://open.fda.moph.go.th/"
+        },
+        {
+          "source": "mda-medcast",
+          "reason": "403 del proxy (portal.mda.gov.my)",
+          "url": "https://portal.mda.gov.my/"
+        },
+        {
+          "source": "invima-dispositivos",
+          "reason": "403 del proxy (www.datos.gov.co)",
+          "url": "https://www.datos.gov.co/"
+        },
+        {
+          "source": "cofepris-dispositivos",
+          "reason": "403 del proxy (datos.gob.mx)",
+          "url": "https://datos.gob.mx/"
+        },
+        {
+          "source": "anmat-productos-medicos",
+          "reason": "403 del proxy (datos.gob.ar)",
+          "url": "https://datos.gob.ar/"
+        },
+        {
+          "source": "digemid-dispositivos",
+          "reason": "403 del proxy (www.datosabiertos.gob.pe)",
+          "url": "https://www.datosabiertos.gob.pe/"
+        },
+        {
+          "source": "agemed-dispositivos",
+          "reason": "403 del proxy (www.agemed.gob.bo)",
+          "url": "https://www.agemed.gob.bo/"
+        },
+        {
+          "source": "who-pq-ivd",
+          "reason": "403 del proxy (extranet.who.int)",
+          "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
+        },
+        {
+          "source": "unicef-supply",
+          "reason": "403 del proxy (supply.unicef.org)",
+          "url": "https://supply.unicef.org/"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "taxonomy-nodes.ndjson.gz",
+      "rows": 33616,
+      "bytes": 1831432,
+      "sha256": "e2cd23c56d8c59e7bcde9bd5ec07ac517071945a075fce6056455171beafe87f"
+    },
+    {
+      "path": "taxonomy-crosswalks.ndjson.gz",
+      "rows": 218,
+      "bytes": 6118,
+      "sha256": "693b9ff457457334ef14ebae655365ca92ca59fb5cff315ef6151a4c134691e7"
+    },
+    {
+      "path": "manufacturers.ndjson.gz",
+      "rows": 19941,
+      "bytes": 3813288,
+      "sha256": "592d836e24c32c352b540d463f762a38a7d33dbfebd56047d155c57a950ab9a0"
+    },
+    {
+      "path": "models-0001.ndjson.gz",
+      "rows": 136309,
+      "bytes": 10092254,
+      "sha256": "247d7ef0d7b557ba600ce79a51f55e2af2c8a147241cc7a883adef1972fa8efc"
+    },
+    {
+      "path": "models-0002.ndjson.gz",
+      "rows": 28886,
+      "bytes": 2238514,
+      "sha256": "96b36b765f5981e13b1dd708c566c6bd2577bb83c0571785b8556252a33dc4c9"
+    },
+    {
+      "path": "review-manufacturers.ndjson.gz",
+      "rows": 9558,
+      "bytes": 1136910,
+      "sha256": "43e53b2f0e3620b50333ce01f9df45a6c96b4afc4ee562750032fd7abcf5ad16"
+    },
+    {
+      "path": "industry-mentions.ndjson.gz",
+      "rows": 552,
+      "bytes": 26845,
+      "sha256": "e0aa5de17a9e5cab76a611a2795fbcc680fa29a1b2c868f0799f732cc8524cc8"
+    },
+    {
+      "path": "industry-candidates.ndjson.gz",
+      "rows": 178,
+      "bytes": 9815,
+      "sha256": "7675ad1549f9b14b3af5a973d4571aed332e2abe777df5fe2bb5471b9f46ccad"
+    }
+  ]
+}

@@ -1,0 +1,845 @@
+{
+  "generatedAt": "2026-10-24T04:35:01Z",
+  "regions": [
+    {
+      "region": "us",
+      "status": "consolidated",
+      "ref": "origin/justin/seed-dx-devices-us",
+      "commit": "dc28f18c0b527ba9730cc50e076f0093c7ab21f3",
+      "commitDate": "2026-10-24T04:13:39+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/compassionate-brown-tr71nn"
+      ],
+      "manifestGeneratedAt": "2026-10-24T04:12:35.287Z",
+      "rowsRead": 204096,
+      "gaps": [
+        {
+          "source": "fda-gudid",
+          "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+          "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
+        }
+      ]
+    },
+    {
+      "region": "eu",
+      "status": "consolidated",
+      "ref": "origin/claude/adoring-curie-xdkt83",
+      "commit": "2e7f6e46f8db8d41c87d91aa4fb27c5d94464d6a",
+      "commitDate": "2026-10-24T03:59:33+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/adoring-curie-xdkt83-test"
+      ],
+      "manifestGeneratedAt": "2026-10-24T03:48:44Z",
+      "rowsRead": 716,
+      "gaps": [
+        {
+          "source": "ec-emdn",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        },
+        {
+          "source": "eudamed-udi",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://developer.datalake.sante.service.ec.europa.eu/"
+        },
+        {
+          "source": "eudamed-certificates",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "url": "https://ec.europa.eu/tools/eudamed/"
+        },
+        {
+          "source": "mhra-pard",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Contenido de gov.uk suele publicarse bajo Open Government Licence v3.0; pendiente confirmar que aplica a PARD y que la exportación masiva está permitida.",
+          "url": "https://pard.mhra.gov.uk/"
+        },
+        {
+          "source": "swissmedic-swissdamed",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Las condiciones generales del sitio de Swissmedic prohíben reproducir su información sin autorización expresa y mencionan expresamente la extracción automatizada (scraping/data mining). No se pudo confirmar si rigen para swissdamed. Hasta confirmarlo NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "url": "https://swissdamed.ch/"
+        },
+        {
+          "source": "it-salute-bdrdm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/"
+        },
+        {
+          "source": "it-salute-cnd",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z)",
+          "url": "https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/"
+        },
+        {
+          "source": "ec-nando",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+        },
+        {
+          "source": "de-bfarm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+        },
+        {
+          "source": "es-aemps-ccps",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.aemps.gob.es/"
+        },
+        {
+          "source": "fr-ansm",
+          "reason": "403 del proxy (política de red del entorno, sondeo 2026-10-24T03:35:41.135Z) · sin descarga automática: No aplica.",
+          "url": "https://ansm.sante.fr/"
+        }
+      ]
+    },
+    {
+      "region": "row",
+      "status": "consolidated",
+      "ref": "origin/claude/inspiring-planck-xhpf4w",
+      "commit": "33e67ca12cc5015b2447966a4fe03fc68ea95dad",
+      "commitDate": "2026-10-24T04:21:10+00:00",
+      "dir": null,
+      "alternatives": [],
+      "manifestGeneratedAt": "2026-10-24T04:19:46.367Z",
+      "rowsRead": 3534775,
+      "gaps": [
+        {
+          "source": "anvisa-produtos",
+          "reason": "403 del proxy (dados.anvisa.gov.br); se usó un espejo de 2025-06-17",
+          "url": "https://dados.anvisa.gov.br/dados/"
+        },
+        {
+          "source": "hc-mdall",
+          "reason": "403 del proxy (health-products.canada.ca); solo hay espejo de 2020-02-07",
+          "url": "https://health-products.canada.ca/mdall-limh/"
+        },
+        {
+          "source": "tga-artg",
+          "reason": "403 del proxy (www.tga.gov.au); el ARTG completo no tiene espejo; solo hay DAEN parcial",
+          "url": "https://www.tga.gov.au/resources/artg"
+        },
+        {
+          "source": "nmpa-udi",
+          "reason": "403 del proxy (udi.nmpa.gov.cn)",
+          "url": "https://udi.nmpa.gov.cn/"
+        },
+        {
+          "source": "mfds-devices",
+          "reason": "403 del proxy (www.data.go.kr, emedi.mfds.go.kr)",
+          "url": "https://www.data.go.kr/"
+        },
+        {
+          "source": "tfda-devices",
+          "reason": "403 del proxy (data.gov.tw, data.fda.gov.tw). Hay una copia en la release data-20261023 de github.com/masalu0105-gif/taiwan-laboratory-mcp (104 891 licencias), pero bajar assets de releases exige adjuntar el repo con credenciales y esa acción fue denegada en esta sesión",
+          "url": "https://data.gov.tw/dataset/9576"
+        },
+        {
+          "source": "cdsco-devices",
+          "reason": "403 del proxy (cdsco.gov.in, cdscomdonline.gov.in). Se cargaron las licencias de importación (espejo); faltan las licencias de fabricación nacional (MD-5/MD-9) y las de autoridades estatales",
+          "url": "https://cdsco.gov.in/"
+        },
+        {
+          "source": "hsa-smdr",
+          "reason": "403 del proxy (data.gov.sg)",
+          "url": "https://data.gov.sg/"
+        },
+        {
+          "source": "amar-devices",
+          "reason": "403 del proxy (data.gov.il)",
+          "url": "https://data.gov.il/"
+        },
+        {
+          "source": "sfda-mdma",
+          "reason": "403 del proxy (medicaldevice.sfda.gov.sa)",
+          "url": "https://medicaldevice.sfda.gov.sa/"
+        },
+        {
+          "source": "thai-fda-devices",
+          "reason": "403 del proxy (open.fda.moph.go.th)",
+          "url": "https://open.fda.moph.go.th/"
+        },
+        {
+          "source": "mda-medcast",
+          "reason": "403 del proxy (portal.mda.gov.my)",
+          "url": "https://portal.mda.gov.my/"
+        },
+        {
+          "source": "invima-dispositivos",
+          "reason": "403 del proxy (www.datos.gov.co)",
+          "url": "https://www.datos.gov.co/"
+        },
+        {
+          "source": "cofepris-dispositivos",
+          "reason": "403 del proxy (datos.gob.mx)",
+          "url": "https://datos.gob.mx/"
+        },
+        {
+          "source": "anmat-productos-medicos",
+          "reason": "403 del proxy (datos.gob.ar)",
+          "url": "https://datos.gob.ar/"
+        },
+        {
+          "source": "digemid-dispositivos",
+          "reason": "403 del proxy (www.datosabiertos.gob.pe)",
+          "url": "https://www.datosabiertos.gob.pe/"
+        },
+        {
+          "source": "agemed-dispositivos",
+          "reason": "403 del proxy (www.agemed.gob.bo)",
+          "url": "https://www.agemed.gob.bo/"
+        },
+        {
+          "source": "who-pq-ivd",
+          "reason": "403 del proxy (extranet.who.int)",
+          "url": "https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics"
+        },
+        {
+          "source": "unicef-supply",
+          "reason": "403 del proxy (supply.unicef.org)",
+          "url": "https://supply.unicef.org/"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source": "fda-ai-enabled-devices",
+      "region": "master",
+      "read": 1524,
+      "valid": 1524,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 1429,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-510k",
+      "region": "us",
+      "read": 71955,
+      "valid": 71955,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 71294,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-denovo",
+      "region": "us",
+      "read": 240,
+      "valid": 240,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 235,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-pma",
+      "region": "us",
+      "read": 2646,
+      "valid": 2646,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 2057,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-rl",
+      "region": "us",
+      "read": 110614,
+      "valid": 110614,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 108260,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-gudid",
+      "region": "us",
+      "read": 3130,
+      "valid": 3130,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 3130,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-maude",
+      "region": "us",
+      "read": 1336,
+      "valid": 1336,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 1104,
+      "attachedBySameModel": 5,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-recall",
+      "region": "us",
+      "read": 13692,
+      "valid": 13692,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 13222,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "cdc-livd-sars-cov-2",
+      "region": "us",
+      "read": 483,
+      "valid": 483,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 483,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "eudamed-udi",
+      "region": "eu",
+      "read": 716,
+      "valid": 716,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 432,
+      "attachedBySameModel": 5,
+      "invalidSamples": []
+    },
+    {
+      "source": "anvisa-produtos",
+      "region": "row",
+      "read": 93770,
+      "valid": 93770,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 243,
+      "invalidSamples": []
+    },
+    {
+      "source": "anvisa-produtos-modelos",
+      "region": "row",
+      "read": 1027762,
+      "valid": 1027762,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 1,
+      "invalidSamples": []
+    },
+    {
+      "source": "pmda-approvals",
+      "region": "row",
+      "read": 35298,
+      "valid": 35298,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "hc-mdall",
+      "region": "row",
+      "read": 2333236,
+      "valid": 2333236,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 47732,
+      "attachedBySameModel": 40,
+      "invalidSamples": []
+    },
+    {
+      "source": "tga-daen",
+      "region": "row",
+      "read": 18917,
+      "valid": 18917,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 424,
+      "attachedBySameModel": 6,
+      "invalidSamples": []
+    },
+    {
+      "source": "cdsco-import-licences",
+      "region": "row",
+      "read": 25792,
+      "valid": 25792,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 49,
+      "invalidSamples": []
+    }
+  ],
+  "taxonomy": {
+    "nodes": 33616,
+    "bySystem": {
+      "in:cdsco-device-name": 11371,
+      "emdn": 8455,
+      "fda-product-code": 7091,
+      "br:anvisa-nome-tecnico": 2785,
+      "jmdn": 2092,
+      "gmdn-pt": 1743,
+      "gmdn": 79
+    },
+    "diagnosticBySystem": {
+      "fda-product-code": 3122,
+      "emdn": 2492,
+      "gmdn": 79
+    },
+    "byDecision": {
+      "in:cdsco-device-name:null:null": 11371,
+      "emdn:null:null": 5786,
+      "fda-product-code:false:cfr-non-diagnostic-subpart": 3089,
+      "br:anvisa-nome-tecnico:null:null": 2785,
+      "emdn:true:emdn-category-w": 2263,
+      "jmdn:null:null": 2092,
+      "fda-product-code:true:cfr-ivd-part": 2076,
+      "gmdn-pt:null:null": 1743,
+      "fda-product-code:true:cfr-subpart-title": 975,
+      "fda-product-code:null:no-regulation": 831,
+      "emdn:true:emdn-group-title-inherited": 199,
+      "emdn:null:emdn-group-title-mixed-inherited": 173,
+      "gmdn:true:crosswalk-published": 79,
+      "fda-product-code:true:fda-review-panel-ivd": 71,
+      "fda-product-code:false:cfr-blood-establishment": 37,
+      "emdn:true:emdn-group-title": 30,
+      "fda-product-code:false:cfr-non-device-part": 5,
+      "emdn:null:emdn-group-title-mixed": 4,
+      "fda-product-code:null:cfr-section-outside-verified-ranges": 4,
+      "fda-product-code:null:fda-code-not-in-pcd": 3
+    },
+    "diagnosticByBranch": {
+      "emdn:ivd": 2263,
+      "fda-product-code:ivd": 2147,
+      "fda-product-code:diagnostic": 777,
+      "emdn:diagnostic": 229,
+      "fda-product-code:monitoring": 198,
+      "gmdn:diagnostic": 78,
+      "gmdn:ivd": 1
+    },
+    "crosswalks": 218,
+    "crosswalksBySystems": {
+      "fda-product-code→gmdn": 109,
+      "gmdn→fda-product-code": 109
+    },
+    "diagnosticTypesWithModels": 3033,
+    "ivdPanelsMeasured": [
+      "IM",
+      "MG",
+      "PA",
+      "TX"
+    ],
+    "panelParts": {
+      "AN": {
+        "868": 220,
+        "870": 8,
+        "872": 1,
+        "874": 1,
+        "876": 2,
+        "878": 3,
+        "882": 2,
+        "890": 1
+      },
+      "CH": {
+        "862": 472,
+        "864": 8,
+        "866": 4,
+        "868": 1,
+        "880": 5
+      },
+      "CV": {
+        "868": 1,
+        "870": 316,
+        "876": 1,
+        "878": 4,
+        "880": 1,
+        "892": 1
+      },
+      "DE": {
+        "872": 317,
+        "878": 3,
+        "880": 2,
+        "890": 3
+      },
+      "EN": {
+        "868": 3,
+        "872": 3,
+        "874": 229,
+        "878": 1,
+        "880": 2,
+        "882": 2,
+        "892": 4
+      },
+      "GU": {
+        "870": 5,
+        "876": 528,
+        "878": 10,
+        "880": 1,
+        "882": 1,
+        "884": 5,
+        "890": 1,
+        "892": 1
+      },
+      "HE": {
+        "660": 3,
+        "862": 1,
+        "864": 223,
+        "866": 11,
+        "868": 1,
+        "880": 1
+      },
+      "HO": {
+        "864": 2,
+        "868": 3,
+        "870": 7,
+        "872": 1,
+        "876": 7,
+        "878": 46,
+        "880": 295,
+        "882": 1,
+        "890": 6,
+        "892": 2
+      },
+      "IM": {
+        "862": 2,
+        "864": 6,
+        "866": 247
+      },
+      "MG": {
+        "864": 1,
+        "866": 4
+      },
+      "MI": {
+        "610": 2,
+        "862": 5,
+        "864": 1,
+        "866": 508
+      },
+      "NE": {
+        "870": 9,
+        "874": 2,
+        "878": 2,
+        "882": 211,
+        "888": 6,
+        "890": 7
+      },
+      "OB": {
+        "862": 1,
+        "870": 2,
+        "876": 2,
+        "878": 2,
+        "884": 240,
+        "890": 1
+      },
+      "OP": {
+        "876": 3,
+        "878": 2,
+        "880": 1,
+        "886": 308,
+        "892": 5
+      },
+      "OR": {
+        "878": 16,
+        "882": 6,
+        "888": 268,
+        "890": 2
+      },
+      "PA": {
+        "864": 265,
+        "866": 33
+      },
+      "PM": {
+        "882": 3,
+        "888": 1,
+        "890": 199
+      },
+      "RA": {
+        "872": 6,
+        "876": 1,
+        "884": 9,
+        "892": 184
+      },
+      "SU": {
+        "868": 1,
+        "870": 1,
+        "874": 2,
+        "876": 21,
+        "878": 466,
+        "880": 12,
+        "882": 2,
+        "890": 4,
+        "892": 2
+      },
+      "TX": {
+        "862": 316,
+        "864": 2,
+        "866": 1
+      }
+    }
+  },
+  "catalog": {
+    "rowsIncluded": 250151,
+    "rowsNotDiagnostic": 2624,
+    "rowsAttachedBySameModel": 349,
+    "rowsUndetermined": 3488336,
+    "rowsWithoutType": 2286266,
+    "undeterminedTopTypes": {
+      "(sin tipo)": 2286266,
+      "br:anvisa-nome-tecnico|name:INSTRUMENTOS CIRÚRGICOS": 130916,
+      "br:anvisa-nome-tecnico|name:BROCAS CIRURGICAS": 74940,
+      "br:anvisa-nome-tecnico|name:SISTEMAS DE FIXAÇÃO ORTOPÉDICOS E DISPOSITIVOS ASSOCIADOS": 39811,
+      "br:anvisa-nome-tecnico|name:KIT INSTRUMENTAL": 35644,
+      "br:anvisa-nome-tecnico|name:CANULAS": 32156,
+      "br:anvisa-nome-tecnico|name:CATETERES": 24698,
+      "br:anvisa-nome-tecnico|name:INSTRUMENTAL PARA IMPLANTE ORTOPEDICO": 24100,
+      "br:anvisa-nome-tecnico|name:COMPONENTES DE ORTESES E PROTESES EXTERNAS": 21497,
+      "br:anvisa-nome-tecnico|name:PINO E FIO RÍGIDOS NÃO ABSORVÍVEIS": 20353,
+      "br:anvisa-nome-tecnico|name:CANULAS METALICAS": 16568,
+      "br:anvisa-nome-tecnico|name:CURATIVO": 16403,
+      "br:anvisa-nome-tecnico|name:SISTEMAS INTERNOS DE FIXAÇÃO DE COLUNA VERTEBRAL": 15869,
+      "br:anvisa-nome-tecnico|name:COMPONENTES DE IMPLANTE ODONTOLOGICO": 15137,
+      "br:anvisa-nome-tecnico|name:BROCAS DE PERFURACAO OSSEA": 14760,
+      "br:anvisa-nome-tecnico|name:CAMPO DESCARTAVEL ESTERIL": 14378,
+      "br:anvisa-nome-tecnico|name:AGULHAS DESCARTAVEIS": 9762,
+      "br:anvisa-nome-tecnico|name:FRASCO OU MATERIAL PARA COLETA, ARMAZENAMENTO OU TRANSPORTE DE AMOSTRAS BIOLÓGICAS": 8777,
+      "br:anvisa-nome-tecnico|name:VESTIMENTA CIRURGICA": 8339,
+      "br:anvisa-nome-tecnico|name:DISPOSITIVO PARA FIXACAO DE CATETER": 8139,
+      "br:anvisa-nome-tecnico|name:KIT CIRURGICO": 8014,
+      "br:anvisa-nome-tecnico|name:APARELHO AUDITIVO": 7769,
+      "br:anvisa-nome-tecnico|name:CABO/ELETRODO ELETROCIRÚRGICO (POTÊNCIA MAIOR QUE 50W)": 7524,
+      "br:anvisa-nome-tecnico|name:CONTAINERS EM GERAL(CAIXAS, BANDEJAS, CUBAS, ETC)": 7435,
+      "br:anvisa-nome-tecnico|name:FILME PROTETOR": 6876,
+      "br:anvisa-nome-tecnico|name:FIO GUIA": 5944,
+      "br:anvisa-nome-tecnico|name:FIO DE SUTURA": 5894,
+      "br:anvisa-nome-tecnico|name:ENDOSCOPIO FLEXIVEL": 5850,
+      "br:anvisa-nome-tecnico|name:BANDAGEM": 5844,
+      "br:anvisa-nome-tecnico|name:PRÓTESES TOTAIS DE JOELHO": 5704,
+      "br:anvisa-nome-tecnico|name:VESTIMENTA HOSPITALAR": 5698,
+      "br:anvisa-nome-tecnico|name:INSTRUMENTAL MONOPOLAR/BIPOLAR PARA ELETROCIRURGIA": 5641,
+      "br:anvisa-nome-tecnico|name:SISTEMA DE FIXAÇÃO RÍGIDA DE PLACAS ESPECIAIS PARA OSTEOSSÍNTESE": 5405,
+      "br:anvisa-nome-tecnico|name:HASTES ÓSSEAS": 5348,
+      "br:anvisa-nome-tecnico|name:IMPLANTE PARA ANEURISMA": 5302,
+      "br:anvisa-nome-tecnico|name:AGULHAS": 5176,
+      "br:anvisa-nome-tecnico|name:ESPARADRAPOS E FITAS ADESIVAS": 5045,
+      "br:anvisa-nome-tecnico|name:ENDOPRÓTESE NÃO CONVENCIONAL PARA MEMBROS INFERIORES": 5024,
+      "br:anvisa-nome-tecnico|name:PORCELANA/ CERÂMICA ODONTOLÓGICA": 4897,
+      "br:anvisa-nome-tecnico|name:PARAFUSO ÓSSEO ORTOPÉDICO NÃO BIOABSORVÍVEL, NÃO ESTÉRIL": 4875,
+      "br:anvisa-nome-tecnico|name:BROCAS ODONTOLOGICAS": 4797,
+      "br:anvisa-nome-tecnico|name:TAMPÕES, DILUENTES E DEMAIS SOLUÇÕES PARA ANÁLISE LABORATORIAL": 4766,
+      "br:anvisa-nome-tecnico|name:MASCARAS": 4726,
+      "br:anvisa-nome-tecnico|name:ENDOSCOPIO RIGIDO": 4648,
+      "br:anvisa-nome-tecnico|name:CATETER BALÃO PARA ANGIOPLASTIA PERIFÉRICA": 4638,
+      "br:anvisa-nome-tecnico|name:KIT DE MONITORACAO": 4571,
+      "br:anvisa-nome-tecnico|name:STENT NÃO VASCULAR (NÃO ENQUADRADO COMO BILIAR, BRONQUIAL, ESOFÁGICO, PANCREÁTICO, URINÁRIO E VAGINAL)": 4540,
+      "br:anvisa-nome-tecnico|name:CABO PARA ELETRODOS": 4316,
+      "br:anvisa-nome-tecnico|name:LIMAS PARA ODONTOLOGIA": 4216,
+      "br:anvisa-nome-tecnico|name:FIXADORES EXTERNOS": 4179
+    },
+    "manufacturers": 19941,
+    "brands": 80165,
+    "models": 165195,
+    "registrations": 250151,
+    "modelsByJurisdictionCount": {
+      "1": 164909,
+      "2": 279,
+      "3": 7
+    },
+    "modelsByJurisdiction": {
+      "US": 120536,
+      "CA": 43839,
+      "EU": 434,
+      "AU": 405,
+      "BR": 238,
+      "IN": 36
+    },
+    "manufacturersByCountry": {
+      "US": 13687,
+      "CN": 1283,
+      "(sin país)": 768,
+      "CA": 525,
+      "DE": 450,
+      "GB": 328,
+      "IL": 300,
+      "KR": 281,
+      "TW": 256,
+      "JP": 219,
+      "FR": 202,
+      "IT": 155,
+      "NL": 123,
+      "AU": 114,
+      "SE": 100,
+      "CH": 96,
+      "IE": 91,
+      "IN": 89,
+      "DK": 80,
+      "MX": 76,
+      "BE": 58,
+      "ES": 58,
+      "FI": 56,
+      "HK": 51,
+      "SG": 50,
+      "PK": 47,
+      "AT": 33,
+      "TR": 29,
+      "MY": 26,
+      "BR": 24,
+      "VN": 23,
+      "CR": 21,
+      "NO": 21,
+      "NZ": 18,
+      "PL": 18,
+      "HU": 16,
+      "LT": 11,
+      "ZA": 11,
+      "AR": 9,
+      "CZ": 9,
+      "DO": 9,
+      "TH": 9,
+      "IS": 6,
+      "RU": 6,
+      "SK": 6,
+      "AE": 5,
+      "CO": 5,
+      "SI": 5,
+      "PA": 4,
+      "BG": 3,
+      "CL": 3,
+      "EG": 3,
+      "GR": 3,
+      "LU": 3,
+      "PH": 3,
+      "PT": 3,
+      "RO": 3,
+      "UY": 3,
+      "VG": 3,
+      "BB": 2,
+      "GT": 2,
+      "HR": 2,
+      "ID": 2,
+      "LI": 2,
+      "LV": 2,
+      "MC": 2,
+      "MU": 2,
+      "PE": 2,
+      "SC": 2,
+      "AM": 1,
+      "BY": 1,
+      "CS": 1,
+      "EE": 1,
+      "FL": 1,
+      "GA": 1,
+      "HN": 1,
+      "IM": 1,
+      "IR": 1,
+      "JM": 1,
+      "JO": 1,
+      "KH": 1,
+      "KN": 1,
+      "KP": 1,
+      "KY": 1,
+      "MA": 1,
+      "MM": 1,
+      "MT": 1,
+      "NI": 1,
+      "RS": 1,
+      "SA": 1,
+      "TN": 1,
+      "TT": 1,
+      "WS": 1
+    }
+  },
+  "manufacturers": {
+    "entitiesAll": 63337,
+    "mergesByRule": {
+      "same-name-same-country": 10722,
+      "same-name-unique-country": 1602,
+      "same-name-no-country": 1003,
+      "same-registry-id": 109
+    },
+    "reviewByKind": {
+      "possible-group-shared-first-word": 7667,
+      "same-name-different-country": 1244,
+      "same-name-ambiguous-country": 414,
+      "name-match-conflicting-ids": 233
+    }
+  },
+  "industry": {
+    "organizations": 46,
+    "mentions": 552,
+    "companies": 370,
+    "companiesMatchedToRegistry": 192,
+    "companiesOnlyInIndustryLists": 178
+  },
+  "emdnCopies": {
+    "rowsA": 8453,
+    "rowsB": 8454,
+    "onlyA": [],
+    "onlyB": [
+      "V020303"
+    ],
+    "differ": []
+  },
+  "actors": [
+    {
+      "region": "eu",
+      "files": [
+        {
+          "path": "actors/eudamed-actors-0001.ndjson.gz",
+          "declaredRows": 26583,
+          "sha256": "0ffc5948dddc3ddc22c0ad26e8fc4d8f7c1f500b57fa6233ef0d0124afa6ae21",
+          "ok": true
+        }
+      ],
+      "valid": 26583,
+      "invalid": 0
+    }
+  ],
+  "mirrors": {
+    "ej86-fda-ai": {
+      "repo": "https://github.com/ej86/fda-ai-medical-device-analytics.git",
+      "commit": "8840a03632ffdc346a8bf05a459236c913b9198c",
+      "files": [
+        {
+          "path": "foiclass.csv",
+          "sha256": "ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de",
+          "officialUrl": "https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files"
+        },
+        {
+          "path": "aiml-devices-csv.csv",
+          "sha256": "4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d",
+          "officialUrl": "https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices"
+        }
+      ]
+    },
+    "batirmedical-emdn": {
+      "repo": "https://github.com/BatirMedical/nomenclature-emdn.git",
+      "commit": "e0131762b3385c1085b97da9c5f74d32edb89df3",
+      "files": [
+        {
+          "path": "EMDN_BatirMedical.csv",
+          "sha256": "7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379",
+          "officialUrl": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        }
+      ]
+    },
+    "lisadonlon-emdn": {
+      "repo": "https://github.com/lisadonlon/GMDNEMDN.git",
+      "commit": "ef6086489b942d96ff0d2e18f9f1f8434a94f954",
+      "files": [
+        {
+          "path": "data/EMDN.txt",
+          "sha256": "033572eb47bb3f595c3fd9b1e8494680fd2dd189c4ee21261b4d64e3cab26f3f",
+          "officialUrl": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        }
+      ]
+    }
+  }
+}
