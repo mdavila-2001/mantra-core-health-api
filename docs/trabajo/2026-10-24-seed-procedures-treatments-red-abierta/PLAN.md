@@ -1,6 +1,6 @@
 # Plan — Procedimientos y tratamientos no farmacológicos: fase 2 y pasadas con la red abierta
 
-- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` (rama `justin/seed-procedures-treatments`, reiniciada desde `dev` tras el merge de #689; PR nuevo contra `dev`) · Predecesor: PR #689 (fase 1, pasadas 1–4; su plan y reporte los borró la limpieza `268f43c7` de `dev`, siguen en el historial de git)
+- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` (rama `justin/seed-procedures-treatments`, reiniciada desde `dev` tras el merge de #689; #721 mergeó hasta la pasada 6, las pasadas 7+ van en un PR nuevo contra `dev` con la rama rebasada) · Predecesores: PR #721 (pasadas 5–6 y fase 2), PR #689 (fase 1, pasadas 1–4; su plan y reporte los borró la limpieza `268f43c7` de `dev`, siguen en el historial de git)
 - Resultado observable: el corpus de `tools/terminology-import/procedures-treatments/` suma las fuentes que estaban bloqueadas por la red (ClinicalTrials.gov + MeSH, ICD-10-PCS, NCIt oficial, …) con el mismo contrato, y la bitácora `docs/seed-research/procedures-treatments.md` trae la fase 2 medida contra lo que cargan las sesiones hermanas.
 - Kill-test: una relación de ClinicalTrials.gov con `relationType.assertion` distinto de `investigational`, o sin NCT en la evidencia.
 
