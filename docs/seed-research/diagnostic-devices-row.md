@@ -159,7 +159,7 @@ Búsquedas: paquetes de PyPI/npm con registros embebidos, PMDA/JMDN en japonés,
 Las pasadas 3 y 4 aportaron 0 filas seguidas: el loop se detiene. Con la red
 de este entorno (solo GitHub, npm, PyPI y otros registros de paquetes), no
 quedan copias públicas verificables de registros fuera de EE. UU. y Europa.
-Lo que falta está en `out/manifest.json` → `gaps`, y se destraba habilitando
-la red hacia los portales oficiales: los normalizadores ya leen esos formatos
-(ANVISA, MDALL, PMDA, CDSCO) y para las demás autoridades hay que escribir el
-normalizador contra el archivo real cuando se pueda bajar.
+Los huecos están en `out/manifest.json` → `gaps`: dependen de la red hacia los
+portales oficiales. Los normalizadores ya leen esos formatos (ANVISA, MDALL,
+PMDA, CDSCO); para las demás autoridades no hay normalizador, porque no se
+escribe sin el archivo real.

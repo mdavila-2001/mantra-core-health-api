@@ -185,7 +185,7 @@ La búsqueda web no encontró términos de licencia para ninguna.
 
 | Instrumento                            | Motivo                                                                                                                                                                                                                                                                                                                | Evidencia                                               |
 | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| **PHQ-9, GAD-7**                       | **Pendiente de decisión del propietario.** El arquetipo `phq_9.v0` cita el permiso del sitio de los autores: «no permission is required to reproduce, translate, display or distribute them». El README del catálogo exige permiso escrito para uso comercial y `catalog.spec.ts` los prohíbe: no se cambió esa regla | `openEHR-EHR-OBSERVATION.phq_9.v0`, campo `copyright`   |
+| **PHQ-9, GAD-7**                       | **Sin decisión de licencia del propietario.** El arquetipo `phq_9.v0` cita el permiso del sitio de los autores: «no permission is required to reproduce, translate, display or distribute them». El README del catálogo exige permiso escrito para uso comercial y `catalog.spec.ts` los prohíbe: no se cambió esa regla | `openEHR-EHR-OBSERVATION.phq_9.v0`, campo `copyright`   |
 | Braden, Braden Q                       | © de los autores; «compliance with the terms established by the copyright owners»                                                                                                                                                                                                                                     | arquetipo, `copyright`                                  |
 | Clinical Frailty Scale                 | © Rockwood 2005–2020                                                                                                                                                                                                                                                                                                  | arquetipo `clinical_frailty_scale2.v1`                  |
 | Waterlow                               | © judy-waterlow.co.uk                                                                                                                                                                                                                                                                                                 | arquetipo `waterlow_score.v0`                           |
@@ -229,18 +229,17 @@ La búsqueda web no encontró términos de licencia para ninguna.
 ## Huecos
 
 - **NNAC de Bolivia, unidades 15 a 24, y normas 2025 del Ministerio de Salud y Deportes**: no se
-  pudieron descargar (minsalud.gob.bo bloqueado por la red). Siguen pendientes del trabajo anterior.
+  pudieron descargar (minsalud.gob.bo bloqueado por la red).
 - **Guías nacionales y de sociedades** de la lista del brief (NICE, MINSAL, CENETEC, GuíaSalud,
   MinSalud Colombia, GINA, GOLD, KDIGO, ESC, ACOG, AAP, ADA) y WHO IMAI/IMCI en IRIS: bloqueadas.
-  Para una sesión con red abierta, son la próxima pasada.
 - **DAK de la OMS sin repositorio público**: no se encontró DAK de tuberculosis, hipertensión, salud
   infantil (AIEPI), malaria, dengue ni salud mental.
-- PHQ-9 y GAD-7: decisión de licencia pendiente (arriba).
+- PHQ-9 y GAD-7: sin decisión de licencia (arriba).
 
-## Revisión clínica pendiente
+## Sin revisión clínica
 
-Toda traducción propia está marcada en la ayuda del campo como «no oficial». Necesitan revisión
-de un profesional, en este orden:
+Toda traducción propia está marcada en la ayuda del campo como «no oficial» y no la revisó un
+profesional. Las de mayor riesgo:
 
 1. **NIHSS** (EMERG_ACV): no es la versión certificada en castellano. Para la certificación de
    evaluadores se usa la versión oficial.

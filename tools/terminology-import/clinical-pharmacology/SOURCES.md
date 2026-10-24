@@ -46,12 +46,12 @@ value set del glosario y no debe agregarse a uno sin filtrar esas secciones.
 | WHO ATC/DDD Index (WHOCC) | Los códigos ATC se usan como identificadores, pero el índice con nombres y DDD no se redistribuye para uso comercial sin permiso del WHOCC. Los nombres vienen de la AEMPS; **las DDD no se cargan** (hueco declarado). No reverificado. |
 | WHO Model Formulary (2008) y WHO EML/eEML | © OMS; la EML se publica bajo CC BY-NC-SA 3.0 IGO (no comercial). Requiere decisión legal del propietario. Además, `list.essentialmeds.org` y `www.who.int` devolvieron 403. No reverificado. |
 | EMA EPAR / SmPC centralizados | Las fichas de los medicamentos centralizados están en PDF (también en castellano). CIMA ya publica la mayoría de esos medicamentos; los que CIMA no segmenta quedan como hueco. **No se escribió un parser de PDF sin un archivo real contra el cual validarlo** (mismo criterio que la fase UMLS del README). `www.ema.europa.eu` devolvió 403. |
-| DailyMed (servicio propio) | Publica las mismas SPL que openFDA; sólo aportaría las etiquetas que openFDA no indexa. Pasada pendiente detrás de openFDA. |
+| DailyMed (servicio propio) | Publica las mismas SPL que openFDA; sólo aportaría las etiquetas que openFDA no indexa. No se consultó. |
 | DDInter | Licencia no verificada (se sabe que restringe el uso comercial; confirmar). No usado; las interacciones quedan como texto literal de 4.5 / `drug_interactions`. `ddinter2.scbdd.com` devolvió 403. |
 | ONC High-Priority DDI list | Publicada en un artículo (Phansalkar et al., JAMIA 2012); no hay un archivo oficial legible por máquina ni licencia explícita. No usado. |
 | PharmGKB/ClinPGx, CPIC | ClinPGx publica bajo CC BY-SA 4.0 (share-alike: decisión del propietario); CPIC: licencia por confirmar. Hosts con 403. La farmacogenómica de la FDA (`pharmacogenomics` de openFDA) sí está mapeada. |
 | AGEMED (Bolivia) | El portal consulta de a un registro y exige reCAPTCHA: **no se elude**. Hay que pedir la base por acceso a información pública. |
-| Formulario Terapéutico Nacional (Bolivia) | PDF del Ministerio de Salud; host bloqueado y licencia sin confirmar. Pasada pendiente; mismo criterio de no parsear PDF sin archivo real. |
+| Formulario Terapéutico Nacional (Bolivia) | PDF del Ministerio de Salud; host bloqueado y licencia sin confirmar. No se parsea PDF sin archivo real. |
 | SNOMED CT | Bolivia no es miembro de SNOMED International. |
 | PubMed / Europe PMC | Literatura: sirve para descubrir fuentes, no es contenido de monografía. No se carga. |
 

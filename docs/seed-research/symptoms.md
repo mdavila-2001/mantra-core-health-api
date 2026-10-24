@@ -250,8 +250,8 @@ Medición en la base desechable con dos andamios:
   `mesh`).
 
 CIE-11 capítulo 21 y CIE-10 capítulo R: los carga `seed-diseases` (MMS 2026-01
-completa; CIE-10 sólo como claves `icd10-who` sin título por la licencia OMS
-pendiente). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
+completa; CIE-10 sólo como claves `icd10-who` sin título, porque no hay licencia
+OMS). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 
 ## Glosario: extensión, no duplicado
 
@@ -315,6 +315,6 @@ node tools/terminology-import/symptoms/load-symptoms.mjs                # dry-ru
 node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos (.env DB_*); --glossary opcional
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs      # dry-run del plan de relaciones
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --check   # modelo + resolución, sin escribir
-node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # sólo cuando el modelo tenga la tabla
+node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # exige la tabla en el modelo
 node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 16 pruebas con recortes reales
 ```

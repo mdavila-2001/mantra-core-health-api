@@ -54,8 +54,7 @@ Aportes nuevos contados **por code system + código** tras deduplicar.
 | 8 | 2026-10-24 | Literatura (búsqueda web, sólo huecos): Gerokomos (EVRUPP en España), TFG UVa, ANA 2015, FAQ Omaha, ICN Q&A 2020 | 0 | 0 | 0 | 0 | identifica escalas sin fuente cargable: Norton, Norton modificada, EMINA, Cubbin-Jackson, Morse |
 
 **Saturación**: las pasadas 5, 6, 7 y 8 aportan 0 → con la red de esta sesión no hay más que
-encontrar. Lo que falta está detrás de hosts bloqueados o de licencias (tabla «Huecos»). Si el
-propietario habilita dominios, la próxima pasada empieza por Omaha System.
+encontrar. El resto está detrás de hosts bloqueados o de licencias (tabla «Huecos»).
 
 ## Jerarquía (dominio → clase → elemento)
 
@@ -122,9 +121,9 @@ Las ramas hermanas (`justin/seed-diseases`, `justin/seed-symptoms`, `justin/seed
 archivos nuevos no mencionan enfermería; carga `maxo`, `ncit`, `ohd`, sin solaparse por code system
 con esta rama. `link-check.mjs` repite el control (git y, con `--db`, por código en la base).
 
-## Huecos y licencias pendientes
+## Huecos y licencias
 
-| Hueco | Qué hace falta | Quién |
+| Hueco | Requisito | Quién lo da |
 |---|---|---|
 | Omaha System (dominio público) | habilitar `www.omahasystem.org` en la red del entorno; luego escribir el parser contra el archivo real | propietario (red) |
 | CCC v2.5 | leer y aceptar el acuerdo de SabaCare | propietario (licencia) |

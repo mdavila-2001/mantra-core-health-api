@@ -18,8 +18,7 @@ vía WebFetch). Sólo estaban abiertos los registros de paquetes y GitHub.
 Por eso las pasadas 1 y siguientes figuran como **bloqueadas**, no como «0 nuevos»: un cero por
 bloqueo no es saturación y **no cuenta** para la regla de «dos pasadas seguidas con 0». La orden
 del propietario de iterar con `/loop` hasta que sea imposible encontrar más tampoco se pudo
-cumplir: cada iteración habría sido otro 403. Para retomarla hay que habilitar los hosts en
-*Network access* del entorno (lista en `SOURCES.md`) y correr las pasadas en el orden de abajo.
+cumplir: cada iteración habría sido otro 403. Los hosts necesarios están listados en `SOURCES.md`.
 
 ## Pasadas
 
@@ -31,23 +30,6 @@ nunca por nombre.
 | 0 | 2026-10-24 | Archivos ya en el repo: LINAME 2022-2024 (482 ATC 5), dataset `vademecum` (483 ATC 5) | 483 (universo) | 0 | Fija el universo inicial. Ninguna de las dos trae texto clínico (la LINAME no tiene indicaciones, dosis ni contraindicaciones), así que no genera monografías. |
 | 1 | 2026-10-24 | CIMA: listado, detalle, maestra ATC, fichas técnicas completas, notas de seguridad | — | — | **Bloqueada (403).** Código y parser validados con respuestas reales ya versionadas. |
 | 2 | 2026-10-24 | RxNav (ATC 5 → RxCUI → UNII) + openFDA drug labels | — | — | **Bloqueada (403).** Código listo; parser de openFDA/RxNav sin validar contra datos reales. |
-
-### Pasadas planificadas (en este orden, cada una con fuentes nuevas e independientes)
-
-1. **CIMA, granularidad por (VTM, vías)** — `fetch-cima.mjs`. Universo esperado: los ATC 5 de los
-   25 470 medicamentos del catálogo. Mide cuántos ATC 5 y secciones nuevas aporta.
-2. **RxNav + openFDA** — `fetch-rxnorm.mjs` y `fetch-openfda.mjs`. Aporta secciones en inglés para
-   los ATC 5 ya vistos y ATC 5 nuevos de la LINAME/maestra que CIMA no comercializa.
-3. **CIMA exhaustiva** — `fetch-cima.mjs --granularity product`: todas las fichas segmentadas, no
-   sólo la de referencia. Aporta secciones (otros titulares/vías), no ATC nuevos.
-4. **DailyMed** — sólo etiquetas que openFDA no indexa (por `set_id`). Requiere un fetcher nuevo.
-5. **EMA (centralizados) y Formulario Terapéutico Nacional de Bolivia** — PDF: requieren parser
-   validado contra archivos reales; no se escribe a ciegas.
-6. **Maestras de ATC sin producto** — ATC 5 de la maestra de CIMA sin ficha en ninguna fuente:
-   quedan como hueco documentado (código y nombre AEMPS, sin monografía).
-
-La saturación se declara cuando dos pasadas seguidas de esta lista (u otras nuevas) aportan 0 ATC 5
-y 0 secciones tras deduplicar.
 
 ## Fuentes descartadas
 

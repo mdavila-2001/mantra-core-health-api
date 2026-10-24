@@ -111,11 +111,10 @@ LabeledIn crowd 212 `no-not-disease`, 211 `no-char_risk`, 131 `no-contra`, 58 `n
 `uncertain`; DrugCentral 2 788 filas sin UMLS CUI ni DOID y 9 387 valores SNOMED descartados;
 DrugMechDB 2 caminos sin código; MAxO 938 anotaciones sin sustancia CHEBI.
 
-### Enlace con enfermedades y catálogo (fase 2)
+### Enlace con enfermedades y catálogo
 
-- **`justin/seed-diseases`: todavía no existe en `origin`** (último `git fetch`: 2026-10-24). La validación
-  de enlace contra las enfermedades cargadas queda **pendiente**; el script está listo:
-  `validate-links.mjs --targets targets.json`, con los `internal_code` que declare `docs/seed-research/diseases.md`.
+- **Enlace contra las enfermedades cargadas: no medido.** El script es
+  `validate-links.mjs --targets targets.json`, con los `internal_code` que declara `docs/seed-research/diseases.md`.
 - **Catálogo de medicamentos (`vademecum`, ATC 5): 0 enlaces posibles hoy**, porque ninguna afirmación
   tiene ATC (hueco H-ATC). Los 2 414 fármacos quedan «sin match en el catálogo» hasta tener un cruce publicado RxCUI/ChEMBL/DrugCentral → ATC.
 - Enlace por RxCUI (`rxnorm_full`/`rxterms`) e ICD-10-CM (`icd10cm`) funciona: probado en la base

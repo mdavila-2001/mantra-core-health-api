@@ -23,7 +23,7 @@ suben además porque contienen los ítems con copyright de terceros (Braden, Wat
 importador deja afuera.
 
 **Licencias.** Las filas de openEHR CKM son CC-BY-SA (atribución por fila en `provenance`); las
-del CMDIC tienen la licencia no declarada (base legal en `content_license`, pendiente de
+del CMDIC tienen la licencia no declarada (base legal en `content_license`, sin
 confirmar); el registro sale de un paquete CC0. Detalle en `../SOURCES.md`.
 
 ```sh

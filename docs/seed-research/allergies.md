@@ -14,8 +14,8 @@
   19 y 20) aportaron **0** cada una. El techo real lo pone la red: la política
   de esta sesión bloquea (403) las fuentes de referencia de alergología (IUIS,
   ICD-11, openFDA/UNII, RxNav vigente, NCIt, ChEBI completo, UniProt, EUR-Lex,
-  Codex, Wikidata). La lista está en «Huecos». Ahí está el trabajo que falta, y
-  no se puede completar desde este contenedor.
+  Codex, Wikidata). La lista está en «Huecos»: esa cobertura no es alcanzable
+  desde este contenedor.
 - **Enumeraciones FHIR en la API**: los seis campos de catálogo de
   `clinical.allergy_intolerances` y `clinical.allergy_reactions` (tipo,
   categoría, criticidad, estado clínico, verificación y severidad de la reacción)
@@ -89,9 +89,8 @@ inventar equivalencias.
 
 **Criterio de parada:** las pasadas 18, 19 y 20 aportaron 0 seguidas, y no
 queda ninguna fuente **alcanzable desde esta red** que no se haya revisado. Las
-fuentes que faltan no son «imposibles de encontrar»: están bloqueadas. En
-cuanto la red las permita, cada una es una pasada más con su propio aporte
-esperado (ver «Huecos»).
+fuentes ausentes no son «imposibles de encontrar»: están bloqueadas (ver
+«Huecos», con el aporte esperado de cada una).
 
 ### Fuentes evaluadas y descartadas
 
