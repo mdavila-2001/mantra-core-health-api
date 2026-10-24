@@ -816,6 +816,22 @@ export class CreateExceptionDto {
   @IsOptional()
   @IsBoolean()
   isAvailable?: boolean;
+
+  /**
+   * El profesional ya vio las citas que el bloqueo alcanza y confirmó.
+   *
+   * Sin esto, un rato con citas responde 422 con `affectedBookings` —la vista
+   * previa— y **no cancela nada**. Con `true`, cada cita se cancela con el
+   * motivo del bloqueo y se le avisa al paciente (24/10/2026).
+   */
+  @ApiPropertyOptional({
+    description:
+      'true: cancela las citas del rato y avisa a cada paciente. Ausente o false: si hay citas, responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea.',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  cancelAffectedBookings?: boolean;
 }
 
 /**
@@ -835,6 +851,13 @@ export class ExceptionResponseDto {
     description: 'Slots libres que quedaron bloqueados por la excepción',
   })
   blockedSlots!: number;
+
+  /** Citas canceladas (o rechazadas) por este bloqueo, con aviso al paciente. */
+  @ApiProperty({
+    description:
+      'Citas que el bloqueo canceló, con aviso a cada paciente. 0 si no había o no se confirmó.',
+  })
+  cancelledBookings!: number;
 }
 
 /**
@@ -1125,6 +1148,19 @@ export class CloseSlotsDto {
   @ArrayNotEmpty()
   @IsUUID(undefined, { each: true })
   slotIds!: string[];
+
+  /**
+   * El profesional ya vio las citas de esos cupos y confirmó cancelarlas.
+   * Sin esto, un cupo con paciente responde 409 con `affectedBookings`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'true: cancela las citas de esos cupos y avisa a cada paciente. Ausente o false: si hay citas, responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no cierra.',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  cancelAffectedBookings?: boolean;
 }
 
 /** Lo que responde cerrar cupos sueltos. */
@@ -1132,6 +1168,10 @@ export class CloseSlotsResponseDto {
   /** Cuántos cupos quedaron cerrados. */
   @ApiProperty()
   closedSlots!: number;
+
+  /** Citas canceladas (o rechazadas) al cerrar, con aviso al paciente. */
+  @ApiProperty()
+  cancelledBookings!: number;
 
   /**
    * La excepción que se creó para que regenerar no los devuelva.
