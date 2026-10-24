@@ -1,13 +1,13 @@
 # Cobertura de la consolidación de equipos de diagnóstico
 
-Generado: 2026-10-24T18:15:19Z. Se genera con `build.mjs`; no lo edite a mano.
+Generado: 2026-10-24T18:30:48Z. Se genera con `build.mjs`; no lo edite a mano.
 
 ## Regiones
 
 | Región | Estado | Rama / carpeta | Commit | Filas leídas |
 |---|---|---|---|---:|
 | us | consolidada | origin/justin/seed-dx-devices-us | b699958585e5 | 215690 |
-| eu | consolidada | origin/claude/adoring-curie-xdkt83 | 63de12cbc0ab | 716 |
+| eu | consolidada | origin/claude/adoring-curie-xdkt83 | 0ac247f88b65 | 503648 |
 | row | consolidada | origin/claude/inspiring-planck-xhpf4w | fef932d6f0bf | 6569701 |
 
 ## Fuentes
@@ -23,7 +23,8 @@ Generado: 2026-10-24T18:15:19Z. Se genera con `build.mjs`; no lo edite a mano.
 | fda-maude | us | 12930 | 12930 | 0 | 0 |
 | fda-recall | us | 13692 | 13692 | 0 | 0 |
 | cdc-livd-sars-cov-2 | us | 483 | 483 | 0 | 0 |
-| eudamed-udi | eu | 716 | 716 | 0 | 0 |
+| eudamed-udi | eu | 303085 | 303085 | 0 | 0 |
+| it-salute-bdrdm | eu | 200563 | 200563 | 0 | 0 |
 | anvisa-produtos | row | 100681 | 100681 | 0 | 0 |
 | anvisa-produtos-modelos | row | 3274089 | 3274089 | 0 | 0 |
 | pmda-approvals | row | 35298 | 35298 | 0 | 0 |
@@ -37,9 +38,9 @@ Generado: 2026-10-24T18:15:19Z. Se genera con `build.mjs`; no lo edite a mano.
 
 | Medida | Valor |
 |---|---:|
-| Nodos | 37.274 |
+| Nodos | 39.573 |
 | Mapeos publicados | 218 |
-| Tipos de diagnóstico con al menos un modelo | 3.897 |
+| Tipos de diagnóstico con al menos un modelo | 5.600 |
 
 Product codes de la FDA: openFDA 2026-10-21 (7096) contra git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28) (7088); solo en la oficial 8, solo en la copia 0; difieren nombre 10, clase 4, regulación 4.
 
@@ -52,6 +53,7 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 | fda-product-code | 7.099 |
 | jmdn | 3.874 |
 | br:anvisa-nome-tecnico | 2.867 |
+| cnd | 2.299 |
 | gmdn-pt | 1.743 |
 | tw:tfda-classification | 1.366 |
 | tw:tfda-category | 346 |
@@ -74,6 +76,7 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 | jmdn:null:null | 3.874 |
 | fda-product-code:false:cfr-non-diagnostic-subpart | 3.096 |
 | br:anvisa-nome-tecnico:null:null | 2.867 |
+| cnd:null:null | 2.299 |
 | emdn:true:emdn-category-w | 2.275 |
 | fda-product-code:true:cfr-ivd-part | 2.081 |
 | gmdn-pt:null:null | 1.743 |
@@ -96,47 +99,48 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 
 | Medida | Valor |
 |---|---:|
-| Filas de diagnóstico consolidadas | 376.114 |
-| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 536 |
+| Filas de diagnóstico consolidadas | 624.340 |
+| … de ellas sin tipo propio, sumadas por ser del mismo modelo | 9.011 |
 | Filas no diagnósticas (descartadas) | 2.769 |
-| Filas sin decisión (tipo sin criterio publicado) | 6.408.748 |
-| … de ellas sin ningún tipo | 2.286.312 |
-| Fabricantes | 21.528 |
-| Marcas | 107.407 |
-| Modelos | 288.325 |
-| Registros | 376.114 |
+| Filas sin decisión (tipo sin criterio publicado) | 6.663.454 |
+| … de ellas sin ningún tipo | 2.285.882 |
+| Fabricantes | 23.814 |
+| Marcas | 195.228 |
+| Modelos | 469.628 |
+| Registros | 624.340 |
 
 | Jurisdicción | Modelos con registro |
 |---|---:|
-| US | 130.010 |
-| BR | 113.912 |
-| CA | 43.845 |
-| EU | 434 |
+| EU | 181.678 |
+| US | 130.324 |
+| BR | 113.921 |
+| CA | 44.218 |
+| TW | 3.798 |
 | AU | 420 |
 | IN | 42 |
-| TW | 9 |
 
 | Jurisdicciones por modelo | Modelos |
 |---|---:|
-| 1 | 287.984 |
-| 2 | 335 |
-| 3 | 6 |
+| 1 | 464.918 |
+| 2 | 4.648 |
+| 3 | 61 |
+| 4 | 1 |
 
 ## Fabricantes: fusiones y revisión
 
 | Regla de fusión | Fusiones |
 |---|---:|
-| same-name-same-country | 16.082 |
-| same-name-no-country | 2.044 |
-| same-name-unique-country | 1.990 |
-| same-registry-id | 970 |
+| same-name-same-country | 20.130 |
+| same-name-unique-country | 3.574 |
+| same-name-no-country | 3.126 |
+| same-registry-id | 991 |
 
 | Caso para revisión (no fusionado) | Casos |
 |---|---:|
-| possible-group-shared-first-word | 9.005 |
-| same-name-different-country | 1.563 |
-| same-name-ambiguous-country | 514 |
-| name-match-conflicting-ids | 234 |
+| possible-group-shared-first-word | 7.175 |
+| same-name-different-country | 2.052 |
+| same-name-ambiguous-country | 906 |
+| name-match-conflicting-ids | 510 |
 
 ## Listados del sector (asociaciones y ferias)
 
@@ -145,6 +149,6 @@ EMDN v2026 oficial (8516 términos) contra la V2 (8454): nuevos 74, solo en la V
 | Organizaciones | 46 |
 | Menciones con URL | 552 |
 | Empresas distintas | 370 |
-| … que cruzan con un fabricante de los registros | 197 |
-| … solo en listados del sector (candidatas) | 173 |
+| … que cruzan con un fabricante de los registros | 214 |
+| … solo en listados del sector (candidatas) | 156 |
 

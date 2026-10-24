@@ -384,6 +384,32 @@ que esta pasada no es la segunda en 0: el contador vuelve a empezar.
 - **Descartadas**: ninguna.
 - **Saturación**: las pasadas 10 a 12 aportaron por fuentes nuevas (red completa). El contador vuelve a 0: faltan dos pasadas seguidas en 0. `eu` puede volver a empujar con su descarga oficial.
 
+### Pasada 13 (2026-10-24): EUDAMED y BD/RDM oficiales vía `eu`
+
+- **Base**: `dev` @`c3d08ca5` mergeado en la rama (sin conflictos). `dev` ya trae las pasadas 7 y 8 de `eu` (mdavila-2001/mantra-core-health-api#724).
+- **Regiones**:
+  - `eu` @`0ac247f8` (`claude/adoring-curie-xdkt83`): **503 648 filas**, todas válidas, de fuentes oficiales:
+    - `eudamed-udi` 303 085, del Data Lake de EUDAMED, por código EMDN;
+    - `it-salute-bdrdm` 200 563, banca dati del Ministero della Salute (IODL 2.0), con su CND.
+  - `eu` publica 32 753 actores (antes 26 583) y la EMDN v2026. Su sha256 (`a973dcdd8ae2`) es el mismo que el del Excel que bajó master en la pasada 12: dos descargas independientes del mismo archivo.
+  - `us` y `row`: sin cambios.
+- **Nuevos tras deduplicar** (contra la pasada 12):
+  - Registros: **+248 226** (624 340). De EUDAMED entran 240 516 (333 por mismo modelo). Del BD/RDM entran 3 188, solo por mismo modelo, porque la CND todavía no tenía criterio.
+  - Modelos: **+181 303** (469 628).
+  - Fabricantes: **+2 286** (23 814).
+  - Marcas: +87 821 (195 228).
+  - Jurisdicciones: **EU 181 678** (antes 434), US 130 324, BR 113 921, CA 44 218, **TW 3 798** (antes 9), AU 420, IN 42.
+  - Por mismo modelo entran 9 011 registros (antes 536); 4 532 son de TFDA que comparten modelo con uno de diagnóstico de otro país.
+  - **Modelos en 2 jurisdicciones: 4 648** (antes 335); en 3: 61 (antes 6); en 4: **1** (antes 0).
+  - Tipos de diagnóstico con al menos un modelo: 5 600 (+1 703).
+  - Nodos: 39 573 (+2 299 de la CND italiana, sin decisión en esta pasada).
+  - Fusiones: `same-name-same-country` 20 130 (+4 048), `same-name-unique-country` 3 574 (+1 584), `same-name-no-country` 3 126 (+1 082), `same-registry-id` 991 (+21).
+  - A revisión: 510 `name-match-conflicting-ids` (+276), 2 052 mismo nombre en otro país.
+  - Listados del sector: 214 empresas cruzan con un registro (+17).
+- **Sin decisión**: 6 663 454 filas (+254 706): 62 569 de EUDAMED (sobre todo EMDN Z de títulos mixtos) y 197 375 del BD/RDM (CND).
+- **Taxonomía cargada**: +2 299 conceptos CND y +7 designaciones EMDN (nombres que trae EUDAMED). El value set no cambia (5 722) y la 2.ª corrida da 0.
+- **Descartadas**: ninguna.
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 Un esquema nuevo `device_catalog` (módulo propio, después de 03 `terminology`
