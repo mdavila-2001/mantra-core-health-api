@@ -78,7 +78,7 @@ Propuesta completa en
 
 Validación de la propuesta en la base desechable: 344 981 aristas
 enfermedad → síntoma (344 258 `REL_SYMPTOM` + 723 `REL_SYMPTOM_EXCLUDED`) y
-372 528 filas de evidencia en 57 s; segunda corrida 0/0 en 33 s. Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
+372 528 filas de evidencia en 53 s; segunda corrida 0/0 en 34 s. Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
 desde `OMIM:154700` y con «Muy frecuente» TAS desde `ORPHA:558`, en la misma
 arista.
 
@@ -257,9 +257,9 @@ como sustituto de `seed-diseases`.
 
 | Paso | Filas nuevas | Tiempo | Re-corrida |
 |---|---|---:|---|
-| `load-symptoms.mjs --apply --glossary` | 24 777 conceptos · 70 747 designaciones · 367 171 propiedades · 29 428 is-a · 37 292 membresías | 18 s | 0 filas, 13 s |
+| `load-symptoms.mjs --apply --glossary` | 24 777 conceptos · 70 747 designaciones · 367 171 propiedades · 29 428 is-a · 37 292 membresías | 19 s | 0 filas, 13 s |
 | `load-disease-phenotypes.mjs --apply` sin la tabla propuesta | 0 (aborta, salida 2) | 5 s | — |
-| idem con la tabla propuesta aplicada en la base desechable | 344 981 aristas · 372 528 evidencias | 57 s | 0 filas, 33 s |
+| idem con la tabla propuesta aplicada en la base desechable | 344 981 aristas · 372 528 evidencias | 53 s | 0 filas, 34 s |
 
 Tamaño de la base tras todo (incluido el andamio de Mondo): 639 MB. `catalog_import_batches` suma una fila por
 corrida y sistema (es el registro de cada corrida, no dato).
@@ -277,7 +277,7 @@ corrida y sistema (es el registro de cada corrida, no dato).
 | UMLS / MedDRA / OMIM API | sinónimos y cruces | requieren licencia o cuenta |
 | CIAP-2 / ICPC-2 (WONCA) | motivos de consulta de atención primaria | © WONCA; uso comercial con licencia. No se usaron copias de terceros |
 | PubMed / Europe PMC | detectar huecos en la literatura | `eutils.ncbi.nlm.nih.gov` y `www.ebi.ac.uk` bloqueados |
-| Página de licencia de HPO y términos de uso del NCIt | texto vigente de las condiciones | `hpo.jax.org` y `evs.nci.nih.gov` bloqueados: verificar antes de publicar |
+| Página de licencia de HPO; reconfirmar términos de uso del NCIt | texto vigente de las condiciones | `hpo.jax.org` y `evs.nci.nih.gov` bloqueados. NCIt figura como CC BY 4.0 en `docs/terminology-expansion/SOURCE-REGISTER.md` (revisión anterior): reconfirmar antes de publicar |
 
 ## Cómo correr
 

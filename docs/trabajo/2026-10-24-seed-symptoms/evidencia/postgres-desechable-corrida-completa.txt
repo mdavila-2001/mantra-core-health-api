@@ -3,7 +3,7 @@ andamio sembrado
 [load] {"codeSystem":"hpo","storedAs":"hpo","version":"2026-09-01","concepts":19894,"designations":61927,"properties":309294,"isA":24436,"maps":0,"glossaryMembers":37292,"remappedIds":0}
 [load] {"codeSystem":"symp","storedAs":"symp","version":"2026-07-30","concepts":895,"designations":1138,"properties":8892,"isA":898,"maps":0,"glossaryMembers":0,"remappedIds":0}
 [load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":3988,"designations":7682,"properties":48985,"isA":4094,"maps":0,"glossaryMembers":0,"remappedIds":0}
-(18 s)
+(19 s)
 ### terms run 2
 [load] {"codeSystem":"hpo","storedAs":"hpo","version":"2026-09-01","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
 [load] {"codeSystem":"symp","storedAs":"symp","version":"2026-07-30","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
@@ -24,9 +24,9 @@ mondo andamio 32134
     "relationships": 344981,
     "evidence": 372528
   },
-  "segundos": 56
+  "segundos": 52
 }
-(57 s)
+(53 s)
 ### relations run 2
 === RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
 {
@@ -34,6 +34,6 @@ mondo andamio 32134
     "relationships": 0,
     "evidence": 0
   },
-  "segundos": 33
+  "segundos": 34
 }
-(33 s)
+(34 s)

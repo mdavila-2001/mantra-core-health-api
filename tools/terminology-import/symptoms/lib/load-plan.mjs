@@ -53,10 +53,12 @@ export const CODE_SYSTEMS = {
   },
   ncit: {
     sourceCode: 'NCI_EVS',
-    sourceName: 'NCI Thesaurus (National Cancer Institute, Enterprise Vocabulary Services)',
+    sourceName: 'National Cancer Institute — Enterprise Vocabulary Services (NCI EVS)',
     owner: 'National Cancer Institute — Enterprise Vocabulary Services',
     officialUrl: 'https://evs.nci.nih.gov/',
-    name: 'NCI Thesaurus (NCIt)',
+    // «NCI Thesaurus» identifica sólo la edición publicada por NCI: un subconjunto
+    // no se nombra así (docs/terminology-expansion/SOURCE-REGISTER.md).
+    name: 'Subconjunto de signos, síntomas y hallazgos clínicos de la NCIt OBO Edition',
     canonicalUrl: 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl',
     caseSensitive: true,
   },

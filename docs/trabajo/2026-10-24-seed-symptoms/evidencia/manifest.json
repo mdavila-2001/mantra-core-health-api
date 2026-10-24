@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T02:08:42.284Z",
+  "generatedAt": "2026-10-24T02:15:12.311Z",
   "dir": "<GLOSSARY_BUILD_DIR>/symptoms-sources",
   "files": [
     {
@@ -73,7 +73,7 @@
       "file": "ncit/ncit.obo",
       "url": "https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo",
       "owner": "NCI Thesaurus (National Cancer Institute, EVS) — edición OBO (ncit-obo-org)",
-      "license": "NCI Thesaurus: la edición OBO no declara licencia; términos de uso del NCI EVS (https://evs.nci.nih.gov/) — verificar antes de publicar",
+      "license": "CC BY 4.0 según los términos de uso de NCI EVS (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm, registrados en docs/terminology-expansion/SOURCE-REGISTER.md): atribuir a NCI con la versión y no presentar un derivado como la edición oficial; el .obo no la declara — reconfirmar",
       "bytes": 248162694,
       "sha256": "8fdc2d29c9ebd91ada8330ed023b0c56ae787a31e6aedff453ee9bfef6fc18f6",
       "retrievedAt": "2026-10-24T02:08:29.185Z",

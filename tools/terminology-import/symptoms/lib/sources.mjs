@@ -87,7 +87,7 @@ export const SOURCE_FILES = [
     // coincide en los dos lados.
     url: 'https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo',
     owner: 'NCI Thesaurus (National Cancer Institute, EVS) — edición OBO (ncit-obo-org)',
-    license: 'NCI Thesaurus: la edición OBO no declara licencia; términos de uso del NCI EVS (https://evs.nci.nih.gov/) — verificar antes de publicar',
+    license: 'CC BY 4.0 según los términos de uso de NCI EVS (https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm, registrados en docs/terminology-expansion/SOURCE-REGISTER.md): atribuir a NCI con la versión y no presentar un derivado como la edición oficial; el .obo no la declara — reconfirmar',
     versionFrom: 'obo-data-version',
   },
   {

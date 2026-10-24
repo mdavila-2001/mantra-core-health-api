@@ -65,7 +65,7 @@ Postgres 16 desechable (DDL `00_shared` + `03_terminology`; andamio descrito en 
 [load] {"codeSystem":"hpo",...,"concepts":19894,"designations":61927,"properties":309294,"isA":24436,"maps":0,"glossaryMembers":37292,...}
 [load] {"codeSystem":"symp",...,"concepts":895,"designations":1138,"properties":8892,"isA":898,...}
 [load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":3988,"designations":7682,"properties":48985,"isA":4094,...}
-(18 s)
+(19 s)
 ### terms run 2
 [load] {"codeSystem":"hpo",...,"concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,...}
 (13 s)
@@ -74,11 +74,11 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 ### relations run 1
     "relationships": 344981,
     "evidence": 372528
-(57 s)
+(53 s)
 ### relations run 2
     "relationships": 0,
     "evidence": 0
-(33 s)
+(34 s)
 ```
 
 `evidencia/postgres-desechable-check-formato-688.txt` (omim/orphanet/decipher con código sin prefijo):
@@ -104,7 +104,7 @@ BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (column
 - **NCIt ampliado en la pasada 6.** Se sumaron los hallazgos clínicos por sistema (C36278, tipo semántico *Finding*) porque el pedido incluye «hallazgos clínicos».
 
 ## Riesgos residuales
-- **Licencias de HPO y NCIt.** Su texto vigente no se pudo leer (hosts bloqueados). En la base sólo quedó lo que declara cada archivo.
+- **Licencias de HPO y NCIt.** Su texto vigente no se pudo leer (hosts bloqueados). HPO: en la base queda lo que declara `hp.json`. NCIt: CC BY 4.0 según los términos de uso de NCI EVS registrados en `docs/terminology-expansion/SOURCE-REGISTER.md` en un corte anterior; reconfirmar. El code system no se llama «NCI Thesaurus» (marca de la edición oficial).
 - **Glosario.** Si se activa `--glossary` antes de traer P3841 de Wikidata, puede haber síntomas duplicados visibles (una ficha de Wikidata y otra de HPO).
 - **Enfermedades comunes.** Las 132 600 anotaciones son de 2015 y con evidencia `ITM`, es decir, minería de texto de la fuente. Quien las use tiene que poder filtrarlas por `evidence_code`.
 - **Tamaño.** La base desechable llegó a ~639 MB con todo, incluido el andamio de Mondo.
