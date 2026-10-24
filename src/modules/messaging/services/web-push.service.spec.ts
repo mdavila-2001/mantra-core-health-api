@@ -186,15 +186,18 @@ describe('WebPushService', () => {
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain(ENDPOINT);
   });
 
-  it('si otra cuenta usa el mismo navegador, la suscripción anterior se retira', async () => {
+  it('si otra cuenta usa el mismo navegador, la fila pasa a ella y la anterior deja de recibir', async () => {
     vapidOn();
     const { service, devices } = build();
     await service.subscribe('u1', { endpoint: ENDPOINT, keys: KEYS });
     await service.subscribe('u2', { endpoint: ENDPOINT, keys: KEYS });
-    const u1 = devices.find((d) => d.userId === 'u1');
-    const u2 = devices.find((d) => d.userId === 'u2');
-    expect(u1.pushTokenEncrypted).toBeUndefined();
-    expect(u2.pushTokenEncrypted).toBeDefined();
+    expect(devices).toHaveLength(1);
+    expect(devices[0].userId).toBe('u2');
+    sendNotification.mockResolvedValue({});
+    await service.pushToUser({ recipientUserId: 'u1', subject: 'x' });
+    expect(sendNotification).not.toHaveBeenCalled();
+    await service.pushToUser({ recipientUserId: 'u2', subject: 'x' });
+    expect(sendNotification).toHaveBeenCalledTimes(1);
   });
 
   it('unsubscribe quita el token de ese navegador y es idempotente', async () => {

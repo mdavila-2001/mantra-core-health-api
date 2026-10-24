@@ -120,23 +120,15 @@ export class WebPushService {
     const fingerprint = fingerprintOf(input.endpoint);
     await this.em.transactional(async (tx) => {
       const now = new Date();
-      // Un navegador pertenece a una cuenta a la vez: si otra persona usó
-      // antes este mismo navegador, su suscripción se retira para que los
-      // avisos de ella no le lleguen a quien entra ahora.
-      const others = await tx.find(Devices, {
-        deviceFingerprint: fingerprint,
-        userId: { $ne: userId },
-        pushTokenEncrypted: { $ne: null },
-      });
-      for (const other of others) {
-        other.pushTokenEncrypted = undefined;
-        other.updatedAt = now;
-      }
+      // La huella es única en toda la tabla (`uq_devices_device_fingerprint`):
+      // un navegador pertenece a una cuenta a la vez. Si otra persona lo usó
+      // antes, la fila pasa a quien entra ahora y la anterior deja de recibir
+      // los avisos de ella.
       const existing = await tx.findOne(Devices, {
-        userId,
         deviceFingerprint: fingerprint,
       });
       if (existing) {
+        existing.userId = userId;
         existing.pushTokenEncrypted = token;
         existing.lastSeenAt = now;
         existing.updatedAt = now;
