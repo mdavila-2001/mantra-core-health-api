@@ -15,6 +15,8 @@ import {
   VectorCorpusRepository,
 } from '../repositories';
 import { MAX_CANDIDATES, type AuthorizationDecision } from '../constants';
+import { inScopeOrNotFound, resolveVectorScope } from '../vector-scope';
+import { VectorErrorReason } from '../vector_rag.error-reasons';
 import {
   OpenRetrievalSessionDto,
   RetrievalSessionResponseDto,
@@ -75,16 +77,17 @@ export class RetrievalService {
     dto: OpenRetrievalSessionDto,
     actor: AuthenticatedUser,
   ): Promise<RetrievalSessionResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const collection = await this.catalogRepo.findCollectionById(
-        tx,
-        dto.vectorCollectionId,
+      const collection = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findCollectionById(
+          tx,
+          dto.vectorCollectionId,
+          scope.tenantId,
+        ),
+        'Colección no encontrada.',
       );
-      if (!collection) {
-        throw new ResourceNotFoundException('Colección no encontrada.', {
-          vectorCollectionId: dto.vectorCollectionId,
-        });
-      }
       if (collection.lifecycleState === 'deprecated') {
         throw new PreconditionFailedException('La colección está deprecada.', {
           vectorCollectionId: collection.id,
@@ -94,6 +97,7 @@ export class RetrievalService {
       const policy = await this.requirePublishedPolicy(
         tx,
         collection.accessPolicyId,
+        collection.tenantId,
       );
 
       if (!policy.allowedPrincipalTypes.includes(dto.principalType)) {
@@ -201,17 +205,17 @@ export class RetrievalService {
     dto: RankCandidatesDto,
     actor: AuthenticatedUser,
   ): Promise<RankCandidatesResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const session = await this.retrievalRepo.findSessionForUpdate(
-        tx,
-        sessionId,
+      const session = inScopeOrNotFound(
+        scope,
+        await this.retrievalRepo.findSessionForUpdate(
+          tx,
+          sessionId,
+          scope.tenantId,
+        ),
+        'Sesión de retrieval no encontrada.',
       );
-      if (!session) {
-        throw new ResourceNotFoundException(
-          'Sesión de retrieval no encontrada.',
-          { sessionId },
-        );
-      }
       if (session.status !== 'open') {
         throw new PreconditionFailedException('La sesión ya no está abierta.', {
           sessionId,
@@ -246,39 +250,35 @@ export class RetrievalService {
       let rank = 0;
       for (const candidate of ordered.slice(0, MAX_CANDIDATES)) {
         rank += 1;
+        // Chunk, documento y colección tienen que ser del tenant de la sesión:
+        // un candidato de otra organización responde como inexistente y no
+        // llega a ser evaluado, ranqueado ni citado.
         const chunk = await this.corpusRepo.findChunkById(
           tx,
           candidate.vectorChunkId,
         );
-        if (!chunk) {
+        const document = chunk
+          ? await this.corpusRepo.findDocumentById(tx, chunk.vectorDocumentId)
+          : null;
+        const collection = document
+          ? await this.catalogRepo.findCollectionById(
+              tx,
+              document.vectorCollectionId,
+              session.tenantId,
+            )
+          : null;
+        if (!chunk || !document || !collection) {
           throw new ResourceNotFoundException(
             'Chunk candidato no encontrado.',
-            {
-              vectorChunkId: candidate.vectorChunkId,
-            },
-          );
-        }
-        const document = await this.corpusRepo.findDocumentById(
-          tx,
-          chunk.vectorDocumentId,
-        );
-        if (!document) {
-          throw new ResourceNotFoundException(
-            'Documento del chunk no encontrado.',
-            {
-              vectorChunkId: candidate.vectorChunkId,
-            },
+            undefined,
+            VectorErrorReason.RESOURCE_OUT_OF_SCOPE,
           );
         }
 
         const policy = await this.requirePublishedPolicy(
           tx,
-          (
-            await this.catalogRepo.findCollectionById(
-              tx,
-              document.vectorCollectionId,
-            )
-          )?.accessPolicyId,
+          collection.accessPolicyId,
+          session.tenantId,
         );
 
         const decision = this.decide(document, policy, session);
@@ -371,17 +371,17 @@ export class RetrievalService {
     dto: MaterializeEvidenceDto,
     actor: AuthenticatedUser,
   ): Promise<EvidenceResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const session = await this.retrievalRepo.findSessionForUpdate(
-        tx,
-        sessionId,
+      const session = inScopeOrNotFound(
+        scope,
+        await this.retrievalRepo.findSessionForUpdate(
+          tx,
+          sessionId,
+          scope.tenantId,
+        ),
+        'Sesión de retrieval no encontrada.',
       );
-      if (!session) {
-        throw new ResourceNotFoundException(
-          'Sesión de retrieval no encontrada.',
-          { sessionId },
-        );
-      }
       if (session.status !== 'ranked') {
         throw new PreconditionFailedException(
           'La sesión tiene que estar ranqueada para materializar evidencia.',
@@ -475,17 +475,17 @@ export class RetrievalService {
     dto: CaptureFeedbackDto,
     actor: AuthenticatedUser,
   ): Promise<FeedbackResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const session = await this.retrievalRepo.findSessionForUpdate(
-        tx,
-        sessionId,
+      const session = inScopeOrNotFound(
+        scope,
+        await this.retrievalRepo.findSessionForUpdate(
+          tx,
+          sessionId,
+          scope.tenantId,
+        ),
+        'Sesión de retrieval no encontrada.',
       );
-      if (!session) {
-        throw new ResourceNotFoundException(
-          'Sesión de retrieval no encontrada.',
-          { sessionId },
-        );
-      }
       if (session.status !== 'completed' && session.status !== 'flagged') {
         throw new PreconditionFailedException(
           'Sólo se puede dar feedback de una sesión completada.',
@@ -557,21 +557,19 @@ export class RetrievalService {
   private async requirePublishedPolicy(
     tx: EntityManager,
     accessPolicyId: string | undefined,
+    tenantId: string,
   ): Promise<RagAccessPolicies> {
     if (!accessPolicyId) {
       throw new PreconditionFailedException(
         'La colección no tiene política de acceso RAG; no se puede consultar.',
       );
     }
-    const policy = await this.catalogRepo.findPolicyById(tx, accessPolicyId);
-    if (!policy) {
-      throw new ResourceNotFoundException(
-        'Política de acceso RAG no encontrada.',
-        {
-          accessPolicyId,
-        },
-      );
-    }
+    // La política que gobierna la consulta es del mismo tenant que la colección.
+    const policy = inScopeOrNotFound(
+      { tenantId },
+      await this.catalogRepo.findPolicyById(tx, accessPolicyId, tenantId),
+      'Política de acceso RAG no encontrada.',
+    );
     if (policy.state !== 'published') {
       throw new PreconditionFailedException(
         'La política de acceso RAG no está publicada.',

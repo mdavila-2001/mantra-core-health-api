@@ -7,10 +7,14 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { TrackingRepository } from '../repositories';
+import { TrackingErrorReason } from '../tracking.error-reasons';
 import { TrackableSubjects } from '../entities';
 import {
   OpenSubjectDto,
@@ -106,6 +110,16 @@ const LIVE_SHIPMENT_STATES: readonly string[] = [
   CONCEPTS.TRACK_RETRY_SCHEDULED,
 ];
 
+/**
+ * Roles que operan cualquier envío de su tenant. Un `COURIER` sólo opera los
+ * que tiene asignados: ver `assertMayOperate`.
+ */
+const SHIPMENT_MANAGER_ROLES: readonly string[] = [
+  'LOGISTICS_OPERATOR',
+  'TRACKING_ADMIN',
+  'SYSTEM',
+];
+
 const DEFAULT_SCAN_BATCH = 100;
 const TRACKING_NUMBER_BYTES = 8;
 
@@ -147,12 +161,15 @@ export class TrackingService {
       'Opening trackable subject',
     );
 
+    // El tenant es el del contexto verificado, nunca el del cuerpo.
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const open = await this.trackingRepo.findOpenSubjectByRef(
         tx,
         dto.subjectRefType,
         dto.subjectRefId,
         CONCEPTS.SUBJECT_OPEN,
+        tenantId,
       );
       if (open) {
         throw new ConflictException(
@@ -186,7 +203,7 @@ export class TrackingService {
 
       const trackingNumber = await this.generateTrackingNumber(tx);
       const subject = this.trackingRepo.createSubject(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         subjectTypeConceptId: SUBJECT_TYPE_CONCEPT[dto.subjectType],
         subjectRefType: dto.subjectRefType,
         subjectRefId: dto.subjectRefId,
@@ -201,7 +218,7 @@ export class TrackingService {
       const shipment = this.trackingRepo.createShipment(tx, {
         trackableSubjectId: subject.id,
         carrierId: dto.carrierId,
-        tenantId: dto.tenantId,
+        tenantId,
         shipmentNumber,
         originAddressId: dto.originAddressId,
         destinationAddressId: dto.destinationAddressId,
@@ -246,12 +263,15 @@ export class TrackingService {
       );
     }
 
+    // Los hitos que define un administrador son del tenant activo: uno global
+    // cambiaría el catálogo de todas las organizaciones.
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const existing = await this.trackingRepo.findMilestonesBySubjectType(
         tx,
         subjectTypeConceptId,
         CONCEPTS.STATE_ACTIVE,
-        dto.tenantId,
+        tenantId,
       );
       const existingCodes = new Set(existing.map((m) => m.code));
       const existingTerminals = existing.filter((m) => m.isTerminal).length;
@@ -275,7 +295,7 @@ export class TrackingService {
         }
         ordinal += 1;
         const created = this.trackingRepo.createMilestoneDefinition(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           subjectTypeConceptId,
           code: milestone.code,
           name: milestone.name,
@@ -310,16 +330,16 @@ export class TrackingService {
       'Dispatching shipment',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (shipment.statusConceptId !== CONCEPTS.TRACK_PREPARING) {
         throw new PreconditionFailedException(
           'El envío no está en preparación',
@@ -345,12 +365,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const dispatchedAt = new Date();
       shipment.statusConceptId = CONCEPTS.TRACK_IN_TRANSIT;
@@ -396,15 +413,21 @@ export class TrackingService {
       'Recording tracking event',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         subjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          subjectId,
-        });
+      if (!subject) throw this.subjectNotFound();
+      if (!this.isShipmentManager(actor, tenantId)) {
+        const shipment = await this.trackingRepo.findShipmentBySubject(
+          tx,
+          subject.id,
+        );
+        this.assertMayOperate(actor, tenantId, shipment);
       }
       if (subject.stateConceptId === CONCEPTS.SUBJECT_CLOSED) {
         throw new PreconditionFailedException(
@@ -530,10 +553,9 @@ export class TrackingService {
         };
       }
 
-      const locked = await this.trackingRepo.findSubjectForUpdate(
-        tx,
-        subject.id,
-      );
+      // El webhook resolvió el sujeto por número de seguimiento, no por un
+      // UUID de un cliente autenticado: no hay tenant de sesión que aplicar.
+      const locked = await this.trackingRepo.lockSubjectById(tx, subject.id);
       if (!locked) {
         throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
           subjectId: subject.id,
@@ -605,16 +627,16 @@ export class TrackingService {
       'Recording shipment handoff',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         throw new PreconditionFailedException(
           'El envío ya no admite traspasos',
@@ -698,16 +720,16 @@ export class TrackingService {
       'Recomputing ETA',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         throw new PreconditionFailedException(
           'El envío ya no admite estimaciones',
@@ -743,6 +765,7 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
       if (subject) touch(subject, actor.id);
 
@@ -788,16 +811,16 @@ export class TrackingService {
       );
     }
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (shipment.statusConceptId === CONCEPTS.TRACK_DELIVERED) {
         throw new ConflictException('El envío ya está entregado', {
           shipmentId,
@@ -831,12 +854,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const proof = this.trackingRepo.createDeliveryProof(tx, {
         shipmentId,
@@ -909,16 +929,16 @@ export class TrackingService {
       'Recording shipment exception',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (!LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         throw new PreconditionFailedException(
           'El envío ya no admite excepciones',
@@ -932,12 +952,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const statusConceptId = dto.scheduleRetry
         ? CONCEPTS.TRACK_RETRY_SCHEDULED
@@ -995,16 +1012,16 @@ export class TrackingService {
       'Cancelling shipment',
     );
 
+    const tenantId = requireTenantId();
+
     return this.em.transactional(async (tx) => {
       const shipment = await this.trackingRepo.findShipmentForUpdate(
         tx,
         shipmentId,
+        tenantId,
       );
-      if (!shipment) {
-        throw new ResourceNotFoundException('Envío no encontrado', {
-          shipmentId,
-        });
-      }
+      if (!shipment) throw this.shipmentNotFound();
+      this.assertMayOperate(actor, tenantId, shipment);
       if (shipment.statusConceptId === CONCEPTS.TRACK_CANCELLED) {
         throw new ConflictException('El envío ya está cancelado', {
           shipmentId,
@@ -1021,12 +1038,9 @@ export class TrackingService {
       const subject = await this.trackingRepo.findSubjectForUpdate(
         tx,
         shipment.trackableSubjectId,
+        tenantId,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          trackableSubjectId: shipment.trackableSubjectId,
-        });
-      }
+      if (!subject) throw this.subjectNotFound();
 
       const cancelledAt = new Date();
       shipment.statusConceptId = CONCEPTS.TRACK_CANCELLED;
@@ -1132,6 +1146,59 @@ export class TrackingService {
   }
 
   // --- Apoyo ---
+
+  /** Envío inexistente o de otro tenant: la misma respuesta, sin `details`. */
+  private shipmentNotFound(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      'Envío no encontrado',
+      undefined,
+      TrackingErrorReason.SHIPMENT_NOT_FOUND,
+    );
+  }
+
+  /** Sujeto inexistente o de otro tenant: la misma respuesta, sin `details`. */
+  private subjectNotFound(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      'Sujeto rastreable no encontrado',
+      undefined,
+      TrackingErrorReason.SUBJECT_NOT_FOUND,
+    );
+  }
+
+  /** Si el actor opera cualquier envío de su tenant (operador, administrador, sistema). */
+  private isShipmentManager(
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): boolean {
+    if (actor.roles.includes('SUPERADMIN')) return true;
+    return SHIPMENT_MANAGER_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+  }
+
+  /**
+   * Política de recurso del envío, ya dentro del tenant: el operador, el
+   * administrador y el sistema operan cualquiera; un mensajero sólo el que
+   * tiene asignado. Cualquier otro caso es 403 sin escribir nada.
+   */
+  private assertMayOperate(
+    actor: AuthenticatedUser,
+    tenantId: string,
+    shipment: { assignedCourierUserId?: string } | null,
+  ): void {
+    if (this.isShipmentManager(actor, tenantId)) return;
+    if (
+      shipment?.assignedCourierUserId === actor.id &&
+      roleAuthorizesInTenant(actor, 'COURIER', tenantId)
+    ) {
+      return;
+    }
+    throw new InsufficientRoleException(
+      'No tiene acceso a este envío',
+      undefined,
+      TrackingErrorReason.SHIPMENT_ACCESS_DENIED,
+    );
+  }
 
   /**
    * Hito que el sujeto debería estar alcanzando: el siguiente al actual por
