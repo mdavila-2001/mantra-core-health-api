@@ -164,6 +164,8 @@ function build() {
       effectiveRoles.ensureRoleByCode(...args),
     ),
     managingTenantId: mockFn().mockResolvedValue(null),
+    // Sin cifras por defecto: nadie tiene cuenta ni reseñas.
+    directoryStats: mockFn().mockResolvedValue(new Map()),
   };
   // Por defecto el bypass está apagado: listPractitioners filtra por
   // verificado, igual que se comportaría un arranque sin
@@ -2841,6 +2843,82 @@ describe('ProfilesPractitionersService', () => {
         specialties: [{ specialtyConceptId: 'con-cardio', isPrimary: true }],
       });
       expect(page.nextCursor).toBeNull();
+    });
+
+    /**
+     * Lo que deja ordenar la guía por nota y por atenciones: cada fila trae sus
+     * cifras, pedidas en UN lote para la página entera.
+     */
+    it('suma la nota y la actividad de cada fila, en un solo lote', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        row,
+        { ...row, profileId: 'per-2', practitionerCode: 'MED-2' },
+      ]);
+      d.practitionerContext.directoryStats.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            {
+              activity: {
+                encounters: 120,
+                medicationRequests: 45,
+                clinicalNotes: 80,
+                documents: 3,
+              },
+              ratingAverage: 4.6,
+              ratingCount: 12,
+            },
+          ],
+        ]),
+      );
+
+      const page = await d.service.listPractitioners({ limit: 50 });
+
+      expect(d.practitionerContext.directoryStats).toHaveBeenCalledTimes(1);
+      expect(d.practitionerContext.directoryStats.mock.calls[0][1]).toEqual([
+        'per-1',
+        'per-2',
+      ]);
+      expect(page.items[0]).toMatchObject({
+        ratingAverage: 4.6,
+        ratingCount: 12,
+        activity: {
+          encounters: 120,
+          medicationRequests: 45,
+          clinicalNotes: 80,
+          documents: 3,
+        },
+      });
+      // Sin cifras: `null` de nota —no cero estrellas— y actividad en cero.
+      expect(page.items[1]).toMatchObject({
+        ratingAverage: null,
+        ratingCount: 0,
+        activity: {
+          encounters: 0,
+          medicationRequests: 0,
+          clinicalNotes: 0,
+          documents: 0,
+        },
+      });
+    });
+
+    /** Una lectura de cifras caída no tumba la guía: salen en cero. */
+    it('si las cifras no se pueden leer, lista igual con ceros', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.practitionerContext.directoryStats.mockRejectedValue(
+        new Error('relation does not exist'),
+      );
+
+      const page = await d.service.listPractitioners({ limit: 50 });
+
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]).toMatchObject({
+        ratingAverage: null,
+        ratingCount: 0,
+        activity: { encounters: 0 },
+      });
     });
 
     /** La fila de más existe sólo para saber si hay página siguiente. */
