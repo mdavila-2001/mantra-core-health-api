@@ -10,7 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
-import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
+import { composeAccountDisplayName } from '../../../../common/text/person-name';
 import {
   UsersRepository,
   CredentialsRepository,

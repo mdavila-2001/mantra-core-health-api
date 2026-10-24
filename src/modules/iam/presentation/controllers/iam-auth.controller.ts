@@ -35,7 +35,7 @@ import {
   type AuthenticatedUser,
   type RefreshCookieEnv,
 } from '../../../../common';
-import type { UploadedFileBytes } from '../../../common/services';
+import type { RegistrationUploadedFile } from '../../application/ports/registration-files.port';
 import {
   IamAuthService,
   IamAssistedRegistrationService,
@@ -174,7 +174,7 @@ export class IamAuthController {
     summary: 'Pre-cargar una imagen de firma o sello para el registro',
   })
   uploadRegistrationSignatureImage(
-    @UploadedFile() file: UploadedFileBytes | undefined,
+    @UploadedFile() file: RegistrationUploadedFile | undefined,
   ): Promise<RegistrationDocumentUploadResponseDto> {
     return this.registrationDocumentUploadService.uploadSignatureImage(file);
   }
@@ -219,7 +219,7 @@ export class IamAuthController {
     summary: 'Pre-cargar un PDF para un registro de organización o profesional',
   })
   uploadRegistrationDocument(
-    @UploadedFile() file: UploadedFileBytes | undefined,
+    @UploadedFile() file: RegistrationUploadedFile | undefined,
   ): Promise<RegistrationDocumentUploadResponseDto> {
     return this.registrationDocumentUploadService.upload(file);
   }

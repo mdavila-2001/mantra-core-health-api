@@ -3,6 +3,13 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamPatientSelfRegistrationService } from './iam-patient-self-registration.service';
 import { TracingService } from '../../../../observability';
+import { InsuranceDeclaredCoverageAdapter } from '../../infrastructure/adapters/insurance-declared-coverage.adapter';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
+import {
+  commonRecords,
+  directoryRegistration,
+  profilesRegistration,
+} from './iam-registration.testing';
 // `UnauthorizedException` es la de Nest, no la de dominio: es la que usan el
 // resto de flujos de autenticación de IAM (login, activación de cuenta).
 import { UnauthorizedException } from '@nestjs/common';
@@ -130,22 +137,29 @@ describe('IamPatientSelfRegistrationService', () => {
       rolesRepo as never,
       eventsRepo as never,
       emailVerificationsRepo,
-      personsRepo as never,
-      personProfilesRepo as never,
-      patientProfilesRepo as never,
-      accountLinksRepo as never,
-      identifiersRepo as never,
-      contactPointsRepo as never,
-      addressesRepo as never,
-      catalogConceptsRepo as never,
-      relatedPersonsRepo as never,
-      insuranceCatalogRepo as never,
-      coverageRepo as never,
-      notificationsService as never,
-      tenantMembershipsRepo as never,
+      profilesRegistration({
+        persons: personsRepo,
+        personProfiles: personProfilesRepo,
+        patientProfiles: patientProfilesRepo,
+        accountLinks: accountLinksRepo,
+        relatedPersons: relatedPersonsRepo,
+        contactPoints: contactPointsRepo,
+        administrativeAreas,
+      }),
+      commonRecords({
+        identifiers: identifiersRepo,
+        contactPoints: contactPointsRepo,
+        addresses: addressesRepo,
+        catalogConcepts: catalogConceptsRepo,
+      }),
+      new InsuranceDeclaredCoverageAdapter(
+        insuranceCatalogRepo as never,
+        coverageRepo as never,
+      ),
+      new MessagingEmailNoticeAdapter(notificationsService as never),
+      directoryRegistration({ memberships: tenantMembershipsRepo }),
       logger as never,
       new TracingService(),
-      administrativeAreas as never,
     );
     return {
       service,
