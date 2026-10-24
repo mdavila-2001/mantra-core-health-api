@@ -20,8 +20,6 @@ import { PersonAccountLinksRepository } from '../profiles/infrastructure/reposit
 import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
 import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
 import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
-import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
-import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
 // De acá sale `ValueSetsRepository`, que es de donde el servicio de arriba lee
 // los 36 conceptos, y `CatalogConceptsRepository`, que da el rótulo con el que
 // el índice de búsqueda guarda la especialidad. `terminology` no importa ningún
