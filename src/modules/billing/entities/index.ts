@@ -17,6 +17,8 @@ export * from './quotations.entity';
 export * from './receivable_payment_allocations.entity';
 export * from './reimbursements.entity';
 export * from './service_catalog.entity';
+export * from './siat_simulated_invoices.entity';
+export * from './siat_simulated_outbox.entity';
 export * from './tax_codes.entity';
 export * from './tax_periods.entity';
 export * from './vendors.entity';

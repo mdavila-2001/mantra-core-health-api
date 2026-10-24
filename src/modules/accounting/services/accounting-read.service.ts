@@ -7,7 +7,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { Practices } from '../../practice/entities';
-import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  PracticeTenantLookupService,
+  practiceAccessScope,
+} from '../../practice/services';
 import { BusinessPartners } from '../../erp/entities';
 import { ACCT } from '../accounting.concepts';
 import {
@@ -165,22 +168,19 @@ export class AccountingReadService {
   }
 
   /**
-   * Duplicado deliberado y mínimo de `LedgerReadService.assertPractitionerOwnsPractice`
-   * (D-8): un guard compartido cambiaría el constructor de los servicios que
-   * pasan sus dependencias por posición en los specs, fuera del alcance de
-   * esta tarjeta.
+   * Corte 422 de `PRACTITIONER` (D-8). Qué roles se filtran lo decide
+   * `practiceAccessScope` de `practice` —el mismo criterio que acota
+   * `GET /practices`—; acá sólo se resuelve la vinculación y se traduce a los
+   * errores de contabilidad. El constructor no cambia: los specs pasan sus
+   * dependencias por posición.
    */
   private async assertPractitionerOwnsPractice(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    if (
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('ACCOUNTING_APPROVER')
-    ) {
-      return;
-    }
-    if (!actor.roles.includes('PRACTITIONER')) {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
+    // sólo se traduce a los errores 422 propios de contabilidad.
+    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
       return;
     }
     if (!actor.practitionerProfileId) {
