@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T02:57:53.514Z",
+  "generatedAt": "2026-10-24T03:13:05.591Z",
   "versions": {
     "mondo": "2026-10-06",
     "orphanet": "2026-06-23",
@@ -55,9 +55,9 @@
     {
       "file": "mesh.part-01.ndjson.gz",
       "codeSystem": "mesh",
-      "records": 8863,
-      "bytes": 149814,
-      "sha256": "1ed365aa3b35a0f2c6e9d0833b5df6b6d41d20fa5f17c05554180c892133f3df"
+      "records": 9264,
+      "bytes": 156812,
+      "sha256": "fad409966b7c5697774ccf8362bc23ffcea7fde9c397ca05ce5e03fce7df327c"
     },
     {
       "file": "mondo.part-01.ndjson.gz",
@@ -101,28 +101,28 @@
     },
     {
       "file": "diseases-build-stats.json",
-      "bytes": 3914,
-      "sha256": "7eb073e88360fd97f8c797c4c06978d27f36deb788b709e24be88406fb8efb92"
+      "bytes": 4037,
+      "sha256": "4c8fb0b8cedc4e4d7518b59f9d1f1c87998725b792340ddca154fbbdd9d5a3af"
     },
     {
       "file": "diseases-citations.json",
-      "bytes": 421693,
-      "sha256": "3dd3a749d25f3d55d0e635adc2bc10ba55300db5888d103fffe9b8df9ddd8bc9"
+      "bytes": 541065,
+      "sha256": "058220646b80b85bbf28face4993d17d4d25e4da416aea29b9328fcd7dee4b60"
     },
     {
       "file": "sources-manifest.json",
-      "bytes": 34859,
-      "sha256": "c4780e72c3d1d8239a7bd341152f9bf6e948385e216617ed882eb2f0e683ce26"
+      "bytes": 35628,
+      "sha256": "2cd86aaca5016106929ec04ff0db80db217f69ce12c222edb08aae2921558065"
     },
     {
       "file": "diseases-coverage.json",
-      "bytes": 18962,
-      "sha256": "086fb3fb1c7018971c19f3556b569b3829072c30fbe35f95dc7ce5cec4928af2"
+      "bytes": 19159,
+      "sha256": "fa0d5d9c9190900846054da5722381e28852c169617b3f9fc883e65b169dffb9"
     },
     {
       "file": "diseases-coverage.md",
-      "bytes": 10943,
-      "sha256": "07edd6bc63f2c4f8888540929c6d2fd4185c4fe47b09a37dc08a53b9d0003e2c"
+      "bytes": 11016,
+      "sha256": "9a645b02eafebcda93ba83a1209eaa5da0dc84710d0f11f1dd0cdf48dd65ed1c"
     }
   ]
 }

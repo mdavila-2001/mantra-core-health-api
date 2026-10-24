@@ -114,3 +114,17 @@ test('instantánea versionada: gzip partido, SHA-256 en MANIFEST.json y lectura 
   writeFileSync(join(dir, 'omim.part-01.ndjson.gz'), readFileSync(join(dir, 'omim.part-01.ndjson.gz')).subarray(1));
   assert.throws(() => readSnapshot(null, dir), /SHA-256 distinto/);
 });
+
+test('enfermedades comunes de HPO (Groza 2015): MeSH y DOID; los ceros a la izquierda del DOID se resuelven contra DOID', async () => {
+  const { citeHpoCommonDiseases, resolveDoidCode } = await import('../lib/citations.mjs');
+  assert.deepEqual(citeHpoCommonDiseases(join(FX, 'hpo-common')), [
+    { cs: 'doid', code: 'DOID:0003113' },
+    { cs: 'mesh', code: 'D002375' },
+  ]);
+  const doid = new Set(['DOID:3113', 'DOID:0050156', 'DOID:5158']);
+  const alt = new Map([['DOID:9917', 'DOID:5158']]);
+  assert.equal(resolveDoidCode('DOID:0003113', doid, alt), 'DOID:3113'); // sin ceros
+  assert.equal(resolveDoidCode('DOID:0050156', doid, alt), 'DOID:0050156'); // el código exacto existe
+  assert.equal(resolveDoidCode('DOID:0009917', doid, alt), 'DOID:5158'); // por alt_id
+  assert.equal(resolveDoidCode('DOID:0005898', doid, alt), 'DOID:0005898'); // sin match: queda sin resolver
+});

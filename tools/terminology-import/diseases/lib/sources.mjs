@@ -118,6 +118,18 @@ export const SOURCE_FILES = [
     license: LICENSES.HPO,
   },
   {
+    // Groza et al. 2015 (AJHG 97:111-124, PMC4572507): anotaciones HPO de enfermedades comunes, por DOID o MeSH.
+    // Archivo fijo de 2015 en el bucket público de Monarch (data.monarchinitiative.org/hpo/); sólo los ids.
+    key: 'hpo-common-diseases',
+    file: 'hpo-common/common_disease_annot.tar.gz',
+    url: 'https://storage.googleapis.com/data-public-monarchinitiative/hpo/common_disease_annot.tar.gz',
+    expectedSha256: '4c871573d57199cd944cac991ecdbbe60272420376a4064db92f39691afc93d2',
+    publisher: 'Human Phenotype Ontology — Groza et al. 2015 (Monarch Initiative)',
+    version: '2015 (archivo fijo)',
+    license: LICENSES.HPO,
+    untarTo: 'hpo-common/x',
+  },
+  {
     key: 'phenopacket-store',
     file: 'phenopacket-store/all_phenopackets.zip',
     url: 'https://github.com/monarch-initiative/phenopacket-store/releases/download/0.1.27/all_phenopackets.zip',

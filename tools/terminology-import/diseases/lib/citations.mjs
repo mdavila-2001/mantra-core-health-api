@@ -3,6 +3,7 @@
 // que se pueda cargar. De ellas sólo se toman los identificadores:
 //  - anotaciones HPO (phenotype.hpoa): OMIM, ORPHA y DECIPHER de cada anotación
 //    (es la entrada de la sesión de síntomas: cada id tiene que resolver acá);
+//  - anotaciones HPO de enfermedades comunes (Groza 2015): MeSH y DOID;
 //  - phenopacket-store: el OMIM del diagnóstico de cada caso;
 //  - tabla OMS 10To11MapToOneCategory: cada código CIE-10 2019 con su categoría
 //    CIE-11 MMS de destino (correspondencia publicada por la OMS).
@@ -30,11 +31,11 @@ export function citeHpoAnnotations(path) {
   return out;
 }
 
-function walkJson(dir, acc = []) {
+function walkFiles(dir, ext, acc = []) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
-    if (statSync(p).isDirectory()) walkJson(p, acc);
-    else if (name.endsWith('.json')) acc.push(p);
+    if (statSync(p).isDirectory()) walkFiles(p, ext, acc);
+    else if (name.endsWith(ext)) acc.push(p);
   }
   return acc;
 }
@@ -42,7 +43,7 @@ function walkJson(dir, acc = []) {
 /** phenopacket-store (descomprimido) → [{ cs, code }] únicos de `diseases` y de los diagnósticos. */
 export function citePhenopackets(dir) {
   const ids = new Set();
-  for (const file of walkJson(dir)) {
+  for (const file of walkFiles(dir, '.json')) {
     let doc;
     try {
       doc = JSON.parse(readFileSync(file, 'utf8'));
@@ -56,6 +57,42 @@ export function citePhenopackets(dir) {
     .map((id) => id.split(':'))
     .filter(([p, l]) => p === 'OMIM' && /^\d{6}$/.test(l))
     .map(([, l]) => ({ cs: 'omim', code: l }));
+}
+
+/**
+ * Anotaciones HPO de enfermedades comunes (Groza 2015) → [{ cs, code }] únicos.
+ * Un archivo `.tab` por enfermedad; la columna «Disease ID» trae `MESH:D…` o
+ * `DO:DOID:<7 dígitos>`. El DOID se devuelve tal cual: los ceros a la izquierda
+ * se resuelven contra DOID en el build (`resolveDoidCode`).
+ */
+export function citeHpoCommonDiseases(dir) {
+  const ids = new Set();
+  for (const file of walkFiles(dir, '.tab')) {
+    const second = readFileSync(file, 'utf8').split('\n')[1] ?? '';
+    const id = second.split('\t')[0].trim();
+    if (id) ids.add(id);
+  }
+  const out = [];
+  for (const id of [...ids].sort()) {
+    const mesh = /^MESH:([CD]\d+)$/.exec(id);
+    const doid = /^DO:(DOID:\d+)$/.exec(id);
+    if (mesh) out.push({ cs: 'mesh', code: mesh[1] });
+    else if (doid) out.push({ cs: 'doid', code: doid[1] });
+  }
+  return out;
+}
+
+/**
+ * DOID citado con ceros a la izquierda (`DOID:0013550`, donde DO publica
+ * `DOID:13550`): primero el código exacto (hay DOID vigentes de 7 dígitos como
+ * `DOID:0050156`), después sin ceros, después por `alt_id`. Sin match, se
+ * devuelve tal cual y queda sin resolver.
+ */
+export function resolveDoidCode(code, doidCodes, altIds) {
+  if (doidCodes.has(code)) return code;
+  const stripped = `DOID:${String(Number(code.slice(5)))}`;
+  if (doidCodes.has(stripped)) return stripped;
+  return altIds.get(code) ?? altIds.get(stripped) ?? code;
 }
 
 /**

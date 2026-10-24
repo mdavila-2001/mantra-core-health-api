@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import { BUILD_DIR, nowIso, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { KEY_VERSION, SYSTEMS } from './lib/code-systems.mjs';
 import { buildDoid, buildEfo, buildIcd11Mms, buildMondo, buildNcit, buildOrphanet, readOrphanet } from './lib/records.mjs';
-import { citeHpoAnnotations, citePhenopackets, icd10KeysFromWhoMap } from './lib/citations.mjs';
+import { citeHpoAnnotations, citeHpoCommonDiseases, citePhenopackets, icd10KeysFromWhoMap, resolveDoidCode } from './lib/citations.mjs';
 import { resolveXrefs } from './lib/resolve.mjs';
 import { SNAPSHOT_DIR, writeSnapshot } from './lib/snapshot.mjs';
 import { NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
@@ -87,6 +87,11 @@ async function main() {
     'hpo-annotations': citeHpoAnnotations(m['hpo-annotations'].path),
     'phenopacket-store': citePhenopackets(m['phenopacket-store'].unzippedTo),
   };
+  const doidCodes = new Set(doid.records.map((r) => r.code));
+  const doidAlt = new Map(doid.records.flatMap((r) => (r.properties.disease_alt_ids ?? []).map((a) => [a, r.code])));
+  citations['hpo-common-diseases'] = citeHpoCommonDiseases(m['hpo-common-diseases'].unzippedTo).map((c) =>
+    c.cs === 'doid' ? { cs: 'doid', code: resolveDoidCode(c.code, doidCodes, doidAlt) } : c,
+  );
   const who10 = icd10KeysFromWhoMap(m['icd10-to-icd11'].path);
   const seeded = who10.keys.map((k) => ({
     cs: 'icd10-who',

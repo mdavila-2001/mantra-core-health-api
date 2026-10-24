@@ -14,3 +14,4 @@ probar los lectores sin red y sin base.
 | `icd11_map_11To10_2025-01.sample.txt`, `icd11_map_10To11_2025-01.sample.txt` | Tablas de correspondencia CIE-11 ↔ CIE-10 de la OMS, 2025-01 (filas sin modificar) | CC BY-ND 3.0 IGO — © Organización Mundial de la Salud |
 | `hpo_phenotype.sample.hpoa` | Anotaciones HPO, 2026-09-02 | Licencia HPO — Human Phenotype Ontology (hpo.jax.org) |
 | `phenopackets/PMID_23086397_Patient_4.json` | phenopacket-store 0.1.27 | BSD-3-Clause — Monarch Initiative |
+| `hpo-common/MESH-D002375.tab`, `hpo-common/DO-DOID_0003113.tab` | Anotaciones HPO de enfermedades comunes (Groza et al. 2015), `common_disease_annot.tar.gz` (primeras líneas) | Licencia HPO — Human Phenotype Ontology (hpo.jax.org) |

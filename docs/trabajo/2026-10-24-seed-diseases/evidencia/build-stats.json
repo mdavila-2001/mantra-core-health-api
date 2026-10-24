@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T01:25:13.675Z",
+  "generatedAt": "2026-10-24T03:13:00.243Z",
   "versions": {
     "mondo": "2026-10-06",
     "orphanet": "2026-06-23",
@@ -92,8 +92,8 @@
       "maps": 11649
     },
     "mesh": {
-      "concepts": 8863,
-      "active": 8863,
+      "concepts": 9264,
+      "active": 9264,
       "deprecated": 0,
       "withDefinition": 0,
       "designations": 0,
@@ -171,10 +171,16 @@
       "keys": 780,
       "unresolved": 0
     },
+    "hpo-common-diseases": {
+      "cited": 3647,
+      "existing": 2600,
+      "keys": 1046,
+      "unresolved": 1
+    },
     "who-icd10-to-icd11": {
       "cited": 12597,
       "postcoordinatedTargetsSkipped": 826
     }
   },
-  "seconds": 38
+  "seconds": 58
 }

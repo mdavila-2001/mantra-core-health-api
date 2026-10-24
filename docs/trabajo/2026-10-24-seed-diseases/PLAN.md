@@ -54,6 +54,7 @@
 | H3.S1.M1 | Regla de deduplicación (union-find por equivalencia / xref sin semántica) | «más amplio/estrecho» no deduplica | test «saturación: …» ok | HECHO |
 | H3.S1.M2 | 14 pasadas registradas | Tabla con 14 filas | `coverage-report.mjs` → 14 filas | HECHO |
 | H3.S1.M3 | Dos pasadas seguidas con 0 | Las dos últimas en 0 | ídem | BLOQUEADO |
+| H3.S1.M4 | Pasada 15 (enfermedades comunes de HPO, Groza 2015) | DOID resuelto por código/alt_id; MeSH como claves | test «enfermedades comunes de HPO …» ok; `coverage-report.mjs` → fila 15 | HECHO |
 | H3.S2.M1 | Cobertura contra MONDO | % por sistema | `coverage-report.mjs` → bloque `vsMondo` | HECHO |
 | H3.S2.M2 | Cobertura contra UMLS | % contra conceptos de enfermedad de UMLS | — (cuenta UTS) | BLOQUEADO |
 

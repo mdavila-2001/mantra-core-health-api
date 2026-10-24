@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T01:30:41.137Z",
+  "generatedAt": "2026-10-24T03:12:02.299Z",
   "sources": [
     {
       "key": "mondo",
@@ -584,6 +584,19 @@
       "bytes": 2509984,
       "sha256": "3ad9eb86c031df8bc7d5efefa6edc93562182eb9a6a71e5129d3f18b9d42c50e",
       "retrievedAt": "2026-10-24T01:09:17.963Z"
+    },
+    {
+      "key": "hpo-common-diseases",
+      "file": "hpo-common/common_disease_annot.tar.gz",
+      "url": "https://storage.googleapis.com/data-public-monarchinitiative/hpo/common_disease_annot.tar.gz",
+      "expectedSha256": "4c871573d57199cd944cac991ecdbbe60272420376a4064db92f39691afc93d2",
+      "publisher": "Human Phenotype Ontology — Groza et al. 2015 (Monarch Initiative)",
+      "version": "2015 (archivo fijo)",
+      "license": "Licencia propia de HPO (LICENSE.md del repo remite a https://hpo.jax.org/app/license): uso libre con atribución y versión",
+      "untarTo": "hpo-common/x",
+      "bytes": 6724219,
+      "sha256": "4c871573d57199cd944cac991ecdbbe60272420376a4064db92f39691afc93d2",
+      "retrievedAt": "2026-10-24T03:11:20.600Z"
     }
   ]
 }

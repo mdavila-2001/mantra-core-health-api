@@ -11,14 +11,14 @@ Sin DDL: todo entra en las tablas existentes del módulo 03 `terminology`.
 |---|---|
 | Sistemas con nomenclatura propia | `mondo`, `orphanet` (**castellano**), `doid`, `ncit-disease`, `icd11-mms`, `efo-disease` |
 | Sistemas de clave cruzada (sólo código) | `omim`, `icd10-who`, `icd11-foundation`, `mesh`, `umls`, `decipher` |
-| Conceptos | **183 313** (114 226 de nomenclatura + 69 087 claves) |
+| Conceptos | **183 714** (114 226 de nomenclatura + 69 488 claves) |
 | Designaciones | 309 745 (25 942 en castellano, todas de Orphanet) |
 | Aristas de jerarquía (`REL_IS_A`) | 147 251 |
 | Alineamientos publicados (`concept_maps`) | 190 313 (+ los condicionales hacia `icd10cm` / CIE-10-ES si esos conceptos existen) |
-| Propiedades | 491 228 |
-| Peso en Postgres 16 (tablas + índices del módulo 03) | 419 MB la base de prueba completa; `concept_properties` 158 MB |
+| Propiedades | 492 030 |
+| Peso en Postgres 16 (tablas + índices del módulo 03) | 420 MB la base de prueba completa; `concept_properties` 158 MB |
 | Carga en base limpia / segunda corrida | 72 s / 43 s con **0 filas nuevas** (idempotente) |
-| Instantánea en git | `tools/terminology-import/diseases/data/` — 12 `*.ndjson.gz` (14 MB, la mayor 4,2 MB) + `MANIFEST.json`; `load-catalog.mjs --from-snapshot` carga desde ahí sin red: 85 s / 44 s con 0 nuevas, mismos 183 313 conceptos |
+| Instantánea en git | `tools/terminology-import/diseases/data/` — 12 `*.ndjson.gz` (14 MB, la mayor 4,2 MB) + `MANIFEST.json`; `load-catalog.mjs --from-snapshot` carga desde ahí sin red: 84 s / 43 s con 0 nuevas |
 | Saturación | **No alcanzada** con lo accesible: las últimas pasadas que aportan vienen de fuentes que no se pueden cargar (licencia sin declarar o sólo conversiones de terceros). Ver §5. |
 
 Todos los nombres, sinónimos y definiciones son **verbatim** de la fuente y
@@ -66,7 +66,7 @@ sistema (para `$lookup`): `https://mantracore.health/fhir/CodeSystem/<internal_c
 | `omim` | `219700` · `PS219700` | `xref-keys` | 10 744 | Clave: número MIM citado por MONDO, Orphanet, DOID, EFO, HPO o phenopacket-store |
 | `icd10-who` | `E84.0` · `A00-A09` · `I` | `xref-keys` | 12 639 | Clave: código CIE-10 OMS 2019 (todas las entidades de la tabla OMS 10→11 + las citadas) |
 | `icd11-foundation` | `465177735` | `xref-keys` | 4 630 | Clave: entidad de la Fundación citada por MONDO/Orphanet |
-| `mesh` | `D003920` | `xref-keys` | 8 863 | Clave: descriptor MeSH citado |
+| `mesh` | `D003920` | `xref-keys` | 9 264 | Clave: descriptor MeSH citado (incluye los 1 046 de las anotaciones HPO de enfermedades comunes) |
 | `umls` | `C0011849` | `xref-keys` | 32 150 | Clave: CUI citado |
 | `decipher` | `16` | `xref-keys` | 61 | Clave: síndrome DECIPHER citado por HPO / MONDO |
 
@@ -140,10 +140,12 @@ conexos nuevos.
 | 12 | OMS, tabla 10→11 (códigos CIE-10 2019) | claves citadas | 12 597 | **887** (destino poscoordinado o sin categoría simple en la CIE-11 2026-01) | títulos CIE-10 (licencia comercial de la OMS) |
 | 13 | MeSH 2025 árbol C (conversión PyOBO) | medida, no se carga | 5 067 | 1 585 | conversión de terceros sin números de árbol; oficial bloqueada. La cabeza C21 «Disorders of Environmental Origin» no se incluyó en la medida (no se pudo verificar su id): subestima. |
 | 14 | GARD (conversión PyOBO) | medida, no se carga | 6 109 | 2 598 | sin licencia declarada; sin cruces publicados |
+| 15 | Anotaciones HPO de enfermedades comunes (Groza et al. 2015, `common_disease_annot.tar.gz`) | claves citadas | 3 647 (2 601 DOID, 1 046 MeSH) | **670** (401 MeSH que no citaba nadie + MeSH citados antes sólo sin equivalencia + 1 DOID sin resolver, `DOID:5898`) | DOID con ceros a la izquierda resueltos por código exacto, sin ceros o `alt_id` (nunca por nombre) |
 
 **Resultado.** Con las fuentes accesibles y cargables, **no se llegó a dos
 pasadas seguidas con 0**: la 11 dio 0, pero la 12 (CIE-10 OMS) aportó 887
-códigos, y las 13–14 siguen aportando desde fuentes que no se pueden cargar.
+códigos, las 13–14 siguen aportando desde fuentes que no se pueden cargar y la
+15 (detectada por `seed-symptoms`) aportó 670 claves.
 Lo que queda por encima de lo cargado es, por fuente:
 
 - **MeSH oficial** (`nlmpubs.nlm.nih.gov`, desc2026.xml con números de árbol y
@@ -186,7 +188,7 @@ repo + los 12 conceptos internos que siembra la API), 2026-10-24.
 | `umls` (clave) | 32 150 | 0 | 64 300 / 7,6 MB | 0 | 0 (es destino) | Puente de deduplicación y enlace con fuentes que hablan en CUI. **Ninguna consulta de producto lo lee hoy**: si el propietario no lo necesita, se puede omitir con `--systems` (≈ 96 000 filas). |
 | `icd10-who` (clave) | 12 639 | 0 | 25 278 / 3,0 MB | 0 | 11 649 | Códigos CIE-10 OMS (estándar del SNIS) ↔ CIE-11 |
 | `omim` (clave) | 10 744 | 0 | 21 488 / 2,7 MB | 0 | 0 (es destino) | Enlace de las anotaciones HPO / síntomas |
-| `mesh` (clave) | 8 863 | 0 | 17 726 / 2,0 MB | 0 | 0 (es destino) | Enlace con fuentes indexadas en MeSH |
+| `mesh` (clave) | 9 264 | 0 | 18 528 / 2,1 MB | 0 | 0 (es destino) | Enlace con fuentes indexadas en MeSH |
 | `icd11-foundation` (clave) | 4 630 | 0 | 9 260 / 1,0 MB | 0 | 0 (es destino) | Puente MONDO ↔ CIE-11 MMS |
 | `decipher` (clave) | 61 | 0 | 122 | 0 | 0 | Enlace de las anotaciones HPO |
 

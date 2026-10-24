@@ -1,9 +1,9 @@
 === Catálogo de enfermedades → terminology.*  ===
 Leyendo la instantánea versionada /home/user/mantra-core-health-api/tools/terminology-import/diseases/data
 Totales: {
-  concepts: 183313,
+  concepts: 183714,
   designations: 309745,
-  properties: 491228,
+  properties: 492030,
   relationships: 147251,
   maps: 190313,
   externalMapsCandidates: 11806
@@ -14,7 +14,7 @@ Totales: {
 [concepts] icd10-who +12639
 [concepts] icd11-foundation +4630
 [concepts] icd11-mms +37052
-[concepts] mesh +8863
+[concepts] mesh +9264
 [concepts] mondo +27185
 [concepts] ncit-disease +22379
 [concepts] omim +10744
@@ -26,7 +26,7 @@ Totales: {
 [load] icd10-who {"concepts":12639,"designations":0,"properties":25278,"relationships":0,"maps":11649,"externalMaps":0}
 [load] icd11-foundation {"concepts":4630,"designations":0,"properties":9260,"relationships":0,"maps":0,"externalMaps":0}
 [load] icd11-mms {"concepts":37052,"designations":37052,"properties":74739,"relationships":37024,"maps":19023,"externalMaps":0}
-[load] mesh {"concepts":8863,"designations":0,"properties":17726,"relationships":0,"maps":0,"externalMaps":0}
+[load] mesh {"concepts":9264,"designations":0,"properties":18528,"relationships":0,"maps":0,"externalMaps":0}
 [load] mondo {"concepts":27185,"designations":110080,"properties":108518,"relationships":35577,"maps":74069,"externalMaps":0}
 [load] ncit-disease {"concepts":22379,"designations":69326,"properties":67134,"relationships":37305,"maps":13981,"externalMaps":0}
 [load] omim {"concepts":10744,"designations":0,"properties":21488,"relationships":0,"maps":0,"externalMaps":0}
@@ -85,9 +85,9 @@ Totales: {
       "externalMaps": 0
     },
     "mesh": {
-      "concepts": 8863,
+      "concepts": 9264,
       "designations": 0,
-      "properties": 17726,
+      "properties": 18528,
       "relationships": 0,
       "maps": 0,
       "externalMaps": 0
@@ -133,5 +133,5 @@ Totales: {
       "externalMaps": 0
     }
   },
-  "segundos": 85
+  "segundos": 84
 }

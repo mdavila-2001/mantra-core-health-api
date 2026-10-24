@@ -2,7 +2,7 @@
 
 - Fecha: 2026-10-24 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude/eager-pasteur-hxks7i` (la tarea pedía `justin/seed-diseases`) · PR: [#688](https://github.com/mdavila-2001/mantra-core-health-api/pull/688) contra `dev`, sin mergear
 - Peldaño de evidencia alcanzado: **VERIFIED — carga real en Postgres 16 desechable**: filas, tiempo, idempotencia y consultas del contrato ejercitadas. **No** `REGRESSION_VERIFIED`: no se corrieron `yarn build`, `yarn test`, `yarn docs:validate` ni `yarn docs:build`, y la carga no se hizo contra una base sembrada por la API real (los 12 conceptos internos se insertaron a mano en la base desechable).
-- Avance: **28 / 30 microtareas HECHO (93,3 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
+- Avance: **29 / 31 microtareas HECHO (93,5 %)**, calculado. 2 BLOQUEADO (H3.S1.M3, H3.S2.M2). El hito H3 queda **A MEDIAS**.
 
 ## Completado
 
@@ -13,7 +13,7 @@
 | H1.S2.M1 | Registro de fuentes | `node -e "import('./tools/terminology-import/diseases/lib/sources.mjs')…"` | `47 5` |
 | H1.S2.M2 | Descarga + hash verificado | `node tools/terminology-import/diseases/fetch-sources.mjs` | `[ok] icd11-mms 4214980 B sha256=f1356588f409…` · `Manifiesto: … (52 archivos)` |
 | H1.S3.M1 | `SOURCES.md` | lectura | 13 fuentes cargadas, 5 medidas, 16 descartadas con motivo |
-| H2.S1.M1–H2.S3.M1 | Lectores, reglas, resolución y plan | `node --test "tools/terminology-import/diseases/test/*.test.mjs"` | `# pass 15` `# fail 0` |
+| H2.S1.M1–H2.S3.M1 | Lectores, reglas, resolución y plan | `node --test "tools/terminology-import/diseases/test/*.test.mjs"` | `# pass 16` `# fail 0` |
 | H2.S3.M2 | Mapeos condicionales | carga con 2 conceptos de prueba (`icd10cm-Q87.4`, `cie10es-Q87.4`) | `[load] mondo {…"externalMaps":2}`; 2.ª corrida `"externalMaps":0` |
 | H3.S1.M1 | Regla de deduplicación | test «saturación: …» | ok |
 | H3.S1.M2 | 14 pasadas | `coverage-report.mjs` | tabla de 14 filas (`evidencia/coverage.md`) |
@@ -29,6 +29,7 @@
 | H6.S1.M2 | Gzip determinista | `sha256sum -c sha-before.txt` tras rebuild | `mondo.part-01.ndjson.gz: OK` |
 | H6.S1.M3 | Carga desde la instantánea | `load-catalog.mjs --from-snapshot` ×2 en base limpia | 1.ª `"segundos": 85`; 2.ª 0 nuevas, `"segundos": 44`; conteos `183325\|309745\|491228\|147251\|190313` = los del build (`evidencia/load-snapshot-*.txt`) |
 | H6.S1.M4 | Carga parcial `--systems` (bug encontrado y corregido: FK de `concept_maps` hacia sistemas no cargados) | `fresh-db.sh` + `--from-snapshot --systems orphanet,omim`, luego `--systems mondo`, luego completo ×2 | parcial sin error (`orphanet maps 8745`); completo converge a `183325\|190313`; corrida siguiente 0 nuevas |
+| H3.S1.M4 | Pasada 15: anotaciones HPO de enfermedades comunes (Groza 2015), fuente aportada por `seed-symptoms` | `fetch-sources.mjs --only hpo-common-diseases` (SHA-256 esperado) + build + `coverage-report.mjs` | `cited 3647, existing 2600, keys 1046, unresolved 1`; `mesh` 8 863 → 9 264; pasada 15 = 670 nuevos; carga desde la instantánea ×2 → `183726\|…\|492030\|…` y 0 nuevas |
 | H5.S1.M5 | PLAN + REPORTE | `ls docs/trabajo/2026-10-24-seed-diseases/` | `PLAN.md REPORTE.md evidencia` |
 
 ## A medias
@@ -57,8 +58,8 @@ Salidas completas en `evidencia/`. Extractos literales:
 
 ```
 $ node --test "tools/terminology-import/diseases/test/*.test.mjs"
-# tests 15
-# pass 15
+# tests 16
+# pass 16
 # fail 0
 exit 0
 
@@ -78,8 +79,8 @@ $ node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.
 
 $ psql … -c "select count(*) …"
  concepts | desig  | props  |  rels  |  maps  |   db
-   183325 | 309745 | 491228 | 147251 | 190313 | 419 MB
-(183 325 = 183 313 del catálogo + 12 conceptos internos de prueba)
+   183726 | 309745 | 492030 | 147251 | 190313 | 420 MB   (tras la pasada 15, desde la instantánea)
+(183 726 = 183 714 del catálogo + 12 conceptos internos de prueba)
 ```
 
 Fuentes y hashes: `evidencia/manifest-fuentes.tsv`. Conteos del build: `evidencia/build-stats.json`. Pasadas y cobertura: `evidencia/coverage.md`.

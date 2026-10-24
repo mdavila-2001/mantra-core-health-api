@@ -16,6 +16,7 @@
 | 12 | `who-icd10-to-icd11` | claves citadas | — | 12597 | 887 | 887 |
 | 13 | `mesh-c` | medida (no se carga) | — | 5067 | 1585 | 1585 |
 | 14 | `gard` | medida (no se carga) | — | 6109 | 2598 | 2598 |
+| 15 | `hpo-common-diseases` | claves citadas | — | 3647 | 670 | 670 |
 
 ## Conceptos por sistema
 
@@ -27,7 +28,7 @@
 | `icd10-who` | sí | 12639 | 12639 | 0 | 0 | 0 |
 | `icd11-foundation` | sí | 4630 | 4630 | 0 | 0 | 0 |
 | `icd11-mms` | no | 37052 | 37052 | 0 | 0 | 0 |
-| `mesh` | sí | 8863 | 8863 | 0 | 0 | 0 |
+| `mesh` | sí | 9264 | 9264 | 0 | 0 | 0 |
 | `mondo` | no | 27185 | 23264 | 0 | 16749 | 0 |
 | `ncit-disease` | no | 22379 | 22379 | 0 | 22376 | 0 |
 | `omim` | sí | 10744 | 10744 | 0 | 0 | 0 |

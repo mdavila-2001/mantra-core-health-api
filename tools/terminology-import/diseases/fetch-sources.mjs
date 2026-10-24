@@ -54,6 +54,11 @@ function main() {
     if (src.expectedSha256 && entry.sha256 !== src.expectedSha256) {
       throw new Error(`${src.key}: SHA-256 ${entry.sha256} ≠ esperado ${src.expectedSha256}. No se usa.`);
     }
+    if (src.untarTo) {
+      ensureDir(join(SOURCES_DIR, src.untarTo));
+      execFileSync('tar', ['-xzf', dest, '-C', join(SOURCES_DIR, src.untarTo)], { stdio: 'inherit' });
+      entry.unzippedTo = join(SOURCES_DIR, src.untarTo);
+    }
     if (src.unzipTo) {
       ensureDir(join(SOURCES_DIR, src.unzipTo));
       execFileSync('unzip', ['-oq', dest, '-d', join(SOURCES_DIR, src.unzipTo)], { stdio: 'inherit' });

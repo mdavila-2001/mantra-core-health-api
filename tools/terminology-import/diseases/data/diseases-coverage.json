@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T02:57:00.808Z",
+  "generatedAt": "2026-10-24T03:13:13.171Z",
   "passes": [
     {
       "pass": 1,
@@ -156,6 +156,15 @@
       "items": 6109,
       "newConcepts": 2598,
       "newEntities": 2598
+    },
+    {
+      "pass": 15,
+      "source": "hpo-common-diseases",
+      "kind": "claves citadas",
+      "version": null,
+      "items": 3647,
+      "newConcepts": 670,
+      "newEntities": 670
     }
   ],
   "systems": {
@@ -216,8 +225,8 @@
     "mesh": {
       "name": "MeSH (NLM) — descriptores citados por MONDO, Orphanet y DOID",
       "keyOnly": true,
-      "concepts": 8863,
-      "active": 8863,
+      "concepts": 9264,
+      "active": 9264,
       "withSpanishName": 0,
       "withDefinition": 0,
       "withSpanishDefinition": 0

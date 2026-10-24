@@ -46,6 +46,7 @@ export const PASSES = [
   { citer: 'who-icd10-to-icd11', cs: 'icd10-who' },
   { measure: 'mesh-c' },
   { measure: 'gard' },
+  { citer: 'hpo-common-diseases' },
 ];
 const SYSTEM_PASSES = PASSES.filter((p) => p.cs && !p.citer).map((p) => p.cs);
 const DEDUP_EQUIVALENCES = new Set(['equivalent', null]);
