@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   MarketingCampaignsService,
   MarketingJourneysService,
@@ -220,6 +225,11 @@ export class MarketingController {
 
   /** MKT-03: token que identifica al destinatario en el enlace público. */
   @Post('tracked-links/:id/recipient-tokens')
+  @Audited({
+    action: 'TRACKED_LINK_RECIPIENT_TOKEN_ISSUED',
+    entity: 'tracked_link',
+    entityId: 'param:id',
+  })
   @Roles('SYSTEM', 'MARKETING_MANAGER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
