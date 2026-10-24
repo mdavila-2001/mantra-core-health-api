@@ -19,6 +19,16 @@
 ## A medias
 ninguna
 
+## Gates sobre el head con `dev` mergeado (36c212bb)
+| Gate | Resultado | Evidencia |
+|---|---|---|
+| `corepack yarn typecheck` | exit 0 | `evidencia/typecheck.txt` |
+| `corepack yarn lint` | exit 0 | `evidencia/lint.txt` |
+| `corepack yarn build` | exit 0 | `evidencia/build.txt` |
+| `node --test` (síntomas + importadores) | 63/63 | `evidencia/node-test.txt` |
+| `corepack yarn test src/modules/terminology src/common/seed --runInBand` | 657/658; falla `xlsx-parser.spec.ts` por el entorno (xlsx 0.18.5 local en vez de 0.20.3, CDN bloqueado); el PR no toca `src/` | `evidencia/jest-terminologia.txt` |
+| CI de GitHub | sin corridas: el workflow «Documentación» no corre en el repo desde el 2026-10-22 (última corrida #805); el PR figura `blocked` | — |
+
 ## Pendiente
 | ID | Estado | Qué lo destraba |
 |---|---|---|
