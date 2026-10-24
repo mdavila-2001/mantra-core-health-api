@@ -2188,6 +2188,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Algún producto no pertenece al catálogo del laboratorio | Excepción explícita en src/modules/pharma_lab/services/medical-visitors.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un rol de ámbito global se asigna sin tenant, sede ni consultorio | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2460,6 +2461,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un rol de ámbito global se asigna sin tenant, sede ni consultorio | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El laboratorio no está activo | Excepción explícita en src/modules/pharma_lab/services/pharma-lab-access.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

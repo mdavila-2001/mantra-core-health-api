@@ -256,6 +256,16 @@ export class CatalogReadService {
     return (await this.repo.evidence(em, objectId)).map(presentarEvidencia);
   }
 
+  /** Evidencia enlazada a una columna (la nota de una FK, por ejemplo). */
+  async columnEvidence(columnId: string) {
+    const em = this.db();
+    if (!(await this.repo.columnById(em, columnId)))
+      throw new ResourceNotFoundException('Columna del catálogo no encontrada');
+    return (await this.repo.columnEvidence(em, columnId)).map(
+      presentarEvidencia,
+    );
+  }
+
   async history(objectId: string) {
     const em = this.db();
     await this.objeto(em, objectId);
@@ -270,6 +280,7 @@ export class CatalogReadService {
       revisions: revisiones.map((r) => ({
         revisionNo: r.revision_no,
         origin: r.origin,
+        classification: r.classification,
         submittedStatus: r.submitted_status,
         changeReason: r.change_reason,
         authorUserId: r.author_user_id,
