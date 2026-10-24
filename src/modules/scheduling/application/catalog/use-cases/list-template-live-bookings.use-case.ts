@@ -48,6 +48,8 @@ export class ListTemplateLiveBookingsUseCase {
       );
     }
     this.access.assertActorResource(resource, actor);
+    // Trae nombres de pacientes: dueño de la agenda, o de su organización.
+    this.access.assertMayReadAgendaBookings(resource, actor);
 
     const slots = await this.catalogRepo.findSlotsOfTemplate(em, templateId);
     const affected = await this.blockedBookings.describe(em, slots);

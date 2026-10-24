@@ -95,6 +95,9 @@ export class RetireTemplateUseCase {
       this.access.assertActorResource(resource, actor);
 
       if (options.cancelAffectedBookings) {
+        // Cancela citas y avisa a pacientes: dueño de la agenda, o de su
+        // organización — no cualquier administrador de agenda.
+        this.access.assertMayReadAgendaBookings(resource, actor);
         const slots = await this.catalogRepo.findSlotsOfTemplateForUpdate(
           tx,
           templateId,

@@ -2884,6 +2884,17 @@ describe('SchedulingCatalogService', () => {
           bookableSlotId: 's-1',
           statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
         };
+        // Quien administra agendas, de la organización de ésta: con citas de
+        // por medio, el administrador también tiene que ser de la organización.
+        const actor = {
+          id: 'user-1',
+          roles: ['SCHEDULING_ADMIN'],
+          tenantIds: [TENANT],
+        };
+        const adminWithoutTenant = {
+          id: 'user-1',
+          roles: ['SCHEDULING_ADMIN'],
+        };
 
         function withBookedRange(
           d: ReturnType<typeof buildCatalog>,
@@ -2891,6 +2902,7 @@ describe('SchedulingCatalogService', () => {
         ) {
           d.catalogRepo.findResourceById.mockResolvedValue({
             id: RESOURCE,
+            tenantId: TENANT,
             resourceRefId: 'hp-1',
             resourceRefType: 'health_practitioner_profiles',
           });
@@ -3038,6 +3050,41 @@ describe('SchedulingCatalogService', () => {
           ).rejects.toThrow(/ya recibido/);
           expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
           expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+        });
+
+        it('un administrador de OTRA organización no ve nombres ni cancela: 403 antes de describir', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+
+          await expect(
+            d.service.createException(RESOURCE, dto, {
+              ...actor,
+              tenantIds: ['99999999-9999-9999-9999-999999999999'],
+            } as never),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(d.noticeRepo.findDisplayNameForProfile).not.toHaveBeenCalled();
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+          expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+        });
+
+        it('un administrador SIN citas de por medio bloquea como siempre, sea o no de la organización', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({
+            id: RESOURCE,
+            tenantId: TENANT,
+            resourceRefId: 'hp-1',
+            resourceRefType: 'health_practitioner_profiles',
+          });
+          d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+          d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+          const res = await d.service.createException(
+            RESOURCE,
+            dto,
+            adminWithoutTenant as never,
+          );
+
+          expect(res.id).toBe('exc-1');
         });
 
         it('la agenda de OTRO profesional: prohibido antes de mirar una sola cita', async () => {
