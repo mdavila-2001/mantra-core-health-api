@@ -360,9 +360,9 @@ export class IamPatientSelfRegistrationService {
       // su propio perfil): la cuenta recién creada quedaría inutilizable más
       // allá del login. `ROLE_STAFF`/`SCOPE_ALL_TENANT` son un default
       // pragmático — el catálogo de roles de tenant (`DIR.ROLE_*`) sólo modela
-      // personal de una clínica, no hay un rol "paciente"; qué tenant/rol le
-      // corresponde a un paciente directo-al-consumidor es una decisión de
-      // producto pendiente, no algo que este fix deba inventar. El status es
+      // personal de una clínica, no hay un rol "paciente", y producto no definió
+      // qué tenant/rol le corresponde a un paciente directo-al-consumidor; este
+      // alta no lo inventa. El status es
       // `DIR.MEMBERSHIP_ACTIVE`, el concepto propio de directory: antes se
       // escribía el de promotions porque era el único que
       // `IamAuthService.loadActiveTenantIds` consultaba — ese método ya acepta

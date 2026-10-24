@@ -66,7 +66,7 @@ export class IntegrationsWebhooksService {
 
       // Verificación de firma HMAC ANTES de persistir (fail-closed): sin firma
       // válida contra el secreto de la conexión no se admite el webhook.
-      const secret = deriveWebhookSecret('connection', connection.id); // TODO secreto por conexión
+      const secret = deriveWebhookSecret('connection', connection.id);
       const rawBody = canonicalJson(dto.payloadJson);
       if (!verifySignature(secret, rawBody, dto.signature)) {
         throw new UnauthorizedException('Firma del webhook inválida', {

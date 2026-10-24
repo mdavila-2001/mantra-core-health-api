@@ -12,7 +12,7 @@ export const CIMA_REST = 'https://cima.aemps.es/cima/rest';
  *
  * 4.4 (advertencias y precauciones) NO tiene un `kind` propio en el catálogo de
  * fármacos. Se publica como `special_populations`, el más cercano, con el título
- * oficial en `locator`. Es una decisión pendiente de la ficha (ver GAPS.md).
+ * oficial en `locator`.
  */
 export const SECTION_KINDS = Object.freeze({
   '4.1': 'indications',

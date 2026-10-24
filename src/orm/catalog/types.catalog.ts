@@ -35,10 +35,8 @@ export interface EnumTypeSpec {
 }
 
 /**
- * TODO (deuda conocida, heredada del modelo): el documento de materialización
- * física de la bóveda lista "definir valores del enum
- * terminology.technical_data_type" como pendiente. El modelo declara el tipo
- * pero no su dominio de valores.
+ * Dominio heredado del modelo: el modelo declara el enum
+ * `terminology.technical_data_type` pero no su dominio de valores.
  *
  * Sin un valor mínimo el arranque no puede crear el tipo (PostgreSQL no admite
  * enums vacíos) y, en cascada, no puede crear las seis tablas que lo usan:
@@ -48,9 +46,8 @@ export interface EnumTypeSpec {
  *
  * Se materializa por tanto un conjunto provisional con los tipos técnicos que
  * las columnas del modelo necesitan describir. Es ampliable sin pérdida de
- * datos (`ALTER TYPE ... ADD VALUE`), así que cuando el modelo fije el dominio
- * definitivo bastará con añadir lo que falte. Queda marcado `provisional: true`
- * para que el informe de arranque lo reporte como deuda y no pase inadvertido.
+ * datos (`ALTER TYPE ... ADD VALUE`). Queda marcado `provisional: true` para
+ * que el informe de arranque lo muestre y no pase inadvertido.
  */
 export const enumTypeCatalog: readonly EnumTypeSpec[] = [
   {
