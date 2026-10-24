@@ -355,3 +355,11 @@ test('MAUDE aplanado como mapa de texto: sólo corta en claves conocidas', () =>
   assert.equal(m.model_number, '86114');
   assert.equal(m.device_report_product_code, 'BSK');
 });
+
+test('cargador: la versión del code system sale de la clasificación (oficial primero)', async () => {
+  const { codeSystemVersion } = await import('../load-dx-device-types-us.mjs');
+  const official = { official: [{ dest: 'openfda/device/classification/device-classification-0001-of-0001.json.zip', exportDate: '2026-10-21' }], inputs: [{ source: 'mirror ej86 foiclass.csv', version: 'FDA foiclass.zip espejo' }], files: [{ sourceVersion: 'Archivos masivos MAUDE' }] };
+  assert.equal(codeSystemVersion(official), 'openFDA device/classification export 2026-10-21');
+  assert.equal(codeSystemVersion({ inputs: official.inputs, files: official.files }), 'FDA foiclass.zip espejo', 'sin oficial: la del espejo de clasificación, nunca la de MAUDE');
+  assert.equal(codeSystemVersion({}), 'desconocida');
+});
