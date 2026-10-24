@@ -41,8 +41,8 @@ Deduplicación siempre por código, nunca por nombre:
 
 Cada pasada se mide contra la anterior armada con el **mismo código**, con flags `--no-cima`,
 `--no-ema`, `--no-eml`, `--no-dailymed`, `--no-lactmed` y `--no-livertox`. La salida literal de cada
-pasada está en la descripción del PR que la incorporó: PR 710 (pasada 1), PR 730 (pasadas 2–5) y el
-PR de las pasadas 6–9.
+pasada está en la descripción del PR que la incorporó: PR 710 (pasada 1), PR 730 (pasadas 2–5) y
+PR 835 (pasadas 6–9).
 
 | # | Hora (UTC) | Fuentes | ATC 5 nuevos con monografía | Secciones nuevas |
 |---|---|---|---:|---:|
@@ -244,7 +244,7 @@ el cruce no se midió. Con la base cargada lo mide `validate-links.mjs` (`produc
 
 En un Postgres 16 desechable, con el DDL de `database/SQL/00_shared` y `03_terminology` tal cual
 (sin la API, sin DDL nuevo, nunca una base viva). Evidencia en
-la descripción de los PR 730 y el de las pasadas 6–9.
+la descripción de los PR 730 y 835.
 
 | Corrida | Conceptos | Designaciones | IS_A | Propiedades | `concept_maps` → vademecum | Borradas | Tiempo |
 |---|---:|---:|---:|---:|---:|---:|---:|
