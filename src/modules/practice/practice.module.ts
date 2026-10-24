@@ -20,6 +20,7 @@ import {
   PractitionerSitesService,
   OwnSiteProvisioningService,
   PracticeOrganizationReadService,
+  PracticeAccessService,
 } from './services';
 import {
   PracticesRepository,
@@ -101,6 +102,7 @@ import {
     PractitionerSitesService,
     OwnSiteProvisioningService,
     PracticeOrganizationReadService,
+    PracticeAccessService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

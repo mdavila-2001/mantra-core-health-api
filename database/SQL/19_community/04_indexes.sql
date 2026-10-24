@@ -76,6 +76,30 @@ CREATE INDEX IF NOT EXISTS "gin_service_reviews_search" ON "community"."service_
 
 CREATE UNIQUE INDEX IF NOT EXISTS "uq_service_reviews_verified_encounter" ON "community"."service_reviews" ("reviewer_patient_profile_id", "target_public_profile_id", "verified_encounter_id") WHERE verified_encounter_id IS NOT NULL;
 
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_reviewer_patient_profile_id" ON "community"."party_ratings" ("reviewer_patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_reviewer_practitioner_profile_id" ON "community"."party_ratings" ("reviewer_practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_reviewer_practice_id" ON "community"."party_ratings" ("reviewer_practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_target_patient_profile_id" ON "community"."party_ratings" ("target_patient_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_target_practitioner_profile_id" ON "community"."party_ratings" ("target_practitioner_profile_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_target_practice_id" ON "community"."party_ratings" ("target_practice_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_verified_encounter_id" ON "community"."party_ratings" ("verified_encounter_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_verified_role_assignment_id" ON "community"."party_ratings" ("verified_role_assignment_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_moderation_status_concept_id" ON "community"."party_ratings" ("moderation_status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_created_by_user_id" ON "community"."party_ratings" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_party_ratings_updated_by_user_id" ON "community"."party_ratings" ("updated_by_user_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_party_ratings_basis" ON "community"."party_ratings" (coalesce(reviewer_patient_profile_id, reviewer_practitioner_profile_id, reviewer_practice_id), coalesce(target_patient_profile_id, target_practitioner_profile_id, target_practice_id), coalesce(verified_encounter_id, verified_role_assignment_id));
+
 CREATE INDEX IF NOT EXISTS "ix_review_dimension_scores_review_id" ON "community"."review_dimension_scores" ("review_id");
 
 CREATE INDEX IF NOT EXISTS "ix_review_dimension_scores_dimension_concept_id" ON "community"."review_dimension_scores" ("dimension_concept_id");
@@ -286,8 +310,6 @@ CREATE INDEX IF NOT EXISTS "ix_conversations_updated_by_user_id" ON "community".
 
 CREATE INDEX IF NOT EXISTS "ix_conversations_tenant_id_status_concept_id" ON "community"."conversations" ("tenant_id", "status_concept_id", "updated_at" DESC);
 
-CREATE INDEX IF NOT EXISTS "ix_conversation_participants_profile_pinned" ON "community"."conversation_participants" ("participant_profile_id", "is_pinned") WHERE is_pinned;
-
 CREATE UNIQUE INDEX IF NOT EXISTS "ux_chat_auto_replies_public_profile_id" ON "community"."chat_auto_replies" ("public_profile_id");
 
 CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_status_concept_id" ON "community"."chat_auto_replies" ("status_concept_id");
@@ -295,6 +317,8 @@ CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_status_concept_id" ON "communit
 CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_created_by_user_id" ON "community"."chat_auto_replies" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_chat_auto_replies_updated_by_user_id" ON "community"."chat_auto_replies" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_conversation_participants_profile_pinned" ON "community"."conversation_participants" ("participant_profile_id", "is_pinned") WHERE is_pinned;
 
 CREATE INDEX IF NOT EXISTS "ix_conversation_participants_conversation_id" ON "community"."conversation_participants" ("conversation_id");
 

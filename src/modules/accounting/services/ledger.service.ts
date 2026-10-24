@@ -34,7 +34,10 @@ import {
 import { sumCents, fromCents } from './money';
 import { classify } from './journal-classification';
 import { AuditTrailService } from '../../audit/services';
-import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  PracticeTenantLookupService,
+  practiceAccessScope,
+} from '../../practice/services';
 
 /** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
 const JOURNAL_AUDIT_ENTITY = 'journal_transaction';
@@ -130,13 +133,9 @@ export class LedgerService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    if (
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('ACCOUNTING_APPROVER')
-    ) {
-      return;
-    }
-    if (!actor.roles.includes('PRACTITIONER')) {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
+    // sólo se traduce a los errores 422 propios de contabilidad.
+    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
       // Ningún otro rol llega hoy a estas rutas (el `@Roles` del controlador
       // ya lo impide); no-op defensivo, no un permiso implícito.
       return;

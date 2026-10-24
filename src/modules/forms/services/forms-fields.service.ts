@@ -15,6 +15,7 @@ import {
   FieldDefinitionsRepository,
   FieldValuesRepository,
 } from '../repositories';
+import { choiceOptionsOf } from '../entities';
 import {
   CreateFieldDefinitionDto,
   CreateFieldDependencyDto,
@@ -195,7 +196,7 @@ export class FormsFieldsService {
       this.validateChoiceField({
         dataType: dto.dataType ?? field.dataType,
         valueSetId: field.valueSetId,
-        options: dto.options ?? field.options,
+        options: dto.options ?? choiceOptionsOf(field.options),
         allowOther: dto.allowOther ?? field.allowOther,
       });
 
@@ -210,7 +211,7 @@ export class FormsFieldsService {
         field.dataType = dto.dataType;
       }
       if (dto.options !== undefined) {
-        const retiradas = (field.options ?? []).filter(
+        const retiradas = (choiceOptionsOf(field.options) ?? []).filter(
           (opcion) => !dto.options!.includes(opcion),
         );
         const enUso = await this.valuesRepo.findCodesInUseByField(
