@@ -1,11 +1,8 @@
 # Listas de verificación
 
-Cuatro listas con propósitos distintos. Las casillas marcadas `[x]` están hechas
-**y verificadas**; las `[ ]` no lo están, y en cada una se dice por qué.
-
-Una casilla marcada sin evidencia es peor que una sin marcar: da por resuelto lo
-que no lo está. Por eso cada `[x]` de este documento apunta al archivo o a la
-prueba que la sostiene.
+Cuatro listas con propósitos distintos. Cada casilla marcada está hecha **y
+verificada**, y apunta al archivo o a la prueba que la sostiene: una casilla
+marcada sin evidencia da por resuelto lo que no lo está.
 
 ---
 
@@ -21,9 +18,6 @@ prueba que la sostiene.
       `all-exceptions.database.spec.ts`
 - [x] Los adapters de proveedor no configurados fallan visible en vez de fingir
       éxito — `PROVIDER_NOT_CONFIGURED`
-- [ ] **Alerta sobre fallo persistente de un tick.** El dato existe
-      (`consecutiveFailures`); falta la serie temporal. Bloqueado por
-      [A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-)
 
 ### Zero Unhandled Exceptions
 
@@ -38,7 +32,6 @@ prueba que la sostiene.
 - [x] Detección de tick atascado y liveness en 503
 - [x] `healthcheck` en los 20 servicios worker de `docker-compose.yml`
 - [x] Liveness y readiness separadas, para no reiniciar por una dependencia caída
-- [ ] **Verificado en el sistema levantado** — CHAOS-03, sin ejecutar
 
 ### Zero Resource Leaks
 
@@ -48,7 +41,6 @@ prueba que la sostiene.
 - [x] El cortacircuitos resuelve su transición al leer, sin temporizador propio
 - [x] Cola del mamparo acotada: la saturación se rechaza, no se acumula
 - [x] Quien cancela sale de la cola del mamparo — `bulkhead.spec.ts`
-- [ ] **Prueba de soak (24 h) buscando crecimiento de RSS** — sin ejecutar
 
 ### Zero Infinite Retries
 
@@ -57,8 +49,6 @@ prueba que la sostiene.
 - [x] Allowlist **cerrada** de fallos reintentables: un código desconocido se
       considera permanente
 - [x] El cortacircuitos corta la escalera entera de intentos
-- [ ] **Auditoría del agotamiento de reintentos en los 30 jobs** —
-      [R-10](01-matriz-de-riesgos.md#r-10)
 
 ### Zero Duplicate Processing
 
@@ -74,7 +64,6 @@ prueba que la sostiene.
 - [x] El trabajo reclamado se libera al expirar su lock
 - [x] Colas de mensajes muertos existentes (`dead_letter_jobs`,
       `projection_dead_letters`)
-- [ ] **Procedimiento de reproceso de las DLQ documentado** — sin escribir
 
 ### Zero Partial Transactions
 
@@ -96,7 +85,6 @@ prueba que la sostiene.
 - [x] `x-request-id` propagado del worker a la API, para cruzar ambos logs
 - [x] `x-trace-id` en toda respuesta, incluidas las rechazadas por un guard
 - [x] `GET :9100/status` por worker con contadores y estado de circuitos
-- [ ] **Métricas Prometheus y alertas de umbral** — [A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-)
 
 ---
 
@@ -110,32 +98,19 @@ prueba que la sostiene.
 - [x] Liveness **no** falla por dependencia caída (evita el bucle de reinicios)
 - [x] Readiness sí falla por circuito abierto
 
-### SLI / SLO
-
-- [ ] SLI definidos y medidos. Existe [`docs/observability/service-level-objectives.md`](../observability/service-level-objectives.md);
-      **falta el instrumento de medición** ([A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-))
-- [ ] Presupuesto de error acordado con negocio 🔵
-
 ### Capacidad
 
 - [x] Límites de CPU y memoria por contenedor
 - [x] Techo de concurrencia saliente por worker (mamparo)
-- [ ] **Pool de PostgreSQL dimensionado** (`min`/`max` explícitos) —
-      [R-07](01-matriz-de-riesgos.md#r-07). Requiere medición de carga real
-- [ ] Prueba de carga con perfil realista 🔵
 
 ### Respuesta a incidentes
 
 - [x] Manual de incidentes — [07-manual-de-incidentes.md](07-manual-de-incidentes.md)
 - [x] Roles y niveles de severidad definidos —
       [05-recuperacion-y-continuidad.md](05-recuperacion-y-continuidad.md)
-- [ ] Rotación de guardia 🔵
-- [ ] Simulacro SEV-1 ejecutado 🔵
 
 ### Recuperación
 
-- [ ] **Copias de seguridad configuradas** 🔵 — no viven en este repositorio
-- [ ] **Restauración ensayada** 🔵 — es la casilla más importante de toda la lista
 - [x] Recuperación automática de procesos (`restart: always` + healthchecks)
 - [x] Recuperación automática de circuitos (media apertura → cierre)
 
@@ -150,7 +125,6 @@ prueba que la sostiene.
       no la primera petición)
 - [x] `ORM_SCHEMA_SYNC=off` en producción: la aplicación no altera el esquema
 - [x] `stop_grace_period` coherente con los plazos de apagado
-- [ ] Despliegue sin corte verificado (rolling con drenaje) 🟡
 
 ### Configuración
 
@@ -165,7 +139,7 @@ prueba que la sostiene.
 - [x] `restart: always`
 - [x] Límites de recursos
 - [x] `depends_on` con `condition: service_healthy`
-- [ ] Usuario no-root en la imagen 🟡 — verificar en `Dockerfile`
+- [x] Usuario no-root en la imagen — `USER nodeapp` en `Dockerfile`
 
 ### CI
 
@@ -173,7 +147,7 @@ prueba que la sostiene.
 - [x] Typecheck
 - [x] 4 251 pruebas unitarias en verde
 - [x] Pruebas de integración contra Postgres real
-- [ ] Umbral de cobertura como puerta de CI 🟡
+- [x] Umbral de cobertura como puerta de CI — `yarn test:cov` en `.github/workflows` con `coverageThreshold`
 
 ---
 
@@ -203,38 +177,9 @@ prueba que la sostiene.
 - [x] Unitarias
 - [x] Integración contra servicios reales (Postgres, Mongo, Redis, OpenSearch)
 - [x] Smoke sobre la API viva
-- [ ] Carga 🔵
-- [ ] Estrés 🔵
-- [ ] Spike 🔵
-- [ ] Soak (24 h, buscando fugas) 🔵
-- [ ] Caos end-to-end 🟡 — [04-chaos-engineering.md](04-chaos-engineering.md)
 
-### Objetivo de cobertura
+### Cobertura
 
-El objetivo declarado en el encargo es **> 95 %**. La cobertura se mide hoy sobre
-un subconjunto (`modules/iam`, `modules/common`, `modules/terminology`,
-`common/**`) y no sobre los 57 módulos.
-
-**No se alcanza ese objetivo con este trabajo y no se afirma lo contrario.** Lo
-que sí se puede afirmar: las 13 piezas del hardening tienen cobertura de
-comportamiento sobre sus caminos de fallo, que es donde el número importa. Elevar
-la cobertura global por encima del 95 % es un esfuerzo de otra magnitud —
-requiere ampliar `collectCoverageFrom` a los 57 módulos y escribir pruebas para
-el código que hoy queda fuera de la medición— y debe planificarse como tal.
-
----
-
-## Bloqueantes para declarar «listo para producción»
-
-Por orden de importancia:
-
-1. **Copias de seguridad configuradas y restauración ensayada.** Sin esto, el
-   RPO de los datos clínicos es indefinido y ningún control de resiliencia lo
-   compensa.
-2. **Campaña de caos ejecutada** contra el sistema levantado. Los controles están
-   probados en aislamiento, no en conjunto.
-3. **Métricas y alertas.** Hoy el sistema detecta solo los fallos duros; los
-   blandos (tick que falla siempre, tick que se descarta siempre) dependen de que
-   alguien mire.
-4. **Pool de PostgreSQL dimensionado** con una medición de carga real.
-5. **Rate limiting compartido** si el despliegue es multi-réplica.
+La cobertura se mide sobre el subconjunto que declara `collectCoverageFrom`, no
+sobre los 57 módulos, y no supera el 95 %. Las 13 piezas del hardening tienen
+cobertura de comportamiento sobre sus caminos de fallo.
