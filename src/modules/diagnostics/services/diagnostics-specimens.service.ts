@@ -8,7 +8,9 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { SpecimensRepository } from '../repositories';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
 import { DIAG } from '../diagnostics.concepts';
+import { DiagnosticsErrorReason } from '../diagnostics.error-reasons';
 import {
   assertContainerTypeInCatalog,
   assertSpecimenTypeInCatalog,
@@ -45,11 +47,13 @@ export class DiagnosticsSpecimensService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param repo - Valor de repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: SpecimensRepository,
+    private readonly scope: DiagnosticsScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsSpecimensService.name);
@@ -66,10 +70,21 @@ export class DiagnosticsSpecimensService {
     );
     // Antes de abrir la transacción: es un error del cliente, no del estado.
     assertSpecimenTypeInCatalog(dto.specimenTypeConceptId);
+    const custodianTenantId = this.scope.activeTenantFor(dto.custodianTenantId);
     return this.em.transactional(async (tx) => {
+      if (dto.encounterId) {
+        await this.scope.encounter(tx, dto.encounterId, dto.patientProfileId);
+      }
+      if (dto.serviceRequestId) {
+        await this.scope.serviceRequest(
+          tx,
+          dto.serviceRequestId,
+          dto.patientProfileId,
+        );
+      }
       const specimen = this.repo.createSpecimen(tx, {
         patientProfileId: dto.patientProfileId,
-        custodianTenantId: dto.custodianTenantId,
+        custodianTenantId,
         specimenTypeConceptId: dto.specimenTypeConceptId,
         statusConceptId: DIAG.SPECIMEN_COLLECTED,
         serviceRequestId: dto.serviceRequestId,
@@ -98,18 +113,27 @@ export class DiagnosticsSpecimensService {
       'Accessioning specimens',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId =
-        dto.custodianTenantId ??
-        (await this.tenantOfSpecimen(tx, dto.specimenIds[0]));
+      const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
+      if (dto.serviceRequestId) {
+        await this.scope.serviceRequest(
+          tx,
+          dto.serviceRequestId,
+          dto.patientProfileId,
+        );
+      }
 
-      // Precondición: todos los especímenes existen y están en un estado acesionable.
+      // Precondición: todos los especímenes son del tenant activo y del mismo
+      // paciente, y están en un estado acesionable. Un lote que mezcla tenants
+      // o pacientes se rechaza entero antes de escribir.
       const specimens = [];
       for (const specimenId of dto.specimenIds) {
-        const specimen = await this.repo.findSpecimen(tx, specimenId);
-        if (!specimen) {
-          throw new ResourceNotFoundException('Espécimen no encontrado', {
-            specimenId,
-          });
+        const specimen = await this.scope.specimen(tx, specimenId);
+        if (specimen.patientProfileId !== dto.patientProfileId) {
+          throw new ResourceNotFoundException(
+            'Espécimen no encontrado',
+            undefined,
+            DiagnosticsErrorReason.DIAGNOSTICS_RESOURCE_NOT_AVAILABLE,
+          );
         }
         if (specimen.statusConceptId === DIAG.SPECIMEN_REJECTED) {
           throw new PreconditionFailedException(
@@ -176,11 +200,14 @@ export class DiagnosticsSpecimensService {
       'Rejecting specimen',
     );
     return this.em.transactional(async (tx) => {
-      const specimen = await this.repo.findSpecimen(tx, specimenId);
-      if (!specimen)
-        throw new ResourceNotFoundException('Espécimen no encontrado', {
-          specimenId,
-        });
+      const specimen = await this.scope.specimen(tx, specimenId);
+      if (dto.recollectionServiceRequestId) {
+        await this.scope.serviceRequest(
+          tx,
+          dto.recollectionServiceRequestId,
+          specimen.patientProfileId,
+        );
+      }
       if (specimen.statusConceptId === DIAG.SPECIMEN_REJECTED) {
         throw new PreconditionFailedException(
           'El espécimen ya está rechazado',
@@ -225,11 +252,17 @@ export class DiagnosticsSpecimensService {
     );
     assertContainerTypeInCatalog(dto.containerTypeConceptId);
     return this.em.transactional(async (tx) => {
-      const specimen = await this.repo.findSpecimen(tx, specimenId);
-      if (!specimen)
-        throw new ResourceNotFoundException('Espécimen no encontrado', {
-          specimenId,
-        });
+      const specimen = await this.scope.specimen(tx, specimenId);
+      if (dto.parentContainerId) {
+        const parent = await this.scope.container(tx, dto.parentContainerId);
+        if (parent.specimenId !== specimen.id) {
+          throw new ResourceNotFoundException(
+            'Contenedor no encontrado',
+            undefined,
+            DiagnosticsErrorReason.DIAGNOSTICS_RESOURCE_NOT_AVAILABLE,
+          );
+        }
+      }
 
       const container = this.repo.createContainer(tx, {
         specimenId,
@@ -256,11 +289,15 @@ export class DiagnosticsSpecimensService {
       'Recording container custody event',
     );
     return this.em.transactional(async (tx) => {
-      const container = await this.repo.findContainer(tx, containerId);
-      if (!container)
-        throw new ResourceNotFoundException('Contenedor no encontrado', {
-          containerId,
-        });
+      const container = await this.scope.container(tx, containerId);
+      const specimen = await this.scope.specimen(tx, dto.specimenId);
+      if (specimen.id !== container.specimenId) {
+        throw new ResourceNotFoundException(
+          'Contenedor no encontrado',
+          undefined,
+          DiagnosticsErrorReason.DIAGNOSTICS_RESOURCE_NOT_AVAILABLE,
+        );
+      }
 
       this.repo.recordContainerEvent(tx, {
         specimenContainerId: containerId,
@@ -369,18 +406,5 @@ export class DiagnosticsSpecimensService {
       this.repo.findCustodyEventsBySpecimenIds(em, [id]),
     ]);
     return toSpecimenDetail(specimen, containers, custody);
-  }
-
-  /** Resuelve el tenant custodio del espécimen para acesiones sin tenant explícito. */
-  private async tenantOfSpecimen(
-    em: EntityManager,
-    specimenId: string,
-  ): Promise<string> {
-    const specimen = await this.repo.findSpecimen(em, specimenId);
-    if (!specimen)
-      throw new ResourceNotFoundException('Espécimen no encontrado', {
-        specimenId,
-      });
-    return specimen.custodianTenantId;
   }
 }

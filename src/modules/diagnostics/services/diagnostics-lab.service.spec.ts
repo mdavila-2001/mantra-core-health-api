@@ -14,6 +14,8 @@ import {
   ConflictException,
   PreconditionFailedException,
 } from '../../../common';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
+import { T1, T2, expectNotAvailable, inTenant } from './diagnostics.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -37,15 +39,39 @@ function build() {
     recordVerification: mockFn(),
     markTestsVerifiedForObservation: mockFn().mockResolvedValue(0),
   };
-  const specimensRepo = { findAccession: mockFn() };
+  const specimensRepo = { findAccession: mockFn(), findSpecimen: mockFn() };
+  const refsRepo = {
+    findServiceRequest: mockFn(),
+    findObservation: mockFn().mockResolvedValue({
+      id: 'o1',
+      custodianTenantId: T1,
+      patientProfileId: 'p1',
+    }),
+    findFile: mockFn(),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new DiagnosticsLabService(
+  const scope = new DiagnosticsScopeService(
+    specimensRepo as any,
+    {} as any,
+    {} as any,
+    {} as any,
+    refsRepo as any,
+  );
+  const raw = new DiagnosticsLabService(
     em as any,
     repo,
     specimensRepo as any,
+    scope,
     logger as any,
   );
-  return { service, tx, repo, specimensRepo };
+  return {
+    raw,
+    service: inTenant(raw),
+    tx,
+    repo,
+    specimensRepo,
+    refsRepo,
+  };
 }
 
 describe('DiagnosticsLabService', () => {
@@ -53,21 +79,27 @@ describe('DiagnosticsLabService', () => {
     it('throws when accession missing', async () => {
       const d = build();
       d.specimensRepo.findAccession.mockResolvedValue(null);
-      await expect(
+      await expectNotAvailable(
         d.service.createWorkOrder(
           { laboratoryAccessionId: 'x', tests: [] } as any,
           actor,
         ),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      );
     });
 
     it('opens order, creates tests and moves accession to in-process', async () => {
       const d = build();
       const accession = {
         id: 'a1',
-        custodianTenantId: 't1',
+        custodianTenantId: T1,
+        patientProfileId: 'p1',
         statusConceptId: DIAG.ACCESSION_RECEIVED,
       };
+      d.refsRepo.findServiceRequest.mockResolvedValue({
+        id: 'sr1',
+        custodianTenantId: T1,
+        patientProfileId: 'p1',
+      });
       d.specimensRepo.findAccession.mockResolvedValue(accession);
       d.repo.createWorkOrder.mockReturnValue({
         id: 'wo1',
@@ -93,14 +125,15 @@ describe('DiagnosticsLabService', () => {
   });
 
   describe('createAnalyzerRun (soporte)', () => {
-    it('requires a custodian tenant', async () => {
+    it('requires an active tenant in the context', async () => {
       const d = build();
       await expect(
-        d.service.createAnalyzerRun(
+        d.raw.createAnalyzerRun(
           { analyzerDeviceId: 'dev1', runIdentifier: 'r1' } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.repo.createAnalyzerRun).not.toHaveBeenCalled();
     });
 
     it('opens a run', async () => {
@@ -113,7 +146,7 @@ describe('DiagnosticsLabService', () => {
         {
           analyzerDeviceId: 'dev1',
           runIdentifier: 'r1',
-          custodianTenantId: 't1',
+          custodianTenantId: T1,
         },
         actor,
       );
@@ -125,14 +158,17 @@ describe('DiagnosticsLabService', () => {
     it('throws when run missing', async () => {
       const d = build();
       d.repo.findAnalyzerRun.mockResolvedValue(null);
-      await expect(
+      await expectNotAvailable(
         d.service.ingestMessage('missing', { payloadHash: 'h' } as any, actor),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      );
     });
 
     it('rejects duplicate message control id (idempotency)', async () => {
       const d = build();
-      d.repo.findAnalyzerRun.mockResolvedValue({ id: 'run1' });
+      d.repo.findAnalyzerRun.mockResolvedValue({
+        id: 'run1',
+        custodianTenantId: T1,
+      });
       d.repo.findMessageByControlId.mockResolvedValue({ id: 'dup' });
       await expect(
         d.service.ingestMessage(
@@ -145,14 +181,25 @@ describe('DiagnosticsLabService', () => {
 
     it('ingests and marks the linked test preliminary', async () => {
       const d = build();
-      d.repo.findAnalyzerRun.mockResolvedValue({ id: 'run1' });
+      d.repo.findAnalyzerRun.mockResolvedValue({
+        id: 'run1',
+        custodianTenantId: T1,
+      });
       d.repo.findMessageByControlId.mockResolvedValue(null);
       d.repo.recordMessage.mockReturnValue({
         id: 'msg1',
         validationStatusConceptId: DIAG.MESSAGE_VALIDATED,
       });
-      const test = { id: 'wt1', statusConceptId: DIAG.TEST_PENDING };
+      const test = {
+        id: 'wt1',
+        laboratoryWorkOrderId: 'wo1',
+        statusConceptId: DIAG.TEST_PENDING,
+      };
       d.repo.findWorkOrderTest.mockResolvedValue(test);
+      d.repo.findWorkOrder.mockResolvedValue({
+        id: 'wo1',
+        custodianTenantId: T1,
+      });
 
       const res = await d.service.ingestMessage(
         'run1',
@@ -170,15 +217,16 @@ describe('DiagnosticsLabService', () => {
   });
 
   describe('verifyResult (UC-20-06)', () => {
-    it('requires a custodian tenant', async () => {
+    it('requires an active tenant in the context', async () => {
       const d = build();
       await expect(
-        d.service.verifyResult(
+        d.raw.verifyResult(
           'o1',
           { level: 'TECHNICAL', verifiedByProfileId: 'p1' } as any,
           actor,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.repo.recordVerification).not.toHaveBeenCalled();
     });
 
     it('records a verification and marks tests verified', async () => {
@@ -192,7 +240,7 @@ describe('DiagnosticsLabService', () => {
         {
           level: 'MEDICAL',
           verifiedByProfileId: 'p1',
-          custodianTenantId: 't1',
+          custodianTenantId: T1,
         } as any,
         actor,
       );
@@ -202,6 +250,191 @@ describe('DiagnosticsLabService', () => {
         'o1',
         DIAG.TEST_VERIFIED,
       );
+    });
+  });
+
+  describe('alcance de tenant (DIAG-01)', () => {
+    const run = (tenantId: string) => ({
+      id: 'run1',
+      custodianTenantId: tenantId,
+    });
+
+    it('crear la corrida toma el tenant del contexto y rechaza uno distinto del cuerpo', async () => {
+      const d = build();
+      d.repo.createAnalyzerRun.mockReturnValue({
+        id: 'run1',
+        statusConceptId: DIAG.ANALYZER_RUN_OPEN,
+      });
+      await d.service.createAnalyzerRun(
+        { analyzerDeviceId: 'dev1', runIdentifier: 'r1' } as any,
+        actor,
+      );
+      expect(d.repo.createAnalyzerRun).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ custodianTenantId: T1 }),
+      );
+      await expectNotAvailable(
+        d.service.createAnalyzerRun(
+          {
+            analyzerDeviceId: 'dev1',
+            runIdentifier: 'r1',
+            custodianTenantId: T2,
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createAnalyzerRun).toHaveBeenCalledTimes(1);
+    });
+
+    it('abrir una orden de trabajo sobre una acesión de T2 no escribe', async () => {
+      const d = build();
+      d.specimensRepo.findAccession.mockResolvedValue({
+        id: 'aB',
+        custodianTenantId: T2,
+        patientProfileId: 'p1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      });
+      await expectNotAvailable(
+        d.service.createWorkOrder(
+          { laboratoryAccessionId: 'aB', tests: [] } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createWorkOrder).not.toHaveBeenCalled();
+    });
+
+    it('una orden de otro tenant o un espécimen de otro paciente no entran en la orden de trabajo', async () => {
+      const d = build();
+      const accession = {
+        id: 'a1',
+        custodianTenantId: T1,
+        patientProfileId: 'p1',
+        statusConceptId: DIAG.ACCESSION_RECEIVED,
+      };
+      d.specimensRepo.findAccession.mockResolvedValue(accession);
+      d.refsRepo.findServiceRequest.mockResolvedValue({
+        id: 'srB',
+        custodianTenantId: T2,
+        patientProfileId: 'p1',
+      });
+      await expectNotAvailable(
+        d.service.createWorkOrder(
+          {
+            laboratoryAccessionId: 'a1',
+            tests: [{ serviceRequestId: 'srB', testCodeConceptId: 'tc1' }],
+          } as any,
+          actor,
+        ),
+      );
+      d.specimensRepo.findSpecimen.mockResolvedValue({
+        id: 's9',
+        custodianTenantId: T1,
+        patientProfileId: 'otro-paciente',
+      });
+      await expectNotAvailable(
+        d.service.createWorkOrder(
+          {
+            laboratoryAccessionId: 'a1',
+            tests: [{ specimenId: 's9', testCodeConceptId: 'tc1' }],
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.createWorkOrder).not.toHaveBeenCalled();
+      expect(accession.statusConceptId).toBe(DIAG.ACCESSION_RECEIVED);
+    });
+
+    it('ingerir un mensaje en la corrida de T2 no lo registra', async () => {
+      const d = build();
+      d.repo.findAnalyzerRun.mockResolvedValue(run(T2));
+      await expectNotAvailable(
+        d.service.ingestMessage('run1', { payloadHash: 'h' } as any, actor),
+      );
+      expect(d.repo.recordMessage).not.toHaveBeenCalled();
+    });
+
+    it('una prueba de la orden de trabajo de T2 no se marca como preliminar', async () => {
+      const d = build();
+      d.repo.findAnalyzerRun.mockResolvedValue(run(T1));
+      const test: any = {
+        id: 'wtB',
+        laboratoryWorkOrderId: 'woB',
+        statusConceptId: DIAG.TEST_PENDING,
+      };
+      d.repo.findWorkOrderTest.mockResolvedValue(test);
+      d.repo.findWorkOrder.mockResolvedValue({
+        id: 'woB',
+        custodianTenantId: T2,
+      });
+      await expectNotAvailable(
+        d.service.ingestMessage(
+          'run1',
+          { payloadHash: 'h', laboratoryWorkOrderTestId: 'wtB' } as any,
+          actor,
+        ),
+      );
+      expect(test.statusConceptId).toBe(DIAG.TEST_PENDING);
+      expect(d.repo.recordMessage).not.toHaveBeenCalled();
+    });
+
+    it('una observación o un archivo de T2 no se enlazan al mensaje', async () => {
+      const d = build();
+      d.repo.findAnalyzerRun.mockResolvedValue(run(T1));
+      d.refsRepo.findObservation.mockResolvedValue({
+        id: 'oB',
+        custodianTenantId: T2,
+        patientProfileId: 'p1',
+      });
+      await expectNotAvailable(
+        d.service.ingestMessage(
+          'run1',
+          { payloadHash: 'h', mappedObservationId: 'oB' } as any,
+          actor,
+        ),
+      );
+      d.refsRepo.findFile.mockResolvedValue({ id: 'fB', tenantId: T2 });
+      await expectNotAvailable(
+        d.service.ingestMessage(
+          'run1',
+          { payloadHash: 'h', rawMessageFileId: 'fB' } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.recordMessage).not.toHaveBeenCalled();
+    });
+
+    it('verificar una observación de T2 no registra la verificación ni cierra pruebas', async () => {
+      const d = build();
+      d.refsRepo.findObservation.mockResolvedValue({
+        id: 'oB',
+        custodianTenantId: T2,
+        patientProfileId: 'p1',
+      });
+      await expectNotAvailable(
+        d.service.verifyResult(
+          'oB',
+          { level: 'MEDICAL', verifiedByProfileId: 'p1' } as any,
+          actor,
+        ),
+      );
+      expect(d.repo.recordVerification).not.toHaveBeenCalled();
+      expect(d.repo.markTestsVerifiedForObservation).not.toHaveBeenCalled();
+    });
+
+    it('el verificador declarado debe ser el profesional que firma', async () => {
+      const d = build();
+      await expect(
+        d.service.verifyResult(
+          'o1',
+          { level: 'MEDICAL', verifiedByProfileId: 'otro' } as any,
+          {
+            id: 'u1',
+            roles: ['CLINICIAN'],
+            practitionerProfileId: 'hp1',
+          } as any,
+        ),
+      ).rejects.toMatchObject({ status: 403 });
+      expect(d.repo.recordVerification).not.toHaveBeenCalled();
     });
   });
 });

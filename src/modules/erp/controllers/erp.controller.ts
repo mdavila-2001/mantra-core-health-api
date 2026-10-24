@@ -209,7 +209,7 @@ export class ErpController {
     @Body() dto: ApproveTimeOffDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<TimeOffResponseDto> {
-    return this.operationsService.approveTimeOff(reqId, dto, actor);
+    return this.operationsService.approveTimeOff(id, reqId, dto, actor);
   }
 
   /** UC-38-10. */

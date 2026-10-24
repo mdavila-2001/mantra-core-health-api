@@ -304,6 +304,14 @@ export class EducationLearningRepository {
     );
   }
 
+  /** Intento por id, sin bloqueo: sirve para comprobar su alcance antes de bloquearlo. */
+  findAttemptById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AssessmentAttempts | null> {
+    return em.findOne(AssessmentAttempts, { id });
+  }
+
   /**
    * Obtiene find attempt for update.
    *
