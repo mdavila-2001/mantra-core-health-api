@@ -17,11 +17,11 @@
 | H3.S2.M3 | Idempotente | idem, segunda vez | todos los contadores en 0 |
 | H3.S3.M1 | Extensión opcional al glosario | idem | `glossaryMembers: 37292` (18 646 términos × 2 value sets) |
 | H4.S1.M1–M4 | Corpus de relaciones: HPOA 286 651, Mondo 974, DOID 2 268, enfermedades comunes 132 600 | build + pruebas | 50/50 pruebas |
-| H4.S2.M1–M3 | Propuesta de tabla probada; cargador bloqueado sin ella; con ella 344 981 aristas + 372 528 evidencias, re-corrida 0 | ver log abajo | ver log abajo |
-| H4.S3.M2 | Contra el catálogo **real** de #688 (snapshot f7f84be1: omim 10 744, orphanet 11 645, decipher 61, mondo 27 185, doid 14 854, mesh 8 863 conceptos): HPOA 268 906/268 906, DOID 2 268/2 268, Mondo 814/815, enfermedades comunes 116 824/132 277 → 387 637 aristas + 388 781 evidencias; re-corrida 0 | `evidencia/integracion-seed-diseases-688.txt` | 64 s; re-corrida 0/0 en 36 s |
+| H4.S2.M1–M3 | Propuesta de tabla probada; cargador bloqueado sin ella; con ella 345 438 aristas + 373 108 evidencias (andamio Mondo), re-corrida 0 | ver log abajo | ver log abajo |
+| H4.S3.M2 | Contra el catálogo **real** de #688 (snapshot f7f84be1: omim 10 744, orphanet 11 645, decipher 61, mondo 27 185, doid 14 854, mesh 8 863 conceptos): HPOA 268 906/268 906, DOID 2 268/2 268, Mondo 814/815, enfermedades comunes 117 404/132 277 → 388 103 aristas + 389 361 evidencias; re-corrida 0 | `evidencia/andamio/integration-run.sh` → `evidencia/integracion-seed-diseases-688.txt` | 57 s; re-corrida 0/0 en 32 s |
 | H4.S3.M1 | Formatos de #688: HPOA resuelve 100 % directo | `load-disease-phenotypes.mjs --check --sources hpoa` | `diseaseUnresolved: 0`, `viaMondo: 0`, 268 306 aristas |
 | H5.S1.M1–M2 | 8 pasadas; 7 y 8 aportan 0 | `evidencia/saturation.json` + doc | ver `docs/seed-research/symptoms.md` |
-| H5.S2.M1 | Cobertura: 12 625 / 23 263 enfermedades de Mondo (54,3 %) con síntomas | build | `evidencia/coverage-resumen.json` |
+| H5.S2.M1 | Cobertura: 12 631 / 23 263 enfermedades de Mondo (54,3 %) con síntomas | build | `evidencia/coverage-resumen.json` |
 | H6.S1.M1–M5 | Gates | ver Evidencia | exit 0 / 50 pass / 17 pass |
 | H6.S2.M1 | PR | — | #686 |
 | H6.S2.M3 | Corpus normalizado versionado: `symptoms/data/` 20,9 MB en 10 `.gz` (máx. 8,9 MB) + MANIFEST | `pack-data.mjs`; `SYMPTOMS_OUT_DIR=<tmp> unpack-data.mjs`; `diff -r` | «IDENTICO»; mismo SHA-256 en dos empaquetados (determinista) |
@@ -66,20 +66,20 @@ Postgres 16 desechable (DDL `00_shared` + `03_terminology`; andamio descrito en 
 [load] {"codeSystem":"hpo",...,"concepts":19894,"designations":61927,"properties":309294,"isA":24436,"maps":0,"glossaryMembers":37292,...}
 [load] {"codeSystem":"symp",...,"concepts":895,"designations":1138,"properties":8892,"isA":898,...}
 [load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":3988,"designations":7682,"properties":48985,"isA":4094,...}
-(19 s)
+(17 s)
 ### terms run 2
 [load] {"codeSystem":"hpo",...,"concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,...}
 (13 s)
 ### relations without model
 BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (columnas ausentes: id, relationship_id, …)
 ### relations run 1
-    "relationships": 344981,
-    "evidence": 372528
-(53 s)
+    "relationships": 345438,
+    "evidence": 373108
+(55 s)
 ### relations run 2
     "relationships": 0,
     "evidence": 0
-(34 s)
+(29 s)
 ```
 
 `evidencia/postgres-desechable-check-formato-688.txt` (omim/orphanet/decipher con código sin prefijo):

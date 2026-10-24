@@ -204,11 +204,30 @@ export function doidIds(owlText) {
   return ids;
 }
 
-export function doidNormalizer(ids) {
+/**
+ * `alt_id` declarados por DO (oboInOwl:hasAlternativeId) en clases vigentes:
+ * id retirado → id vigente. Es la misma regla que se aplica a HPO.
+ */
+export function doidAltIds(owlText) {
+  const altOf = new Map();
+  for (const chunk of owlText.split('<owl:Class rdf:about="http://purl.obolibrary.org/obo/').slice(1)) {
+    const m = chunk.match(/^(DOID_\d+)">/);
+    if (!m || /<owl:deprecated rdf:datatype="[^"]*">true<\/owl:deprecated>/.test(chunk)) continue;
+    for (const a of chunk.matchAll(/<oboInOwl:hasAlternativeId[^>]*>(DOID:\d+)<\/oboInOwl:hasAlternativeId>/g)) altOf.set(a[1], m[1].replace('_', ':'));
+  }
+  return altOf;
+}
+
+export function doidNormalizer(ids, altOf = new Map()) {
   return (curie) => {
     if (!curie.startsWith('DOID:') || ids.has(curie)) return { curie, normalized: null };
     const stripped = `DOID:${String(Number(curie.slice(5)))}`;
-    return ids.has(stripped) ? { curie: stripped, normalized: 'zero-padding' } : { curie, normalized: null };
+    if (ids.has(stripped)) return { curie: stripped, normalized: 'zero-padding' };
+    for (const candidate of [curie, stripped]) {
+      const current = altOf.get(candidate);
+      if (current) return { curie: current, normalized: candidate === curie ? 'alt_id' : 'zero-padding+alt_id' };
+    }
+    return { curie, normalized: null };
   };
 }
 
@@ -225,6 +244,7 @@ export function commonDiseaseRows(tabText, file, resolveHp, provenance, stats, n
     const published = rawDisease.startsWith('DO:') ? rawDisease.slice(3) : rawDisease;
     const { curie: diseaseCurie, normalized } = normalizeDoid(published);
     if (normalized) stats.doidNormalized = (stats.doidNormalized ?? 0) + 1;
+    if (normalized?.includes('alt_id')) stats.doidViaAltId = (stats.doidViaAltId ?? 0) + 1;
     const rawHp = f[c('Phenotype ID')];
     const hit = resolveHp(rawHp);
     stats.read++;

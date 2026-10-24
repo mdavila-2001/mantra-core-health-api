@@ -136,6 +136,8 @@ test('enfermedades comunes: DOID con ceros a la izquierda sólo se normaliza si 
   assert.equal(stats.doidNormalized, 2);
   assert.deepEqual(doidNormalizer(new Set(['DOID:0050242']))('DOID:0050242'), { curie: 'DOID:0050242', normalized: null });
   assert.deepEqual(doidNormalizer(new Set())('DOID:0013550'), { curie: 'DOID:0013550', normalized: null });
+  // DO declara DOID:324 como alt_id de DOID:178 (doid.owl 2026-09-30).
+  assert.deepEqual(doidNormalizer(new Set(['DOID:178']), new Map([['DOID:324', 'DOID:178']]))('DOID:0000324'), { curie: 'DOID:178', normalized: 'zero-padding+alt_id' });
 });
 
 test('cruces: prefijo Orphanet de Monarch = ORPHA de HPOA; CUI compartido marca solapamiento', () => {

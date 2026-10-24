@@ -1,5 +1,7 @@
-# Base de integración: catálogo real de seed-diseases (PR #688, f7f84be1, load-catalog.mjs --from-snapshot --systems omim,orphanet,decipher,mondo,doid,mesh) + este corpus
-## code systems de seed-diseases cargados (concepts)
+# Base de integración: catálogo real de seed-diseases (PR #688, snapshot f7f84be1) + este corpus
+$ sh tools/terminology-import/diseases/test/disposable-db/fresh-db.sh   (de #688)
+ok 12
+$ node --max-old-space-size=8000 tools/terminology-import/diseases/load-catalog.mjs --from-snapshot --systems omim,orphanet,decipher,mondo,doid,mesh
 decipher|61
 doid|14854
 mantra-core-internal|12
@@ -7,13 +9,28 @@ mesh|8863
 mondo|27185
 omim|10744
 orphanet|11645
-## andamio: seed-internal.mjs de seed-diseases + REL_SYMPTOM y REL_SYMPTOM_EXCLUDED
-$ load-symptoms.mjs --apply
+$ node evidencia/andamio/seed-missing-internal.mjs integration_scratch
+ya estaba TERM_ACTIVE
+ya estaba ES
+ya estaba EN
+ya estaba DESIG_PREFERRED
+ya estaba DESIG_SYNONYM
+ya estaba IS_A
+agregado REL_SYMPTOM
+agregado REL_SYMPTOM_EXCLUDED
+$ load-symptoms.mjs --apply   (corrida 1)
+[load] {"codeSystem":"hpo","storedAs":"hpo","version":"2026-09-01","concepts":19894,"designations":61927,"properties":234710,"isA":24436,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"symp","storedAs":"symp","version":"2026-07-30","concepts":895,"designations":1138,"properties":8892,"isA":898,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":3988,"designations":7682,"properties":48985,"isA":4094,"maps":0,"glossaryMembers":0,"remappedIds":0}
+(15 s)
+$ load-symptoms.mjs --apply   (corrida 2)
 [load] {"codeSystem":"hpo","storedAs":"hpo","version":"2026-09-01","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
 [load] {"codeSystem":"symp","storedAs":"symp","version":"2026-07-30","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
 [load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
-(9 s)
-$ psql -f proposal/concept_relationship_evidence.sql  (sólo en esta base desechable; ya aplicada en el intento anterior)
+(10 s)
+$ load-disease-phenotypes.mjs --apply   (sin la tabla propuesta)
+BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence (columnas ausentes: id, relationship_id, source_id, source_record_key, source_version, source_uri, retrieved_at, negated, frequency_text, frequency_concept_id, frequency_numerator, frequency_denominator, frequency_percent, evidence_code, onset_concept_id, sex, source_references, qualifiers).
+$ psql -f tools/terminology-import/symptoms/proposal/concept_relationship_evidence.sql   (sólo en esta base desechable)
 $ load-disease-phenotypes.mjs --check --sources hpoa
 {
   "loadedDiseaseSystems": {
@@ -75,42 +92,42 @@ $ load-disease-phenotypes.mjs --check --sources doid
 $ load-disease-phenotypes.mjs --check --sources hpo-common-disease
 {
   "loadedDiseaseSystems": {
-    "doid": 2588,
+    "doid": 2595,
     "mesh": 645
   },
   "stats": {
     "read": 132600,
     "notPhenotype": 323,
     "negatedSkipped": 0,
-    "diseaseUnresolved": 15453,
+    "diseaseUnresolved": 14873,
     "phenotypeUnresolved": 0,
     "viaMondo": 0,
-    "evidence": 116824,
-    "relationships": 116249
+    "evidence": 117404,
+    "relationships": 116715
   },
   "unresolvedDiseasesByPrefix": {
-    "DOID": 13,
+    "DOID": 1,
     "MESH": 401
   },
   "negatedNeeds": null
 }
-$ load-disease-phenotypes.mjs --apply
+$ load-disease-phenotypes.mjs --apply   (corrida 1)
 === RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
 {
   "inserted": {
-    "relationships": 387637,
-    "evidence": 388781
+    "relationships": 388103,
+    "evidence": 389361
   },
-  "segundos": 64
+  "segundos": 57
 }
-(64 s)
-$ load-disease-phenotypes.mjs --apply  (segunda corrida)
+(57 s)
+$ load-disease-phenotypes.mjs --apply   (corrida 2)
 === RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
 {
   "inserted": {
     "relationships": 0,
     "evidence": 0
   },
-  "segundos": 36
+  "segundos": 33
 }
-(36 s)
+(32 s)

@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureDir, nowIso, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
-import { commonDiseaseRows, doidIds, doidNormalizer, doidSymptomAxioms, mondoFeatureRows, parseHpoa } from './lib/annotations.mjs';
+import { commonDiseaseRows, doidAltIds, doidIds, doidNormalizer, doidSymptomAxioms, mondoFeatureRows, parseHpoa } from './lib/annotations.mjs';
 import { coverageReport } from './lib/coverage.mjs';
 import { diseaseIdentity, mondoEquivalences, normalizeDiseaseCurie, termOverlaps } from './lib/crosswalk.mjs';
 import { hpoIdResolver, hpoRows } from './lib/hpo.mjs';
@@ -97,7 +97,7 @@ async function main() {
 
   const doidOwl = readFileSync(sourcePath(sourceByKey('doid-owl').file), 'utf8');
   const doid = doidSymptomAxioms(doidOwl, needSource('doid-owl'));
-  const normalizeDoid = doidNormalizer(doidIds(doidOwl));
+  const normalizeDoid = doidNormalizer(doidIds(doidOwl), doidAltIds(doidOwl));
   await writeNdjson(nd('relations-doid'), doid);
 
   const cdProv = needSource('hpo-common-disease');

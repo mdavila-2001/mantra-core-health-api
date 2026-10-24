@@ -68,14 +68,14 @@ decipher 47
     "read": 132600,
     "notPhenotype": 323,
     "negatedSkipped": 0,
-    "diseaseUnresolved": 30035,
+    "diseaseUnresolved": 29455,
     "phenotypeUnresolved": 0,
-    "viaMondo": 102242,
-    "evidence": 102242,
-    "relationships": 101220
+    "viaMondo": 102822,
+    "evidence": 102822,
+    "relationships": 101686
   },
   "unresolvedDiseasesByPrefix": {
-    "DOID": 358,
+    "DOID": 346,
     "MESH": 540
   },
   "negatedNeeds": null

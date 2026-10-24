@@ -65,7 +65,7 @@
 | H4.S1.M4 | Enfermedades comunes (+ DOID con ceros) | normaliza sólo si el id existe | test «enfermedades comunes…» | HECHO |
 | H4.S2.M1 | Propuesta de tabla de evidencia | DDL aplicable | `psql -f proposal/concept_relationship_evidence.sql` en base desechable | HECHO |
 | H4.S2.M2 | Cargador bloqueado sin modelo | sale con 2 sin escribir | `load-disease-phenotypes.mjs --apply` → «BLOQUEADO POR EL MODELO» | HECHO |
-| H4.S2.M3 | Carga e idempotencia con la propuesta | 344 981 aristas; 2.ª corrida 0 | idem con la tabla aplicada | HECHO |
+| H4.S2.M3 | Carga e idempotencia con la propuesta | 345 438 aristas; 2.ª corrida 0 | idem con la tabla aplicada | HECHO |
 | H4.S2.M4 | Carga en un entorno real | tabla en el modelo | — | BLOQUEADO |
 | H4.S3.M1 | Formatos de código de `seed-diseases` (#688) | 100 % de HPOA resuelve directo | `--check --sources hpoa` → `diseaseUnresolved: 0` | HECHO |
 | H4.S3.M2 | Resolución contra los datos reales de #688 | misma base con ambos cargados | `load-catalog.mjs --from-snapshot` (#688) + `load-disease-phenotypes.mjs --check/--apply` | HECHO |

@@ -4,8 +4,8 @@
    "root": "MONDO:0700096",
    "mondoHumanDiseases": 23263
   },
-  "withPhenotypes": 12625,
-  "withoutPhenotypes": 10638,
+  "withPhenotypes": 12631,
+  "withoutPhenotypes": 10632,
   "coveragePct": 54.3,
   "bySourceCombination": {
    "hpoa": 9288,
@@ -20,15 +20,15 @@
    "doid+mondo": 34,
    "doid+hpo-common-disease+mondo": 77,
    "hpo-common-disease+mondo": 91,
-   "doid": 208,
-   "doid+hpo-common-disease": 208,
-   "hpo-common-disease": 1520
+   "doid": 207,
+   "doid+hpo-common-disease": 209,
+   "hpo-common-disease": 1526
   },
   "annotatedCodesWithoutMondoEquivalence": {
    "OMIM": 87,
    "DECIPHER": 1,
    "ORPHA": 33,
-   "DOID": 362,
+   "DOID": 350,
    "MESH": 540
   }
  },
@@ -220,9 +220,9 @@
    "rows": 132600,
    "positive": 132600,
    "negated": 0,
-   "diseases": 3647,
+   "diseases": 3642,
    "diseasesByPrefix": {
-    "DOID": 2601,
+    "DOID": 2596,
     "MESH": 1046
    },
    "phenotypes": 4524,

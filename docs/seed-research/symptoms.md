@@ -16,7 +16,7 @@ Investigación y corpus de la sesión `seed-symptoms` (2026-10-24). Importadores
 | Aristas jerárquicas is-a (sistema/órgano → tipo → término) | 29 428 |
 | Filas de relación enfermedad → síntoma leídas (4 fuentes publicadas) | 422 493 |
 | — que son síntoma/fenotipo (aspecto P), positivas y negadas | 404 266 |
-| Enfermedades humanas de Mondo con al menos un síntoma enlazado | **12 625 de 23 263 (54,3 %)** |
+| Enfermedades humanas de Mondo con al menos un síntoma enlazado | **12 631 de 23 263 (54,3 %)** |
 | Términos HPO de anomalía fenotípica con al menos una enfermedad | 11 867 de 19 178 |
 
 Estado de la carga:
@@ -76,9 +76,9 @@ Propuesta completa en
    **no** presenta el rasgo); nunca pueden cargarse como `REL_SYMPTOM`. Sin
    el concepto, el cargador las omite y lo cuenta.
 
-Validación de la propuesta en la base desechable: 344 981 aristas
+Validación de la propuesta en la base desechable (con Mondo como sustituto): 345 438 aristas
 enfermedad → síntoma (344 258 `REL_SYMPTOM` + 723 `REL_SYMPTOM_EXCLUDED`) y
-372 528 filas de evidencia en 53 s; segunda corrida 0/0 en 34 s. Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
+373 108 filas de evidencia en 55 s; segunda corrida 0/0 en 29 s. Con el catálogo real de `seed-diseases`: 388 103 aristas y 389 361 evidencias (§ Dependencia). Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
 desde `OMIM:154700` y con «Muy frecuente» TAS desde `ORPHA:558`, en la misma
 arista.
 
@@ -97,7 +97,7 @@ cuentan relaciones de aspecto P no negadas. Cálculo reproducible en
 | 1 | HPO `hp.json` 2026-09-01 + `hp-es.babelon.tsv` + `phenotype.hpoa` 2026-09-02 | 19 894 | 248 404 | OMIM 8 478, Orphanet 4 355, DECIPHER 47 enfermedades |
 | 2 | Symptom Ontology 2026-07-30 + Human Disease Ontology 2026-09-30 (`RO:0002452 has symptom`) | 895 | 2 268 | 873 enfermedades DOID |
 | 3 | NCIt 26.02d, signos y síntomas + Mondo 2026-10-06 (`disease_has_feature`/`has_characteristic` → HP) | 1 093 | 589 | 20 términos NCIt ya estaban (mismo CUI que SYMP) |
-| 4 | Anotaciones HPO de enfermedades comunes (Groza 2015) | 0 | 124 591 | evidencia `ITM` (minería de texto de la fuente), ver abajo |
+| 4 | Anotaciones HPO de enfermedades comunes (Groza 2015) | 0 | 124 474 | evidencia `ITM` (minería de texto de la fuente), ver abajo |
 | 5 | Monarch KG `hpoa_disease_to_phenotype_edges.tsv` (2026-10-07) | 0 | **0** | misma fuente que la pasada 1, re-transformada: lo confirma |
 | 6 | NCIt, hallazgos clínicos por sitio o sistema (C36278, tipo semántico *Finding*) | 2 868 | 0 | criterio de la fuente; quedan fuera resultados de laboratorio, enfermedades y neoplasias |
 | 7 | Monarch `phenopacket_ingest_edges.tsv`, `cureid_edges.tsv` | **0** | **0** | casos individuales y tratamientos; los 7 HP «faltantes» son `alt_id` |
@@ -119,8 +119,10 @@ pueda filtrarlas. Dos ajustes de formato, ambos comprobados contra la release:
 
 - Escriben el DOID con ceros a la izquierda (`DOID:0013550`) donde DO publica
   `DOID:13550`. Se normaliza **sólo** si el id tal cual no existe en
-  `doid.owl` y el id sin ceros sí: 92 532 filas. Cada fila guarda el código
-  publicado (`diseaseAsPublished`) y la normalización aplicada.
+  `doid.owl` y el id sin ceros sí, o si ese id es un `alt_id` que DO declara en
+  una clase vigente (p. ej. `DOID:0000324` → `DOID:324` → `DOID:178`): 93 112
+  filas, 580 de ellas por `alt_id`. Cada fila guarda el código publicado
+  (`diseaseAsPublished`) y la normalización aplicada.
 - Usan HP de 2015: 1 681 se traducen por `alt_id`/`replaced_by` que declara HPO;
   20 que HPO ya no resuelve se descartan y se cuentan.
 
@@ -193,12 +195,12 @@ no son síntomas: quedan en el corpus pero no se cargan como `REL_SYMPTOM`.
 Medido contra las 23 263 enfermedades humanas de Mondo (descendientes de
 `MONDO:0700096`), uniendo códigos por las equivalencias que declara Mondo:
 
-- **Con síntomas: 12 625 (54,3 %)**; sin síntomas: 10 638.
-- Por combinación de fuentes: sólo HPOA 9 288; sólo enfermedades comunes 1 520;
-  HPOA + comunes 575; sólo DOID 208; DOID + comunes 208; DOID + HPOA 203; HPOA +
+- **Con síntomas: 12 631 (54,3 %)**; sin síntomas: 10 632.
+- Por combinación de fuentes: sólo HPOA 9 288; sólo enfermedades comunes 1 526;
+  HPOA + comunes 575; sólo DOID 207; DOID + comunes 209; DOID + HPOA 203; HPOA +
   Mondo 139; sólo Mondo 86; resto 398.
 - Códigos anotados **sin** equivalencia en Mondo (no se pueden enlazar vía Mondo;
-  sí directo si `seed-diseases` carga ese sistema): MeSH 540, DOID 362, OMIM 87,
+  sí directo si `seed-diseases` carga ese sistema): MeSH 540, DOID 350, OMIM 87,
   ORPHA 33, DECIPHER 1.
 
 ## Dependencia con `seed-diseases`
@@ -223,17 +225,18 @@ Medición en la base desechable con dos andamios:
 - **Con el catálogo real de `seed-diseases`** (snapshot de #688, commit f7f84be1,
   `load-catalog.mjs --from-snapshot --systems omim,orphanet,decipher,mondo,doid,mesh`):
   HPOA 268 906/268 906 directo; DOID 2 268/2 268; Mondo 814/815; enfermedades
-  comunes 116 824/132 277 → **387 637 aristas y 388 781 filas de evidencia**
+  comunes 117 404/132 277 → **388 103 aristas y 389 361 filas de evidencia**
   (re-corrida 0). Sin resolver: 401 descriptores MeSH que el `mesh` de
-  `seed-diseases` no carga (14 777 filas; p. ej. `D018805`, `D002828`), 13 DOID
-  que la release vigente ya no tiene (676 filas) y 1 MONDO. Log en
+  `seed-diseases` no carga (14 777 filas; p. ej. `D018805`, `D002828`), 1 DOID
+  sin clase ni `alt_id` en la release vigente (`DOID:5898`, 96 filas) y 1 MONDO
+  (`MONDO:0005829`). Los otros 12 DOID retirados se resuelven por `alt_id`. Log en
   `docs/trabajo/2026-10-24-seed-symptoms/evidencia/integracion-seed-diseases-688.txt`.
 - **Con el formato de #688** (`omim`/`orphanet`/`decipher` con los 8 478 + 4 355
   + 47 códigos de HPOA, código sin prefijo): HPOA resuelve **268 906 de 268 906**
   filas P directo por código, 0 vía Mondo, 0 sin resolver → 268 306 aristas.
 - **Sólo con Mondo** (sin otros sistemas): HPOA 267 254 de 268 906 (1 652 filas
   de 121 códigos sin equivalencia en Mondo), Mondo 815/815, DOID 2 248/2 268 y
-  enfermedades comunes 102 242 de 132 277 (30 035 filas de 898 códigos DOID/MeSH
+  enfermedades comunes 102 822 de 132 277 (29 455 filas de 890 códigos DOID/MeSH
   sin equivalencia en Mondo: entran directo porque `seed-diseases` carga `doid` y
   `mesh`).
 
@@ -267,7 +270,7 @@ como sustituto de `seed-diseases`.
 |---|---|---:|---|
 | `load-symptoms.mjs --apply --glossary` | 24 777 conceptos · 70 747 designaciones · 367 171 propiedades · 29 428 is-a · 37 292 membresías | 19 s | 0 filas, 13 s |
 | `load-disease-phenotypes.mjs --apply` sin la tabla propuesta | 0 (aborta, salida 2) | 5 s | — |
-| idem con la tabla propuesta aplicada en la base desechable | 344 981 aristas · 372 528 evidencias | 53 s | 0 filas, 34 s |
+| idem con la tabla propuesta aplicada en la base desechable | 345 438 aristas · 373 108 evidencias | 55 s | 0 filas, 29 s |
 
 Tamaño de la base tras todo (incluido el andamio de Mondo): 639 MB. `catalog_import_batches` suma una fila por
 corrida y sistema (es el registro de cada corrida, no dato).

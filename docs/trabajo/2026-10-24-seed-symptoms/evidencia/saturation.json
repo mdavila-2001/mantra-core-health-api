@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-24T02:08:59.834Z",
+  "generatedAt": "2026-10-24T03:10:38.596Z",
   "passes": [
     {
       "pass": 1,
@@ -36,7 +36,7 @@
         "HPO common disease annotations (Groza 2015)"
       ],
       "newTerms": 0,
-      "newRelations": 124591
+      "newRelations": 124474
     },
     {
       "pass": 5,
