@@ -1,8 +1,8 @@
 # Catálogo exhaustivo de enfermedades — investigación, saturación y cobertura
 
 Fecha de corte: **2026-10-24**. Importador: `tools/terminology-import/diseases/`
-([README](../../tools/terminology-import/diseases/README.md),
-[SOURCES.md](../../tools/terminology-import/diseases/SOURCES.md)).
+([README](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diseases/README.md),
+[SOURCES.md](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diseases/SOURCES.md)).
 Sin DDL: todo entra en las tablas existentes del módulo 03 `terminology`.
 
 ## 1. Resumen

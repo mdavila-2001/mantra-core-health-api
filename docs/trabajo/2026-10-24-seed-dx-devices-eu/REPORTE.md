@@ -38,7 +38,7 @@
 | Catálogo de equipos en la base | BLOQUEADO | Tablas en `mantra-core-health-model` (propuesta en `docs/seed-research/diagnostic-devices-eu.md`) |
 
 ## Evidencia
-Salidas completas en [`evidencia/`](./evidencia/).
+Salidas completas en [`evidencia/`](https://github.com/mdavila-2001/mantra-core-health-api/tree/dev/docs/trabajo/2026-10-24-seed-dx-devices-eu/evidencia).
 
 ```
 $ node tools/terminology-import/diagnostic-devices/eu/fetch-mirrors.mjs

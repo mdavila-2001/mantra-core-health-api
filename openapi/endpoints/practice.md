@@ -3215,7 +3215,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `contactPhone` | Sí | `object` | longitud máxima 40; patrón runtime `SITE_CONTACT_PHONE_PATTERN`; admite null | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
+| `contactPhone` | Sí | `string` | longitud máxima 40; patrón runtime `SITE_CONTACT_PHONE_PATTERN`; admite null | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
 
 ### Payload completo de ejemplo
 

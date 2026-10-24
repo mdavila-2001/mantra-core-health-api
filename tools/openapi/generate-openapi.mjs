@@ -138,6 +138,12 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // sello SHA-256 (`insurance-portability-public.controller.ts`, `@Public()`
   // — subtarea 3.3, 2026-09-18).
   ['get', '/public/portability/verify/{manifestHash}'],
+  // Entraron con `@Public()` y sin sumarse acá; `docs:validate` los daba como
+  // `security-defined` (2026-10-24). Firma del alta (`iam-auth.controller.ts`) y
+  // catálogo de la ficha pública (`public-catalog.controller.ts`, líneas 30-45).
+  ['post', '/iam/auth/upload-registration-signature-image'],
+  ['get', '/public/profiles/o/{slug}/services'],
+  ['get', '/public/profiles/f/{slug}/products'],
 ];
 
 function markPublicOperations(document) {

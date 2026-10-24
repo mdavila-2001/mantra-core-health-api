@@ -44250,12 +44250,6 @@
                   {
                     "key": "Content-Type",
                     "value": "application/json"
-                  },
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
                   }
                 ],
                 "url": {
@@ -44269,7 +44263,7 @@
                     "upload-registration-signature-image"
                   ]
                 },
-                "description": "Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/upload-registration-signature-image`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_uploadRegistrationSignatureImage`",
+                "description": "Pre-cargar una imagen de firma o sello para el registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/upload-registration-signature-image`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500\n\noperationId: `IamAuthController_uploadRegistrationSignatureImage`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"<binario>\"\n}",
@@ -44278,6 +44272,9 @@
                       "language": "json"
                     }
                   }
+                },
+                "auth": {
+                  "type": "noauth"
                 }
               },
               "response": [],
@@ -67833,7 +67830,7 @@
                 "practices"
               ]
             },
-            "description": "Listar las prácticas activas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /practices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PracticesController_listPractices`"
+            "description": "Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.\n\n`GET /practices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `PracticesController_listPractices`"
           },
           "response": [],
           "event": [
@@ -76614,14 +76611,7 @@
               "name": "GET /public/profiles/f/{slug}/products · Productos que ofrece una farmacia, desde su ficha pública",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/profiles/f/:slug/products",
                   "host": [
@@ -76656,7 +76646,10 @@
                     }
                   ]
                 },
-                "description": "Sin sesión. Marca, presentación, precio vigente de lista pública como texto (o null) y si hay stock; un agotado se lista igual. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/products`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PublicCatalogController_pharmacyProducts`"
+                "description": "Sin sesión. Marca, presentación, precio vigente de lista pública como texto (o null) y si hay stock; un agotado se lista igual. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/products`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `PublicCatalogController_pharmacyProducts`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [
@@ -76685,14 +76678,7 @@
               "name": "GET /public/profiles/o/{slug}/services · Servicios que ofrece una organización, desde su ficha pública",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "X-Tenant-Id",
-                    "value": "{{tenantId}}",
-                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                    "disabled": false
-                  }
-                ],
+                "header": [],
                 "url": {
                   "raw": "{{baseUrl}}/public/profiles/o/:slug/services",
                   "host": [
@@ -76727,7 +76713,10 @@
                     }
                   ]
                 },
-                "description": "Sin sesión. Precio de referencia como texto, o null si no está definido. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/o/{slug}/services`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `PublicCatalogController_organizationServices`"
+                "description": "Sin sesión. Precio de referencia como texto, o null si no está definido. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/o/{slug}/services`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500\n\noperationId: `PublicCatalogController_organizationServices`",
+                "auth": {
+                  "type": "noauth"
+                }
               },
               "response": [],
               "event": [

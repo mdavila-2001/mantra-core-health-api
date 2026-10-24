@@ -1976,10 +1976,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '413':
@@ -1993,9 +1989,10 @@ paths:
       summary: Pre-cargar una imagen de firma o sello para el registro
       tags:
         - iam-auth
+      security: []
       description: >-
-        Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Pre-cargar una imagen de firma o sello para el registro. Operación pública; no requiere JWT. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /iam/auth/upload-registration-document:
     post:
       operationId: IamAuthController_uploadRegistrationDocument
@@ -48611,10 +48608,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -48624,6 +48617,7 @@ paths:
       summary: Servicios que ofrece una organización, desde su ficha pública
       tags:
         - public-catalog
+      security: []
   /public/profiles/f/{slug}/products:
     get:
       description: >-
@@ -48655,10 +48649,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
@@ -48668,6 +48658,7 @@ paths:
       summary: Productos que ofrece una farmacia, desde su ficha pública
       tags:
         - public-catalog
+      security: []
   /qa/environments:
     post:
       description: '`isProductionSafe` decide si los payloads capturados se guardan en claro.'
@@ -72109,7 +72100,7 @@ components:
       type: object
       properties:
         contactPhone:
-          type: object
+          type: string
           nullable: true
           maxLength: 40
           example: +591 72123456

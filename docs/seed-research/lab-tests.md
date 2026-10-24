@@ -3,8 +3,8 @@
 Pedido del propietario: «todos los análisis médicos que existen, con sus features posibles,
 clasificados por la categoría». Varias pasadas, hasta que no se pueda encontrar más.
 
-Importador: [`tools/terminology-import/lab-tests/`](../../tools/terminology-import/lab-tests/README.md) ·
-fuentes y licencias: [`SOURCES.md`](../../tools/terminology-import/lab-tests/SOURCES.md) ·
+Importador: [`tools/terminology-import/lab-tests/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/lab-tests/README.md) ·
+fuentes y licencias: [`SOURCES.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/lab-tests/SOURCES.md) ·
 pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
 
 ## Resumen (2026-10-24)

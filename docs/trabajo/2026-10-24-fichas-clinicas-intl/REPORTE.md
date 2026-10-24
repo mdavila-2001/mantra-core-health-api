@@ -32,7 +32,7 @@ ninguna
 | — | BLOQUEADO | PHQ-9 / GAD-7: decisión del propietario sobre licencia |
 
 ## Evidencia
-Salidas literales en [`evidencia/`](./evidencia/):
+Salidas literales en [`evidencia/`](https://github.com/mdavila-2001/mantra-core-health-api/tree/dev/docs/trabajo/2026-10-24-fichas-clinicas-intl/evidencia):
 
 - `build-forms-check.txt` — `374 fichas ({"SPECIFIC":334,"BASE":36,"GENERAL":4}) · 6373 campos · 0 desactualizadas` · `exit 0`
 - `specs-dirigidos.txt` — `Test Suites: 2 passed, 2 total` · `Tests: 49 passed, 49 total`
