@@ -105,6 +105,23 @@ describe('TargetRecordRepository', () => {
     expect(sql).not.toContain('"patient_id" = excluded."patient_id"');
   });
 
+  it('con upsert y tenant_id: sólo actualiza filas del mismo tenant y nunca reasigna el dueño', async () => {
+    const d = build();
+
+    await d.repo.writeRecord(
+      d.em as any,
+      TARGET,
+      { ...COLUMNS, tenant_id: 'tenant-a' },
+      ['patient_id'],
+      true,
+    );
+
+    expect(d.execute.mock.calls[0][0]).toContain(
+      'on conflict ("patient_id") do update set "note_text" = excluded."note_text" ' +
+        'where "crm"."leads"."tenant_id" = excluded."tenant_id" returning id',
+    );
+  });
+
   it('con upsert y sin columnas actualizables, no hace nada', async () => {
     const d = build();
 

@@ -328,12 +328,12 @@ export class RecordAutomationService {
     // de recorrerlo. Si el mapeo trajera estas columnas, quedarían pisadas.
     columns.created_by_user_id = writerUserId;
     columns.updated_by_user_id = writerUserId;
-    // Igual con el tenant propietario de la fila: si el mapeo declara la columna,
-    // su valor es el del tenant de la automatización y no lo que traiga el
-    // payload del agente, que escribiría la fila en la organización de otro.
-    if (Object.prototype.hasOwnProperty.call(mapping, 'tenant_id')) {
-      columns.tenant_id = tenantId;
-    }
+    // Igual con el tenant propietario de la fila, y siempre: aunque el mapeo no
+    // declare la columna, la fila es del tenant de la automatización y no de lo
+    // que traiga el payload del agente. Una tabla destino sin `tenant_id` no
+    // admite escritura automática: la base rechaza la columna (400) en vez de
+    // dejar una fila que ningún tenant pueda reclamar como suya.
+    columns.tenant_id = tenantId;
 
     return columns;
   }

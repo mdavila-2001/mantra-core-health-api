@@ -70,12 +70,24 @@ function build() {
     createLine: mockFn(),
   };
   const linksRepo = { create: mockFn() };
+  // Por defecto la orden de compra y el contrato son del tenant A.
+  const linkTargets = {
+    findPurchaseOrder: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      tenantId: TENANT_A,
+    })),
+    findContract: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      tenantId: TENANT_A,
+    })),
+  };
   const lookup = buildLookup();
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const raw = new BillsService(
     em as any,
     billsRepo as any,
     linksRepo,
+    linkTargets as any,
     lookup as any,
     logger as any,
   );
@@ -86,6 +98,7 @@ function build() {
     tx,
     billsRepo,
     linksRepo,
+    linkTargets,
     lookup,
   };
 }
@@ -233,6 +246,53 @@ describe('BillsService · alcance de tenant (BILL-01)', () => {
     await d.service.register({ ...dtoFor('pr1'), tenantId: TENANT_B }, actor);
 
     expect(d.linksRepo.create.mock.calls[0][1].tenantId).toBe(TENANT_A);
+  });
+
+  it('la orden de compra de otra organización responde como inexistente y no crea factura ni vínculo', async () => {
+    const foreign = build();
+    foreign.billsRepo.findVendor.mockResolvedValue(activeVendor);
+    foreign.linkTargets.findPurchaseOrder.mockResolvedValue({
+      id: 'po-b',
+      tenantId: TENANT_B,
+    });
+    const absent = build();
+    absent.billsRepo.findVendor.mockResolvedValue(activeVendor);
+    absent.linkTargets.findPurchaseOrder.mockResolvedValue(null);
+
+    const a = await rejection(foreign.service.register(dtoFor('pr1'), actor));
+    const b = await rejection(absent.service.register(dtoFor('pr1'), actor));
+
+    expect(a.getStatus()).toBe(404);
+    expect(a.reason).toBe(BillingErrorReason.BILL_PURCHASE_ORDER_NOT_FOUND);
+    expect(a.details).toBeUndefined();
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.billsRepo.create).not.toHaveBeenCalled();
+    expect(foreign.linksRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('el contrato de otra organización responde como inexistente y no crea factura ni vínculo', async () => {
+    const d = build();
+    d.billsRepo.findVendor.mockResolvedValue(activeVendor);
+    d.linkTargets.findContract.mockResolvedValue({
+      id: 'c-b',
+      tenantId: TENANT_B,
+    });
+
+    const error = await rejection(
+      d.service.register(
+        {
+          ...dtoFor('pr1'),
+          purchaseOrderId: undefined,
+          contractId: '00000000-0000-4000-8000-000000000002',
+        },
+        actor,
+      ),
+    );
+
+    expect(error.getStatus()).toBe(404);
+    expect(error.reason).toBe(BillingErrorReason.BILL_CONTRACT_NOT_FOUND);
+    expect(d.billsRepo.create).not.toHaveBeenCalled();
+    expect(d.linksRepo.create).not.toHaveBeenCalled();
   });
 
   it('una práctica de otro tenant responde como práctica inexistente y no crea nada', async () => {

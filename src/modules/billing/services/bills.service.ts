@@ -7,10 +7,12 @@ import {
   CONCEPTS,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { BillingErrorReason } from '../billing.error-reasons';
 import {
   BillsRepository,
   BillingDocumentLinksRepository,
+  BillingLinkTargetsRepository,
 } from '../repositories';
 import { RegisterBillDto, BillResponseDto } from '../dto';
 import { BILL } from '../billing.concepts';
@@ -27,6 +29,18 @@ import {
 const VENDOR_NOT_FOUND = {
   message: 'Proveedor no encontrado',
   reason: BillingErrorReason.BILL_VENDOR_NOT_FOUND,
+};
+
+/** "No existe" de la orden de compra de la factura; la ajena responde idéntico. */
+const PURCHASE_ORDER_NOT_FOUND = {
+  message: 'Orden de compra no encontrada',
+  reason: BillingErrorReason.BILL_PURCHASE_ORDER_NOT_FOUND,
+};
+
+/** "No existe" del contrato de la factura; el ajeno responde idéntico. */
+const CONTRACT_NOT_FOUND = {
+  message: 'Contrato no encontrado',
+  reason: BillingErrorReason.BILL_CONTRACT_NOT_FOUND,
 };
 
 /**
@@ -48,12 +62,14 @@ export class BillsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param billsRepo - Valor de bills repo requerido por la operación.
    * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param linkTargets - Lectura de los documentos que la factura vincula.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly billsRepo: BillsRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly linkTargets: BillingLinkTargetsRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
@@ -87,6 +103,33 @@ export class BillsService {
         dto.practiceId,
         tenantId,
       );
+      // La orden de compra y el contrato se contrastan con el tenant antes de
+      // escribir: una FK sólo demuestra que existen, y la factura (y su vínculo)
+      // quedaría colgada de un documento de otra organización.
+      if (dto.purchaseOrderId) {
+        const order = await this.linkTargets.findPurchaseOrder(
+          tx,
+          dto.purchaseOrderId,
+        );
+        assertResourceInTenant(
+          order,
+          order?.tenantId,
+          tenantId,
+          PURCHASE_ORDER_NOT_FOUND,
+        );
+      }
+      if (dto.contractId) {
+        const contract = await this.linkTargets.findContract(
+          tx,
+          dto.contractId,
+        );
+        assertResourceInTenant(
+          contract,
+          contract?.tenantId,
+          tenantId,
+          CONTRACT_NOT_FOUND,
+        );
+      }
       const vendor = assertDocumentInPractice(
         await this.billsRepo.findVendor(tx, dto.vendorId),
         dto.practiceId,

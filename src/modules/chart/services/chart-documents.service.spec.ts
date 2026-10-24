@@ -23,6 +23,24 @@ const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 const actor = { id: 'clin-1', roles: [] } as any;
 
 /**
+ * Ejecuta cada método del servicio dentro del contexto de tenant A, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenantA<T extends object>(service: T): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(TENANT_A, () => value.apply(target, args));
+    },
+  });
+}
+
+/**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
@@ -90,7 +108,7 @@ function build() {
     encounterScope,
   );
   return {
-    service,
+    service: inTenantA(service),
     tx,
     em,
     emFork,

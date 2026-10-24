@@ -57,6 +57,14 @@ function build() {
     findLinesByInvoice: mockFn().mockResolvedValue([]),
   };
   const linksRepo = { create: mockFn() };
+  // Por defecto el encuentro `e1` es de A y del paciente `p1`.
+  const linkTargets = {
+    findEncounter: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      tenantId: TENANT_A,
+      patientProfileId: 'p1',
+    })),
+  };
   const practiceTenantLookup = {
     findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
   };
@@ -65,6 +73,7 @@ function build() {
     em as any,
     invoicesRepo as any,
     linksRepo,
+    linkTargets as any,
     practiceTenantLookup as any,
     logger as any,
   );
@@ -76,6 +85,7 @@ function build() {
     em,
     invoicesRepo,
     linksRepo,
+    linkTargets,
     practiceTenantLookup,
   };
 }
@@ -451,6 +461,62 @@ describe('InvoicesService · alcance de tenant (BILL-01)', () => {
     );
 
     expect(d.linksRepo.create.mock.calls[0][1].tenantId).toBe(TENANT_A);
+  });
+
+  it('el encuentro de otra organización responde como encuentro inexistente y no crea factura ni vínculo', async () => {
+    const foreign = build();
+    foreign.linkTargets.findEncounter.mockResolvedValue({
+      id: 'e1',
+      tenantId: TENANT_B,
+      patientProfileId: 'p1',
+    });
+    const absent = build();
+    absent.linkTargets.findEncounter.mockResolvedValue(null);
+
+    const a = await rejection(
+      foreign.service.issueFromEncounter(issueDto('pr1'), actor),
+    );
+    const b = await rejection(
+      absent.service.issueFromEncounter(issueDto('pr1'), actor),
+    );
+
+    expect(a.getStatus()).toBe(404);
+    expect(a.reason).toBe(BillingErrorReason.INVOICE_ENCOUNTER_NOT_FOUND);
+    expect(a.details).toBeUndefined();
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.invoicesRepo.create).not.toHaveBeenCalled();
+    expect(foreign.linksRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('el encuentro de otro paciente de la misma organización también responde como inexistente', async () => {
+    const d = build();
+    d.linkTargets.findEncounter.mockResolvedValue({
+      id: 'e1',
+      tenantId: TENANT_A,
+      patientProfileId: 'p2',
+    });
+
+    const error = await rejection(
+      d.service.issueFromEncounter(issueDto('pr1'), actor),
+    );
+
+    expect(error.getStatus()).toBe(404);
+    expect(error.reason).toBe(BillingErrorReason.INVOICE_ENCOUNTER_NOT_FOUND);
+    expect(d.invoicesRepo.create).not.toHaveBeenCalled();
+    expect(d.linksRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('sin encuentro la factura se emite sin consultar ninguno', async () => {
+    const d = build();
+    d.invoicesRepo.findByNumber.mockResolvedValue(null);
+    d.invoicesRepo.create.mockReturnValue({ id: 'inv1', total: '100.00' });
+
+    await d.service.issueFromEncounter(
+      { ...issueDto('pr1'), encounterId: undefined },
+      actor,
+    );
+
+    expect(d.linkTargets.findEncounter).not.toHaveBeenCalled();
   });
 
   it('emitir en una práctica de B desde A responde como práctica inexistente y no crea nada', async () => {

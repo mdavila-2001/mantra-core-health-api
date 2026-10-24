@@ -3,6 +3,7 @@ export * from './bills.repository';
 export * from './payments-received.repository';
 export * from './payments-made.repository';
 export * from './document-links.repository';
+export * from './link-targets.repository';
 export * from './reimbursements.repository';
 export * from './patient-statements.repository';
 export * from './dunning.repository';

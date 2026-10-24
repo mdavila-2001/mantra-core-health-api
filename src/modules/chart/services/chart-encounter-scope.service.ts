@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
-  getCurrentTenantId,
+  requireTenantId,
 } from '../../../common';
 import {
   ConditionsRepository,
@@ -38,27 +38,28 @@ export class ChartEncounterScopeService {
   ) {}
 
   /**
-   * Exige que el encuentro exista, sea del paciente indicado (y del tenant del
-   * contexto, si lo hay) y siga abierto.
+   * Exige que el encuentro exista, sea del paciente indicado y del tenant del
+   * contexto, y siga abierto.
    *
    * @param tx - Transacción activa de la escritura.
    * @param encounterId - Encuentro que el cuerpo declara.
    * @param patientProfileId - Paciente del expediente al que se escribe.
    * @throws ResourceNotFoundException `CHART_ENCOUNTER_OUT_OF_SCOPE` si no existe
    *   o no es de este paciente o tenant.
-   * @throws PreconditionFailedException `CHART_ENCOUNTER_SEALED` si ya está sellado.
+   * @throws PreconditionFailedException `CHART_ENCOUNTER_SEALED` si ya está sellado,
+   *   o si la petición no fijó ningún tenant (denegar por defecto).
    */
   async assertEncounterBelongsToPatientAndWritable(
     tx: EntityManager,
     encounterId: string,
     patientProfileId: string,
   ): Promise<void> {
+    const tenantId = requireTenantId();
     const encounter = await this.encountersRepo.findById(tx, encounterId);
-    const tenantId = getCurrentTenantId();
     if (
       !encounter ||
       encounter.patientProfileId !== patientProfileId ||
-      (tenantId !== undefined && encounter.tenantId !== tenantId)
+      encounter.tenantId !== tenantId
     ) {
       throw new ResourceNotFoundException(
         'Encuentro no encontrado',
@@ -76,21 +77,28 @@ export class ChartEncounterScopeService {
   }
 
   /**
-   * Exige que el diagnóstico exista y sea del paciente indicado.
+   * Exige que el diagnóstico exista, sea del paciente indicado y esté bajo
+   * custodia del tenant del contexto.
    *
    * @param tx - Transacción activa de la escritura.
    * @param conditionId - Diagnóstico que el cuerpo declara.
    * @param patientProfileId - Paciente del expediente al que se escribe.
    * @throws ResourceNotFoundException `CHART_CONDITION_OUT_OF_SCOPE` si no existe
-   *   o es de otro paciente.
+   *   o es de otro paciente o tenant.
+   * @throws PreconditionFailedException si la petición no fijó ningún tenant.
    */
   async assertConditionBelongsToPatient(
     tx: EntityManager,
     conditionId: string,
     patientProfileId: string,
   ): Promise<void> {
+    const tenantId = requireTenantId();
     const condition = await this.conditionsRepo.findById(tx, conditionId);
-    if (!condition || condition.patientProfileId !== patientProfileId) {
+    if (
+      !condition ||
+      condition.patientProfileId !== patientProfileId ||
+      condition.custodianTenantId !== tenantId
+    ) {
       throw new ResourceNotFoundException(
         'Diagnóstico no encontrado',
         undefined,

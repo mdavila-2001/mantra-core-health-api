@@ -11,10 +11,12 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { BillingErrorReason } from '../billing.error-reasons';
 import {
   InvoicesRepository,
   BillingDocumentLinksRepository,
+  BillingLinkTargetsRepository,
 } from '../repositories';
 import { PracticeTenantLookupService } from '../../practice/services';
 import {
@@ -35,6 +37,12 @@ import {
   assertPracticeInTenant,
 } from '../billing-scope';
 import type { Invoices } from '../entities';
+
+/** "No existe" del encuentro origen de una factura; el ajeno o de otro paciente responde idéntico. */
+const INVOICE_ENCOUNTER_NOT_FOUND = {
+  message: 'Encuentro no encontrado',
+  reason: BillingErrorReason.INVOICE_ENCOUNTER_NOT_FOUND,
+};
 
 /** "No existe" de la factura original de una nota de crédito; la ajena responde idéntico. */
 const CREDIT_NOTE_ORIGINAL_NOT_FOUND = {
@@ -72,12 +80,14 @@ export class InvoicesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param invoicesRepo - Valor de invoices repo requerido por la operación.
    * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param linkTargets - Lectura de los documentos que la factura vincula.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly invoicesRepo: InvoicesRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly linkTargets: BillingLinkTargetsRepository,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
@@ -115,6 +125,28 @@ export class InvoicesService {
         dto.practiceId,
         tenantId,
       );
+      // El encuentro origen se contrasta antes de escribir: una FK sólo
+      // demuestra que existe, y vincular el de otra organización (o el de otro
+      // paciente) colgaría la factura de un expediente ajeno.
+      if (dto.encounterId) {
+        const encounter = await this.linkTargets.findEncounter(
+          tx,
+          dto.encounterId,
+        );
+        assertResourceInTenant(
+          encounter,
+          encounter?.tenantId,
+          tenantId,
+          INVOICE_ENCOUNTER_NOT_FOUND,
+        );
+        if (encounter?.patientProfileId !== dto.patientProfileId) {
+          throw new ResourceNotFoundException(
+            INVOICE_ENCOUNTER_NOT_FOUND.message,
+            undefined,
+            INVOICE_ENCOUNTER_NOT_FOUND.reason,
+          );
+        }
+      }
       const invoiceNumber = dto.invoiceNumber ?? this.generateNumber('INV');
       const clash = await this.invoicesRepo.findByNumber(
         tx,

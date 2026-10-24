@@ -63,6 +63,15 @@ export enum BillingErrorReason {
   /** Ya existe una factura con ese número en la práctica. */
   INVOICE_NUMBER_ALREADY_EXISTS = 'INVOICE_NUMBER_ALREADY_EXISTS',
 
+  /** El encuentro origen de la factura no existe, no es del paciente o es de otro tenant. */
+  INVOICE_ENCOUNTER_NOT_FOUND = 'INVOICE_ENCOUNTER_NOT_FOUND',
+
+  /** La orden de compra de la factura de proveedor no existe o es de otro tenant. */
+  BILL_PURCHASE_ORDER_NOT_FOUND = 'BILL_PURCHASE_ORDER_NOT_FOUND',
+
+  /** El contrato de la factura de proveedor no existe o es de otro tenant. */
+  BILL_CONTRACT_NOT_FOUND = 'BILL_CONTRACT_NOT_FOUND',
+
   /** La factura original a revertir con nota de crédito no existe. */
   INVOICE_CREDIT_NOTE_ORIGINAL_NOT_FOUND = 'INVOICE_CREDIT_NOTE_ORIGINAL_NOT_FOUND',
 

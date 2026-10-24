@@ -36,6 +36,9 @@ export interface WriteRecordResult {
  */
 const SAFE_IDENTIFIER = /^[a-z_][a-z0-9_]{0,62}$/;
 
+/** Columna que identifica al tenant propietario de la fila destino. */
+const TENANT_COLUMN = 'tenant_id';
+
 /**
  * Esquemas en los que una automatización de registro puede escribir. El resto
  * se rechaza (denegar por defecto): un agente nunca escribe de forma dinámica
@@ -205,8 +208,11 @@ export class TargetRecordRepository {
       if (upsert) {
         // Se actualiza todo menos las columnas de la clave: reescribirlas con el
         // mismo valor es ruido, y con otro valor sería cambiar la identidad de la
-        // fila desde una operación que decía estar actualizándola.
-        const updatable = columnNames.filter((c) => !dedupeColumns.includes(c));
+        // fila desde una operación que decía estar actualizándola. El dueño de la
+        // fila (`tenant_id`) tampoco se reasigna nunca.
+        const updatable = columnNames.filter(
+          (c) => !dedupeColumns.includes(c) && c !== TENANT_COLUMN,
+        );
         if (updatable.length === 0) {
           sql += ` on conflict (${conflictTarget}) do nothing`;
         } else {
@@ -217,6 +223,13 @@ export class TargetRecordRepository {
             })
             .join(', ');
           sql += ` on conflict (${conflictTarget}) do update set ${assignments}`;
+          // Una clave de deduplicación sin `tenant_id` puede chocar con la fila de
+          // otra organización: sólo se actualiza la fila que ya es de este tenant.
+          // Si es ajena no se toca y la respuesta es `written: false`.
+          if (columnNames.includes(TENANT_COLUMN)) {
+            const tenant = quoteIdentifier(TENANT_COLUMN, 'campo de destino');
+            sql += ` where ${schema}.${table}.${tenant} = excluded.${tenant}`;
+          }
         }
       } else {
         sql += ` on conflict (${conflictTarget}) do nothing`;

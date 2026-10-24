@@ -640,6 +640,21 @@ describe('RecordAutomationService', () => {
         TENANT_A,
       );
     });
+
+    it('un mapeo que no declara tenant_id igualmente escribe la fila en el tenant de la automatización', async () => {
+      const d = build();
+
+      await d.service.executeRecordAutomation(
+        AGENT_RUN_ID,
+        AUTOMATION_ID,
+        { payloadJson: { patient: { id: 'p-1' }, tenantAjeno: TENANT_B } },
+        actor,
+      );
+
+      expect(d.targetRepo.writeRecord.mock.calls[0][2].tenant_id).toBe(
+        TENANT_A,
+      );
+    });
   });
 
   describe('configuración del destino (AUTO-02)', () => {
