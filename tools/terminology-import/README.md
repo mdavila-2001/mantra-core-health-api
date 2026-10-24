@@ -253,6 +253,12 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
 
+## Farmacología clínica (2026-10-24)
+
+Monografías por ATC 5 con las secciones literales de la ficha técnica de CIMA y de la etiqueta FDA
+(openFDA), cada una con su cita: `clinical-pharmacology/` (ver su `README.md` y `SOURCES.md`).
+Registro de pasadas: `docs/seed-research/clinical-pharmacology.md`.
+
 ## Servicios por especialidad (2026-10-24)
 
 `specialty-services/`: relaciona servicios (FONASA MLE 2026, CUPS y los aranceles
