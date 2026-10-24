@@ -1,0 +1,18 @@
+# curie_map:
+#   BFO: http://purl.obolibrary.org/obo/BFO_
+#   CSP: http://purl.obolibrary.org/obo/mondo/mappings/unknown_prefix/CSP/
+subject_id	subject_label	predicate_id	object_id	object_label	mapping_justification
+MONDO:0002203	constipation disorder	skos:exactMatch	ICD10CM:K59.0	Constipation	semapv:UnspecifiedMatching
+MONDO:0002203	constipation disorder	skos:exactMatch	MEDGEN:1101		semapv:UnspecifiedMatching
+MONDO:0002203	constipation disorder	skos:exactMatch	NCIT:C37930	Constipation	semapv:UnspecifiedMatching
+MONDO:0002203	constipation disorder	skos:exactMatch	UMLS:C0009806		semapv:UnspecifiedMatching
+MONDO:0002203	constipation disorder	skos:exactMatch	icd11.foundation:502284069	Constipation	semapv:UnspecifiedMatching
+MONDO:0002203	constipation disorder	skos:exactMatch	mesh:D003248		semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	DOID:10652	Alzheimer's disease	semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	ICD10CM:G30	Alzheimer's disease	semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	ICD10WHO:G30	Alzheimer disease	semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	MEDGEN:1853		semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	NCIT:C2866	Alzheimer's Disease	semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	UMLS:C0002395		semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	icd11.foundation:1611724421	Alzheimer disease	semapv:UnspecifiedMatching
+MONDO:0004975	Alzheimer disease	skos:exactMatch	mesh:D000544		semapv:UnspecifiedMatching
