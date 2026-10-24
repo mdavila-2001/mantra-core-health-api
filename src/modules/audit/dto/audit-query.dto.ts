@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsIn,
@@ -216,6 +216,48 @@ export class DataAccessEntryDto {
 
 export class DataAccessPageDto {
   @ApiProperty({ type: [DataAccessEntryDto] }) items!: DataAccessEntryDto[];
+  @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
+  @ApiProperty() limit!: number;
+}
+
+/**
+ * Filtros de `GET /audit/me/data-access`: sólo rango y paginación. El paciente sale de la sesión;
+ * ni el actor, ni el tenant, ni el paciente se aceptan por parámetro (el `ValidationPipe` global
+ * rechaza lo que no esté declarado).
+ */
+export class MyDataAccessQueryDto extends PickType(DataAccessQueryDto, [
+  'from',
+  'to',
+  'limit',
+  'cursor',
+] as const) {}
+
+/** Un acceso a los datos del titular, tal como lo ve él: quién, qué, para qué y cuándo. */
+export class MyDataAccessEntryDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({
+    format: 'uuid',
+    description: 'Cuenta (`iam.users`) de quien accedió',
+  })
+  userId!: string;
+  @ApiProperty({ enum: DATA_OPERATIONS }) operation!: string;
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Tipo de dato al que se accedió',
+  })
+  resourceType!: string | null;
+  @ApiPropertyOptional({ nullable: true, format: 'uuid' }) resourceId!:
+    string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Finalidad declarada del acceso',
+  })
+  purpose!: string | null;
+  @ApiProperty({ type: String, format: 'date-time' }) recordedAt!: string;
+}
+
+export class MyDataAccessPageDto {
+  @ApiProperty({ type: [MyDataAccessEntryDto] }) items!: MyDataAccessEntryDto[];
   @ApiPropertyOptional({ nullable: true }) nextCursor!: string | null;
   @ApiProperty() limit!: number;
 }

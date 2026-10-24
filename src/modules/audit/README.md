@@ -50,6 +50,7 @@ Entidades (`tableName`, 131 de 131 archivos `*.entity.ts`): `accounts_history`, 
 | UC-10-10 | `POST /audit/anomaly/scan` | Detectar acceso anómalo | `SECURITY_ADMIN` |
 | UC-10-11 | `POST /moderation/decisions` | Registrar decisión de moderación / gobernanza | `SECURITY_ADMIN` |
 | UC-10-12 | `POST /audit/third-party-access` | Registrar acceso delegado / de tercero gobernado | `SECURITY_ADMIN` |
+| PAC-HIST-004/005 | `GET /audit/me/data-access` | Autoservicio del titular: quién accedió a su historia, a qué, para qué y cuándo (`audit.data_access_log` del `patientProfileId` de la sesión; paginado por cursor) | sesión con perfil de paciente |
 
 ### Casos de uso sin endpoint HTTP
 

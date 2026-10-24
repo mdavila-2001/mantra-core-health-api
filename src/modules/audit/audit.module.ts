@@ -4,6 +4,7 @@ import { RouteIndexModule } from '../../observability/route-index/route-index.mo
 import * as entities from './entities';
 import {
   AuditController,
+  AuditMeController,
   AuditQueryController,
   ComplianceController,
   PrivacyController,
@@ -43,6 +44,7 @@ import {
   controllers: [
     AuditController,
     AuditQueryController,
+    AuditMeController,
     ComplianceController,
     PrivacyController,
     ModerationController,
