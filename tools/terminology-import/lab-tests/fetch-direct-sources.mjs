@@ -21,6 +21,17 @@ const SOCRATA = (id) => `https://www.datos.gov.co/api/views/${id}/rows.csv?acces
 export const DIRECT_SOURCES = {
   'minsalud-co-laboratorio': { dir: 'minsalud-co', files: [{ name: 'POSPOPULI-LABORATORIO-s5f2-yivs.csv', url: SOCRATA('s5f2-yivs') }] },
   'minsalud-co-pbs': { dir: 'minsalud-co', files: [{ name: 'Procedimiento-del-PBS-9zcz-bjue.csv', url: SOCRATA('9zcz-bjue') }] },
+  'pami-nomenclador-oficial': {
+    dir: 'pami',
+    files: [{ name: 'nomenclador-comun.csv', url: 'https://datos.pami.org.ar/dataset/9937b24d-abad-45fb-8158-c1c5684d2635/resource/5d32d7a8-3d6a-4ed4-9701-6d4fd024c657/download/nomenclador-comun.csv' }],
+  },
+  'cms-icd10pcs': {
+    dir: 'cms-icd10pcs',
+    files: [
+      { name: '2027-icd-10-pcs-order-file-long-abbreviated-titles.zip', url: 'https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip' },
+      { name: '2027-icd-10-pcs-code-tables-index.zip', url: 'https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip' },
+    ],
+  },
   'cie10es-px': {
     dir: 'cie10es',
     files: [{ name: PX_FILE, url: `${CIE_BASE}/${PX_FILE}` }],

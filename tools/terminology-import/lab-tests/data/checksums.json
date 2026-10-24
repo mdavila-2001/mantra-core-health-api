@@ -32,14 +32,14 @@
     ]
   },
   "lab-tests-icd10pcs-cms": {
-    "sha256": "4b0619a68feab7cc7ec4e9a23cfa8a86aacc2f07766b2aa8ab75b0097dc328c3",
-    "lines": 4397,
+    "sha256": "e390e722018e39a5efef5a4ea6f66e60f7e601b9767004225211e1d1e9ca2f34",
+    "lines": 4402,
     "files": [
       "lab-tests-icd10pcs-cms.ndjson.gz"
     ]
   },
   "lab-tests-pami-nomenclador": {
-    "sha256": "edc981bc7b0100c610e9c5fbf1f5c32d15cf7b469f45decde448a6e1d408f996",
+    "sha256": "2e3e9855da64fd9ef3e0d589935d479123a60463891a36c8212bcc3139c3acb9",
     "lines": 3034,
     "files": [
       "lab-tests-pami-nomenclador.ndjson.gz"

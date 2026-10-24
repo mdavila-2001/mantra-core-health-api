@@ -17,7 +17,7 @@
 // =============================================================================
 
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { DatabaseSync } from 'node:sqlite';
+import { execFileSync } from 'node:child_process';
 import { gunzipSync } from 'node:zlib';
 import { basename, join, relative } from 'node:path';
 
@@ -40,7 +40,7 @@ import { txToLoincInput } from './lib/loinc-tx.mjs';
 import { parseCsv } from '../lib/glossary-es/loinc-es.mjs';
 import { DOMAINS, assertRecord } from './lib/records.mjs';
 import { GAPS, SOURCES } from './lib/sources.mjs';
-import { TARIFF_EXCLUSIONS, TARIFF_RULES, addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pcsItems, sigtapItems, tariffRecords, tussItems } from './lib/tariffs.mjs';
+import { TARIFF_EXCLUSIONS, TARIFF_RULES, addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pamiOfficialItems, pcsAxisNames, pcsItems, pcsOrderFile, sigtapItems, tariffRecords, tussItems } from './lib/tariffs.mjs';
 import { FULL_SHEET, PX_FILE } from '../lib/glossary-es/cie10es.mjs';
 import { createRequire } from 'node:module';
 import { UCUM_CODE_SYSTEM, ucumRecords } from './lib/ucum.mjs';
@@ -73,6 +73,30 @@ function npmProv(key, file) {
   const m = manifest[key];
   if (!m) throw new Error(`Falta ${key} en ${join(SRC, 'manifest.json')}: corré fetch-lab-tests-sources.mjs.`);
   return { packageName: SOURCES[key].npm.name, packageVersion: SOURCES[key].npm.version, file: relative(BUILD_DIR, file), sha256: sha256File(file), tarballSha256: m.sha256, retrievedAt: m.retrievedAt, license: SOURCES[key].license };
+}
+
+const DIRECT_URL_PAMI = 'https://datos.pami.org.ar/dataset/9937b24d-abad-45fb-8158-c1c5684d2635/resource/5d32d7a8-3d6a-4ed4-9701-6d4fd024c657/download/nomenclador-comun.csv';
+
+/** CSV con separador arbitrario (reusa el parser RFC 4180 cambiando `;` por un separador seguro). */
+function parseCsvWith(text, sep) {
+  if (sep === ',') return parseCsv(text);
+  const rows = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (line === '') continue;
+    const cells = [];
+    let cur = '';
+    let q = false;
+    for (let i = 0; i < line.length; i += 1) {
+      const c = line[i];
+      if (q) {
+        if (c === '"' && line[i + 1] === '"') { cur += '"'; i += 1; } else if (c === '"') q = false; else cur += c;
+      } else if (c === '"') q = true;
+      else if (c === sep) { cells.push(cur); cur = ''; } else cur += c;
+    }
+    cells.push(cur);
+    rows.push(cells);
+  }
+  return rows;
 }
 
 /** Procedencia de un archivo bajado por URL directa (fetch-direct-sources.mjs). */
@@ -206,22 +230,22 @@ const TARIFF_LAYERS = {
     meta: ['data', '2026.06.26', 'metadata.json'],
     items: (dir, read) => tussItems(read(join(dir, 'data', '2026.06.26', 'tables', 'procedures.json'))),
   },
+  // Archivos oficiales de CMS FY2027 (vigente 2026-10-01 → 2027-09-30). La copia FY2026 de
+  // @cyanheads/medical-codes-mcp-server se cotejó contra el order file 2026 de CMS: 0 diferencias.
   'icd10pcs-cms': {
-    file: ['data', 'medical-codes.db'],
+    direct: true,
+    file: ['2027-icd-10-pcs-order-file-long-abbreviated-titles.zip'],
     canonicalUrl: 'http://www.cms.gov/Medicare/Coding/ICD10',
-    sqlite: true,
-    version: (meta) => meta.release_id,
-    sourceUrl: (meta) => meta.source_url,
+    version: () => 'ICD-10-PCS FY2027',
+    sourceUrl: () => 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
     items: (dir) => {
-      const db = new DatabaseSync(join(dir, 'data', 'medical-codes.db'), { readOnly: true });
-      try {
-        const sections = new Map(db.prepare("SELECT value, meaning FROM pcs_axes WHERE position = 1").all().map((r) => [r.value, r.meaning]));
-        return pcsItems(db.prepare("SELECT code, short_desc, long_desc FROM codes WHERE system = 'ICD10PCS' AND billable = 1 ORDER BY code").all(), sections);
-      } finally {
-        db.close();
-      }
+      const order = execFileSync('unzip', ['-p', join(dir, '2027-icd-10-pcs-order-file-long-abbreviated-titles.zip'), 'icd10pcs_order_2027.txt'], { maxBuffer: 64 * 1024 * 1024 }).toString('latin1');
+      const tables = execFileSync('unzip', ['-p', join(dir, '2027-icd-10-pcs-code-tables-index.zip'), 'icd10pcs_tables_2027.xml'], { maxBuffer: 64 * 1024 * 1024 }).toString('utf8');
+      const { sections, types } = pcsAxisNames(tables);
+      return pcsItems(pcsOrderFile(order), sections, types);
     },
   },
+
   'cups-co': {
     direct: true,
     file: ['POSPOPULI-LABORATORIO-s5f2-yivs.csv'],
@@ -242,22 +266,16 @@ const TARIFF_LAYERS = {
       });
     },
   },
+  // CSV oficial de datos.pami.org.ar (cotejado: mismos 4 739 códigos que nomenclador-salud-js, que además
+  // había cambiado la caja de los nombres). `pamiItems` queda para la redistribución npm.
   'pami-nomenclador': {
-    file: ['dist', 'assets', 'estudios.json'],
-    version: () => '2022-08-03',
-    sourceUrl: () => SOURCES['pami-nomenclador'].officialUrl,
-    items: (dir, read) => pamiItems(read(join(dir, 'dist', 'assets', 'estudios.json'))),
+    direct: true,
+    file: ['nomenclador-comun.csv'],
+    version: () => 'Nomenclador Común, estructura de unidades febrero 2019 (datos.pami.org.ar)',
+    sourceUrl: () => DIRECT_URL_PAMI,
+    items: (dir) => pamiOfficialItems(parseCsvWith(new TextDecoder('latin1').decode(readFileSync(join(dir, 'nomenclador-comun.csv'))), ';')),
   },
 };
-
-function sqliteBuildMeta(path, system) {
-  const db = new DatabaseSync(path, { readOnly: true });
-  try {
-    return db.prepare('SELECT * FROM build_meta WHERE system = ?').get(system);
-  } finally {
-    db.close();
-  }
-}
 
 /** Designaciones en castellano de CIE-10-ES Procedimientos (si está descargado con fetch-direct-sources.mjs). */
 function enrichPcsWithCie10es(records) {
@@ -282,7 +300,7 @@ async function buildTariff(key) {
   const via = src.npm ? `${src.npm.name}@${src.npm.version}` : 'descarga directa (fetch-direct-sources.mjs)';
   if (!existsSync(path)) return { layer: key, missing: `${via}: no descargado` };
   const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
-  const pkgMeta = def.sqlite ? sqliteBuildMeta(path, 'ICD10PCS') : def.meta ? read(join(dir, ...def.meta)) : null;
+  const pkgMeta = def.meta ? read(join(dir, ...def.meta)) : null;
   const version = def.version(pkgMeta);
   const np = def.direct ? directProv(path) : npmProv(key, path);
   const { records, stats } = tariffRecords(key, def.items(dir, read), {

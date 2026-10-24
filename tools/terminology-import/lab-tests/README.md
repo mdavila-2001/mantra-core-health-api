@@ -24,7 +24,7 @@ SHA-256, integridad) y `checksums.json`. Si no hay build local, `load-lab-tests.
 `data/` y verifica el SHA-256. Así el corpus se carga sin volver a descargar las fuentes crudas
 (≈255 MB), que no se versionan: se reproducen con `fetch-lab-tests-sources.mjs`.
 
-En Node 22, `build-lab-tests.mjs` usa `node:sqlite` (ICD-10-PCS) y avisa que es experimental.
+`build-lab-tests.mjs` usa el comando `unzip` del sistema para leer los ZIP oficiales de CMS.
 El cargador arma el plan completo en memoria y lo inserta en **una sola transacción**: con LOINC
 (≈100 000 términos × decenas de propiedades) conviene `NODE_OPTIONS=--max-old-space-size=8192`.
 Si Node no ve el proxy, `NODE_USE_ENV_PROXY=1` (no hace falta para `npm pack`).

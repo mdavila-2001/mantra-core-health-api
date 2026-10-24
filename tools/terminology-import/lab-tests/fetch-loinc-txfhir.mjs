@@ -65,8 +65,9 @@ async function call(method, url, body) {
       continue;
     }
     if (res.status === 429 || res.status >= 500) {
-      if (attempt >= 6) throw new Error(`HTTP ${res.status} tras ${attempt} intentos: ${url}`);
-      await sleep(3000 * attempt);
+      // tx.fhir.org devuelve 500 transitorios bajo carga: se espera más antes de rendirse.
+      if (attempt >= 10) throw new Error(`HTTP ${res.status} tras ${attempt} intentos: ${url}`);
+      await sleep(Math.min(60000, 5000 * attempt));
       continue;
     }
     const json = await res.json();

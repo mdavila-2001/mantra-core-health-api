@@ -19,7 +19,7 @@ import { thoRecords } from '../lab-tests/lib/hl7-tho.mjs';
 import { RELATION, buildPlan, planSummary } from '../lab-tests/lib/load-plan.mjs';
 import { loincRecords, parseLinguisticIndex, parseLinguisticVariant, parseLoincTable, parsePanels } from '../lab-tests/lib/loinc.mjs';
 import { assertRecord, conceptIdFor, propertyIdFor } from '../lab-tests/lib/records.mjs';
-import { addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pcsItems, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
+import { addCie10esDesignations, cupsItems, fonasaItems, pamiItems, pamiOfficialItems, pcsAxisNames, pcsItems, pcsOrderFile, ruleFor, sigtapItems, tariffRecords, tussItems } from '../lab-tests/lib/tariffs.mjs';
 import { partsFromFullySpecifiedName } from '../lab-tests/lib/loinc-tx.mjs';
 import { ucumRecords } from '../lab-tests/lib/ucum.mjs';
 
@@ -266,4 +266,33 @@ test('LOINC vía tx.fhir.org: el nombre corto es-AR (FSN) se corta en los seis e
   });
   assert.equal(partsFromFullySpecifiedName('Glucose SerPl-mCnc'), null);
   assert.equal(partsFromFullySpecifiedName('a:b:c'), null);
+});
+
+test('ICD-10-PCS FY2027 (recorte real de cms.gov): order file de ancho fijo y nombres oficiales de sección y tipo', () => {
+  const fx = json('cms-icd10pcs-2027.recorte.json');
+  const codes = pcsOrderFile(fx.order);
+  assert.deepEqual(codes.map((c) => c.code).sort(), ['4A0002Z', 'B00B0ZZ', 'CW70NZZ', 'F003GKZ']); // «B00» es encabezado (válido = 0)
+  assert.equal(codes.find((c) => c.code === 'B00B0ZZ').long_desc, 'Plain Radiography of Spinal Cord using High Osmolar Contrast');
+  const { sections, types } = pcsAxisNames(fx.tables);
+  assert.equal(sections.get('F'), 'Physical Rehabilitation and Diagnostic Audiology');
+  assert.equal(types.get('F0'), 'Speech Assessment');
+  assert.equal(types.get('B0'), 'Plain Radiography');
+  const { records } = tariffRecords('icd10pcs-cms', pcsItems(codes, sections, types), TPROV);
+  assert.equal(records.find((r) => r.code === 'F003GKZ').category.display, 'Physical Rehabilitation and Diagnostic Audiology › Speech Assessment');
+  assert.equal(records.find((r) => r.code === 'CW70NZZ'), undefined);
+});
+
+test('PAMI (recorte real del CSV oficial de datos.pami.org.ar): nombre verbatim, módulo y valor en pesos', () => {
+  const fx = json('pami-oficial.recorte.json');
+  const rows = fx.csv_latin1_decoded.split('\r\n').filter(Boolean).map((l) => l.split(';'));
+  const items = pamiOfficialItems(rows);
+  const acet = items.find((i) => i.code === '660002');
+  assert.equal(acet.name, 'ACETONURIA');
+  assert.equal(acet.display, 'Acetonuria');
+  assert.equal(acet.properties.pami_module, '5');
+  assert.deepEqual(acet.properties.reference_price, { currency: 'ARS', schedule: 'NOMENCLADOR ESTRUCTURA UNIDADES FEBRERO 2019', amount: '27.26', priceText: '$ 27,26' });
+  assert.equal(items.find((i) => i.code === '187143').properties.reference_price.amount, '2935.17');
+  const { records, stats } = tariffRecords('pami-nomenclador', items, TPROV);
+  assert.deepEqual(records.map((r) => r.code).sort(), ['340101', '660002']);
+  assert.equal(stats.excludedExplicitly[0].code, '187143');
 });

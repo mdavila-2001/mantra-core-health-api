@@ -159,5 +159,38 @@
       }
     },
     "retrievedAt": "2026-10-24T16:50:38.980Z"
+  },
+  "pami-nomenclador-oficial": {
+    "dir": "pami",
+    "files": {
+      "nomenclador-comun.csv": {
+        "url": "https://datos.pami.org.ar/dataset/9937b24d-abad-45fb-8158-c1c5684d2635/resource/5d32d7a8-3d6a-4ed4-9701-6d4fd024c657/download/nomenclador-comun.csv",
+        "bytes": 306799,
+        "sha256": "07370b31822789ce774f1f6632855a0e865ec23d65373a1c5e84aeefe96980b4",
+        "lastModified": "Wed, 03 Aug 2022 17:59:03 GMT",
+        "retrievedAt": "2026-10-24T16:58:02.211Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:58:02.211Z"
+  },
+  "cms-icd10pcs": {
+    "dir": "cms-icd10pcs",
+    "files": {
+      "2027-icd-10-pcs-order-file-long-abbreviated-titles.zip": {
+        "url": "https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip",
+        "bytes": 1322280,
+        "sha256": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439",
+        "lastModified": "Fri, 05 Jun 2026 17:08:03 GMT",
+        "retrievedAt": "2026-10-24T16:59:50.366Z"
+      },
+      "2027-icd-10-pcs-code-tables-index.zip": {
+        "url": "https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip",
+        "bytes": 8078885,
+        "sha256": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84",
+        "lastModified": "Fri, 05 Jun 2026 17:06:10 GMT",
+        "retrievedAt": "2026-10-24T16:59:51.432Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:59:51.432Z"
   }
 }

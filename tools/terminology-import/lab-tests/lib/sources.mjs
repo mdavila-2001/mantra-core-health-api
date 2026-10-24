@@ -88,12 +88,9 @@ export const SOURCES = {
     name: 'ICD-10-PCS — International Classification of Diseases, 10th Revision, Procedure Coding System (EE. UU.)',
     owner: 'Centers for Medicare & Medicaid Services (CMS), EE. UU.',
     officialUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
-    license:
-      'Obra del gobierno federal de EE. UU. (CMS), dominio público. Tomado del índice SQLite que empaqueta @cyanheads/medical-codes-mcp-server (Apache-2.0), construido desde los order files oficiales de CMS (release y URL en su tabla build_meta).',
-    obtain: 'npm',
-    npm: { name: '@cyanheads/medical-codes-mcp-server', version: '0.4.1' },
-    dir: 'medical-codes-mcp-server',
-    redistributor: 'https://www.npmjs.com/package/@cyanheads/medical-codes-mcp-server',
+    license: 'Obra del gobierno federal de EE. UU. (CMS), dominio público. Archivos oficiales de cms.gov: order file y code tables FY2027.',
+    obtain: 'url',
+    dir: 'cms-icd10pcs',
   },
   'cups-co': {
     sourceCode: 'MINSALUD_CO_CUPS',
@@ -117,15 +114,12 @@ export const SOURCES = {
   },
   'pami-nomenclador': {
     sourceCode: 'PAMI_NOMENCLADOR',
-    name: 'PAMI — Nomenclador de prácticas médicas (Argentina)',
+    name: 'PAMI — Nomenclador Común de prácticas médicas (Argentina)',
     owner: 'Instituto Nacional de Servicios Sociales para Jubilados y Pensionados (PAMI), Argentina',
     officialUrl: 'https://www.datos.gob.ar/dataset/pami-nomenclador-practicas-medicas--valor-por-capitas-modulos',
-    license:
-      'Datos abiertos de PAMI en datos.gob.ar (conjunto creado y modificado por última vez el 2022-08-03), redistribuidos por nomenclador-salud-js (ISC). La licencia del conjunto en el portal no se pudo leer (403 desde la sesión): a confirmar.',
-    obtain: 'npm',
-    npm: { name: 'nomenclador-salud-js', version: '1.0.2' },
-    dir: 'nomenclador-salud-js',
-    redistributor: 'https://www.npmjs.com/package/nomenclador-salud-js',
+    license: 'Datos abiertos de PAMI publicados en datos.gob.ar bajo CC-BY-4.0 (verificado en la API CKAN del portal, conjunto «nomenclador»); se cita la fuente.',
+    obtain: 'url',
+    dir: 'pami',
   },
 };
 
