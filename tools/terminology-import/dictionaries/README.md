@@ -21,11 +21,13 @@ Extiende lo que ya existía en `tools/terminology-import/` sin duplicarlo: reusa
 | 1 | `fetch-dictionaries.mjs [ids…]` | Baja cada archivo a `dictionaries-sources/<id>/` y deja `manifest.json` (URL, SHA-256, bytes, fecha). Reanudable. | sí |
 | 2 | `build-dictionaries.mjs` | Normaliza a `dictionaries/ndjson/<id>.ndjson` (+ `.meta.json`), `disease-agents.ndjson` y `coverage.json`. Determinista. ~40 s; ~650 MB de NDJSON. | no |
 | 2b | `import-wikidata-es-labels.mjs` | Nombres ES de Wikidata (CC0) por id declarado (P1554 UBERON, P7963 CL, P1402 FMA, P354 HGNC, P685 NCBITaxon…). **No corrido**: query.wikidata.org bloqueado en la sesión que lo escribió. | sí |
+| 2c | `pack-dictionaries-data.mjs --pack` / `--unpack` | Guarda el corpus normalizado en git (`data/`, gzip determinista, partes ≤ 45 MB, `INDEX.json` con SHA-256) y lo restaura verificado, para cargar sin volver a bajar ni construir. Los crudos no se suben: `data/manifest.json` trae URL y SHA-256 para re-bajarlos con `fetch`. | no |
 | 3 | `load-dictionaries.mjs` | Dry-run por defecto; `--apply` carga a `terminology.*`. `--include go,pato,fma-full,abbreviations-literature,…` suma lo opt-in; `--only uberon,cl` limita. | base |
 
 ```sh
 node tools/terminology-import/dictionaries/fetch-dictionaries.mjs          # ~2 min, ~500 MB
 node tools/terminology-import/dictionaries/build-dictionaries.mjs          # ~40 s, sin red
+node tools/terminology-import/dictionaries/pack-dictionaries-data.mjs --unpack   # alternativa a fetch+build: restaura el corpus de data/ (31,7 MB)
 node tools/terminology-import/dictionaries/load-dictionaries.mjs           # plan y conteos, sin base
 node tools/terminology-import/dictionaries/load-dictionaries.mjs --apply   # .env DB_*; exige la API arrancada una vez
 node --test "tools/terminology-import/dictionaries/test/*.test.mjs"        # 18 pruebas con recortes reales

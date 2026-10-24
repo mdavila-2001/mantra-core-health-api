@@ -66,9 +66,11 @@ load-corrida-4.json  73 s  concepts 0       conceptMaps 0
 - Defecto encontrado en el repaso del diff y corregido: el cargador tenía su propio mapa prefijo → code system, desactualizado; se unificó con `PREFIX_CODE_SYSTEM` de `sources.mjs` (la 3.ª corrida sumó los 13 concept_maps que faltaban) y se agregó un test de consistencia.
 - Enfermería pasó a otra sesión (`justin/seed-nursing-care`) a mitad de trabajo: se sacó del alcance.
 
+- Por orden del propietario transmitida por la sesión coordinadora («que todo quede en la nube»), el corpus normalizado **sí** se subió a git, al revés de lo que decía el brief original («fuentes fuera de git»): `tools/terminology-import/dictionaries/data/` (88 archivos gzip, 31,7 MB, el mayor de 12 MB, `INDEX.json` con SHA-256). Restauración verificada con `pack-dictionaries-data.mjs --unpack` (SHA-256 iguales; el plan de carga da los mismos 111 389 conceptos). Los crudos (500 MB, `fma.owl` 200 MB) no se suben: `data/manifest.json` y `fetch-dictionaries.mjs` los reproducen.
+
 ## Riesgos residuales
 - Corpus en inglés: no aparece en `/glossary` hasta tener nombres ES.
-- Licencia de FMA sin confirmar con la página oficial.
+- Licencia de FMA sin confirmar con la página oficial; el corpus derivado de FMA ahora también está en git (la licencia de la UW permite redistribuir, pero conviene confirmarla).
 - `concept_properties` ocupa 195 MB de los 335 MB de la carga por defecto.
 - Si otra sesión carga la misma ontología con otra URL canónica, se crea un segundo code system (la deduplicación es por URL canónica o `internal_code`).
 
