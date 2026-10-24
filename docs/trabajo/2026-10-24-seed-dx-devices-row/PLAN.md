@@ -16,44 +16,46 @@
 ## H1 — Fuentes con copia pública normalizadas al formato común
 **CA:** Dado un clon limpio, cuando se corren `fetch-mirrors.mjs` y `build.mjs`, entonces `out/` tiene un `.ndjson.gz` por fuente y un `manifest.json` cuyos conteos y sha256 coinciden con los archivos.
 **DoD:** `node tools/terminology-import/diagnostic-devices/row/check-out.mjs` → `OK` con 0 errores.
-**Estado:** TODO
+**Estado:** HECHO
 
 ### H1.S1 — Descarga reproducible
+**Estado:** HECHO
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | `fetch-mirrors.mjs` clona cada espejo en su commit fijo fuera de git y verifica el sha256 del archivo usado | el sha256 calculado coincide con el fijado en `sources.mjs` | `node …/row/fetch-mirrors.mjs` → `sha256 OK` por fuente | TODO |
+| H1.S1.M1 | `fetch-mirrors.mjs` clona cada espejo en su commit fijo fuera de git y verifica el sha256 del archivo usado | el sha256 calculado coincide con el fijado en `sources.mjs` | `node …/row/fetch-mirrors.mjs` → `sha256 OK` por fuente | HECHO |
 
 ### H1.S2 — Normalizadores por fuente
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S2.M1 | ANVISA registros (`anvisa-produtos`) | una fila por número de registro con los 18 campos | `node --test …/row/test/` → pass | TODO |
-| H1.S2.M2 | ANVISA modelos (`anvisa-produtos-modelos`) | una fila por registro+modelo | `node --test …/row/test/` → pass | TODO |
-| H1.S2.M3 | PMDA aprobaciones y certificaciones (`pmda-approvals`) | una fila por número+fecha+tipo de trámite | `node --test …/row/test/` → pass | TODO |
-| H1.S2.M4 | Health Canada MDALL (`hc-mdall`) | una fila por identificador de dispositivo, con licencia y compañía | `node --test …/row/test/` → pass | TODO |
-| H1.S2.M5 | TGA DAEN (`tga-daen`) | una fila por ARTG+nombre comercial | `node --test …/row/test/` → pass | TODO |
+| H1.S2.M1 | ANVISA registros (`anvisa-produtos`) | una fila por número de registro con los 18 campos | `node --test …/row/test/` → pass | HECHO |
+| H1.S2.M2 | ANVISA modelos (`anvisa-produtos-modelos`) | una fila por registro+modelo | `node --test …/row/test/` → pass | HECHO |
+| H1.S2.M3 | PMDA aprobaciones y certificaciones (`pmda-approvals`) | una fila por número+fecha+tipo de trámite | `node --test …/row/test/` → pass | HECHO |
+| H1.S2.M4 | Health Canada MDALL (`hc-mdall`) | una fila por identificador de dispositivo, con licencia y compañía | `node --test …/row/test/` → pass | HECHO |
+| H1.S2.M5 | TGA DAEN (`tga-daen`) | una fila por ARTG+nombre comercial | `node --test …/row/test/` → pass | HECHO |
+| H1.S2.M6 | CDSCO licencias de importación (`cdsco-import-licences`), agregada en la pasada 2 | una fila por dispositivo de cada licencia, con fabricante legal y país | `node --test …/row/test/` → pass | HECHO |
 
 ### H1.S3 — Salida y verificación
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S3.M1 | `build.mjs` escribe `.gz` < 50 MB y `manifest.json` con `gaps` | sha256 y filas del manifiesto coinciden | `node …/row/check-out.mjs` → `OK` | TODO |
-| H1.S3.M2 | `coverage.mjs` escribe el reporte de cobertura (por país, tipo, fabricantes, marcas, huecos) | el reporte existe y sus totales coinciden con el manifiesto | `node …/row/coverage.mjs` → totales iguales | TODO |
+| H1.S3.M1 | `build.mjs` escribe `.gz` < 50 MB y `manifest.json` con `gaps` | sha256 y filas del manifiesto coinciden | `node …/row/check-out.mjs` → `OK` | HECHO |
+| H1.S3.M2 | `coverage.mjs` escribe el reporte de cobertura (por país, tipo, fabricantes, marcas, huecos) | el reporte existe y sus totales coinciden con el manifiesto | `node …/row/coverage.mjs` → totales iguales | HECHO |
 
 ## H2 — Saturación (/loop)
 **CA:** Dado el registro de pasadas, cuando dos pasadas seguidas aportan 0 filas nuevas tras deduplicar, entonces el loop se detiene y el registro lo muestra.
 **DoD:** `docs/seed-research/diagnostic-devices-row.md` lista cada pasada con fuentes, filas nuevas y descartes.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | Pasada 1: fuentes de H1 | registrada con conteos | `grep -c "Pasada 1" docs/seed-research/diagnostic-devices-row.md` → ≥1 | TODO |
-| H2.S1.M2 | Pasadas siguientes: buscar más copias (NMPA, MFDS, TFDA, INVIMA, CDSCO, HSA, WHO PQ, …) | cada una registrada con conteos o descartes | ídem | TODO |
+| H2.S1.M1 | Pasada 1: fuentes de H1 | registrada con conteos | `grep -c "Pasada 1" docs/seed-research/diagnostic-devices-row.md` → ≥1 | HECHO |
+| H2.S1.M2 | Pasadas siguientes: buscar más copias (NMPA, MFDS, TFDA, INVIMA, CDSCO, HSA, WHO PQ, …) | cada una registrada con conteos o descartes | ídem | HECHO |
 
 ## H3 — Cierre
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Gates del repo | salen 0 | `corepack yarn typecheck` y `corepack yarn lint` → exit 0 | TODO |
-| H3.S1.M2 | PR contra `dev` sin mergear | PR abierto | URL del PR | TODO |
-| H3.S1.M3 | `REPORTE.md` | existe con las secciones obligatorias | `ls docs/trabajo/2026-10-24-seed-dx-devices-row/REPORTE.md` | TODO |
+| H3.S1.M1 | Gates del repo | salen 0 | `corepack yarn typecheck` y `corepack yarn lint` → exit 0 | BLOQUEADO |
+| H3.S1.M2 | PR contra `dev` sin mergear | PR abierto | URL del PR | HECHO |
+| H3.S1.M3 | `REPORTE.md` | existe con las secciones obligatorias | `ls docs/trabajo/2026-10-24-seed-dx-devices-row/REPORTE.md` | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

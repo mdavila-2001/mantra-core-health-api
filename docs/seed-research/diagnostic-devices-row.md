@@ -139,3 +139,27 @@ Candidatos revisados y descartados:
 | ihcstandardisasi/scrapKFA (Indonesia) | Descargador del catálogo KFA de SATUSEHAT; no publica los datos. |
 
 Sin espejo nuevo: Rusia, Turquía, Vietnam, Filipinas, Indonesia, Global Fund.
+
+## Pasada 4 — paquetes, Japón, Corea, China, OMS (2026-10-24)
+
+Búsquedas: paquetes de PyPI/npm con registros embebidos, PMDA/JMDN en japonés,
+품목허가 de MFDS, 国械注准 de NMPA, lista de diagnósticos precalificados de la OMS.
+
+**Aporte: 0 filas nuevas** (total sin cambios: 3 534 775).
+
+| Candidato | Motivo |
+|---|---|
+| peirin1230-ship-it/syonin-history `cc8289f` (notificaciones de 保険適用 del MHLW: 承認番号, 販売名, producto, JAN, titular) | Es una extracción de tablas desde PDF hecha por un tercero, no la copia de un archivo oficial: no cumple la regla de filas verbatim. Además son 特定保険医療材料 (materiales terapéuticos reembolsables: catéteres, implantes), y sus números de aprobación ya están en `pmda-approvals`. Queda anotado para `master/` como posible fuente de códigos JAN si se valida contra los PDF. |
+| hopol/GD-MedProcure-Radar (compras de equipos médicos en Guangdong) | Solo trae anuncios de licitación (hospital, proyecto, fecha); sin marca, modelo ni registro. |
+| q3dresearch/wss-who-prequal | Captura la lista de vacunas precalificadas, no la de diagnósticos in vitro. |
+| PyPI / npm | No se encontró ningún paquete con registros de dispositivos de estas autoridades. |
+
+## Saturación
+
+Las pasadas 3 y 4 aportaron 0 filas seguidas: el loop se detiene. Con la red
+de este entorno (solo GitHub, npm, PyPI y otros registros de paquetes), no
+quedan copias públicas verificables de registros fuera de EE. UU. y Europa.
+Lo que falta está en `out/manifest.json` → `gaps`, y se destraba habilitando
+la red hacia los portales oficiales: los normalizadores ya leen esos formatos
+(ANVISA, MDALL, PMDA, CDSCO) y para las demás autoridades hay que escribir el
+normalizador contra el archivo real cuando se pueda bajar.
