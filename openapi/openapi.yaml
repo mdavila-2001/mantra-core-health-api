@@ -63136,6 +63136,13 @@ components:
           type: string
           description: Nombre comercial
           maxLength: 300
+        taxIdentifier:
+          type: string
+          description: NIT o identificador tributario; se archiva como número del documento tributario
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9./-]+$
+          example: '1023456028'
         tenantType:
           type: string
           description: >-

@@ -476,6 +476,29 @@ export class RegisterOrganizationDetailsDto {
   tradeName?: string;
 
   /**
+   * NIT (o su equivalente) tal como lo escribe quien registra.
+   *
+   * Lo declara el alta de farmacia, que no tiene bloque `payer` donde ponerlo.
+   * Se archiva como número del documento tributario (`TAX_IDENTIFIER_DOC`) y
+   * sólo tiene efecto si el alta también sube ese documento. Para una
+   * aseguradora sigue mandando `payer.regulatorIdentifier`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'NIT o identificador tributario; se archiva como número del documento tributario',
+    maxLength: 50,
+    example: '1023456028',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(50)
+  @Matches(/^[A-Za-z0-9./-]+$/, {
+    message: 'El NIT sólo admite letras, dígitos, punto, barra y guion',
+  })
+  taxIdentifier?: string;
+
+  /**
    * Tipo de organización: prestador, aseguradora, corredor, universidad,
    * farmacia, institución de salud o negocio de salud.
    */

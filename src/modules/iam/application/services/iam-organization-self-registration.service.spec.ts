@@ -37,7 +37,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
    * @returns Resultado de build.
    */
   function build() {
-    const tx = { flush: fn().mockResolvedValue(undefined) };
+    const tx = { flush: fn().mockResolvedValue(undefined), create: fn() };
     const em = {
       transactional: fn((cb: (tx: unknown) => unknown) => cb(tx)),
     };
@@ -474,6 +474,54 @@ describe('IamOrganizationSelfRegistrationService', () => {
         },
       });
       expect(result.legalDocumentsRegistered).toBe(5);
+    });
+
+    it('farmacia: el NIT de la organización viaja como número del documento tributario', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          tenantType: 'PHARMACY',
+          taxIdentifier: '1023456028',
+          legalDocuments,
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '1023456028' }),
+      );
+    });
+
+    it('el NIT de la organización manda sobre el del bloque payer', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: {
+          ...dto.organization,
+          tenantType: 'PAYER',
+          taxIdentifier: 'NIT-ORG',
+          payer: {
+            carrierCode: 'CARRIER_1',
+            sigla: 'CX',
+            address: 'Av. Siempre Viva 123',
+            regulatorIdentifier: 'NIT-PAYER',
+          },
+          legalDocuments,
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: 'NIT-ORG' }),
+      );
     });
 
     it('no los toca si el alta no declara el bloque', async () => {

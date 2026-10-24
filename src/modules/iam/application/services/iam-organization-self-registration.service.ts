@@ -369,7 +369,9 @@ export class IamOrganizationSelfRegistrationService {
             tenantId: tenant.id,
             ownerUserId: user.id,
             legalEntityType: dto.organization.legalEntityType,
-            taxIdentifier: dto.organization.payer?.regulatorIdentifier,
+            taxIdentifier:
+              dto.organization.taxIdentifier ??
+              dto.organization.payer?.regulatorIdentifier,
             documents: {
               CONSTITUTION_DOC:
                 dto.organization.legalDocuments.constitutionFileId,
