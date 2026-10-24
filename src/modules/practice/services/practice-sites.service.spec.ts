@@ -15,6 +15,10 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import {
+  buildPracticeAccess,
+  type AssignmentRow,
+} from '../../../../test/doubles/practice-access.double';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -22,7 +26,7 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(assignments: AssignmentRow[] = []) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const practicesRepo = {
@@ -55,6 +59,7 @@ function build() {
     rolesRepo as any,
     serviceCatalogRepo as any,
     logger as any,
+    buildPracticeAccess(assignments),
   );
   return {
     service,
@@ -240,5 +245,80 @@ describe('PracticeSitesService', () => {
       expect(role.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ENDED);
       expect(role.validTo).toBeInstanceOf(Date);
     });
+  });
+});
+
+describe('PracticeSitesService.listPractices — acceso por vinculación', () => {
+  const OWN = { id: 'prac-own', code: 'MIO', name: 'Mi consultorio' };
+  const OTHER = { id: 'prac-other', code: 'AJENO', name: 'Consultorio ajeno' };
+  const PENDING = { id: 'prac-pending', code: 'PEND', name: 'Pendiente' };
+  const rows: AssignmentRow[] = [
+    {
+      practitionerProfileId: 'hp-doc',
+      practiceId: OWN.id,
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      validTo: null,
+    },
+    {
+      practitionerProfileId: 'hp-doc',
+      practiceId: PENDING.id,
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+      validTo: null,
+    },
+  ];
+  const doctor = {
+    id: 'user-doc',
+    roles: ['PRACTITIONER'],
+    practitionerProfileId: 'hp-doc',
+  } as any;
+
+  /**
+   * Servicio con las tres prácticas activas en el tenant compartido.
+   * @returns El servicio y sus dobles.
+   */
+  function withPractices() {
+    const d = build(rows);
+    d.practicesRepo.findByTenant.mockResolvedValue(
+      [OWN, OTHER, PENDING].map((p) => ({
+        ...p,
+        tenantId: 'DEFAULT',
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+      })),
+    );
+    return d;
+  }
+
+  it('el médico con vinculación ACTIVE ve sólo esa práctica', async () => {
+    const d = withPractices();
+
+    const list = await d.service.listPractices('DEFAULT', doctor);
+
+    expect(list.map((p) => p.id)).toEqual([OWN.id]);
+    expect(list[0]).toEqual({
+      id: OWN.id,
+      code: OWN.code,
+      name: OWN.name,
+      status: PRAC.PRACTICE_ACTIVE,
+    });
+  });
+
+  it('el médico con vinculación pendiente o sin vinculación no ve ninguna', async () => {
+    const d = withPractices();
+    const newcomer = { ...doctor, practitionerProfileId: 'hp-new' };
+
+    expect(
+      (await d.service.listPractices('DEFAULT', doctor)).map((p) => p.id),
+    ).not.toContain(PENDING.id);
+    await expect(d.service.listPractices('DEFAULT', newcomer)).resolves.toEqual(
+      [],
+    );
+  });
+
+  it('el administrador ve todas las prácticas del tenant', async () => {
+    const d = withPractices();
+
+    const list = await d.service.listPractices('DEFAULT', actor);
+
+    expect(list.map((p) => p.id)).toEqual([OWN.id, OTHER.id, PENDING.id]);
   });
 });
