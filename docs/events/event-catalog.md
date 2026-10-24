@@ -21,8 +21,7 @@ contrato, fuera del alcance de este ejercicio documental).
 AsyncAPI (`asyncapi/asyncapi.yaml`) declara el sobre (envelope) real y verificable
 (`eventType`, `aggregateType`, `aggregateId`, `payloadJson`, metadatos), y modela `payloadJson`
 como `object` genérico — documentar el schema exacto de cada uno de los 79 eventos requeriría
-inspeccionar cada call site individualmente, fuera de alcance de esta fase. Ver `GAP-017` en
-[análisis de brechas](../reports/documentation-gap-analysis.md).
+inspeccionar cada call site individualmente.
 
 ## Catálogo por módulo productor
 

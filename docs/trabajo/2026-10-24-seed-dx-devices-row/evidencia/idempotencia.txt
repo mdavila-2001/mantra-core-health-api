@@ -1,1 +1,0 @@
-IDENTICOS: misma entrada, mismos sha256 en los 7 archivos

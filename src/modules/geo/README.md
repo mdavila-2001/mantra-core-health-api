@@ -115,7 +115,5 @@ eventos de entrada/salida. Las rutas se reservan al rol `SECURITY_ADMIN`.
 corepack yarn test src/modules/geo --runInBand --silent
 ```
 
-La revisión de octubre de 2026 encontró que el rol global no sustituye una
-comprobación por tenant, sujeto y consentimiento. El detalle y la matriz de
-pruebas están en
-[`docs/revision-backend-2026-10-04/modulos/geo.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/geo.md).
+El acceso se decide por rol global, sin comprobación por tenant, sujeto ni
+consentimiento.

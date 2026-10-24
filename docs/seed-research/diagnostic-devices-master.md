@@ -84,7 +84,7 @@ detiene con dos pasadas seguidas en 0.
 ### Pasada 1 (2026-10-24)
 
 - **Regiones**: ninguna rama hermana tiene todavía `out/manifest.json`
-  (`us`, `eu`, `row`: pendientes). Avisé a las tres sesiones con el formato
+  (`us`, `eu`, `row`: sin publicar). Avisé a las tres sesiones con el formato
   común y con el dato de red (git clone de GitHub funciona; los registros
   oficiales dan 403).
 - **Fuentes nuevas**: FDA Product Classification (7 088 product codes) y la
@@ -117,7 +117,7 @@ detiene con dos pasadas seguidas en 0.
   `fda-gudid` 3 130 del subconjunto dental, `fda-denovo` 240). `eu` publicó
   su `out/manifest.json` en `origin/claude/adoring-curie-xdkt83` (`14f81a41`)
   con **0 filas** y 11 huecos (403 del proxy en EUDAMED, MHRA, Swissmedic,
-  CND, NANDO, BfArM, AEMPS, ANSM). `row`: pendiente.
+  CND, NANDO, BfArM, AEMPS, ANSM). `row`: sin publicar.
 - **Fuentes nuevas**: EMDN V2 completa, desde dos copias independientes en git
   (`BatirMedical/nomenclature-emdn@e0131762` y `lisadonlon/GMDNEMDN@ef608648`).
   Coinciden en código, término y nivel en los 8 453 códigos comunes; a la
@@ -150,7 +150,7 @@ detiene con dos pasadas seguidas en 0.
   `coverage.json`.
 - **Taxonomía cargada** en el Postgres 16 desechable: EMDN 8 454 conceptos y
   8 431 relaciones is-a, 218 mapeos, 5 692 miembros del value set; 2.ª corrida
-  en 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada2.txt`).
+  en 0.
 - **Listados del sector**: `data/industry-directories.json` (46
   organizaciones, 552 menciones con URL). Con el corpus de `us`, 130 de 370
   empresas cruzan con un fabricante de los registros; 240 quedan como
@@ -170,7 +170,7 @@ detiene con dos pasadas seguidas en 0.
     `cl-tud/riskman-device-code-validation-scripts`: similitud de texto
     automática, no un mapeo publicado por una autoridad.
   - `bjoleary/fdadata` (`foiclass` del 2026-10-20 en `.rda` de R): no hay R ni
-    lector de `.rda` en el entorno; queda para la próxima pasada (lo usa `us`).
+    lector de `.rda` en el entorno, así que no se leyó (lo usa `us`).
   - `misterrPink1/symmetric` `device.txt` de GUDID 2020: no trae product code
     ni GMDN, así que sin cruzarlo no hay tipo; se lo pasé a `us`.
   - Nota de método: el agente de búsqueda de espejos usó la búsqueda de código
@@ -183,7 +183,7 @@ detiene con dos pasadas seguidas en 0.
 - **Regiones**:
   - `us` @`3ba3358e`: 189 072 filas. Sumó `fda-rl` (110 614) y `cdc-livd-sars-cov-2` (487). De LIVD, 4 filas son inválidas (sin `manufacturerName`; tres son filas de prueba `Test_*` de la planilla) y las 483 válidas no traen tipo de dispositivo, así que quedan sin decisión. Se lo avisé a `us`.
   - `eu` @`e1601ac2` (`origin/claude/adoring-curie-xdkt83`): 716 filas `eudamed-udi`, todas válidas, más 26 583 actores EUDAMED con SRN en `manifest.actors`.
-  - `row`: pendiente. Avisó que va a empujar a `origin/claude/inspiring-planck-xhpf4w`.
+  - `row`: sin publicar en esta pasada.
 - **Fuente nueva para la resolución**: los actores EUDAMED (SRN, nombre, país) entran al resolvedor como identidad publicada. No son equipos.
 - **Nuevos tras deduplicar** (contra la pasada 2):
   - Fabricantes: +5 675 (18 978).
@@ -193,7 +193,7 @@ detiene con dos pasadas seguidas en 0.
   - Tipos con al menos un modelo: 2 976 (+548).
   - Fusiones `same-registry-id`: 107 (SRN). A revisión: 233 `name-match-conflicting-ids`, porque el mismo nombre aparece con SRN distintos y no se fusiona.
   - Listados del sector: 148 empresas cruzan con un fabricante (+18).
-- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0 (`docs/trabajo/2026-10-24-seed-dx-devices-master/evidencia/load-postgres16-pasada3.txt`).
+- **Taxonomía** recargada: +1 concepto EMDN y una versión nueva del value set con 5 693 miembros. La 2.ª corrida da 0.
 - **Descartadas**: ninguna nueva.
 
 ### Pasada 4 (2026-10-24)
@@ -304,8 +304,7 @@ sirviendo para texto libre cuando el equipo no está en el catálogo).
 El importador del catálogo sale directo de `out/manufacturers.ndjson.gz` y
 `out/models-*.ndjson.gz`: cada modelo ya trae sus registros con procedencia.
 
-**Unión con la propuesta de `row`**
-(`docs/trabajo/2026-10-24-seed-dx-devices-row/REPORTE.md`). Coinciden en
+**Unión con la propuesta de `row`**. Coinciden en
 fabricantes con identificadores por esquema, modelos con tipo como FK a
 `terminology.catalog_concepts`, autorizaciones con la cita completa por fila,
 identificadores por modelo y la FK opcional `device_model_id` en

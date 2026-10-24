@@ -3,7 +3,7 @@
   Fuente real: src/modules/identity_assurance/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `identity_assurance`
@@ -89,7 +89,6 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `identity_assertions`,
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/identity_assurance.md)
-identifica que los comandos administrativos de casos y evidencia no atan el UUID
-al tenant ni al sujeto autorizado. La corrida dirigida pasó 17 suites y 139 tests,
+Los comandos administrativos de casos y evidencia no atan el UUID al tenant ni
+al sujeto autorizado. La corrida dirigida pasó 17 suites y 139 tests,
 sin cobertura de RLS, archivos o dos tenants reales.

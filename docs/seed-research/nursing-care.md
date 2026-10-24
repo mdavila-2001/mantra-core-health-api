@@ -1,8 +1,7 @@
 # Cuidados de enfermería — bitácora de búsqueda, saturación y cobertura
 
 Rama `justin/seed-nursing-care` · importador en `tools/terminology-import/nursing-care/`
-· fuentes y licencias en `tools/terminology-import/nursing-care/SOURCES.md`
-· plan y reporte en [`PLAN.md`](../trabajo/2026-10-24-seed-nursing-care/PLAN.md) y [`REPORTE.md`](../trabajo/2026-10-24-seed-nursing-care/REPORTE.md).
+· fuentes y licencias en `tools/terminology-import/nursing-care/SOURCES.md`.
 
 Pedido del propietario: «que se busque completamente el VADEMÉCUM médico para… cuidados médicos de
 enfermería, con los mismos requerimientos». Esta sesión es la **dueña de enfermería**.
@@ -22,8 +21,7 @@ enfermería, con los mismos requerimientos». Esta sesión es la **dueña de enf
 
 Medido en una base PostgreSQL 16 desechable con el DDL de `database/SQL` (módulo 03):
 primera corrida 8 644 conceptos, 9 646 designaciones, 120 991 propiedades, 8 040 relaciones, 173
-membresías; **segunda corrida 0 filas** (idempotente). Evidencia literal en
-`docs/trabajo/2026-10-24-seed-nursing-care/evidencia/`.
+membresías; **segunda corrida 0 filas** (idempotente).
 
 ## Red de esta sesión
 
@@ -56,8 +54,7 @@ Aportes nuevos contados **por code system + código** tras deduplicar.
 | 8 | 2026-10-24 | Literatura (búsqueda web, sólo huecos): Gerokomos (EVRUPP en España), TFG UVa, ANA 2015, FAQ Omaha, ICN Q&A 2020 | 0 | 0 | 0 | 0 | identifica escalas sin fuente cargable: Norton, Norton modificada, EMINA, Cubbin-Jackson, Morse |
 
 **Saturación**: las pasadas 5, 6, 7 y 8 aportan 0 → con la red de esta sesión no hay más que
-encontrar. Lo que falta está detrás de hosts bloqueados o de licencias (tabla «Huecos»). Si el
-propietario habilita dominios, la próxima pasada empieza por Omaha System.
+encontrar. El resto está detrás de hosts bloqueados o de licencias (tabla «Huecos»).
 
 ## Jerarquía (dominio → clase → elemento)
 
@@ -124,9 +121,9 @@ Las ramas hermanas (`justin/seed-diseases`, `justin/seed-symptoms`, `justin/seed
 archivos nuevos no mencionan enfermería; carga `maxo`, `ncit`, `ohd`, sin solaparse por code system
 con esta rama. `link-check.mjs` repite el control (git y, con `--db`, por código en la base).
 
-## Huecos y licencias pendientes
+## Huecos y licencias
 
-| Hueco | Qué hace falta | Quién |
+| Hueco | Requisito | Quién lo da |
 |---|---|---|
 | Omaha System (dominio público) | habilitar `www.omahasystem.org` en la red del entorno; luego escribir el parser contra el archivo real | propietario (red) |
 | CCC v2.5 | leer y aceptar el acuerdo de SabaCare | propietario (licencia) |

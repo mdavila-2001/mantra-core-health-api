@@ -8,9 +8,8 @@ import { IdentityVerificationModule } from './identity-verification/identity-ver
 
 /**
  * Emulador standalone de los cuatro proveedores externos que
- * mantra-core-health-redesa-api todavía no conecta de verdad (mensajería,
- * borrado cross-store, embeddings y verificación de identidad) — ver `docs/progress/ESTADO-Y-PENDIENTES.md` del backend
- * principal, sección "Conectar proveedores externos reales a los workers".
+ * mantra-core-health-redesa-api no conecta de verdad (mensajería, borrado
+ * cross-store, embeddings y verificación de identidad).
  *
  * Deliberadamente sin nada del backend principal: ni base de datos, ni
  * multi-tenant, ni el esquema de auth interno. Es un doble de prueba con

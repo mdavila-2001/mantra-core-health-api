@@ -129,11 +129,8 @@ Evidencia: `services/practitioner-settlement-batch.spec.ts` (dominio puro,
 18 pruebas correcto/límite/inválido), `services/practitioner-settlement-batches.service.spec.ts`
 (servicio con dobles de `EntityManager`, 8 pruebas) y las aserciones de
 `controllers/insurance-controllers.spec.ts` sobre roles y ausencia de
-propiedades de pago en los DTOs. La prueba de integración HTTP end-to-end
-queda **bloqueada** por un defecto ajeno a este carril (MikroORM/`ts-morph`
-no resuelve los metadatos de `terminology.catalog_concepts` en este entorno);
-ver el contrato §12 y el `REPORTE.md` de
-`docs/trabajo/2026-09-24-insurance-exclusions-settlement-contracts/`.
+propiedades de pago en los DTOs. No hay prueba de integración HTTP de punta a
+punta de los lotes.
 
 ## Administración de planes y coberturas
 
@@ -298,7 +295,7 @@ Reglas que no se deducen del código:
   están** `POST …/:id/invoice` ni `POST …/:id/invoice/annulment`, y `invoice`
   viaja siempre `null`: el modelo no declara dónde vive la factura del prestador
   a la aseguradora (`billing.invoices` exige práctica y paciente y no tiene
-  anulación). Es una decisión de modelo pendiente (ADR-0021).
+  anulación).
 
 ## Contenido
 
@@ -327,9 +324,5 @@ Reglas que no se deducen del código:
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/insurance.md)
-identificó pendientes en el camino legacy de reclamos, conciliación, roles de
-lectura, cálculo de varianza y límites de lotes. La corrida dirigida actual
-deja 37 suites y 626 tests pasando, con un test rojo que espera una matriz de
-roles distinta de la que hoy declara el controlador. Esa discrepancia debe
-resolverse con una decisión de acceso y pruebas HTTP por tenant.
+El camino legacy de reclamos, la conciliación, los roles de lectura, el cálculo
+de varianza y los límites de lotes tienen alcance incompleto.

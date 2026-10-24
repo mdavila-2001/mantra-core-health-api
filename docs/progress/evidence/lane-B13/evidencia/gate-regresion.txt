@@ -1,4 +1,0 @@
-$ corepack yarn test --testPathPatterns="quotation|billing|accounting"
-Suites: 36 passed, 0 failed, 36 total
-Tests:  284 passed, 0 failed, 0 skipped, 284 total
-exit=0

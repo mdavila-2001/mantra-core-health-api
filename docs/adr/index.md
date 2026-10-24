@@ -13,11 +13,11 @@
 | [0003](ADR-0003-postgresql-poliglota.md) | Motor de datos — PostgreSQL primario + políglota | Aceptado |
 | [0004](ADR-0004-autenticacion-jwt-propio.md) | Autenticación — JWT propio | Aceptado |
 | [0005](ADR-0005-autorizacion-rbac-pdp-clinico.md) | Autorización — RBAC + PDP clínico aditivo | Aceptado |
-| [0006](ADR-0006-multi-tenancy-rls.md) | Multi-tenancy — RLS sobre esquema compartido | Aceptado (verificación operativa pendiente) |
+| [0006](ADR-0006-multi-tenancy-rls.md) | Multi-tenancy — RLS sobre esquema compartido | Aceptado |
 | [0007](ADR-0007-eventos-sin-broker-externo.md) | Eventos y colas — sin broker externo | Aceptado |
 | [0008](ADR-0008-cache-redis.md) | Caché — Redis dedicado | Aceptado |
 | [0009](ADR-0009-almacenamiento-archivos-minio.md) | Almacenamiento de archivos — MinIO/S3 | Aceptado |
-| [0010](ADR-0010-observabilidad-pino.md) | Observabilidad — logging estructurado con Pino | Aceptado (logging); métricas/trazas pendientes |
+| [0010](ADR-0010-observabilidad-pino.md) | Observabilidad — logging estructurado con Pino | Aceptado (logging; trazas en 0020, métricas HTTP en 0027) |
 | [0011](ADR-0011-sin-versionado-api.md) | Versionado de API — sin versionado activo | Aceptado |
 | [0012](ADR-0012-estrategia-errores.md) | Estrategia de errores — jerarquía de dominio + filtro global | Aceptado |
 | [0013](ADR-0013-idempotencia-por-dominio.md) | Idempotencia — por dominio, no transversal | Aceptado |

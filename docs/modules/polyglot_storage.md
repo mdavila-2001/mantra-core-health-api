@@ -3,7 +3,7 @@
   Fuente real: src/modules/polyglot_storage/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `polyglot_storage`
@@ -192,7 +192,7 @@ delegación de los tres controladores).
   ningún `{id}` que referenciar al llamar. Se publica sin el segmento, y la idempotencia la da la
   clave natural `(versión, región, papel)`.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real contra el motor**: crear la colección en Mongo, aplicar el TTL, mover la réplica.
   El módulo gobierna y registra; el adaptador de cada backend ejecuta.
@@ -201,20 +201,14 @@ delegación de los tres controladores).
 - **Cálculo de los hashes de integridad**: se comparan los dos que llegan; recorrer la proyección y
   la fuente canónica para calcularlos es del worker.
 - **Métricas de uso para el coste**: llegan consolidadas; medirlas es del proveedor.
-- **Validación sintáctica de `row_filter_expression`**: el caso de uso la pide; hoy se guarda tal
-  cual. Necesita el parser del lenguaje de filtros, que no está definido en el modelo.
+- **Validación sintáctica de `row_filter_expression`**: se guarda tal cual, porque el modelo no
+  define el lenguaje de filtros.
 - **Bloqueo distribuido e idempotencia en Redis** (`redis_runtime.*`): aquí lo cubren el `FOR UPDATE`
-  y las claves naturales. Ese esquema es del módulo 56, **sin asignar**.
-- **Outbox** (módulo 35, ya disponible): `StorageBackendRegistered`, `DatasetDefined`,
-  `DatasetVersionPublished`, `CollectionSchemaRegistered`, `DataPlacementApproved`,
-  `ConsistencyPolicyDefined`, `DataAccessPolicyDefined`, `TenantStorageBound`,
-  `EncryptionProfileDefined`, `StoragePoliciesDefined`, `StoreHealthDegraded`,
-  `PlacementFailedOver`, `StorageCostSnapshotConsolidated`, `IntegrityMismatchDetected`,
-  `ProjectionQuarantined`. Quedan por cablear a `OutboxService.publishDomainEvent()`.
+  y las claves naturales.
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 confirmó las reglas de gobierno estáticas y dejó registrada la brecha entre aprobar una colocación y aplicar la política sobre el motor físico. El informe está en [`docs/revision-backend-2026-10-04/modulos/polyglot_storage.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/polyglot_storage.md).
+La revisión de octubre de 2026 confirmó las reglas de gobierno estáticas. Aprobar una colocación no aplica la política sobre el motor físico.
 
 ```bash
 corepack yarn test src/modules/polyglot_storage --runInBand --silent

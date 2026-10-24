@@ -198,7 +198,7 @@ export class IntegrationWebhooksService {
         );
       }
       const secret =
-        sub.secretReference ?? deriveWebhookSecret('subscription', sub.id); // TODO secreto por conexión
+        sub.secretReference ?? deriveWebhookSecret('subscription', sub.id);
       const body = {
         contractVersionId: version.id,
         eventTypeConceptId: sub.eventTypeConceptId,

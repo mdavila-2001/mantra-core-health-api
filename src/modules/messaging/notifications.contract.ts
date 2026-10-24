@@ -121,7 +121,7 @@ export type NotificationDestinationType =
    * recordatorio, cancelación y cambio de cita. `APPOINTMENT` (arriba) no lo
    * emite ningún módulo hoy — se declaró antes de que la agenda tuviera
    * avisos propios y quedó como aspiracional; se deja tal cual (diff mínimo,
-   * decisión D-Notif en `DECISIONS.md`) y este es el literal real.
+   * decisión D-Notif) y este es el literal real.
    */
   | 'scheduling.appointment_bookings'
   /**

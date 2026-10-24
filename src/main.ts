@@ -202,10 +202,8 @@ async function bootstrap() {
 
   // OpenAPI/Swagger en /docs y referencia interactiva Scalar en /reference.
   // Solo fuera de producción: en producción publicarían el mapa completo de
-  // endpoints y esquemas (divulgación de superficie de ataque). La estrategia
-  // de exposición en producción (Scalar protegido, entorno separado, etc.) es
-  // una decisión pendiente — ver `SEC-002` en
-  // `docs/governance/traceability-matrix.md` y `docs/api/conventions.md`.
+  // endpoints y esquemas (divulgación de superficie de ataque). En producción
+  // no se expone ninguna de las dos.
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('ALOVIDA Health API')

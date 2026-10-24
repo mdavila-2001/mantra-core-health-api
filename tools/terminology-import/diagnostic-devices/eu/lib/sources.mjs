@@ -5,7 +5,7 @@
 //
 // `terms.verified` dice si el texto de términos se leyó en la fuente oficial
 // desde esta sesión. Si es false, el texto resume lo que se pudo verificar por
-// otras vías y lo que queda pendiente; no se presenta como dictamen.
+// otras vías y lo que no se pudo verificar; no se presenta como dictamen.
 // =============================================================================
 
 export const SOURCES = {

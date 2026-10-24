@@ -3,7 +3,7 @@
   Fuente real: src/modules/pharmacy/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `pharmacy`
@@ -123,8 +123,8 @@ fusionan**: cada una conserva su id de origen; el ancla común con la receta es 
 - La búsqueda lista también los registros no vigentes (`selectable: false`):
   esconderlos haría que «no está» y «está dado de baja» se vieran igual. No filtra
   por tenant: el registro sanitario es el mismo para todas las farmacias.
-- **Pendiente en la API real:** edición (`PATCH`), precio por lista, imágenes y
-  descripción del producto. Hoy sólo existen en el simulador del front (P47); las
+- **No están en la API real:** edición (`PATCH`), precio por lista, imágenes y
+  descripción del producto; sólo existen en el simulador del front (P47), y las
   dos últimas no tienen columna en el modelo.
 
 ## Entidades
@@ -181,9 +181,8 @@ archivo para que el módulo sea auto-contenido.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy.md)
-registra que las mutaciones administrativas sólo exigen rol global y no atan el
-actor a farmacia ni tenant. También faltan comprobaciones entre farmacia, sede,
-práctica y aseguradora. La corrida dirigida pasó 22 suites y 278 tests; emitió
+Las mutaciones administrativas sólo exigen rol global y no atan el actor a
+farmacia ni tenant, y no se comprueba la relación entre farmacia, sede, práctica
+y aseguradora. La corrida dirigida pasó 22 suites y 278 tests; emitió
 dos advertencias de import JSON sin atributo y no prueba aislamiento de tenant
 ni claves foráneas reales.

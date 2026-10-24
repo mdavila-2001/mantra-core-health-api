@@ -1,8 +1,7 @@
 # Procedimientos y tratamientos no farmacológicos — por enfermedad y por parte del cuerpo
 
 Rama `justin/seed-procedures-treatments` · importador en `tools/terminology-import/procedures-treatments/`
-· fuentes y licencias en `tools/terminology-import/procedures-treatments/SOURCES.md`
-· plan en [`docs/trabajo/2026-10-24-seed-procedures-treatments/PLAN.md`](../trabajo/2026-10-24-seed-procedures-treatments/PLAN.md).
+· fuentes y licencias en `tools/terminology-import/procedures-treatments/SOURCES.md`.
 
 Es una base de **relaciones publicadas**, no un recomendador. Cada fila conserva el predicado literal
 de su fuente (`relationType.sourcePredicate`) y la clase de afirmación (`relationType.assertion`):
@@ -16,7 +15,7 @@ node tools/terminology-import/procedures-treatments/fetch.mjs             # desc
 node tools/terminology-import/procedures-treatments/build.mjs             # normaliza, sin red (~11 s)
 node tools/terminology-import/procedures-treatments/load.mjs              # dry-run: plan sin base
 node tools/terminology-import/procedures-treatments/load.mjs --apply      # carga (.env DB_*)
-node tools/terminology-import/procedures-treatments/validate-siblings.mjs --db   # fase 2
+node tools/terminology-import/procedures-treatments/validate-siblings.mjs --db   # cruce con las ramas hermanas
 node --test tools/terminology-import/procedures-treatments/test/*.test.mjs
 node tools/terminology-import/procedures-treatments/snapshot.mjs          # respalda el corpus en data/ (git)
 ```
@@ -140,28 +139,24 @@ lo detecta y hace falta un normalizador para esa fuente.
   xrefs a TA2 en `uberon.obo` (hueco).
 - **Enfermedades sin enlace:** de 32 134 términos MONDO vigentes, 167 tienen al menos un procedimiento
   (0,5 %). **Sitios sin enlace:** de 15 047 términos Uberon vigentes, 178 aparecen como sitio (unión de
-  los 15 directos y los 171 vía xref, que se solapan). La medición contra lo que efectivamente cargan `seed-diseases` y
-  `seed-medical-dictionaries` queda para la fase 2.
+  los 15 directos y los 171 vía xref, que se solapan). No está medido contra lo que efectivamente
+  cargan `seed-diseases` y `seed-medical-dictionaries`.
 - **Excluido por farmacológico:** 354 términos MAxO y 145 filas POET (para `seed-drug-treatments`).
 
-## Fase 2 — validación con las ramas hermanas
+## Validación con las ramas hermanas
 
-| Rama | Estado (2026-10-24 00:3x UTC) |
-|---|---|
-| `justin/seed-diseases` | no existe en `origin` |
-| `justin/seed-medical-dictionaries` | no existe en `origin` |
-| `justin/seed-specialty-services` | no existe en `origin` |
+No se ejecutó: `justin/seed-diseases`, `justin/seed-medical-dictionaries` y
+`justin/seed-specialty-services` no existían en `origin` (2026-10-24 00:3x UTC). El cruce lo hace
+`validate-siblings.mjs --db` sobre una base desechable con sus importadores corridos, o `--keys`
+con sus claves exportadas a TSV.
 
-Pendiente. Cuando existan: merge en una rama local de validación (sin push), correr sus importadores en
-una base desechable y `validate-siblings.mjs --db`; o exportar sus claves a TSV y usar `--keys`.
-
-## Huecos abiertos
+## Huecos
 
 1. Procedimiento → enfermedad para enfermedades comunes: depende de ClinicalTrials.gov (en estudio),
    MeSH y guías; todos bloqueados por la red.
 2. Procedimiento → sitio para ICHI / ICD-10-PCS (ejes del propio código): bloqueados por la red.
 3. Nombres en castellano: MAxO y NCIt no publican etiquetas oficiales en castellano; se dejan en inglés
    (sin traducción propia). CIE-10-ES daría los de ICD-10-PCS (bloqueado).
-4. Relaciones en la base: bloqueadas hasta que el modelo agregue la procedencia (propuesta arriba).
+4. Relaciones en la base: el modelo no tiene dónde guardar su procedencia (propuesta arriba).
 5. NCIt: la edición OBO trae solo 438 roles de procedimiento y ninguno R180 (`Procedure_Has_Target_Disease`);
    la edición oficial (bloqueada) puede traer más.

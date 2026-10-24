@@ -2,9 +2,7 @@
 
 Rama `justin/seed-dx-devices-us` (espejo de `claude/compassionate-brown-tr71nn`) · importador en
 `tools/terminology-import/diagnostic-devices/us/` · fuentes y licencias en
-`tools/terminology-import/diagnostic-devices/us/SOURCES.md` · plan y reporte en
-[`PLAN.md`](../trabajo/2026-10-24-seed-dx-devices-us/PLAN.md) y
-[`REPORTE.md`](../trabajo/2026-10-24-seed-dx-devices-us/REPORTE.md).
+`tools/terminology-import/diagnostic-devices/us/SOURCES.md`.
 
 Pedido del propietario: «que investigue profundamente todos y cada uno de los equipos de
 diagnóstico con todos los posibles proveedores que lo ofrecen en el mundo (marcas)… ultra
@@ -49,7 +47,7 @@ exacta (`manufacturerKey`), marcas por fabricante + nombre comercial exacto. Nun
 | 9 | 2026-10-24 | Búsqueda de repositorios de GitHub (≈60 consultas: MAUDE por categoría diagnóstica, GUDID, openFDA, R&L, EUA) y búsqueda web | **0** | 0 | 0 | `ivitskiy/hearingindex-data@ce1295f8` (34 audífonos de venta libre QUG/QUH/QUF/SCR, 874.33xx: prótesis, fuera de alcance; valores curados, no registros crudos); repos sólo de código (`batharr41/LotCheck-Engine`, `oxford-pharmacoepi/AccessGUDID`, `acarter881/accessgudid*` y otros 17); agregados sin filas por modelo (`JtrunzPHP/maude-monitor`, `Jeneidi/recallradar`, `jmaho24/maude-dashboard`); la búsqueda de GitHub cortó con 429 y no se insistió |
 | 10 | 2026-10-24 | Vías independientes: hosts oficiales FDA/NLM (vuelven a dar 403), proyectos de GitLab (`openfda`, `gudid`, `maude`, `510k`, `fda device`), paquetes PyPI (`pymaude`, `maude`, `pyfda` y 14 nombres más), búsqueda de conda | **0** | 0 | 0 | GitLab: sólo clientes de API de medicamentos y código (`OrenSource/gudid-go`, `leapbase/OpenFDAExplorer`, `f.veggeberg/open-fda-project`: ningún archivo de datos > 200 KB); PyPI: `pymaude` sin datos, `maude` y `pyfda` son otra cosa; la API de búsqueda de conda devuelve 403 |
 
-**Saturación:** las pasadas 9 y 10 aportan 0 → se cumple el corte de «dos pasadas seguidas sin aportes» con la red de esta sesión. Lo que falta está detrás de hosts bloqueados (tabla «Huecos»). Si el propietario habilita los dominios FDA/NLM, la próxima pasada empieza por `fetch-official.mjs --gudid-delimited` (GUDID completo y nombres propietarios del R&L).
+**Saturación:** las pasadas 9 y 10 aportan 0 → se cumple el corte de «dos pasadas seguidas sin aportes» con la red de esta sesión. Las fuentes no cubiertas están detrás de hosts bloqueados (tabla «Huecos»). Con los dominios FDA/NLM habilitados, una pasada nueva empezaría por `fetch-official.mjs --gudid-delimited` (GUDID completo y nombres propietarios del R&L).
 
 <!-- coverage:start -->
 ## Cobertura (generada por `coverage-report.mjs`)

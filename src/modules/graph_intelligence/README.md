@@ -217,7 +217,7 @@ aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 
   ventana en la que el derecho al olvido está solicitado pero no cumplido, sin nada que garantice que
   la segunda llamada llegue.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Cálculo real de comunidades y riesgo**, y evaluación de `traversal_expression`: el worker de
   analítica los aporta. Este módulo gobierna, versiona y registra.
@@ -225,18 +225,15 @@ aprobadas durante la revisión (28 proyección + 19 recorrido + 25 analítica + 
   ningún caso de uso del módulo 61 les da un endpoint de alta. No se ha inventado uno.
 - **Comprobación de consentimiento contra `consent.consents` / `consent.privacy_restrictions`**
   (UC-61-05): el alcance exige `patientProfileId` cuando `requiresPatientContext`, pero no se
-  contrasta contra el módulo 07, que es de la parte de Pablo.
+  contrasta contra el módulo 07.
 - **`audit.audit_events`** en cambio de política de acceso, consulta al grafo y triage: el caso de uso
   lo pide. El registro de auditoría es del módulo 06.
 - **`redis_runtime.*_cache_entries`** (UC-61-04, 12): la invalidación se publica por outbox
-  (`GraphAccessScopeChanged`); quien la consume y vacía la caché de sesión es el worker. Ese esquema
-  es del módulo 56, **sin asignar**.
-- **Índice `MULTIVALUE` sobre `member_node_ids[]`**: la depuración de comunidades al borrar recorre
-  las del tenant en memoria. Con volumen alto conviene el operador de arrays de Postgres, que exige
-  el índice que el modelo declara pero el ORM no materializa.
+  (`GraphAccessScopeChanged`); quien la consume y vacía la caché de sesión es el worker.
+- **Índice `MULTIVALUE` sobre `member_node_ids[]`**: el modelo lo declara pero el ORM no lo
+  materializa, así que la depuración de comunidades al borrar recorre las del tenant en memoria.
 
 ## Revisión ALOVIDA
 
-Las mutaciones por UUID todavía no comparan el tenant activo contra el recurso cargado, y el
-recorrido con paciente no contrasta consentimiento. Ver el
-[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/graph_intelligence.md).
+Las mutaciones por UUID no comparan el tenant activo contra el recurso cargado, y el recorrido
+con paciente no contrasta consentimiento.

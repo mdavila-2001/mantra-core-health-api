@@ -44,6 +44,4 @@ Ver [ADR-0023](../../docs/adr/ADR-0023-puertos-persistencia-read-write.md) y
 
 El enrutado nuevo es opt-in mediante `PERSISTENCE_PORTS_MODULES`; sin variable
 los módulos reciben la sesión directa heredada. Hoy el piloto es `scheduling`.
-Ejecutar `corepack yarn test --runInBand --silent src/persistence`. El inventario
-y plan de migración están en el
-[informe de revisión](../../docs/revision-backend-2026-10-04/nucleo/app-persistencia-observabilidad.md).
+Ejecutar `corepack yarn test --runInBand --silent src/persistence`.

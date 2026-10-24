@@ -3,7 +3,7 @@
   Fuente real: src/modules/integrations/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `integrations`
@@ -124,6 +124,5 @@ corepack yarn test src/modules/integrations --runInBand --silent
 ```
 
 Revisión 2026-10-05: **7 suites y 53 pruebas aprobadas**. Las pruebas son unitarias con mocks;
-faltan pruebas de aislamiento entre tenants, bóveda de secretos, carrera de callbacks y contrato
-`status + code + reason`. El detalle y plan de corrección están en
-[`docs/revision-backend-2026-10-04/modulos/integrations.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/integrations.md).
+no cubren aislamiento entre tenants, bóveda de secretos, carrera de callbacks ni el contrato
+`status + code + reason`.

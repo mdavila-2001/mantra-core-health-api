@@ -78,11 +78,8 @@ violando la regla de aislamiento. Es el **único** caso detectado por
 `tools/alovida/coverage-report.mjs` (`DIRECT_CROSS_DOMAIN_ACCESS: 1`).
 
 - **Clasificación:** `HIGH` (arquitectural).
-- **Estado:** conocido, no remediado en esta iteración documental — requiere diseñar un puerto de
-  lectura (servicio expuesto por `practice`, o proyección de solo lectura) para que `billing` deje
-  de leer la tabla ajena directamente.
-- **Seguimiento:** `docs/governance/traceability-matrix.md`, fila `ARCH-001`; acción trasladada a
-  `docs/progress/ESTADO-Y-PENDIENTES.md`.
+- **Estado:** aceptado como excepción de solo lectura (`ARCH-001` en la
+  [matriz de trazabilidad](../governance/traceability-matrix.md)).
 
 ## 6. Ausencia de ciclos de imports
 

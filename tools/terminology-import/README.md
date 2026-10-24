@@ -85,31 +85,23 @@ forma estable (0 filas nuevas en corridas repetidas). Cerrar el 2% restante
 requeriría particiones más finas (más subrangos de fecha) — no se hizo por
 retorno decreciente frente al costo de más llamadas a la API pública.
 
-## Fase 2 — pendiente de acceso UMLS (NO construido a ciegas)
+## SNOMED CT y RxNorm RRF: sin importador
 
-El usuario pidió amplificar hacia SNOMED CT y RxNorm completo (descarga RRF
-oficial, no la API pública ya usada). Ambos requieren una cuenta UMLS (NLM)
-gratuita:
+SNOMED CT y RxNorm completo (descarga RRF oficial, no la API pública ya usada) requieren una
+cuenta UMLS (NLM): registro en https://uts.nlm.nih.gov/uts/signup-login, aceptar la UMLS
+Metathesaurus License Agreement (incluye RxNorm completo y LOINC completo; SNOMED CT US Edition si
+el país está afiliado) y una API Key del perfil UTS.
 
-1. Registro: https://uts.nlm.nih.gov/uts/signup-login
-2. Aceptar la UMLS Metathesaurus License Agreement (incluye RxNorm completo
-   y LOINC completo; SNOMED CT US Edition si el país está afiliado).
-3. Generar una API Key en el perfil UTS.
+**Por qué no hay parser**: los archivos RRF de UMLS (`MRCONSO.RRF`, `MRREL.RRF`, `MRDEF.RRF`,
+etc.) tienen un formato pipe-delimited específico por release: escribir un parser sin un archivo
+real contra el cual validarlo arriesga producir código roto o silenciosamente incorrecto —
+exactamente el tipo de dato clínico fabricado que se buscaba evitar en toda esta iniciativa. Los
+archivos de referencia serían `RXNCONSO.RRF` (RxNorm completo) y `sct2_Concept_Full_*.txt` /
+`sct2_Description_Full_*.txt` (SNOMED CT).
 
-**Por qué no se escribió ya el parser**: los archivos RRF de UMLS
-(`MRCONSO.RRF`, `MRREL.RRF`, `MRDEF.RRF`, etc.) tienen un formato pipe-delimited
-específico por release: escribir un parser sin un archivo real contra el cual
-validarlo arriesga producir código roto o silenciosamente incorrecto —
-exactamente el tipo de dato clínico fabricado que se buscaba evitar en toda
-esta iniciativa. Cuando el usuario tenga la API key / los archivos
-descargados, avisar para construir y validar el importador de inmediato
-contra los archivos reales (`RXNCONSO.RRF` para RxNorm completo,
-`sct2_Concept_Full_*.txt` / `sct2_Description_Full_*.txt` para SNOMED CT).
-
-Alcance potencial de fase 2: SNOMED CT US Edition ronda 350,000+ conceptos
-activos (y varios millones de filas de relaciones/descripciones); RxNorm RRF
-completo añade relaciones ingrediente↔producto que la API pública (ya
-importada en `rxnorm_full`) no expone.
+Tamaño de referencia: SNOMED CT US Edition ronda 350,000+ conceptos activos (y varios millones de
+filas de relaciones/descripciones); RxNorm RRF completo añade relaciones ingrediente↔producto que
+la API pública (ya importada en `rxnorm_full`) no expone.
 
 ## Glosario en castellano — importadores ES (2026-09-30)
 
@@ -198,12 +190,10 @@ membresías en `glossary-all-terms` + `glossary-category-<k>` + `glossary-tag-<t
 una vez (value sets y conceptos internos sembrados); si no, aborta con el
 faltante. No actualiza filas existentes.
 
-> [!aviso] Rendimiento pendiente (fuera de este alcance)
-> `ConceptsService.searchConcepts` materializa **todos** los ids miembros del
-> value set y los pasa como `$in` a `catalog_concepts`. Con ~285 000 miembros en
-> `glossary-all-terms` eso es un `IN` de 285 000 uuids por búsqueda. Antes de
-> cargar el corpus completo en un entorno con usuarios hay que resolver esa
-> consulta con un `JOIN`/`EXISTS` contra `value_set_members`.
+> [!nota] Rendimiento
+> Las lecturas del glosario (paraguas, categoría o etiqueta) se resuelven enteras
+> en la base con `CatalogConceptsRepository.searchGlossaryPage`: no materializan
+> los ~285 000 ids miembros de `glossary-all-terms` como un `$in`.
 
 ### Fuentes evaluadas y descartadas
 

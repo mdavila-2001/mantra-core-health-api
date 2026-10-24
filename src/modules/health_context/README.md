@@ -117,16 +117,13 @@ cliente interno del worker.
 
 ## Errores y límites conocidos
 
-Los servicios usan `NOT_FOUND`, `CONFLICT` y `PRECONDITION_FAILED`, pero aún no
-tienen un catálogo propio de `reason` estable. También falta comprobar que una
-fuente localizada corresponda al país de la corrida y que su nivel de confianza
-sea admisible antes de aceptarla; una corrida con agenda permite hoy valores de
+Los servicios usan `NOT_FOUND`, `CONFLICT` y `PRECONDITION_FAILED`, sin un
+catálogo propio de `reason` estable. No se comprueba que una fuente localizada
+corresponda al país de la corrida ni que su nivel de confianza sea admisible
+antes de aceptarla; una corrida con agenda permite hoy valores de
 agente o país enviados en el DTO, y un revisor humano puede enviar un
 `reviewerAgentId`. La carrera de dos claves de idempotencia iguales recibe el
 conflicto del índice en vez de recuperar la corrida ganadora.
-
-El detalle, los planes de corrección y las matrices de cuatro casos están en el
-[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/health_context.md).
 
 ## Pruebas
 
@@ -135,5 +132,5 @@ corepack yarn test src/modules/health_context --runInBand --silent
 ```
 
 Resultado verificado: **3 suites y 81 pruebas aprobadas**. Las specs son
-unitarias; falta integración para roles HTTP, carrera de idempotencia y las
-validaciones de procedencia documentadas en el informe.
+unitarias; no cubren roles HTTP, carrera de idempotencia ni las validaciones de
+procedencia.

@@ -70,7 +70,7 @@ en **cualquier** posición del segmento: `points:batchIngest` declararía un par
 
 Todas las rutas de escritura reciben `@CurrentUser()`; va al `actorUserId` del evento de outbox.
 `GET series/:seriesId/query` no lo pide: no escribe nada. El caso de uso pide además registrar la
-lectura de datos sensibles en `audit.audit_events`, que es del módulo 06 (ver *Pendiente* en el
+lectura de datos sensibles en `audit.audit_events`, que es del módulo 06 (ver *Fuera de este módulo* en el
 README del módulo).
 
 ## Pruebas

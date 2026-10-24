@@ -1,5 +1,0 @@
-Test Suites: 2 passed, 2 total
-Tests:       49 passed, 49 total
-Snapshots:   0 total
-Time:        15.793 s
-Ran all test suites matching src/common/seed/data/clinical-forms/catalog.spec.ts|src/common/seed/clinical-forms-seed.service.spec.ts.

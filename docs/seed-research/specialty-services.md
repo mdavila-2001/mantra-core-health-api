@@ -290,7 +290,7 @@ al cargarlas, re-correr el importador relaciona estos servicios sin tocar códig
 
 ### Lo que no se pudo obtener
 
-| Hueco | Qué lo destraba |
+| Hueco | Qué lo resolvería |
 |---|---|
 | CUPS: año de la resolución | Bajar el anexo oficial (SISPRO `CUPSRips` o la resolución del año) y fijar `version`. |
 | CUPS: 223 códigos en desacuerdo y 574 sólo en la copia B | Igual: con la tabla oficial se resuelven. |

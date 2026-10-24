@@ -6,7 +6,7 @@ estado de acceso comprobado desde la sesión del 2026-10-24.
 «Términos verificados» = el texto de términos se leyó en la fuente oficial. En esta sesión
 **ningún** host oficial fue alcanzable (la política de red del entorno devuelve 403), así que
 ninguno está verificado en origen: lo que se escribe abajo es lo que se pudo confirmar por
-buscador o por documentos oficiales citados por terceros, y queda marcado como pendiente.
+buscador o por documentos oficiales citados por terceros, y queda marcado como no verificado.
 
 | Fuente | Qué aporta | Acceso | Términos | Descarga automática | Estado 2026-10-24 |
 |---|---|---|---|---|---|

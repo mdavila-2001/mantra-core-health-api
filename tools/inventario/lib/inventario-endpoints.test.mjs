@@ -46,7 +46,7 @@ test('ninguna operación queda sin requerimientos, ni con el handler sin localiz
   );
 });
 
-test('trinquete: una operación sin tablas siempre dice por qué (o es una decisión pendiente visible)', () => {
+test('trinquete: una operación sin tablas siempre dice por qué (o declara SIN_DETERMINAR a la vista)', () => {
   const sinTablas = endpoints.filter((e) => !e.tablas.length);
   assert.ok(
     sinTablas.every((e) => e.sinTablas),

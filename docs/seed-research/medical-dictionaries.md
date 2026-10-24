@@ -183,7 +183,7 @@ por clave y, entre fuentes distintas, por xref publicado (concept_maps), nunca p
 | Abreviaturas | En castellano | AbreMES-DB (PlanTL, licencia MIT) está en Zenodo, bloqueado | Habilitar `zenodo.org` y cargar AbreMES-DB (registro 2207130) |
 | Salud pública | MeSH «Epidemiologic Methods», DeCS | Bloqueados | Ídem DeCS |
 | Literatura | Detección de huecos con PubMed / Europe PMC | APIs bloqueadas | Habilitar `eutils.ncbi.nlm.nih.gov` / `www.ebi.ac.uk` |
-| Referencia | UMLS Metathesaurus como medida de cobertura | Exige cuenta UTS | **Pendiente del propietario** (no se creó cuenta) |
+| Referencia | UMLS Metathesaurus como medida de cobertura | Exige cuenta UTS | **Sin cuenta** (no se creó) |
 
 ## Licencias: estado de confirmación
 

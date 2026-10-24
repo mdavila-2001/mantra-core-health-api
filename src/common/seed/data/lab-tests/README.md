@@ -8,4 +8,4 @@ que carga un importador idempotente desde fuentes oficiales descargadas fuera de
 - Pasadas de búsqueda, cobertura y huecos: [`docs/seed-research/lab-tests.md`](../../../../../docs/seed-research/lab-tests.md)
 
 El catálogo de estudios que usa la orden (`service-request-code`, en `dynamic-enum-catalog.ts`)
-no cambia: enlazar un estudio local con un código de este catálogo es una decisión clínica pendiente.
+no cambia: no hay enlace entre un estudio local y un código de este catálogo, porque es una decisión clínica.

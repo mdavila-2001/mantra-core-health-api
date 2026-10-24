@@ -33,7 +33,7 @@ entra a este sistema.
 ## Riesgo residual
 
 Los secretos "planos" (JWT, credenciales de almacenes) no tienen rotación automática ni auditoría
-de acceso individual verificada en esta fase — ver `SEC-002`... realmente `ADR-0015` §"Riesgos".
+de acceso individual — ver `ADR-0015` §"Riesgos".
 No se declara "suficiente para producción" sin una evaluación explícita de si el volumen y
 sensibilidad de estos secretos justifica migrar a un gestor dedicado (Vault, AWS Secrets Manager).
 

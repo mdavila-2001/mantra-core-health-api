@@ -3,7 +3,7 @@
   Fuente real: src/modules/billing/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `billing`
@@ -17,9 +17,7 @@
 
 Facturación al paciente (CxC), cuentas por pagar (CxP), contabilización a ledger,
 conciliación bancaria, morosidad, planes de pago y KPIs financieros. Expone los 12
-casos de uso UC-17-01..12, tres lecturas de soporte y rutas de catálogo. La
-[revisión de 2026-10-05](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/billing.md)
-documenta los límites de autorización, dinero e idempotencia.
+casos de uso UC-17-01..12, tres lecturas de soporte y rutas de catálogo.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -135,9 +133,8 @@ Las rutas de acción usan `:` literal, escapado en el decorador (`invoices\\:iss
 - Totales de factura derivados de líneas (`base = cantidad*precio - descuento`,
   `total = subtotal + impuestos`); `balance = total - paid_total`.
 - Cobros/pagos: el código limita la suma asignada (más retención en CxP) contra el
-  monto y actualiza los saldos. Descuentos, signos y pertenencia de práctica todavía
-  requieren el endurecimiento registrado en el informe antes de considerarlos una
-  garantía contable completa.
+  monto y actualiza los saldos. Descuentos, signos y pertenencia de práctica no
+  están endurecidos: no son una garantía contable completa.
 - Nota de crédito: crea factura de reverso (total negativo) y baja el saldo de la
   original; el reverso no puede exceder el saldo salvo `writeOff`.
 - Bills: vendor activo, sin doble captura de `bill_number`, three-way match (línea

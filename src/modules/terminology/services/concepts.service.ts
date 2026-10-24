@@ -1067,9 +1067,8 @@ export class ConceptsService {
    * mismo criterio que `resolveGlossaryRelations`: es preferible un vecino de
    * menos que uno que el cliente no puede abrir.
    *
-   * TODO(TAREA-41 F1): hoy se traen las aristas del término y se ordenan en
-   * memoria por nombre; con ~1 M de relaciones el orden pasa a ser por
-   * `strength_score` en la base, con los índices compuestos de esa fase.
+   * Las aristas del término se traen y se ordenan en memoria por nombre: el
+   * orden no usa `strength_score` ni se resuelve en la base.
    *
    * @param conceptId - Término central.
    * @param language - Idioma de los nombres (castellano por omisión).

@@ -3,7 +3,7 @@
   Fuente real: src/modules/audio_assets/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `audio_assets`
@@ -112,9 +112,7 @@ Un proveedor nuevo implementa `TtsProviderPort` y se registra en el factory del 
 ## Auditoría vigente
 
 La revisión de octubre de 2026 verificó el aislamiento de caché/contenido por
-tenant, el cifrado de valores dinámicos y las rutas internas de generación. El
-informe y la matriz de regresión están en
-[`docs/revision-backend-2026-10-04/modulos/audio_assets.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/audio_assets.md).
+tenant, el cifrado de valores dinámicos y las rutas internas de generación.
 
 ```bash
 corepack yarn test src/modules/audio_assets --runInBand --silent
