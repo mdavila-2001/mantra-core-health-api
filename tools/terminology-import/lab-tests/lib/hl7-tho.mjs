@@ -7,7 +7,7 @@
 // muestra, sección del servicio diagnóstico). Se copian VERBATIM: código,
 // `display`, `definition`, estado y comentario oficial de HL7. THO no trae
 // designaciones en castellano (sólo alemán en algunas tablas): el texto queda
-// en inglés y la traducción queda pendiente, no se inventa.
+// en inglés: la traducción no se inventa.
 // =============================================================================
 
 import { compact, conceptIdFor } from './records.mjs';

@@ -66,10 +66,9 @@ a que el secreto de webhook se resuelve dinámicamente desde
 global) — patrón de **integraciones multi-tenant configurables en base de datos**, no integraciones
 hardcodeadas por despliegue.
 
-**Brecha documental identificada:** el catálogo completo de proveedores externos soportados
-(pasarelas de pago, aseguradoras, laboratorios, etc.) vive en datos de configuración, no en código
-ni en este grafo — se documenta como pendiente de completar en `docs/architecture/integration-map.md`
-§4 tras inventariar `gateway_connections` y tablas equivalentes en Fase 10 (catálogo de datos).
+**Límite de este mapa:** el catálogo de proveedores externos soportados (pasarelas de pago,
+aseguradoras, laboratorios, etc.) vive en datos de configuración (`gateway_connections` y tablas
+equivalentes), no en código ni en este grafo, así que este documento no lo enumera.
 
 ## 4. Límites de confianza (trust boundaries)
 
@@ -102,9 +101,3 @@ flowchart LR
   su valor real por entorno es una decisión operativa crítica documentada en
   `docs/security/tenant-isolation.md` (Fase 12), coherente con el hallazgo de auditoría previo
   registrado en memoria de sesión ("validar aislamiento por tenant en cada entorno").
-
-## 5. Brechas para fases posteriores
-
-- Catálogo formal de eventos de dominio (nombre, productor, consumidores, esquema) → Fase 11 (AsyncAPI).
-- Runbook de arranque/apagado ordenado de los 21 workers → Fase 13 (operación).
-- Inventario de proveedores externos reales desde `gateway_connections` y tablas equivalentes → Fase 10.

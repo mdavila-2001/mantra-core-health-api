@@ -91,7 +91,7 @@ SHA-256, fecha, licencia, URI del término).
 | EMDN (UE) | `webgate.ec.europa.eu` y `health.ec.europa.eu` bloqueados. El repo de ANS (Francia) sólo trae un subconjunto de 16 códigos EMDN con nombres en francés: no es el nomenclador. |
 | GMDN | Exige membresía (licencia). No se crean cuentas. |
 | ICNP, NANDA-I, NIC, NOC | Enfermería: la carga otra sesión (`justin/seed-nursing-care`). NANDA-I (NANDA International) y NIC/NOC (Elsevier) tienen copyright. |
-| UMLS Metathesaurus | Exige cuenta UTS: **pendiente del propietario**; no se creó cuenta. |
+| UMLS Metathesaurus | Exige cuenta UTS: **sin cuenta** (no se creó). |
 | SNOMED CT | Bolivia no es miembro de SNOMED International; además se descartan los xrefs `SCTID` de las OBO. |
 | MedlinePlus en español | Ya está en el glosario (`import-medlineplus-es.mjs`); `medlineplus.gov` bloqueado. |
 | Wikidata | `query.wikidata.org` y `www.wikidata.org` bloqueados: el importador ES queda escrito y no corrido. |

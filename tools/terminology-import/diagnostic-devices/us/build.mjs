@@ -381,7 +381,7 @@ if (rlDir && !officialListing.length) {
   inputs.push({ source: 'mirror sdgoldberg-meddev (R&L 2024)', version: prov.sourceVersion, records: links.length, registrations: regs.size, listingsWithProductCode: pcdByKey.size, inScope: kept, linksWithoutRegistration: orphan });
 }
 
-if (!rlDone) gaps.push({ source: 'fda-rl', url: 'https://download.open.fda.gov/device/registrationlisting/', reason: '403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento.' });
+if (!rlDone && !officialListing.length) gaps.push({ source: 'fda-rl', url: 'https://download.open.fda.gov/device/registrationlisting/', reason: '403 del proxy — host bloqueado; sin él no hay país del fabricante ni nombres propietarios por establecimiento.' });
 
 // --- 2d. LIVD SARS-CoV-2 de CDC (pruebas IVD con EUA de FDA) ----------------------
 const livd = mirrorFile('cdcgov-routes-livd', 'ReportStream/metadata/tables/local/LIVD-SARS-CoV-2.csv');

@@ -62,10 +62,7 @@ que exista el contenedor de NestJS. `OrmModule` la vuelve a exponer como proveed
 (`{ provide: QueryMetrics, useValue: ormQueryMetrics }`) para que cualquier servicio la
 inyecte con normalidad.
 
-## Lo que falta y sería el siguiente paso
+## Límites
 
-- Exponer `snapshot()` en un endpoint (`@nestjs/terminus` ya está en las dependencias).
-- Etiquetar cada consulta con el identificador de traza de la petición para poder atribuir
-  una consulta lenta a un endpoint concreto.
-- Detección de N+1: `QueryMetrics` tiene ya el volumen por familia, y comparar consultas por
-  petición contra una cota daría la señal.
+`snapshot()` no se expone en ningún endpoint, las consultas no llevan el identificador de traza
+de la petición y no hay detección de N+1.

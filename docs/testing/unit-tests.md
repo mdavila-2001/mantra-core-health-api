@@ -15,9 +15,7 @@ Tests:       3732 passed, 3732 total
 
 Jest reporta *"A worker process has failed to exit gracefully... Active timers can also cause
 this"*. No afecta el resultado (exit 0), pero indica un temporizador o conexión no liberada en
-algún test o en el código bajo prueba. Registrado como `TEST-002` en
-[matriz de trazabilidad](../governance/traceability-matrix.md), `MEDIUM`, no investigado a fondo
-en esta fase — recomendación: `yarn test --detectOpenHandles` para localizarlo.
+algún test o en el código bajo prueba. `yarn test --detectOpenHandles` lo localiza.
 
 ## Cobertura
 

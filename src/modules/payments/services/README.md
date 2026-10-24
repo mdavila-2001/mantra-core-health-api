@@ -37,8 +37,7 @@ Aquí vive la lógica de negocio. Cada método público resuelve un caso de uso 
 ## Dependencias
 
 `EntityManager` (transacciones), los repositorios del módulo y `PinoLogger`. No dependen de otros
-módulos: el estado se deja consistente en PostgreSQL y la proyección a los stores queda para el
-outbox (módulo 35, pendiente).
+módulos: el estado se deja consistente en PostgreSQL; el módulo no publica eventos al outbox.
 
 ## Transacciones
 

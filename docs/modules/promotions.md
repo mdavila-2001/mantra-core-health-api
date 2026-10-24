@@ -3,7 +3,7 @@
   Fuente real: src/modules/promotions/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `promotions`
@@ -152,21 +152,16 @@ que procesa por lotes y no debe esperar a otra pasada. `row_version` aporta bloq
 `corepack yarn test src/modules/promotions --runInBand --silent` — 4 suites y 118 pruebas
 aprobadas durante la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Crédito de billetera**: cuando el premio de una regla o de un referido es `wallet_credit`, este
   módulo no acredita nada — `payments.wallets` pertenece al módulo 42B. La redención y el referido
-  quedan registrados y el crédito se liquidará por outbox.
+  quedan registrados.
 - **Importe del intento de pago**: `apply-discount` registra la redención con `payment_intent_id` y
-  **devuelve** el importe neto, pero no muta `payments.payment_intents`: la escritura cruzada de
-  esquemas la resuelve payments al consumir el evento (misma frontera que el
+  **devuelve** el importe neto, pero no muta `payments.payment_intents` (misma frontera que el
   `journal_transaction_id` de ERP).
-- **Línea de descuento en facturación**: `billing.bill_lines` se poblará desde billing con el mismo
-  criterio.
-- **Outbox**: `PointsEarned`, `CouponRedeemed`, `DiscountApplied`, `ReferralQualified`… se emitirán
-  cuando exista el módulo 35.
+- **Línea de descuento en facturación**: `billing.bill_lines` la escribe billing, no este módulo.
 
 ## Revisión ALOVIDA
 
-Las operaciones administrativas por UUID todavía no comparan la pertenencia de tenant; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/promotions.md).
+Las operaciones administrativas por UUID no comparan la pertenencia de tenant.

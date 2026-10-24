@@ -154,9 +154,9 @@ export class MedicationRequests {
    * Motivo de la receta escrito a mano cuando no hay diagnóstico codificado
    * (P24 / CL-03). Excluyente con `indication_condition_id`: gana el concepto.
    *
-   * Columna pendiente en el modelo (`diagram_08_clinical.puml`,
-   * `indication_text : varchar(200)` nullable): la agrega M1; ver
-   * `docs/trabajo/2026-09-26-m3-api-clinica/REPORTE.md` §«Pedidos a M1».
+   * Declarada en el modelo (`diagram_08_clinical.puml`,
+   * `indication_text : varchar(200)` nullable). Parche para bases ya pobladas:
+   * `2026-10-11_v4238_medication_requests_indication_text.sql`.
    */
   @Property({
     fieldName: 'indication_text',

@@ -20,8 +20,7 @@ import {
  * `options` se reemplaza **entera**, nunca por índice: el orden importa y un
  * parche por posición se rompe en cuanto alguien inserta una opción en el
  * medio. `description: null` la **quita**; ausente significa «no cambió».
- * Las cuadrículas (`rows`) siguen fuera del modelo (D-D, en
- * `docs/progress/DECISIONS.md`) y dan 400.
+ * Las cuadrículas (`rows`) están fuera del modelo (decisión D-D) y dan 400.
  *
  * Cambiar `dataType` con valores ya capturados reescribiría la historia
  * clínica: responde 409.

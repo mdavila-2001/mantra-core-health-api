@@ -41,8 +41,7 @@ plan.
 
 **No se declara este sistema "listo para producción" en materia de recuperación ante desastres.**
 Es la brecha operativa de mayor severidad encontrada en Fase 14, junto con
-[health checks](health-checks.md) y [rollback](rollback.md). Ver `OPS-004` en
-[matriz de trazabilidad](../governance/traceability-matrix.md).
+[rollback](rollback.md).
 
 ## Ver también
 

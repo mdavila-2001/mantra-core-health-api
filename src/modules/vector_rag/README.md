@@ -166,7 +166,7 @@ MANTENIMIENTO
 worker. Lo que aporta es el gobierno: qué modelo se puede usar, qué puede entrar en la colección,
 quién puede ver cada chunk y qué queda registrado de todo ello.
 
-## El índice HNSW y su deuda (heredada de la capa de esquema)
+## El índice HNSW (límite heredado de la capa de esquema)
 
 `vector_embeddings.embedding` es de tipo `vector` (pgvector). El índice HNSW que hace viable la
 búsqueda por similitud lo crea la capa 07 del arranque, **pero hoy se omite**:
@@ -181,11 +181,9 @@ para indexar, y fijar aquí una dimensión (1536, 3072…) sería inventar una d
 modelo y que además es irreversible sin recrear la tabla.
 
 **Consecuencia operativa:** la búsqueda por similitud funciona, pero recorre el corpus entero.
-Aceptable con volumen de desarrollo, inaceptable en producción. Queda registrado en cada arranque
-para que no se olvide.
-
-Cuando el modelo fije la dimensión: cambiar `columnType: 'vector'` por `'vector(N)'` en
-`vector_embeddings.entity.ts` y la condición previa del catálogo se cumplirá sola.
+Aceptable con volumen de desarrollo, inaceptable en producción; el arranque lo registra en cada
+ejecución. Con una dimensión fijada en el modelo, `columnType: 'vector(N)'` en
+`vector_embeddings.entity.ts` cumple la condición previa del catálogo.
 
 ## Permisos
 
@@ -234,26 +232,26 @@ aprobadas durante la revisión (21 gobierno + 20 pipeline + 25 retrieval + 13 ma
   caso de uso dice "PUT para publicar"; separar la publicación de la edición deja claro cuál de las
   dos tiene efecto sobre las consultas.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Cálculo de embeddings y búsqueda ANN**: el worker los aporta. Este módulo no habla con ningún
   proveedor de modelos ni ejecuta `<=>` contra el índice.
-- **Índice HNSW**: bloqueado por la dimensión sin fijar (ver arriba).
+- **Índice HNSW**: no existe mientras el modelo no fije la dimensión (ver arriba).
 - **Redacción del texto**: los DTOs reciben `chunkTextRedacted`, `queryTextRedacted`,
   `quotedTextRedacted` y `commentRedacted` — el redactado ocurre antes, en el worker. Aquí se
   garantiza que el campo que llega es el que se persiste, no que esté efectivamente redactado.
-- **`field_redaction_profile`**: se guarda en la política pero no se aplica. Aplicarlo exige el
-  catálogo de perfiles de redacción, que el modelo no declara.
+- **`field_redaction_profile`**: se guarda en la política pero no se aplica, porque el modelo no
+  declara el catálogo de perfiles de redacción.
 - **Comprobación del consentimiento contra `consent.consent_directives`** (UC-59-06, 07): se exige y
-  se propaga el `consentDirectiveId`, pero no se contrasta contra el módulo 07, que es de la parte de
-  Pablo. Hoy `deny_consent` se decide por la ausencia de la directiva, no por su contenido.
+  se propaga el `consentDirectiveId`, pero no se contrasta contra el módulo 07; `deny_consent` se
+  decide por la ausencia de la directiva, no por su contenido.
 - **`redis_runtime.idempotency_entries`** (UC-59-04, 06): aquí lo cubren la clave de idempotencia del
-  outbox y la búsqueda de sesión abierta por hash. Ese esquema es del módulo 56, **sin asignar**.
-- **Detección fina de descuadre** (UC-59-12): hoy se detecta por documento con más de una versión
-  activa. Comparar `content_hash` contra el manifiesto canónico exige que el manifiesto traiga los
-  hashes, que el caso de uso menciona pero no define en la petición.
+  outbox y la búsqueda de sesión abierta por hash.
+- **Detección fina de descuadre** (UC-59-12): se detecta por documento con más de una versión
+  activa; comparar `content_hash` contra el manifiesto canónico exigiría que el manifiesto trajera
+  los hashes, que el caso de uso menciona pero no define en la petición.
 
 ## Revisión ALOVIDA
 
 Los recursos resueltos por UUID no se acotan al tenant activo y el borrado no filtra los documentos
-por tenant. Ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/vector_rag.md).
+por tenant.

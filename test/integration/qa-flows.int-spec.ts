@@ -32,8 +32,7 @@ import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
  * El destino es un servidor HTTP de prueba que **hace de la API** (regla 65: un
  * doble declarado). Contesta, para cada petición, el estado que el artefacto dice
  * haber observado en la API real; que esos estados sean los reales lo comprueba
- * otra cosa (los 27 casos se ejercieron contra la API el 2026-10-17, ver
- * `docs/trabajo/2026-10-17-superadmin/evidencia/H3.1.2-casos-contra-api-real.txt`).
+ * otra cosa (los 27 casos se ejercieron contra la API el 2026-10-17).
  * Acá se prueba la tubería: sembrar → planificar → aprobar → ejecutar → evaluar.
  *
  * Opt-in con `DATA_CATALOG_IT_DB_URL` (base desechable). Recrea `qa_lab` y `qa_execution`.

@@ -3,7 +3,7 @@
   Fuente real: src/modules/forms/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `forms`
@@ -132,12 +132,11 @@ Guard JWT global. Endpoints de gobernanza/administración de extensibilidad exig
 `FormsReadService` sigue el patrón de `ChartReadService`: sólo lectura sobre un
 `fork` del `EntityManager`, lotes `$in` sin N+1, `limit+1` con recorte declarado.
 Aislamiento de instancias: la propiedad se ancla en el `clinical.encounter` que
-la instancia referencia (`resourceId`) y exige tenant del contexto. Falta aplicar
-la política clínica del paciente a las lecturas profesionales; ver la
-[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/forms.md).
+la instancia referencia (`resourceId`) y exige tenant del contexto. Las lecturas
+profesionales no aplican la política clínica del paciente.
 Enmascarado deny-by-default: un campo con
 `field_value_access_rules` activa responde `masked: true` sin valor, porque la
-semántica de roles de la regla no es evaluable todavía (no existe puente
+semántica de roles de la regla no es evaluable (no existe puente
 rol→value-set en el sistema).
 
 ## Tests

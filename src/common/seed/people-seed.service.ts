@@ -80,7 +80,7 @@ interface CommonCandidate {
  * ## Filtro de candidatos, medido contra el propio padrón
  *
  * De 170 filas de médicos y 165 de pacientes, sólo 13 y 92 respectivamente
- * traen un nombre (`grep`/conteo real, ver `PLAN.md` de este carril) — el
+ * traen un nombre (`grep`/conteo real sobre el padrón) — el
  * resto son filas en blanco del generador del markdown. De los 13 médicos con
  * nombre, sólo los que además traen matrícula del Ministerio pueden darse de
  * alta como `PRACTITIONER` (`licenseNumber` es obligatorio en el DTO): no se

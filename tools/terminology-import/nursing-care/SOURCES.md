@@ -29,7 +29,7 @@ versionan, comprimidos, en [`data/`](./data/README.md) (orden del propietario de
 | Publicador | Ministerio de Sanidad, «Recursos de Modelado Clínico (arquetipos)»: https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Rec_mod_clinico_arquetipos.htm (elaborados por la Universitat Politècnica de València con VeraTech e Indizen) |
 | Versión | commit `093c77ea003742b9540e3dd377d615e2b26f2996` (2025-06-27) |
 | Qué es | Estructura oficial de los informes del Conjunto Mínimo de Datos de los Informes Clínicos (RD 1093/2010), **incluido el Informe de Cuidados de Enfermería** (anexo VII), y sus entradas (valoración activa, resultados, signos vitales…). Original en castellano. |
-| Licencia | **No declarada** en los archivos ni en el repositorio. Base legal anotada: RD 1093/2010 (BOE-A-2010-14199) y art. 13 del TRLPI (BOE-A-1996-8930: las disposiciones legales no son objeto de propiedad intelectual). Estado `official-publication-license-not-stated`. **Pendiente de confirmar con el Ministerio.** |
+| Licencia | **No declarada** en los archivos ni en el repositorio. Base legal anotada: RD 1093/2010 (BOE-A-2010-14199) y art. 13 del TRLPI (BOE-A-1996-8930: las disposiciones legales no son objeto de propiedad intelectual). Estado `official-publication-license-not-stated`. **Sin confirmar con el Ministerio.** |
 | Code system | `es-msssi-cmdic-13606` (versión `2025-06-27+093c77ea`) |
 | Cargado | 58 arquetipos + 559 nodos (secciones, entradas, clusters, elementos y ranuras) = **617 conceptos**; 559 relaciones PART_OF |
 | Relación publicada | Las ranuras (`allow_archetype … include`) del informe de enfermería nombran por id 16 arquetipos que lo componen (regla M2). |

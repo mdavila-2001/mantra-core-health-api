@@ -4,7 +4,7 @@ Fecha de corte: **2026-08-06**. Alcance: la API (57 módulos, 852 endpoints) y l
 20 procesos worker (30 jobs programados).
 
 Este directorio documenta el trabajo de endurecimiento (*hardening*) del backend:
-qué se auditó, qué se encontró, qué se corrigió, qué queda pendiente y cómo se
+qué se auditó, qué se encontró, qué se corrigió, qué no está mitigado y cómo se
 opera el sistema cuando algo falla.
 
 ## Índice
@@ -88,7 +88,7 @@ Ver el hallazgo A-01 en [la auditoría](00-auditoria.md).
 ## Estado
 
 Lo que **está hecho y verificado** por pruebas automatizadas está marcado ✅ en
-cada documento. Lo que está **diseñado pero pendiente de validar en un entorno
-real** está marcado 🟡, y lo que requiere una decisión o un insumo que no está en
-este repositorio, 🔵. La distinción se mantiene deliberadamente: un plan de
+cada documento. Lo que está **diseñado pero sin validar en un entorno real** está
+marcado 🟡, y lo que depende de una decisión o de un insumo que no está en este
+repositorio, 🔵. La distinción se mantiene deliberadamente: un plan de
 recuperación que no se ha ensayado nunca no es un plan de recuperación.

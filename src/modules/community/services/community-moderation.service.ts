@@ -292,8 +292,7 @@ export class CommunityModerationService {
    * revierte la decisión original**: `OVERTURNED` deja constancia de que la
    * apelación prosperó, pero deshacer la sanción —restituir el contenido, anular
    * el strike— es una política de producto que nadie definió, y ejecutarla acá
-   * sería inventarla. Queda registrada como decisión de producto pendiente en el
-   * reporte del carril.
+   * sería inventarla.
    *
    * @param appealId - Apelación a resolver.
    * @param dto - Resolución.

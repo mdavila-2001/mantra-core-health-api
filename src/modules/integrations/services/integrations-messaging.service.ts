@@ -207,7 +207,7 @@ export class IntegrationsMessagingService {
       const url = joinUrl(provider.baseUrl, path);
 
       // Firma el cuerpo con el secreto de la conexión (guarda anti-SSRF dentro).
-      const secret = deriveWebhookSecret('connection', connection.id); // TODO secreto por conexión
+      const secret = deriveWebhookSecret('connection', connection.id);
       const outcome = await this.http.post({
         url,
         body: message.requestPayloadJson,

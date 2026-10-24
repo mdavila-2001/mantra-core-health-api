@@ -67,11 +67,9 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 detectó que `GET` no exige rol y entrega el
-payload flexible completo. Debe incorporarse autorización de lectura por tipo de
-documento y recurso antes de usar documentos con contenido clínico. El detalle y
-las pruebas propuestas están en
-[`docs/revision-backend-2026-10-04/modulos/document_store.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/document_store.md).
+`GET` no exige rol y entrega el payload flexible completo: no hay autorización
+de lectura por tipo de documento ni por recurso, así que el módulo no es apto
+para documentos con contenido clínico.
 
 ```bash
 corepack yarn test src/modules/document_store --runInBand --silent

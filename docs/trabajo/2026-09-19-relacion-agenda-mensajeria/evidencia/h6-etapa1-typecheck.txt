@@ -1,2 +1,0 @@
-﻿=== ETAPA 1 (final): typecheck ===
-exit=0

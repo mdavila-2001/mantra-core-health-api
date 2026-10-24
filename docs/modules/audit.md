@@ -3,7 +3,7 @@
   Fuente real: src/modules/audit/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `audit`
@@ -89,8 +89,8 @@ Entidades (`tableName`, 131 de 131 archivos `*.entity.ts`): `accounts_history`, 
   `row_version`.
 - **Cadena hash** (`audit_log`): cada fila enlaza con la anterior de su partición de
   tenant (`previous_hash`) y sella `record_hash = H(previous_hash || contenido ||
-  recorded_at)`. La verificación tiene una limitación documentada para cadenas que
-  superan su corte de lectura; ver [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/audit.md).
+  recorded_at)`. La verificación no cubre las cadenas que superan su corte de
+  lectura.
 - FKs planas uuid: MikroORM no ordena inserts → `await tx.flush()` entre padre e
   hijo (p. ej. `dsar_requests` antes de su gobernanza/provenance). `em.create(...,
   { partial: true })` en todos los inserts.

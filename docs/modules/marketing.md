@@ -3,7 +3,7 @@
   Fuente real: src/modules/marketing/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `marketing`
@@ -76,7 +76,7 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`,
 `attribution_touches`.
 
 `campaign_dispatches`, `campaign_dispatch_recipients` y `campaign_schedules` pertenecen al envío
-efectivo, que vive en messaging: este módulo no las escribe (ver *Pendiente*).
+efectivo, que vive en messaging: este módulo no las escribe (ver *Fuera de este módulo*).
 
 ## Flujo general
 
@@ -154,15 +154,12 @@ ni el contenido de las plantillas.
 El módulo expone roles de marketing y bloqueos de concurrencia, pero actualmente recibe el tenant
 en el cuerpo y carga recursos por UUID sin comprobar la pertenencia del actor. También hay
 desacuerdo entre la unicidad por tenant que usa el servicio y los índices globales de `code`, y la
-ruta pública de enlaces permite aportar el miembro al que atribuir un click. Véase el informe con
-evidencia y plan: [revisión de marketing](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/marketing.md).
+ruta pública de enlaces permite aportar el miembro al que atribuir un click.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Envío real**: `campaign_dispatches`, `campaign_dispatch_recipients` y `campaign_schedules` se
-  llenan cuando messaging materialice las peticiones de notificación. Aquí los campos que apuntan a
-  ellas (`first_dispatch_id`, `last_dispatch_id`, `notification_request_id`) quedan sin poblar.
-- **Outbox**: los eventos que declaran los casos de uso (`SegmentRefreshed`, `CampaignLaunched`,
-  `JourneyStepExecuted`, `AttributionComputed`…) se emitirán cuando exista el módulo 35.
+- **Envío real**: `campaign_dispatches`, `campaign_dispatch_recipients` y `campaign_schedules` los
+  llena messaging al materializar las peticiones de notificación. Este módulo no escribe los campos
+  que apuntan a ellas (`first_dispatch_id`, `last_dispatch_id`, `notification_request_id`).
 - **Consentimiento**: la base legal de marketing (`consent.consents`) y el `do_not_contact` se
   asumen resueltos por quien llama; este módulo respeta la lista de supresión que recibe.

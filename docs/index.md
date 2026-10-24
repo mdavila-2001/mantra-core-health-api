@@ -58,14 +58,9 @@ uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad 
 | Ver un módulo de negocio concreto                | [Catálogo de módulos](modules/index.md)                                                                                                                                                         |
 | Entender cómo se relacionan los módulos          | [Dependencias entre módulos](architecture/module-dependencies.md)                                                                                                                               |
 | Ver qué se auditó y cómo                         | [Línea base](reports/baseline.md) · [Auditoría Graphify](reports/graphify-audit.md)                                                                                                             |
-| Ver la revisión backend de octubre de 2026       | [Informe maestro de revisión](revision-backend-2026-10-04/README.md)                                                                                                                             |
-| Ver el estado real para producción               | [Auditoría de producción 2026-07-31](reports/production-readiness-2026-07-31.md)                                                                                                                |
-| Ver el progreso de la implementación de audio/TTS | [Informe de progreso](progress/progress-report.md)                                                                                                                                              |
-| Ver brechas documentales conocidas y su estado   | [Análisis de brechas](reports/documentation-gap-analysis.md)                                                                                                                                    |
 | Ver riesgos y su trazabilidad                    | [Matriz de trazabilidad](governance/traceability-matrix.md)                                                                                                                                     |
 | Responder a un incidente en producción           | [Runbooks](operations/runbooks/index.md)                                                                                                                                                        |
 | Entender cómo resiste el sistema bajo estrés     | [Resiliencia](resilience/README.md)                                                                                                                                                             |
-| Ver qué se corrigió antes de documentar          | [Corrección de inconsistencias](reports/inconsistency-remediation.md)                                                                                                                           |
 | Probar la API sin Scalar                         | [Colección Postman](postman/README.md)                                                                                                                                                          |
 | Construir el frontend contra flujos garantizados | [Catálogo de flujos verificados](frontend/CATALOGO-FLUJOS-VERIFICADOS.md)                                                                                                                       |
 
@@ -78,7 +73,5 @@ uno, en [catálogo de módulos](modules/index.md). Áreas destacadas: identidad 
 
 ## Estado de esta documentación
 
-Este portal se construye por fases, siguiendo el plan maestro. Estado actual — ver
-[matriz de trazabilidad](governance/traceability-matrix.md) para el detalle vivo de qué está
-completo, qué está aceptado como limitación conocida, y qué sigue abierto. No se declara
-"completo" hasta que la Fase 18 (auditoría final) lo confirme con evidencia.
+Los riesgos aceptados y remediados, con su evidencia, están en la
+[matriz de trazabilidad](governance/traceability-matrix.md).

@@ -82,11 +82,11 @@ Todas las 16 advertencias `high` provienen de la misma causa raíz: `brace-expan
 `src/modules/billing/repositories/practices-lookup.repository.ts` importa una entidad del dominio `practice` directamente, violando la regla de aislamiento de dominios (cada módulo debe leer otros dominios vía servicio/puerto, no repositorio ajeno).
 
 **Clasificación:** `HIGH` (arquitectural, no de seguridad de datos).
-**Registro:** se documenta como excepción conocida en `docs/governance/traceability-matrix.md` y en `docs/architecture/module-dependencies.md` (Fase 1); no se corrige en esta fase porque corregirlo requiere diseño de un puerto de lectura entre `billing` y `practice` fuera del alcance documental — se traslada como acción a `docs/progress/ESTADO-Y-PENDIENTES.md`.
+**Registro:** se documenta como excepción conocida en `docs/governance/traceability-matrix.md` y en `docs/architecture/module-dependencies.md` (Fase 1), aceptada después como excepción de solo lectura (`ARCH-001`).
 
 ### 3.5 Endpoints y contrato
 
-850 endpoints en 191 controllers **no tienen** contrato OpenAPI versionado ni gobierno automático (Redocly). El `SwaggerModule` actual genera el documento en caliente desde decoradores parciales (no confirmado que todos los controllers usen `@ApiTags`/`@ApiOperation`; se audita en Fase 2). Esto es la brecha central que las Fases 5-7 de este plan cierran.
+850 endpoints en 191 controllers **no tienen** contrato OpenAPI versionado ni gobierno automático (Redocly). El `SwaggerModule` actual genera el documento en caliente desde decoradores parciales (no confirmado que todos los controllers usen `@ApiTags`/`@ApiOperation`). Las Fases 5-7 cerraron esta brecha con `openapi/openapi.yaml` generado.
 
 ## 4. Riesgos iniciales identificados (entrada a Fase 2 — análisis de brechas)
 
@@ -96,7 +96,7 @@ Todas las 16 advertencias `high` provienen de la misma causa raíz: `brace-expan
 4. **20 workers sin documentación operativa** (arranque, apagado ordenado, reintentos, colas que consumen) → bloquea Fase 11 (AsyncAPI/eventos) y Fase 13 (runbooks). `CRITICAL`.
 5. **Swagger deshabilitado en producción** sin alternativa (Scalar protegido) documentada → bloquea Fase 4 (Scalar) hasta decidir estrategia de exposición. `HIGH`.
 6. **16 vulnerabilidades de dependencias** (todas dev-only, mismo CVE) → bajo riesgo real, se documenta y no bloquea. `MEDIUM`.
-7. **Ningún ADR existente** pese a decisiones arquitectónicas grandes ya tomadas (MikroORM, RLS, PDP clínico aditivo, outbox propio, JWT propio) → se reconstruyen retroactivamente en Fase 10. `HIGH`.
+7. **Ningún ADR existente** pese a decisiones arquitectónicas grandes ya tomadas (MikroORM, RLS, PDP clínico aditivo, outbox propio, JWT propio) → reconstruidos retroactivamente en Fase 10 (`docs/adr/`). `HIGH`.
 
 Documentación previa relevante conservada como registro histórico: ver
 [hito de los primeros 30 endpoints](endpoints-first-30-2026-07-milestone.md) — superado por el
@@ -113,6 +113,6 @@ Time:        473.418 s
 
 ✅ **100% verde** — 369 suites / 3724 tests unitarios pasan sin fallos sobre el commit evaluado.
 
-**Hallazgo menor:** Jest reporta *"A worker process has failed to exit gracefully and has been force exited... Active timers can also cause this"*. No afecta el resultado (exit 0) pero indica un handle no liberado (temporizador, conexión) en algún test o en el código bajo prueba. Clasificación `MEDIUM`; se registra en `docs/testing/unit-tests.md` (Fase 14) como deuda a investigar con `--detectOpenHandles`, no bloquea esta iniciativa.
+**Hallazgo menor:** Jest reporta *"A worker process has failed to exit gracefully and has been force exited... Active timers can also cause this"*. No afecta el resultado (exit 0) pero indica un handle no liberado (temporizador, conexión) en algún test o en el código bajo prueba. Clasificación `MEDIUM`; descrito en `docs/testing/unit-tests.md`.
 
-No se ejecutaron en esta fase `yarn test:integration` ni `yarn test:e2e` (requieren Postgres real vía Testcontainers/Docker); su resultado se registra en `docs/testing/integration-tests.md` cuando se ejecuten en Fase 14, dado que no son necesarias para bloquear el arranque de la documentación.
+No se ejecutaron en esta fase `yarn test:integration` ni `yarn test:e2e` (requieren Postgres real vía Testcontainers/Docker); la integración está descrita en `docs/testing/integration-tests.md`.

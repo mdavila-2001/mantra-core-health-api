@@ -1,6 +1,0 @@
-exit=0
-Corpus: copia versionada de /home/user/mantra-core-health-api/tools/terminology-import/specialty-services/data (armado 2026-10-24T02:51:35.135Z)
-{'concepts': 1148, 'designations': 1148, 'properties': 7139, 'relationships': 4923, 'valueSets': 52, 'valueSetVersions': 52, 'valueSetMembers': 4923, 'batches': 3}
-exit=0
-Corpus: copia versionada de /home/user/mantra-core-health-api/tools/terminology-import/specialty-services/data (armado 2026-10-24T02:51:35.135Z)
-{'concepts': 0, 'designations': 0, 'properties': 0, 'relationships': 0, 'valueSets': 0, 'valueSetVersions': 0, 'valueSetMembers': 0, 'batches': 0}

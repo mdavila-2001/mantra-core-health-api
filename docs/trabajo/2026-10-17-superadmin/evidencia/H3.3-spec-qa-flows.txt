@@ -1,6 +1,0 @@
-
-Test Suites: 11 passed, 11 total
-Tests:       215 passed, 215 total
-Snapshots:   0 total
-Time:        4.398 s, estimated 5 s
-Ran all test suites matching src/observability/route-index|src/modules/qa_lab|src/modules/qa_execution.

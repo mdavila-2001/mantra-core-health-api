@@ -1,4 +1,0 @@
-$ corepack yarn pw playwright/carril-19-route-health.spec.ts --workers=1
-Usage Error: Couldn't find a script named "pw".
-
-$ yarn run [--inspect] [--inspect-brk] [-T,--top-level] [-B,--binaries-only] [--require #0] <scriptName> ...

@@ -20,7 +20,7 @@ pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
   6 ejes, unidades, paneles y variante en castellano.
 - La saturación se alcanzó **dentro de lo alcanzable** desde la sesión (npm, PyPI, Maven): las
   pasadas 7 y 8 aportaron 0 conceptos nuevos. No es la saturación de internet: las fuentes primarias
-  bloqueadas siguen siendo el siguiente paso.
+  siguen bloqueadas.
 
 ## Cómo se modela hoy (paso 0)
 
@@ -28,7 +28,7 @@ pruebas: `tools/terminology-import/test/lab-tests.test.mjs`.
   (`LAB_*`, `IMG_*`… en `clinical.concepts.ts`, value set `service-request-code`). Está documentado
   que **no** usa LOINC a propósito: un código LOINC es una *medición*, no el *servicio* que se pide.
   Este catálogo **no toca** ese binding: enlazar un estudio local con un código de catálogo es una
-  decisión clínica, pendiente para quien gobierne el nomenclador.
+  decisión clínica de quien gobierne el nomenclador.
 - Laboratorio: `diagnostics.laboratory_work_order_tests.test_code_concept_id` y
   `diagnostic_units.diagnostic_study_offerings.study_concept_id` apuntan a `terminology.catalog_concepts`
   sin value set que los acote. Este catálogo les da contenido real.
@@ -87,7 +87,7 @@ categoría es el prefijo, sin nombre inventado. Cada categoría es un value set
 
 | Fuente | Qué trae |
 |---|---|
-| LOINC (cuando se cargue) | 6 ejes, clase y tipo de clase, estado, unidades UCUM de ejemplo, pedible/observación, tipo de panel y miembros con orden y obligatoriedad, partes LP, rangos de uso frecuente, Universal Lab Orders, Top 2000, partes RadLex del Playbook, nombre y ejes en castellano. |
+| LOINC (si se carga) | 6 ejes, clase y tipo de clase, estado, unidades UCUM de ejemplo, pedible/observación, tipo de panel y miembros con orden y obligatoriedad, partes LP, rangos de uso frecuente, Universal Lab Orders, Top 2000, partes RadLex del Playbook, nombre y ejes en castellano. |
 | SIGTAP | Subgrupo y forma oficiales, complejidad, restricción de sexo, edad mínima/máxima (meses), valores SUS (ambulatorio, hospitalario, profesional, en centavos de BRL). |
 | FONASA | Precio y copago por nivel 1–3 (CLP), nombre oficial verbatim. |
 | TUSS | Vigencia (`startsAt`, `endsAt`, `implementedUntil`). |
@@ -128,13 +128,13 @@ muestras con su subconjunto de 0487. Tamaño medido en Postgres 16 desechable: 1
 - **Sin traducciones propias.** Castellano sólo donde la fuente lo es (FONASA, PAMI) o lo será (variante
   LOINC). SIGTAP y TUSS quedan en portugués, e ICD-10-PCS, HL7 y UCUM en inglés. CIE-10-ES Procedimientos
   (Ministerio de Sanidad) es la traducción oficial de ICD-10-PCS y ya tiene importador en el glosario
-  (`import-cie10es.mjs`). Enlazar sus designaciones a estos conceptos queda pendiente (sanidad.gob.es, 403).
+  (`import-cie10es.mjs`). Sus designaciones no están enlazadas a estos conceptos (sanidad.gob.es, 403).
 
 ## Huecos
 
-| Hueco | Estado | Qué destraba |
+| Hueco | Causa | Acceso necesario |
 |---|---|---|
-| **LOINC completo** (laboratorio con 6 ejes, paneles, unidades, variante ES, Playbook RSNA, Universal Lab Orders, Top 2000) | pendiente del usuario + red | Cuenta en loinc.org y el zip en `lab-tests-sources/loinc/`; o habilitar `loinc.org` en la red del entorno. Alternativa sin cuenta (subconjunto público, sin paneles ni ES): habilitar `clinicaltables.nlm.nih.gov` y correr `import-loinc.mjs`; este catálogo enriquece los mismos ids. |
+| **LOINC completo** (laboratorio con 6 ejes, paneles, unidades, variante ES, Playbook RSNA, Universal Lab Orders, Top 2000) | cuenta de usuario + red | Cuenta en loinc.org y el zip en `lab-tests-sources/loinc/`; o habilitar `loinc.org` en la red del entorno. Alternativa sin cuenta (subconjunto público, sin paneles ni ES): habilitar `clinicaltables.nlm.nih.gov` y correr `import-loinc.mjs`; este catálogo enriquece los mismos ids. |
 | NCBI GTR (genética) | red | Habilitar `ftp.ncbi.nlm.nih.gov`. Parser a escribir contra el archivo real (no a ciegas). |
 | RSNA RadLex Playbook | red | Viene dentro de LOINC (`LoincRsnaRadiologyPlaybook.csv`, ya soportado) o habilitando `playbook.radlex.org`. |
 | DICOM CID 29 (modalidades) | red | `dicom.nema.org`. |
@@ -148,7 +148,7 @@ muestras con su subconjunto de 0487. Tamaño medido en Postgres 16 desechable: 1
 
 ## Propuestas para el repo del modelo (sin DDL en la API)
 
-Todo entró en las tablas existentes. Para la próxima versión del modelo, conviene:
+Todo entró en las tablas existentes. Mejoras posibles en el modelo:
 
 1. **`concept_designations` sin procedencia.** No hay columna para la variante o el productor (p. ej.
    LOINC esAR vs. esES) ni para marcar una traducción no oficial. Hoy va como propiedad del concepto

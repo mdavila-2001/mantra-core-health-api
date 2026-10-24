@@ -1,7 +1,7 @@
 # Contrato — Liquidación aseguradora ↔ profesional: exclusiones formales y lotes periódicos (H8 · MED-E13..E16)
 
-- Versión: 1.1 · Fecha: 2026-09-25 (v1.0: 2026-09-24) · Estado: **propuesta para confirmación** de los propietarios nombrados en el HANDOFF §H8 del plan médico (Billing/Reporting y propietario del contrato de aseguradora). No es un acuerdo aceptado hasta que ellos lo firmen; los supuestos van marcados con su ambigüedad (`A0`–`A9`, definidas en [PLAN.md](../trabajo/2026-09-24-insurance-exclusions-settlement-contracts/PLAN.md)).
-- Alcance: `mantra-core-health-api` módulo `insurance` (26). Sin cambios de DDL: toda pieza de esquema deseable se declara en §9 como handoff al dueño de `mantra-core-health-model`.
+- Versión: 1.1 · Fecha: 2026-09-25 (v1.0: 2026-09-24) · Estado: **implementado** en el módulo `insurance`. Los supuestos tomados van marcados con su ambigüedad (`A0`–`A9`).
+- Alcance: `mantra-core-health-api` módulo `insurance` (26). Sin cambios de DDL (§9).
 - Idioma: el documento está en castellano; los identificadores de código, columnas, rutas y campos JSON están en inglés y se citan tal cual.
 - **Cambios de v1.1** (implementación de H3): (a) §7 regla 5 — el corte no tiene cota inferior explícita: incluye toda EOB firme publicada hasta el fin del período, sin importar cuándo, salvo que ya haya salido en un lote anterior; (b) §7/§9 — un reclamo ya incluido en un lote previo deja de listarse como `ALREADY_BATCHED`: es invisible para el corte nuevo (no es un candidato, ya se resolvió), salvo que se haya revertido después, caso en que genera un ajuste (§10); (c) §9 — nuevo concepto `SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT` para persistir el ajuste como ítem append-only; (d) §7 — un lote sin ningún reclamo elegible **se emite igual**, vacío (ambigüedad **A8**); (e) §12 — la cadencia de un lote ya persistido se **infiere** de su período al leerlo, porque la tabla reutilizada no tiene columna de cadencia (ambigüedad **A9**).
 
@@ -14,10 +14,10 @@ Este contrato resuelve la fila «Factura, cobertura y lotes periódicos» del `H
 | `📋 Registro de procesos por módulo.md` §6.2 ítems 1–4 (líneas 589–594 de la copia local) | La app responde APROBADO / NO APROBADO **indicando la cláusula del contrato y la excepción de la póliza**; al paciente sólo le interesa saber por qué no se aprobó | §3, §4, §5 |
 | Ídem §2.7 ítem 4 (líneas 350–352) | La parte de la aseguradora se factura a la compañía **semanal, quincenal o mensualmente**; el médico saca un informe de lo facturado al seguro, con deducible y sin seguro | §7, §8, §12 |
 | HANDOFF §H8 · MED-E13 | Emisor y destinatario correctos; sin fingir cobro | §2, §11 |
-| HANDOFF §H8 · MED-E14 | Cobertura por consulta con importes del paciente y de la aseguradora separados | §3, §4, §12 (lo que sigue pendiente) |
+| HANDOFF §H8 · MED-E14 | Cobertura por consulta con importes del paciente y de la aseguradora separados | §3, §4, §12 |
 | HANDOFF §H8 · MED-E15 | Calendario semanal/quincenal/mensual, idempotencia, reversión y cancelación | §7, §8, §9, §10 |
 | HANDOFF §H8 · MED-E16 | Informe del profesional sin duplicar importes | §7 (totales), §12 (DTO) |
-| MATRIX `RP-MED-L0264` (A MEDIAS), `L0265` (BLOQUEADO), `L0266` (A MEDIAS) | Los tres incisos del médico sobre facturación al seguro | §12 |
+| MATRIX `RP-MED-L0264`, `L0265`, `L0266` | Los tres incisos del médico sobre facturación al seguro | §12 |
 | Prompt Tarea 3 (2026-09-24) CA-3.1..CA-3.4 | Conciliación exacta, lote periódico, cláusula obligatoria, anti-tampering | §3, §4, §6, §7 |
 
 Ambigüedad **A0**: el prompt cita el Registro en las líneas 488–491; en la copia local esas líneas pertenecen al módulo de análisis médicos. Se citan las líneas de la copia local.
@@ -30,7 +30,6 @@ Ambigüedad **A0**: el prompt cita el Registro en las líneas 488–491; en la c
 | **Profesional / prestador** (emisor del reclamo y destinatario del lote) | `insurance_claims.billing_provider_entity_id` + `billing_provider_type_concept_id`: `BILLING_PROVIDER_TYPE_PRACTICE` → `practice.practices` (el consultorio o la clínica del médico); `…_PHARMACY` → farmacia; `…_DIAGNOSTIC_UNIT` → unidad diagnóstica. El alcance de lectura del prestador es el de `ClaimsReadService` (prácticas y unidades diagnósticas activas del tenant) | Presentar el reclamo, leer su detalle con el desglose (`GET /insurance-claims/:id`), **leer sus lotes** (`GET /practitioner-settlement-batches[/:id]`) |
 | **Paciente** (titular de la cobertura) | `insurance.patient_coverages.patient_profile_id`; el actor se resuelve por el vínculo persistente de cuenta, nunca por un `pid` declarado (`PatientSettlementService`) | Ver la liquidación publicada de su pedido (`insuranceSettlement`) con las exclusiones y su cláusula |
 | **Plataforma** | `SECURITY_ADMIN` / `SUPERADMIN` | Acceso administrativo transversal ya existente; este contrato no le agrega escrituras |
-| **Billing / Reporting** (propietarios del handoff) | Personas | Confirmar §7–§11 y decidir lo que §12 deja abierto |
 
 Ambigüedad **A4**: el HANDOFF habla del «médico». El mecanismo se define por `providerEntityId` + tipo de facturador y por eso cubre también farmacias y unidades diagnósticas sin cambiar nada; el nombre «practitioner» en rutas y DTOs conserva el foco del H8.
 
@@ -154,17 +153,7 @@ Los cortes son independientes entre cadencias: no se mezclan lotes semanales y m
 2. **Serialización**: la generación toma `SELECT pg_advisory_xact_lock(hashtext('practitioner-settlement-batch:' || carrier || ':' || provider))` dentro de la transacción (mismo patrón que `AuditLogRepository` y `CredentialsRepository`), y recién después busca por clave natural y por reclamos ya incluidos. Dos generaciones concurrentes del mismo par se resuelven en una creación y un replay.
 3. **Un reclamo, un lote**: antes de incluir, se consultan los `insurance_reconciliation_items` existentes (`SETTLEMENT_ITEM_INCLUDED`) de esos reclamos; el que ya figura queda invisible para el corte nuevo (§7 regla 8, v1.1), no se vuelve a incluir.
 4. **Persistencia** (ambigüedad **A6**): se reutilizan `insurance.insurance_reconciliation_batches` e `insurance.insurance_reconciliation_items` — mismo grano aseguradora × prestador × período — con estados propios `SETTLEMENT_BATCH_ISSUED`, `SETTLEMENT_ITEM_INCLUDED` y `SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT` (v1.1, §10), distintos de los de la conciliación manual UC-26-13 (`RECON_BATCH_OPEN`, `RECON_ITEM_MATCHED`). Columnas: `total_claimed_amount` = facturado, `total_approved_amount` = a transferir, `expected_amount` (ítem) = aprobado del reclamo incluido, o el ajuste negativo si es `SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT`; **`total_paid_amount` y `accepted_amount` no se escriben nunca** (§11).
-5. **Handoff al dueño del modelo** (no se aplica en este carril; la garantía queda en servicio hasta entonces):
-
-```sql
--- Propuesta v4.2.2x — unicidad de lote por clave natural y de reclamo por lote de liquidación.
-CREATE UNIQUE INDEX IF NOT EXISTS uq_settlement_batch_natural_key
-  ON insurance.insurance_reconciliation_batches (insurance_carrier_id, provider_entity_id, period_start, period_end)
-  WHERE status_concept_id = '<uuid determinista de insurance:SETTLEMENT_BATCH_ISSUED>';
-CREATE UNIQUE INDEX IF NOT EXISTS uq_settlement_item_claim
-  ON insurance.insurance_reconciliation_items (insurance_claim_id)
-  WHERE status_concept_id = '<uuid determinista de insurance:SETTLEMENT_ITEM_INCLUDED>';
-```
+5. **Sin índice único en el modelo**: la unicidad de lote por clave natural y de reclamo por lote la garantiza el servicio (puntos 2 y 3), no la base.
 
 ## 10. Reversión y cancelación después del corte
 
@@ -224,13 +213,13 @@ PractitionerSettlementBatchDto {
 | Punto del H8 | Estado con este contrato |
 |---|---|
 | Emisor / destinatario | Definidos (§2): el prestador emite, la aseguradora adjudica y publica; el lote nombra a los dos por id |
-| Cobertura e importes separados | Definidos y verificados (§3–§4) para reclamos con pedido; **para la consulta médica el camino de creación no existe** (`CreateClaimDto` no admite `encounterId`, MATRIX L0264). El carril que lo cree debe usar `validateLinkedClaimSettlement` en adjudicación y publicación, exactamente como los reclamos con pedido |
-| Calendario semanal/quincenal/mensual | **Implementado** (§8, `resolveSettlementPeriod`/`inferSettlementCadence`, 18 pruebas unitarias), pendiente de confirmar A3/A5 |
-| Idempotencia | **Implementado**: clave natural + cerrojo (§9, `SettlementRepository.lockSettlementPair`); índice único propuesto al modelo (aún no aplicado) |
-| Reversión y cancelación | **Implementado** (§10, `SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT`, v1.1); anulación de lote entero = decisión de negocio sin tomar |
+| Cobertura e importes separados | Definidos y verificados (§3–§4) para reclamos con pedido; **para la consulta médica el camino de creación no existe** (`CreateClaimDto` no admite `encounterId`, MATRIX L0264). Un camino de creación para la consulta debe usar `validateLinkedClaimSettlement` en adjudicación y publicación, exactamente como los reclamos con pedido |
+| Calendario semanal/quincenal/mensual | **Implementado** (§8, `resolveSettlementPeriod`/`inferSettlementCadence`, 18 pruebas unitarias), con los supuestos A3/A5 |
+| Idempotencia | **Implementado**: clave natural + cerrojo (§9, `SettlementRepository.lockSettlementPair`); sin índice único en el modelo |
+| Reversión y cancelación | **Implementado** (§10, `SETTLEMENT_ITEM_REVERSAL_ADJUSTMENT`, v1.1); la anulación de un lote entero no está definida |
 | Sin simular pago | **Garantizado**: `total_paid_amount`/`accepted_amount` nunca se escriben; comprobado por spec (`insurance-controllers.spec.ts`, verificación de metadatos Swagger de los cinco DTOs) |
-| Informe del médico (L0266) | El DTO del lote trae los tres totales, el detalle por reclamo y los ajustes por reversión; la **pantalla** del profesional y su integración con Contabilidad quedan para otro carril |
+| Informe del médico (L0266) | El DTO del lote trae los tres totales, el detalle por reclamo y los ajustes por reversión; la **pantalla** del profesional y su integración con Contabilidad no son parte de este contrato |
 | Lectura del lote por farmacias | **Implementado** (v1.1): el alcance de lectura del prestador cubre prácticas activas, unidades diagnósticas activas y farmacias del tenant (`PractitionerSettlementBatchesService.providerEntityIdsForTenant`) |
-| Prueba de integración HTTP end-to-end | **Bloqueada**, por una causa ajena a este carril: MikroORM con `ts-morph` no resuelve los metadatos de `terminology.catalog_concepts` en este entorno de pruebas (reproducible contra Postgres local y contra Neon por igual), así que `Test.createTestingModule` no arranca. La evidencia de este contrato es unitaria (`EntityManager` doblado); queda declarado en el `REPORTE.md` del carril, no escondido |
+| Prueba de integración HTTP end-to-end | No existe; la cobertura es unitaria (dominio puro, servicio con dobles y aserciones de controladores) |
 
-Ambigüedades abiertas para confirmar: **A1** (rutas en inglés), **A2** (412), **A3** (cadencia obligatoria sin default), **A5** (fecha de EOB como criterio), **A6** (tablas reutilizadas e índices), **A7** (endurecer también la escritura de reclamos genéricos sin pedido), **A8** (lote vacío se emite igual), **A9** (cadencia inferida al leer, no persistida).
+Supuestos tomados: **A1** (rutas en inglés), **A2** (412), **A3** (cadencia obligatoria sin default), **A5** (fecha de EOB como criterio), **A6** (tablas reutilizadas e índices), **A7** (endurecer también la escritura de reclamos genéricos sin pedido), **A8** (lote vacío se emite igual), **A9** (cadencia inferida al leer, no persistida).

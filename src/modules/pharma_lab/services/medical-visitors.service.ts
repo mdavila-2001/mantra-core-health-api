@@ -88,7 +88,7 @@ export class MedicalVisitorsService {
 
   /**
    * Asigna MEDICAL_VISITOR al vincular, con ámbito del tenant del laboratorio
-   * (AG-31, decisión D-PharmaLab-1 en `DECISIONS.md`: asignación en `authz` al
+   * (AG-31, decisión D-PharmaLab-1: asignación en `authz` al
    * vincular, no rol derivado de la membresía en el login).
    *
    * No lanza si ya lo tenía asignado en ese mismo ámbito (`relinkVisitor` puede

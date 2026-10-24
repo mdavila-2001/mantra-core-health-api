@@ -239,8 +239,7 @@ Medición en la base desechable con dos andamios:
   132 008/132 104, todo directo por código → **402 633 aristas y 403 959 filas
   de evidencia** (re-corrida 0, 33 s). Sin resolver sólo `DOID:5898` (96 filas:
   sin clase ni `alt_id` en la release vigente). Los otros 12 DOID retirados se
-  resuelven por `alt_id`. Log en
-  `docs/trabajo/2026-10-24-seed-symptoms/evidencia/integracion-seed-diseases-688.txt`.
+  resuelven por `alt_id`.
 - **Con el formato de #688** (`omim`/`orphanet`/`decipher` con los 8 478 + 4 355
   + 47 códigos de HPOA, código sin prefijo): HPOA resuelve **268 906 de 268 906**
   filas P directo por código, 0 vía Mondo, 0 sin resolver → 268 306 aristas.
@@ -251,8 +250,8 @@ Medición en la base desechable con dos andamios:
   `mesh`).
 
 CIE-11 capítulo 21 y CIE-10 capítulo R: los carga `seed-diseases` (MMS 2026-01
-completa; CIE-10 sólo como claves `icd10-who` sin título por la licencia OMS
-pendiente). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
+completa; CIE-10 sólo como claves `icd10-who` sin título, porque no hay licencia
+OMS). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 
 ## Glosario: extensión, no duplicado
 
@@ -271,7 +270,7 @@ pendiente). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
 ## Corrida en Postgres desechable
 
 Postgres 16 local, DDL de `database/SQL/00_shared` + `03_terminology` (copia del
-modelo). Andamio (versionado en `docs/trabajo/2026-10-24-seed-symptoms/evidencia/andamio/`): los 7 conceptos internos que en un entorno
+modelo). Andamio de la corrida: los 7 conceptos internos que en un entorno
 real siembra la API (estado activo, idiomas, tipos de designación, is-a,
 `REL_SYMPTOM`, `REL_SYMPTOM_EXCLUDED`), los dos value sets del glosario y Mondo
 como sustituto de `seed-diseases`.
@@ -316,6 +315,6 @@ node tools/terminology-import/symptoms/load-symptoms.mjs                # dry-ru
 node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos (.env DB_*); --glossary opcional
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs      # dry-run del plan de relaciones
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --check   # modelo + resolución, sin escribir
-node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # sólo cuando el modelo tenga la tabla
+node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # exige la tabla en el modelo
 node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 16 pruebas con recortes reales
 ```

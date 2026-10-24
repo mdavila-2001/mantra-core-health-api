@@ -1,5 +1,0 @@
---- xlsx
---- exceljs
---- csv-parse
---- papaparse
---- fast-csv

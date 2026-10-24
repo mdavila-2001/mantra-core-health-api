@@ -31,7 +31,7 @@ nº de registro), nunca por nombre.
 | 0 | 2026-10-24 00:40 | Archivos del repo: LINAME 2022-2024 (482 ATC 5), dataset `vademecum` (483) | 0 | 0 | Universo inicial de 483 ATC 5. Sin texto clínico. |
 | 1 | 2026-10-24 15:21 | **openFDA drug labels** (export 2026-10-23, 14 particiones, 262 901 etiquetas) + **FDA GSRS** (export 2026-10-21, 167 385 sustancias) como puente UNII ↔ WHO-ATC | **1 033** | **18 853** | Ver abajo. Idioma de origen: inglés. |
 | — | 2026-10-24 | CIMA (AEMPS) | — | — | **Bloqueada (403).** |
-| — | 2026-10-24 | RxNav (puente ATC → RxCUI → UNII) | — | — | **Bloqueada (403).** Destrabaría las etiquetas ambiguas (ver «Huecos»). |
+| — | 2026-10-24 | RxNav (puente ATC → RxCUI → UNII) | — | — | **Bloqueada (403).** Es el puente que resolvería las etiquetas ambiguas (ver «Huecos»). |
 | — | 2026-10-24 | DailyMed, EMA, FTN Bolivia, WHO EML, CPIC | — | — | **Bloqueadas (403).** |
 
 ### Pasada 1 en detalle (openFDA + GSRS)
@@ -123,7 +123,7 @@ el cruce no se midió. Con la base cargada lo mide `validate-links.mjs` (`produc
   Por la combinación que el GSRS anota en un solo principio quedan, por ejemplo, amoxicilina
   (J01CA04 / J01CR02) y enalapril (C09AA02 / C09BA02).
 
-  **Lo destraba RxNav** (ATC 5 → ingrediente → UNII: el código ATC 5 elige el ingrediente) **o
+  Las resolverían **RxNav** (ATC 5 → ingrediente → UNII: el código ATC 5 elige el ingrediente) **o
   CIMA** (ATC por producto). No se resuelve por nombre ni por vía.
 - **Sin texto en castellano:** CIMA bloqueada.
 - **DDD:** no se cargan (WHOCC).
@@ -132,8 +132,8 @@ el cruce no se midió. Con la base cargada lo mide `validate-links.mjs` (`produc
 ## Carga y enlaces verificados
 
 En un Postgres 16 desechable, con el DDL de `database/SQL/00_shared` y `03_terminology` tal cual
-(sin la API, sin DDL nuevo). Evidencia en `docs/trabajo/2026-10-24-farmacologia-clinica/evidencia/11`
-y `12`.
+(sin la API, sin DDL nuevo). La salida de `validate-links.mjs` y el plan en seco quedan en
+`tools/terminology-import/clinical-pharmacology/data/` (`validate-links.json.gz`, `load-plan.dry-run.json.gz`).
 
 | Corrida | Conceptos | Designaciones | IS_A | Propiedades | `concept_maps` → vademecum | Borradas | Tiempo |
 |---|---:|---:|---:|---:|---:|---:|---:|

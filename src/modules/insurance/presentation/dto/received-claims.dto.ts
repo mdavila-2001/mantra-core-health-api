@@ -210,10 +210,9 @@ export class ReceivedClaimDto {
   decision!: ReceivedClaimDecisionViewDto | null;
 
   /**
-   * La factura que produjo el dictamen favorable. **Siempre `null` por ahora**:
-   * el modelo no declara dónde vive la factura del prestador a la aseguradora
-   * (decisión pendiente). El dictamen favorable publica el evento
-   * `InsuranceClaimDecided`, que es lo que la facturación consumirá.
+   * La factura que produjo el dictamen favorable. **Siempre `null`**: el modelo
+   * no declara dónde vive la factura del prestador a la aseguradora. El
+   * dictamen favorable publica el evento `InsuranceClaimDecided`.
    */
   @ApiProperty({
     nullable: true,

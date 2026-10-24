@@ -163,12 +163,12 @@ transacciones), no en el cliente.
 | Línea de nivel `fatal` | Agregador de logs | **Cualquiera** |
 | `/readiness` en 503 | Sonda externa | Más de 1 minuto |
 
-### Alertas que faltan 🔵
+### Alertas sin serie temporal 🔵
 
-Todas dependen de [A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-): no
-hay endpoint `/metrics` y por tanto no hay series temporales sobre las que definir
-umbrales. Los datos existen y están expuestos en `GET :9100/status`; lo que falta
-es quien los recoja periódicamente.
+Estas señales no tienen alerta automática: no hay endpoint `/metrics`
+([A-12](00-auditoria.md#a-12--no-hay-métricas-prometheus-)) y por tanto no hay
+series temporales sobre las que definir umbrales. Los datos están expuestos en
+`GET :9100/status` y se consultan a mano.
 
 | Señal | Umbral propuesto | Por qué importa |
 | --- | --- | --- |
