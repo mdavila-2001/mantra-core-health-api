@@ -270,6 +270,14 @@ export const FUENTES = {
     license:
       'Arquetipo CC BY-SA 4.0; el puntaje (Schroeder KW et al., NEJM 1987) se usa como categorías clínicas',
   },
+  OMS_DAK_HIV: {
+    sourceTitle:
+      'WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary',
+    organization: 'Organización Mundial de la Salud (OMS)',
+    url: 'https://github.com/WorldHealthOrganization/smart-hiv',
+    sourceVersion: 'HIV_DAK_2023-Web_Annex_A.Data_dictionary_231117_CLEAN.xlsx',
+    license: LIBRE_OMS,
+  },
   ACR_BIRADS: {
     sourceTitle: 'Breast Imaging Reporting and Data System (BI-RADS)',
     organization: 'American College of Radiology (ACR)',

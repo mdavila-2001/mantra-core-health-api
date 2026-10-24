@@ -18,6 +18,7 @@
  */
 import { b, control, i, si, una } from './lib.mjs';
 import { escala, factores } from './openehr/escalas.mjs';
+import { citaDak, dak, DESCARGO_OMS } from './who-dak/dak.mjs';
 
 const CKM = (x) => `openEHR-EHR-OBSERVATION.${x}`;
 const FECHA = '2026-10-24';
@@ -829,3 +830,782 @@ export const ESPECIFICAS_INTL = [
       }),
   },
 ];
+
+/* -- Pasada 2: Digital Adaptation Kits de la OMS ------------------------- */
+
+/**
+ * Suma opciones al final de una lista existente (antes de «Ninguno»), sin
+ * quitar ni renombrar ninguna: las capturas guardadas siguen siendo válidas.
+ */
+function sumarOpciones(campos, code, nuevas, ayuda) {
+  return campos.map((c) => {
+    if (c.code !== code) return c;
+    if (c.options === undefined) throw new Error(`${code} no es de lista`);
+    const repetidas = nuevas.filter((o) => c.options.includes(o));
+    if (repetidas.length > 0)
+      throw new Error(`${code}: opciones ya presentes ${repetidas}`);
+    const k = c.options.findIndex((o) => /^Ningun[oa]$/.test(o));
+    const options =
+      k < 0
+        ? [...c.options, ...nuevas]
+        : [...c.options.slice(0, k), ...nuevas, ...c.options.slice(k)];
+    return {
+      ...c,
+      options,
+      description: [c.description, ayuda].filter(Boolean).join(' '),
+    };
+  });
+}
+
+const NOTA_DAK = (que, dak) =>
+  `Ampliación internacional (${FECHA}): ${que} desde la ${citaDak(dak)}; instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. ${DESCARGO_OMS}`;
+
+/* Puerperio: DAK de atención posnatal (PNC). */
+const PUERPERIO_PELIGRO = [
+  dak('PNC', 'PNC.B4a.DE.1', 'puerperio_signos_de_peligro', {
+    nombre: 'Signos de peligro de la mujer',
+    traduccion: {
+      'PNC.B4a.DE.2': 'Sin signos de peligro',
+      'PNC.B4a.DE.3': 'Sangrado vaginal anormal',
+      'PNC.B4a.DE.4': 'Cianosis central',
+      'PNC.B4a.DE.5': 'Convulsiones',
+      'PNC.B4a.DE.6': 'Fiebre (37,5 °C o más)',
+      'PNC.B4a.DE.7': 'Cefalea intensa',
+      'PNC.B4a.DE.8': 'Dolor intenso (no abdominal)',
+      'PNC.B4a.DE.9': 'Vómitos intensos',
+      'PNC.B4a.DE.10': 'Dolor abdominal intenso',
+      'PNC.B4a.DE.11': 'Inconsciente',
+      'PNC.B4a.DE.12': 'Alteraciones visuales',
+    },
+  }),
+  dak('PNC', 'PNC.B3a.DE.35', 'puerperio_molestias', {
+    nombre: 'Molestias referidas en las últimas 24 horas',
+    traduccion: {
+      'PNC.B3a.DE.36': 'Ninguna',
+      'PNC.B3a.DE.37': 'Entuertos (cólicos uterinos)',
+      'PNC.B3a.DE.38': 'Cefalea',
+      'PNC.B3a.DE.39': 'Cansancio',
+      'PNC.B3a.DE.40': 'Dolor de espalda',
+      'PNC.B3a.DE.41': 'Dolor perineal',
+      'PNC.B3a.DE.42': 'Incontinencia urinaria',
+      'PNC.B3a.DE.43': 'Incontinencia fecal',
+      'PNC.B3a.DE.44': 'Náuseas',
+      'PNC.B3a.DE.45': 'Vómitos',
+      'PNC.B3a.DE.46': 'Sangrado vaginal excesivo',
+      'PNC.B3a.DE.47': 'Secreciones fétidas',
+      'PNC.B3a.DE.48': 'Edema de piernas',
+      'PNC.B3a.DE.49': 'Dolor a la palpación en las piernas',
+      'PNC.B3a.DE.50': 'Enrojecimiento de las piernas',
+      'PNC.B3a.DE.51': 'Diarrea',
+      'PNC.B3a.DE.52': 'Estreñimiento',
+      'PNC.B3a.DE.53': 'Síntomas gripales',
+      'PNC.B3a.DE.54': 'Fiebre',
+      'PNC.B3a.DE.55': 'Mareos',
+      'PNC.B3a.DE.56': 'Tos',
+      'PNC.B3a.DE.57': 'Falta de aire',
+      'PNC.B3a.DE.58': 'Dolor torácico',
+    },
+  }),
+  dak('PNC', 'PNC.B4a.DE.27', 'puerperio_preeclampsia_grave', {
+    nombre: 'Síntomas de preeclampsia grave',
+    traduccion: {
+      'PNC.B4a.DE.28': 'Sin síntomas de preeclampsia grave',
+      'PNC.B4a.DE.29': 'Cefalea intensa',
+      'PNC.B4a.DE.30': 'Alteraciones visuales',
+      'PNC.B4a.DE.31': 'Dolor epigástrico',
+      'PNC.B4a.DE.32': 'Mareos',
+      'PNC.B4a.DE.33': 'Vómitos',
+    },
+  }),
+];
+
+const PUERPERIO_UTERO = [
+  dak('PNC', 'PNC.B4a.DE.90', 'puerperio_tono_uterino', {
+    nombre: 'Tono del fondo uterino',
+    traduccion: {
+      'PNC.B4a.DE.91': 'Contraído',
+      'PNC.B4a.DE.92': 'Flácido',
+      'PNC.B4a.DE.93': 'No evaluable',
+    },
+  }),
+  dak('PNC', 'PNC.B4a.DE.94', 'puerperio_altura_uterina', {
+    nombre: 'Altura del fondo uterino',
+    traduccion: {
+      'PNC.B4a.DE.95': '1 a 2 cm por encima del ombligo',
+      'PNC.B4a.DE.96': '1 a 2 cm por debajo del ombligo',
+      'PNC.B4a.DE.97': 'A mitad de camino entre el ombligo y la sínfisis',
+      'PNC.B4a.DE.98': 'Intrapélvico',
+    },
+  }),
+  ...si('tipo_parto', 'Vaginal', [
+    dak('PNC', 'PNC.B4a.DE.113', 'puerperio_examen_perineal', {
+      nombre: 'Examen perineal',
+      traduccion: {
+        'PNC.B4a.DE.114': 'Sin heridas',
+        'PNC.B4a.DE.115': 'Heridas limpias y secas',
+        'PNC.B4a.DE.116': 'Cerradas con puntos',
+        'PNC.B4a.DE.117': 'Cerradas sin puntos',
+        'PNC.B4a.DE.118': 'Dehiscencia',
+        'PNC.B4a.DE.119': 'Hematoma',
+        'PNC.B4a.DE.120': 'Enrojecimiento',
+        'PNC.B4a.DE.121': 'Tumefacción',
+        'PNC.B4a.DE.122': 'Calor local',
+        'PNC.B4a.DE.123': 'Secreción fétida o purulenta',
+        'PNC.B4a.DE.124': 'Secreción serosa',
+      },
+    }),
+  ]),
+  ...si('tipo_parto', 'Cesárea', [
+    dak('PNC', 'PNC.B4a.DE.144', 'puerperio_herida_cesarea', {
+      nombre: 'Examen de la herida de la cesárea',
+      traduccion: {
+        'PNC.B4a.DE.145': 'Examen de la herida no realizado',
+        'PNC.B4a.DE.146': 'Limpia y seca',
+        'PNC.B4a.DE.147': 'Cerrada con puntos',
+        'PNC.B4a.DE.148': 'Cerrada sin puntos',
+        'PNC.B4a.DE.149': 'Dehiscente',
+        'PNC.B4a.DE.150': 'Hematoma',
+        'PNC.B4a.DE.151': 'Enrojecimiento',
+        'PNC.B4a.DE.152': 'Tumefacción',
+        'PNC.B4a.DE.153': 'Calor local',
+        'PNC.B4a.DE.154': 'Secreción fétida o purulenta',
+        'PNC.B4a.DE.155': 'Secreción serosa',
+      },
+    }),
+  ]),
+];
+
+const PUERPERIO_MAMAS = [
+  dak('PNC', 'PNC.B3a.DE.23', 'puerperio_problemas_mamas', {
+    nombre: 'Problemas de lactancia o de las mamas',
+    traduccion: {
+      'PNC.B3a.DE.24': 'Ninguno',
+      'PNC.B3a.DE.25': 'Dolor mamario',
+      'PNC.B3a.DE.26': 'Congestión mamaria',
+      'PNC.B3a.DE.27': 'Pezones doloridos',
+      'PNC.B3a.DE.28': 'Infección del pezón',
+      'PNC.B3a.DE.29': 'Mastitis o absceso',
+      'PNC.B3a.DE.30': 'Poca producción de leche',
+      'PNC.B3a.DE.31': 'Problemas de posición',
+      'PNC.B3a.DE.32': 'Problemas de agarre',
+      'PNC.B3a.DE.33': 'Reflujo o regurgitación',
+    },
+  }),
+];
+
+const PUERPERIO_ANIMO = [
+  dak('PNC', 'PNC.B3a.DE.1', 'puerperio_tamizaje_depresion_ansiedad', {
+    nombre: 'Indagación clínica de depresión y ansiedad posnatal',
+    traduccion: {
+      'PNC.B3a.DE.2': 'No realizada',
+      'PNC.B3a.DE.3': 'Positiva (hay signos)',
+      'PNC.B3a.DE.4': 'Negativa (no hay signos)',
+      'PNC.B3a.DE.5': 'No se pudo determinar',
+    },
+  }),
+];
+
+const PUERPERIO_METODO = si(
+  'anticoncepcion_posparto',
+  ['Elegida e iniciada', 'Elegida, pendiente'],
+  [
+    dak('PNC', 'PNC.B3a.DE.147', 'puerperio_metodo_anticonceptivo', {
+      nombre: 'Método anticonceptivo posparto elegido',
+      traduccion: {
+        'PNC.B3a.DE.148': 'DIU de cobre',
+        'PNC.B3a.DE.149': 'DIU de levonorgestrel',
+        'PNC.B3a.DE.150': 'Implante de etonogestrel (una varilla)',
+        'PNC.B3a.DE.151': 'Implante de levonorgestrel (dos varillas)',
+        'PNC.B3a.DE.152': 'DMPA intramuscular',
+        'PNC.B3a.DE.153': 'DMPA subcutáneo',
+        'PNC.B3a.DE.154': 'Enantato de noretisterona (NET-EN)',
+        'PNC.B3a.DE.155': 'Píldora de progestágeno solo',
+        'PNC.B3a.DE.156': 'Anticonceptivo oral combinado',
+        'PNC.B3a.DE.157': 'Parche anticonceptivo combinado',
+        'PNC.B3a.DE.158': 'Anillo vaginal combinado',
+        'PNC.B3a.DE.159': 'Anillo vaginal de progesterona',
+        'PNC.B3a.DE.160': 'Método de la amenorrea de la lactancia (MELA)',
+        'PNC.B3a.DE.161': 'Preservativo masculino',
+        'PNC.B3a.DE.162': 'Preservativo femenino',
+        'PNC.B3a.DE.163': 'Vasectomía',
+        'PNC.B3a.DE.164': 'Ligadura tubaria',
+        'PNC.B3a.DE.165': 'No se entregó método',
+      },
+    }),
+  ],
+);
+
+/* Recién nacido: DAK de atención posnatal (PNC), examen del neonato. */
+const RN_EXAMEN = [
+  dak('PNC', 'PNC.B4b.DE.48', 'rn_temperatura_al_tacto', {
+    nombre: 'Temperatura al tacto',
+    traduccion: {
+      'PNC.B4b.DE.49': 'Normal',
+      'PNC.B4b.DE.50': 'Frío',
+      'PNC.B4b.DE.51':
+        'Muy caliente (sobrecalentado: rubicundo, sudoroso o pelo húmedo)',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.25', 'rn_piel', {
+    nombre: 'Piel',
+    traduccion: {
+      'PNC.B4b.DE.26': 'Normal',
+      'PNC.B4b.DE.27': 'Palidez',
+      'PNC.B4b.DE.28': 'Cianosis',
+      'PNC.B4b.DE.29':
+        'Signos de infección cutánea (pústulas, ampollas, tumefacción, enrojecimiento o induración)',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.31', 'rn_ictericia_localizacion', {
+    nombre: 'Ictericia: hasta dónde llega',
+    traduccion: {
+      'PNC.B4b.DE.32': 'Cara',
+      'PNC.B4b.DE.33': 'Tórax',
+      'PNC.B4b.DE.34': 'Abdomen',
+      'PNC.B4b.DE.35': 'Piernas',
+      'PNC.B4b.DE.36': 'Brazos',
+      'PNC.B4b.DE.37': 'Palmas',
+      'PNC.B4b.DE.38': 'Plantas',
+    },
+    extra: 'Sólo si hay ictericia.',
+  }),
+  dak('PNC', 'PNC.B4b.DE.80', 'rn_fontanelas', {
+    nombre: 'Fontanelas',
+    traduccion: {
+      'PNC.B4b.DE.81': 'Normales',
+      'PNC.B4b.DE.82': 'Abombadas o tensas',
+      'PNC.B4b.DE.83': 'Deprimidas',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.88', 'rn_ojos', {
+    nombre: 'Ojos',
+    traduccion: {
+      'PNC.B4b.DE.89': 'Normales',
+      'PNC.B4b.DE.90': 'Tumefactos y con secreción purulenta',
+      'PNC.B4b.DE.91': 'Opacidades',
+      'PNC.B4b.DE.92': 'Escleras amarillas',
+      'PNC.B4b.DE.93': 'Enrojecimiento',
+      'PNC.B4b.DE.94': 'Reflejo rojo normal',
+      'PNC.B4b.DE.95': 'Reflejo rojo anormal',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.121', 'rn_cordon_umbilical', {
+    nombre: 'Cordón umbilical',
+    traduccion: {
+      'PNC.B4b.DE.122': 'Normal (tres vasos, limpio y seco)',
+      'PNC.B4b.DE.123': 'Ombligo o piel periumbilical enrojecidos o tumefactos',
+      'PNC.B4b.DE.124': 'Secreción purulenta',
+      'PNC.B4b.DE.125': 'Sangrado',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.52', 'rn_malformaciones', {
+    nombre: 'Malformaciones',
+    traduccion: {
+      'PNC.B4b.DE.53': 'Ninguna evidente',
+      'PNC.B4b.DE.54': 'Pie bot',
+      'PNC.B4b.DE.55': 'Labio leporino',
+      'PNC.B4b.DE.56': 'Paladar hendido',
+      'PNC.B4b.DE.57': 'Aspecto inusual que genera preocupación',
+      'PNC.B4b.DE.58':
+        'Tejido expuesto en cabeza, abdomen, espalda, periné o genitales',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.128', 'rn_genitales', {
+    nombre: 'Genitales',
+    traduccion: {
+      'PNC.B4b.DE.129': 'Aspecto habitual',
+      'PNC.B4b.DE.132': 'Sangrado vaginal',
+      'PNC.B4b.DE.133': 'Labios fusionados',
+      'PNC.B4b.DE.134': 'Testículos no descendidos',
+      'PNC.B4b.DE.137': 'Hipospadias',
+      'PNC.B4b.DE.138': 'Hidrocele',
+      'PNC.B4b.DE.139': 'Hernia inguinal',
+      'PNC.B4b.DE.140': 'Genitales ambiguos',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.142', 'rn_ano', {
+    nombre: 'Ano',
+    traduccion: {
+      'PNC.B4b.DE.143': 'Normal (permeable)',
+      'PNC.B4b.DE.144': 'Ano imperforado',
+      'PNC.B4b.DE.145': 'Aspecto anormal',
+    },
+  }),
+  dak('PNC', 'PNC.B4b.DE.152', 'rn_espalda_columna', {
+    nombre: 'Espalda y columna',
+    traduccion: {
+      'PNC.B4b.DE.153': 'Normales',
+      'PNC.B4b.DE.154': 'Hoyuelos o fositas',
+      'PNC.B4b.DE.155': 'Apéndices cutáneos',
+      'PNC.B4b.DE.156': 'Mechones de pelo',
+      'PNC.B4b.DE.157': 'Anencefalia',
+      'PNC.B4b.DE.158': 'Encefalocele',
+      'PNC.B4b.DE.159': 'Espina bífida',
+    },
+  }),
+];
+
+const RN_CUIDADOS = [
+  dak('PNC', 'PNC.B3b.DE.45', 'rn_alimentacion_actual', {
+    nombre: 'Alimentación actual',
+    traduccion: {
+      'PNC.B3b.DE.46': 'Lactancia exclusiva a demanda',
+      'PNC.B3b.DE.47': 'Lactancia exclusiva con horario',
+      'PNC.B3b.DE.48': 'Mixta (fórmula y leche materna)',
+      'PNC.B3b.DE.49': 'Fórmula',
+    },
+  }),
+  dak('PNC', 'PNC.B3b.DE.87', 'rn_posicion_para_dormir', {
+    nombre: 'Posición en la que suele dormir',
+    traduccion: {
+      'PNC.B3b.DE.88': 'Boca arriba',
+      'PNC.B3b.DE.89': 'De costado',
+      'PNC.B3b.DE.90': 'Boca abajo',
+      'PNC.B3b.DE.91': 'No se sabe',
+    },
+  }),
+];
+
+const RN_VITAMINA_K = [
+  dak('PNC', 'PNC.B3b.DE.24', 'rn_vitamina_k', {
+    nombre: 'Vitamina K al nacer',
+    traduccion: {
+      'PNC.B3b.DE.25': 'Sí',
+      'PNC.B3b.DE.26': 'No',
+      'PNC.B3b.DE.27': 'No se sabe',
+    },
+  }),
+];
+
+/** Signos de peligro del neonato de la DAK PNC que la lista original no tenía. */
+const RN_PELIGRO_DAK = [
+  'Respiración ruidosa (quejido, estridor)',
+  'Cianosis central',
+  'Respiración lenta, boqueo o apnea',
+  'Aleteo nasal',
+  'Distensión abdominal',
+  'Sólo se mueve al estimularlo o no se mueve',
+  'Secreción purulenta del muñón umbilical',
+  'Sangrado del muñón umbilical',
+];
+
+/* VIH: DAK de VIH (2023), visita de atención y tratamiento. */
+const VIH_ADHERENCIA = si(
+  'adherencia',
+  ['Olvida dosis algunas veces', 'Abandonó el tratamiento'],
+  [
+    dak('HIV', 'HIV.D.DE197', 'vih_motivos_mala_adherencia', {
+      nombre: 'Motivos del problema de adherencia',
+      traduccion: {
+        'HIV.D.DE198': 'Se olvidó',
+        'HIV.D.DE199': 'Toxicidad o efectos adversos',
+        'HIV.D.DE200': 'Falta de tiempo',
+        'HIV.D.DE201': 'Cambio de rutina',
+        'HIV.D.DE202': 'Costo del traslado',
+        'HIV.D.DE203': 'Distancia al establecimiento',
+        'HIV.D.DE204': 'Perdió o se le acabaron las pastillas',
+        'HIV.D.DE205': 'Desabastecimiento',
+        'HIV.D.DE206': 'Estaba demasiado enfermo',
+        'HIV.D.DE207': 'Cantidad de pastillas',
+        'HIV.D.DE208': 'Se sentía bien',
+        'HIV.D.DE209': 'Depresión',
+        'HIV.D.DE210': 'Consumo de alcohol',
+        'HIV.D.DE211': 'Consumo de otras sustancias',
+        'HIV.D.DE212': 'Estigma o temor a que se sepa el diagnóstico',
+        'HIV.D.DE213': 'Falta de alimentos',
+        'HIV.D.DE214': 'Mal sabor',
+      },
+    }),
+  ],
+);
+
+const VIH_TOXICIDAD = si('efectos_adversos', true, [
+  dak('HIV', 'HIV.D.DE466', 'vih_toxicidad_limitante', {
+    nombre: 'Tipo de toxicidad que limita el tratamiento',
+    traduccion: {
+      'HIV.D.DE467':
+        'Gastrointestinal (náuseas, diarrea, dolor abdominal, vómitos)',
+      'HIV.D.DE468': 'Cutánea (exantema, hipersensibilidad)',
+      'HIV.D.DE469': 'Neuropatía periférica',
+      'HIV.D.DE470':
+        'Sistema nervioso central (mareo, ansiedad, pesadillas, depresión)',
+      'HIV.D.DE471': 'Aumento de peso',
+      'HIV.D.DE472': 'Disfunción hepática (ictericia)',
+      'HIV.D.DE473': 'Hematológica (anemia, neutropenia)',
+      'HIV.D.DE474': 'Cansancio',
+      'HIV.D.DE475': 'Cefalea',
+      'HIV.D.DE476': 'Ósea (fracturas, osteopenia)',
+      'HIV.D.DE477':
+        'Metabólica (cambios de la grasa corporal, hiperglucemia, dislipidemia)',
+      'HIV.D.DE478': 'Renal (nefrolitiasis, insuficiencia renal)',
+      'HIV.D.DE479': 'Reacción adversa inesperada',
+    },
+  }),
+]);
+
+const VIH_CARGA = [
+  dak('HIV', 'HIV.D.DE391', 'vih_motivo_carga_viral', {
+    nombre: 'Motivo de la carga viral',
+    traduccion: {
+      'HIV.D.DE392': 'Control de rutina',
+      'HIV.D.DE393': 'Control dirigido (sospecha clínica)',
+      'HIV.D.DE394': 'Primera carga viral',
+      'HIV.D.DE395': 'Control después de la consejería reforzada de adherencia',
+    },
+  }),
+  dak('HIV', 'HIV.D.DE225', 'vih_fracaso_tratamiento', {
+    nombre: 'Fracaso del tratamiento antirretroviral',
+    traduccion: {
+      'HIV.D.DE226': 'Fracaso clínico',
+      'HIV.D.DE227': 'Fracaso inmunológico',
+      'HIV.D.DE228': 'Fracaso virológico',
+    },
+    extra: 'Dejar en blanco si no hay fracaso.',
+  }),
+];
+
+const VIH_TAMIZAJES = [
+  dak('HIV', 'HIV.D.DE17', 'vih_signos_enfermedad_grave', {
+    nombre: 'Signos de enfermedad grave',
+    traduccion: {
+      'HIV.D.DE18': 'Fiebre de 39 °C o más',
+      'HIV.D.DE19': 'Taquicardia',
+      'HIV.D.DE20': 'Taquipnea',
+      'HIV.D.DE21': 'No puede caminar sin ayuda',
+      'HIV.D.DE22': 'Letargo',
+      'HIV.D.DE23': 'Inconsciencia',
+      'HIV.D.DE24': 'Convulsiones',
+      'HIV.D.DE25': 'No puede beber (niño)',
+      'HIV.D.DE26': 'No puede mamar (lactante o niño)',
+      'HIV.D.DE27': 'Vómitos repetidos',
+      'HIV.D.DE28': 'Cefalea',
+    },
+    extra: 'Cualquiera de estos signos indica triaje o referencia de urgencia.',
+  }),
+  dak('HIV', 'HIV.D.DE973', 'vih_sintomas_tb', {
+    nombre: 'Síntomas de tuberculosis (tamizaje)',
+    multiple: true,
+    traduccion: {
+      'HIV.D.DE974': 'Tos actual',
+      'HIV.D.DE975': 'Tos de 2 semanas o más',
+      'HIV.D.DE976': 'Fiebre de 39 °C o más',
+      'HIV.D.DE977': 'Pérdida de peso (referida)',
+      'HIV.D.DE978': 'Sudoración nocturna',
+      'HIV.D.DE979': 'Poca ganancia de peso (niño)',
+      'HIV.D.DE980': 'Juega menos (niño)',
+      'HIV.D.DE981': 'Dolor torácico',
+      'HIV.D.DE982': 'Hemoptisis',
+      'HIV.D.DE983': 'Letargo',
+      'HIV.D.DE984': 'Ninguno',
+    },
+    extra:
+      'La DAK lo marca como respuesta única; se ofrece como varias porque los síntomas pueden coexistir.',
+  }),
+  dak('HIV', 'HIV.D.DE986', 'vih_resultado_tamizaje_tb', {
+    nombre: 'Resultado del tamizaje de tuberculosis',
+    traduccion: {
+      'HIV.D.DE987': 'Positivo',
+      'HIV.D.DE988': 'Negativo',
+      'HIV.D.DE989': 'No concluyente',
+    },
+  }),
+  dak('HIV', 'HIV.D.DE162', 'vih_hbsag', {
+    nombre: 'HBsAg (hepatitis B)',
+    traduccion: {
+      'HIV.D.DE163': 'Positivo',
+      'HIV.D.DE164': 'Negativo',
+      'HIV.D.DE165': 'Indeterminado',
+    },
+  }),
+  dak('HIV', 'HIV.D.DE170', 'vih_vhc', {
+    nombre: 'Prueba de hepatitis C',
+    traduccion: {
+      'HIV.D.DE171': 'Positiva',
+      'HIV.D.DE172': 'Negativa',
+      'HIV.D.DE173': 'Indeterminada',
+    },
+  }),
+];
+
+/* Planificación familiar: DAK de planificación familiar (FP). */
+const FP_MOTIVO = [
+  dak('FP', 'FP.DE.0059', 'fp_motivo_visita', {
+    nombre: 'Motivo de la visita',
+    traduccion: {
+      'FP.DE.0060': 'Dejar la anticoncepción',
+      'FP.DE.0061': 'Consejería en anticoncepción',
+      'FP.DE.0062': 'Iniciar anticoncepción',
+      'FP.DE.0063': 'Continuar con el método actual',
+      'FP.DE.0064': 'Anticoncepción de emergencia',
+      'FP.DE.0065': 'Problemas o dudas con el método',
+      'FP.DE.0066': 'Retiro del implante',
+      'FP.DE.0067': 'Retiro del DIU',
+      'FP.DE.0068': 'Cambio de método',
+    },
+  }),
+  dak('FP', 'FP.DE.0074', 'fp_intencion_embarazo', {
+    nombre: '¿Desea un embarazo en el próximo año?',
+    traduccion: {
+      'FP.DE.0075': 'Sí, quiero quedar embarazada',
+      'FP.DE.0076': 'Me da lo mismo',
+      'FP.DE.0077': 'No, no quiero quedar embarazada',
+      'FP.DE.0078': 'No está segura',
+    },
+  }),
+  ...si('fp_motivo_visita', 'Dejar la anticoncepción', [
+    dak('FP', 'FP.DE.0069', 'fp_motivo_dejar_metodo', {
+      nombre: 'Motivo para dejar el método',
+      traduccion: {
+        'FP.DE.0070': 'Efectos adversos',
+        'FP.DE.0071': 'Desea un embarazo',
+        'FP.DE.0072': 'Falla del método (embarazo no buscado)',
+      },
+    }),
+  ]),
+  ...si('fp_motivo_visita', 'Problemas o dudas con el método', [
+    dak('FP', 'FP.DE.0216', 'fp_problemas_metodo', {
+      nombre: 'Problemas con el método',
+      traduccion: {
+        'FP.DE.0217': 'Sangrado abundante o prolongado',
+        'FP.DE.0218': 'Sangrado irregular',
+        'FP.DE.0219': 'Amenorrea',
+        'FP.DE.0220': 'Sangrado vaginal inexplicado',
+        'FP.DE.0221': 'Cólicos y dolor',
+        'FP.DE.0222': 'Posible anemia',
+        'FP.DE.0223': 'La pareja siente los hilos del DIU',
+        'FP.DE.0224': 'Dolor intenso en el bajo vientre',
+        'FP.DE.0225': 'Sospecha de perforación',
+        'FP.DE.0226': 'Expulsión parcial del DIU',
+        'FP.DE.0227': 'Expulsión completa del DIU',
+        'FP.DE.0228': 'No se encuentran los hilos del DIU',
+        'FP.DE.0229': 'Acné',
+        'FP.DE.0230': 'Cefaleas comunes',
+        'FP.DE.0231': 'Sensibilidad mamaria',
+        'FP.DE.0232': 'Cambio de peso',
+        'FP.DE.0233': 'Náuseas o mareos',
+        'FP.DE.0234': 'Cardiopatía isquémica',
+        'FP.DE.0235': 'Migraña',
+        'FP.DE.0236': 'Olvido de píldoras',
+        'FP.DE.0237': 'Inyección atrasada',
+        'FP.DE.0238': 'Cambios de ánimo o del deseo sexual',
+        'FP.DE.0239': 'Sospecha de embarazo',
+        'FP.DE.0240': 'Problemas con el parche',
+        'FP.DE.0241': 'Problemas con el anillo vaginal',
+        'FP.DE.0242': 'Cambio en el momento de la menstruación',
+        'FP.DE.0243': 'Sangrado o coágulos',
+        'FP.DE.0244': 'Dolor que dura meses',
+        'FP.DE.0245': 'Infección en el sitio de inserción o incisión',
+        'FP.DE.0246': 'Absceso',
+        'FP.DE.0247': 'Dificultad para usar el preservativo',
+        'FP.DE.0248': 'Irritación genital',
+        'FP.DE.0249': 'Preservativo mal usado, roto o deslizado',
+        'FP.DE.0250': 'Dificultad para convencer a la pareja',
+        'FP.DE.0251': 'El preservativo hace ruido',
+        'FP.DE.0252': 'Trombosis venosa profunda',
+        'FP.DE.0253': 'Embarazo ectópico',
+        'FP.DE.0254': 'Infarto de miocardio',
+        'FP.DE.0255': 'Enfermedad hepática',
+        'FP.DE.0256': 'Enfermedad inflamatoria pélvica',
+        'FP.DE.0257': 'Embolia pulmonar',
+        'FP.DE.0258': 'Embarazo ectópico roto',
+        'FP.DE.0259': 'Alergia grave al látex',
+        'FP.DE.0260': 'Accidente cerebrovascular',
+        'FP.DE.0261': 'Síndrome de shock tóxico',
+      },
+    }),
+  ]),
+];
+
+/* Prenatal: DAK de atención prenatal (ANC), verificación rápida. */
+const ANC_PELIGRO = [
+  dak('ANC', 'ANC.B5.DE48', 'anc_signos_de_peligro', {
+    nombre: 'Signos de peligro (verificación rápida al llegar)',
+    traduccion: {
+      'ANC.B5.DE49': 'Sin signos de peligro',
+      'ANC.B5.DE50': 'Sangrado vaginal',
+      'ANC.B5.DE51': 'Cianosis central',
+      'ANC.B5.DE52': 'Convulsiones',
+      'ANC.B5.DE53': 'Fiebre',
+      'ANC.B5.DE54': 'Parto inminente',
+      'ANC.B5.DE55': 'Trabajo de parto',
+      'ANC.B5.DE56': 'Aspecto de estar muy enferma',
+      'ANC.B5.DE57': 'Cefalea intensa',
+      'ANC.B5.DE58': 'Dolor intenso (no abdominal)',
+      'ANC.B5.DE59': 'Vómitos intensos',
+      'ANC.B5.DE60': 'Dolor abdominal intenso',
+      'ANC.B5.DE61': 'Inconsciente',
+      'ANC.B5.DE62': 'Alteraciones visuales',
+    },
+    extra:
+      'Se verifica antes de cada contacto: cualquier signo de peligro indica atención o referencia de urgencia.',
+  }),
+];
+
+Object.assign(MEJORAS, {
+  GINOBS_CTRL_PUERPERIO: {
+    version: 2,
+    nota: NOTA_DAK(
+      'signos de peligro, molestias, examen uterino y perineal o de la herida de cesárea, problemas de lactancia, indagación de depresión posnatal y método anticonceptivo posparto',
+      'PNC',
+    ),
+    aplicar: (c) =>
+      despues(
+        despues(
+          despues(
+            despues(
+              despues(c, 'dias_posparto', PUERPERIO_PELIGRO),
+              'involucion_uterina',
+              PUERPERIO_UTERO,
+            ),
+            'lactancia',
+            PUERPERIO_MAMAS,
+          ),
+          'animo_puerperio',
+          PUERPERIO_ANIMO,
+        ),
+        'anticoncepcion_posparto',
+        PUERPERIO_METODO,
+      ),
+  },
+  INFECTO_CTRL_VIH: {
+    version: 2,
+    nota: NOTA_DAK(
+      'motivos de mala adherencia, toxicidad limitante, motivo de la carga viral, fracaso terapéutico, signos de enfermedad grave, tamizaje de tuberculosis y hepatitis B y C',
+      'HIV',
+    ),
+    aplicar: (c) =>
+      despues(
+        despues(
+          despues(
+            despues(c, 'adherencia', VIH_ADHERENCIA),
+            'efectos_adversos',
+            VIH_TOXICIDAD,
+          ),
+          'carga_viral',
+          VIH_CARGA,
+        ),
+        'vih_sintomas',
+        VIH_TAMIZAJES,
+      ),
+  },
+  MEDFAM_CTRL_PLANIFICACION: {
+    version: 2,
+    nota: NOTA_DAK(
+      'motivo de la visita, intención de embarazo, motivo para dejar el método y problemas con el método',
+      'FP',
+    ),
+    aplicar: (c) => despues(c, 'tipo_de_evaluacion', FP_MOTIVO),
+  },
+  GINOBS_CONTROL_PRENATAL: {
+    version: 3,
+    nota: NOTA_DAK('signos de peligro de la verificación rápida', 'ANC'),
+    aplicar: (c) => antes(c, 'signos_de_alarma_obstetricos', ANC_PELIGRO),
+  },
+});
+
+/* El recién nacido ya tenía mejora de la pasada 1 (Apgar): se encadena. */
+{
+  const pasada1 = MEJORAS.PEDIA_RECIEN_NACIDO;
+  MEJORAS.PEDIA_RECIEN_NACIDO = {
+    version: 2,
+    nota: `${pasada1.nota} ${NOTA_DAK(
+      'examen físico del neonato, alimentación, posición para dormir, vitamina K y signos de peligro que faltaban',
+      'PNC',
+    )}`,
+    aplicar: (c) =>
+      sumarOpciones(
+        despues(
+          despues(
+            despues(pasada1.aplicar(c), 'perimetro_cefalico_cm', RN_EXAMEN),
+            'lactancia_primera_hora',
+            RN_CUIDADOS,
+          ),
+          'vacunas_rn',
+          RN_VITAMINA_K,
+        ),
+        'signos_peligro_rn',
+        RN_PELIGRO_DAK,
+        `Ampliada (${FECHA}) con los signos de peligro del elemento PNC.B4b.DE.1 de la ${citaDak('PNC')}; traducción propia, no oficial. ${DESCARGO_OMS}`,
+      ),
+  };
+}
+
+ESPECIFICAS_INTL.push({
+  code: 'INFECTO_CTRL_ITS',
+  carpeta: 'infectologia',
+  nombre: 'Infecciones de transmisión sexual: evaluación y control',
+  fuente: 'OMS_DAK_HIV',
+  fecha: FECHA,
+  nota: `Estructura de cuadro agudo del catálogo (NT 022). Factores de riesgo de la DAK de planificación familiar y ITS (FP.DE.0183) y síndrome, pruebas y resultados de la DAK de VIH de la OMS (HIV.D.DE778, DE789, DE802, DE808). Traducción propia del inglés, no oficial. ${DESCARGO_OMS}`,
+  campos: () =>
+    control({
+      condicion: 'infección de transmisión sexual',
+      modo: 'agudo',
+      evaluacion: [
+        dak('FP', 'FP.DE.0183', 'its_factores_de_riesgo', {
+          nombre: 'Factores de riesgo de ITS',
+          traduccion: {
+            'FP.DE.0184': 'Mujer adolescente',
+            'FP.DE.0185': 'Vive con VIH',
+            'FP.DE.0186': 'Cambia con frecuencia de pareja sexual',
+            'FP.DE.0187': 'Varias parejas sexuales',
+            'FP.DE.0188': 'Trabajo sexual',
+            'FP.DE.0189': 'Cliente de trabajo sexual',
+            'FP.DE.0190': 'Separado de su pareja habitual por largos periodos',
+            'FP.DE.0191':
+              'Relaciones sin preservativo con una pareja que tiene una ITS',
+            'FP.DE.0192': 'ITS en el último año',
+            'FP.DE.0193':
+              'Perforaciones de la piel con agujas no estériles (tatuajes, piercing, inyecciones)',
+            'FP.DE.0194': 'Pareja con conductas de riesgo',
+          },
+        }),
+        dak('HIV', 'HIV.D.DE778', 'its_sindrome', {
+          nombre: 'Síndrome o ITS diagnosticada',
+          req: true,
+          traduccion: {
+            'HIV.D.DE779': 'Síndrome de secreción uretral',
+            'HIV.D.DE780': 'Síndrome de flujo vaginal',
+            'HIV.D.DE781': 'Dolor abdominal bajo',
+            'HIV.D.DE782': 'Síndrome de úlcera genital',
+            'HIV.D.DE783': 'Secreción anorrectal',
+            'HIV.D.DE784': 'Muestra enviada a estudio',
+          },
+        }),
+        dak('HIV', 'HIV.D.DE789', 'its_pruebas', {
+          nombre: 'ITS estudiadas',
+          traduccion: {
+            'HIV.D.DE790': 'Neisseria gonorrhoeae',
+            'HIV.D.DE791': 'Chlamydia trachomatis',
+            'HIV.D.DE792': 'Trichomonas vaginalis',
+            'HIV.D.DE793': 'Sífilis (Treponema pallidum)',
+            'HIV.D.DE794': 'Virus del herpes simple (VHS-1, VHS-2)',
+            'HIV.D.DE795': 'Mycoplasma genitalium',
+            'HIV.D.DE796': 'Mpox',
+            'HIV.D.DE797': 'Hepatitis B',
+            'HIV.D.DE798': 'Hepatitis C',
+          },
+        }),
+        ...si('its_pruebas', 'Sífilis (Treponema pallidum)', [
+          dak('HIV', 'HIV.D.DE802', 'its_resultado_sifilis', {
+            nombre: 'Resultado de la prueba de sífilis',
+            traduccion: {
+              'HIV.D.DE803': 'Positivo',
+              'HIV.D.DE804': 'Negativo',
+              'HIV.D.DE805': 'No concluyente',
+            },
+          }),
+        ]),
+        ...si('its_pruebas', 'Neisseria gonorrhoeae', [
+          dak('HIV', 'HIV.D.DE808', 'its_resultado_gonorrea', {
+            nombre: 'Resultado de la prueba de gonorrea',
+            traduccion: {
+              'HIV.D.DE809': 'Positivo',
+              'HIV.D.DE810': 'Negativo',
+              'HIV.D.DE811': 'No concluyente',
+            },
+          }),
+        ]),
+      ],
+    }),
+});

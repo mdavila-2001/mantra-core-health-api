@@ -1,0 +1,53 @@
+{
+  "PNC": [
+    "PNC.B4a.DE.1",
+    "PNC.B3a.DE.35",
+    "PNC.B3a.DE.23",
+    "PNC.B3a.DE.1",
+    "PNC.B4a.DE.27",
+    "PNC.B4a.DE.90",
+    "PNC.B4a.DE.94",
+    "PNC.B4a.DE.113",
+    "PNC.B4a.DE.144",
+    "PNC.B3a.DE.147",
+    "PNC.B4b.DE.1",
+    "PNC.B4b.DE.25",
+    "PNC.B4b.DE.31",
+    "PNC.B4b.DE.48",
+    "PNC.B4b.DE.80",
+    "PNC.B4b.DE.88",
+    "PNC.B4b.DE.121",
+    "PNC.B4b.DE.52",
+    "PNC.B4b.DE.128",
+    "PNC.B4b.DE.142",
+    "PNC.B4b.DE.152",
+    "PNC.B3b.DE.24",
+    "PNC.B3b.DE.45",
+    "PNC.B3b.DE.87"
+  ],
+  "HIV": [
+    "HIV.D.DE197",
+    "HIV.D.DE17",
+    "HIV.D.DE225",
+    "HIV.D.DE391",
+    "HIV.D.DE466",
+    "HIV.D.DE162",
+    "HIV.D.DE170",
+    "HIV.D.DE973",
+    "HIV.D.DE986",
+    "HIV.D.DE778",
+    "HIV.D.DE789",
+    "HIV.D.DE802",
+    "HIV.D.DE808"
+  ],
+  "FP": [
+    "FP.DE.0059",
+    "FP.DE.0074",
+    "FP.DE.0216",
+    "FP.DE.0069",
+    "FP.DE.0183"
+  ],
+  "ANC": [
+    "ANC.B5.DE48"
+  ]
+}

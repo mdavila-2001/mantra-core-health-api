@@ -5,7 +5,7 @@
     "code": "GINECOLOGIA_OBSTETRICIA",
     "display": "Ginecología y obstetricia"
   },
-  "version": 2,
+  "version": 3,
   "provenance": {
     "sourceTitle": "Historia Clínica Perinatal — Sistema Informático Perinatal (SIP)",
     "organization": "Centro Latinoamericano de Perinatología, Salud de la Mujer y Reproductiva (CLAP/SMR) — OPS/OMS",
@@ -13,7 +13,7 @@
     "license": "Publicación OPS/OMS de acceso abierto (CC BY-NC-SA 3.0 IGO)",
     "sourceVersion": "Historia clínica perinatal simplificada",
     "retrievedAt": "2026-08-14",
-    "note": "Transcripción de la sección de control prenatal. El formulario completo cubre además parto, puerperio y recién nacido. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar."
+    "note": "Transcripción de la sección de control prenatal. El formulario completo cubre además parto, puerperio y recién nacido. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Ampliación internacional (2026-10-24): signos de peligro de la verificación rápida desde la WHO Digital Adaptation Kit for antenatal care: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-anc, commit 301a6b8); instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
   },
   "fields": [
     {
@@ -222,6 +222,31 @@
       "name": "Hierro y ácido fólico",
       "dataType": "boolean",
       "required": false
+    },
+    {
+      "section": "Signos de alarma",
+      "code": "anc_signos_de_peligro",
+      "name": "Signos de peligro (verificación rápida al llegar)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin signos de peligro",
+        "Sangrado vaginal",
+        "Cianosis central",
+        "Convulsiones",
+        "Fiebre",
+        "Parto inminente",
+        "Trabajo de parto",
+        "Aspecto de estar muy enferma",
+        "Cefalea intensa",
+        "Dolor intenso (no abdominal)",
+        "Vómitos intensos",
+        "Dolor abdominal intenso",
+        "Inconsciente",
+        "Alteraciones visuales"
+      ],
+      "multiple": true,
+      "description": "Se verifica antes de cada contacto: cualquier signo de peligro indica atención o referencia de urgencia. Fuente: elemento ANC.B5.DE48 «Danger signs» de la WHO Digital Adaptation Kit for antenatal care: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-anc, commit 301a6b8). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
     },
     {
       "section": "Signos de alarma",
