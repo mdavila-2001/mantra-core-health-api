@@ -2,10 +2,9 @@
 // Ensamblado del corpus (puro, sin red ni disco): filas crudas ya leídas →
 // filas del formato común, deduplicadas, más el reporte de cobertura.
 //
-// Recorte: se exportan las filas cuyo código EMDN/CND está EN ALCANCE (W
-// entera o tipo listado) y también las de categorías EN REVISIÓN, marcadas en
-// `extra.dxScope`, para que `master/` las clasifique con su taxonomía. Las de
-// categorías excluidas no se exportan (y fetch.mjs ni siquiera las pide).
+// Recorte: se exportan solo las filas cuyo código EMDN/CND está EN ALCANCE
+// (W entera o tipo listado tras la revisión tipo por tipo); `extra.dxScope`
+// dice qué regla las incluyó. El resto se cuenta por regla y no se exporta.
 // =============================================================================
 
 import { RowError, dedupe, normKey } from './common.mjs';
@@ -32,15 +31,10 @@ export function scopeOf(record) {
   const codes = typeCodes(record);
   if (!codes.length) return { inScope: false, rule: 'sin-codigo-emdn' };
   const verdicts = codes.map((t) => classifyEmdn(t.code));
-  return (
-    verdicts.find((v) => v.inScope) ??
-    verdicts.find((v) => v.rule.startsWith('pendiente-revision')) ??
-    verdicts[0]
-  );
+  return verdicts.find((v) => v.inScope) ?? verdicts[0];
 }
 
-export const isExported = (s) =>
-  s.inScope || s.rule.startsWith('pendiente-revision');
+export const isExported = (s) => s.inScope;
 
 /**
  * @param {{
@@ -139,12 +133,7 @@ export function coverageReport({
   return {
     totalRead,
     devicesExported: devices.length,
-    devicesInScope: devices.filter(
-      (d) => !d.extra?.dxScope?.startsWith('pendiente'),
-    ).length,
-    devicesPendingReview: devices.filter((d) =>
-      d.extra?.dxScope?.startsWith('pendiente'),
-    ).length,
+    devicesInScope: devices.length,
     duplicatesDropped: duplicates.length,
     rejectedRows: rejected.count,
     rejectedSamples: rejected.samples,

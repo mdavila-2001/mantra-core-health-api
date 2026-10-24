@@ -8,25 +8,26 @@ Sesión `seed-dx-devices-eu` · rama `claude/adoring-curie-xdkt83` (desde `dev`)
 
 ## Resumen honesto
 
-- **El corpus europeo no se pudo descargar desde esta sesión.** La política de red del entorno
-  devuelve 403 en todos los hosts oficiales del reparto (EUDAMED, EMDN, MHRA, swissdamed,
-  Ministero della Salute, NANDO, BfArM, AEMPS, ANSM) y también en los espejos generales
-  (`zenodo.org`, `data.europa.eu`, `web.archive.org`). Solo responden GitHub, npm y PyPI.
-- Se buscaron réplicas abiertas en esos hosts: no existe ninguna copia con licencia clara de
-  EUDAMED, de la EMDN, de PARD ni de la BD/RDM. La única tabla real encontrada (4 203 fabricantes
-  de swissdamed) proviene de extraer swissdamed y **se descartó** por los términos de Swissmedic.
-- Resultado: **0 equipos, 0 fabricantes, 0 marcas, 0 conceptos EMDN** cargados. Nada se inventó.
-  Esto es un **hueco bloqueado**, no una saturación.
-- Lo que sí queda listo: pipeline completo (sondeo → descarga reanudable con manifiesto → NDJSON
-  común comprimido y partido → carga de la EMDN a `terminology.*` sin DDL), contratos de las APIs
-  verificados contra documentación citada, criterio de alcance EMDN, 21 tests dirigidos en verde y
-  la propuesta de tablas para el repo del modelo.
+- **Las fuentes oficiales siguen bloqueadas** por la política de red del entorno (403 en EUDAMED,
+  la Comisión, MHRA, swissdamed, el Ministero della Salute, NANDO, BfArM, AEMPS y ANSM).
+- Desde la pasada 4 el corpus sale de **réplicas públicas en GitHub fijadas por commit**
+  (descubiertas por la sesión `master` y verificadas acá: licencia, formato y procedencia):
+  - **716 equipos de diagnóstico** de EUDAMED (UDI-DI, EMDN, fabricante con SRN, marca, modelo o
+    referencia, clase, estado y, cuando hay, certificado y organismo notificado), de **114
+    fabricantes** y **391 marcas**;
+  - **EMDN V2 completa**: 8 453 conceptos con jerarquía (3 121 en alcance diagnóstico);
+  - **26 583 actores fabricantes de EUDAMED** con SRN (versión vigente de cada uno).
+- Cada fila cita la ficha oficial de EUDAMED (`sourceUrl`) y la réplica (`extra.mirror`: repo,
+  commit, ruta, sha256). Nada se inventó.
+- **No está saturado**: EUDAMED tiene millones de UDI-DI y estas réplicas cubren solo los
+  fabricantes que sus autores descargaron. El cuello de botella sigue siendo la red: con los
+  hosts habilitados, `fetch.mjs` baja EUDAMED completo por código EMDN.
 
 **Para destrabarlo**: habilitar en *Network access* del entorno estos hosts y volver a correr
-`probe.mjs → fetch.mjs → build.mjs` (o relanzar el /loop):
+`probe.mjs → fetch.mjs → build.mjs`:
 `api.datalake.sante.service.ec.europa.eu`, `health.ec.europa.eu`, `webgate.ec.europa.eu`,
 `ec.europa.eu`, `www.dati.salute.gov.it`, `pard.mhra.gov.uk`, `swissdamed.ch`,
-`www.bfarm.de`, `www.aemps.gob.es`, `ansm.sante.fr`. Además, para instalar dependencias:
+`www.bfarm.de`, `www.aemps.gob.es`, `ansm.sante.fr`. Para instalar dependencias:
 `repo.yarnpkg.com` y `cdn.sheetjs.com` (ver «Entorno»).
 
 ## Paso 0 — discovery del modelo
@@ -52,15 +53,19 @@ la EMDN descargada.
 | Categoría | Decisión | Motivo |
 |---|---|---|
 | **W** (IVD) | **Incluida entera** | Todo producto IVD es diagnóstico (IVDR art. 2.2): analizadores, reactivos, kits, calibradores, controles, autodiagnóstico y point-of-care. |
-| **Z** (equipamiento) | Revisión tipo por tipo | Contiene imagenología, monitorización, exploración funcional y patología digital, pero también equipos quirúrgicos y de terapia en los mismos grupos (verificado: `Z12130580` son accesorios de un sistema motorizado de cirugía ortopédica dentro de Z12). |
-| **C, G, N, Q, R, U, V** | Revisión tipo por tipo | Mezclan ramas diagnósticas (electrodos ECG/EEG/EMG, endoscopía diagnóstica, oftalmología y audiometría, espirometría, urodinamia, termometría) con terapéuticas. |
+| **Z** (equipamiento) | **Tipo por tipo** | Entran: medicina nuclear (Z1102), radiología diagnóstica (Z1103), ecografía (Z1104), RM (Z1105), gestión de imagen y PACS (Z1106, Z1107), densitometría, monitores diagnósticos, termografía; endoscopía diagnóstica GI, GU, pulmonar, ORL y cápsula (Z120204–Z120212 salvo robótica, motorizada, litotricia, neuro y artroscopía); monitorización y telemetría de signos vitales; diagnóstico de medicina general (dermatoscopios, glucómetros, capilaroscopios…); ECG, Holter, ergometría, gasto cardíaco; EEG, EMG, PSG, MEG; oftalmología diagnóstica; audiometría y vestibular; espirometría (Z1215); urodinamia y uroflujometría; diagnóstico prenatal; manometría y pH GI; poligrafía y Holter multidisciplinario; consumibles diagnósticos (Z13). Quedan fuera radioterapia (Z1101), dosimetría, cirugía, terapia y los «accesorios/software/otros» de grupos mixtos. |
+| **C** | Tipo por tipo | Entran: angiografía **diagnóstica** cardíaca y periférica, FFR, electrofisiología y mapeo, electrodos de ECG, sensores de oximetría, estetoscopios, esfigmomanómetros. Fuera: angioplastia, embolización, cánulas, guías, introductores. |
+| **G** | Tipo por tipo | Entran: sondas diagnósticas oroesofágicas, procedimientos diagnósticos GI (G0206) y endoscopía GI diagnóstica (G0307). |
+| **N** | Tipo por tipo | Entran: electrodos de EMG y EEG. Fuera: electroestimuladores, drenajes, catéteres. |
+| **Q** | Tipo por tipo | Entran: electrodos oftalmológicos de diagnóstico. Fuera: odontología, cirugía oftálmica y ORL. |
+| **R** | Tipo por tipo | Entran: sondas de broncoscopía de un solo uso y dispositivos de prueba de función pulmonar. |
+| **U** | Tipo por tipo | Entran: urodinamia (U05), estudio fetal, amnioscopios. |
+| **V** | Tipo por tipo | Entran: dispositivos de medición (V03: termómetros, sondas de temperatura, calibres, goniómetros, tallímetros, balanzas). |
 | **A, B, D, F, H, J, K, L, M, P, S, T, X, Y** | Excluidas | Administración/infusión, transfusión, desinfección, diálisis, suturas, implantables activos, endoterapia/electrocirugía, instrumental quirúrgico, apósitos, prótesis, esterilización, protección/incontinencia, productos sin finalidad médica, ayudas técnicas. La recolección de muestras que es IVD ya está en W. |
 
-Los tipos de las categorías en revisión entran **solo** si se listan uno por uno en
-`INCLUDED_TYPE_PREFIXES` con su motivo y la versión de la EMDN donde se leyó el nombre oficial;
-`build.mjs` escribe `out/emdn-scope-review.md` con todos esos tipos para decidirlos y falla si un
-prefijo listado no existe. Hoy la lista está vacía porque la EMDN no se pudo descargar: decidirla
-de memoria sería inventar.
+La lista exacta, con el motivo de cada uno de los 79 prefijos, está en `INCLUDED_TYPE_PREFIXES`
+(`lib/emdn-scope.mjs`), decidida leyendo el nombre oficial de cada tipo en la EMDN V2. El árbol
+completo con ✔/✘ por tipo queda en `out/emdn-scope-review.md`.
 
 Clases de riesgo: se conservan tal como las publica la fuente (EUDAMED decodifica
 `RISK_CLASS_ID` con `/reference`); no se recalculan.
@@ -144,12 +149,38 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
 - Nuevos tras deduplicar: **0 · 0 · 0**. Segunda pasada seguida en 0 **por bloqueo**: el loop se
   cierra como **BLOQUEADO**, no como saturado.
 
-### Pasada 3 — 2026-10-24 · /loop
+### Pasada 3 — 2026-10-24 · /loop (primer cierre)
 
 - `probe.mjs`: 0/11 alcanzables (`out/probe/probe-20261024T0335.json`). Sin cambios en la
   política de red: no se descargó nada.
 - Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO**. Para reanudar, habilitar
   los hosts listados arriba y relanzar el /loop (o `probe → fetch → build`).
+
+### Pasada 4 — 2026-10-24 · réplicas públicas en GitHub (aviso de `master`)
+
+- La sesión `master` encontró copias en git de datos de esta región. Se verificó cada una
+  (licencia, formato, y en el código del convertidor qué campo de EUDAMED alimenta cada valor)
+  y se fijó por commit en `lib/mirrors.mjs`; `fetch-mirrors.mjs` las clona con checkout
+  disperso y anota el sha256.
+- Fuentes nuevas:
+  - `zdavatz/eudamed2firstbase@48f93836`: 22 865 UDI-DI de EUDAMED en GS1 firstbase. Mapeo
+    verificado en `src/transform_detail.rs`: EMDN = clasificación 88, clase = 76/85, modelo =
+    `MODEL_NUMBER` (deviceModel) o la referencia, **descartando** la referencia cuando el
+    convertidor la rellenó con el GTIN; la clase I se marca como posible valor por defecto del
+    convertidor.
+  - `DLinRT-eu/dlinrteu-website@f096a477`: 116 dispositivos de una consulta al portal por código
+    EMDN (42 de ecografía Z1104 en alcance; 74 de radioterapia Z1101 fuera).
+  - `BatirMedical/nomenclature-emdn@e0131762`: EMDN V2 completa (8 453 términos). Permitió decidir
+    el alcance **tipo por tipo** fuera de W (79 prefijos con motivo).
+  - `longtran00/EUDAMED_ManufacturersScraper@44ff9f90`: 43 669 filas de actores fabricantes
+    (todas las versiones) → 26 583 SRN con su versión vigente; 571 inactivos.
+- Leídas 22 981 filas de equipos → **716 en alcance tras deduplicar** (157 duplicados por UDI-DI
+  o fabricante + modelo + marca; 22 108 fuera de alcance por regla, contadas en
+  `out/coverage.json`). **Nuevos: 716 equipos · 114 fabricantes · 391 marcas**, más 8 453
+  conceptos EMDN y 26 583 actores.
+- Descartadas: `zdavatz/swissdamed2sqlite/csv/srn_unique.csv` (sigue en pie el motivo de términos
+  de Swissmedic); los mapeos GMDN↔EMDN de `lisadonlon/GMDNEMDN`, `Kilanopi` y `cl-tud` (son
+  automáticos por similitud de texto, no oficiales; aviso de `master`).
 
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 

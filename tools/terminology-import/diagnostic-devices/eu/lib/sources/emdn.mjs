@@ -36,6 +36,7 @@ export const EMDN_HEADER_SPEC = {
       'terminal level',
       'final level',
       'livello terminale',
+      'terminal level yes/no',
       'terminale',
     ],
     required: false,

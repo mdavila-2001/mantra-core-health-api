@@ -22,17 +22,35 @@ buscador o por documentos oficiales citados por terceros, y queda marcado como p
 | **AEMPS / CCPS** (España) | — | Consulta pública, sin descarga masiva | — | No | Hueco |
 | **ANSM** (Francia) | — | Sin registro nacional descargable (remite a EUDAMED) | — | No | Hueco |
 
+## Réplicas públicas en git (de dónde salen los datos mientras los hosts oficiales están bloqueados)
+
+Fijadas por commit en [`lib/mirrors.mjs`](lib/mirrors.mjs); `fetch-mirrors.mjs` las clona y anota
+el sha256. Cada fila cita la ficha oficial en `sourceUrl` y la réplica en `extra.mirror`.
+
+| Réplica | Commit | Qué aporta | Licencia del repo | Datos |
+|---|---|---|---|---|
+| `zdavatz/eudamed2firstbase` · `firstbase_json/processed/` | `48f93836` (2026-10-22) | 22 865 UDI-DI de EUDAMED (detalle + Basic UDI-DI) en GS1 firstbase | GPL-3.0 (código) | EUDAMED, reutilización con atribución (Decisión 2011/833/UE) |
+| `DLinRT-eu/dlinrteu-website` · `docs/audits/eudamed/2026-09-22-eudamed-emdn-discovery.csv` | `f096a477` (2026-10-23) | 116 dispositivos del portal de EUDAMED consultados por código EMDN | AGPL-3.0 | EUDAMED, ídem |
+| `BatirMedical/nomenclature-emdn` · `EMDN_BatirMedical.csv` | `e0131762` (2025-04-02) | EMDN V2 completa, 8 453 términos | MIT (estructura) | EMDN de la Comisión, acceso libre y gratuito |
+| `longtran00/EUDAMED_ManufacturersScraper` · `Eudamed_Manufacturers.xlsx` | `44ff9f90` (2025-02-18) | 43 669 filas de actores fabricantes (con historial) | sin licencia declarada (el código no se usa) | EUDAMED, ídem |
+
+Límites conocidos: el convertidor de `eudamed2firstbase` rellena la referencia con el GTIN cuando
+falta (se descarta) y pone clase I por defecto si le faltaba la Basic UDI-DI (se marca en
+`extra.riskClassMayBeConverterDefault`). Las réplicas cubren solo lo que sus autores descargaron:
+no son EUDAMED completo.
+
 ## Claves de fuente en el formato común y recorte
 
 Claves (`source`): `eudamed-udi`, `eudamed-certificates`, `ec-emdn`, `mhra-pard`,
 `swissmedic-swissdamed`, `it-salute-bdrdm`, `it-salute-cnd`, `ec-nando`, `de-bfarm`,
-`es-aemps-ccps`, `fr-ansm`.
+`es-aemps-ccps`, `fr-ansm`. Actores aparte: `eudamed-actors` (en `out/actors/`, no son filas de
+equipos).
 
 Recorte aplicado por esta región (lo pide el README común): se exportan filas con código EMDN/CND
-de la categoría W (IVD, entera) y de tipos listados en `INCLUDED_TYPE_PREFIXES`, más las filas de
-las categorías C, G, N, Q, R, U, V y Z marcadas `extra.dxScope = "pendiente-revision:<letra>"`
-para que `master` las clasifique. No se piden ni exportan las categorías A, B, D, F, H, J, K, L,
-M, P, S, T, X, Y (motivos en `lib/emdn-scope.mjs`).
+de la categoría W (IVD, entera) y de los 79 tipos listados en `INCLUDED_TYPE_PREFIXES`, decididos
+uno por uno contra la EMDN V2; `extra.dxScope` dice qué regla incluyó cada fila. No se exportan
+las categorías A, B, D, F, H, J, K, L, M, P, S, T, X, Y ni los tipos no diagnósticos o mixtos de
+C, G, N, Q, R, U, V y Z (motivos en `lib/emdn-scope.mjs` y árbol en `out/emdn-scope-review.md`).
 
 ## Documentación de terceros usada para fijar contratos (no para datos)
 
@@ -56,3 +74,4 @@ M, P, S, T, X, Y (motivos en `lib/emdn-scope.mjs`).
 | Copias de la EMDN en Scribd | Copias no oficiales |
 | `register-dynamics/notified-body-registers` | Copia de NANDO de 2018, anterior a las designaciones MDR/IVDR |
 | `anamnesi.na.icar.cnr.it` CodeSystem CND | Un solo código; no es la CND completa |
+| Mapeos GMDN↔EMDN de `lisadonlon/GMDNEMDN`, `Kilanopi`, `cl-tud` | Automáticos por similitud de texto, no oficiales: un mapeo entre nomenclaturas solo vale si lo publica una fuente |

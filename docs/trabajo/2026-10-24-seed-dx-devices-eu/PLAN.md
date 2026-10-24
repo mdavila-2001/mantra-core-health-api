@@ -48,13 +48,24 @@ sha256) y se normaliza al formato común; cuando no, queda registrada como hueco
 | H2.S1.M5 | Adaptador BD/RDM Italia | Encabezados faltantes → error explícito | test `it-bdrdm` | HECHO |
 | H2.S1.M6 | Alcance EMDN | W entra, resto solo por lista explícita | test `scope` | HECHO |
 | H2.S2.M1 | `fetch.mjs` | Fuente bloqueada → hueco registrado, sin datos inventados | corrida pegada | HECHO |
-| H2.S2.M2 | `build.mjs` | NDJSON `.gz` partido < 50 MB + cobertura | corrida pegada | A MEDIAS |
+| H2.S2.M2 | `build.mjs` | NDJSON `.gz` partido < 50 MB + cobertura | corrida pegada | HECHO |
 | H2.S2.M3 | `load.mjs` (dry-run por defecto) | EMDN → `terminology.*` idempotente, sin DDL | dry-run pegado | A MEDIAS |
+
+### H2.S3 — Réplicas públicas en git (agregado en la pasada 4, aviso de `master`)
+**CA:** Dada una réplica fijada por commit, cuando se normaliza, entonces cada fila cita la ficha oficial y la réplica (repo, commit, ruta, sha256). **DoD:** tests dirigidos + corrida pegada. **Estado:** HECHO
+
+| ID | Microtarea | CA (binario) | DoD | Estado |
+|---|---|---|---|---|
+| H2.S3.M1 | `fetch-mirrors.mjs` | Clona en el commit fijado y anota sha256 | corrida pegada (`evidencia/pasada-4-fetch-mirrors.txt`) | HECHO |
+| H2.S3.M2 | Adaptador eudamed2firstbase | Documento GS1 → fila común (EMDN 88, clase, certificado) | test `firstbase: …` (3) | HECHO |
+| H2.S3.M3 | Adaptador DLinRT | UUID del UDI-DI desde detail_url | test `DLinRT: …` | HECHO |
+| H2.S3.M4 | Adaptador de actores | Versión vigente por SRN | test `actores: …` | HECHO |
+| H2.S3.M5 | Alcance tipo por tipo fuera de W | 79 prefijos con motivo, verificados contra la EMDN V2 | `assertTypePrefixesExist` en build + test `alcance: …` | HECHO |
 
 ## H3 — Saturación con /loop
 **CA:** Dadas las pasadas, cuando dos seguidas aportan 0 filas nuevas con las fuentes alcanzables,
 entonces se cierra; si las fuentes siguen bloqueadas, se cierra como BLOQUEADO, nunca como saturado.
-**DoD:** bitácora de pasadas en `docs/seed-research/diagnostic-devices-eu.md`; push tras cada pasada. **Estado:** BLOQUEADO
+**DoD:** bitácora de pasadas en `docs/seed-research/diagnostic-devices-eu.md`; push tras cada pasada. **Estado:** EN CURSO
 
 ## H4 — Cierre
 **CA:** typecheck, lint y tests dirigidos en verde; PR contra `dev` sin mergear; REPORTE escrito.

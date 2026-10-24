@@ -9,12 +9,17 @@
 //   out/emdn/ec-emdn-NNNN.ndjson.gz      EMDN completa con jerarquía y alcance
 //                                        (clasificación, no filas de equipos)
 //   out/coverage.json / coverage.md      cobertura y huecos
-//   out/emdn-scope-review.md             tipos EMDN pendientes de decidir
+//   out/actors/eudamed-actors-NNNN.ndjson.gz  actores fabricantes con SRN (no son equipos)
+//   out/emdn-scope-review.md             decisión de alcance por tipo EMDN (fuera de W)
+//
+// Fuentes: caché oficial (fetch.mjs) y réplicas fijadas por commit
+// (fetch-mirrors.mjs, lib/mirrors.mjs) cuando el host oficial está bloqueado.
 //
 //   node tools/terminology-import/diagnostic-devices/eu/build.mjs
 // =============================================================================
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import {
   cacheDir,
@@ -34,7 +39,19 @@ import {
   REVIEW_CATEGORIES,
   assertTypePrefixesExist,
 } from './lib/emdn-scope.mjs';
+import { classifyEmdn } from './lib/emdn-scope.mjs';
+import { mirrorById } from './lib/mirrors.mjs';
 import { parseEmdnRows, readFirstSheet } from './lib/sources/emdn.mjs';
+import {
+  assertActorsHeader,
+  normalizeActorRow,
+  selectCurrentVersions,
+} from './lib/sources/eudamed-actors.mjs';
+import { normalizeFirstbaseDoc } from './lib/sources/eudamed-firstbase.mjs';
+import {
+  assertDlinrtHeader,
+  normalizeDlinrtRow,
+} from './lib/sources/dlinrt.mjs';
 import { parsePage } from './lib/sources/eudamed-datalake.mjs';
 import {
   assertColumnMap,
@@ -49,6 +66,35 @@ const cache = existsSync(MANIFEST)
   : { files: [], gaps: [] };
 const fileMeta = new Map(cache.files.map((f) => [f.file, f]));
 const gaps = [...(cache.gaps ?? [])];
+const MIRROR_MANIFEST = cacheDir('mirrors', 'manifest.json');
+const mirrorsCache = existsSync(MIRROR_MANIFEST)
+  ? readJson(MIRROR_MANIFEST)
+  : { mirrors: [] };
+const rejectedFromMirrors = { count: 0, samples: [] };
+
+/** Réplica descargada y sana, con la cita que va en extra.mirror de cada fila. */
+function mirror(id) {
+  const m = mirrorsCache.mirrors.find((x) => x.id === id && !x.error);
+  if (!m) return null;
+  const def = mirrorById(id);
+  return {
+    ...m,
+    cite: {
+      repo: m.repo,
+      commit: m.commit,
+      path: m.data,
+      sha256: m.sha256,
+      upstream: def.upstream,
+    },
+  };
+}
+
+function rejectRow(err) {
+  if (!(err instanceof RowError)) throw err;
+  rejectedFromMirrors.count++;
+  if (rejectedFromMirrors.samples.length < 20)
+    rejectedFromMirrors.samples.push(err.message);
+}
 
 function latestProbe() {
   const dir = outDir('probe');
@@ -90,13 +136,26 @@ async function loadEmdn() {
   const xlsx = cache.files.find(
     (f) => f.source === 'EMDN' && /\.xlsx?$/i.test(f.file),
   );
-  if (!xlsx) return [];
-  const { header, records } = await readFirstSheet(xlsx.file);
-  const concepts = parseEmdnRows(header, records, {
-    sourceUrl: xlsx.url,
-    sourceVersion: `sha256:${xlsx.sha256.slice(0, 12)}`,
-    retrievedAt: xlsx.retrievedAt,
-  });
+  let concepts;
+  if (xlsx) {
+    const { header, records } = await readFirstSheet(xlsx.file);
+    concepts = parseEmdnRows(header, records, {
+      sourceUrl: xlsx.url,
+      sourceVersion: `sha256:${xlsx.sha256.slice(0, 12)}`,
+      retrievedAt: xlsx.retrievedAt,
+    });
+  } else {
+    const m = mirror('batirmedical-emdn');
+    if (!m) return [];
+    const { header, records } = parseCsv(
+      readFileSync(join(m.dir, m.data), 'utf8'),
+    );
+    concepts = parseEmdnRows(header, records, {
+      sourceUrl: `${m.repo}/blob/${m.commit}/${m.data}`,
+      sourceVersion: `${mirrorById(m.id).upstreamVersion};via=batirmedical@${m.commit.slice(0, 8)};sha256:${m.sha256.slice(0, 12)}`,
+      retrievedAt: m.retrievedAt,
+    });
+  }
   assertTypePrefixesExist(new Set(concepts.map((c) => c.code)));
   return concepts;
 }
@@ -133,6 +192,74 @@ function loadBdrdm() {
       if (!(err instanceof RowError)) throw err;
     }
   return rows;
+}
+
+function loadFirstbase(emdnByCode) {
+  const m = mirror('zdavatz-eudamed2firstbase');
+  if (!m) return [];
+  const dir = join(m.dir, m.data);
+  const rows = [];
+  for (const f of readdirSync(dir)
+    .filter((x) => x.endsWith('.json'))
+    .sort())
+    try {
+      rows.push(
+        normalizeFirstbaseDoc(JSON.parse(readFileSync(join(dir, f), 'utf8')), {
+          uuid: f.replace(/\.json$/, ''),
+          emdnByCode,
+          mirror: { ...m.cite, path: `${m.data}/${f}` },
+          retrievedAt: m.retrievedAt,
+        }),
+      );
+    } catch (err) {
+      rejectRow(err);
+    }
+  return rows;
+}
+
+function loadDlinrt() {
+  const m = mirror('dlinrt-eudamed-emdn-discovery');
+  if (!m) return [];
+  const { header, records } = parseCsv(
+    readFileSync(join(m.dir, m.data), 'utf8'),
+  );
+  assertDlinrtHeader(header);
+  const rows = [];
+  for (const r of records)
+    try {
+      rows.push(
+        normalizeDlinrtRow(r, { mirror: m.cite, retrievedAt: m.retrievedAt }),
+      );
+    } catch (err) {
+      rejectRow(err);
+    }
+  return rows;
+}
+
+function loadActors() {
+  const m = mirror('longtran-eudamed-manufacturers');
+  if (!m) return [];
+  const XLSX = createRequire(import.meta.url)('xlsx');
+  const wb = XLSX.readFile(join(m.dir, m.data));
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
+    raw: false,
+    defval: '',
+  });
+  assertActorsHeader(Object.keys(rows[0] ?? {}));
+  const out = [];
+  for (const { row, versions } of selectCurrentVersions(rows))
+    try {
+      const a = normalizeActorRow(row, {
+        sourceUrl: mirrorById(m.id).upstream,
+        mirror: m.cite,
+        retrievedAt: m.retrievedAt,
+        versions,
+      });
+      if (a) out.push(a);
+    } catch (err) {
+      rejectRow(err);
+    }
+  return out;
 }
 
 /**
@@ -175,20 +302,20 @@ function manifestGaps(rawGaps, probe) {
 
 function scopeReviewMd(concepts) {
   const lines = [
-    '# EMDN: tipos pendientes de decidir (fuera de W)',
+    '# EMDN: decisión de alcance por tipo (fuera de W)',
     '',
-    `Generado: ${nowIso()}. Solo entran tipos listados en \`INCLUDED_TYPE_PREFIXES\` (lib/emdn-scope.mjs), uno por uno y con motivo.`,
+    `Generado: ${nowIso()}. ✔ = exportado como equipo de diagnóstico (\`INCLUDED_TYPE_PREFIXES\` en lib/emdn-scope.mjs, con su motivo); ✘ = no diagnóstico o mixto. La categoría W entra entera.`,
     '',
   ];
   for (const cat of Object.keys(REVIEW_CATEGORIES)) {
-    const list = concepts.filter((c) => c.category === cat);
+    const list = concepts.filter((c) => c.category === cat && c.level <= 4);
     lines.push(
       `## ${cat} — ${list.find((c) => c.level === 1)?.display ?? ''}`,
       '',
     );
     for (const c of list)
       lines.push(
-        `${'  '.repeat(c.level - 1)}- \`${c.code}\` ${c.display}${c.terminal ? ' *(terminal)*' : ''}`,
+        `${'  '.repeat(c.level - 1)}- ${classifyEmdn(c.code).inScope ? '✔' : '✘'} \`${c.code}\` ${c.display}`,
       );
     lines.push('');
   }
@@ -211,7 +338,6 @@ Generado: ${cov.generatedAt}
 | Filas leídas de las fuentes | ${cov.totalRead} |
 | Filas exportadas (tras deduplicar) | ${cov.devicesExported} |
 | · en alcance diagnóstico | ${cov.devicesInScope} |
-| · en categorías pendientes de revisión | ${cov.devicesPendingReview} |
 | Duplicados descartados | ${cov.duplicatesDropped} |
 | Filas rechazadas por formato | ${cov.rejectedRows} |
 | Fabricantes distintos | ${cov.distinctManufacturers} |
@@ -248,7 +374,7 @@ ${t(cov.excludedByRule)}
 ## Alcance EMDN
 - Incluidas enteras: ${Object.keys(INCLUDED_CATEGORIES).join(', ')}
 - Tipos incluidos fuera de W: ${INCLUDED_TYPE_PREFIXES.length || 'ninguno todavía'}
-- Exportadas como pendientes de revisión: ${Object.keys(REVIEW_CATEGORIES).join(', ')}
+- Revisadas tipo por tipo: ${Object.keys(REVIEW_CATEGORIES).join(', ')} (ver out/emdn-scope-review.md)
 - Excluidas enteras: ${Object.keys(EXCLUDED_CATEGORIES).join(', ')}
 
 ## Huecos
@@ -275,6 +401,10 @@ async function main() {
     (p) => p.rows,
   );
   const bdrdm = loadBdrdm();
+  const emdnByCode = new Map(emdnConcepts.map((c) => [c.code, c]));
+  const firstbase = loadFirstbase(emdnByCode);
+  const dlinrt = loadDlinrt();
+  const actors = loadActors();
   if (!emdnConcepts.length)
     gaps.push({
       source: 'ec-emdn',
@@ -287,10 +417,24 @@ async function main() {
     referenceRows,
     udiPages,
     actorRows,
-    extraDevices: bdrdm,
+    extraDevices: [...firstbase, ...dlinrt, ...bdrdm],
     gaps,
   });
   coverage.generatedAt = nowIso();
+  coverage.rejectedRows += rejectedFromMirrors.count;
+  coverage.totalRead += rejectedFromMirrors.count;
+  coverage.rejectedSamples.push(...rejectedFromMirrors.samples);
+  coverage.actors = actors.length;
+  coverage.mirrors = mirrorsCache.mirrors.map(
+    ({ id, repo, commit, files, sha256, error }) => ({
+      id,
+      repo,
+      commit,
+      files,
+      sha256,
+      error,
+    }),
+  );
 
   // Un juego de partes por fuente; las fuentes sin filas no dejan archivos.
   const bySource = new Map();
@@ -313,6 +457,9 @@ async function main() {
     for (const part of writeNdjsonGzParts(source, rows))
       files.push({ ...part, source, sourceVersion: version });
   }
+  const actorParts = writeNdjsonGzParts('eudamed-actors', actors, {
+    dir: outDir('actors'),
+  });
   const emdnParts = writeNdjsonGzParts('ec-emdn', emdnConcepts, {
     dir: outDir('emdn'),
     sortKey: (c) => c.code,
@@ -336,8 +483,26 @@ async function main() {
       rows,
       sha256,
     })),
+    actors: actorParts.map(({ path, rows, sha256 }) => ({
+      path: `actors/${path}`,
+      source: 'eudamed-actors',
+      rows,
+      sha256,
+      note: 'Actores fabricantes de EUDAMED (no son filas de equipos): source, sourceRecordId (SRN), sourceUrl, sourceVersion, retrievedAt, manufacturerName, manufacturerCountry, manufacturerRegistryId y extra.',
+    })),
+    mirrors: mirrorsCache.mirrors.map(
+      ({ id, repo, commit, data, files, sha256, error }) => ({
+        id,
+        repo,
+        commit,
+        path: data,
+        files,
+        sha256,
+        error,
+      }),
+    ),
     scope:
-      'Exporta filas con EMDN/CND en alcance (categoría W entera y tipos listados) y, marcadas en extra.dxScope = "pendiente-revision:<letra>", las de categorías C, G, N, Q, R, U, V y Z para que master las clasifique. No exporta categorías excluidas (ver lib/emdn-scope.mjs).',
+      'Recorte por código EMDN (lib/emdn-scope.mjs): categoría W entera y, fuera de W, solo los tipos listados uno por uno contra la EMDN V2 (imagenología, monitorización, exploración funcional, endoscopía diagnóstica, termometría y medición, electrodos diagnósticos, urodinamia). extra.dxScope dice qué regla incluyó cada fila.',
     gaps: manifestGaps(gaps, latestProbe()),
   });
   coverage.files = files;
@@ -349,9 +514,9 @@ async function main() {
   console.log(
     JSON.stringify(
       {
+        actors: actors.length,
         devicesExported: coverage.devicesExported,
         devicesInScope: coverage.devicesInScope,
-        devicesPendingReview: coverage.devicesPendingReview,
         distinctManufacturers: coverage.distinctManufacturers,
         distinctBrands: coverage.distinctBrands,
         rejectedRows: coverage.rejectedRows,
