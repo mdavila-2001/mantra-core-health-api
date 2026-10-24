@@ -10,6 +10,10 @@ export const OFFICIAL_RECORD_URL = Object.freeze({
   DENOVO: (id) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpmn/denovo.cfm?ID=${encodeURIComponent(id)}`,
   PMA: (id) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfpma/pma.cfm?id=${encodeURIComponent(id)}`,
   HDE: (id) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfhde/hde.cfm?id=${encodeURIComponent(id)}`,
+  /** Informe MAUDE (`mdrfoi__id` = MDR_REPORT_KEY). */
+  MAUDE: (key, pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfmaude/detail.cfm?mdrfoi__id=${encodeURIComponent(key)}&pc=${encodeURIComponent(pc)}`,
+  /** Registro de retiro en la API oficial de openFDA (enforcement), por número de retiro `Z-NNNN-AAAA`. */
+  RECALL: (z) => `https://api.fda.gov/device/enforcement.json?search=recall_number:%22${encodeURIComponent(z)}%22`,
   GUDID: (di) => `https://accessgudid.nlm.nih.gov/devices/${encodeURIComponent(di)}`,
   PRODUCT_CODE: (pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=${encodeURIComponent(pc)}`,
   /** Ficha pública de un listado (`lid` = KEY_VAL del listado, `lpcd` = product code). */
@@ -149,5 +153,33 @@ export const MIRRORS = Object.freeze([
     upstream: { url: 'https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfClia/Search.cfm', exportDate: '2025-03', note: 'sólo enriquece: analitos por K-number' },
     enrichOnly: true,
     priority: 0,
+  },
+  {
+    id: 'tonystathoulis-maude',
+    repo: 'https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence',
+    commit: 'd20a9fa8bd5a027c4068c2de1fa289ed2d6e5893',
+    files: ['medical device safety intelligence/data/processed/maude_devices.csv', 'medical device safety intelligence/data/processed/maude_reports.csv'],
+    license: 'Sin licencia declarada en el repo; contenido: registros de openFDA device/event (MAUDE), CC0.',
+    upstream: { url: 'https://api.fda.gov/device/event.json', exportDate: null, note: 'Eventos recibidos 2026-09-01 a 2026-10-13, todos los paneles; marcas con «¿» donde el original tenía ® o ™ (daño de codificación del espejo, se conserva verbatim)' },
+    priority: 10,
+  },
+  {
+    id: 'sarath-fda-device-recalls',
+    repo: 'https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics',
+    commit: '3e485d48c4f9ff490d0ce31d5f152acb323a2c9e',
+    files: ['fda_device_recalls.xlsm'],
+    convert: [{ xlsx: 'fda_device_recalls.xlsm', sheet: 'Recalls_Data', out: 'recalls.ndjson' }],
+    license: 'Sin licencia declarada en el repo; contenido: openFDA device/enforcement unido a recall y classification (CC0).',
+    upstream: { url: 'https://api.fda.gov/device/enforcement.json', exportDate: null, note: 'report_date 2012-06-20 a 2026-09-23' },
+    priority: 10,
+  },
+  {
+    id: 'hxlvvm-recalltrace',
+    repo: 'https://github.com/hxlvvm/RecallTrace',
+    commit: 'ffe8177d7906fbfac991fdc520c55a3d551c5ba0',
+    files: ['data/snapshot/recalls.jsonl.gz', 'data/snapshot/MANIFEST.json'],
+    license: 'MIT (código); el manifiesto declara los datos openFDA CC0.',
+    upstream: { url: 'https://api.fda.gov/device/recall.json', exportDate: '2026-10-07', note: 'product_code FRN, MKJ, CBK, MHX, DQA' },
+    priority: 20,
   },
 ]);

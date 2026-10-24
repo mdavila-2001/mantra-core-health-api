@@ -19,7 +19,9 @@ import {
   fromFdadataPmn,
   fromGudidXml,
   fromLivd,
+  fromMaudeDevices,
   fromOpenFdaUdi,
+  fromRecall,
   fromRlFlat,
   regulationFromNumber,
 } from '../lib/normalize.mjs';
@@ -313,4 +315,35 @@ test('LIVD SARS-CoV-2 real: un kit por Testkit Name ID; UDI-DI sólo si el tipo 
   assert.equal(kit.udiDi, null);
   assert.equal(kit.extra.livdRows, rows.filter((x) => x['Testkit Name ID'] === kit.sourceRecordId).length);
   assert.ok(kit.extra.equipment.length >= 1);
+});
+
+test('MAUDE real: una fila por product code + fabricante + marca + modelo, id = informe más antiguo', () => {
+  const t = new ProductCodeTable();
+  t.addClassification({ product_code: 'DQA', device_name: 'Oximeter', medical_specialty: 'CV', device_class: '2', regulation_number: '870.2700' });
+  t.addClassification({ product_code: 'MCM', device_name: 'Implant, Cochlear', medical_specialty: 'EN', device_class: '3', regulation_number: '874.3340' });
+  const rows = parseCsv(fixture('maude-devices.sample.csv'));
+  const out = fromMaudeDevices(rows, t, PROV);
+  assert.equal(out.length, 1, 'el implante coclear queda fuera; las dos filas DQA son la misma combinación');
+  const r = out[0];
+  assert.deepEqual(validateRecord(r), []);
+  assert.equal(r.source, 'fda-maude');
+  assert.equal(r.brandName, 'EarlyVue VS30');
+  assert.equal(r.extra.reportCount, 2);
+  const minKey = Math.min(...rows.filter((x) => x.device_report_product_code === 'DQA').map((x) => Number(x.mdr_report_key)));
+  assert.equal(r.sourceRecordId.split(':')[0], String(minKey));
+  assert.match(r.sourceUrl, /cfmaude\/detail\.cfm\?mdrfoi__id=\d+&pc=DQA$/);
+});
+
+test('retiros reales (enforcement y recall): una fila por número Z, estado verbatim', () => {
+  const t = new ProductCodeTable();
+  t.addClassification({ product_code: 'DQA', device_name: 'Oximeter', medical_specialty: 'CV', device_class: '2', regulation_number: '870.2700' });
+  const out = ndjson('recalls.sample.ndjson').map((r) => fromRecall(r, t, PROV));
+  assert.equal(out.length, 3);
+  for (const r of out) {
+    assert.deepEqual(validateRecord(r), []);
+    assert.equal(r.source, 'fda-recall');
+    assert.match(r.sourceRecordId, /^Z-\d{4}-\d{4}$/);
+    assert.ok(r.manufacturerName);
+  }
+  assert.equal(fromRecall({ ...ndjson('recalls.sample.ndjson')[0], product_code: 'HRS' }, t, PROV), null);
 });

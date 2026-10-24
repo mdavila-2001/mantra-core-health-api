@@ -8,7 +8,8 @@
 //   node tools/terminology-import/diagnostic-devices/us/fetch-mirrors.mjs [--only <id>]
 //
 // Los .rda (R) se convierten a NDJSON con `lib/rda_to_ndjson.py`; requiere un
-// Python con `rdata` (`DX_PYTHON=/ruta/a/venv/bin/python`).
+// Python con `rdata` (`DX_PYTHON=/ruta/a/venv/bin/python`). Los .xlsx/.xlsm, con
+// `lib/xlsx_to_ndjson.py` (`openpyxl`).
 // =============================================================================
 
 import { execFileSync } from 'node:child_process';
@@ -57,8 +58,9 @@ for (const m of MIRRORS) {
     const out = join(dir, '.converted', c.out);
     ensureDir(join(dir, '.converted'));
     const py = process.env.DX_PYTHON ?? 'python3';
-    console.log(execFileSync(py, ['-I', fileURLToPath(new URL('./lib/rda_to_ndjson.py', import.meta.url)), join(dir, c.rda), c.object, out], { encoding: 'utf8' }).trim());
-    files.push({ path: `.converted/${c.out}`, derivedFrom: c.rda, bytes: statSync(out).size, sha256: await sha256File(out) });
+    const [script, src, obj] = c.rda ? ['rda_to_ndjson.py', c.rda, c.object] : ['xlsx_to_ndjson.py', c.xlsx, c.sheet];
+    console.log(execFileSync(py, ['-I', fileURLToPath(new URL(`./lib/${script}`, import.meta.url)), join(dir, src), obj, out], { encoding: 'utf8' }).trim());
+    files.push({ path: `.converted/${c.out}`, derivedFrom: src, bytes: statSync(out).size, sha256: await sha256File(out) });
   }
   manifest.push({ id: m.id, repo: m.repo, commit: got, commitDate: git(dir, 'log', '-1', '--format=%cI'), files, upstream: m.upstream ?? null });
   console.log(`[${m.id}] OK ${got.slice(0, 12)} · ${files.length} archivos`);

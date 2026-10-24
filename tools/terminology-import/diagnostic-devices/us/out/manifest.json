@@ -1,6 +1,6 @@
 {
  "region": "us",
- "generatedAt": "2026-10-24T04:03:14.085Z",
+ "generatedAt": "2026-10-24T04:12:35.287Z",
  "formatVersion": 1,
  "scope": "Sólo product codes de alcance diagnóstico; criterio en ../lib/scope.mjs y lista completa en fda-product-codes.json",
  "files": [
@@ -43,6 +43,22 @@
    "rows": 3130,
    "bytes": 309765,
    "sha256": "0ac976b2d0aa6f31f06b19a0526ad4079e49369a27c6205b7417f18769c2cf3d"
+  },
+  {
+   "path": "fda-maude-0001.ndjson.gz",
+   "source": "fda-maude",
+   "sourceVersion": "openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
+   "rows": 1336,
+   "bytes": 130955,
+   "sha256": "40e3904d43a1893be96ee8459d347f59a679f7091cc433dbb29211c4e89b1584"
+  },
+  {
+   "path": "fda-recall-0001.ndjson.gz",
+   "source": "fda-recall",
+   "sourceVersion": "openFDA device/enforcement + recall corte 2026-10-05 vía espejo https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics@3e485d48c4f9 + openFDA device/recall (FRN, MKJ, CBK, MHX, DQA) 2026-10-07 vía espejo https://github.com/hxlvvm/RecallTrace@ffe8177d7906",
+   "rows": 13692,
+   "bytes": 5844436,
+   "sha256": "4f10fc9151468ba180e62fcfac2627733d426dee3d530a7c07260eebfef27f79"
   },
   {
    "path": "cdc-livd-sars-cov-2-0001.ndjson.gz",
@@ -124,6 +140,24 @@
     "Test_OTC_Device",
     "Test_Unproctored_Device"
    ]
+  },
+  {
+   "source": "mirror tonystathoulis-maude",
+   "version": "openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13 corte 2026-10-19 vía espejo https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence@d20a9fa8bd5a",
+   "records": 62533,
+   "inScopeCombinations": 1336
+  },
+  {
+   "source": "mirror hxlvvm-recalltrace",
+   "version": "openFDA device/recall (FRN, MKJ, CBK, MHX, DQA) 2026-10-07 vía espejo https://github.com/hxlvvm/RecallTrace@ffe8177d7906",
+   "records": 1794,
+   "inScope": 414
+  },
+  {
+   "source": "mirror sarath-fda-device-recalls",
+   "version": "openFDA device/enforcement + recall corte 2026-10-05 vía espejo https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics@3e485d48c4f9",
+   "records": 40057,
+   "inScope": 13578
   },
   {
    "source": "mirror unmtransinfo-cfde-biomarkers (CLIA)",
@@ -433,6 +467,53 @@
    }
   },
   {
+   "id": "hxlvvm-recalltrace",
+   "repo": "https://github.com/hxlvvm/RecallTrace",
+   "commit": "ffe8177d7906fbfac991fdc520c55a3d551c5ba0",
+   "commitDate": "2026-10-07T17:50:35+02:00",
+   "files": [
+    {
+     "path": "data/snapshot/recalls.jsonl.gz",
+     "bytes": 21365011,
+     "sha256": "22567184bb982bdfa2771d6beddec4115334770e1d52f7fddd2d71513f49d2f8"
+    },
+    {
+     "path": "data/snapshot/MANIFEST.json",
+     "bytes": 767,
+     "sha256": "4b776f39bf7a1eb70b7904c704cf3308280ff0db87bc0b29a7f96f46715f6fc1"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/recall.json",
+    "exportDate": "2026-10-07",
+    "note": "product_code FRN, MKJ, CBK, MHX, DQA"
+   }
+  },
+  {
+   "id": "sarath-fda-device-recalls",
+   "repo": "https://github.com/Sarath-Venkatesan/fda-device-recalls-analytics",
+   "commit": "3e485d48c4f9ff490d0ce31d5f152acb323a2c9e",
+   "commitDate": "2026-10-05T23:10:56+02:00",
+   "files": [
+    {
+     "path": "fda_device_recalls.xlsm",
+     "bytes": 25618201,
+     "sha256": "ee6752129f6d726177a357f38f61780402f0212a4f39f7a14e1fd048ad902552"
+    },
+    {
+     "path": ".converted/recalls.ndjson",
+     "derivedFrom": "fda_device_recalls.xlsm",
+     "bytes": 61232629,
+     "sha256": "ad63cd8e8e12dfdaa700656823c0ea883be818220d8bde23f839255baa5a4d50"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/enforcement.json",
+    "exportDate": null,
+    "note": "report_date 2012-06-20 a 2026-09-23"
+   }
+  },
+  {
    "id": "sdgoldberg-meddev",
    "repo": "https://github.com/sdgoldberg/MedDev",
    "commit": "6cbd231bb5d0778ff2fd7d165ba5d8f0f613f55e",
@@ -473,6 +554,29 @@
     "url": "https://www.fda.gov/medical-devices/device-registration-and-listing/establishment-registration-and-medical-device-listing-files-download",
     "exportDate": "2024",
     "note": "Instantánea 2024: todas las filas de Registration.txt traen REG_EXPIRY_DATE_YEAR=2024 (commit 2025-05-30). No incluye el archivo de nombres propietarios."
+   }
+  },
+  {
+   "id": "tonystathoulis-maude",
+   "repo": "https://github.com/Tonystathoulis/Medical-Device-Safety-Intelligence",
+   "commit": "d20a9fa8bd5a027c4068c2de1fa289ed2d6e5893",
+   "commitDate": "2026-10-19T13:04:19+03:00",
+   "files": [
+    {
+     "path": "medical device safety intelligence/data/processed/maude_devices.csv",
+     "bytes": 7584575,
+     "sha256": "25e5e98e30c9bfadc348b3263fed5363ba315faf293a423b11506782118ac3dd"
+    },
+    {
+     "path": "medical device safety intelligence/data/processed/maude_reports.csv",
+     "bytes": 7624594,
+     "sha256": "a8bd7826163ef40023539fa32f585f764e36b85e75d731f1cc1739de379474fe"
+    }
+   ],
+   "upstream": {
+    "url": "https://api.fda.gov/device/event.json",
+    "exportDate": null,
+    "note": "Eventos recibidos 2026-09-01 a 2026-10-13, todos los paneles; marcas con «¿» donde el original tenía ® o ™ (daño de codificación del espejo, se conserva verbatim)"
    }
   },
   {

@@ -811,3 +811,109 @@ export function fromLivd(rows, prov, discarded = []) {
     );
   });
 }
+
+// --- MAUDE (openFDA device/event): marca + modelo + fabricante por product code ---
+
+/**
+ * Filas de dispositivo de MAUDE agrupadas por (product code, fabricante,
+ * marca, modelo) exactos: una fila por combinación. El id de origen es el
+ * informe más antiguo (menor MDR_REPORT_KEY) de la combinación.
+ */
+export function fromMaudeDevices(rows, table, prov, receivedByKey = new Map()) {
+  const groups = new Map();
+  for (const r of rows) {
+    const pc = clean(r.device_report_product_code)?.toUpperCase();
+    const mfr = verbatim(r.manufacturer_d_name);
+    if (!pc || !mfr || !table.scope(pc).include) continue;
+    const brand = verbatim(r.brand_name);
+    const model = verbatim(r.model_number);
+    if (!brand && !model) continue;
+    const key = [pc, mfr, brand ?? '', model ?? ''].join('\u0001');
+    const g = groups.get(key) ?? { keys: [], first: r };
+    g.keys.push(`${r.mdr_report_key}:${r.device_ordinal}`);
+    if (Number(r.mdr_report_key) < Number(g.first.mdr_report_key)) g.first = r;
+    groups.set(key, g);
+  }
+  return [...groups.values()].map(({ keys, first: r }) => {
+    const pc = clean(r.device_report_product_code).toUpperCase();
+    const reportKeys = [...new Set(keys)].sort((a, b) => Number(a.split(':')[0]) - Number(b.split(':')[0]) || a.localeCompare(b));
+    return makeRecord(
+      {
+        source: 'fda-maude',
+        sourceRecordId: `${r.mdr_report_key}:${r.device_ordinal}`,
+        sourceUrl: OFFICIAL_RECORD_URL.MAUDE(r.mdr_report_key, pc),
+        sourceVersion: prov.sourceVersion,
+        retrievedAt: prov.retrievedAt,
+        ...typeFields(table, pc),
+        manufacturerName: verbatim(r.manufacturer_d_name),
+        manufacturerCountry: null,
+        manufacturerRegistryId: null,
+        brandName: verbatim(r.brand_name),
+        model: verbatim(r.model_number),
+        udiDi: null,
+        riskClass: fdaRiskClass(table.get(pc)?.deviceClass),
+        authorizationId: null,
+        authorizationDate: null,
+        status: null,
+      },
+      {
+        recordLevel: 'adverse_event_device',
+        ...scopeExtra(table, pc),
+        genericName: verbatim(r.generic_name),
+        reportCount: reportKeys.length,
+        reportKeysSample: reportKeys.slice(0, 20),
+        firstReportReceived: receivedByKey.get(String(r.mdr_report_key)) ?? null,
+        via: prov.via,
+      },
+    );
+  });
+}
+
+// --- Retiros del mercado (openFDA device/enforcement y device/recall) ---------------
+
+/** Una fila por número de retiro de producto (`Z-NNNN-AAAA`). */
+export function fromRecall(r, table, prov) {
+  const z = clean(r.recall_number ?? r.product_res_number)?.toUpperCase();
+  const pc = clean(r.product_code)?.toUpperCase();
+  const firm = verbatim(r.recalling_firm);
+  if (!z || !pc || !firm || !table.scope(pc).include) return null;
+  const ks = (Array.isArray(r.k_numbers) ? r.k_numbers : []).map((k) => clean(k)?.toUpperCase()).filter(Boolean);
+  return makeRecord(
+    {
+      source: 'fda-recall',
+      sourceRecordId: z,
+      sourceUrl: OFFICIAL_RECORD_URL.RECALL(z),
+      sourceVersion: prov.sourceVersion,
+      retrievedAt: prov.retrievedAt,
+      ...typeFields(table, pc),
+      manufacturerName: firm,
+      manufacturerCountry: null,
+      manufacturerRegistryId: null,
+      brandName: null,
+      model: null,
+      udiDi: null,
+      riskClass: fdaRiskClass(table.get(pc)?.deviceClass),
+      authorizationId: ks[0] ?? null,
+      authorizationDate: null,
+      status: verbatim(r.status ?? r.recall_status),
+    },
+    {
+      recordLevel: 'recall',
+      ...scopeExtra(table, pc),
+      productDescription: verbatim(r.product_description),
+      codeInfo: verbatim(r.code_info),
+      recallClass: verbatim(r.classification ?? r.openfda?.device_class ?? null),
+      reasonForRecall: verbatim(r.reason_for_recall),
+      rootCause: verbatim(r.root_cause ?? r.root_cause_description ?? null),
+      eventId: clean(r.event_id ?? r.res_event_number),
+      recallInitiationDate: isoDate(r.recall_initiation_date ?? r.event_date_initiated),
+      reportDate: isoDate(r.report_date),
+      terminationDate: isoDate(r.termination_date ?? r.event_date_terminated),
+      kNumbers: ks,
+      firmCountryAsPublished: verbatim(r.country),
+      firmCity: verbatim(r.city),
+      firmState: verbatim(r.state),
+      via: prov.via,
+    },
+  );
+}

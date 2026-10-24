@@ -30,6 +30,8 @@ import {
   fromAiList,
   fromGudidXml,
   fromLivd,
+  fromMaudeDevices,
+  fromRecall,
   fromRlFlat,
   fromFdadataPma,
   fromFdadataPmn,
@@ -393,6 +395,38 @@ if (livd) {
   inputs.push({ source: 'mirror cdcgov-routes LIVD SARS-CoV-2', version: prov.sourceVersion, records: rows.length, testKits: out.length, rowsDiscardedWithoutManufacturer: [...new Set(discarded)].sort() });
 }
 
+// --- 2e. MAUDE (openFDA device/event, espejo Tonystathoulis) -------------------------
+const maudeCsv = mirrorFile('tonystathoulis-maude', 'medical device safety intelligence/data/processed/maude_devices.csv');
+if (maudeCsv) {
+  const prov = mirrorProv('tonystathoulis-maude', 'medical device safety intelligence/data/processed/maude_devices.csv', 'openFDA device/event (MAUDE), recibidos 2026-09-01 a 2026-10-13');
+  const rows = parseCsv(readFileSync(maudeCsv, 'utf8').replace(/^\uFEFF/, ''));
+  const rep = mirrorFile('tonystathoulis-maude', 'medical device safety intelligence/data/processed/maude_reports.csv');
+  const received = new Map(rep ? parseCsv(readFileSync(rep, 'utf8').replace(/^\uFEFF/, '')).map((r) => [String(r.mdr_report_key), r.date_received || null]) : []);
+  const out = fromMaudeDevices(rows, table, prov, received);
+  out.forEach(add);
+  inputs.push({ source: 'mirror tonystathoulis-maude', version: prov.sourceVersion, records: rows.length, inScopeCombinations: out.length });
+}
+
+// --- 2f. Retiros del mercado (openFDA enforcement/recall) -----------------------------
+const recallSources = [
+  ['hxlvvm-recalltrace', 'data/snapshot/recalls.jsonl.gz', 'openFDA device/recall (FRN, MKJ, CBK, MHX, DQA)', (p) => gunzipSync(readFileSync(p)).toString('utf8')],
+  ['sarath-fda-device-recalls', '.converted/recalls.ndjson', 'openFDA device/enforcement + recall', (p) => readFileSync(p, 'utf8')],
+];
+for (const [id, file, what, read] of recallSources) {
+  const p = mirrorFile(id, file);
+  if (!p) continue;
+  const prov = mirrorProv(id, file, what);
+  let n = 0;
+  let kept = 0;
+  for (const line of read(p).split('\n')) {
+    if (!line) continue;
+    n++;
+    const row = fromRecall(JSON.parse(line), table, prov);
+    if (row) (add(row), kept++);
+  }
+  inputs.push({ source: `mirror ${id}`, version: prov.sourceVersion, records: n, inScope: kept });
+}
+
 // --- 3a. Enriquecimiento: base CLIA de FDA (analitos por documento / K-number) ------
 const cliaFiles = ['output/clia_doc2test2analyte_chem.tsv', 'output/clia_doc2test2analyte_gp.tsv'].map((f) => mirrorFile('unmtransinfo-cfde-biomarkers', f)).filter(Boolean);
 if (cliaFiles.length) {
@@ -470,7 +504,7 @@ for (const f of readdirSync(OUT_DIR).filter((x) => /^[a-z0-9-]+-\d{4}\.ndjson\.g
     if (r.udiDi) previous.udiDi.add(r.udiDi);
   }
 }
-const SOURCES = ['fda-510k', 'fda-denovo', 'fda-pma', 'fda-rl', 'fda-gudid', 'cdc-livd-sars-cov-2'];
+const SOURCES = ['fda-510k', 'fda-denovo', 'fda-pma', 'fda-rl', 'fda-gudid', 'fda-maude', 'fda-recall', 'cdc-livd-sars-cov-2'];
 const parts = [];
 for (const source of SOURCES) {
   const rows = [...(bySource.get(source)?.values() ?? [])].sort((a, b) => a.sourceRecordId.localeCompare(b.sourceRecordId));
