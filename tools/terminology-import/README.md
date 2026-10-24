@@ -252,12 +252,3 @@ node --test tools/terminology-import/test/medicine-catalog.test.mjs     # 14 pru
 
 **Plan de carga medido en seco (2026-10-01):** 67 764 conceptos y 868 740 propiedades, todos con id único.
 **No se corrió contra Postgres** (requiere el stack Docker, que el propietario pidió no levantar sin permiso).
-
-## Catálogo de análisis médicos (2026-10-24)
-
-Laboratorio, imagenología, anatomía patológica, genética y pruebas funcionales, con muestra
-(HL7 0487/0371/0488/0493), sección (HL7 0074) y unidades UCUM. Hoy cubre FONASA, SIGTAP, TUSS,
-ICD-10-PCS y PAMI: 11 398 prestaciones. LOINC queda soportado pero pendiente de que una persona
-lo descargue. Todo en [`lab-tests/`](lab-tests/README.md); fuentes en
-[`lab-tests/SOURCES.md`](lab-tests/SOURCES.md); pasadas y cobertura en
-[`docs/seed-research/lab-tests.md`](../../docs/seed-research/lab-tests.md).
