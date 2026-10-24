@@ -80,49 +80,6 @@ export class DynamicFieldDefinitions {
   cardinalityMax?: number;
 
   /**
-   * Las opciones de un campo de elección sin `valueSetId`: texto libre que
-   * quien arma el formulario escribió a mano, en el orden en que se ofrecen.
-   *
-   * Sólo tiene sentido con `dataType: 'code'`. Conviven con `valueSetId` —los
-   * dos resuelven «de dónde salen las opciones»— pero no a la vez: un campo
-   * así declara uno de los dos, nunca ambos (ver `docs/pendientes-backend-
-   * formularios.md` del frontend, que es de donde sale este contrato).
-   *
-   * Adelanta la entidad al esquema (ver `database/README.md` —DDL fuera de
-   * este repo—): la columna todavía no existe en el modelo canónico y se
-   * crea de forma aditiva por `ORM_SCHEMA_SYNC=safe` hasta que se promueva.
-   */
-  @Property({ type: 'json', columnType: 'jsonb', nullable: true })
-  options?: string[];
-
-  /**
-   * Si el campo de elección admite marcar varias opciones («casillas de
-   * verificación») en vez de una sola («opción múltiple»). Sólo con
-   * `dataType: 'code'`; es cardinalidad, no tipo, y por eso no es otro
-   * `dataType` — `cardinalityMin`/`cardinalityMax` sólo aplican cuando esto
-   * es `true`.
-   */
-  @Property({ type: 'boolean', nullable: true })
-  multiple?: boolean;
-
-  /**
-   * Si un campo de elección ofrece además «Otro», con un texto libre que no
-   * está entre {@link options}. Sólo con `dataType: 'code'` y con opciones
-   * propias — no tiene sentido sobre un `valueSetId`, que es un catálogo
-   * cerrado administrado aparte.
-   */
-  @Property({ fieldName: 'allow_other', type: 'boolean', nullable: true })
-  allowOther?: boolean;
-
-  /**
-   * La ayuda que se lee bajo la pregunta cuando el nombre no alcanza — la
-   * «Descripción» de una pregunta de Google Forms. Se sirve como `hint` del
-   * campo y por lo tanto entra en el `aria-describedby` de su control.
-   */
-  @Property({ type: 'text', nullable: true })
-  description?: string;
-
-  /**
    * Valor de length min mantenido por la instancia.
    */
   @Property({ fieldName: 'length_min', columnType: 'int', nullable: true })
@@ -232,6 +189,48 @@ export class DynamicFieldDefinitions {
    */
   @Property({ fieldName: 'state_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
   stateConceptId?: string;
+
+  /**
+   * Las opciones de un campo de elección sin `valueSetId`: texto libre que
+   * quien arma el formulario escribió a mano, en el orden en que se ofrecen.
+   *
+   * Sólo tiene sentido con `dataType: 'code'`. Conviven con `valueSetId` —los
+   * dos resuelven «de dónde salen las opciones»— pero no a la vez: un campo
+   * así declara uno de los dos, nunca ambos (ver `docs/pendientes-backend-
+   * formularios.md` del frontend, que es de donde sale este contrato).
+   *
+   * Declarada en el modelo canónico (`diagram_09_forms.puml`); parche para
+   * bases ya pobladas: `2026-10-05_v4238_forms_choice_field_options.sql`.
+   */
+  @Property({ type: 'json', columnType: 'jsonb', nullable: true })
+  options?: unknown;
+
+  /**
+   * Si el campo de elección admite marcar varias opciones («casillas de
+   * verificación») en vez de una sola («opción múltiple»). Sólo con
+   * `dataType: 'code'`; es cardinalidad, no tipo, y por eso no es otro
+   * `dataType` — `cardinalityMin`/`cardinalityMax` sólo aplican cuando esto
+   * es `true`.
+   */
+  @Property({ type: 'boolean', nullable: true })
+  multiple?: boolean;
+
+  /**
+   * Si un campo de elección ofrece además «Otro», con un texto libre que no
+   * está entre {@link options}. Sólo con `dataType: 'code'` y con opciones
+   * propias — no tiene sentido sobre un `valueSetId`, que es un catálogo
+   * cerrado administrado aparte.
+   */
+  @Property({ fieldName: 'allow_other', type: 'boolean', nullable: true })
+  allowOther?: boolean;
+
+  /**
+   * La ayuda que se lee bajo la pregunta cuando el nombre no alcanza — la
+   * «Descripción» de una pregunta de Google Forms. Se sirve como `hint` del
+   * campo y por lo tanto entra en el `aria-describedby` de su control.
+   */
+  @Property({ columnType: 'text', nullable: true })
+  description?: string;
 
   /**
    * Fecha y hora en que se creó el registro.
