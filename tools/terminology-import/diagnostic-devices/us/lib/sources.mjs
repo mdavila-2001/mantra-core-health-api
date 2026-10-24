@@ -12,9 +12,9 @@ export const OFFICIAL_RECORD_URL = Object.freeze({
   HDE: (id) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfhde/hde.cfm?id=${encodeURIComponent(id)}`,
   /** Informe MAUDE (`mdrfoi__id` = MDR_REPORT_KEY). */
   MAUDE: (key, pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfmaude/detail.cfm?mdrfoi__id=${encodeURIComponent(key)}&pc=${encodeURIComponent(pc)}`,
-  /** Registro de retiro en la API oficial de openFDA (enforcement), por número de retiro `Z-NNNN-AAAA`. */
   /** Informe MAUDE en la API oficial de openFDA, por número de informe (cuando no hay MDR_REPORT_KEY). */
   MAUDE_REPORT: (n) => `https://api.fda.gov/device/event.json?search=report_number:%22${encodeURIComponent(n)}%22`,
+  /** Registro de retiro en la API oficial de openFDA (enforcement), por número de retiro `Z-NNNN-AAAA`. */
   RECALL: (z) => `https://api.fda.gov/device/enforcement.json?search=recall_number:%22${encodeURIComponent(z)}%22`,
   GUDID: (di) => `https://accessgudid.nlm.nih.gov/devices/${encodeURIComponent(di)}`,
   PRODUCT_CODE: (pc) => `https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm?ID=${encodeURIComponent(pc)}`,
@@ -199,5 +199,33 @@ export const MIRRORS = Object.freeze([
     license: 'Código MIT; datos CC BY 4.0 (Zenodo 10.5281/zenodo.20411622). Contenido: informes openFDA device/event (CC0) de product codes de dispositivos con IA.',
     upstream: { url: 'https://api.fda.gov/device/event.json', exportDate: null, note: 'informes recibidos 2020-01-01 a 2026-04-30; las columnas matched_* son un cruce del autor y NO se usan' },
     priority: 5,
+  },
+  {
+    id: 'arpan2217-maude-1991-2010',
+    repo: 'https://github.com/arpan2217/medical-device-adverse-events',
+    commit: 'c2096e3e12a9a8f505f4057ce544e3b6b59fff6c',
+    files: ['data/fda_adverse_events_subset.csv'],
+    license: 'Sin licencia declarada en el repo; contenido: openFDA device/event (CC0) aplanado, con el arreglo `device` como mapa de texto.',
+    upstream: { url: 'https://api.fda.gov/device/event.json', exportDate: null, note: '30 000 informes recibidos 1991–2010, todos los paneles' },
+    priority: 4,
+  },
+  {
+    id: 'sarcom2-maude-cardio-2024',
+    repo: 'https://github.com/sarcom2/fda-device-events-elt',
+    commit: 'd7e08df377ce61ab012a554d9a68b4c729a4dd50',
+    files: ['data/snapshots/device_events_cardio_2024.parquet'],
+    convert: [{ parquet: 'data/snapshots/device_events_cardio_2024.parquet', columns: 'mdr_report_key,report_number,date_received,brand_name,generic_name,manufacturer_name,device_report_product_code', out: 'cardio_2024.ndjson' }],
+    license: 'Sin licencia declarada en el repo; contenido: openFDA device/event (CC0), panel cardiovascular, 2024.',
+    upstream: { url: 'https://api.fda.gov/device/event.json', exportDate: null, note: '108 265 informes recibidos en 2024 (cardiovascular); sin número de modelo' },
+    priority: 3,
+  },
+  {
+    id: 'levisw-maude-2022-2024',
+    repo: 'https://github.com/levisw/FDA-Medical-Device-Failure-Classification',
+    commit: '728544bf5893161bd741e10796872746cd7ab9d1',
+    files: ['data/train_data_1.csv', 'data/train_data_2.csv', 'data/train_data_3.csv', 'data/train_data_4.csv', 'data/test_data.csv'],
+    license: 'Sin licencia declarada en el repo; contenido: columnas de los archivos masivos MAUDE de FDA (dominio público), eventos 2022–2024.',
+    upstream: { url: 'https://www.fda.gov/medical-devices/medical-device-reporting-mdr-how-report-medical-device-problems/mdr-data-files', exportDate: null, note: 'MDR_REPORT_KEY, DEVICE_REPORT_PRODUCT_CODE, BRAND_NAME, MANUFACTURER_G1_NAME; sin modelo ni fabricante D' },
+    priority: 2,
   },
 ]);

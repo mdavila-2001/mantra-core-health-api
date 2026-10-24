@@ -22,7 +22,7 @@ test/                 node --test
 export DX_DEVICES_US_RAW_DIR=…            # opcional
 NODE_USE_ENV_PROXY=1 node tools/terminology-import/diagnostic-devices/us/fetch-official.mjs   # hosts FDA/NLM
 node tools/terminology-import/diagnostic-devices/us/fetch-mirrors.mjs
-node tools/terminology-import/diagnostic-devices/us/build.mjs
+node --max-old-space-size=8192 tools/terminology-import/diagnostic-devices/us/build.mjs   # ~3 min; con 2 GB de heap no alcanza
 node tools/terminology-import/diagnostic-devices/us/load-dx-device-types-us.mjs [--apply]
 node --test "tools/terminology-import/diagnostic-devices/us/test/*.test.mjs"
 ```

@@ -1,2 +1,2 @@
-# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck
+# NODE_OPTIONS=--max-old-space-size=8192 corepack yarn typecheck   (sobre origin/dev eb34a8ae)
 exit=0

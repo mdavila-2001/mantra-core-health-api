@@ -882,18 +882,19 @@ export function fromMaudeDevices(rows, table, prov, receivedByKey = new Map()) {
     const model = verbatim(r.model_number);
     if (!brand && !model) continue;
     const key = [pc, mfr, brand ?? '', model ?? ''].join('\u0001');
-    const g = groups.get(key) ?? { keys: [], first: r };
-    g.keys.push(`${r.mdr_report_key}:${r.device_ordinal}`);
+    const g = groups.get(key) ?? { keys: [], first: r, key };
+    g.keys.push(r.device_ordinal == null ? String(r.mdr_report_key) : `${r.mdr_report_key}:${r.device_ordinal}`);
     if (Number(r.mdr_report_key) < Number(g.first.mdr_report_key)) g.first = r;
     groups.set(key, g);
   }
-  return [...groups.values()].map(({ keys, first: r }) => {
+  return [...groups.values()].map(({ keys, first: r, key }) => {
     const pc = clean(r.device_report_product_code).toUpperCase();
     const reportKeys = [...new Set(keys)].sort((a, b) => Number(a.split(':')[0]) - Number(b.split(':')[0]) || a.localeCompare(b));
     return makeRecord(
       {
         source: 'fda-maude',
-        sourceRecordId: `${r.mdr_report_key}:${r.device_ordinal}`,
+        // Sin ordinal publicado, el id lleva un sufijo estable de la combinación (un informe puede traer varios equipos).
+        sourceRecordId: r.device_ordinal == null ? `${r.mdr_report_key}#${createHash('sha1').update(key).digest('hex').slice(0, 8)}` : `${r.mdr_report_key}:${r.device_ordinal}`,
         sourceUrl: OFFICIAL_RECORD_URL.MAUDE(r.mdr_report_key, pc),
         sourceVersion: prov.sourceVersion,
         retrievedAt: prov.retrievedAt,
@@ -913,6 +914,7 @@ export function fromMaudeDevices(rows, table, prov, receivedByKey = new Map()) {
         recordLevel: 'adverse_event_device',
         ...scopeExtra(table, pc),
         genericName: verbatim(r.generic_name),
+        manufacturerField: r.__manufacturerField ?? 'manufacturer_d_name',
         reportCount: reportKeys.length,
         reportKeysSample: reportKeys.slice(0, 20),
         firstReportReceived: receivedByKey.get(String(r.mdr_report_key)) ?? null,
@@ -969,4 +971,20 @@ export function fromRecall(r, table, prov) {
       via: prov.via,
     },
   );
+}
+
+/**
+ * `device` de openFDA aplanado como mapa de Spark/Java (`{clave=valor, …}`):
+ * se corta sólo en `, <clave conocida>=` para no partir valores con comas.
+ */
+export function parseFlatMap(text, knownKeys) {
+  const s = String(text ?? '').trim().replace(/^\[?\{/, '').replace(/\}\]?$/, '');
+  const alt = knownKeys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+  const parts = s.split(new RegExp(`, (?=(?:${alt})=)`));
+  const out = {};
+  for (const p of parts) {
+    const i = p.indexOf('=');
+    if (i > 0) out[p.slice(0, i)] = p.slice(i + 1);
+  }
+  return out;
 }
