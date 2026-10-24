@@ -70,11 +70,11 @@ load-corrida-4.json  73 s  concepts 0       conceptMaps 0
 
 ## Riesgos residuales
 - Corpus en inglés: no aparece en `/glossary` hasta tener nombres ES.
-- Licencia de FMA sin confirmar con la página oficial; el corpus derivado de FMA ahora también está en git (la licencia de la UW permite redistribuir, pero conviene confirmarla).
 - `concept_properties` ocupa 195 MB de los 335 MB de la carga por defecto.
 - Si otra sesión carga la misma ontología con otra URL canónica, se crea un segundo code system (la deduplicación es por URL canónica o `internal_code`).
 
 ## Decisiones y ambigüedades
+- Licencia de FMA: confirmada por el propietario el 2026-10-24 (corpus derivado de FMA en git y cargado por defecto).
 - Sólo sinónimos EXACT son designaciones; castellano y latín sólo con idioma declarado por la fuente (FMA).
 - Xrefs SNOMED/UMLS/MedGen/MedDRA no se copian (licencias; Bolivia no es miembro de SNOMED).
 - Carga por defecto sólo de lo que sirve a una consulta del producto; el resto opt-in con motivo y tamaño.

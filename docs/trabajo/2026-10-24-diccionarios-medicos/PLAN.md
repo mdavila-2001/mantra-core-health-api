@@ -13,7 +13,7 @@
 - OUT: enfermedades, síntomas, alergias, análisis, servicios, medicamentos, fichas y enfermería (sesiones hermanas: sólo se enlazan por código); el glosario (`/glossary`) y su API; cualquier DDL o migración; el repo del modelo.
 - Ambigüedades registradas:
   1. ¿Entran al glosario términos sólo en inglés? Supuesto: **no** (el glosario es castellano); quedan en la API de terminología. Confirmar con el propietario.
-  2. Licencia de FMA: abierta (UW 2006 / CC BY 3.0 según Bioregistry); página oficial inalcanzable. Confirmar con el propietario antes de mostrarla al público.
+  2. Licencia de FMA: abierta (UW 2006 / CC BY 3.0 según Bioregistry); página oficial inalcanzable. **Confirmada por el propietario el 2026-10-24.**
   3. Rama: el pedido dice `justin/seed-medical-dictionaries`; la sesión está fijada a `claude/vigilant-ramanujan-ms3xcw`. Supuesto: se trabaja y se abre el PR desde la rama fijada. Confirmar con Justin si quiere renombrarla.
 
 ## H1 — Corpus normalizado con procedencia

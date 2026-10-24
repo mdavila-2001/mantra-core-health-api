@@ -67,8 +67,8 @@ SHA-256, fecha, licencia, URI del término).
 - **FMA**: «intellectual property of the University of Washington» (comentario del propio `fma.owl`),
   distribuida desde 2006 con una licencia abierta de la UW (perpetua, mundial, no exclusiva, sin regalías,
   para reproducir, modificar y distribuir); Bioregistry la registra como CC BY 3.0 y OBO Foundry como
-  «CUSTOM». La página oficial de licencia (`si.washington.edu`) no fue alcanzable desde la sesión:
-  **confirmar con el propietario** antes de mostrarla al público. El archivo es el último publicado en
+  «CUSTOM». La página oficial de licencia (`si.washington.edu`) no fue alcanzable desde la sesión.
+  **Confirmada por el propietario el 2026-10-24.** El archivo es el último publicado en
   `bitbucket.org/uwsig/fma` (commit de 2015; el repositorio se actualizó por última vez en 2018).
 - **Metainventario de abreviaturas**: CC BY 4.0 (`LICENSE.txt` del repositorio). Incluye registros
   derivados de UMLS-LRABR (léxico SPECIALIST de la NLM, de uso libre) y de ADAM; ésos son los que quedan

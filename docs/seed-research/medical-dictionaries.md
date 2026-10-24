@@ -185,10 +185,10 @@ por clave y, entre fuentes distintas, por xref publicado (concept_maps), nunca p
 | Literatura | Detección de huecos con PubMed / Europe PMC | APIs bloqueadas | Habilitar `eutils.ncbi.nlm.nih.gov` / `www.ebi.ac.uk` |
 | Referencia | UMLS Metathesaurus como medida de cobertura | Exige cuenta UTS | **Pendiente del propietario** (no se creó cuenta) |
 
-## Licencias pendientes de confirmación
+## Licencias: estado de confirmación
 
 1. **FMA** — licencia abierta de la UW (2006) / CC BY 3.0 según Bioregistry; la página oficial no fue
-   alcanzable. Confirmar antes de mostrar FMA en pantallas públicas.
+   alcanzable. **Confirmada por el propietario el 2026-10-24.**
 2. **EMDN** — si se habilita: el portal de la Comisión dice «accesible a todos, sin cargo»; confirmar la
    política de reutilización (Decisión 2011/833/UE) antes de cargarla.
 3. **UMLS** — requiere que el propietario acepte la licencia UTS.
