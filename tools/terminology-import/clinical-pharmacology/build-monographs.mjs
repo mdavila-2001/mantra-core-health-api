@@ -25,8 +25,10 @@ import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/m
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
 import { MONOGRAPHS_META, MONOGRAPHS_NDJSON, cpOut, ftPath, ftSectionPath, notesPath, openFdaDir } from './lib/paths.mjs';
 
-const { opt } = parseArgs();
+const { opt, has } = parseArgs();
 const GRANULARITY = opt('--granularity', 'route');
+/** `--no-cima`: arma sin CIMA (para medir por separado lo que aporta cada fuente en el registro de pasadas). */
+const NO_CIMA = has('--no-cima');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -132,7 +134,11 @@ async function openFdaLinked({ bridges, gsrs }) {
 
 async function main() {
   const t0 = Date.now();
-  const { products, master, liname, universe } = readAllInputs();
+  const inputs = readAllInputs();
+  const { liname } = inputs;
+  const products = NO_CIMA ? [] : inputs.products;
+  const master = NO_CIMA ? [] : inputs.master;
+  const universe = NO_CIMA ? new Map([...inputs.universe].map(([c, o]) => [c, o.filter((x) => !x.startsWith('cima-'))]).filter(([, o]) => o.length)) : inputs.universe;
   const names = atcNameIndex({ master, products });
   const { byAtc, withoutAtc5 } = groupByAtc5(products);
   console.log(`=== Monografías: universo ${universe.size} ATC 5; CIMA ${products.length} medicamentos (${withoutAtc5.length} sin ATC 5) ===`);
@@ -194,6 +200,7 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
+    sources: NO_CIMA ? 'sin CIMA (--no-cima)' : 'todas',
     universe: universe.size,
     monographs: out.length,
     sections: out.reduce((n, m) => n + m.sections.length, 0),
