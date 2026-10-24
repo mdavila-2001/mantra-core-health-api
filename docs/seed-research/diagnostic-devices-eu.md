@@ -144,6 +144,13 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
 - Nuevos tras deduplicar: **0 · 0 · 0**. Segunda pasada seguida en 0 **por bloqueo**: el loop se
   cierra como **BLOQUEADO**, no como saturado.
 
+### Pasada 3 — 2026-10-24 · /loop
+
+- `probe.mjs`: 0/11 alcanzables (`out/probe/probe-20261024T0335.json`). Sin cambios en la
+  política de red: no se descargó nada.
+- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO**. Para reanudar, habilitar
+  los hosts listados arriba y relanzar el /loop (o `probe → fetch → build`).
+
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)
 
 El modelo no tiene catálogo de equipos. Propuesta concreta (a decidir y escribir en el repo del
