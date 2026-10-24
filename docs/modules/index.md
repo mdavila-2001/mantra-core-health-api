@@ -11,7 +11,7 @@
 | [`community`](community.md) | 14 | 33 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`consent`](consent.md) | 11 | 11 | 9 | 10 | 16 |
-| [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
+| [`accounting`](accounting.md) | 10 | 11 | 10 | 45 | 13 |
 | [`authz`](authz.md) | 9 | 11 | 15 | 15 | 21 |
 | [`clinical`](clinical.md) | 9 | 17 | 15 | 23 | 15 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 8 | 12 | 13 | 9 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **278** | **429** | **416** | **1265** | **523** |
+| **Total** | **279** | **430** | **417** | **1268** | **524** |
