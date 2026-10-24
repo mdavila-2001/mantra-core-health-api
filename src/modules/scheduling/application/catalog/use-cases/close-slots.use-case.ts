@@ -229,7 +229,9 @@ export class CloseSlotsUseCase {
         );
       }
 
-      const affected = await this.blockedBookings.describe(tx, slots);
+      const affected = await this.blockedBookings.describe(tx, slots, () =>
+        this.access.assertMayReadAgendaBookings(resource, actor),
+      );
       this.blockedBookings.assertNobodyPresent(affected.present, resourceId);
       if (
         affected.cancellable.length > 0 &&

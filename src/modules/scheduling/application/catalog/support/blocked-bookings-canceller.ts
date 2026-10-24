@@ -105,6 +105,7 @@ export class BlockedBookingsCanceller {
   async describe(
     tx: EntityManager,
     slots: readonly BookableSlots[],
+    authorize?: () => void,
   ): Promise<AffectedBookings> {
     if (slots.length === 0) return { cancellable: [], present: [] };
 
@@ -121,6 +122,11 @@ export class BlockedBookingsCanceller {
       slotIds,
       PRESENT_BOOKING_STATES,
     );
+
+    // Con citas de por medio, quien pide tiene que poder verlas: se comprueba
+    // ANTES de resolver un solo nombre. Sin citas no hay nada que proteger, y
+    // bloquear un rato vacío sigue como siempre.
+    if (cancellable.length + present.length > 0) authorize?.();
 
     const describe = async (
       bookingId: string,
