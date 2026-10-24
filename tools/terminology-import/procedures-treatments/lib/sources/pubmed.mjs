@@ -56,6 +56,20 @@ export const PUBMED_SUBSETS = {
     name: 'Ensayos controlados aleatorizados en MEDLINE/PubMed',
     typeCode: 'pubmed-rct:co-indexed',
   },
+  reviews: {
+    cache: 'pubmed-reviews',
+    // Las revisiones Cochrane ya son su propio subconjunto.
+    term: '(Systematic Review[pt] OR Meta-Analysis[pt]) NOT "Cochrane Database Syst Rev"[Journal]',
+    name: 'Revisiones sistemáticas y metaanálisis (fuera de Cochrane) en MEDLINE/PubMed',
+    typeCode: 'pubmed-review:co-indexed',
+  },
+  trials: {
+    cache: 'pubmed-trials',
+    // Los aleatorizados ya son su propio subconjunto.
+    term: 'Clinical Trial[pt] NOT Randomized Controlled Trial[pt]',
+    name: 'Ensayos clínicos no aleatorizados en MEDLINE/PubMed',
+    typeCode: 'pubmed-trial:co-indexed',
+  },
 };
 
 const RETRACTED_PUBLICATION = 'D016441';

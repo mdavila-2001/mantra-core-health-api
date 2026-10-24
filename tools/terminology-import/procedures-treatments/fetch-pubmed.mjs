@@ -9,6 +9,8 @@
 //                        Guideline / Practice Guideline)
 //   --subset rct         ensayos controlados aleatorizados publicados
 //                        (tipo de publicación Randomized Controlled Trial)
+//   --subset reviews     revisiones sistemáticas y metaanálisis fuera de Cochrane
+//   --subset trials      ensayos clínicos no aleatorizados
 //
 // Por registro se guarda PMID, estado MEDLINE, fecha de revisión, tipos de
 // publicación y encabezados MeSH (descriptor + calificadores), tal cual.
