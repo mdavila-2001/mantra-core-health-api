@@ -9,7 +9,7 @@
 # Módulo `consent`
 
 **Fuente:** [`src/modules/consent/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/consent/README.md)
-· 11 controllers · 11 services · 9 repositories · 10 entidades · 16 DTO
+· 12 controllers · 12 services · 9 repositories · 10 entidades · 17 DTO
 
 ---
 

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `accounting`
 
-Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 46 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger`
-- **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingSubledgerController`
+- **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-collections`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger`
+- **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingCollectionsController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingSubledgerController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -19,43 +19,44 @@ Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada de
 6. [GET /accounting/assets](#6-get-accounting-assets) — Registro de activos fijos de una práctica
 7. [POST /accounting/assets/capitalize](#7-post-accounting-assets-capitalize) — Capitalizar activo (alta y asignación)
 8. [GET /accounting/balance-sheet](#8-get-accounting-balance-sheet) — Balance general de una práctica a una fecha de corte
-9. [POST /accounting/clearing-documents](#9-post-accounting-clearing-documents) — Compensar/clearing de partidas abiertas
-10. [POST /accounting/depreciation/run](#10-post-accounting-depreciation-run) — Ejecutar depreciación de activos (batch)
-11. [GET /accounting/dimensions](#11-get-accounting-dimensions) — Dimensiones analíticas de una práctica
-12. [POST /accounting/exchange-rates](#12-post-accounting-exchange-rates) — Registrar tipo de cambio para conversión
-13. [POST /accounting/fiscal-periods/{id}/lock](#13-post-accounting-fiscal-periods-id-lock) — Cerrar/bloquear un periodo fiscal
-14. [GET /accounting/fiscal-years](#14-get-accounting-fiscal-years) — Ejercicio fiscal vigente de una práctica
-15. [POST /accounting/fiscal-years](#15-post-accounting-fiscal-years) — Abrir un ejercicio fiscal y sus periodos
-16. [GET /accounting/general-ledger](#16-get-accounting-general-ledger) — Libro mayor de una cuenta (movimientos posteados, con saldo corrido)
-17. [GET /accounting/income-statement](#17-get-accounting-income-statement) — Estado de resultados de una práctica
-18. [GET /accounting/journal-transactions](#18-get-accounting-journal-transactions) — Libro diario de una práctica
-19. [POST /accounting/journal-transactions](#19-post-accounting-journal-transactions) — Registrar y postear un asiento balanceado (partida doble)
-20. [GET /accounting/journal-transactions/{id}](#20-get-accounting-journal-transactions-id) — Un asiento con sus líneas
-21. [POST /accounting/journal-transactions/{id}/approve](#21-post-accounting-journal-transactions-id-approve) — Aprobar el asiento (rol de aprobación)
-22. [POST /accounting/journal-transactions/{id}/classify](#22-post-accounting-journal-transactions-id-classify) — Clasificar automáticamente el asiento
-23. [GET /accounting/journal-transactions/{id}/document-flow](#23-get-accounting-journal-transactions-id-document-flow) — Flujo del documento de un asiento
-24. [POST /accounting/journal-transactions/{id}/files](#24-post-accounting-journal-transactions-id-files) — Adjuntar un documento soporte al asiento
-25. [POST /accounting/journal-transactions/{id}/post](#25-post-accounting-journal-transactions-id-post) — Postear el asiento aprobado (efecto en el mayor)
-26. [POST /accounting/journal-transactions/{id}/reverse](#26-post-accounting-journal-transactions-id-reverse) — Reversar un asiento posteado (líneas espejo)
-27. [POST /accounting/journal-transactions/{id}/submit-review](#27-post-accounting-journal-transactions-id-submit-review) — Enviar el asiento a revisión
-28. [POST /accounting/journal-transactions/drafts](#28-post-accounting-journal-transactions-drafts) — Crear un asiento en borrador (DRAFT, sin postear)
-29. [POST /accounting/liabilities/{id}/payments](#29-post-accounting-liabilities-id-payments) — Liquidar cuota de pasivo (principal + interés)
-30. [GET /accounting/open-items](#30-get-accounting-open-items) — Cartera abierta de una práctica
-31. [POST /accounting/open-items](#31-post-accounting-open-items) — Generar partida abierta en subledger
-32. [POST /accounting/postings/determine-accounts](#32-post-accounting-postings-determine-accounts) — Determinar la cuenta objetivo por reglas vigentes
-33. [GET /accounting/practitioner/assets](#33-get-accounting-practitioner-assets) — Listar los activos propios de una práctica
-34. [POST /accounting/practitioner/assets](#34-post-accounting-practitioner-assets) — Dar de alta un activo propio
-35. [PATCH /accounting/practitioner/assets/{id}/automation](#35-patch-accounting-practitioner-assets-id-automation) — Prender o apagar la automatización de un activo
-36. [POST /accounting/practitioner/assets/{id}/progress](#36-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
-37. [POST /accounting/practitioner/consultation-income](#37-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
-38. [POST /accounting/practitioner/entries](#38-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
-39. [GET /accounting/practitioner/liabilities](#39-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
-40. [POST /accounting/practitioner/liabilities](#40-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
-41. [PATCH /accounting/practitioner/liabilities/{id}/automation](#41-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
-42. [POST /accounting/practitioner/liabilities/{id}/progress](#42-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
-43. [GET /accounting/practitioner/liabilities/{id}/schedule](#43-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
-44. [GET /accounting/practitioner/paid-consultations](#44-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
-45. [GET /accounting/trial-balance](#45-get-accounting-trial-balance) — Balance de sumas y saldos
+9. [GET /accounting/clearing-documents](#9-get-accounting-clearing-documents) — Listar documentos de compensación del tenant
+10. [POST /accounting/clearing-documents](#10-post-accounting-clearing-documents) — Compensar/clearing de partidas abiertas
+11. [POST /accounting/depreciation/run](#11-post-accounting-depreciation-run) — Ejecutar depreciación de activos (batch)
+12. [GET /accounting/dimensions](#12-get-accounting-dimensions) — Dimensiones analíticas de una práctica
+13. [POST /accounting/exchange-rates](#13-post-accounting-exchange-rates) — Registrar tipo de cambio para conversión
+14. [POST /accounting/fiscal-periods/{id}/lock](#14-post-accounting-fiscal-periods-id-lock) — Cerrar/bloquear un periodo fiscal
+15. [GET /accounting/fiscal-years](#15-get-accounting-fiscal-years) — Ejercicio fiscal vigente de una práctica
+16. [POST /accounting/fiscal-years](#16-post-accounting-fiscal-years) — Abrir un ejercicio fiscal y sus periodos
+17. [GET /accounting/general-ledger](#17-get-accounting-general-ledger) — Libro mayor de una cuenta (movimientos posteados, con saldo corrido)
+18. [GET /accounting/income-statement](#18-get-accounting-income-statement) — Estado de resultados de una práctica
+19. [GET /accounting/journal-transactions](#19-get-accounting-journal-transactions) — Libro diario de una práctica
+20. [POST /accounting/journal-transactions](#20-post-accounting-journal-transactions) — Registrar y postear un asiento balanceado (partida doble)
+21. [GET /accounting/journal-transactions/{id}](#21-get-accounting-journal-transactions-id) — Un asiento con sus líneas
+22. [POST /accounting/journal-transactions/{id}/approve](#22-post-accounting-journal-transactions-id-approve) — Aprobar el asiento (rol de aprobación)
+23. [POST /accounting/journal-transactions/{id}/classify](#23-post-accounting-journal-transactions-id-classify) — Clasificar automáticamente el asiento
+24. [GET /accounting/journal-transactions/{id}/document-flow](#24-get-accounting-journal-transactions-id-document-flow) — Flujo del documento de un asiento
+25. [POST /accounting/journal-transactions/{id}/files](#25-post-accounting-journal-transactions-id-files) — Adjuntar un documento soporte al asiento
+26. [POST /accounting/journal-transactions/{id}/post](#26-post-accounting-journal-transactions-id-post) — Postear el asiento aprobado (efecto en el mayor)
+27. [POST /accounting/journal-transactions/{id}/reverse](#27-post-accounting-journal-transactions-id-reverse) — Reversar un asiento posteado (líneas espejo)
+28. [POST /accounting/journal-transactions/{id}/submit-review](#28-post-accounting-journal-transactions-id-submit-review) — Enviar el asiento a revisión
+29. [POST /accounting/journal-transactions/drafts](#29-post-accounting-journal-transactions-drafts) — Crear un asiento en borrador (DRAFT, sin postear)
+30. [POST /accounting/liabilities/{id}/payments](#30-post-accounting-liabilities-id-payments) — Liquidar cuota de pasivo (principal + interés)
+31. [GET /accounting/open-items](#31-get-accounting-open-items) — Cartera abierta de una práctica
+32. [POST /accounting/open-items](#32-post-accounting-open-items) — Generar partida abierta en subledger
+33. [POST /accounting/postings/determine-accounts](#33-post-accounting-postings-determine-accounts) — Determinar la cuenta objetivo por reglas vigentes
+34. [GET /accounting/practitioner/assets](#34-get-accounting-practitioner-assets) — Listar los activos propios de una práctica
+35. [POST /accounting/practitioner/assets](#35-post-accounting-practitioner-assets) — Dar de alta un activo propio
+36. [PATCH /accounting/practitioner/assets/{id}/automation](#36-patch-accounting-practitioner-assets-id-automation) — Prender o apagar la automatización de un activo
+37. [POST /accounting/practitioner/assets/{id}/progress](#37-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
+38. [POST /accounting/practitioner/consultation-income](#38-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
+39. [POST /accounting/practitioner/entries](#39-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
+40. [GET /accounting/practitioner/liabilities](#40-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
+41. [POST /accounting/practitioner/liabilities](#41-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
+42. [PATCH /accounting/practitioner/liabilities/{id}/automation](#42-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
+43. [POST /accounting/practitioner/liabilities/{id}/progress](#43-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
+44. [GET /accounting/practitioner/liabilities/{id}/schedule](#44-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
+45. [GET /accounting/practitioner/paid-consultations](#45-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
+46. [GET /accounting/trial-balance](#46-get-accounting-trial-balance) — Balance de sumas y saldos
 
 ---
 
@@ -1261,7 +1262,148 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /accounting/clearing-documents
+## 9. GET /accounting/clearing-documents
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-collections`
+- **Nombre:** Listar documentos de compensación del tenant
+- **Operation ID:** `AccountingCollectionsController_listClearingDocuments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingCollectionsController.listClearingDocuments](../../src/modules/accounting/controllers/accounting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar documentos de compensación del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V16-08: listar documentos de compensación del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/clearing-documents` en `AccountingCollectionsController_listClearingDocuments`. El controlador delega en `AccountingCollectionsService.listClearingDocuments`. No recibe body. El tipo de retorno estático es `Promise<ClearingDocumentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/clearing-documents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/clearing-documents?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ClearingDocumentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ClearingDocumentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ClearingDocumentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ClearingDocumentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ClearingDocumentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ClearingDocumentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClearingDocumentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "clearingNumber": "valor-ejemplo",
+      "transactionId": "00000000-0000-4000-8000-000000000001",
+      "clearingDate": "2026-07-31",
+      "companyBankAccountId": {},
+      "paymentTransactionId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ClearingDocumentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","clearingNumber":"valor-ejemplo","transactionId":"00000000-0000-4000-8000-000000000001","clearingDate":"2026-07-31","companyBankAccountId":{},"paymentTransactionId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].clearingNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].transactionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].clearingDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].companyBankAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].paymentTransactionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/clearing-documents"
+}
+```
+
+---
+
+## 10. POST /accounting/clearing-documents
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-subledger`
@@ -1426,7 +1568,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /accounting/depreciation/run
+## 11. POST /accounting/depreciation/run
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-assets`
@@ -1565,7 +1707,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /accounting/dimensions
+## 12. GET /accounting/dimensions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -1694,7 +1836,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /accounting/exchange-rates
+## 13. POST /accounting/exchange-rates
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fx`
@@ -1830,7 +1972,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /accounting/fiscal-periods/{id}/lock
+## 14. POST /accounting/fiscal-periods/{id}/lock
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fiscal`
@@ -1955,7 +2097,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /accounting/fiscal-years
+## 15. GET /accounting/fiscal-years
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -2093,7 +2235,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /accounting/fiscal-years
+## 16. POST /accounting/fiscal-years
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-fiscal`
@@ -2248,7 +2390,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /accounting/general-ledger
+## 17. GET /accounting/general-ledger
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2403,7 +2545,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /accounting/income-statement
+## 18. GET /accounting/income-statement
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2560,7 +2702,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /accounting/journal-transactions
+## 19. GET /accounting/journal-transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2697,7 +2839,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /accounting/journal-transactions
+## 20. POST /accounting/journal-transactions
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -2902,7 +3044,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /accounting/journal-transactions/{id}
+## 21. GET /accounting/journal-transactions/{id}
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3047,7 +3189,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /accounting/journal-transactions/{id}/approve
+## 22. POST /accounting/journal-transactions/{id}/approve
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3194,7 +3336,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /accounting/journal-transactions/{id}/classify
+## 23. POST /accounting/journal-transactions/{id}/classify
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3341,7 +3483,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /accounting/journal-transactions/{id}/document-flow
+## 24. GET /accounting/journal-transactions/{id}/document-flow
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -3466,7 +3608,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /accounting/journal-transactions/{id}/files
+## 25. POST /accounting/journal-transactions/{id}/files
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3593,7 +3735,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /accounting/journal-transactions/{id}/post
+## 26. POST /accounting/journal-transactions/{id}/post
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3740,7 +3882,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /accounting/journal-transactions/{id}/reverse
+## 27. POST /accounting/journal-transactions/{id}/reverse
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -3886,7 +4028,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /accounting/journal-transactions/{id}/submit-review
+## 28. POST /accounting/journal-transactions/{id}/submit-review
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -4033,7 +4175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /accounting/journal-transactions/drafts
+## 29. POST /accounting/journal-transactions/drafts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -4239,7 +4381,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /accounting/liabilities/{id}/payments
+## 30. POST /accounting/liabilities/{id}/payments
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-liabilities`
@@ -4395,7 +4537,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /accounting/open-items
+## 31. GET /accounting/open-items
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-cockpit`
@@ -4556,7 +4698,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /accounting/open-items
+## 32. POST /accounting/open-items
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-subledger`
@@ -4698,7 +4840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /accounting/postings/determine-accounts
+## 33. POST /accounting/postings/determine-accounts
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`
@@ -4826,7 +4968,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /accounting/practitioner/assets
+## 34. GET /accounting/practitioner/assets
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -4921,7 +5063,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /accounting/practitioner/assets
+## 35. POST /accounting/practitioner/assets
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5083,7 +5225,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. PATCH /accounting/practitioner/assets/{id}/automation
+## 36. PATCH /accounting/practitioner/assets/{id}/automation
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5198,7 +5340,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /accounting/practitioner/assets/{id}/progress
+## 37. POST /accounting/practitioner/assets/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5338,7 +5480,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /accounting/practitioner/consultation-income
+## 38. POST /accounting/practitioner/consultation-income
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5499,7 +5641,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /accounting/practitioner/entries
+## 39. POST /accounting/practitioner/entries
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5657,7 +5799,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /accounting/practitioner/liabilities
+## 40. GET /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5752,7 +5894,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /accounting/practitioner/liabilities
+## 41. POST /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5905,7 +6047,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. PATCH /accounting/practitioner/liabilities/{id}/automation
+## 42. PATCH /accounting/practitioner/liabilities/{id}/automation
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6020,7 +6162,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /accounting/practitioner/liabilities/{id}/progress
+## 43. POST /accounting/practitioner/liabilities/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6162,7 +6304,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /accounting/practitioner/liabilities/{id}/schedule
+## 44. GET /accounting/practitioner/liabilities/{id}/schedule
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6284,7 +6426,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /accounting/practitioner/paid-consultations
+## 45. GET /accounting/practitioner/paid-consultations
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6412,7 +6554,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /accounting/trial-balance
+## 46. GET /accounting/trial-balance
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`

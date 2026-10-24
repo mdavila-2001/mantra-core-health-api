@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `object_storage`
 
-Referencia exhaustiva de 14 operación(es) del módulo `object_storage`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 16 operación(es) del módulo `object_storage`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `dicomweb`, `object-storage`
-- **Controladores:** `DicomWebController`, `ObjectStorageController`
+- **Etiquetas OpenAPI:** `dicomweb`, `object-storage`, `object-storage-collections`
+- **Controladores:** `DicomWebController`, `ObjectStorageCollectionsController`, `ObjectStorageController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,17 +14,19 @@ Referencia exhaustiva de 14 operación(es) del módulo `object_storage`, derivad
 1. [GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid}](#1-get-dicomweb-studies-studyuid-series-seriesuid-instances-sopuid) — Resolver una instancia DICOM y registrar el acceso (WADO-RS)
 2. [POST /object-storage/archive-jobs/build](#2-post-object-storage-archive-jobs-build) — Archivar el objeto a almacenamiento frío
 3. [POST /object-storage/dicom/studies/catalog](#3-post-object-storage-dicom-studies-catalog) — Catalogar la jerarquía DICOM estudio/serie/instancia
-4. [POST /object-storage/large-payloads](#4-post-object-storage-large-payloads) — Registrar un payload grande y vincularlo a su entidad de origen
-5. [POST /object-storage/namespaces/{code}/uploads/initiate](#5-post-object-storage-namespaces-code-uploads-initiate) — Iniciar una carga multiparte
-6. [POST /object-storage/objects/{manifestId}/request-deletion](#6-post-object-storage-objects-manifestid-request-deletion) — Solicitar el borrado gobernado
-7. [POST /object-storage/objects/{manifestId}/versions](#7-post-object-storage-objects-manifestid-versions) — Crear una versión nueva del objeto
-8. [POST /object-storage/uploads/{id}/complete](#8-post-object-storage-uploads-id-complete) — Completar la carga y materializar la versión del objeto
-9. [GET /object-storage/versions/{versionId}/content/{token}](#9-get-object-storage-versions-versionid-content-token) — Descargar el contenido de una versión con el enlace emitido
-10. [POST /object-storage/versions/{versionId}/integrity-checks](#10-post-object-storage-versions-versionid-integrity-checks) — Registrar la verificación de integridad
-11. [POST /object-storage/versions/{versionId}/legal-holds](#11-post-object-storage-versions-versionid-legal-holds) — Colocar una retención legal
-12. [DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}](#12-delete-object-storage-versions-versionid-legal-holds-holdid) — Liberar una retención legal
-13. [POST /object-storage/versions/{versionId}/retention-lock](#13-post-object-storage-versions-versionid-retention-lock) — Aplicar retención WORM sobre la versión
-14. [POST /object-storage/versions/{versionId}/signed-url](#14-post-object-storage-versions-versionid-signed-url) — Emitir acceso firmado a una versión
+4. [GET /object-storage/large-payloads](#4-get-object-storage-large-payloads) — Listar cargas grandes del tenant
+5. [POST /object-storage/large-payloads](#5-post-object-storage-large-payloads) — Registrar un payload grande y vincularlo a su entidad de origen
+6. [POST /object-storage/namespaces/{code}/uploads/initiate](#6-post-object-storage-namespaces-code-uploads-initiate) — Iniciar una carga multiparte
+7. [POST /object-storage/objects/{manifestId}/request-deletion](#7-post-object-storage-objects-manifestid-request-deletion) — Solicitar el borrado gobernado
+8. [POST /object-storage/objects/{manifestId}/versions](#8-post-object-storage-objects-manifestid-versions) — Crear una versión nueva del objeto
+9. [GET /object-storage/uploads](#9-get-object-storage-uploads) — Listar cargas multiparte del tenant
+10. [POST /object-storage/uploads/{id}/complete](#10-post-object-storage-uploads-id-complete) — Completar la carga y materializar la versión del objeto
+11. [GET /object-storage/versions/{versionId}/content/{token}](#11-get-object-storage-versions-versionid-content-token) — Descargar el contenido de una versión con el enlace emitido
+12. [POST /object-storage/versions/{versionId}/integrity-checks](#12-post-object-storage-versions-versionid-integrity-checks) — Registrar la verificación de integridad
+13. [POST /object-storage/versions/{versionId}/legal-holds](#13-post-object-storage-versions-versionid-legal-holds) — Colocar una retención legal
+14. [DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}](#14-delete-object-storage-versions-versionid-legal-holds-holdid) — Liberar una retención legal
+15. [POST /object-storage/versions/{versionId}/retention-lock](#15-post-object-storage-versions-versionid-retention-lock) — Aplicar retención WORM sobre la versión
+16. [POST /object-storage/versions/{versionId}/signed-url](#16-post-object-storage-versions-versionid-signed-url) — Emitir acceso firmado a una versión
 
 ---
 
@@ -477,7 +479,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /object-storage/large-payloads
+## 4. GET /object-storage/large-payloads
+
+- **Módulo:** `object_storage`
+- **Etiqueta OpenAPI:** `object-storage-collections`
+- **Nombre:** Listar cargas grandes del tenant
+- **Operation ID:** `ObjectStorageCollectionsController_listLargePayloads`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ObjectStorageCollectionsController.listLargePayloads](../../src/modules/object_storage/controllers/object-storage-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar cargas grandes del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V60-04: listar cargas grandes del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /object-storage/large-payloads` en `ObjectStorageCollectionsController_listLargePayloads`. El controlador delega en `ObjectStorageCollectionsService.listLargePayloads`. No recibe body. El tipo de retorno estático es `Promise<LargePayloadManifestPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /object-storage/large-payloads HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `STORAGE_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /object-storage/large-payloads?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LargePayloadManifestPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LargePayloadManifestPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LargePayloadManifestPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LargePayloadManifestPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LargePayloadManifestPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LargePayloadManifestPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LargePayloadManifestPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "payloadType": "valor-ejemplo",
+      "sourceEntityType": "valor-ejemplo",
+      "sourceEntityId": "00000000-0000-4000-8000-000000000001",
+      "objectManifestId": "00000000-0000-4000-8000-000000000001",
+      "containsPhi": true,
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<LargePayloadManifestItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","payloadType":"valor-ejemplo","sourceEntityType":"valor-ejemplo","sourceEntityId":"00000000-0000-4000-8000-000000000001","objectManifestId":"00000000-0000-4000-8000-000000000001","containsPhi":true,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].payloadType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].sourceEntityType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].sourceEntityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].objectManifestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].containsPhi` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/object-storage/large-payloads"
+}
+```
+
+---
+
+## 5. POST /object-storage/large-payloads
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -618,7 +758,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /object-storage/namespaces/{code}/uploads/initiate
+## 6. POST /object-storage/namespaces/{code}/uploads/initiate
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -758,7 +898,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /object-storage/objects/{manifestId}/request-deletion
+## 7. POST /object-storage/objects/{manifestId}/request-deletion
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -896,7 +1036,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /object-storage/objects/{manifestId}/versions
+## 8. POST /object-storage/objects/{manifestId}/versions
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1073,7 +1213,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /object-storage/uploads/{id}/complete
+## 9. GET /object-storage/uploads
+
+- **Módulo:** `object_storage`
+- **Etiqueta OpenAPI:** `object-storage-collections`
+- **Nombre:** Listar cargas multiparte del tenant
+- **Operation ID:** `ObjectStorageCollectionsController_listUploads`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ObjectStorageCollectionsController.listUploads](../../src/modules/object_storage/controllers/object-storage-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar cargas multiparte del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V60-08, V60-05: listar cargas multiparte del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /object-storage/uploads` en `ObjectStorageCollectionsController_listUploads`. El controlador delega en `ObjectStorageCollectionsService.listUploads`. No recibe body. El tipo de retorno estático es `Promise<MultipartUploadPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `namespaceId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /object-storage/uploads HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `STORAGE_CLIENT`, `SYSTEM`, `STORAGE_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /object-storage/uploads?page=1&pageSize=20&order=DESC&sortBy=createdAt&namespaceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MultipartUploadPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MultipartUploadPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MultipartUploadPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MultipartUploadPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MultipartUploadPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MultipartUploadPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MultipartUploadPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "namespaceId": "00000000-0000-4000-8000-000000000001",
+      "providerUploadId": "00000000-0000-4000-8000-000000000001",
+      "targetObjectKey": "valor-ejemplo",
+      "expectedSizeBytes": "valor-ejemplo",
+      "receivedSizeBytes": "valor-ejemplo",
+      "status": "ok",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<MultipartUploadItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","namespaceId":"00000000-0000-4000-8000-000000000001","providerUploadId":"00000000-0000-4000-8000-000000000001","targetObjectKey":"valor-ejemplo","expectedSizeBytes":"valor-ejemplo","receivedSizeBytes":"valor-ejemplo","status":"ok","expiresAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].namespaceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerUploadId` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetObjectKey` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].expectedSizeBytes` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].receivedSizeBytes` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/object-storage/uploads"
+}
+```
+
+---
+
+## 10. POST /object-storage/uploads/{id}/complete
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1256,7 +1539,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /object-storage/versions/{versionId}/content/{token}
+## 11. GET /object-storage/versions/{versionId}/content/{token}
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1361,7 +1644,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /object-storage/versions/{versionId}/integrity-checks
+## 12. POST /object-storage/versions/{versionId}/integrity-checks
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1496,7 +1779,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /object-storage/versions/{versionId}/legal-holds
+## 13. POST /object-storage/versions/{versionId}/legal-holds
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1629,7 +1912,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}
+## 14. DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1751,7 +2034,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /object-storage/versions/{versionId}/retention-lock
+## 15. POST /object-storage/versions/{versionId}/retention-lock
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`
@@ -1892,7 +2175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /object-storage/versions/{versionId}/signed-url
+## 16. POST /object-storage/versions/{versionId}/signed-url
 
 - **Módulo:** `object_storage`
 - **Etiqueta OpenAPI:** `object-storage`

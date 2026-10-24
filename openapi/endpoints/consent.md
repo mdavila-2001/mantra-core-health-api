@@ -2,37 +2,43 @@
 
 # Endpoints del módulo `consent`
 
-Referencia exhaustiva de 22 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 28 operación(es) del módulo `consent`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents`
-- **Controladores:** `ConsentEvidenceController`, `ConsentMeController`, `ConsentSweepController`, `ConsentsController`, `EncounterInformedConsentsController`, `HipaaAuthorizationsController`, `PatientObjectionsController`, `PractitionerAccessRequestsController`, `PrivacyRestrictionsController`, `ProcessingLegalBasesController`, `TreatmentInformedConsentsController`
+- **Etiquetas OpenAPI:** `consent-collections`, `consent-consents`, `consent-evidence`, `consent-hipaa-authorizations`, `consent-internal`, `consent-me`, `consent-patient-objections`, `consent-practitioner-access`, `consent-privacy-restrictions`, `consent-processing-legal-bases`, `consent-treatment-informed-consents`
+- **Controladores:** `ConsentCollectionsController`, `ConsentEvidenceController`, `ConsentMeController`, `ConsentSweepController`, `ConsentsController`, `EncounterInformedConsentsController`, `HipaaAuthorizationsController`, `PatientObjectionsController`, `PractitionerAccessRequestsController`, `PrivacyRestrictionsController`, `ProcessingLegalBasesController`, `TreatmentInformedConsentsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /consent/consent-evidence](#1-post-consent-consent-evidence) — Registrar evidencia inmutable de consentimiento
-2. [POST /consent/consents](#2-post-consent-consents) — Capturar consentimiento de directiva de privacidad
-3. [PATCH /consent/consents/{id}/provisions](#3-patch-consent-consents-id-provisions) — Actualizar provisiones granulares (data class / actor / acción)
-4. [POST /consent/consents/{id}/withdraw](#4-post-consent-consents-id-withdraw) — Revocar/retirar consentimiento y disparar re-evaluación de accesos
-5. [GET /consent/encounters/{encounterId}/informed-consent](#5-get-consent-encounters-encounterid-informed-consent) — Consentimientos informados registrados en el encuentro
-6. [POST /consent/encounters/{encounterId}/informed-consent](#6-post-consent-encounters-encounterid-informed-consent) — Registrar el consentimiento informado del encuentro
-7. [POST /consent/hipaa-authorizations](#7-post-consent-hipaa-authorizations) — Otorgar autorización HIPAA de divulgación
-8. [POST /consent/hipaa-authorizations/{id}/revoke](#8-post-consent-hipaa-authorizations-id-revoke) — Revocar autorización HIPAA
-9. [POST /consent/internal/expiration-sweep](#9-post-consent-internal-expiration-sweep) — Expirar consentimientos y autorizaciones vencidas (barrido)
-10. [GET /consent/me/consents](#10-get-consent-me-consents) — Mis consentimientos (vigentes y retirados)
-11. [POST /consent/me/consents/{id}/withdraw](#11-post-consent-me-consents-id-withdraw) — Retirar uno de mis consentimientos
-12. [GET /consent/me/hipaa-authorizations](#12-get-consent-me-hipaa-authorizations) — Mis autorizaciones de divulgación
-13. [GET /consent/me/objections](#13-get-consent-me-objections) — Mis objeciones (abiertas y resueltas)
-14. [GET /consent/me/treatment-informed-consents](#14-get-consent-me-treatment-informed-consents) — Mis consentimientos informados de tratamiento
-15. [POST /consent/patient-objections](#15-post-consent-patient-objections) — Registrar objeción del paciente y materializar restricción
-16. [POST /consent/patient-objections/{id}/resolve](#16-post-consent-patient-objections-id-resolve) — Resolver objeción del paciente
-17. [POST /consent/practitioner-access-requests](#17-post-consent-practitioner-access-requests) — Pedir acceso al expediente de un paciente encontrado en la búsqueda
-18. [POST /consent/practitioner-access-requests/{id}/decision](#18-post-consent-practitioner-access-requests-id-decision) — Aceptar (con las especialidades autorizadas) o rechazar la solicitud
-19. [GET /consent/practitioner-access-requests/mine](#19-get-consent-practitioner-access-requests-mine) — Mis solicitudes de vínculo pendientes de decisión
-20. [POST /consent/privacy-restrictions](#20-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
-21. [POST /consent/processing-legal-bases](#21-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
-22. [POST /consent/treatment-informed-consents](#22-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
+2. [GET /consent/consents](#2-get-consent-consents) — Listar los consentimientos del tenant
+3. [POST /consent/consents](#3-post-consent-consents) — Capturar consentimiento de directiva de privacidad
+4. [PATCH /consent/consents/{id}/provisions](#4-patch-consent-consents-id-provisions) — Actualizar provisiones granulares (data class / actor / acción)
+5. [POST /consent/consents/{id}/withdraw](#5-post-consent-consents-id-withdraw) — Revocar/retirar consentimiento y disparar re-evaluación de accesos
+6. [GET /consent/encounters/{encounterId}/informed-consent](#6-get-consent-encounters-encounterid-informed-consent) — Consentimientos informados registrados en el encuentro
+7. [POST /consent/encounters/{encounterId}/informed-consent](#7-post-consent-encounters-encounterid-informed-consent) — Registrar el consentimiento informado del encuentro
+8. [GET /consent/hipaa-authorizations](#8-get-consent-hipaa-authorizations) — Listar las autorizaciones HIPAA del tenant
+9. [POST /consent/hipaa-authorizations](#9-post-consent-hipaa-authorizations) — Otorgar autorización HIPAA de divulgación
+10. [POST /consent/hipaa-authorizations/{id}/revoke](#10-post-consent-hipaa-authorizations-id-revoke) — Revocar autorización HIPAA
+11. [POST /consent/internal/expiration-sweep](#11-post-consent-internal-expiration-sweep) — Expirar consentimientos y autorizaciones vencidas (barrido)
+12. [GET /consent/me/consents](#12-get-consent-me-consents) — Mis consentimientos (vigentes y retirados)
+13. [POST /consent/me/consents/{id}/withdraw](#13-post-consent-me-consents-id-withdraw) — Retirar uno de mis consentimientos
+14. [GET /consent/me/hipaa-authorizations](#14-get-consent-me-hipaa-authorizations) — Mis autorizaciones de divulgación
+15. [GET /consent/me/objections](#15-get-consent-me-objections) — Mis objeciones (abiertas y resueltas)
+16. [GET /consent/me/treatment-informed-consents](#16-get-consent-me-treatment-informed-consents) — Mis consentimientos informados de tratamiento
+17. [GET /consent/patient-objections](#17-get-consent-patient-objections) — Listar las objeciones de paciente del tenant
+18. [POST /consent/patient-objections](#18-post-consent-patient-objections) — Registrar objeción del paciente y materializar restricción
+19. [POST /consent/patient-objections/{id}/resolve](#19-post-consent-patient-objections-id-resolve) — Resolver objeción del paciente
+20. [POST /consent/practitioner-access-requests](#20-post-consent-practitioner-access-requests) — Pedir acceso al expediente de un paciente encontrado en la búsqueda
+21. [POST /consent/practitioner-access-requests/{id}/decision](#21-post-consent-practitioner-access-requests-id-decision) — Aceptar (con las especialidades autorizadas) o rechazar la solicitud
+22. [GET /consent/practitioner-access-requests/mine](#22-get-consent-practitioner-access-requests-mine) — Mis solicitudes de vínculo pendientes de decisión
+23. [GET /consent/privacy-restrictions](#23-get-consent-privacy-restrictions) — Listar las restricciones de privacidad del tenant
+24. [POST /consent/privacy-restrictions](#24-post-consent-privacy-restrictions) — Aplicar restricción de privacidad que afecta RLS clínico
+25. [GET /consent/processing-legal-bases](#25-get-consent-processing-legal-bases) — Listar las bases legales de tratamiento del tenant
+26. [POST /consent/processing-legal-bases](#26-post-consent-processing-legal-bases) — Establecer/versionar base legal de procesamiento
+27. [GET /consent/treatment-informed-consents](#27-get-consent-treatment-informed-consents) — Listar los consentimientos informados de tratamiento del tenant
+28. [POST /consent/treatment-informed-consents](#28-post-consent-treatment-informed-consents) — Capturar consentimiento informado de tratamiento
 
 ---
 
@@ -174,7 +180,166 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /consent/consents
+## 2. GET /consent/consents
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-collections`
+- **Nombre:** Listar los consentimientos del tenant
+- **Operation ID:** `ConsentCollectionsController_listConsents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ConsentCollectionsController.listConsents](../../src/modules/consent/controllers/consent-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los consentimientos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V07-01: listar los consentimientos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/consents` en `ConsentCollectionsController_listConsents`. El controlador delega en `ConsentCollectionsService.listConsents`. No recibe body. El tipo de retorno estático es `Promise<ConsentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `processingPurposeId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/consents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/consents?page=1&pageSize=20&order=DESC&sortBy=createdAt&patientProfileId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001&processingPurposeId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConsentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ConsentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ConsentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ConsentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ConsentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ConsentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConsentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "grantedByUserId": {},
+      "grantedByRelatedPersonId": {},
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "processingPurposeId": "00000000-0000-4000-8000-000000000001",
+      "processingLegalBasisId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "policyUri": "valor-ejemplo",
+      "policyVersion": "valor-ejemplo",
+      "tenantId": {},
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "withdrawalReasonConceptId": {},
+      "withdrawnAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ConsentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","grantedByUserId":{},"grantedByRelatedPersonId":{},"categoryConceptId":"00000000-0000-4000-8000-000000000001","processingPurposeId":"00000000-0000-4000-8000-000000000001","processingLegalBasisId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","policyUri":"valor-ejemplo","policyVersion":"valor-ejemplo","tenantId":{},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","withdrawalReasonConceptId":{},"withdrawnAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].grantedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].grantedByRelatedPersonId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].categoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].processingPurposeId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].processingLegalBasisId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].policyUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].policyVersion` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].withdrawalReasonConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].withdrawnAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/consents"
+}
+```
+
+---
+
+## 3. POST /consent/consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-consents`
@@ -346,7 +511,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. PATCH /consent/consents/{id}/provisions
+## 4. PATCH /consent/consents/{id}/provisions
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-consents`
@@ -496,7 +661,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /consent/consents/{id}/withdraw
+## 5. POST /consent/consents/{id}/withdraw
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-consents`
@@ -619,7 +784,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /consent/encounters/{encounterId}/informed-consent
+## 6. GET /consent/encounters/{encounterId}/informed-consent
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -743,7 +908,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /consent/encounters/{encounterId}/informed-consent
+## 7. POST /consent/encounters/{encounterId}/informed-consent
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`
@@ -885,7 +1050,159 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /consent/hipaa-authorizations
+## 8. GET /consent/hipaa-authorizations
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-collections`
+- **Nombre:** Listar las autorizaciones HIPAA del tenant
+- **Operation ID:** `ConsentCollectionsController_listHipaaAuthorizations`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ConsentCollectionsController.listHipaaAuthorizations](../../src/modules/consent/controllers/consent-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las autorizaciones HIPAA del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V07-03: listar las autorizaciones hipaa del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/hipaa-authorizations` en `ConsentCollectionsController_listHipaaAuthorizations`. El controlador delega en `ConsentCollectionsService.listHipaaAuthorizations`. No recibe body. El tipo de retorno estático es `Promise<HipaaAuthorizationPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/hipaa-authorizations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/hipaa-authorizations?page=1&pageSize=20&order=DESC&sortBy=createdAt&patientProfileId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<HipaaAuthorizationPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<HipaaAuthorizationPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<HipaaAuthorizationPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<HipaaAuthorizationPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<HipaaAuthorizationPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<HipaaAuthorizationPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HipaaAuthorizationPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "processingPurposeId": "00000000-0000-4000-8000-000000000001",
+      "recipientDescription": "Texto descriptivo de ejemplo",
+      "informationDescription": "Texto descriptivo de ejemplo",
+      "expirationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "expirationEventText": "valor-ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "revokedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<HipaaAuthorizationItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","processingPurposeId":"00000000-0000-4000-8000-000000000001","recipientDescription":"Texto descriptivo de ejemplo","informationDescription":"Texto descriptivo de ejemplo","expirationTypeConceptId":"00000000-0000-4000-8000-000000000001","expiresAt":"2026-07-31T12:00:00.000Z","expirationEventText":"valor-ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","signedAt":"2026-07-31T12:00:00.000Z","revokedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].processingPurposeId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].recipientDescription` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].informationDescription` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].expirationTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].expiresAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].expirationEventText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].signedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].revokedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/hipaa-authorizations"
+}
+```
+
+---
+
+## 9. POST /consent/hipaa-authorizations
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-hipaa-authorizations`
@@ -1030,7 +1347,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /consent/hipaa-authorizations/{id}/revoke
+## 10. POST /consent/hipaa-authorizations/{id}/revoke
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-hipaa-authorizations`
@@ -1140,7 +1457,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /consent/internal/expiration-sweep
+## 11. POST /consent/internal/expiration-sweep
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-internal`
@@ -1247,7 +1564,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /consent/me/consents
+## 12. GET /consent/me/consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-me`
@@ -1375,7 +1692,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /consent/me/consents/{id}/withdraw
+## 13. POST /consent/me/consents/{id}/withdraw
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-me`
@@ -1499,7 +1816,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /consent/me/hipaa-authorizations
+## 14. GET /consent/me/hipaa-authorizations
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-me`
@@ -1627,7 +1944,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /consent/me/objections
+## 15. GET /consent/me/objections
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-me`
@@ -1751,7 +2068,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /consent/me/treatment-informed-consents
+## 16. GET /consent/me/treatment-informed-consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-me`
@@ -1868,7 +2185,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /consent/patient-objections
+## 17. GET /consent/patient-objections
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-collections`
+- **Nombre:** Listar las objeciones de paciente del tenant
+- **Operation ID:** `ConsentCollectionsController_listPatientObjections`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ConsentCollectionsController.listPatientObjections](../../src/modules/consent/controllers/consent-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las objeciones de paciente del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V07-04: listar las objeciones de paciente del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/patient-objections` en `ConsentCollectionsController_listPatientObjections`. El controlador delega en `ConsentCollectionsService.listPatientObjections`. No recibe body. El tipo de retorno estático es `Promise<PatientObjectionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/patient-objections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/patient-objections?page=1&pageSize=20&order=DESC&sortBy=createdAt&patientProfileId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientObjectionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PatientObjectionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientObjectionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientObjectionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientObjectionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientObjectionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientObjectionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "processingPurposeId": "00000000-0000-4000-8000-000000000001",
+      "objectionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "raisedAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z",
+      "resolutionConceptId": {},
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PatientObjectionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","processingPurposeId":"00000000-0000-4000-8000-000000000001","objectionTypeConceptId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","raisedAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","resolutionConceptId":{},"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].processingPurposeId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].objectionTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].raisedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resolvedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resolutionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/patient-objections"
+}
+```
+
+---
+
+## 18. POST /consent/patient-objections
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-patient-objections`
@@ -2009,7 +2474,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /consent/patient-objections/{id}/resolve
+## 19. POST /consent/patient-objections/{id}/resolve
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-patient-objections`
@@ -2136,7 +2601,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /consent/practitioner-access-requests
+## 20. POST /consent/practitioner-access-requests
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-practitioner-access`
@@ -2284,7 +2749,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /consent/practitioner-access-requests/{id}/decision
+## 21. POST /consent/practitioner-access-requests/{id}/decision
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-practitioner-access`
@@ -2437,7 +2902,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /consent/practitioner-access-requests/mine
+## 22. GET /consent/practitioner-access-requests/mine
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-practitioner-access`
@@ -2550,7 +3015,157 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /consent/privacy-restrictions
+## 23. GET /consent/privacy-restrictions
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-collections`
+- **Nombre:** Listar las restricciones de privacidad del tenant
+- **Operation ID:** `ConsentCollectionsController_listPrivacyRestrictions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ConsentCollectionsController.listPrivacyRestrictions](../../src/modules/consent/controllers/consent-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las restricciones de privacidad del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V07-06: listar las restricciones de privacidad del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/privacy-restrictions` en `ConsentCollectionsController_listPrivacyRestrictions`. El controlador delega en `ConsentCollectionsService.listPrivacyRestrictions`. No recibe body. El tipo de retorno estático es `Promise<PrivacyRestrictionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/privacy-restrictions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/privacy-restrictions?page=1&pageSize=20&order=DESC&sortBy=createdAt&patientProfileId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrivacyRestrictionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PrivacyRestrictionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrivacyRestrictionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrivacyRestrictionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrivacyRestrictionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrivacyRestrictionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrivacyRestrictionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "restrictionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "dataClassConceptId": "00000000-0000-4000-8000-000000000001",
+      "targetActorTypeConceptId": {},
+      "targetActorId": {},
+      "reasonText": "Texto descriptivo de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PrivacyRestrictionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","restrictionTypeConceptId":"00000000-0000-4000-8000-000000000001","dataClassConceptId":"00000000-0000-4000-8000-000000000001","targetActorTypeConceptId":{},"targetActorId":{},"reasonText":"Texto descriptivo de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].restrictionTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataClassConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetActorTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].targetActorId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].reasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/privacy-restrictions"
+}
+```
+
+---
+
+## 24. POST /consent/privacy-restrictions
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-privacy-restrictions`
@@ -2690,7 +3305,157 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /consent/processing-legal-bases
+## 25. GET /consent/processing-legal-bases
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-collections`
+- **Nombre:** Listar las bases legales de tratamiento del tenant
+- **Operation ID:** `ConsentCollectionsController_listProcessingLegalBases`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ConsentCollectionsController.listProcessingLegalBases](../../src/modules/consent/controllers/consent-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las bases legales de tratamiento del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V07-07: listar las bases legales de tratamiento del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/processing-legal-bases` en `ConsentCollectionsController_listProcessingLegalBases`. El controlador delega en `ConsentCollectionsService.listProcessingLegalBases`. No recibe body. El tipo de retorno estático es `Promise<ProcessingLegalBasisPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `processingPurposeId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/processing-legal-bases HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/processing-legal-bases?page=1&pageSize=20&order=DESC&sortBy=createdAt&processingPurposeId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProcessingLegalBasisPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProcessingLegalBasisPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProcessingLegalBasisPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProcessingLegalBasisPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProcessingLegalBasisPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProcessingLegalBasisPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcessingLegalBasisPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "processingPurposeId": "00000000-0000-4000-8000-000000000001",
+      "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
+      "generalLegalBasisConceptId": "00000000-0000-4000-8000-000000000001",
+      "specialCategoryConditionConceptId": {},
+      "policyVersion": "valor-ejemplo",
+      "legalReferenceUri": "valor-ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ProcessingLegalBasisItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","processingPurposeId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","generalLegalBasisConceptId":"00000000-0000-4000-8000-000000000001","specialCategoryConditionConceptId":{},"policyVersion":"valor-ejemplo","legalReferenceUri":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].processingPurposeId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].generalLegalBasisConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].specialCategoryConditionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].policyVersion` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].legalReferenceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].validFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/processing-legal-bases"
+}
+```
+
+---
+
+## 26. POST /consent/processing-legal-bases
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-processing-legal-bases`
@@ -2829,7 +3594,160 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /consent/treatment-informed-consents
+## 27. GET /consent/treatment-informed-consents
+
+- **Módulo:** `consent`
+- **Etiqueta OpenAPI:** `consent-collections`
+- **Nombre:** Listar los consentimientos informados de tratamiento del tenant
+- **Operation ID:** `ConsentCollectionsController_listTreatmentInformedConsents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ConsentCollectionsController.listTreatmentInformedConsents](../../src/modules/consent/controllers/consent-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los consentimientos informados de tratamiento del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V07-08: listar los consentimientos informados de tratamiento del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /consent/treatment-informed-consents` en `ConsentCollectionsController_listTreatmentInformedConsents`. El controlador delega en `ConsentCollectionsService.listTreatmentInformedConsents`. No recibe body. El tipo de retorno estático es `Promise<TreatmentInformedConsentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /consent/treatment-informed-consents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /consent/treatment-informed-consents?page=1&pageSize=20&order=DESC&sortBy=createdAt&patientProfileId=00000000-0000-4000-8000-000000000001&encounterId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TreatmentInformedConsentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TreatmentInformedConsentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "procedureCodeConceptId": {},
+      "informationVersion": "valor-ejemplo",
+      "interpreterUserId": {},
+      "witnessUserId": {},
+      "decisionConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "signedAt": "2026-07-31T12:00:00.000Z",
+      "withdrawnAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TreatmentInformedConsentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","procedureCodeConceptId":{},"informationVersion":"valor-ejemplo","interpreterUserId":{},"witnessUserId":{},"decisionConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","signedAt":"2026-07-31T12:00:00.000Z","withdrawnAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].encounterId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].procedureCodeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].informationVersion` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].interpreterUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].witnessUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].decisionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].signedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].withdrawnAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/consent/treatment-informed-consents"
+}
+```
+
+---
+
+## 28. POST /consent/treatment-informed-consents
 
 - **Módulo:** `consent`
 - **Etiqueta OpenAPI:** `consent-treatment-informed-consents`

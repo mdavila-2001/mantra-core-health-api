@@ -131,10 +131,10 @@ Campos de la respuesta:
 | `data[].updatedAt` | Sí | `string` | formato `date-time` | Fecha y hora de la última actualización. | `2026-07-31T12:00:00.000Z` |
 | `data[].deletedAt` | No | `string` | formato `date-time`; admite null | Marca de borrado lógico; null si el documento está vivo | `2026-07-31T12:00:00.000Z` |
 | `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Valor de meta mantenido por la instancia. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
-| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Valor de page mantenido por la instancia. | `1` |
-| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Valor de page size mantenido por la instancia. | `1` |
-| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Valor de total mantenido por la instancia. | `1` |
-| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Valor de total pages mantenido por la instancia. | `1` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

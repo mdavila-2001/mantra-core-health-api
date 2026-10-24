@@ -2,34 +2,200 @@
 
 # Endpoints del módulo `platform_ops`
 
-Referencia exhaustiva de 15 operación(es) del módulo `platform_ops`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `platform_ops`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `platform-ops`
-- **Controladores:** `PlatformOpsController`
+- **Etiquetas OpenAPI:** `platform-ops`, `platform-ops-collections`
+- **Controladores:** `PlatformOpsCollectionsController`, `PlatformOpsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /ops/artifacts](#1-post-ops-artifacts) — Publicar un artefacto inmutable
-2. [POST /ops/capacity-plans/{id}/measurements](#2-post-ops-capacity-plans-id-measurements) — Registrar una medición de capacidad
-3. [POST /ops/change-requests](#3-post-ops-change-requests) — Registrar una solicitud de cambio
-4. [POST /ops/change-requests/{id}/approvals](#4-post-ops-change-requests-id-approvals) — Registrar la decisión del CAB
-5. [POST /ops/deployments](#5-post-ops-deployments) — Ejecutar un despliegue
-6. [POST /ops/deployments/{id}/rollback](#6-post-ops-deployments-id-rollback) — Revertir un despliegue
-7. [POST /ops/error-budget/{policyId}/burn-events](#7-post-ops-error-budget-policyid-burn-events) — Registrar la quema del presupuesto de error
-8. [POST /ops/health-checks/{id}/runs](#8-post-ops-health-checks-id-runs) — Registrar una corrida de health check
-9. [PATCH /ops/incidents/{id}](#9-patch-ops-incidents-id) — Mover el incidente, sumar respondientes y publicar comunicaciones
-10. [POST /ops/incidents/{id}/postmortem](#10-post-ops-incidents-id-postmortem) — Abrir el postmortem del incidente resuelto
-11. [POST /ops/readiness-reviews/{id}/complete](#11-post-ops-readiness-reviews-id-complete) — Cerrar la revisión de preparación con su decisión
-12. [POST /ops/resilience-exercises/{id}/complete](#12-post-ops-resilience-exercises-id-complete) — Cerrar un ejercicio de resiliencia
-13. [POST /ops/runbook-executions](#13-post-ops-runbook-executions) — Registrar la ejecución de un runbook
-14. [POST /ops/runbooks/{id}/versions](#14-post-ops-runbooks-id-versions) — Publicar una versión del runbook
-15. [POST /ops/slo/{id}/measurements](#15-post-ops-slo-id-measurements) — Registrar la medición de una ventana del SLO
+1. [GET /ops/artifacts](#1-get-ops-artifacts) — Listar artefactos del tenant
+2. [POST /ops/artifacts](#2-post-ops-artifacts) — Publicar un artefacto inmutable
+3. [POST /ops/capacity-plans/{id}/measurements](#3-post-ops-capacity-plans-id-measurements) — Registrar una medición de capacidad
+4. [GET /ops/change-requests](#4-get-ops-change-requests) — Listar solicitudes de cambio del tenant
+5. [POST /ops/change-requests](#5-post-ops-change-requests) — Registrar una solicitud de cambio
+6. [POST /ops/change-requests/{id}/approvals](#6-post-ops-change-requests-id-approvals) — Registrar la decisión del CAB
+7. [GET /ops/deployments](#7-get-ops-deployments) — Listar despliegues del tenant
+8. [POST /ops/deployments](#8-post-ops-deployments) — Ejecutar un despliegue
+9. [POST /ops/deployments/{id}/rollback](#9-post-ops-deployments-id-rollback) — Revertir un despliegue
+10. [POST /ops/error-budget/{policyId}/burn-events](#10-post-ops-error-budget-policyid-burn-events) — Registrar la quema del presupuesto de error
+11. [POST /ops/health-checks/{id}/runs](#11-post-ops-health-checks-id-runs) — Registrar una corrida de health check
+12. [GET /ops/incidents](#12-get-ops-incidents) — Listar incidentes de salud del tenant
+13. [PATCH /ops/incidents/{id}](#13-patch-ops-incidents-id) — Mover el incidente, sumar respondientes y publicar comunicaciones
+14. [POST /ops/incidents/{id}/postmortem](#14-post-ops-incidents-id-postmortem) — Abrir el postmortem del incidente resuelto
+15. [POST /ops/readiness-reviews/{id}/complete](#15-post-ops-readiness-reviews-id-complete) — Cerrar la revisión de preparación con su decisión
+16. [GET /ops/resilience-exercises](#16-get-ops-resilience-exercises) — Listar ejercicios de resiliencia del tenant
+17. [POST /ops/resilience-exercises/{id}/complete](#17-post-ops-resilience-exercises-id-complete) — Cerrar un ejercicio de resiliencia
+18. [POST /ops/runbook-executions](#18-post-ops-runbook-executions) — Registrar la ejecución de un runbook
+19. [POST /ops/runbooks/{id}/versions](#19-post-ops-runbooks-id-versions) — Publicar una versión del runbook
+20. [POST /ops/slo/{id}/measurements](#20-post-ops-slo-id-measurements) — Registrar la medición de una ventana del SLO
 
 ---
 
-## 1. POST /ops/artifacts
+## 1. GET /ops/artifacts
+
+- **Módulo:** `platform_ops`
+- **Etiqueta OpenAPI:** `platform-ops-collections`
+- **Nombre:** Listar artefactos del tenant
+- **Operation ID:** `PlatformOpsCollectionsController_listArtifacts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PlatformOpsCollectionsController.listArtifacts](../../src/modules/platform_ops/controllers/platform-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar artefactos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V46-02: listar artefactos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ops/artifacts` en `PlatformOpsCollectionsController_listArtifacts`. El controlador delega en `PlatformOpsCollectionsService.listArtifacts`. No recibe body. El tipo de retorno estático es `Promise<ArtifactPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ops/artifacts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DEPLOY_PIPELINE`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ops/artifacts?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ArtifactPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ArtifactPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ArtifactPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ArtifactPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ArtifactPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ArtifactPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArtifactPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "serviceComponentId": {},
+      "producedByToolId": {},
+      "artifactRef": "valor-ejemplo",
+      "artifactTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "version": "valor-ejemplo",
+      "semver": "valor-ejemplo",
+      "gitRef": "valor-ejemplo",
+      "commitSha": "valor-ejemplo",
+      "storageUri": "valor-ejemplo",
+      "fileId": {},
+      "sizeBytes": 1,
+      "isImmutable": true,
+      "builtAt": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ArtifactItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"serviceComponentId":{},"producedByToolId":{},"artifactRef":"valor-ejemplo","artifactTypeConceptId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","version":"valor-ejemplo","semver":"valor-ejemplo","gitRef":"valor-ejemplo","commitSha":"valor-ejemplo","storageUri":"valor-ejemplo","fileId":{},"sizeBytes":1,"isImmutable":true,"builtAt":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].serviceComponentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].producedByToolId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].artifactRef` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].artifactTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].version` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].semver` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].gitRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].commitSha` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].storageUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].fileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].sizeBytes` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].isImmutable` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].builtAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ops/artifacts"
+}
+```
+
+---
+
+## 2. POST /ops/artifacts
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -190,7 +356,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /ops/capacity-plans/{id}/measurements
+## 3. POST /ops/capacity-plans/{id}/measurements
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -337,7 +503,170 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /ops/change-requests
+## 4. GET /ops/change-requests
+
+- **Módulo:** `platform_ops`
+- **Etiqueta OpenAPI:** `platform-ops-collections`
+- **Nombre:** Listar solicitudes de cambio del tenant
+- **Operation ID:** `PlatformOpsCollectionsController_listChangeRequests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PlatformOpsCollectionsController.listChangeRequests](../../src/modules/platform_ops/controllers/platform-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar solicitudes de cambio del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V46-04: listar solicitudes de cambio del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ops/change-requests` en `PlatformOpsCollectionsController_listChangeRequests`. El controlador delega en `PlatformOpsCollectionsService.listChangeRequests`. No recibe body. El tipo de retorno estático es `Promise<ChangeRequestPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ops/change-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ops/change-requests?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChangeRequestPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ChangeRequestPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ChangeRequestPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ChangeRequestPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ChangeRequestPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ChangeRequestPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChangeRequestPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "serviceComponentId": "00000000-0000-4000-8000-000000000001",
+      "deploymentId": {},
+      "changeNumber": "valor-ejemplo",
+      "title": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "changeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "riskLevelConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "requestedByUserId": {},
+      "plannedStartAt": "2026-07-31T12:00:00.000Z",
+      "plannedEndAt": "2026-07-31T12:00:00.000Z",
+      "rollbackPlanText": "valor-ejemplo",
+      "validationPlanText": "valor-ejemplo",
+      "maintenanceWindowId": {},
+      "implementedAt": "2026-07-31T12:00:00.000Z",
+      "closedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ChangeRequestItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"serviceComponentId":"00000000-0000-4000-8000-000000000001","deploymentId":{},"changeNumber":"valor-ejemplo","title":"valor-ejemplo","description":"Texto descriptivo de ejemplo","changeTypeConceptId":"00000000-0000-4000-8000-000000000001","riskLevelConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","requestedByUserId":{},"plannedStartAt":"2026-07-31T12:00:00.000Z","plannedEndAt":"2026-07-31T12:00:00.000Z","rollbackPlanText":"valor-ejemplo","validationPlanText":"valor-ejemplo","maintenanceWindowId":{},"implementedAt":"2026-07-31T12:00:00.000Z","closedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].serviceComponentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].deploymentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].changeNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].changeTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].riskLevelConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requestedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].plannedStartAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].plannedEndAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].rollbackPlanText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].validationPlanText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].maintenanceWindowId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].implementedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].closedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ops/change-requests"
+}
+```
+
+---
+
+## 5. POST /ops/change-requests
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -491,7 +820,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /ops/change-requests/{id}/approvals
+## 6. POST /ops/change-requests/{id}/approvals
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -632,7 +961,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /ops/deployments
+## 7. GET /ops/deployments
+
+- **Módulo:** `platform_ops`
+- **Etiqueta OpenAPI:** `platform-ops-collections`
+- **Nombre:** Listar despliegues del tenant
+- **Operation ID:** `PlatformOpsCollectionsController_listDeployments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PlatformOpsCollectionsController.listDeployments](../../src/modules/platform_ops/controllers/platform-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar despliegues del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V46-01: listar despliegues del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ops/deployments` en `PlatformOpsCollectionsController_listDeployments`. El controlador delega en `PlatformOpsCollectionsService.listDeployments`. No recibe body. El tipo de retorno estático es `Promise<DeploymentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ops/deployments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `RELEASE_MANAGER`, `DEPLOY_PIPELINE`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ops/deployments?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DeploymentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DeploymentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DeploymentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DeploymentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DeploymentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DeploymentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeploymentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "serviceComponentId": "00000000-0000-4000-8000-000000000001",
+      "artifactId": "00000000-0000-4000-8000-000000000001",
+      "environmentConceptId": "00000000-0000-4000-8000-000000000001",
+      "deploymentNumber": "valor-ejemplo",
+      "strategyConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "deployedByUserId": {},
+      "gitRef": "valor-ejemplo",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "finishedAt": "2026-07-31T12:00:00.000Z",
+      "isCurrent": true,
+      "rollbackOfDeploymentId": {},
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<DeploymentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"serviceComponentId":"00000000-0000-4000-8000-000000000001","artifactId":"00000000-0000-4000-8000-000000000001","environmentConceptId":"00000000-0000-4000-8000-000000000001","deploymentNumber":"valor-ejemplo","strategyConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","deployedByUserId":{},"gitRef":"valor-ejemplo","startedAt":"2026-07-31T12:00:00.000Z","finishedAt":"2026-07-31T12:00:00.000Z","isCurrent":true,"rollbackOfDeploymentId":{},"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].serviceComponentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].artifactId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].environmentConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].deploymentNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].strategyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].deployedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].gitRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].finishedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].isCurrent` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].rollbackOfDeploymentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RELEASE_MANAGER, DEPLOY_PIPELINE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ops/deployments"
+}
+```
+
+---
+
+## 8. POST /ops/deployments
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -780,7 +1264,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /ops/deployments/{id}/rollback
+## 9. POST /ops/deployments/{id}/rollback
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -917,7 +1401,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /ops/error-budget/{policyId}/burn-events
+## 10. POST /ops/error-budget/{policyId}/burn-events
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -1058,7 +1542,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /ops/health-checks/{id}/runs
+## 11. POST /ops/health-checks/{id}/runs
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -1209,7 +1693,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /ops/incidents/{id}
+## 12. GET /ops/incidents
+
+- **Módulo:** `platform_ops`
+- **Etiqueta OpenAPI:** `platform-ops-collections`
+- **Nombre:** Listar incidentes de salud del tenant
+- **Operation ID:** `PlatformOpsCollectionsController_listIncidents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PlatformOpsCollectionsController.listIncidents](../../src/modules/platform_ops/controllers/platform-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar incidentes de salud del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V46-08: listar incidentes de salud del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ops/incidents` en `PlatformOpsCollectionsController_listIncidents`. El controlador delega en `PlatformOpsCollectionsService.listIncidents`. No recibe body. El tipo de retorno estático es `Promise<HealthIncidentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ops/incidents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `INCIDENT_COMMANDER`, `SRE`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ops/incidents?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<HealthIncidentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<HealthIncidentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<HealthIncidentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<HealthIncidentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<HealthIncidentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<HealthIncidentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HealthIncidentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "serviceComponentId": "00000000-0000-4000-8000-000000000001",
+      "healthCheckId": {},
+      "incidentNumber": "valor-ejemplo",
+      "severityConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "title": "valor-ejemplo",
+      "detectedByRunId": {},
+      "openedAt": "2026-07-31T12:00:00.000Z",
+      "acknowledgedAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z",
+      "rootCauseText": "valor-ejemplo",
+      "resolutionText": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<HealthIncidentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"serviceComponentId":"00000000-0000-4000-8000-000000000001","healthCheckId":{},"incidentNumber":"valor-ejemplo","severityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","title":"valor-ejemplo","detectedByRunId":{},"openedAt":"2026-07-31T12:00:00.000Z","acknowledgedAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z","rootCauseText":"valor-ejemplo","resolutionText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].serviceComponentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].healthCheckId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].incidentNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].severityConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].detectedByRunId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].openedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].acknowledgedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resolvedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].rootCauseText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].resolutionText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: INCIDENT_COMMANDER, SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ops/incidents"
+}
+```
+
+---
+
+## 13. PATCH /ops/incidents/{id}
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -1380,7 +2019,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /ops/incidents/{id}/postmortem
+## 14. POST /ops/incidents/{id}/postmortem
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -1557,7 +2196,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /ops/readiness-reviews/{id}/complete
+## 15. POST /ops/readiness-reviews/{id}/complete
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -1709,7 +2348,163 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /ops/resilience-exercises/{id}/complete
+## 16. GET /ops/resilience-exercises
+
+- **Módulo:** `platform_ops`
+- **Etiqueta OpenAPI:** `platform-ops-collections`
+- **Nombre:** Listar ejercicios de resiliencia del tenant
+- **Operation ID:** `PlatformOpsCollectionsController_listResilienceExercises`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PlatformOpsCollectionsController.listResilienceExercises](../../src/modules/platform_ops/controllers/platform-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar ejercicios de resiliencia del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V46-11: listar ejercicios de resiliencia del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ops/resilience-exercises` en `PlatformOpsCollectionsController_listResilienceExercises`. El controlador delega en `PlatformOpsCollectionsService.listResilienceExercises`. No recibe body. El tipo de retorno estático es `Promise<ResilienceExercisePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ops/resilience-exercises HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SRE`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ops/resilience-exercises?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ResilienceExercisePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ResilienceExercisePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ResilienceExercisePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ResilienceExercisePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ResilienceExercisePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ResilienceExercisePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResilienceExercisePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "serviceComponentId": "00000000-0000-4000-8000-000000000001",
+      "exerciseTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "scenarioName": "Nombre de ejemplo",
+      "hypothesisText": "valor-ejemplo",
+      "plannedAt": "2026-07-31T12:00:00.000Z",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "endedAt": "2026-07-31T12:00:00.000Z",
+      "resultConceptId": "00000000-0000-4000-8000-000000000001",
+      "observedRtoSeconds": "valor-ejemplo",
+      "observedRpoSeconds": "valor-ejemplo",
+      "evidenceUri": "valor-ejemplo",
+      "findingsJson": {
+        "clave": "valor"
+      },
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ResilienceExerciseItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"serviceComponentId":"00000000-0000-4000-8000-000000000001","exerciseTypeConceptId":"00000000-0000-4000-8000-000000000001","scenarioName":"Nombre de ejemplo","hypothesisText":"valor-ejemplo","plannedAt":"2026-07-31T12:00:00.000Z","startedAt":"2026-07-31T12:00:00.000Z","endedAt":"2026-07-31T12:00:00.000Z","resultConceptId":"00000000-0000-4000-8000-000000000001","observedRtoSeconds":"valor-ejemplo","observedRpoSeconds":"valor-ejemplo","evidenceUri":"valor-ejemplo","findingsJson":{"clave":"valor"},"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].serviceComponentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].exerciseTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].scenarioName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].hypothesisText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].plannedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].startedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].endedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resultConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].observedRtoSeconds` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].observedRpoSeconds` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].evidenceUri` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].findingsJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SRE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ops/resilience-exercises"
+}
+```
+
+---
+
+## 17. POST /ops/resilience-exercises/{id}/complete
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -1859,7 +2654,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /ops/runbook-executions
+## 18. POST /ops/runbook-executions
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -2004,7 +2799,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /ops/runbooks/{id}/versions
+## 19. POST /ops/runbooks/{id}/versions
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`
@@ -2136,7 +2931,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /ops/slo/{id}/measurements
+## 20. POST /ops/slo/{id}/measurements
 
 - **Módulo:** `platform_ops`
 - **Etiqueta OpenAPI:** `platform-ops`

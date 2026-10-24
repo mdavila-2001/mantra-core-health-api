@@ -2,34 +2,184 @@
 
 # Endpoints del módulo `polyglot_storage`
 
-Referencia exhaustiva de 15 operación(es) del módulo `polyglot_storage`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `polyglot_storage`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `polyglot-finops`, `polyglot-governance`, `polyglot-ops`
-- **Controladores:** `StorageFinOpsController`, `StorageGovernanceController`, `StorageOperationsController`
+- **Etiquetas OpenAPI:** `polyglot-finops`, `polyglot-governance`, `polyglot-ops`, `polyglot-storage-collections`
+- **Controladores:** `PolyglotStorageCollectionsController`, `StorageFinOpsController`, `StorageGovernanceController`, `StorageOperationsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /finops/storage-cost-snapshots](#1-post-finops-storage-cost-snapshots) — Consolidar la instantánea de costes del periodo
-2. [POST /governance/collections](#2-post-governance-collections) — Definir una colección física y su esquema versionado
-3. [POST /governance/consistency-policies](#3-post-governance-consistency-policies) — Definir una política de consistencia
-4. [POST /governance/datasets](#4-post-governance-datasets) — Definir un dataset gobernado con su versión inicial
-5. [POST /governance/datasets/{id}/data-access-policies](#5-post-governance-datasets-id-data-access-policies) — Definir la política de acceso al dato del dataset
-6. [POST /governance/datasets/{id}/versions](#6-post-governance-datasets-id-versions) — Publicar una versión nueva del dataset
-7. [POST /governance/encryption-profiles](#7-post-governance-encryption-profiles) — Definir un perfil de cifrado con su política de rotación
-8. [POST /governance/placements/{id}/failover](#8-post-governance-placements-id-failover) — Forzar el failover de una colocación
-9. [POST /governance/placements/approve](#9-post-governance-placements-approve) — Aprobar una colocación respetando residencia y clasificación
-10. [POST /governance/policies](#10-post-governance-policies) — Definir políticas de residencia, replicación y retención
-11. [POST /governance/storage-backends](#11-post-governance-storage-backends) — Registrar un backend con sus regiones y capacidades
-12. [POST /governance/tenants/{tenantId}/storage-bindings](#12-post-governance-tenants-tenantid-storage-bindings) — Vincular el tenant a su colocación
-13. [POST /ops/integrity-policies](#13-post-ops-integrity-policies) — Definir la política de integridad del dataset
-14. [POST /ops/integrity/{datasetId}/verify](#14-post-ops-integrity-datasetid-verify) — Verificar que la proyección cuadra con la fuente canónica
-15. [POST /ops/store-health-checks](#15-post-ops-store-health-checks) — Registrar una comprobación de salud de la región
+1. [GET /finops/storage-cost-snapshots](#1-get-finops-storage-cost-snapshots) — Listar fotografías de costo de almacenamiento del tenant
+2. [POST /finops/storage-cost-snapshots](#2-post-finops-storage-cost-snapshots) — Consolidar la instantánea de costes del periodo
+3. [POST /governance/collections](#3-post-governance-collections) — Definir una colección física y su esquema versionado
+4. [POST /governance/consistency-policies](#4-post-governance-consistency-policies) — Definir una política de consistencia
+5. [POST /governance/datasets](#5-post-governance-datasets) — Definir un dataset gobernado con su versión inicial
+6. [POST /governance/datasets/{id}/data-access-policies](#6-post-governance-datasets-id-data-access-policies) — Definir la política de acceso al dato del dataset
+7. [POST /governance/datasets/{id}/versions](#7-post-governance-datasets-id-versions) — Publicar una versión nueva del dataset
+8. [POST /governance/encryption-profiles](#8-post-governance-encryption-profiles) — Definir un perfil de cifrado con su política de rotación
+9. [POST /governance/placements/{id}/failover](#9-post-governance-placements-id-failover) — Forzar el failover de una colocación
+10. [POST /governance/placements/approve](#10-post-governance-placements-approve) — Aprobar una colocación respetando residencia y clasificación
+11. [POST /governance/policies](#11-post-governance-policies) — Definir políticas de residencia, replicación y retención
+12. [POST /governance/storage-backends](#12-post-governance-storage-backends) — Registrar un backend con sus regiones y capacidades
+13. [GET /governance/tenants/{tenantId}/storage-bindings](#13-get-governance-tenants-tenantid-storage-bindings) — Listar vínculos de almacenamiento del tenant del tenant
+14. [POST /governance/tenants/{tenantId}/storage-bindings](#14-post-governance-tenants-tenantid-storage-bindings) — Vincular el tenant a su colocación
+15. [POST /ops/integrity-policies](#15-post-ops-integrity-policies) — Definir la política de integridad del dataset
+16. [POST /ops/integrity/{datasetId}/verify](#16-post-ops-integrity-datasetid-verify) — Verificar que la proyección cuadra con la fuente canónica
+17. [POST /ops/store-health-checks](#17-post-ops-store-health-checks) — Registrar una comprobación de salud de la región
 
 ---
 
-## 1. POST /finops/storage-cost-snapshots
+## 1. GET /finops/storage-cost-snapshots
+
+- **Módulo:** `polyglot_storage`
+- **Etiqueta OpenAPI:** `polyglot-storage-collections`
+- **Nombre:** Listar fotografías de costo de almacenamiento del tenant
+- **Operation ID:** `PolyglotStorageCollectionsController_listStorageCostSnapshots`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PolyglotStorageCollectionsController.listStorageCostSnapshots](../../src/modules/polyglot_storage/controllers/polyglot-storage-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar fotografías de costo de almacenamiento del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V54-02: listar fotografías de costo de almacenamiento del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /finops/storage-cost-snapshots` en `PolyglotStorageCollectionsController_listStorageCostSnapshots`. El controlador delega en `PolyglotStorageCollectionsService.listStorageCostSnapshots`. No recibe body. El tipo de retorno estático es `Promise<StorageCostSnapshotPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /finops/storage-cost-snapshots HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `FINOPS_ANALYST`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /finops/storage-cost-snapshots?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<StorageCostSnapshotPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<StorageCostSnapshotPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<StorageCostSnapshotPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<StorageCostSnapshotPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<StorageCostSnapshotPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<StorageCostSnapshotPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StorageCostSnapshotPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "storageBackendRegionId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "datasetDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "periodStart": "2026-07-31",
+      "periodEnd": "2026-07-31",
+      "storageBytes": "valor-ejemplo",
+      "readUnits": "valor-ejemplo",
+      "writeUnits": "valor-ejemplo",
+      "egressBytes": "valor-ejemplo",
+      "estimatedCost": "valor-ejemplo",
+      "currencyCode": "BOB",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<StorageCostSnapshotItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","storageBackendRegionId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","datasetDefinitionId":"00000000-0000-4000-8000-000000000001","periodStart":"2026-07-31","periodEnd":"2026-07-31","storageBytes":"valor-ejemplo","readUnits":"valor-ejemplo","writeUnits":"valor-ejemplo","egressBytes":"valor-ejemplo","estimatedCost":"valor-ejemplo","currencyCode":"BOB","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].storageBackendRegionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].datasetDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].periodStart` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].periodEnd` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].storageBytes` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].readUnits` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].writeUnits` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].egressBytes` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].estimatedCost` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, FINOPS_ANALYST, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/finops/storage-cost-snapshots"
+}
+```
+
+---
+
+## 2. POST /finops/storage-cost-snapshots
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-finops`
@@ -183,7 +333,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /governance/collections
+## 3. POST /governance/collections
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -347,7 +497,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /governance/consistency-policies
+## 4. POST /governance/consistency-policies
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -484,7 +634,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /governance/datasets
+## 5. POST /governance/datasets
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -632,7 +782,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /governance/datasets/{id}/data-access-policies
+## 6. POST /governance/datasets/{id}/data-access-policies
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -771,7 +921,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /governance/datasets/{id}/versions
+## 7. POST /governance/datasets/{id}/versions
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -913,7 +1063,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /governance/encryption-profiles
+## 8. POST /governance/encryption-profiles
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -1067,7 +1217,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /governance/placements/{id}/failover
+## 9. POST /governance/placements/{id}/failover
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -1196,7 +1346,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /governance/placements/approve
+## 10. POST /governance/placements/approve
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -1349,7 +1499,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /governance/policies
+## 11. POST /governance/policies
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -1526,7 +1676,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /governance/storage-backends
+## 12. POST /governance/storage-backends
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -1715,7 +1865,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /governance/tenants/{tenantId}/storage-bindings
+## 13. GET /governance/tenants/{tenantId}/storage-bindings
+
+- **Módulo:** `polyglot_storage`
+- **Etiqueta OpenAPI:** `polyglot-storage-collections`
+- **Nombre:** Listar vínculos de almacenamiento del tenant del tenant
+- **Operation ID:** `PolyglotStorageCollectionsController_listStorageBindings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PolyglotStorageCollectionsController.listStorageBindings](../../src/modules/polyglot_storage/controllers/polyglot-storage-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar vínculos de almacenamiento del tenant del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V54-11: listar vínculos de almacenamiento del tenant del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /governance/tenants/{tenantId}/storage-bindings` en `PolyglotStorageCollectionsController_listStorageBindings`. El controlador delega en `PolyglotStorageCollectionsService.listStorageBindings`. No recibe body. El tipo de retorno estático es `Promise<TenantStorageBindingPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /governance/tenants/00000000-0000-4000-8000-000000000001/storage-bindings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `tenantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /governance/tenants/00000000-0000-4000-8000-000000000001/storage-bindings?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TenantStorageBindingPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TenantStorageBindingPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TenantStorageBindingPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TenantStorageBindingPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TenantStorageBindingPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TenantStorageBindingPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TenantStorageBindingPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantStorageBindingPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "datasetDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "primaryPlacementId": "00000000-0000-4000-8000-000000000001",
+      "secondaryPlacementId": {},
+      "tenantPartitionKey": "valor-ejemplo",
+      "state": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TenantStorageBindingItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","datasetDefinitionId":"00000000-0000-4000-8000-000000000001","primaryPlacementId":"00000000-0000-4000-8000-000000000001","secondaryPlacementId":{},"tenantPartitionKey":"valor-ejemplo","state":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].datasetDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].primaryPlacementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].secondaryPlacementId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tenantPartitionKey` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/governance/tenants/{tenantId}/storage-bindings"
+}
+```
+
+---
+
+## 14. POST /governance/tenants/{tenantId}/storage-bindings
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-governance`
@@ -1858,7 +2151,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /ops/integrity-policies
+## 15. POST /ops/integrity-policies
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-ops`
@@ -1998,7 +2291,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /ops/integrity/{datasetId}/verify
+## 16. POST /ops/integrity/{datasetId}/verify
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-ops`
@@ -2135,7 +2428,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /ops/store-health-checks
+## 17. POST /ops/store-health-checks
 
 - **Módulo:** `polyglot_storage`
 - **Etiqueta OpenAPI:** `polyglot-ops`

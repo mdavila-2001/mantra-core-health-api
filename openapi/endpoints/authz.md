@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `authz`
 
-Referencia exhaustiva de 32 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 36 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles`
-- **Controladores:** `AuthzAdminController`, `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
+- **Etiquetas OpenAPI:** `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-collections`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles`
+- **Controladores:** `AuthzAdminController`, `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzCollectionsController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -17,32 +17,36 @@ Referencia exhaustiva de 32 operación(es) del módulo `authz`, derivada del con
 4. [POST /authz/care-relationships/{id}/revoke](#4-post-authz-care-relationships-id-revoke) — Revocar o expirar una relación asistencial
 5. [POST /authz/care-relationships/request](#5-post-authz-care-relationships-request) — Solicitar autorización del paciente para una relación asistencial
 6. [GET /authz/care-relationships/requests/mine](#6-get-authz-care-relationships-requests-mine) — Mis solicitudes de relación asistencial pendientes de decidir
-7. [DELETE /authz/clinical-access-grants/{grantId}](#7-delete-authz-clinical-access-grants-grantid) — Revocar o expirar una concesión de acceso clínico
-8. [POST /authz/decisions/evaluate](#8-post-authz-decisions-evaluate) — Recalcular la decisión de autorización efectiva (PDP)
-9. [GET /authz/internal-users](#9-get-authz-internal-users) — Usuarios internos con sus roles
-10. [GET /authz/legal-representations](#10-get-authz-legal-representations) — Listar representaciones legales de un paciente
-11. [POST /authz/legal-representations](#11-post-authz-legal-representations) — Registrar una representación legal del paciente
-12. [POST /authz/legal-representations/{id}/revoke](#12-post-authz-legal-representations-id-revoke) — Revocar o expirar una representación legal
-13. [GET /authz/me/access](#13-get-authz-me-access) — Quién ve mi historia
-14. [POST /authz/me/care-relationships/{id}/revoke](#14-post-authz-me-care-relationships-id-revoke) — Revocar una de mis relaciones asistenciales
-15. [POST /authz/me/clinical-access-grants/{grantId}/revoke](#15-post-authz-me-clinical-access-grants-grantid-revoke) — Revocar uno de los accesos clínicos a mi historia
-16. [POST /authz/patients/{patientProfileId}/break-the-glass](#16-post-authz-patients-patientprofileid-break-the-glass) — Break-the-glass / anulación de emergencia
-17. [POST /authz/patients/{patientProfileId}/clinical-access-grants](#17-post-authz-patients-patientprofileid-clinical-access-grants) — Otorgar acceso clínico con propósito de uso
-18. [POST /authz/pdp/cache/invalidate](#18-post-authz-pdp-cache-invalidate) — Invalidar la cache de decisiones del PDP
-19. [POST /authz/permission-categories](#19-post-authz-permission-categories) — Definir una categoría de permiso
-20. [GET /authz/permissions](#20-get-authz-permissions) — Catálogo de permisos, paginado por código
-21. [POST /authz/permissions](#21-post-authz-permissions) — Definir un permiso del catálogo global
-22. [POST /authz/resource-scope-grants](#22-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
-23. [GET /authz/roles](#23-get-authz-roles) — Listar los roles asignables
-24. [POST /authz/roles](#24-post-authz-roles) — Componer un rol (con herencia opcional)
-25. [PUT /authz/roles/{roleId}/field-permissions](#25-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
-26. [GET /authz/roles/{roleId}/permissions](#26-get-authz-roles-roleid-permissions) — Permisos activos de un rol, con su efecto y ámbito
-27. [PUT /authz/roles/{roleId}/permissions](#27-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
-28. [POST /authz/tenants/{tenantId}/access-policies](#28-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
-29. [POST /authz/users/{userId}/permission-grants](#29-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
-30. [GET /authz/users/{userId}/role-assignments](#30-get-authz-users-userid-role-assignments) — Asignaciones de rol de un usuario, activas o no
-31. [POST /authz/users/{userId}/role-assignments](#31-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
-32. [DELETE /authz/users/{userId}/role-assignments/{assignmentId}](#32-delete-authz-users-userid-role-assignments-assignmentid) — Revocar una asignación de rol (revocación lógica: la fila queda como historia)
+7. [GET /authz/clinical-access-grants](#7-get-authz-clinical-access-grants) — Listar las concesiones de acceso clínico del tenant
+8. [DELETE /authz/clinical-access-grants/{grantId}](#8-delete-authz-clinical-access-grants-grantid) — Revocar o expirar una concesión de acceso clínico
+9. [POST /authz/decisions/evaluate](#9-post-authz-decisions-evaluate) — Recalcular la decisión de autorización efectiva (PDP)
+10. [GET /authz/internal-users](#10-get-authz-internal-users) — Usuarios internos con sus roles
+11. [GET /authz/legal-representations](#11-get-authz-legal-representations) — Listar representaciones legales de un paciente
+12. [POST /authz/legal-representations](#12-post-authz-legal-representations) — Registrar una representación legal del paciente
+13. [POST /authz/legal-representations/{id}/revoke](#13-post-authz-legal-representations-id-revoke) — Revocar o expirar una representación legal
+14. [GET /authz/me/access](#14-get-authz-me-access) — Quién ve mi historia
+15. [POST /authz/me/care-relationships/{id}/revoke](#15-post-authz-me-care-relationships-id-revoke) — Revocar una de mis relaciones asistenciales
+16. [POST /authz/me/clinical-access-grants/{grantId}/revoke](#16-post-authz-me-clinical-access-grants-grantid-revoke) — Revocar uno de los accesos clínicos a mi historia
+17. [POST /authz/patients/{patientProfileId}/break-the-glass](#17-post-authz-patients-patientprofileid-break-the-glass) — Break-the-glass / anulación de emergencia
+18. [POST /authz/patients/{patientProfileId}/clinical-access-grants](#18-post-authz-patients-patientprofileid-clinical-access-grants) — Otorgar acceso clínico con propósito de uso
+19. [POST /authz/pdp/cache/invalidate](#19-post-authz-pdp-cache-invalidate) — Invalidar la cache de decisiones del PDP
+20. [POST /authz/permission-categories](#20-post-authz-permission-categories) — Definir una categoría de permiso
+21. [GET /authz/permissions](#21-get-authz-permissions) — Catálogo de permisos, paginado por código
+22. [POST /authz/permissions](#22-post-authz-permissions) — Definir un permiso del catálogo global
+23. [GET /authz/resource-scope-grants](#23-get-authz-resource-scope-grants) — Listar las concesiones de alcance de recurso del tenant
+24. [POST /authz/resource-scope-grants](#24-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
+25. [GET /authz/roles](#25-get-authz-roles) — Listar los roles asignables
+26. [POST /authz/roles](#26-post-authz-roles) — Componer un rol (con herencia opcional)
+27. [PUT /authz/roles/{roleId}/field-permissions](#27-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
+28. [GET /authz/roles/{roleId}/permissions](#28-get-authz-roles-roleid-permissions) — Permisos activos de un rol, con su efecto y ámbito
+29. [PUT /authz/roles/{roleId}/permissions](#29-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
+30. [GET /authz/tenants/{tenantId}/access-policies](#30-get-authz-tenants-tenantid-access-policies) — Listar las políticas de acceso ABAC del tenant
+31. [POST /authz/tenants/{tenantId}/access-policies](#31-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
+32. [GET /authz/users/{userId}/permission-grants](#32-get-authz-users-userid-permission-grants) — Listar las excepciones de permiso de un usuario en el tenant
+33. [POST /authz/users/{userId}/permission-grants](#33-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
+34. [GET /authz/users/{userId}/role-assignments](#34-get-authz-users-userid-role-assignments) — Asignaciones de rol de un usuario, activas o no
+35. [POST /authz/users/{userId}/role-assignments](#35-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
+36. [DELETE /authz/users/{userId}/role-assignments/{assignmentId}](#36-delete-authz-users-userid-role-assignments-assignmentid) — Revocar una asignación de rol (revocación lógica: la fila queda como historia)
 
 ---
 
@@ -792,7 +796,160 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. DELETE /authz/clinical-access-grants/{grantId}
+## 7. GET /authz/clinical-access-grants
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-collections`
+- **Nombre:** Listar las concesiones de acceso clínico del tenant
+- **Operation ID:** `AuthzCollectionsController_listClinicalAccessGrants`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzCollectionsController.listClinicalAccessGrants](../../src/modules/authz/controllers/authz-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las concesiones de acceso clínico del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V06-03, V06-06: listar las concesiones de acceso clínico del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/clinical-access-grants` en `AuthzCollectionsController_listClinicalAccessGrants`. El controlador delega en `AuthzCollectionsService.listClinicalAccessGrants`. No recibe body. El tipo de retorno estático es `Promise<ClinicalAccessGrantPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `patientProfileId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grantedUserId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/clinical-access-grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICAL_APPROVER`, `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/clinical-access-grants?page=1&pageSize=20&order=DESC&sortBy=createdAt&patientProfileId=00000000-0000-4000-8000-000000000001&grantedUserId=00000000-0000-4000-8000-000000000001&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ClinicalAccessGrantPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ClinicalAccessGrantPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ClinicalAccessGrantPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ClinicalAccessGrantPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ClinicalAccessGrantPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ClinicalAccessGrantPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClinicalAccessGrantPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "grantedUserId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "branchId": {},
+      "encounterId": {},
+      "consentId": {},
+      "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+      "accessLevelConceptId": "00000000-0000-4000-8000-000000000001",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ClinicalAccessGrantItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","grantedUserId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","branchId":{},"encounterId":{},"consentId":{},"reasonConceptId":"00000000-0000-4000-8000-000000000001","accessLevelConceptId":"00000000-0000-4000-8000-000000000001","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].grantedUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].branchId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].encounterId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].consentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].reasonConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].accessLevelConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].validFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICAL_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/clinical-access-grants"
+}
+```
+
+---
+
+## 8. DELETE /authz/clinical-access-grants/{grantId}
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -904,7 +1061,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /authz/decisions/evaluate
+## 9. POST /authz/decisions/evaluate
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-pdp`
@@ -1066,7 +1223,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /authz/internal-users
+## 10. GET /authz/internal-users
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-admin`
@@ -1162,7 +1319,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /authz/legal-representations
+## 11. GET /authz/legal-representations
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-care-relationships`
@@ -1275,7 +1432,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /authz/legal-representations
+## 12. POST /authz/legal-representations
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-care-relationships`
@@ -1416,7 +1573,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /authz/legal-representations/{id}/revoke
+## 13. POST /authz/legal-representations/{id}/revoke
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-care-relationships`
@@ -1529,7 +1686,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /authz/me/access
+## 14. GET /authz/me/access
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-me`
@@ -1675,7 +1832,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /authz/me/care-relationships/{id}/revoke
+## 15. POST /authz/me/care-relationships/{id}/revoke
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-me`
@@ -1789,7 +1946,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /authz/me/clinical-access-grants/{grantId}/revoke
+## 16. POST /authz/me/clinical-access-grants/{grantId}/revoke
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-me`
@@ -1902,7 +2059,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /authz/patients/{patientProfileId}/break-the-glass
+## 17. POST /authz/patients/{patientProfileId}/break-the-glass
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -2037,7 +2194,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /authz/patients/{patientProfileId}/clinical-access-grants
+## 18. POST /authz/patients/{patientProfileId}/clinical-access-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -2188,7 +2345,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /authz/pdp/cache/invalidate
+## 19. POST /authz/pdp/cache/invalidate
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-pdp`
@@ -2313,7 +2470,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /authz/permission-categories
+## 20. POST /authz/permission-categories
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-catalog`
@@ -2444,7 +2601,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /authz/permissions
+## 21. GET /authz/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-admin`
@@ -2540,7 +2697,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /authz/permissions
+## 22. POST /authz/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-catalog`
@@ -2688,7 +2845,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /authz/resource-scope-grants
+## 23. GET /authz/resource-scope-grants
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-collections`
+- **Nombre:** Listar las concesiones de alcance de recurso del tenant
+- **Operation ID:** `AuthzCollectionsController_listResourceScopeGrants`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzCollectionsController.listResourceScopeGrants](../../src/modules/authz/controllers/authz-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las concesiones de alcance de recurso del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V06-10: listar las concesiones de alcance de recurso del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/resource-scope-grants` en `AuthzCollectionsController_listResourceScopeGrants`. El controlador delega en `AuthzCollectionsService.listResourceScopeGrants`. No recibe body. El tipo de retorno estático es `Promise<ResourceScopeGrantPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `subjectId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `resourceId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `permissionId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/resource-scope-grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/resource-scope-grants?page=1&pageSize=20&order=DESC&sortBy=createdAt&subjectId=00000000-0000-4000-8000-000000000001&resourceId=00000000-0000-4000-8000-000000000001&permissionId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ResourceScopeGrantPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ResourceScopeGrantPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ResourceScopeGrantPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ResourceScopeGrantPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ResourceScopeGrantPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ResourceScopeGrantPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceScopeGrantPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "permissionId": "00000000-0000-4000-8000-000000000001",
+      "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "resourceId": "00000000-0000-4000-8000-000000000001",
+      "effectConceptId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ResourceScopeGrantItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectId":"00000000-0000-4000-8000-000000000001","permissionId":"00000000-0000-4000-8000-000000000001","resourceTypeConceptId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","effectConceptId":"00000000-0000-4000-8000-000000000001","tenantId":{},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].permissionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].resourceTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].resourceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].effectConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/resource-scope-grants"
+}
+```
+
+---
+
+## 24. POST /authz/resource-scope-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -2834,7 +3140,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /authz/roles
+## 25. GET /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2940,7 +3246,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /authz/roles
+## 26. POST /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -3086,7 +3392,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. PUT /authz/roles/{roleId}/field-permissions
+## 27. PUT /authz/roles/{roleId}/field-permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -3235,7 +3541,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /authz/roles/{roleId}/permissions
+## 28. GET /authz/roles/{roleId}/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-admin`
@@ -3329,7 +3635,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. PUT /authz/roles/{roleId}/permissions
+## 29. PUT /authz/roles/{roleId}/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -3480,7 +3786,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /authz/tenants/{tenantId}/access-policies
+## 30. GET /authz/tenants/{tenantId}/access-policies
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-collections`
+- **Nombre:** Listar las políticas de acceso ABAC del tenant
+- **Operation ID:** `AuthzCollectionsController_listAccessPolicies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzCollectionsController.listAccessPolicies](../../src/modules/authz/controllers/authz-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las políticas de acceso ABAC del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V06-14: listar las políticas de acceso abac del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/tenants/{tenantId}/access-policies` en `AuthzCollectionsController_listAccessPolicies`. El controlador delega en `AuthzCollectionsService.listAccessPolicies`. No recibe body. El tipo de retorno estático es `Promise<AccessPolicyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/tenants/00000000-0000-4000-8000-000000000001/access-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `tenantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/tenants/00000000-0000-4000-8000-000000000001/access-policies?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AccessPolicyPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AccessPolicyPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AccessPolicyPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AccessPolicyPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<AccessPolicyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AccessPolicyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AccessPolicyPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessPolicyPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "effectConceptId": "00000000-0000-4000-8000-000000000001",
+      "targetResource": "valor-ejemplo",
+      "conditionJson": {
+        "clave": "valor"
+      },
+      "priority": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<AccessPolicyItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","effectConceptId":"00000000-0000-4000-8000-000000000001","targetResource":"valor-ejemplo","conditionJson":{"clave":"valor"},"priority":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].effectConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetResource` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].conditionJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].priority` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/tenants/{tenantId}/access-policies"
+}
+```
+
+---
+
+## 31. POST /authz/tenants/{tenantId}/access-policies
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-policies`
@@ -3617,7 +4071,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /authz/users/{userId}/permission-grants
+## 32. GET /authz/users/{userId}/permission-grants
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-collections`
+- **Nombre:** Listar las excepciones de permiso de un usuario en el tenant
+- **Operation ID:** `AuthzCollectionsController_listUserPermissionGrants`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzCollectionsController.listUserPermissionGrants](../../src/modules/authz/controllers/authz-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las excepciones de permiso de un usuario en el tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V06-15: listar las excepciones de permiso de un usuario en el tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/users/{userId}/permission-grants` en `AuthzCollectionsController_listUserPermissionGrants`. El controlador delega en `AuthzCollectionsService.listUserPermissionGrants`. No recibe body. El tipo de retorno estático es `Promise<UserPermissionGrantPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `permissionId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/users/00000000-0000-4000-8000-000000000001/permission-grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `userId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/users/00000000-0000-4000-8000-000000000001/permission-grants?page=1&pageSize=20&order=DESC&sortBy=createdAt&permissionId=00000000-0000-4000-8000-000000000001&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<UserPermissionGrantPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<UserPermissionGrantPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<UserPermissionGrantPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<UserPermissionGrantPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<UserPermissionGrantPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<UserPermissionGrantPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<UserPermissionGrantPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserPermissionGrantPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "permissionId": "00000000-0000-4000-8000-000000000001",
+      "effectConceptId": "00000000-0000-4000-8000-000000000001",
+      "scopeConceptId": {},
+      "resourceSelectorJson": {
+        "clave": "valor"
+      },
+      "tenantId": {},
+      "reason": "Texto descriptivo de ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<UserPermissionGrantItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","permissionId":"00000000-0000-4000-8000-000000000001","effectConceptId":"00000000-0000-4000-8000-000000000001","scopeConceptId":{},"resourceSelectorJson":{"clave":"valor"},"tenantId":{},"reason":"Texto descriptivo de ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].permissionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].effectConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].scopeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].resourceSelectorJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].reason` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/users/{userId}/permission-grants"
+}
+```
+
+---
+
+## 33. POST /authz/users/{userId}/permission-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -3762,7 +4371,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /authz/users/{userId}/role-assignments
+## 34. GET /authz/users/{userId}/role-assignments
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-admin`
@@ -3856,7 +4465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /authz/users/{userId}/role-assignments
+## 35. POST /authz/users/{userId}/role-assignments
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -3999,7 +4608,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
+## 36. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-admin`

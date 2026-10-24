@@ -2,29 +2,34 @@
 
 # Endpoints del módulo `payments`
 
-Referencia exhaustiva de 14 operación(es) del módulo `payments`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 19 operación(es) del módulo `payments`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `payments`, `payments-intents`, `payments-transactions`
-- **Controladores:** `PaymentsIntentsController`, `PaymentsOperationsController`, `PaymentsTransactionsController`
+- **Etiquetas OpenAPI:** `payments`, `payments-collections`, `payments-intents`, `payments-transactions`
+- **Controladores:** `PaymentsCollectionsController`, `PaymentsIntentsController`, `PaymentsOperationsController`, `PaymentsTransactionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /payments/callbacks/{callbackPath}](#1-post-payments-callbacks-callbackpath) — Recibir el callback/webhook del gateway (idempotente)
-2. [POST /payments/checkout-sessions](#2-post-payments-checkout-sessions) — Abrir una sesión de checkout con contexto de cajero
-3. [POST /payments/fee-schedules](#3-post-payments-fee-schedules) — Publicar una versión del tarifario
-4. [POST /payments/intents](#4-post-payments-intents) — Crear una intención de pago idempotente
-5. [POST /payments/intents/{id}/fx-lock](#5-post-payments-intents-id-fx-lock) — Bloquear el tipo de cambio de la intención
-6. [POST /payments/intents/{id}/risk-assessment](#6-post-payments-intents-id-risk-assessment) — Registrar la evaluación de riesgo y 3-D Secure
-7. [POST /payments/intents/{id}/splits](#7-post-payments-intents-id-splits) — Repartir el cobro entre cuentas conectadas
-8. [POST /payments/intents/{id}/transactions](#8-post-payments-intents-id-transactions) — Procesar la transacción contra el gateway (authorize/capture)
-9. [POST /payments/payouts](#9-post-payments-payouts) — Ejecutar un payout a una cuenta conectada
-10. [POST /payments/reconciliation-runs](#10-post-payments-reconciliation-runs) — Conciliar gateway contra ledger y abrir excepciones
-11. [POST /payments/settlements/import](#11-post-payments-settlements-import) — Importar la liquidación del gateway
-12. [POST /payments/transactions/{id}/cancellation-requests](#12-post-payments-transactions-id-cancellation-requests) — Solicitar la anulación del cobro
-13. [POST /payments/transactions/{id}/refunds](#13-post-payments-transactions-id-refunds) — Emitir un reembolso total o parcial
-14. [POST /payments/transactions/{id}/status-inquiry](#14-post-payments-transactions-id-status-inquiry) — Consultar el estado de la transacción en el gateway
+2. [GET /payments/checkout-sessions](#2-get-payments-checkout-sessions) — Listar sesiones de cobro del tenant
+3. [POST /payments/checkout-sessions](#3-post-payments-checkout-sessions) — Abrir una sesión de checkout con contexto de cajero
+4. [GET /payments/fee-schedules](#4-get-payments-fee-schedules) — Listar aranceles del tenant
+5. [POST /payments/fee-schedules](#5-post-payments-fee-schedules) — Publicar una versión del tarifario
+6. [GET /payments/intents](#6-get-payments-intents) — Listar intenciones de pago del tenant
+7. [POST /payments/intents](#7-post-payments-intents) — Crear una intención de pago idempotente
+8. [POST /payments/intents/{id}/fx-lock](#8-post-payments-intents-id-fx-lock) — Bloquear el tipo de cambio de la intención
+9. [POST /payments/intents/{id}/risk-assessment](#9-post-payments-intents-id-risk-assessment) — Registrar la evaluación de riesgo y 3-D Secure
+10. [POST /payments/intents/{id}/splits](#10-post-payments-intents-id-splits) — Repartir el cobro entre cuentas conectadas
+11. [POST /payments/intents/{id}/transactions](#11-post-payments-intents-id-transactions) — Procesar la transacción contra el gateway (authorize/capture)
+12. [GET /payments/payouts](#12-get-payments-payouts) — Listar liquidaciones del tenant
+13. [POST /payments/payouts](#13-post-payments-payouts) — Ejecutar un payout a una cuenta conectada
+14. [GET /payments/reconciliation-runs](#14-get-payments-reconciliation-runs) — Listar conciliaciones de pagos del tenant
+15. [POST /payments/reconciliation-runs](#15-post-payments-reconciliation-runs) — Conciliar gateway contra ledger y abrir excepciones
+16. [POST /payments/settlements/import](#16-post-payments-settlements-import) — Importar la liquidación del gateway
+17. [POST /payments/transactions/{id}/cancellation-requests](#17-post-payments-transactions-id-cancellation-requests) — Solicitar la anulación del cobro
+18. [POST /payments/transactions/{id}/refunds](#18-post-payments-transactions-id-refunds) — Emitir un reembolso total o parcial
+19. [POST /payments/transactions/{id}/status-inquiry](#19-post-payments-transactions-id-status-inquiry) — Consultar el estado de la transacción en el gateway
 
 ---
 
@@ -169,7 +174,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /payments/checkout-sessions
+## 2. GET /payments/checkout-sessions
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-collections`
+- **Nombre:** Listar sesiones de cobro del tenant
+- **Operation ID:** `PaymentsCollectionsController_listCheckoutSessions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsCollectionsController.listCheckoutSessions](../../src/modules/payments/controllers/payments-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar sesiones de cobro del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V42-02: listar sesiones de cobro del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /payments/checkout-sessions` en `PaymentsCollectionsController_listCheckoutSessions`. El controlador delega en `PaymentsCollectionsService.listCheckoutSessions`. No recibe body. El tipo de retorno estático es `Promise<PaymentCheckoutSessionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /payments/checkout-sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`, `CASHIER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /payments/checkout-sessions?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PaymentCheckoutSessionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PaymentCheckoutSessionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PaymentCheckoutSessionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PaymentCheckoutSessionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PaymentCheckoutSessionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PaymentCheckoutSessionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentCheckoutSessionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "gatewayConnectionId": "00000000-0000-4000-8000-000000000001",
+      "paymentDebtId": "00000000-0000-4000-8000-000000000001",
+      "paymentIntentId": {},
+      "externalTransactionId": "00000000-0000-4000-8000-000000000001",
+      "redirectUrl": "valor-ejemplo",
+      "successReturnUrl": "valor-ejemplo",
+      "failureReturnUrl": "valor-ejemplo",
+      "callbackEndpointId": {},
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "openedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PaymentCheckoutSessionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","gatewayConnectionId":"00000000-0000-4000-8000-000000000001","paymentDebtId":"00000000-0000-4000-8000-000000000001","paymentIntentId":{},"externalTransactionId":"00000000-0000-4000-8000-000000000001","redirectUrl":"valor-ejemplo","successReturnUrl":"valor-ejemplo","failureReturnUrl":"valor-ejemplo","callbackEndpointId":{},"expiresAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","openedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].gatewayConnectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].paymentDebtId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].paymentIntentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].externalTransactionId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].redirectUrl` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].successReturnUrl` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].failureReturnUrl` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].callbackEndpointId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].openedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/checkout-sessions"
+}
+```
+
+---
+
+## 3. POST /payments/checkout-sessions
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -325,7 +485,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /payments/fee-schedules
+## 4. GET /payments/fee-schedules
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-collections`
+- **Nombre:** Listar aranceles del tenant
+- **Operation ID:** `PaymentsCollectionsController_listFeeSchedules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsCollectionsController.listFeeSchedules](../../src/modules/payments/controllers/payments-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar aranceles del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V42-03: listar aranceles del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /payments/fee-schedules` en `PaymentsCollectionsController_listFeeSchedules`. El controlador delega en `PaymentsCollectionsService.listFeeSchedules`. No recibe body. El tipo de retorno estático es `Promise<FeeSchedulePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /payments/fee-schedules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /payments/fee-schedules?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FeeSchedulePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<FeeSchedulePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FeeSchedulePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FeeSchedulePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FeeSchedulePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FeeSchedulePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeeSchedulePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "feeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "calculationMethodConceptId": "00000000-0000-4000-8000-000000000001",
+      "percentage": "valor-ejemplo",
+      "fixedAmount": "valor-ejemplo",
+      "currencyConceptId": {},
+      "minAmount": "valor-ejemplo",
+      "maxAmount": "valor-ejemplo",
+      "appliesToConceptId": {},
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<FeeScheduleItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","feeTypeConceptId":"00000000-0000-4000-8000-000000000001","calculationMethodConceptId":"00000000-0000-4000-8000-000000000001","percentage":"valor-ejemplo","fixedAmount":"valor-ejemplo","currencyConceptId":{},"minAmount":"valor-ejemplo","maxAmount":"valor-ejemplo","appliesToConceptId":{},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].feeTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].calculationMethodConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].percentage` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].fixedAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].minAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].maxAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].appliesToConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/fee-schedules"
+}
+```
+
+---
+
+## 5. POST /payments/fee-schedules
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -472,7 +789,165 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /payments/intents
+## 6. GET /payments/intents
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-collections`
+- **Nombre:** Listar intenciones de pago del tenant
+- **Operation ID:** `PaymentsCollectionsController_listIntents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsCollectionsController.listIntents](../../src/modules/payments/controllers/payments-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar intenciones de pago del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V42-04: listar intenciones de pago del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /payments/intents` en `PaymentsCollectionsController_listIntents`. El controlador delega en `PaymentsCollectionsService.listIntents`. No recibe body. El tipo de retorno estático es `Promise<PaymentIntentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `practiceId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /payments/intents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`, `CASHIER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /payments/intents?page=1&pageSize=20&order=DESC&sortBy=createdAt&practiceId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PaymentIntentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PaymentIntentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PaymentIntentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PaymentIntentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PaymentIntentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PaymentIntentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentIntentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "practiceId": {},
+      "gatewayId": "00000000-0000-4000-8000-000000000001",
+      "gatewayConnectionId": {},
+      "paymentMethodId": {},
+      "purposeConceptId": "00000000-0000-4000-8000-000000000001",
+      "invoiceId": {},
+      "sourceRefType": "valor-ejemplo",
+      "sourceRefId": {},
+      "amount": "valor-ejemplo",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "gatewayIntentRef": "valor-ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PaymentIntentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","practiceId":{},"gatewayId":"00000000-0000-4000-8000-000000000001","gatewayConnectionId":{},"paymentMethodId":{},"purposeConceptId":"00000000-0000-4000-8000-000000000001","invoiceId":{},"sourceRefType":"valor-ejemplo","sourceRefId":{},"amount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","gatewayIntentRef":"valor-ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","expiresAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].practiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].gatewayId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].gatewayConnectionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].paymentMethodId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].purposeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].invoiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].sourceRefType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].sourceRefId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].gatewayIntentRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].expiresAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/intents"
+}
+```
+
+---
+
+## 7. POST /payments/intents
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -628,7 +1103,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /payments/intents/{id}/fx-lock
+## 8. POST /payments/intents/{id}/fx-lock
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -772,7 +1247,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /payments/intents/{id}/risk-assessment
+## 9. POST /payments/intents/{id}/risk-assessment
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -911,7 +1386,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /payments/intents/{id}/splits
+## 10. POST /payments/intents/{id}/splits
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -1055,7 +1530,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /payments/intents/{id}/transactions
+## 11. POST /payments/intents/{id}/transactions
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -1201,7 +1676,166 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /payments/payouts
+## 12. GET /payments/payouts
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-collections`
+- **Nombre:** Listar liquidaciones del tenant
+- **Operation ID:** `PaymentsCollectionsController_listPayouts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsCollectionsController.listPayouts](../../src/modules/payments/controllers/payments-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar liquidaciones del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V42-09: listar liquidaciones del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /payments/payouts` en `PaymentsCollectionsController_listPayouts`. El controlador delega en `PaymentsCollectionsService.listPayouts`. No recibe body. El tipo de retorno estático es `Promise<PaymentsPayoutPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /payments/payouts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /payments/payouts?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PaymentsPayoutPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PaymentsPayoutPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PaymentsPayoutPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PaymentsPayoutPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PaymentsPayoutPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PaymentsPayoutPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentsPayoutPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "practiceId": {},
+      "payeeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "payeeRefId": "00000000-0000-4000-8000-000000000001",
+      "gatewayId": "00000000-0000-4000-8000-000000000001",
+      "amount": "valor-ejemplo",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "periodStart": "2026-07-31",
+      "periodEnd": "2026-07-31",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "scheduledAt": "2026-07-31T12:00:00.000Z",
+      "executedAt": "2026-07-31T12:00:00.000Z",
+      "destinationRef": "valor-ejemplo",
+      "gatewayPayoutRef": "valor-ejemplo",
+      "journalTransactionId": {},
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PaymentsPayoutItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","practiceId":{},"payeeTypeConceptId":"00000000-0000-4000-8000-000000000001","payeeRefId":"00000000-0000-4000-8000-000000000001","gatewayId":"00000000-0000-4000-8000-000000000001","amount":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","periodStart":"2026-07-31","periodEnd":"2026-07-31","statusConceptId":"00000000-0000-4000-8000-000000000001","scheduledAt":"2026-07-31T12:00:00.000Z","executedAt":"2026-07-31T12:00:00.000Z","destinationRef":"valor-ejemplo","gatewayPayoutRef":"valor-ejemplo","journalTransactionId":{},"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].practiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].payeeTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].payeeRefId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].gatewayId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].periodStart` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].periodEnd` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].scheduledAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].executedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].destinationRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].gatewayPayoutRef` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].journalTransactionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/payouts"
+}
+```
+
+---
+
+## 13. POST /payments/payouts
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -1363,7 +1997,160 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /payments/reconciliation-runs
+## 14. GET /payments/reconciliation-runs
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-collections`
+- **Nombre:** Listar conciliaciones de pagos del tenant
+- **Operation ID:** `PaymentsCollectionsController_listReconciliationRuns`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsCollectionsController.listReconciliationRuns](../../src/modules/payments/controllers/payments-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar conciliaciones de pagos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V42-10: listar conciliaciones de pagos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /payments/reconciliation-runs` en `PaymentsCollectionsController_listReconciliationRuns`. El controlador delega en `PaymentsCollectionsService.listReconciliationRuns`. No recibe body. El tipo de retorno estático es `Promise<PaymentsReconciliationRunPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /payments/reconciliation-runs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /payments/reconciliation-runs?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PaymentsReconciliationRunPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PaymentsReconciliationRunPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PaymentsReconciliationRunPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PaymentsReconciliationRunPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PaymentsReconciliationRunPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PaymentsReconciliationRunPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentsReconciliationRunPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "gatewayId": "00000000-0000-4000-8000-000000000001",
+      "periodStart": "2026-07-31",
+      "periodEnd": "2026-07-31",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "totalGateway": "valor-ejemplo",
+      "totalLedger": "valor-ejemplo",
+      "totalBank": "valor-ejemplo",
+      "matchedCount": 1,
+      "unmatchedCount": 1,
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "finishedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PaymentsReconciliationRunItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","gatewayId":"00000000-0000-4000-8000-000000000001","periodStart":"2026-07-31","periodEnd":"2026-07-31","statusConceptId":"00000000-0000-4000-8000-000000000001","totalGateway":"valor-ejemplo","totalLedger":"valor-ejemplo","totalBank":"valor-ejemplo","matchedCount":1,"unmatchedCount":1,"startedAt":"2026-07-31T12:00:00.000Z","finishedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].gatewayId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].periodStart` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].periodEnd` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].totalGateway` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].totalLedger` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].totalBank` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].matchedCount` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].unmatchedCount` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].startedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].finishedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/reconciliation-runs"
+}
+```
+
+---
+
+## 15. POST /payments/reconciliation-runs
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -1529,7 +2316,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /payments/settlements/import
+## 16. POST /payments/settlements/import
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -1691,7 +2478,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /payments/transactions/{id}/cancellation-requests
+## 17. POST /payments/transactions/{id}/cancellation-requests
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-transactions`
@@ -1828,7 +2615,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /payments/transactions/{id}/refunds
+## 18. POST /payments/transactions/{id}/refunds
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-transactions`
@@ -1965,7 +2752,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /payments/transactions/{id}/status-inquiry
+## 19. POST /payments/transactions/{id}/status-inquiry
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-transactions`

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `auth_providers`
 
-Referencia exhaustiva de 12 operación(es) del módulo `auth_providers`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `auth_providers`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `auth-providers`
-- **Controladores:** `AuthProvidersController`
+- **Etiquetas OpenAPI:** `auth-providers`, `auth-providers-collections`
+- **Controladores:** `AuthProvidersCollectionsController`, `AuthProvidersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,15 +14,18 @@ Referencia exhaustiva de 12 operación(es) del módulo `auth_providers`, derivad
 1. [POST /auth-providers/account-link-requests](#1-post-auth-providers-account-link-requests) — Solicitar la vinculación de un sujeto externo
 2. [POST /auth-providers/account-link-requests/complete](#2-post-auth-providers-account-link-requests-complete) — Completar la vinculación presentando el token
 3. [POST /auth-providers/federated-identities/{id}/unlink](#3-post-auth-providers-federated-identities-id-unlink) — Desvincular una identidad federada
-4. [POST /auth-providers/identity-providers](#4-post-auth-providers-identity-providers) — Registrar un proveedor de identidad
-5. [PUT /auth-providers/identity-providers/{id}/attribute-mappings](#5-put-auth-providers-identity-providers-id-attribute-mappings) — Fijar el mapeo de atributos del proveedor
-6. [POST /auth-providers/identity-providers/{id}/protocol-configs](#6-post-auth-providers-identity-providers-id-protocol-configs) — Configurar el protocolo de un entorno e importar el JWKS
-7. [POST /auth-providers/identity-providers/{id}/provisioning-rules](#7-post-auth-providers-identity-providers-id-provisioning-rules) — Definir una regla de aprovisionamiento
-8. [POST /auth-providers/identity-providers/{id}/signing-keys](#8-post-auth-providers-identity-providers-id-signing-keys) — Publicar una clave de firma del proveedor
-9. [POST /auth-providers/identity-providers/{id}/signing-keys/rotate](#9-post-auth-providers-identity-providers-id-signing-keys-rotate) — Rotar la clave de firma
-10. [POST /auth-providers/identity-providers/by-code/{code}/authorize](#10-post-auth-providers-identity-providers-by-code-code-authorize) — Iniciar el login federado
-11. [POST /auth-providers/identity-providers/by-code/{code}/callback](#11-post-auth-providers-identity-providers-by-code-code-callback) — Procesar el callback del proveedor
-12. [POST /auth-providers/tenant-bindings](#12-post-auth-providers-tenant-bindings) — Vincular el proveedor a un tenant
+4. [GET /auth-providers/identity-providers](#4-get-auth-providers-identity-providers) — Listar los proveedores de identidad del tenant y los globales
+5. [POST /auth-providers/identity-providers](#5-post-auth-providers-identity-providers) — Registrar un proveedor de identidad
+6. [PUT /auth-providers/identity-providers/{id}/attribute-mappings](#6-put-auth-providers-identity-providers-id-attribute-mappings) — Fijar el mapeo de atributos del proveedor
+7. [POST /auth-providers/identity-providers/{id}/protocol-configs](#7-post-auth-providers-identity-providers-id-protocol-configs) — Configurar el protocolo de un entorno e importar el JWKS
+8. [GET /auth-providers/identity-providers/{id}/provisioning-rules](#8-get-auth-providers-identity-providers-id-provisioning-rules) — Listar las reglas de aprovisionamiento de un proveedor en el tenant
+9. [POST /auth-providers/identity-providers/{id}/provisioning-rules](#9-post-auth-providers-identity-providers-id-provisioning-rules) — Definir una regla de aprovisionamiento
+10. [POST /auth-providers/identity-providers/{id}/signing-keys](#10-post-auth-providers-identity-providers-id-signing-keys) — Publicar una clave de firma del proveedor
+11. [POST /auth-providers/identity-providers/{id}/signing-keys/rotate](#11-post-auth-providers-identity-providers-id-signing-keys-rotate) — Rotar la clave de firma
+12. [POST /auth-providers/identity-providers/by-code/{code}/authorize](#12-post-auth-providers-identity-providers-by-code-code-authorize) — Iniciar el login federado
+13. [POST /auth-providers/identity-providers/by-code/{code}/callback](#13-post-auth-providers-identity-providers-by-code-code-callback) — Procesar el callback del proveedor
+14. [GET /auth-providers/tenant-bindings](#14-get-auth-providers-tenant-bindings) — Listar los proveedores habilitados en el tenant
+15. [POST /auth-providers/tenant-bindings](#15-post-auth-providers-tenant-bindings) — Vincular el proveedor a un tenant
 
 ---
 
@@ -424,7 +427,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /auth-providers/identity-providers
+## 4. GET /auth-providers/identity-providers
+
+- **Módulo:** `auth_providers`
+- **Etiqueta OpenAPI:** `auth-providers-collections`
+- **Nombre:** Listar los proveedores de identidad del tenant y los globales
+- **Operation ID:** `AuthProvidersCollectionsController_listIdentityProviders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthProvidersCollectionsController.listIdentityProviders](../../src/modules/auth_providers/controllers/auth-providers-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los proveedores de identidad del tenant y los globales. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V40-03: listar los proveedores de identidad del tenant y los globales.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /auth-providers/identity-providers` en `AuthProvidersCollectionsController_listIdentityProviders`. El controlador delega en `AuthProvidersCollectionsService.listIdentityProviders`. No recibe body. El tipo de retorno estático es `Promise<IdentityProviderPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `protocolConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /auth-providers/identity-providers HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `IDENTITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /auth-providers/identity-providers?page=1&pageSize=20&order=DESC&sortBy=createdAt&protocolConceptId=00000000-0000-4000-8000-000000000001&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IdentityProviderPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<IdentityProviderPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IdentityProviderPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IdentityProviderPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IdentityProviderPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IdentityProviderPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdentityProviderPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "protocolConceptId": "00000000-0000-4000-8000-000000000001",
+      "providerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "issuer": "valor-ejemplo",
+      "logoFileId": {},
+      "isGlobal": true,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<IdentityProviderItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","protocolConceptId":"00000000-0000-4000-8000-000000000001","providerCategoryConceptId":"00000000-0000-4000-8000-000000000001","issuer":"valor-ejemplo","logoFileId":{},"isGlobal":true,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].protocolConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].issuer` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].logoFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].isGlobal` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: IDENTITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/auth-providers/identity-providers"
+}
+```
+
+---
+
+## 5. POST /auth-providers/identity-providers
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -568,7 +719,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. PUT /auth-providers/identity-providers/{id}/attribute-mappings
+## 6. PUT /auth-providers/identity-providers/{id}/attribute-mappings
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -720,7 +871,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /auth-providers/identity-providers/{id}/protocol-configs
+## 7. POST /auth-providers/identity-providers/{id}/protocol-configs
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -899,7 +1050,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /auth-providers/identity-providers/{id}/provisioning-rules
+## 8. GET /auth-providers/identity-providers/{id}/provisioning-rules
+
+- **Módulo:** `auth_providers`
+- **Etiqueta OpenAPI:** `auth-providers-collections`
+- **Nombre:** Listar las reglas de aprovisionamiento de un proveedor en el tenant
+- **Operation ID:** `AuthProvidersCollectionsController_listProvisioningRules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthProvidersCollectionsController.listProvisioningRules](../../src/modules/auth_providers/controllers/auth-providers-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las reglas de aprovisionamiento de un proveedor en el tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V40-07: listar las reglas de aprovisionamiento de un proveedor en el tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /auth-providers/identity-providers/{id}/provisioning-rules` en `AuthProvidersCollectionsController_listProvisioningRules`. El controlador delega en `AuthProvidersCollectionsService.listProvisioningRules`. No recibe body. El tipo de retorno estático es `Promise<ProvisioningRulePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /auth-providers/identity-providers/00000000-0000-4000-8000-000000000001/provisioning-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `IDENTITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /auth-providers/identity-providers/00000000-0000-4000-8000-000000000001/provisioning-rules?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProvisioningRulePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProvisioningRulePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProvisioningRulePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProvisioningRulePageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ProvisioningRulePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProvisioningRulePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProvisioningRulePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProvisioningRulePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "providerId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "priority": 1,
+      "conditionJson": {
+        "clave": "valor"
+      },
+      "assignRoleConceptId": {},
+      "assignTenantId": {},
+      "effectConceptId": {},
+      "isActive": true,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ProvisioningRuleItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","providerId":"00000000-0000-4000-8000-000000000001","tenantId":{},"priority":1,"conditionJson":{"clave":"valor"},"assignRoleConceptId":{},"assignTenantId":{},"effectConceptId":{},"isActive":true,"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].priority` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].conditionJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].assignRoleConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].assignTenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].effectConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: IDENTITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/auth-providers/identity-providers/{id}/provisioning-rules"
+}
+```
+
+---
+
+## 9. POST /auth-providers/identity-providers/{id}/provisioning-rules
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -1042,7 +1342,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /auth-providers/identity-providers/{id}/signing-keys
+## 10. POST /auth-providers/identity-providers/{id}/signing-keys
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -1184,7 +1484,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /auth-providers/identity-providers/{id}/signing-keys/rotate
+## 11. POST /auth-providers/identity-providers/{id}/signing-keys/rotate
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -1327,7 +1627,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /auth-providers/identity-providers/by-code/{code}/authorize
+## 12. POST /auth-providers/identity-providers/by-code/{code}/authorize
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -1466,7 +1766,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /auth-providers/identity-providers/by-code/{code}/callback
+## 13. POST /auth-providers/identity-providers/by-code/{code}/callback
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`
@@ -1616,7 +1916,154 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /auth-providers/tenant-bindings
+## 14. GET /auth-providers/tenant-bindings
+
+- **Módulo:** `auth_providers`
+- **Etiqueta OpenAPI:** `auth-providers-collections`
+- **Nombre:** Listar los proveedores habilitados en el tenant
+- **Operation ID:** `AuthProvidersCollectionsController_listTenantBindings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthProvidersCollectionsController.listTenantBindings](../../src/modules/auth_providers/controllers/auth-providers-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los proveedores habilitados en el tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V40-09: listar los proveedores habilitados en el tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /auth-providers/tenant-bindings` en `AuthProvidersCollectionsController_listTenantBindings`. El controlador delega en `AuthProvidersCollectionsService.listTenantBindings`. No recibe body. El tipo de retorno estático es `Promise<ProviderTenantBindingPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `providerId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /auth-providers/tenant-bindings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `IDENTITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /auth-providers/tenant-bindings?page=1&pageSize=20&order=DESC&sortBy=createdAt&providerId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProviderTenantBindingPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProviderTenantBindingPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProviderTenantBindingPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProviderTenantBindingPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProviderTenantBindingPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProviderTenantBindingPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProviderTenantBindingPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "providerId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "isEnabled": true,
+      "autoProvision": true,
+      "defaultRoleConceptId": {},
+      "allowedEmailDomains": "valor-ejemplo",
+      "justInTimeProvisioning": true,
+      "ordinal": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ProviderTenantBindingItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","providerId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","isEnabled":true,"autoProvision":true,"defaultRoleConceptId":{},"allowedEmailDomains":"valor-ejemplo","justInTimeProvisioning":true,"ordinal":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].isEnabled` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].autoProvision` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].defaultRoleConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].allowedEmailDomains` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].justInTimeProvisioning` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].ordinal` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: IDENTITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/auth-providers/tenant-bindings"
+}
+```
+
+---
+
+## 15. POST /auth-providers/tenant-bindings
 
 - **Módulo:** `auth_providers`
 - **Etiqueta OpenAPI:** `auth-providers`

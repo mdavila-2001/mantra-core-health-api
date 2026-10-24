@@ -9,7 +9,7 @@
 # Módulo `workflow`
 
 **Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/workflow/README.md)
-· 3 controllers · 3 services · 3 repositories · 8 entidades · 1 DTO
+· 4 controllers · 4 services · 3 repositories · 8 entidades · 2 DTO
 
 ---
 

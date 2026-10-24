@@ -2,32 +2,185 @@
 
 # Endpoints del módulo `system_context`
 
-Referencia exhaustiva de 13 operación(es) del módulo `system_context`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 15 operación(es) del módulo `system_context`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `system-context`
-- **Controladores:** `SystemContextController`
+- **Etiquetas OpenAPI:** `system-context`, `system-context-collections`
+- **Controladores:** `SystemContextCollectionsController`, `SystemContextController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /system-context/contexts](#1-post-system-context-contexts) — Definir un contexto de sistema con su versión inicial
-2. [POST /system-context/contexts/{id}/bindings](#2-post-system-context-contexts-id-bindings) — Vincular el contexto a un consumidor
-3. [POST /system-context/contexts/{id}/refresh](#3-post-system-context-contexts-id-refresh) — Refrescar el contexto y snapshotear su procedencia
-4. [POST /system-context/contexts/{id}/rollback](#4-post-system-context-contexts-id-rollback) — Volver a una versión anterior del contexto
-5. [POST /system-context/contexts/{id}/versions/{version}/activate](#5-post-system-context-contexts-id-versions-version-activate) — Promover la versión a vigente
-6. [GET /system-context/dynamic-enums](#6-get-system-context-dynamic-enums) — Leer las opciones publicadas de una enumeración
-7. [GET /system-context/dynamic-enums/bindings](#7-get-system-context-dynamic-enums-bindings) — Listar los amarres campo -> enumeración
-8. [POST /system-context/dynamic-enums/definitions](#8-post-system-context-dynamic-enums-definitions) — Definir una enumeración dinámica ligada a un value set
-9. [POST /system-context/dynamic-enums/definitions/{defId}/bindings](#9-post-system-context-dynamic-enums-definitions-defid-bindings) — Vincular la enumeración a un campo destino
-10. [POST /system-context/dynamic-enums/definitions/{defId}/retire](#10-post-system-context-dynamic-enums-definitions-defid-retire) — Retirar la definición (borrado lógico gobernado)
-11. [POST /system-context/dynamic-enums/definitions/{defId}/versions](#11-post-system-context-dynamic-enums-definitions-defid-versions) — Redactar una versión con su snapshot de opciones
-12. [POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish](#12-post-system-context-dynamic-enums-definitions-defid-versions-version-publish) — Publicar la versión e invalidar la caché
-13. [POST /system-context/dynamic-enums/resolve](#13-post-system-context-dynamic-enums-resolve) — Resolver y validar un valor de enumeración antes de escribirlo
+1. [GET /system-context/contexts](#1-get-system-context-contexts) — Listar contextos de sistema del tenant
+2. [POST /system-context/contexts](#2-post-system-context-contexts) — Definir un contexto de sistema con su versión inicial
+3. [POST /system-context/contexts/{id}/bindings](#3-post-system-context-contexts-id-bindings) — Vincular el contexto a un consumidor
+4. [POST /system-context/contexts/{id}/refresh](#4-post-system-context-contexts-id-refresh) — Refrescar el contexto y snapshotear su procedencia
+5. [POST /system-context/contexts/{id}/rollback](#5-post-system-context-contexts-id-rollback) — Volver a una versión anterior del contexto
+6. [POST /system-context/contexts/{id}/versions/{version}/activate](#6-post-system-context-contexts-id-versions-version-activate) — Promover la versión a vigente
+7. [GET /system-context/dynamic-enums](#7-get-system-context-dynamic-enums) — Leer las opciones publicadas de una enumeración
+8. [GET /system-context/dynamic-enums/bindings](#8-get-system-context-dynamic-enums-bindings) — Listar los amarres campo -> enumeración
+9. [GET /system-context/dynamic-enums/definitions](#9-get-system-context-dynamic-enums-definitions) — Listar definiciones de catálogo dinámico del tenant
+10. [POST /system-context/dynamic-enums/definitions](#10-post-system-context-dynamic-enums-definitions) — Definir una enumeración dinámica ligada a un value set
+11. [POST /system-context/dynamic-enums/definitions/{defId}/bindings](#11-post-system-context-dynamic-enums-definitions-defid-bindings) — Vincular la enumeración a un campo destino
+12. [POST /system-context/dynamic-enums/definitions/{defId}/retire](#12-post-system-context-dynamic-enums-definitions-defid-retire) — Retirar la definición (borrado lógico gobernado)
+13. [POST /system-context/dynamic-enums/definitions/{defId}/versions](#13-post-system-context-dynamic-enums-definitions-defid-versions) — Redactar una versión con su snapshot de opciones
+14. [POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish](#14-post-system-context-dynamic-enums-definitions-defid-versions-version-publish) — Publicar la versión e invalidar la caché
+15. [POST /system-context/dynamic-enums/resolve](#15-post-system-context-dynamic-enums-resolve) — Resolver y validar un valor de enumeración antes de escribirlo
 
 ---
 
-## 1. POST /system-context/contexts
+## 1. GET /system-context/contexts
+
+- **Módulo:** `system_context`
+- **Etiqueta OpenAPI:** `system-context-collections`
+- **Nombre:** Listar contextos de sistema del tenant
+- **Operation ID:** `SystemContextCollectionsController_listContexts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemContextCollectionsController.listContexts](../../src/modules/system_context/controllers/system-context-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar contextos de sistema del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V45-01: listar contextos de sistema del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /system-context/contexts` en `SystemContextCollectionsController_listContexts`. El controlador delega en `SystemContextCollectionsService.listContexts`. No recibe body. El tipo de retorno estático es `Promise<SystemContextPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /system-context/contexts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `GOVERNANCE`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /system-context/contexts?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SystemContextPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<SystemContextPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SystemContextPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SystemContextPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SystemContextPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SystemContextPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SystemContextPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "contextTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "scopeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "countryConceptId": {},
+      "localeConceptId": {},
+      "currentVersionId": {},
+      "refreshPolicyConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<SystemContextItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","contextTypeConceptId":"00000000-0000-4000-8000-000000000001","scopeTypeConceptId":"00000000-0000-4000-8000-000000000001","tenantId":{},"countryConceptId":{},"localeConceptId":{},"currentVersionId":{},"refreshPolicyConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].contextTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].scopeTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].countryConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].localeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].currentVersionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].refreshPolicyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, GOVERNANCE. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/system-context/contexts"
+}
+```
+
+---
+
+## 2. POST /system-context/contexts
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -179,7 +332,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /system-context/contexts/{id}/bindings
+## 3. POST /system-context/contexts/{id}/bindings
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -327,7 +480,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /system-context/contexts/{id}/refresh
+## 4. POST /system-context/contexts/{id}/refresh
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -502,7 +655,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /system-context/contexts/{id}/rollback
+## 5. POST /system-context/contexts/{id}/rollback
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -641,7 +794,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /system-context/contexts/{id}/versions/{version}/activate
+## 6. POST /system-context/contexts/{id}/versions/{version}/activate
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -775,7 +928,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /system-context/dynamic-enums
+## 7. GET /system-context/dynamic-enums
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -920,7 +1073,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /system-context/dynamic-enums/bindings
+## 8. GET /system-context/dynamic-enums/bindings
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1050,7 +1203,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /system-context/dynamic-enums/definitions
+## 9. GET /system-context/dynamic-enums/definitions
+
+- **Módulo:** `system_context`
+- **Etiqueta OpenAPI:** `system-context-collections`
+- **Nombre:** Listar definiciones de catálogo dinámico del tenant
+- **Operation ID:** `SystemContextCollectionsController_listDynamicEnumDefinitions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemContextCollectionsController.listDynamicEnumDefinitions](../../src/modules/system_context/controllers/system-context-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar definiciones de catálogo dinámico del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V45-05: listar definiciones de catálogo dinámico del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /system-context/dynamic-enums/definitions` en `SystemContextCollectionsController_listDynamicEnumDefinitions`. El controlador delega en `SystemContextCollectionsService.listDynamicEnumDefinitions`. No recibe body. El tipo de retorno estático es `Promise<DynamicEnumDefinitionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /system-context/dynamic-enums/definitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `TERMINOLOGY_ENGINEER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /system-context/dynamic-enums/definitions?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DynamicEnumDefinitionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DynamicEnumDefinitionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DynamicEnumDefinitionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DynamicEnumDefinitionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DynamicEnumDefinitionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DynamicEnumDefinitionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DynamicEnumDefinitionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "scopeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "countryConceptId": {},
+      "selectionModeConceptId": {},
+      "allowTenantExtension": true,
+      "allowCustomValue": true,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<DynamicEnumDefinitionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","valueSetId":"00000000-0000-4000-8000-000000000001","scopeTypeConceptId":"00000000-0000-4000-8000-000000000001","tenantId":{},"countryConceptId":{},"selectionModeConceptId":{},"allowTenantExtension":true,"allowCustomValue":true,"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].valueSetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].scopeTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].countryConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].selectionModeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].allowTenantExtension` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].allowCustomValue` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/system-context/dynamic-enums/definitions"
+}
+```
+
+---
+
+## 10. POST /system-context/dynamic-enums/definitions
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1196,7 +1500,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /system-context/dynamic-enums/definitions/{defId}/bindings
+## 11. POST /system-context/dynamic-enums/definitions/{defId}/bindings
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1342,7 +1646,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /system-context/dynamic-enums/definitions/{defId}/retire
+## 12. POST /system-context/dynamic-enums/definitions/{defId}/retire
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1472,7 +1776,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /system-context/dynamic-enums/definitions/{defId}/versions
+## 13. POST /system-context/dynamic-enums/definitions/{defId}/versions
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1638,7 +1942,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish
+## 14. POST /system-context/dynamic-enums/definitions/{defId}/versions/{version}/publish
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`
@@ -1760,7 +2064,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /system-context/dynamic-enums/resolve
+## 15. POST /system-context/dynamic-enums/resolve
 
 - **Módulo:** `system_context`
 - **Etiqueta OpenAPI:** `system-context`

@@ -2,25 +2,27 @@
 
 # Endpoints del módulo `geo`
 
-Referencia exhaustiva de 10 operación(es) del módulo `geo`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 12 operación(es) del módulo `geo`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips`
-- **Controladores:** `GeoGeofencesController`, `GeoTrackedSubjectsController`, `GeoTrackingSessionsController`, `GeoTripsController`
+- **Etiquetas OpenAPI:** `geo-collections`, `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips`
+- **Controladores:** `GeoCollectionsController`, `GeoGeofencesController`, `GeoTrackedSubjectsController`, `GeoTrackingSessionsController`, `GeoTripsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /geo/geofence-events](#1-post-geo-geofence-events) — Registrar un evento de entrada/salida de geofence
-2. [POST /geo/geofences](#2-post-geo-geofences) — Definir y activar un geofence (circle o polygon)
-3. [POST /geo/tracked-subjects](#3-post-geo-tracked-subjects) — Alta de sujeto rastreado con consentimiento de ubicación
-4. [GET /geo/tracked-subjects/{id}/last-position](#4-get-geo-tracked-subjects-id-last-position) — Consultar la última posición conocida del sujeto
-5. [POST /geo/tracked-subjects/{id}/pings](#5-post-geo-tracked-subjects-id-pings) — Ingerir un batch de pings de ubicación de alta frecuencia
-6. [POST /geo/tracked-subjects/{id}/revoke-consent](#6-post-geo-tracked-subjects-id-revoke-consent) — Revocar consentimiento de ubicación y pausar el rastreo
-7. [POST /geo/tracking-sessions](#7-post-geo-tracking-sessions) — Iniciar una sesión de tracking de un sujeto
-8. [POST /geo/tracking-sessions/{id}/close](#8-post-geo-tracking-sessions-id-close) — Cerrar una sesión de tracking
-9. [POST /geo/trips](#9-post-geo-trips) — Iniciar un viaje (trip)
-10. [POST /geo/trips/{id}/close](#10-post-geo-trips-id-close) — Cerrar un viaje con distancia/duración
+2. [GET /geo/geofences](#2-get-geo-geofences) — Listar las geocercas del tenant
+3. [POST /geo/geofences](#3-post-geo-geofences) — Definir y activar un geofence (circle o polygon)
+4. [GET /geo/tracked-subjects](#4-get-geo-tracked-subjects) — Listar los sujetos rastreados del tenant
+5. [POST /geo/tracked-subjects](#5-post-geo-tracked-subjects) — Alta de sujeto rastreado con consentimiento de ubicación
+6. [GET /geo/tracked-subjects/{id}/last-position](#6-get-geo-tracked-subjects-id-last-position) — Consultar la última posición conocida del sujeto
+7. [POST /geo/tracked-subjects/{id}/pings](#7-post-geo-tracked-subjects-id-pings) — Ingerir un batch de pings de ubicación de alta frecuencia
+8. [POST /geo/tracked-subjects/{id}/revoke-consent](#8-post-geo-tracked-subjects-id-revoke-consent) — Revocar consentimiento de ubicación y pausar el rastreo
+9. [POST /geo/tracking-sessions](#9-post-geo-tracking-sessions) — Iniciar una sesión de tracking de un sujeto
+10. [POST /geo/tracking-sessions/{id}/close](#10-post-geo-tracking-sessions-id-close) — Cerrar una sesión de tracking
+11. [POST /geo/trips](#11-post-geo-trips) — Iniciar un viaje (trip)
+12. [POST /geo/trips/{id}/close](#12-post-geo-trips-id-close) — Cerrar un viaje con distancia/duración
 
 ---
 
@@ -167,7 +169,154 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /geo/geofences
+## 2. GET /geo/geofences
+
+- **Módulo:** `geo`
+- **Etiqueta OpenAPI:** `geo-collections`
+- **Nombre:** Listar las geocercas del tenant
+- **Operation ID:** `GeoCollectionsController_listGeofences`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GeoCollectionsController.listGeofences](../../src/modules/geo/controllers/geo-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las geocercas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V13-07: listar las geocercas del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /geo/geofences` en `GeoCollectionsController_listGeofences`. El controlador delega en `GeoCollectionsService.listGeofences`. No recibe body. El tipo de retorno estático es `Promise<GeofencePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /geo/geofences HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /geo/geofences?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GeofencePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<GeofencePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GeofencePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GeofencePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GeofencePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GeofencePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GeofencePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "shapeTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "geometryJson": {
+        "clave": "valor"
+      },
+      "radiusM": "valor-ejemplo",
+      "centerLat": "valor-ejemplo",
+      "centerLng": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<GeofenceItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","shapeTypeConceptId":"00000000-0000-4000-8000-000000000001","geometryJson":{"clave":"valor"},"radiusM":"valor-ejemplo","centerLat":"valor-ejemplo","centerLng":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].shapeTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].geometryJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].radiusM` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].centerLat` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].centerLng` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/geo/geofences"
+}
+```
+
+---
+
+## 3. POST /geo/geofences
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-geofences`
@@ -313,7 +462,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /geo/tracked-subjects
+## 4. GET /geo/tracked-subjects
+
+- **Módulo:** `geo`
+- **Etiqueta OpenAPI:** `geo-collections`
+- **Nombre:** Listar los sujetos rastreados del tenant
+- **Operation ID:** `GeoCollectionsController_listTrackedSubjects`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GeoCollectionsController.listTrackedSubjects](../../src/modules/geo/controllers/geo-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los sujetos rastreados del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V13-01: listar los sujetos rastreados del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /geo/tracked-subjects` en `GeoCollectionsController_listTrackedSubjects`. El controlador delega en `GeoCollectionsService.listTrackedSubjects`. No recibe body. El tipo de retorno estático es `Promise<TrackedSubjectPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `subjectId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /geo/tracked-subjects HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /geo/tracked-subjects?page=1&pageSize=20&order=DESC&sortBy=createdAt&subjectId=00000000-0000-4000-8000-000000000001&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TrackedSubjectPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TrackedSubjectPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TrackedSubjectPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TrackedSubjectPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TrackedSubjectPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TrackedSubjectPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackedSubjectPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "deviceId": {},
+      "tenantId": {},
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TrackedSubjectItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectId":"00000000-0000-4000-8000-000000000001","deviceId":{},"tenantId":{},"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].deviceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/geo/tracked-subjects"
+}
+```
+
+---
+
+## 5. POST /geo/tracked-subjects
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-tracked-subjects`
@@ -447,7 +736,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /geo/tracked-subjects/{id}/last-position
+## 6. GET /geo/tracked-subjects/{id}/last-position
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-tracked-subjects`
@@ -567,7 +856,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /geo/tracked-subjects/{id}/pings
+## 7. POST /geo/tracked-subjects/{id}/pings
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-tracked-subjects`
@@ -721,7 +1010,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /geo/tracked-subjects/{id}/revoke-consent
+## 8. POST /geo/tracked-subjects/{id}/revoke-consent
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-tracked-subjects`
@@ -831,7 +1120,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /geo/tracking-sessions
+## 9. POST /geo/tracking-sessions
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-tracking-sessions`
@@ -967,7 +1256,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /geo/tracking-sessions/{id}/close
+## 10. POST /geo/tracking-sessions/{id}/close
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-tracking-sessions`
@@ -1086,7 +1375,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /geo/trips
+## 11. POST /geo/trips
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-trips`
@@ -1224,7 +1513,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /geo/trips/{id}/close
+## 12. POST /geo/trips/{id}/close
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo-trips`

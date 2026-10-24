@@ -9,7 +9,7 @@
 # Módulo `graph_intelligence`
 
 **Fuente:** [`src/modules/graph_intelligence/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/graph_intelligence/README.md)
-· 2 controllers · 3 services · 2 repositories · 13 entidades · 1 DTO
+· 3 controllers · 4 services · 2 repositories · 13 entidades · 2 DTO
 
 ---
 

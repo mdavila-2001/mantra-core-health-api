@@ -2,49 +2,50 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 34 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 35 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`
-- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`
+- **Etiquetas OpenAPI:** `billing-collections`, `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`
+- **Controladores:** `BillingCollectionsController`, `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /billing/bills](#1-post-billing-bills) — Registrar factura de proveedor con three-way match
-2. [POST /billing/documents/{id}:post-to-ledger](#2-post-billing-documents-id-post-to-ledger) — Contabilizar documento (posting CxC/CxP)
-3. [POST /billing/dunning-runs:execute](#3-post-billing-dunning-runs-execute) — Ejecutar ciclo de morosidad (dunning)
-4. [POST /billing/internal/dunning-runs/run-due](#4-post-billing-internal-dunning-runs-run-due) — Evaluar y disparar morosidad automática por tenant
-5. [GET /billing/invoices](#5-get-billing-invoices) — Listar las facturas de la práctica
-6. [POST /billing/invoices:issue-from-encounter](#6-post-billing-invoices-issue-from-encounter) — Emitir factura desde los cargos del encuentro
-7. [GET /billing/invoices/{id}](#7-get-billing-invoices-id) — Detalle de una factura, con sus líneas
-8. [POST /billing/invoices/{id}:credit-note](#8-post-billing-invoices-id-credit-note) — Emitir nota de crédito / castigo sobre una factura
-9. [POST /billing/kpi-snapshots:compute](#9-post-billing-kpi-snapshots-compute) — Calcular snapshot de KPI financiero y aging
-10. [GET /billing/patient-statements](#10-get-billing-patient-statements) — Listar los estados de cuenta de la práctica
-11. [POST /billing/patient-statements:generate](#11-post-billing-patient-statements-generate) — Generar el estado de cuenta del paciente
-12. [POST /billing/payment-plans](#12-post-billing-payment-plans) — Configurar un plan de pagos del paciente
-13. [POST /billing/payments-made:execute](#13-post-billing-payments-made-execute) — Ejecutar pago a proveedor con asignación
-14. [POST /billing/payments-received:apply](#14-post-billing-payments-received-apply) — Aplicar un pago recibido con asignación multi-factura
-15. [POST /billing/reconciliation:clear](#15-post-billing-reconciliation-clear) — Conciliar pagos vía documento de compensación
-16. [POST /billing/reimbursements:link](#16-post-billing-reimbursements-link) — Vincular reembolso de reclamo de seguro a la factura
-17. [GET /billing/service-catalog](#17-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
-18. [POST /billing/service-catalog](#18-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
-19. [PATCH /billing/service-catalog/{id}](#19-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
-20. [GET /billing/service-catalog/procedure-specialties](#20-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
-21. [GET /billing/service-catalog/procedures](#21-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
-22. [GET /billing/simulated/catalogs](#22-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
-23. [GET /billing/simulated/charges](#23-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
-24. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#24-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
-25. [POST /billing/simulated/charges/{chargeId}/invoices](#25-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
-26. [POST /billing/simulated/charges/{chargeId}/payment](#26-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
-27. [GET /billing/simulated/invoices/{invoiceId}](#27-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
-28. [POST /billing/simulated/invoices/{invoiceId}/annulment](#28-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
-29. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#29-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
-30. [POST /billing/simulated/invoices/{invoiceId}/email](#30-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
-31. [GET /billing/simulated/my-invoices](#31-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
-32. [GET /billing/simulated/my-invoices/{invoiceId}](#32-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
-33. [GET /billing/simulated/outbox](#33-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
-34. [GET /billing/simulated/status](#34-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
+2. [GET /billing/documents](#2-get-billing-documents) — Listar vínculos documentales de facturación del tenant
+3. [POST /billing/documents/{id}:post-to-ledger](#3-post-billing-documents-id-post-to-ledger) — Contabilizar documento (posting CxC/CxP)
+4. [POST /billing/dunning-runs:execute](#4-post-billing-dunning-runs-execute) — Ejecutar ciclo de morosidad (dunning)
+5. [POST /billing/internal/dunning-runs/run-due](#5-post-billing-internal-dunning-runs-run-due) — Evaluar y disparar morosidad automática por tenant
+6. [GET /billing/invoices](#6-get-billing-invoices) — Listar las facturas de la práctica
+7. [POST /billing/invoices:issue-from-encounter](#7-post-billing-invoices-issue-from-encounter) — Emitir factura desde los cargos del encuentro
+8. [GET /billing/invoices/{id}](#8-get-billing-invoices-id) — Detalle de una factura, con sus líneas
+9. [POST /billing/invoices/{id}:credit-note](#9-post-billing-invoices-id-credit-note) — Emitir nota de crédito / castigo sobre una factura
+10. [POST /billing/kpi-snapshots:compute](#10-post-billing-kpi-snapshots-compute) — Calcular snapshot de KPI financiero y aging
+11. [GET /billing/patient-statements](#11-get-billing-patient-statements) — Listar los estados de cuenta de la práctica
+12. [POST /billing/patient-statements:generate](#12-post-billing-patient-statements-generate) — Generar el estado de cuenta del paciente
+13. [POST /billing/payment-plans](#13-post-billing-payment-plans) — Configurar un plan de pagos del paciente
+14. [POST /billing/payments-made:execute](#14-post-billing-payments-made-execute) — Ejecutar pago a proveedor con asignación
+15. [POST /billing/payments-received:apply](#15-post-billing-payments-received-apply) — Aplicar un pago recibido con asignación multi-factura
+16. [POST /billing/reconciliation:clear](#16-post-billing-reconciliation-clear) — Conciliar pagos vía documento de compensación
+17. [POST /billing/reimbursements:link](#17-post-billing-reimbursements-link) — Vincular reembolso de reclamo de seguro a la factura
+18. [GET /billing/service-catalog](#18-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
+19. [POST /billing/service-catalog](#19-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
+20. [PATCH /billing/service-catalog/{id}](#20-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
+21. [GET /billing/service-catalog/procedure-specialties](#21-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
+22. [GET /billing/service-catalog/procedures](#22-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
+23. [GET /billing/simulated/catalogs](#23-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
+24. [GET /billing/simulated/charges](#24-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
+25. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#25-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
+26. [POST /billing/simulated/charges/{chargeId}/invoices](#26-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
+27. [POST /billing/simulated/charges/{chargeId}/payment](#27-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
+28. [GET /billing/simulated/invoices/{invoiceId}](#28-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
+29. [POST /billing/simulated/invoices/{invoiceId}/annulment](#29-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
+30. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#30-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
+31. [POST /billing/simulated/invoices/{invoiceId}/email](#31-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
+32. [GET /billing/simulated/my-invoices](#32-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
+33. [GET /billing/simulated/my-invoices/{invoiceId}](#33-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
+34. [GET /billing/simulated/outbox](#34-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
+35. [GET /billing/simulated/status](#35-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
 
 ---
 
@@ -234,7 +235,152 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /billing/documents/{id}:post-to-ledger
+## 2. GET /billing/documents
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-collections`
+- **Nombre:** Listar vínculos documentales de facturación del tenant
+- **Operation ID:** `BillingCollectionsController_listDocuments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingCollectionsController.listDocuments](../../src/modules/billing/controllers/billing-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar vínculos documentales de facturación del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V17-02: listar vínculos documentales de facturación del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/documents` en `BillingCollectionsController_listDocuments`. El controlador delega en `BillingCollectionsService.listDocuments`. No recibe body. El tipo de retorno estático es `Promise<BillingDocumentLinkPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `invoiceId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/documents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/documents?page=1&pageSize=20&order=DESC&sortBy=createdAt&invoiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BillingDocumentLinkPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<BillingDocumentLinkPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<BillingDocumentLinkPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<BillingDocumentLinkPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<BillingDocumentLinkPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<BillingDocumentLinkPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BillingDocumentLinkPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "invoiceId": {},
+      "billId": {},
+      "contractId": {},
+      "salesOrderId": {},
+      "purchaseOrderId": {},
+      "claimId": {},
+      "encounterId": {},
+      "relationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<BillingDocumentLinkItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","invoiceId":{},"billId":{},"contractId":{},"salesOrderId":{},"purchaseOrderId":{},"claimId":{},"encounterId":{},"relationTypeConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].invoiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].billId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].contractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].salesOrderId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].purchaseOrderId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].claimId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].encounterId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].relationTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/documents"
+}
+```
+
+---
+
+## 3. POST /billing/documents/{id}:post-to-ledger
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -368,7 +514,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /billing/dunning-runs:execute
+## 4. POST /billing/dunning-runs:execute
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -521,7 +667,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /billing/internal/dunning-runs/run-due
+## 5. POST /billing/internal/dunning-runs/run-due
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -652,7 +798,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. GET /billing/invoices
+## 6. GET /billing/invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -787,7 +933,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /billing/invoices:issue-from-encounter
+## 7. POST /billing/invoices:issue-from-encounter
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -974,7 +1120,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /billing/invoices/{id}
+## 8. GET /billing/invoices/{id}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1101,7 +1247,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /billing/invoices/{id}:credit-note
+## 9. POST /billing/invoices/{id}:credit-note
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1269,7 +1415,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /billing/kpi-snapshots:compute
+## 10. POST /billing/kpi-snapshots:compute
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -1407,7 +1553,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /billing/patient-statements
+## 11. GET /billing/patient-statements
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1540,7 +1686,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /billing/patient-statements:generate
+## 12. POST /billing/patient-statements:generate
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1687,7 +1833,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /billing/payment-plans
+## 13. POST /billing/payment-plans
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1841,7 +1987,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /billing/payments-made:execute
+## 14. POST /billing/payments-made:execute
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-payables`
@@ -2014,7 +2160,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /billing/payments-received:apply
+## 15. POST /billing/payments-received:apply
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -2188,7 +2334,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /billing/reconciliation:clear
+## 16. POST /billing/reconciliation:clear
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -2319,7 +2465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /billing/reimbursements:link
+## 17. POST /billing/reimbursements:link
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -2462,7 +2608,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /billing/service-catalog
+## 18. GET /billing/service-catalog
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2605,7 +2751,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /billing/service-catalog
+## 19. POST /billing/service-catalog
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2774,7 +2920,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. PATCH /billing/service-catalog/{id}
+## 20. PATCH /billing/service-catalog/{id}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2927,7 +3073,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /billing/service-catalog/procedure-specialties
+## 21. GET /billing/service-catalog/procedure-specialties
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -3035,7 +3181,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /billing/service-catalog/procedures
+## 22. GET /billing/service-catalog/procedures
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -3163,7 +3309,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /billing/simulated/catalogs
+## 23. GET /billing/simulated/catalogs
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3252,7 +3398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /billing/simulated/charges
+## 24. GET /billing/simulated/charges
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3345,7 +3491,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+## 25. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3461,7 +3607,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /billing/simulated/charges/{chargeId}/invoices
+## 26. POST /billing/simulated/charges/{chargeId}/invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3596,7 +3742,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /billing/simulated/charges/{chargeId}/payment
+## 27. POST /billing/simulated/charges/{chargeId}/payment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3717,7 +3863,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /billing/simulated/invoices/{invoiceId}
+## 28. GET /billing/simulated/invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3812,7 +3958,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /billing/simulated/invoices/{invoiceId}/annulment
+## 29. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3924,7 +4070,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+## 30. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4021,7 +4167,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /billing/simulated/invoices/{invoiceId}/email
+## 31. POST /billing/simulated/invoices/{invoiceId}/email
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4133,7 +4279,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /billing/simulated/my-invoices
+## 32. GET /billing/simulated/my-invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4222,7 +4368,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /billing/simulated/my-invoices/{invoiceId}
+## 33. GET /billing/simulated/my-invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4315,7 +4461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /billing/simulated/outbox
+## 34. GET /billing/simulated/outbox
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4406,7 +4552,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /billing/simulated/status
+## 35. GET /billing/simulated/status
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`

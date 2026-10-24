@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `lakehouse`
 
-Referencia exhaustiva de 13 operación(es) del módulo `lakehouse`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `lakehouse`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `lakehouse`
-- **Controladores:** `LakehouseController`, `ResearchController`
+- **Etiquetas OpenAPI:** `lakehouse`, `lakehouse-collections`
+- **Controladores:** `LakehouseCollectionsController`, `LakehouseController`, `ResearchController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,17 +13,21 @@ Referencia exhaustiva de 13 operación(es) del módulo `lakehouse`, derivada del
 
 1. [POST /lakehouse/catalogs](#1-post-lakehouse-catalogs) — Registrar el catálogo / metastore
 2. [POST /lakehouse/data-products/{id}/versions](#2-post-lakehouse-data-products-id-versions) — Publicar el producto de datos y su versión
-3. [POST /lakehouse/datasets](#3-post-lakehouse-datasets) — Registrar el dataset y su esquema inicial
-4. [POST /lakehouse/datasets/{id}/quality-runs](#4-post-lakehouse-datasets-id-quality-runs) — Evaluar la calidad del dataset y abrir hallazgos
-5. [POST /lakehouse/ingestion/curated-runs](#5-post-lakehouse-ingestion-curated-runs) — Ingerir dato de salud de-identificado en la zona curada
-6. [POST /lakehouse/transformations/{defId}/runs](#6-post-lakehouse-transformations-defid-runs) — Registrar la corrida con sus particiones, archivos y linaje
-7. [POST /lakehouse/zones](#7-post-lakehouse-zones) — Definir una zona del data lake
-8. [POST /research/dataset-releases](#8-post-research-dataset-releases) — Solicitar el release de un dataset para investigación
-9. [POST /research/dataset-releases/{id}/approve](#9-post-research-dataset-releases-id-approve) — Aprobar y materializar el manifiesto de-identificado
-10. [POST /research/dataset-releases/{id}/revoke](#10-post-research-dataset-releases-id-revoke) — Expirar o revocar el release
-11. [GET /research/dataset-releases/expired](#11-get-research-dataset-releases-expired) — Listar releases con manifiesto vencido sin cerrar
-12. [POST /research/deidentification-profiles](#12-post-research-deidentification-profiles) — Dar de alta un perfil de de-identificación
-13. [POST /research/projects/{id}/cohorts](#13-post-research-projects-id-cohorts) — Definir el proyecto de investigación y su cohorte
+3. [GET /lakehouse/datasets](#3-get-lakehouse-datasets) — Listar datasets del lakehouse del tenant
+4. [POST /lakehouse/datasets](#4-post-lakehouse-datasets) — Registrar el dataset y su esquema inicial
+5. [GET /lakehouse/datasets/{id}/quality-runs](#5-get-lakehouse-datasets-id-quality-runs) — Listar corridas de calidad de un dataset del tenant
+6. [POST /lakehouse/datasets/{id}/quality-runs](#6-post-lakehouse-datasets-id-quality-runs) — Evaluar la calidad del dataset y abrir hallazgos
+7. [POST /lakehouse/ingestion/curated-runs](#7-post-lakehouse-ingestion-curated-runs) — Ingerir dato de salud de-identificado en la zona curada
+8. [GET /lakehouse/transformations/{defId}/runs](#8-get-lakehouse-transformations-defid-runs) — Listar ejecuciones de una transformación del tenant
+9. [POST /lakehouse/transformations/{defId}/runs](#9-post-lakehouse-transformations-defid-runs) — Registrar la corrida con sus particiones, archivos y linaje
+10. [POST /lakehouse/zones](#10-post-lakehouse-zones) — Definir una zona del data lake
+11. [GET /research/dataset-releases](#11-get-research-dataset-releases) — Listar liberaciones de datasets del tenant
+12. [POST /research/dataset-releases](#12-post-research-dataset-releases) — Solicitar el release de un dataset para investigación
+13. [POST /research/dataset-releases/{id}/approve](#13-post-research-dataset-releases-id-approve) — Aprobar y materializar el manifiesto de-identificado
+14. [POST /research/dataset-releases/{id}/revoke](#14-post-research-dataset-releases-id-revoke) — Expirar o revocar el release
+15. [GET /research/dataset-releases/expired](#15-get-research-dataset-releases-expired) — Listar releases con manifiesto vencido sin cerrar
+16. [POST /research/deidentification-profiles](#16-post-research-deidentification-profiles) — Dar de alta un perfil de de-identificación
+17. [POST /research/projects/{id}/cohorts](#17-post-research-projects-id-cohorts) — Definir el proyecto de investigación y su cohorte
 
 ---
 
@@ -335,7 +339,153 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /lakehouse/datasets
+## 3. GET /lakehouse/datasets
+
+- **Módulo:** `lakehouse`
+- **Etiqueta OpenAPI:** `lakehouse-collections`
+- **Nombre:** Listar datasets del lakehouse del tenant
+- **Operation ID:** `LakehouseCollectionsController_listDatasets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LakehouseCollectionsController.listDatasets](../../src/modules/lakehouse/controllers/lakehouse-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar datasets del lakehouse del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V63-05: listar datasets del lakehouse del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /lakehouse/datasets` en `LakehouseCollectionsController_listDatasets`. El controlador delega en `LakehouseCollectionsService.listDatasets`. No recibe body. El tipo de retorno estático es `Promise<LakehouseDatasetPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /lakehouse/datasets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_PLATFORM_ENGINEER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /lakehouse/datasets?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LakehouseDatasetPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LakehouseDatasetPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LakehouseDatasetPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LakehouseDatasetPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LakehouseDatasetPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LakehouseDatasetPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LakehouseDatasetPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "dataProductVersionId": "00000000-0000-4000-8000-000000000001",
+      "dataLakeZoneId": "00000000-0000-4000-8000-000000000001",
+      "lakehouseCatalogId": "00000000-0000-4000-8000-000000000001",
+      "databaseName": "Nombre de ejemplo",
+      "tableName": "Nombre de ejemplo",
+      "storageFormat": "valor-ejemplo",
+      "partitionSpecJson": {
+        "clave": "valor"
+      },
+      "sourceDatasetCode": "CODIGO_EJEMPLO",
+      "lifecycleState": "valor-ejemplo"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<LakehouseDatasetItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","dataProductVersionId":"00000000-0000-4000-8000-000000000001","dataLakeZoneId":"00000000-0000-4000-8000-000000000001","lakehouseCatalogId":"00000000-0000-4000-8000-000000000001","databaseName":"Nombre de ejemplo","tableName":"Nombre de ejemplo","storageFormat":"valor-ejemplo","partitionSpecJson":{"clave":"valor"},"sourceDatasetCode":"CODIGO_EJEMPLO","lifecycleState":"valor-ejemplo"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataProductVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataLakeZoneId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].lakehouseCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].databaseName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].tableName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].storageFormat` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].partitionSpecJson` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].sourceDatasetCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].lifecycleState` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/lakehouse/datasets"
+}
+```
+
+---
+
+## 4. POST /lakehouse/datasets
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -498,7 +648,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /lakehouse/datasets/{id}/quality-runs
+## 5. GET /lakehouse/datasets/{id}/quality-runs
+
+- **Módulo:** `lakehouse`
+- **Etiqueta OpenAPI:** `lakehouse-collections`
+- **Nombre:** Listar corridas de calidad de un dataset del tenant
+- **Operation ID:** `LakehouseCollectionsController_listQualityRuns`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LakehouseCollectionsController.listQualityRuns](../../src/modules/lakehouse/controllers/lakehouse-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar corridas de calidad de un dataset del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V63-06: listar corridas de calidad de un dataset del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /lakehouse/datasets/{id}/quality-runs` en `LakehouseCollectionsController_listQualityRuns`. El controlador delega en `LakehouseCollectionsService.listQualityRuns`. No recibe body. El tipo de retorno estático es `Promise<LakehouseQualityRunPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /lakehouse/datasets/00000000-0000-4000-8000-000000000001/quality-runs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_STEWARD`, `SYSTEM`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /lakehouse/datasets/00000000-0000-4000-8000-000000000001/quality-runs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LakehouseQualityRunPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LakehouseQualityRunPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "lakehouseDatasetId": "00000000-0000-4000-8000-000000000001",
+      "transformationRunId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "evaluatedRecordCount": "valor-ejemplo",
+      "failedRecordCount": "valor-ejemplo",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<LakehouseQualityRunItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","lakehouseDatasetId":"00000000-0000-4000-8000-000000000001","transformationRunId":"00000000-0000-4000-8000-000000000001","status":"ok","evaluatedRecordCount":"valor-ejemplo","failedRecordCount":"valor-ejemplo","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].lakehouseDatasetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].transformationRunId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].evaluatedRecordCount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].failedRecordCount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_STEWARD, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/lakehouse/datasets/{id}/quality-runs"
+}
+```
+
+---
+
+## 6. POST /lakehouse/datasets/{id}/quality-runs
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -651,7 +944,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /lakehouse/ingestion/curated-runs
+## 7. POST /lakehouse/ingestion/curated-runs
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -851,7 +1144,152 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /lakehouse/transformations/{defId}/runs
+## 8. GET /lakehouse/transformations/{defId}/runs
+
+- **Módulo:** `lakehouse`
+- **Etiqueta OpenAPI:** `lakehouse-collections`
+- **Nombre:** Listar ejecuciones de una transformación del tenant
+- **Operation ID:** `LakehouseCollectionsController_listRuns`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LakehouseCollectionsController.listRuns](../../src/modules/lakehouse/controllers/lakehouse-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar ejecuciones de una transformación del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V63-08: listar ejecuciones de una transformación del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /lakehouse/transformations/{defId}/runs` en `LakehouseCollectionsController_listRuns`. El controlador delega en `LakehouseCollectionsService.listRuns`. No recibe body. El tipo de retorno estático es `Promise<TransformationRunPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `defId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /lakehouse/transformations/00000000-0000-4000-8000-000000000001/runs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `TRANSFORMATION_WORKER`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `defId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /lakehouse/transformations/00000000-0000-4000-8000-000000000001/runs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TransformationRunPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TransformationRunPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TransformationRunPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TransformationRunPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TransformationRunPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TransformationRunPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TransformationRunPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransformationRunPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "transformationDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "sourceCheckpoint": "valor-ejemplo",
+      "status": "ok",
+      "inputRecordCount": "valor-ejemplo",
+      "outputRecordCount": "valor-ejemplo",
+      "rejectedRecordCount": "valor-ejemplo",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TransformationRunItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","transformationDefinitionId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","sourceCheckpoint":"valor-ejemplo","status":"ok","inputRecordCount":"valor-ejemplo","outputRecordCount":"valor-ejemplo","rejectedRecordCount":"valor-ejemplo","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].transformationDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].sourceCheckpoint` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].inputRecordCount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].outputRecordCount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].rejectedRecordCount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/lakehouse/transformations/{defId}/runs"
+}
+```
+
+---
+
+## 9. POST /lakehouse/transformations/{defId}/runs
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1056,7 +1494,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /lakehouse/zones
+## 10. POST /lakehouse/zones
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1194,7 +1632,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /research/dataset-releases
+## 11. GET /research/dataset-releases
+
+- **Módulo:** `lakehouse`
+- **Etiqueta OpenAPI:** `lakehouse-collections`
+- **Nombre:** Listar liberaciones de datasets del tenant
+- **Operation ID:** `LakehouseCollectionsController_listDatasetReleases`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [LakehouseCollectionsController.listDatasetReleases](../../src/modules/lakehouse/controllers/lakehouse-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar liberaciones de datasets del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V63-01: listar liberaciones de datasets del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /research/dataset-releases` en `LakehouseCollectionsController_listDatasetReleases`. El controlador delega en `LakehouseCollectionsService.listDatasetReleases`. No recibe body. El tipo de retorno estático es `Promise<DatasetReleaseRequestPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /research/dataset-releases HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRINCIPAL_INVESTIGATOR`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /research/dataset-releases?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DatasetReleaseRequestPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DatasetReleaseRequestPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DatasetReleaseRequestPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DatasetReleaseRequestPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DatasetReleaseRequestPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DatasetReleaseRequestPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DatasetReleaseRequestPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "researchProjectId": "00000000-0000-4000-8000-000000000001",
+      "dataProductVersionId": "00000000-0000-4000-8000-000000000001",
+      "cohortDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "purposeOfUseCode": "CODIGO_EJEMPLO",
+      "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "status": "ok"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<DatasetReleaseRequestItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","researchProjectId":"00000000-0000-4000-8000-000000000001","dataProductVersionId":"00000000-0000-4000-8000-000000000001","cohortDefinitionId":"00000000-0000-4000-8000-000000000001","purposeOfUseCode":"CODIGO_EJEMPLO","requestedByUserId":"00000000-0000-4000-8000-000000000001","requestedAt":"2026-07-31T12:00:00.000Z","status":"ok"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].researchProjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataProductVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].cohortDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].purposeOfUseCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].requestedByUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/research/dataset-releases"
+}
+```
+
+---
+
+## 12. POST /research/dataset-releases
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1336,7 +1914,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /research/dataset-releases/{id}/approve
+## 13. POST /research/dataset-releases/{id}/approve
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1486,7 +2064,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /research/dataset-releases/{id}/revoke
+## 14. POST /research/dataset-releases/{id}/revoke
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1614,7 +2192,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /research/dataset-releases/expired
+## 15. GET /research/dataset-releases/expired
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1726,7 +2304,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /research/deidentification-profiles
+## 16. POST /research/deidentification-profiles
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`
@@ -1867,7 +2445,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /research/projects/{id}/cohorts
+## 17. POST /research/projects/{id}/cohorts
 
 - **Módulo:** `lakehouse`
 - **Etiqueta OpenAPI:** `lakehouse`

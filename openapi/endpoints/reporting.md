@@ -2,31 +2,182 @@
 
 # Endpoints del módulo `reporting`
 
-Referencia exhaustiva de 12 operación(es) del módulo `reporting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `reporting`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `reporting`
-- **Controladores:** `ReportingController`
+- **Etiquetas OpenAPI:** `reporting`, `reporting-collections`
+- **Controladores:** `ReportingCollectionsController`, `ReportingController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /reporting/dashboards](#1-post-reporting-dashboards) — Componer un tablero con sus widgets
-2. [POST /reporting/data-sources](#2-post-reporting-data-sources) — Registrar una fuente de datos gobernada
-3. [POST /reporting/definitions](#3-post-reporting-definitions) — Autorar una definición con sus parámetros y columnas
-4. [POST /reporting/definitions/{id}/deprecate](#4-post-reporting-definitions-id-deprecate) — Deprecar la definición y suspender sus programaciones
-5. [POST /reporting/definitions/{id}/executions](#5-post-reporting-definitions-id-executions) — Encolar una corrida parametrizada
-6. [POST /reporting/definitions/{id}/schedules](#6-post-reporting-definitions-id-schedules) — Programar la distribución periódica del reporte
-7. [POST /reporting/definitions/{id}/versions/publish](#7-post-reporting-definitions-id-versions-publish) — Publicar una versión del reporte
-8. [POST /reporting/executions/{id}/distributions](#8-post-reporting-executions-id-distributions) — Crear las distribuciones del reporte por destinatario
-9. [POST /reporting/executions/{id}/retry](#9-post-reporting-executions-id-retry) — Devolver a la cola una corrida fallida
-10. [POST /reporting/executions/{id}/snapshot](#10-post-reporting-executions-id-snapshot) — Registrar el artefacto materializado y cerrar la corrida
-11. [POST /reporting/scheduler/tick](#11-post-reporting-scheduler-tick) — Disparar las programaciones vencidas
-12. [POST /reporting/schedules/{id}/subscriptions](#12-post-reporting-schedules-id-subscriptions) — Suscribirse a una programación
+1. [GET /reporting/dashboards](#1-get-reporting-dashboards) — Listar tableros del tenant
+2. [POST /reporting/dashboards](#2-post-reporting-dashboards) — Componer un tablero con sus widgets
+3. [GET /reporting/data-sources](#3-get-reporting-data-sources) — Listar fuentes de datos de reporte del tenant
+4. [POST /reporting/data-sources](#4-post-reporting-data-sources) — Registrar una fuente de datos gobernada
+5. [GET /reporting/definitions](#5-get-reporting-definitions) — Listar definiciones de reporte del tenant
+6. [POST /reporting/definitions](#6-post-reporting-definitions) — Autorar una definición con sus parámetros y columnas
+7. [POST /reporting/definitions/{id}/deprecate](#7-post-reporting-definitions-id-deprecate) — Deprecar la definición y suspender sus programaciones
+8. [GET /reporting/definitions/{id}/executions](#8-get-reporting-definitions-id-executions) — Listar ejecuciones de una definición del tenant
+9. [POST /reporting/definitions/{id}/executions](#9-post-reporting-definitions-id-executions) — Encolar una corrida parametrizada
+10. [GET /reporting/definitions/{id}/schedules](#10-get-reporting-definitions-id-schedules) — Listar agendas de una definición del tenant
+11. [POST /reporting/definitions/{id}/schedules](#11-post-reporting-definitions-id-schedules) — Programar la distribución periódica del reporte
+12. [POST /reporting/definitions/{id}/versions/publish](#12-post-reporting-definitions-id-versions-publish) — Publicar una versión del reporte
+13. [GET /reporting/executions](#13-get-reporting-executions) — Listar ejecuciones de reporte del tenant
+14. [POST /reporting/executions/{id}/distributions](#14-post-reporting-executions-id-distributions) — Crear las distribuciones del reporte por destinatario
+15. [POST /reporting/executions/{id}/retry](#15-post-reporting-executions-id-retry) — Devolver a la cola una corrida fallida
+16. [POST /reporting/executions/{id}/snapshot](#16-post-reporting-executions-id-snapshot) — Registrar el artefacto materializado y cerrar la corrida
+17. [POST /reporting/scheduler/tick](#17-post-reporting-scheduler-tick) — Disparar las programaciones vencidas
+18. [POST /reporting/schedules/{id}/subscriptions](#18-post-reporting-schedules-id-subscriptions) — Suscribirse a una programación
 
 ---
 
-## 1. POST /reporting/dashboards
+## 1. GET /reporting/dashboards
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-collections`
+- **Nombre:** Listar tableros del tenant
+- **Operation ID:** `ReportingCollectionsController_listDashboards`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingCollectionsController.listDashboards](../../src/modules/reporting/controllers/reporting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar tableros del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V39-07: listar tableros del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /reporting/dashboards` en `ReportingCollectionsController_listDashboards`. El controlador delega en `ReportingCollectionsService.listDashboards`. No recibe body. El tipo de retorno estático es `Promise<DashboardPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /reporting/dashboards HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `REPORTING_ADMIN`, `REPORT_AUTHOR`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /reporting/dashboards?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DashboardPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DashboardPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DashboardPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DashboardPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DashboardPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DashboardPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DashboardPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "layoutJson": {
+        "clave": "valor"
+      },
+      "requiredPermissionId": {},
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<DashboardItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","layoutJson":{"clave":"valor"},"requiredPermissionId":{},"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].layoutJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].requiredPermissionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REPORTING_ADMIN, REPORT_AUTHOR. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/reporting/dashboards"
+}
+```
+
+---
+
+## 2. POST /reporting/dashboards
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -191,7 +342,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /reporting/data-sources
+## 3. GET /reporting/data-sources
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-collections`
+- **Nombre:** Listar fuentes de datos de reporte del tenant
+- **Operation ID:** `ReportingCollectionsController_listDataSources`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingCollectionsController.listDataSources](../../src/modules/reporting/controllers/reporting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar fuentes de datos de reporte del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V39-08: listar fuentes de datos de reporte del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /reporting/data-sources` en `ReportingCollectionsController_listDataSources`. El controlador delega en `ReportingCollectionsService.listDataSources`. No recibe body. El tipo de retorno estático es `Promise<ReportDataSourcePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /reporting/data-sources HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `REPORTING_ADMIN`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /reporting/data-sources?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDataSourcePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReportDataSourcePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportDataSourcePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportDataSourcePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportDataSourcePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportDataSourcePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDataSourcePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "sourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "readModelDefinitionId": {},
+      "viewName": "Nombre de ejemplo",
+      "specJson": {
+        "clave": "valor"
+      },
+      "rowSecurityJson": {
+        "clave": "valor"
+      },
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ReportDataSourceItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","sourceTypeConceptId":"00000000-0000-4000-8000-000000000001","readModelDefinitionId":{},"viewName":"Nombre de ejemplo","specJson":{"clave":"valor"},"rowSecurityJson":{"clave":"valor"},"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].sourceTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].readModelDefinitionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].viewName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].specJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].rowSecurityJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REPORTING_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/reporting/data-sources"
+}
+```
+
+---
+
+## 4. POST /reporting/data-sources
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -333,7 +635,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /reporting/definitions
+## 5. GET /reporting/definitions
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-collections`
+- **Nombre:** Listar definiciones de reporte del tenant
+- **Operation ID:** `ReportingCollectionsController_listDefinitions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingCollectionsController.listDefinitions](../../src/modules/reporting/controllers/reporting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar definiciones de reporte del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V39-01: listar definiciones de reporte del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /reporting/definitions` en `ReportingCollectionsController_listDefinitions`. El controlador delega en `ReportingCollectionsService.listDefinitions`. No recibe body. El tipo de retorno estático es `Promise<ReportDefinitionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /reporting/definitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `REPORTING_ADMIN`, `REPORT_AUTHOR`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /reporting/definitions?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDefinitionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReportDefinitionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportDefinitionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportDefinitionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportDefinitionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportDefinitionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDefinitionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "categoryConceptId": {},
+      "dataSourceId": "00000000-0000-4000-8000-000000000001",
+      "querySpecJson": {
+        "clave": "valor"
+      },
+      "defaultOutputFormatConceptId": {},
+      "requiredPermissionId": {},
+      "isPublic": true,
+      "currentVersion": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ReportDefinitionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","categoryConceptId":{},"dataSourceId":"00000000-0000-4000-8000-000000000001","querySpecJson":{"clave":"valor"},"defaultOutputFormatConceptId":{},"requiredPermissionId":{},"isPublic":true,"currentVersion":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].categoryConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].dataSourceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].querySpecJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].defaultOutputFormatConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].requiredPermissionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].isPublic` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].currentVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REPORTING_ADMIN, REPORT_AUTHOR. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/reporting/definitions"
+}
+```
+
+---
+
+## 6. POST /reporting/definitions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -531,7 +988,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /reporting/definitions/{id}/deprecate
+## 7. POST /reporting/definitions/{id}/deprecate
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -660,7 +1117,169 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /reporting/definitions/{id}/executions
+## 8. GET /reporting/definitions/{id}/executions
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-collections`
+- **Nombre:** Listar ejecuciones de una definición del tenant
+- **Operation ID:** `ReportingCollectionsController_listDefinitionExecutions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingCollectionsController.listDefinitionExecutions](../../src/modules/reporting/controllers/reporting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar ejecuciones de una definición del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V39-02: listar ejecuciones de una definición del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /reporting/definitions/{id}/executions` en `ReportingCollectionsController_listDefinitionExecutions`. El controlador delega en `ReportingCollectionsService.listDefinitionExecutions`. No recibe body. El tipo de retorno estático es `Promise<ReportExecutionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /reporting/definitions/00000000-0000-4000-8000-000000000001/executions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `REPORTING_ADMIN`, `REPORT_VIEWER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /reporting/definitions/00000000-0000-4000-8000-000000000001/executions?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportExecutionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportExecutionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "reportDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "reportVersionId": {},
+      "scheduleId": {},
+      "tenantId": {},
+      "triggerConceptId": "00000000-0000-4000-8000-000000000001",
+      "requestedByUserId": {},
+      "parametersJson": {
+        "clave": "valor"
+      },
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "finishedAt": "2026-07-31T12:00:00.000Z",
+      "rowCount": "valor-ejemplo",
+      "outputFormatConceptId": {},
+      "outputFileId": {},
+      "errorText": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ReportExecutionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","reportDefinitionId":"00000000-0000-4000-8000-000000000001","reportVersionId":{},"scheduleId":{},"tenantId":{},"triggerConceptId":"00000000-0000-4000-8000-000000000001","requestedByUserId":{},"parametersJson":{"clave":"valor"},"statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","finishedAt":"2026-07-31T12:00:00.000Z","rowCount":"valor-ejemplo","outputFormatConceptId":{},"outputFileId":{},"errorText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reportDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reportVersionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].scheduleId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].triggerConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requestedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].parametersJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].startedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].finishedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].rowCount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].outputFormatConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].outputFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].errorText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REPORTING_ADMIN, REPORT_VIEWER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/reporting/definitions/{id}/executions"
+}
+```
+
+---
+
+## 9. POST /reporting/definitions/{id}/executions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -795,7 +1414,163 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /reporting/definitions/{id}/schedules
+## 10. GET /reporting/definitions/{id}/schedules
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-collections`
+- **Nombre:** Listar agendas de una definición del tenant
+- **Operation ID:** `ReportingCollectionsController_listSchedules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingCollectionsController.listSchedules](../../src/modules/reporting/controllers/reporting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar agendas de una definición del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V39-03: listar agendas de una definición del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /reporting/definitions/{id}/schedules` en `ReportingCollectionsController_listSchedules`. El controlador delega en `ReportingCollectionsService.listSchedules`. No recibe body. El tipo de retorno estático es `Promise<ReportSchedulePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /reporting/definitions/00000000-0000-4000-8000-000000000001/schedules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `REPORTING_ADMIN`, `REPORT_AUTHOR`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /reporting/definitions/00000000-0000-4000-8000-000000000001/schedules?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportSchedulePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReportSchedulePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportSchedulePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportSchedulePageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReportSchedulePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportSchedulePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportSchedulePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportSchedulePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "reportDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "name": "Nombre de ejemplo",
+      "cronExpression": "valor-ejemplo",
+      "timeZone": "America/La_Paz",
+      "parametersJson": {
+        "clave": "valor"
+      },
+      "outputFormatConceptId": "00000000-0000-4000-8000-000000000001",
+      "isEnabled": true,
+      "nextRunAt": "2026-07-31T12:00:00.000Z",
+      "lastRunAt": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ReportScheduleItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","reportDefinitionId":"00000000-0000-4000-8000-000000000001","tenantId":{},"name":"Nombre de ejemplo","cronExpression":"valor-ejemplo","timeZone":"America/La_Paz","parametersJson":{"clave":"valor"},"outputFormatConceptId":"00000000-0000-4000-8000-000000000001","isEnabled":true,"nextRunAt":"2026-07-31T12:00:00.000Z","lastRunAt":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reportDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].cronExpression` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].timeZone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `data[].parametersJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].outputFormatConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].isEnabled` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].nextRunAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].lastRunAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REPORTING_ADMIN, REPORT_AUTHOR. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/reporting/definitions/{id}/schedules"
+}
+```
+
+---
+
+## 11. POST /reporting/definitions/{id}/schedules
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -942,7 +1717,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /reporting/definitions/{id}/versions/publish
+## 12. POST /reporting/definitions/{id}/versions/publish
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1070,7 +1845,167 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /reporting/executions/{id}/distributions
+## 13. GET /reporting/executions
+
+- **Módulo:** `reporting`
+- **Etiqueta OpenAPI:** `reporting-collections`
+- **Nombre:** Listar ejecuciones de reporte del tenant
+- **Operation ID:** `ReportingCollectionsController_listExecutions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ReportingCollectionsController.listExecutions](../../src/modules/reporting/controllers/reporting-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar ejecuciones de reporte del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V39-05: listar ejecuciones de reporte del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /reporting/executions` en `ReportingCollectionsController_listExecutions`. El controlador delega en `ReportingCollectionsService.listExecutions`. No recibe body. El tipo de retorno estático es `Promise<ReportExecutionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `reportDefinitionId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /reporting/executions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `REPORTING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /reporting/executions?page=1&pageSize=20&order=DESC&sortBy=createdAt&reportDefinitionId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportExecutionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReportExecutionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportExecutionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "reportDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "reportVersionId": {},
+      "scheduleId": {},
+      "tenantId": {},
+      "triggerConceptId": "00000000-0000-4000-8000-000000000001",
+      "requestedByUserId": {},
+      "parametersJson": {
+        "clave": "valor"
+      },
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "finishedAt": "2026-07-31T12:00:00.000Z",
+      "rowCount": "valor-ejemplo",
+      "outputFormatConceptId": {},
+      "outputFileId": {},
+      "errorText": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ReportExecutionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","reportDefinitionId":"00000000-0000-4000-8000-000000000001","reportVersionId":{},"scheduleId":{},"tenantId":{},"triggerConceptId":"00000000-0000-4000-8000-000000000001","requestedByUserId":{},"parametersJson":{"clave":"valor"},"statusConceptId":"00000000-0000-4000-8000-000000000001","startedAt":"2026-07-31T12:00:00.000Z","finishedAt":"2026-07-31T12:00:00.000Z","rowCount":"valor-ejemplo","outputFormatConceptId":{},"outputFileId":{},"errorText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reportDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reportVersionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].scheduleId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].triggerConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requestedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].parametersJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].startedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].finishedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].rowCount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].outputFormatConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].outputFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].errorText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: REPORTING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/reporting/executions"
+}
+```
+
+---
+
+## 14. POST /reporting/executions/{id}/distributions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1212,7 +2147,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /reporting/executions/{id}/retry
+## 15. POST /reporting/executions/{id}/retry
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1340,7 +2275,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /reporting/executions/{id}/snapshot
+## 16. POST /reporting/executions/{id}/snapshot
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1485,7 +2420,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /reporting/scheduler/tick
+## 17. POST /reporting/scheduler/tick
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`
@@ -1612,7 +2547,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /reporting/schedules/{id}/subscriptions
+## 18. POST /reporting/schedules/{id}/subscriptions
 
 - **Módulo:** `reporting`
 - **Etiqueta OpenAPI:** `reporting`

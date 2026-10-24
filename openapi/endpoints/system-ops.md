@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `system_ops`
 
-Referencia exhaustiva de 24 operación(es) del módulo `system_ops`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 31 operación(es) del módulo `system_ops`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention`
-- **Controladores:** `AssessmentController`, `BackupController`, `DraftController`, `GovernanceCatalogController`, `LegalHoldController`, `ResidencyController`, `RestoreTestController`, `RetentionExecutionController`
+- **Etiquetas OpenAPI:** `system-ops-assessments`, `system-ops-backup`, `system-ops-collections`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention`
+- **Controladores:** `AssessmentController`, `BackupController`, `DraftController`, `GovernanceCatalogController`, `LegalHoldController`, `ResidencyController`, `RestoreTestController`, `RetentionExecutionController`, `SystemOpsCollectionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,28 +13,35 @@ Referencia exhaustiva de 24 operación(es) del módulo `system_ops`, derivada de
 
 1. [POST /admin/governance/anonymization-rules](#1-post-admin-governance-anonymization-rules) — Definir una regla de anonimización
 2. [POST /admin/governance/assessments/{id}/findings](#2-post-admin-governance-assessments-id-findings) — Abrir un hallazgo sobre una evaluación
-3. [POST /admin/governance/assessments/{id}/remediation-plans](#3-post-admin-governance-assessments-id-remediation-plans) — Crear un plan de remediación con sus acciones
-4. [POST /admin/governance/cross-border-transfers](#4-post-admin-governance-cross-border-transfers) — Registrar una transferencia transfronteriza (append-only)
-5. [POST /admin/governance/drafts](#5-post-admin-governance-drafts) — Guardar un draft record genérico
-6. [POST /admin/governance/drafts/{id}/publish](#6-post-admin-governance-drafts-id-publish) — Publicar un draft record y materializarlo
-7. [POST /admin/governance/entity-registry](#7-post-admin-governance-entity-registry) — Registrar dominio, clasificación y catalogar entidad + campos
-8. [PATCH /admin/governance/entity-registry/{id}/retention](#8-patch-admin-governance-entity-registry-id-retention) — Aplicar una política de retención a una entidad
-9. [PATCH /admin/governance/entity-registry/{id}/write-policy](#9-patch-admin-governance-entity-registry-id-write-policy) — Vincular una política de escritura a una entidad
-10. [PATCH /admin/governance/field-registry/{id}](#10-patch-admin-governance-field-registry-id) — Asignar regla de anonimización / masking a un campo
-11. [PATCH /admin/governance/findings/{id}](#11-patch-admin-governance-findings-id) — Actualizar un hallazgo (estado / owner)
-12. [POST /admin/governance/legal-holds](#12-post-admin-governance-legal-holds) — Colocar un legal hold sobre un objetivo
-13. [POST /admin/governance/legal-holds/{id}/release](#13-post-admin-governance-legal-holds-id-release) — Levantar un legal hold ACTIVE
-14. [POST /admin/governance/operational-frameworks](#14-post-admin-governance-operational-frameworks) — Publicar un framework operativo con sus controles
-15. [POST /admin/governance/remediation-actions/{id}/verify](#15-post-admin-governance-remediation-actions-id-verify) — Verificar y cerrar una acción de remediación
-16. [POST /admin/governance/residency-policies](#16-post-admin-governance-residency-policies) — Definir una política de residencia de datos
-17. [POST /admin/governance/retention-policies](#17-post-admin-governance-retention-policies) — Definir una política de retención con base legal
-18. [POST /admin/governance/tenant-residency-bindings](#18-post-admin-governance-tenant-residency-bindings) — Vincular un tenant a una política de residencia
-19. [POST /admin/governance/workload-assessments](#19-post-admin-governance-workload-assessments) — Iniciar una evaluación de workload
-20. [PUT /admin/governance/workload-assessments/{id}/control-results](#20-put-admin-governance-workload-assessments-id-control-results) — Registrar (UPSERT) resultados de control de una evaluación
-21. [POST /admin/governance/write-policies](#21-post-admin-governance-write-policies) — Definir una política de escritura
-22. [POST /admin/ops/backup-policies](#22-post-admin-ops-backup-policies) — Definir una política de backup (RPO/RTO/inmutabilidad)
-23. [POST /internal/governance/retention-executions/run](#23-post-internal-governance-retention-executions-run) — Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
-24. [POST /internal/ops/restore-test-runs](#24-post-internal-ops-restore-test-runs) — Registrar una prueba de restauración con evidencia
+3. [GET /admin/governance/assessments/{id}/remediation-plans](#3-get-admin-governance-assessments-id-remediation-plans) — Listar planes de remediación de una evaluación del tenant
+4. [POST /admin/governance/assessments/{id}/remediation-plans](#4-post-admin-governance-assessments-id-remediation-plans) — Crear un plan de remediación con sus acciones
+5. [GET /admin/governance/cross-border-transfers](#5-get-admin-governance-cross-border-transfers) — Listar transferencias transfronterizas del tenant
+6. [POST /admin/governance/cross-border-transfers](#6-post-admin-governance-cross-border-transfers) — Registrar una transferencia transfronteriza (append-only)
+7. [GET /admin/governance/drafts](#7-get-admin-governance-drafts) — Listar borradores de gobierno del tenant
+8. [POST /admin/governance/drafts](#8-post-admin-governance-drafts) — Guardar un draft record genérico
+9. [POST /admin/governance/drafts/{id}/publish](#9-post-admin-governance-drafts-id-publish) — Publicar un draft record y materializarlo
+10. [POST /admin/governance/entity-registry](#10-post-admin-governance-entity-registry) — Registrar dominio, clasificación y catalogar entidad + campos
+11. [PATCH /admin/governance/entity-registry/{id}/retention](#11-patch-admin-governance-entity-registry-id-retention) — Aplicar una política de retención a una entidad
+12. [PATCH /admin/governance/entity-registry/{id}/write-policy](#12-patch-admin-governance-entity-registry-id-write-policy) — Vincular una política de escritura a una entidad
+13. [PATCH /admin/governance/field-registry/{id}](#13-patch-admin-governance-field-registry-id) — Asignar regla de anonimización / masking a un campo
+14. [PATCH /admin/governance/findings/{id}](#14-patch-admin-governance-findings-id) — Actualizar un hallazgo (estado / owner)
+15. [GET /admin/governance/legal-holds](#15-get-admin-governance-legal-holds) — Listar retenciones legales del tenant
+16. [POST /admin/governance/legal-holds](#16-post-admin-governance-legal-holds) — Colocar un legal hold sobre un objetivo
+17. [POST /admin/governance/legal-holds/{id}/release](#17-post-admin-governance-legal-holds-id-release) — Levantar un legal hold ACTIVE
+18. [POST /admin/governance/operational-frameworks](#18-post-admin-governance-operational-frameworks) — Publicar un framework operativo con sus controles
+19. [POST /admin/governance/remediation-actions/{id}/verify](#19-post-admin-governance-remediation-actions-id-verify) — Verificar y cerrar una acción de remediación
+20. [POST /admin/governance/residency-policies](#20-post-admin-governance-residency-policies) — Definir una política de residencia de datos
+21. [POST /admin/governance/retention-policies](#21-post-admin-governance-retention-policies) — Definir una política de retención con base legal
+22. [GET /admin/governance/tenant-residency-bindings](#22-get-admin-governance-tenant-residency-bindings) — Listar vínculos de residencia del tenant
+23. [POST /admin/governance/tenant-residency-bindings](#23-post-admin-governance-tenant-residency-bindings) — Vincular un tenant a una política de residencia
+24. [GET /admin/governance/workload-assessments](#24-get-admin-governance-workload-assessments) — Listar evaluaciones de carga de trabajo del tenant
+25. [POST /admin/governance/workload-assessments](#25-post-admin-governance-workload-assessments) — Iniciar una evaluación de workload
+26. [PUT /admin/governance/workload-assessments/{id}/control-results](#26-put-admin-governance-workload-assessments-id-control-results) — Registrar (UPSERT) resultados de control de una evaluación
+27. [POST /admin/governance/write-policies](#27-post-admin-governance-write-policies) — Definir una política de escritura
+28. [GET /admin/ops/backup-policies](#28-get-admin-ops-backup-policies) — Listar políticas de respaldo del tenant
+29. [POST /admin/ops/backup-policies](#29-post-admin-ops-backup-policies) — Definir una política de backup (RPO/RTO/inmutabilidad)
+30. [POST /internal/governance/retention-executions/run](#30-post-internal-governance-retention-executions-run) — Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
+31. [POST /internal/ops/restore-test-runs](#31-post-internal-ops-restore-test-runs) — Registrar una prueba de restauración con evidencia
 
 ---
 
@@ -306,7 +313,159 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /admin/governance/assessments/{id}/remediation-plans
+## 3. GET /admin/governance/assessments/{id}/remediation-plans
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar planes de remediación de una evaluación del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listRemediationPlans`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listRemediationPlans](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar planes de remediación de una evaluación del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-05: listar planes de remediación de una evaluación del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/assessments/{id}/remediation-plans` en `SystemOpsCollectionsController_listRemediationPlans`. El controlador delega en `SystemOpsCollectionsService.listRemediationPlans`. No recibe body. El tipo de retorno estático es `Promise<RemediationPlanPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/assessments/00000000-0000-4000-8000-000000000001/remediation-plans HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/assessments/00000000-0000-4000-8000-000000000001/remediation-plans?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RemediationPlanPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<RemediationPlanPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RemediationPlanPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RemediationPlanPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<RemediationPlanPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RemediationPlanPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RemediationPlanPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RemediationPlanPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "workloadAssessmentId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "ownerUserId": {},
+      "targetCompletionAt": "2026-07-31T12:00:00.000Z",
+      "approvedByUserId": {},
+      "approvedAt": "2026-07-31T12:00:00.000Z",
+      "notes": "Texto descriptivo de ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<RemediationPlanItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","workloadAssessmentId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","ownerUserId":{},"targetCompletionAt":"2026-07-31T12:00:00.000Z","approvedByUserId":{},"approvedAt":"2026-07-31T12:00:00.000Z","notes":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].workloadAssessmentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].targetCompletionAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].approvedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].approvedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].notes` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/assessments/{id}/remediation-plans"
+}
+```
+
+---
+
+## 4. POST /admin/governance/assessments/{id}/remediation-plans
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -467,7 +626,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /admin/governance/cross-border-transfers
+## 5. GET /admin/governance/cross-border-transfers
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar transferencias transfronterizas del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listCrossBorderTransfers`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listCrossBorderTransfers](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar transferencias transfronterizas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-06: listar transferencias transfronterizas del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/cross-border-transfers` en `SystemOpsCollectionsController_listCrossBorderTransfers`. El controlador delega en `SystemOpsCollectionsService.listCrossBorderTransfers`. No recibe body. El tipo de retorno estático es `Promise<CrossBorderTransferEventPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/cross-border-transfers HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/cross-border-transfers?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CrossBorderTransferEventPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CrossBorderTransferEventPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CrossBorderTransferEventPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CrossBorderTransferEventPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CrossBorderTransferEventPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CrossBorderTransferEventPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CrossBorderTransferEventPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "dataCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "sourceRegionConceptId": "00000000-0000-4000-8000-000000000001",
+      "destinationRegionConceptId": "00000000-0000-4000-8000-000000000001",
+      "transferBasisConceptId": "00000000-0000-4000-8000-000000000001",
+      "recipientTenantId": {},
+      "transferReference": "valor-ejemplo",
+      "approvedByUserId": {},
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CrossBorderTransferEventItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","dataCategoryConceptId":"00000000-0000-4000-8000-000000000001","sourceRegionConceptId":"00000000-0000-4000-8000-000000000001","destinationRegionConceptId":"00000000-0000-4000-8000-000000000001","transferBasisConceptId":"00000000-0000-4000-8000-000000000001","recipientTenantId":{},"transferReference":"valor-ejemplo","approvedByUserId":{},"recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].sourceRegionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].destinationRegionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].transferBasisConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].recipientTenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].transferReference` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].approvedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].recordedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/cross-border-transfers"
+}
+```
+
+---
+
+## 6. POST /admin/governance/cross-border-transfers
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-residency`
@@ -604,7 +905,160 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /admin/governance/drafts
+## 7. GET /admin/governance/drafts
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar borradores de gobierno del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listDrafts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listDrafts](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar borradores de gobierno del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-01: listar borradores de gobierno del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/drafts` en `SystemOpsCollectionsController_listDrafts`. El controlador delega en `SystemOpsCollectionsService.listDrafts`. No recibe body. El tipo de retorno estático es `Promise<DraftRecordPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/drafts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/drafts?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DraftRecordPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DraftRecordPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DraftRecordPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DraftRecordPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DraftRecordPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DraftRecordPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DraftRecordPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "schemaName": "Nombre de ejemplo",
+      "tableName": "Nombre de ejemplo",
+      "targetRecordId": {},
+      "ownerUserId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "draftLabel": "valor-ejemplo",
+      "payloadJson": {
+        "clave": "valor"
+      },
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "schemaVersion": 1,
+      "publishedRecordId": {},
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<DraftRecordItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","schemaName":"Nombre de ejemplo","tableName":"Nombre de ejemplo","targetRecordId":{},"ownerUserId":"00000000-0000-4000-8000-000000000001","tenantId":{},"draftLabel":"valor-ejemplo","payloadJson":{"clave":"valor"},"statusConceptId":"00000000-0000-4000-8000-000000000001","schemaVersion":1,"publishedRecordId":{},"expiresAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].schemaName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].tableName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].targetRecordId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].ownerUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].draftLabel` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].payloadJson` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].schemaVersion` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].publishedRecordId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].expiresAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/drafts"
+}
+```
+
+---
+
+## 8. POST /admin/governance/drafts
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-drafts`
@@ -741,7 +1195,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /admin/governance/drafts/{id}/publish
+## 9. POST /admin/governance/drafts/{id}/publish
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-drafts`
@@ -871,7 +1325,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /admin/governance/entity-registry
+## 10. POST /admin/governance/entity-registry
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1074,7 +1528,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PATCH /admin/governance/entity-registry/{id}/retention
+## 11. PATCH /admin/governance/entity-registry/{id}/retention
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1202,7 +1656,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /admin/governance/entity-registry/{id}/write-policy
+## 12. PATCH /admin/governance/entity-registry/{id}/write-policy
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1329,7 +1783,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. PATCH /admin/governance/field-registry/{id}
+## 13. PATCH /admin/governance/field-registry/{id}
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -1457,7 +1911,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PATCH /admin/governance/findings/{id}
+## 14. PATCH /admin/governance/findings/{id}
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -1581,7 +2035,152 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /admin/governance/legal-holds
+## 15. GET /admin/governance/legal-holds
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar retenciones legales del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listLegalHolds`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listLegalHolds](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar retenciones legales del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-02: listar retenciones legales del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/legal-holds` en `SystemOpsCollectionsController_listLegalHolds`. El controlador delega en `SystemOpsCollectionsService.listLegalHolds`. No recibe body. El tipo de retorno estático es `Promise<LegalHoldPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/legal-holds HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/legal-holds?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LegalHoldPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LegalHoldPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LegalHoldPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LegalHoldPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LegalHoldPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LegalHoldPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LegalHoldPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "targetTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "targetId": "00000000-0000-4000-8000-000000000001",
+      "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+      "authorityReference": "valor-ejemplo",
+      "startsAt": "2026-07-31T12:00:00.000Z",
+      "endsAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<LegalHoldItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","targetTypeConceptId":"00000000-0000-4000-8000-000000000001","targetId":"00000000-0000-4000-8000-000000000001","reasonConceptId":"00000000-0000-4000-8000-000000000001","authorityReference":"valor-ejemplo","startsAt":"2026-07-31T12:00:00.000Z","endsAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reasonConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].authorityReference` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startsAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].endsAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/legal-holds"
+}
+```
+
+---
+
+## 16. POST /admin/governance/legal-holds
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-legal-holds`
@@ -1714,7 +2313,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /admin/governance/legal-holds/{id}/release
+## 17. POST /admin/governance/legal-holds/{id}/release
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-legal-holds`
@@ -1837,7 +2436,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /admin/governance/operational-frameworks
+## 18. POST /admin/governance/operational-frameworks
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2002,7 +2601,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /admin/governance/remediation-actions/{id}/verify
+## 19. POST /admin/governance/remediation-actions/{id}/verify
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2128,7 +2727,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /admin/governance/residency-policies
+## 20. POST /admin/governance/residency-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-residency`
@@ -2269,7 +2868,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /admin/governance/retention-policies
+## 21. POST /admin/governance/retention-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -2400,7 +2999,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /admin/governance/tenant-residency-bindings
+## 22. GET /admin/governance/tenant-residency-bindings
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar vínculos de residencia del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listTenantResidencyBindings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listTenantResidencyBindings](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar vínculos de residencia del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-16: listar vínculos de residencia del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/tenant-residency-bindings` en `SystemOpsCollectionsController_listTenantResidencyBindings`. El controlador delega en `SystemOpsCollectionsService.listTenantResidencyBindings`. No recibe body. El tipo de retorno estático es `Promise<TenantResidencyBindingPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/tenant-residency-bindings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/tenant-residency-bindings?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TenantResidencyBindingPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TenantResidencyBindingPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TenantResidencyBindingPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TenantResidencyBindingPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TenantResidencyBindingPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TenantResidencyBindingPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantResidencyBindingPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "residencyPolicyId": "00000000-0000-4000-8000-000000000001",
+      "primaryRegionConceptId": "00000000-0000-4000-8000-000000000001",
+      "disasterRecoveryRegionConceptId": {},
+      "effectiveFrom": "2026-07-31T12:00:00.000Z",
+      "effectiveTo": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TenantResidencyBindingItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","residencyPolicyId":"00000000-0000-4000-8000-000000000001","primaryRegionConceptId":"00000000-0000-4000-8000-000000000001","disasterRecoveryRegionConceptId":{},"effectiveFrom":"2026-07-31T12:00:00.000Z","effectiveTo":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].residencyPolicyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].primaryRegionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].disasterRecoveryRegionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].effectiveFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].effectiveTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/tenant-residency-bindings"
+}
+```
+
+---
+
+## 23. POST /admin/governance/tenant-residency-bindings
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-residency`
@@ -2529,7 +3271,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /admin/governance/workload-assessments
+## 24. GET /admin/governance/workload-assessments
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar evaluaciones de carga de trabajo del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listWorkloadAssessments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listWorkloadAssessments](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar evaluaciones de carga de trabajo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-17: listar evaluaciones de carga de trabajo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/governance/workload-assessments` en `SystemOpsCollectionsController_listWorkloadAssessments`. El controlador delega en `SystemOpsCollectionsService.listWorkloadAssessments`. No recibe body. El tipo de retorno estático es `Promise<WorkloadAssessmentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/governance/workload-assessments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/governance/workload-assessments?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<WorkloadAssessmentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<WorkloadAssessmentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<WorkloadAssessmentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<WorkloadAssessmentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<WorkloadAssessmentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<WorkloadAssessmentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkloadAssessmentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "operationalFrameworkId": "00000000-0000-4000-8000-000000000001",
+      "workloadCode": "CODIGO_EJEMPLO",
+      "workloadName": "Nombre de ejemplo",
+      "serviceComponentId": {},
+      "assessmentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "assessmentPeriodStart": "2026-07-31",
+      "assessmentPeriodEnd": "2026-07-31",
+      "facilitatorUserId": {},
+      "approvedByUserId": {},
+      "approvedAt": "2026-07-31T12:00:00.000Z",
+      "summaryJson": {
+        "clave": "valor"
+      },
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<WorkloadAssessmentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","operationalFrameworkId":"00000000-0000-4000-8000-000000000001","workloadCode":"CODIGO_EJEMPLO","workloadName":"Nombre de ejemplo","serviceComponentId":{},"assessmentTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","assessmentPeriodStart":"2026-07-31","assessmentPeriodEnd":"2026-07-31","facilitatorUserId":{},"approvedByUserId":{},"approvedAt":"2026-07-31T12:00:00.000Z","summaryJson":{"clave":"valor"},"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].operationalFrameworkId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].workloadCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].workloadName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].serviceComponentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].assessmentTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].assessmentPeriodStart` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].assessmentPeriodEnd` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].facilitatorUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].approvedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].approvedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].summaryJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/governance/workload-assessments"
+}
+```
+
+---
+
+## 25. POST /admin/governance/workload-assessments
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2668,7 +3567,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PUT /admin/governance/workload-assessments/{id}/control-results
+## 26. PUT /admin/governance/workload-assessments/{id}/control-results
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-assessments`
@@ -2810,7 +3709,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /admin/governance/write-policies
+## 27. POST /admin/governance/write-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-governance`
@@ -2950,7 +3849,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /admin/ops/backup-policies
+## 28. GET /admin/ops/backup-policies
+
+- **Módulo:** `system_ops`
+- **Etiqueta OpenAPI:** `system-ops-collections`
+- **Nombre:** Listar políticas de respaldo del tenant
+- **Operation ID:** `SystemOpsCollectionsController_listBackupPolicies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SystemOpsCollectionsController.listBackupPolicies](../../src/modules/system_ops/controllers/system-ops-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar políticas de respaldo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V11-20: listar políticas de respaldo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/ops/backup-policies` en `SystemOpsCollectionsController_listBackupPolicies`. El controlador delega en `SystemOpsCollectionsService.listBackupPolicies`. No recibe body. El tipo de retorno estático es `Promise<BackupPolicyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/ops/backup-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/ops/backup-policies?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BackupPolicyPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<BackupPolicyPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<BackupPolicyPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<BackupPolicyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<BackupPolicyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<BackupPolicyPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BackupPolicyPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "resourceScopeConceptId": "00000000-0000-4000-8000-000000000001",
+      "backupTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "rpoSeconds": 1,
+      "rtoSeconds": 1,
+      "retentionDays": 1,
+      "immutableCopyRequired": true,
+      "encryptionRequired": true,
+      "restoreTestFrequencyDays": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<BackupPolicyItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","resourceScopeConceptId":"00000000-0000-4000-8000-000000000001","backupTypeConceptId":"00000000-0000-4000-8000-000000000001","rpoSeconds":1,"rtoSeconds":1,"retentionDays":1,"immutableCopyRequired":true,"encryptionRequired":true,"restoreTestFrequencyDays":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].resourceScopeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].backupTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].rpoSeconds` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].rtoSeconds` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].retentionDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].immutableCopyRequired` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].encryptionRequired` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].restoreTestFrequencyDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/ops/backup-policies"
+}
+```
+
+---
+
+## 29. POST /admin/ops/backup-policies
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-backup`
@@ -3090,7 +4138,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /internal/governance/retention-executions/run
+## 30. POST /internal/governance/retention-executions/run
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-retention`
@@ -3229,7 +4277,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /internal/ops/restore-test-runs
+## 31. POST /internal/ops/restore-test-runs
 
 - **Módulo:** `system_ops`
 - **Etiqueta OpenAPI:** `system-ops-restore`

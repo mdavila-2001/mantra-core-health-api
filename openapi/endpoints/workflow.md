@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `workflow`
 
-Referencia exhaustiva de 11 operación(es) del módulo `workflow`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 12 operación(es) del módulo `workflow`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `workflow`
-- **Controladores:** `WorkflowDefinitionsController`, `WorkflowInstancesController`, `WorkflowTransitionsController`
+- **Etiquetas OpenAPI:** `workflow`, `workflow-collections`
+- **Controladores:** `WorkflowCollectionsController`, `WorkflowDefinitionsController`, `WorkflowInstancesController`, `WorkflowTransitionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -15,13 +15,14 @@ Referencia exhaustiva de 11 operación(es) del módulo `workflow`, derivada del 
 2. [POST /workflow/aggregates/{aggregateId}/transitions/{commandCode}](#2-post-workflow-aggregates-aggregateid-transitions-commandcode) — Disparar una transición validada
 3. [POST /workflow/aggregates/{aggregateId}/transitions/{eventId}/compensate](#3-post-workflow-aggregates-aggregateid-transitions-eventid-compensate) — Compensar una transición
 4. [POST /workflow/aggregates/{aggregateId}/transitions/{eventId}/retry](#4-post-workflow-aggregates-aggregateid-transitions-eventid-retry) — Reintentar una transición cuyo efecto falló
-5. [POST /workflow/instances](#5-post-workflow-instances) — Crear una instancia de workflow y sus tareas iniciales
-6. [POST /workflow/instances/sweep-timeouts](#6-post-workflow-instances-sweep-timeouts) — Escalar las instancias con el plazo vencido
-7. [POST /workflow/state-machines](#7-post-workflow-state-machines) — Registrar una definición de máquina de estado
-8. [POST /workflow/state-machines/{id}/publish](#8-post-workflow-state-machines-id-publish) — Publicar la versión de la definición
-9. [POST /workflow/state-machines/{id}/states](#9-post-workflow-state-machines-id-states) — Declarar los estados de la máquina
-10. [POST /workflow/state-machines/{id}/transitions](#10-post-workflow-state-machines-id-transitions) — Declarar una transición con sus guardas y efectos
-11. [POST /workflow/tasks/{id}/complete](#11-post-workflow-tasks-id-complete) — Completar una tarea de workflow
+5. [GET /workflow/instances](#5-get-workflow-instances) — Listar instancias de flujo de trabajo del tenant
+6. [POST /workflow/instances](#6-post-workflow-instances) — Crear una instancia de workflow y sus tareas iniciales
+7. [POST /workflow/instances/sweep-timeouts](#7-post-workflow-instances-sweep-timeouts) — Escalar las instancias con el plazo vencido
+8. [POST /workflow/state-machines](#8-post-workflow-state-machines) — Registrar una definición de máquina de estado
+9. [POST /workflow/state-machines/{id}/publish](#9-post-workflow-state-machines-id-publish) — Publicar la versión de la definición
+10. [POST /workflow/state-machines/{id}/states](#10-post-workflow-state-machines-id-states) — Declarar los estados de la máquina
+11. [POST /workflow/state-machines/{id}/transitions](#11-post-workflow-state-machines-id-transitions) — Declarar una transición con sus guardas y efectos
+12. [POST /workflow/tasks/{id}/complete](#12-post-workflow-tasks-id-complete) — Completar una tarea de workflow
 
 ---
 
@@ -600,7 +601,157 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /workflow/instances
+## 5. GET /workflow/instances
+
+- **Módulo:** `workflow`
+- **Etiqueta OpenAPI:** `workflow-collections`
+- **Nombre:** Listar instancias de flujo de trabajo del tenant
+- **Operation ID:** `WorkflowCollectionsController_listInstances`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [WorkflowCollectionsController.listInstances](../../src/modules/workflow/controllers/workflow-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar instancias de flujo de trabajo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V32-05: listar instancias de flujo de trabajo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /workflow/instances` en `WorkflowCollectionsController_listInstances`. El controlador delega en `WorkflowCollectionsService.listInstances`. No recibe body. El tipo de retorno estático es `Promise<WorkflowInstancePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `subjectId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /workflow/instances HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `BILLING_AGENT`, `SCHEDULER`, `SYSTEM`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /workflow/instances?page=1&pageSize=20&order=DESC&sortBy=createdAt&subjectId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<WorkflowInstancePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<WorkflowInstancePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<WorkflowInstancePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<WorkflowInstancePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<WorkflowInstancePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<WorkflowInstancePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkflowInstancePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "workflowCode": "CODIGO_EJEMPLO",
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "currentStateConceptId": "00000000-0000-4000-8000-000000000001",
+      "currentStepCode": "CODIGO_EJEMPLO",
+      "contextJson": {
+        "clave": "valor"
+      },
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<WorkflowInstanceItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","workflowCode":"CODIGO_EJEMPLO","subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","currentStateConceptId":"00000000-0000-4000-8000-000000000001","currentStepCode":"CODIGO_EJEMPLO","contextJson":{"clave":"valor"},"dueAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].workflowCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].currentStateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].currentStepCode` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].contextJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].dueAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/workflow/instances"
+}
+```
+
+---
+
+## 6. POST /workflow/instances
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`
@@ -764,7 +915,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /workflow/instances/sweep-timeouts
+## 7. POST /workflow/instances/sweep-timeouts
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`
@@ -888,7 +1039,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /workflow/state-machines
+## 8. POST /workflow/state-machines
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`
@@ -1026,7 +1177,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /workflow/state-machines/{id}/publish
+## 9. POST /workflow/state-machines/{id}/publish
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`
@@ -1158,7 +1309,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /workflow/state-machines/{id}/states
+## 10. POST /workflow/state-machines/{id}/states
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`
@@ -1312,7 +1463,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /workflow/state-machines/{id}/transitions
+## 11. POST /workflow/state-machines/{id}/transitions
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`
@@ -1508,7 +1659,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /workflow/tasks/{id}/complete
+## 12. POST /workflow/tasks/{id}/complete
 
 - **Módulo:** `workflow`
 - **Etiqueta OpenAPI:** `workflow`

@@ -9,7 +9,7 @@
 # Módulo `vector_rag`
 
 **Fuente:** [`src/modules/vector_rag/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/vector_rag/README.md)
-· 2 controllers · 4 services · 3 repositories · 14 entidades · 1 DTO
+· 3 controllers · 5 services · 3 repositories · 14 entidades · 2 DTO
 
 ---
 

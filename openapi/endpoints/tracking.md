@@ -2,30 +2,180 @@
 
 # Endpoints del módulo `tracking`
 
-Referencia exhaustiva de 11 operación(es) del módulo `tracking`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 14 operación(es) del módulo `tracking`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `tracking`
-- **Controladores:** `TrackingController`
+- **Etiquetas OpenAPI:** `tracking`, `tracking-collections`
+- **Controladores:** `TrackingCollectionsController`, `TrackingController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /tracking/milestone-definitions](#1-post-tracking-milestone-definitions) — Definir el catálogo de hitos esperados
-2. [POST /tracking/shipments/{id}/cancel](#2-post-tracking-shipments-id-cancel) — Cancelar el envío y cerrar el sujeto
-3. [POST /tracking/shipments/{id}/delivery-proof](#3-post-tracking-shipments-id-delivery-proof) — Registrar la prueba de entrega y cerrar
-4. [POST /tracking/shipments/{id}/dispatch](#4-post-tracking-shipments-id-dispatch) — Despachar el envío
-5. [POST /tracking/shipments/{id}/eta/recompute](#5-post-tracking-shipments-id-eta-recompute) — Registrar una estimación de llegada
-6. [POST /tracking/shipments/{id}/exception](#6-post-tracking-shipments-id-exception) — Marcar una excepción o reintento de entrega
-7. [POST /tracking/shipments/{id}/handoffs](#7-post-tracking-shipments-id-handoffs) — Registrar el traspaso entre responsables
-8. [POST /tracking/sla/scan](#8-post-tracking-sla-scan) — Barrer los compromisos de hito vencidos
-9. [POST /tracking/trackable-subjects](#9-post-tracking-trackable-subjects) — Abrir un sujeto rastreable y su envío
-10. [POST /tracking/trackable-subjects/{id}/events](#10-post-tracking-trackable-subjects-id-events) — Registrar un evento y avanzar el hito
-11. [POST /tracking/webhooks/carriers/{carrierCode}](#11-post-tracking-webhooks-carriers-carriercode) — Ingerir el webhook del transportista
+1. [GET /tracking/milestone-definitions](#1-get-tracking-milestone-definitions) — Listar definiciones de hito del tenant
+2. [POST /tracking/milestone-definitions](#2-post-tracking-milestone-definitions) — Definir el catálogo de hitos esperados
+3. [GET /tracking/shipments](#3-get-tracking-shipments) — Listar envíos del tenant
+4. [POST /tracking/shipments/{id}/cancel](#4-post-tracking-shipments-id-cancel) — Cancelar el envío y cerrar el sujeto
+5. [POST /tracking/shipments/{id}/delivery-proof](#5-post-tracking-shipments-id-delivery-proof) — Registrar la prueba de entrega y cerrar
+6. [POST /tracking/shipments/{id}/dispatch](#6-post-tracking-shipments-id-dispatch) — Despachar el envío
+7. [POST /tracking/shipments/{id}/eta/recompute](#7-post-tracking-shipments-id-eta-recompute) — Registrar una estimación de llegada
+8. [POST /tracking/shipments/{id}/exception](#8-post-tracking-shipments-id-exception) — Marcar una excepción o reintento de entrega
+9. [POST /tracking/shipments/{id}/handoffs](#9-post-tracking-shipments-id-handoffs) — Registrar el traspaso entre responsables
+10. [POST /tracking/sla/scan](#10-post-tracking-sla-scan) — Barrer los compromisos de hito vencidos
+11. [GET /tracking/trackable-subjects](#11-get-tracking-trackable-subjects) — Listar sujetos rastreables del tenant
+12. [POST /tracking/trackable-subjects](#12-post-tracking-trackable-subjects) — Abrir un sujeto rastreable y su envío
+13. [POST /tracking/trackable-subjects/{id}/events](#13-post-tracking-trackable-subjects-id-events) — Registrar un evento y avanzar el hito
+14. [POST /tracking/webhooks/carriers/{carrierCode}](#14-post-tracking-webhooks-carriers-carriercode) — Ingerir el webhook del transportista
 
 ---
 
-## 1. POST /tracking/milestone-definitions
+## 1. GET /tracking/milestone-definitions
+
+- **Módulo:** `tracking`
+- **Etiqueta OpenAPI:** `tracking-collections`
+- **Nombre:** Listar definiciones de hito del tenant
+- **Operation ID:** `TrackingCollectionsController_listMilestoneDefinitions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TrackingCollectionsController.listMilestoneDefinitions](../../src/modules/tracking/controllers/tracking-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar definiciones de hito del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V37-06: listar definiciones de hito del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tracking/milestone-definitions` en `TrackingCollectionsController_listMilestoneDefinitions`. El controlador delega en `TrackingCollectionsService.listMilestoneDefinitions`. No recibe body. El tipo de retorno estático es `Promise<MilestoneDefinitionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tracking/milestone-definitions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `TRACKING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tracking/milestone-definitions?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MilestoneDefinitionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MilestoneDefinitionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MilestoneDefinitionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MilestoneDefinitionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MilestoneDefinitionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MilestoneDefinitionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MilestoneDefinitionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "milestoneStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "ordinal": 1,
+      "isTerminal": true,
+      "slaMinutes": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<MilestoneDefinitionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","milestoneStatusConceptId":"00000000-0000-4000-8000-000000000001","ordinal":1,"isTerminal":true,"slaMinutes":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].milestoneStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].ordinal` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].isTerminal` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].slaMinutes` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: TRACKING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tracking/milestone-definitions"
+}
+```
+
+---
+
+## 2. POST /tracking/milestone-definitions
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -178,7 +328,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /tracking/shipments/{id}/cancel
+## 3. GET /tracking/shipments
+
+- **Módulo:** `tracking`
+- **Etiqueta OpenAPI:** `tracking-collections`
+- **Nombre:** Listar envíos del tenant
+- **Operation ID:** `TrackingCollectionsController_listShipments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TrackingCollectionsController.listShipments](../../src/modules/tracking/controllers/tracking-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar envíos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V37-01: listar envíos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tracking/shipments` en `TrackingCollectionsController_listShipments`. El controlador delega en `TrackingCollectionsService.listShipments`. No recibe body. El tipo de retorno estático es `Promise<ShipmentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tracking/shipments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `LOGISTICS_OPERATOR`, `TRACKING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tracking/shipments?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ShipmentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ShipmentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ShipmentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ShipmentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ShipmentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ShipmentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ShipmentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "trackableSubjectId": "00000000-0000-4000-8000-000000000001",
+      "carrierId": {},
+      "tenantId": {},
+      "shipmentNumber": "valor-ejemplo",
+      "originAddressId": {},
+      "destinationAddressId": {},
+      "assignedCourierUserId": {},
+      "trackedSubjectId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "dispatchedAt": "2026-07-31T12:00:00.000Z",
+      "estimatedArrivalAt": "2026-07-31T12:00:00.000Z",
+      "deliveredAt": "2026-07-31T12:00:00.000Z",
+      "distanceM": "valor-ejemplo",
+      "temperatureControlled": true,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ShipmentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","trackableSubjectId":"00000000-0000-4000-8000-000000000001","carrierId":{},"tenantId":{},"shipmentNumber":"valor-ejemplo","originAddressId":{},"destinationAddressId":{},"assignedCourierUserId":{},"trackedSubjectId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","dispatchedAt":"2026-07-31T12:00:00.000Z","estimatedArrivalAt":"2026-07-31T12:00:00.000Z","deliveredAt":"2026-07-31T12:00:00.000Z","distanceM":"valor-ejemplo","temperatureControlled":true,"createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].trackableSubjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].carrierId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].shipmentNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].originAddressId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].destinationAddressId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].assignedCourierUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].trackedSubjectId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dispatchedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].estimatedArrivalAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].deliveredAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].distanceM` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].temperatureControlled` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LOGISTICS_OPERATOR, TRACKING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tracking/shipments"
+}
+```
+
+---
+
+## 4. POST /tracking/shipments/{id}/cancel
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -311,7 +618,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /tracking/shipments/{id}/delivery-proof
+## 5. POST /tracking/shipments/{id}/delivery-proof
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -461,7 +768,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /tracking/shipments/{id}/dispatch
+## 6. POST /tracking/shipments/{id}/dispatch
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -594,7 +901,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /tracking/shipments/{id}/eta/recompute
+## 7. POST /tracking/shipments/{id}/eta/recompute
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -732,7 +1039,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /tracking/shipments/{id}/exception
+## 8. POST /tracking/shipments/{id}/exception
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -872,7 +1179,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /tracking/shipments/{id}/handoffs
+## 9. POST /tracking/shipments/{id}/handoffs
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -1021,7 +1328,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /tracking/sla/scan
+## 10. POST /tracking/sla/scan
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -1146,7 +1453,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /tracking/trackable-subjects
+## 11. GET /tracking/trackable-subjects
+
+- **Módulo:** `tracking`
+- **Etiqueta OpenAPI:** `tracking-collections`
+- **Nombre:** Listar sujetos rastreables del tenant
+- **Operation ID:** `TrackingCollectionsController_listTrackableSubjects`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TrackingCollectionsController.listTrackableSubjects](../../src/modules/tracking/controllers/tracking-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar sujetos rastreables del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V37-07: listar sujetos rastreables del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tracking/trackable-subjects` en `TrackingCollectionsController_listTrackableSubjects`. El controlador delega en `TrackingCollectionsService.listTrackableSubjects`. No recibe body. El tipo de retorno estático es `Promise<TrackableSubjectPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tracking/trackable-subjects HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `TRACKING_ADMIN`, `LOGISTICS_OPERATOR`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tracking/trackable-subjects?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TrackableSubjectPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TrackableSubjectPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TrackableSubjectPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TrackableSubjectPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TrackableSubjectPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TrackableSubjectPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackableSubjectPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectRefType": "valor-ejemplo",
+      "subjectRefId": "00000000-0000-4000-8000-000000000001",
+      "trackingNumber": "valor-ejemplo",
+      "currentStatusConceptId": {},
+      "currentMilestoneId": {},
+      "priorityConceptId": {},
+      "openedAt": "2026-07-31T12:00:00.000Z",
+      "closedAt": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TrackableSubjectItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectRefType":"valor-ejemplo","subjectRefId":"00000000-0000-4000-8000-000000000001","trackingNumber":"valor-ejemplo","currentStatusConceptId":{},"currentMilestoneId":{},"priorityConceptId":{},"openedAt":"2026-07-31T12:00:00.000Z","closedAt":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectRefType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].subjectRefId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].trackingNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currentStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].currentMilestoneId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].priorityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].openedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].closedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: TRACKING_ADMIN, LOGISTICS_OPERATOR. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tracking/trackable-subjects"
+}
+```
+
+---
+
+## 12. POST /tracking/trackable-subjects
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -1298,7 +1756,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /tracking/trackable-subjects/{id}/events
+## 13. POST /tracking/trackable-subjects/{id}/events
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`
@@ -1448,7 +1906,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /tracking/webhooks/carriers/{carrierCode}
+## 14. POST /tracking/webhooks/carriers/{carrierCode}
 
 - **Módulo:** `tracking`
 - **Etiqueta OpenAPI:** `tracking`

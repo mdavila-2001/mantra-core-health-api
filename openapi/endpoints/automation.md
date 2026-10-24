@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `automation`
 
-Referencia exhaustiva de 17 operación(es) del módulo `automation`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `automation`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `automation`
-- **Controladores:** `AgentCatalogController`, `AutomationOrchestrationController`
+- **Etiquetas OpenAPI:** `automation`, `automation-collections`
+- **Controladores:** `AgentCatalogController`, `AutomationCollectionsController`, `AutomationOrchestrationController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,20 +14,23 @@ Referencia exhaustiva de 17 operación(es) del módulo `automation`, derivada de
 1. [POST /automation/agent-runs/{id}/approvals](#1-post-automation-agent-runs-id-approvals) — Solicitar aprobación y pausar la ejecución
 2. [POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute](#2-post-automation-agent-runs-id-record-automations-recordautomationid-execute) — Ejecutar una automatización de registro con deduplicación
 3. [POST /automation/agent-runs/{id}/steps](#3-post-automation-agent-runs-id-steps) — Registrar un paso de la traza del agente
-4. [POST /automation/agents](#4-post-automation-agents) — Registrar un agente con su primera versión
-5. [POST /automation/agents/{id}/guardrails](#5-post-automation-agents-id-guardrails) — Adjuntar una política de guardrail a un agente
-6. [POST /automation/agents/{id}/memory](#6-post-automation-agents-id-memory) — Persistir memoria del agente
-7. [POST /automation/agents/{id}/versions/{versionId}/tool-bindings](#7-post-automation-agents-id-versions-versionid-tool-bindings) — Enlazar herramientas a una versión del agente
-8. [POST /automation/agents/{id}/versions/publish](#8-post-automation-agents-id-versions-publish) — Publicar una versión del agente
-9. [POST /automation/approvals/{id}/decide](#9-post-automation-approvals-id-decide) — Decidir la aprobación y reanudar o abortar el run
-10. [POST /automation/guardrails](#10-post-automation-guardrails) — Definir una política de guardrail
-11. [POST /automation/runs/{workflowRunId}/agent-runs](#11-post-automation-runs-workflowrunid-agent-runs) — Arrancar la ejecución de un agente dentro del run
-12. [POST /automation/runs/{workflowRunId}/finalize](#12-post-automation-runs-workflowrunid-finalize) — Cerrar la ejecución con el resumen de coste
-13. [POST /automation/tools](#13-post-automation-tools) — Registrar una herramienta de agente
-14. [POST /automation/triggers](#14-post-automation-triggers) — Configurar un disparador de automatización
-15. [POST /automation/triggers/calendar/tick](#15-post-automation-triggers-calendar-tick) — Evaluar los disparadores de calendario vencidos
-16. [POST /automation/workflows](#16-post-automation-workflows) — Definir un workflow con sus pasos
-17. [POST /automation/workflows/{id}/runs](#17-post-automation-workflows-id-runs) — Arrancar la ejecución de un workflow
+4. [GET /automation/agents](#4-get-automation-agents) — Listar agentes de automatización del tenant
+5. [POST /automation/agents](#5-post-automation-agents) — Registrar un agente con su primera versión
+6. [POST /automation/agents/{id}/guardrails](#6-post-automation-agents-id-guardrails) — Adjuntar una política de guardrail a un agente
+7. [POST /automation/agents/{id}/memory](#7-post-automation-agents-id-memory) — Persistir memoria del agente
+8. [POST /automation/agents/{id}/versions/{versionId}/tool-bindings](#8-post-automation-agents-id-versions-versionid-tool-bindings) — Enlazar herramientas a una versión del agente
+9. [POST /automation/agents/{id}/versions/publish](#9-post-automation-agents-id-versions-publish) — Publicar una versión del agente
+10. [POST /automation/approvals/{id}/decide](#10-post-automation-approvals-id-decide) — Decidir la aprobación y reanudar o abortar el run
+11. [POST /automation/guardrails](#11-post-automation-guardrails) — Definir una política de guardrail
+12. [POST /automation/runs/{workflowRunId}/agent-runs](#12-post-automation-runs-workflowrunid-agent-runs) — Arrancar la ejecución de un agente dentro del run
+13. [POST /automation/runs/{workflowRunId}/finalize](#13-post-automation-runs-workflowrunid-finalize) — Cerrar la ejecución con el resumen de coste
+14. [POST /automation/tools](#14-post-automation-tools) — Registrar una herramienta de agente
+15. [GET /automation/triggers](#15-get-automation-triggers) — Listar disparadores de automatización del tenant
+16. [POST /automation/triggers](#16-post-automation-triggers) — Configurar un disparador de automatización
+17. [POST /automation/triggers/calendar/tick](#17-post-automation-triggers-calendar-tick) — Evaluar los disparadores de calendario vencidos
+18. [GET /automation/workflows](#18-get-automation-workflows) — Listar flujos de automatización del tenant
+19. [POST /automation/workflows](#19-post-automation-workflows) — Definir un workflow con sus pasos
+20. [POST /automation/workflows/{id}/runs](#20-post-automation-workflows-id-runs) — Arrancar la ejecución de un workflow
 
 ---
 
@@ -467,7 +470,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /automation/agents
+## 4. GET /automation/agents
+
+- **Módulo:** `automation`
+- **Etiqueta OpenAPI:** `automation-collections`
+- **Nombre:** Listar agentes de automatización del tenant
+- **Operation ID:** `AutomationCollectionsController_listAgents`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AutomationCollectionsController.listAgents](../../src/modules/automation/controllers/automation-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar agentes de automatización del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V48-04: listar agentes de automatización del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /automation/agents` en `AutomationCollectionsController_listAgents`. El controlador delega en `AutomationCollectionsService.listAgents`. No recibe body. El tipo de retorno estático es `Promise<AgentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /automation/agents HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUTOMATION_ENGINEER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /automation/agents?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AgentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AgentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AgentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AgentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AgentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AgentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AgentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "agentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "defaultModelConceptId": {},
+      "systemServiceComponentId": {},
+      "autonomyLevelConceptId": "00000000-0000-4000-8000-000000000001",
+      "actsAsUserId": {},
+      "currentVersion": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<AgentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","agentTypeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","defaultModelConceptId":{},"systemServiceComponentId":{},"autonomyLevelConceptId":"00000000-0000-4000-8000-000000000001","actsAsUserId":{},"currentVersion":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].agentTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].defaultModelConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].systemServiceComponentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].autonomyLevelConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].actsAsUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].currentVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/automation/agents"
+}
+```
+
+---
+
+## 5. POST /automation/agents
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -622,7 +776,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /automation/agents/{id}/guardrails
+## 6. POST /automation/agents/{id}/guardrails
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -758,7 +912,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /automation/agents/{id}/memory
+## 7. POST /automation/agents/{id}/memory
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -903,7 +1057,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /automation/agents/{id}/versions/{versionId}/tool-bindings
+## 8. POST /automation/agents/{id}/versions/{versionId}/tool-bindings
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1052,7 +1206,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /automation/agents/{id}/versions/publish
+## 9. POST /automation/agents/{id}/versions/publish
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1197,7 +1351,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /automation/approvals/{id}/decide
+## 10. POST /automation/approvals/{id}/decide
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1334,7 +1488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /automation/guardrails
+## 11. POST /automation/guardrails
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1478,7 +1632,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /automation/runs/{workflowRunId}/agent-runs
+## 12. POST /automation/runs/{workflowRunId}/agent-runs
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1619,7 +1773,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /automation/runs/{workflowRunId}/finalize
+## 13. POST /automation/runs/{workflowRunId}/finalize
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1752,7 +1906,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /automation/tools
+## 14. POST /automation/tools
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -1899,7 +2053,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /automation/triggers
+## 15. GET /automation/triggers
+
+- **Módulo:** `automation`
+- **Etiqueta OpenAPI:** `automation-collections`
+- **Nombre:** Listar disparadores de automatización del tenant
+- **Operation ID:** `AutomationCollectionsController_listTriggers`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AutomationCollectionsController.listTriggers](../../src/modules/automation/controllers/automation-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar disparadores de automatización del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V48-13: listar disparadores de automatización del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /automation/triggers` en `AutomationCollectionsController_listTriggers`. El controlador delega en `AutomationCollectionsService.listTriggers`. No recibe body. El tipo de retorno estático es `Promise<AutomationTriggerPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /automation/triggers HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUTOMATION_ENGINEER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /automation/triggers?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AutomationTriggerPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AutomationTriggerPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AutomationTriggerPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AutomationTriggerPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AutomationTriggerPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AutomationTriggerPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AutomationTriggerPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "triggerTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "eventType": "valor-ejemplo",
+      "targetResourceType": "valor-ejemplo",
+      "conditionJson": {
+        "clave": "valor"
+      },
+      "scheduleCron": "valor-ejemplo",
+      "workflowId": "00000000-0000-4000-8000-000000000001",
+      "isEnabled": true,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z",
+      "campaignScheduleId": {},
+      "scheduleSourceConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<AutomationTriggerItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","triggerTypeConceptId":"00000000-0000-4000-8000-000000000001","eventType":"valor-ejemplo","targetResourceType":"valor-ejemplo","conditionJson":{"clave":"valor"},"scheduleCron":"valor-ejemplo","workflowId":"00000000-0000-4000-8000-000000000001","isEnabled":true,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z","campaignScheduleId":{},"scheduleSourceConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].triggerTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].eventType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].targetResourceType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].conditionJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].scheduleCron` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].workflowId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].isEnabled` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].campaignScheduleId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].scheduleSourceConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/automation/triggers"
+}
+```
+
+---
+
+## 16. POST /automation/triggers
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -2051,7 +2362,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /automation/triggers/calendar/tick
+## 17. POST /automation/triggers/calendar/tick
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -2184,7 +2495,154 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /automation/workflows
+## 18. GET /automation/workflows
+
+- **Módulo:** `automation`
+- **Etiqueta OpenAPI:** `automation-collections`
+- **Nombre:** Listar flujos de automatización del tenant
+- **Operation ID:** `AutomationCollectionsController_listWorkflows`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AutomationCollectionsController.listWorkflows](../../src/modules/automation/controllers/automation-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar flujos de automatización del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V48-15: listar flujos de automatización del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /automation/workflows` en `AutomationCollectionsController_listWorkflows`. El controlador delega en `AutomationCollectionsService.listWorkflows`. No recibe body. El tipo de retorno estático es `Promise<WorkflowPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /automation/workflows HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `AUTOMATION_ENGINEER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /automation/workflows?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<WorkflowPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<WorkflowPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<WorkflowPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<WorkflowPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<WorkflowPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<WorkflowPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkflowPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "orchestrationTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "definitionJson": {
+        "clave": "valor"
+      },
+      "currentVersion": 1,
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<WorkflowItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","orchestrationTypeConceptId":"00000000-0000-4000-8000-000000000001","definitionJson":{"clave":"valor"},"currentVersion":1,"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].orchestrationTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].definitionJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].currentVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: AUTOMATION_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/automation/workflows"
+}
+```
+
+---
+
+## 19. POST /automation/workflows
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`
@@ -2358,7 +2816,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /automation/workflows/{id}/runs
+## 20. POST /automation/workflows/{id}/runs
 
 - **Módulo:** `automation`
 - **Etiqueta OpenAPI:** `automation`

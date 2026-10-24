@@ -2,35 +2,185 @@
 
 # Endpoints del módulo `vector_rag`
 
-Referencia exhaustiva de 16 operación(es) del módulo `vector_rag`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 22 operación(es) del módulo `vector_rag`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `vector_rag`
-- **Controladores:** `VectorGovernanceController`, `VectorRuntimeController`
+- **Etiquetas OpenAPI:** `vector-rag-collections`, `vector_rag`
+- **Controladores:** `VectorGovernanceController`, `VectorRagCollectionsController`, `VectorRuntimeController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /vector-rag/collections](#1-post-vector-rag-collections) — Crear una colección vectorial con su vínculo de tenant
-2. [POST /vector-rag/collections/{id}/embedding-jobs](#2-post-vector-rag-collections-id-embedding-jobs) — Encolar un job de embedding
-3. [PUT /vector-rag/collections/{id}/lifecycle](#3-put-vector-rag-collections-id-lifecycle) — Sellar o deprecar la colección
-4. [POST /vector-rag/collections/{id}/re-embed](#4-post-vector-rag-collections-id-re-embed) — Migrar la colección a un modelo nuevo
-5. [POST /vector-rag/collections/{id}/reconciliation](#5-post-vector-rag-collections-id-reconciliation) — Reconciliar el manifiesto canónico contra el vectorial
-6. [POST /vector-rag/deletion-jobs](#6-post-vector-rag-deletion-jobs) — Propagar el borrado de la fuente a los embeddings
-7. [POST /vector-rag/embedding-jobs/{id}/run](#7-post-vector-rag-embedding-jobs-id-run) — Ejecutar un lote del job de embedding
-8. [GET /vector-rag/embedding-jobs/pending](#8-get-vector-rag-embedding-jobs-pending) — Listar jobs de embedding en cola
-9. [POST /vector-rag/embedding-model-versions](#9-post-vector-rag-embedding-model-versions) — Registrar y aprobar una versión de modelo de embedding
-10. [POST /vector-rag/embedding-model-versions/{id}/retire](#10-post-vector-rag-embedding-model-versions-id-retire) — Retirar una versión de modelo
-11. [POST /vector-rag/rag-access-policies](#11-post-vector-rag-rag-access-policies) — Definir una política de acceso RAG
-12. [PUT /vector-rag/rag-access-policies/{id}/publish](#12-put-vector-rag-rag-access-policies-id-publish) — Publicar la política y reenlazar colecciones
-13. [POST /vector-rag/retrieval-sessions](#13-post-vector-rag-retrieval-sessions) — Abrir una sesión de retrieval gobernada por consentimiento
-14. [POST /vector-rag/retrieval-sessions/{id}/evidence](#14-post-vector-rag-retrieval-sessions-id-evidence) — Materializar la evidencia citable
-15. [POST /vector-rag/retrieval-sessions/{id}/feedback](#15-post-vector-rag-retrieval-sessions-id-feedback) — Capturar feedback de la sesión
-16. [POST /vector-rag/retrieval-sessions/{id}/search](#16-post-vector-rag-retrieval-sessions-id-search) — Ranquear los candidatos y filtrarlos por consentimiento y etiquetas
+1. [GET /vector-rag/collections](#1-get-vector-rag-collections) — Listar colecciones vectoriales del tenant
+2. [POST /vector-rag/collections](#2-post-vector-rag-collections) — Crear una colección vectorial con su vínculo de tenant
+3. [GET /vector-rag/collections/{id}/embedding-jobs](#3-get-vector-rag-collections-id-embedding-jobs) — Listar trabajos de embedding de una colección del tenant
+4. [POST /vector-rag/collections/{id}/embedding-jobs](#4-post-vector-rag-collections-id-embedding-jobs) — Encolar un job de embedding
+5. [PUT /vector-rag/collections/{id}/lifecycle](#5-put-vector-rag-collections-id-lifecycle) — Sellar o deprecar la colección
+6. [POST /vector-rag/collections/{id}/re-embed](#6-post-vector-rag-collections-id-re-embed) — Migrar la colección a un modelo nuevo
+7. [GET /vector-rag/collections/{id}/reconciliation](#7-get-vector-rag-collections-id-reconciliation) — Listar conciliaciones de una colección del tenant
+8. [POST /vector-rag/collections/{id}/reconciliation](#8-post-vector-rag-collections-id-reconciliation) — Reconciliar el manifiesto canónico contra el vectorial
+9. [GET /vector-rag/deletion-jobs](#9-get-vector-rag-deletion-jobs) — Listar trabajos de borrado vectorial del tenant
+10. [POST /vector-rag/deletion-jobs](#10-post-vector-rag-deletion-jobs) — Propagar el borrado de la fuente a los embeddings
+11. [GET /vector-rag/embedding-jobs](#11-get-vector-rag-embedding-jobs) — Listar trabajos de embedding del tenant
+12. [POST /vector-rag/embedding-jobs/{id}/run](#12-post-vector-rag-embedding-jobs-id-run) — Ejecutar un lote del job de embedding
+13. [GET /vector-rag/embedding-jobs/pending](#13-get-vector-rag-embedding-jobs-pending) — Listar jobs de embedding en cola
+14. [POST /vector-rag/embedding-model-versions](#14-post-vector-rag-embedding-model-versions) — Registrar y aprobar una versión de modelo de embedding
+15. [POST /vector-rag/embedding-model-versions/{id}/retire](#15-post-vector-rag-embedding-model-versions-id-retire) — Retirar una versión de modelo
+16. [GET /vector-rag/rag-access-policies](#16-get-vector-rag-rag-access-policies) — Listar políticas de acceso RAG del tenant
+17. [POST /vector-rag/rag-access-policies](#17-post-vector-rag-rag-access-policies) — Definir una política de acceso RAG
+18. [PUT /vector-rag/rag-access-policies/{id}/publish](#18-put-vector-rag-rag-access-policies-id-publish) — Publicar la política y reenlazar colecciones
+19. [POST /vector-rag/retrieval-sessions](#19-post-vector-rag-retrieval-sessions) — Abrir una sesión de retrieval gobernada por consentimiento
+20. [POST /vector-rag/retrieval-sessions/{id}/evidence](#20-post-vector-rag-retrieval-sessions-id-evidence) — Materializar la evidencia citable
+21. [POST /vector-rag/retrieval-sessions/{id}/feedback](#21-post-vector-rag-retrieval-sessions-id-feedback) — Capturar feedback de la sesión
+22. [POST /vector-rag/retrieval-sessions/{id}/search](#22-post-vector-rag-retrieval-sessions-id-search) — Ranquear los candidatos y filtrarlos por consentimiento y etiquetas
 
 ---
 
-## 1. POST /vector-rag/collections
+## 1. GET /vector-rag/collections
+
+- **Módulo:** `vector_rag`
+- **Etiqueta OpenAPI:** `vector-rag-collections`
+- **Nombre:** Listar colecciones vectoriales del tenant
+- **Operation ID:** `VectorRagCollectionsController_listCollections`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [VectorRagCollectionsController.listCollections](../../src/modules/vector_rag/controllers/vector-rag-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar colecciones vectoriales del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V59-01: listar colecciones vectoriales del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /vector-rag/collections` en `VectorRagCollectionsController_listCollections`. El controlador delega en `VectorRagCollectionsService.listCollections`. No recibe body. El tipo de retorno estático es `Promise<VectorCollectionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /vector-rag/collections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `RAG_COLLECTION_ADMIN`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /vector-rag/collections?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<VectorCollectionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<VectorCollectionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<VectorCollectionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<VectorCollectionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<VectorCollectionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<VectorCollectionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VectorCollectionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "dimension": 1,
+      "distanceMetric": "valor-ejemplo",
+      "embeddingModelVersionId": "00000000-0000-4000-8000-000000000001",
+      "containsPhi": true,
+      "accessPolicyId": "00000000-0000-4000-8000-000000000001",
+      "lifecycleState": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<VectorCollectionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dimension":1,"distanceMetric":"valor-ejemplo","embeddingModelVersionId":"00000000-0000-4000-8000-000000000001","containsPhi":true,"accessPolicyId":"00000000-0000-4000-8000-000000000001","lifecycleState":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].dimension` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].distanceMetric` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].embeddingModelVersionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].containsPhi` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].accessPolicyId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].lifecycleState` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/vector-rag/collections"
+}
+```
+
+---
+
+## 2. POST /vector-rag/collections
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -183,7 +333,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /vector-rag/collections/{id}/embedding-jobs
+## 3. GET /vector-rag/collections/{id}/embedding-jobs
+
+- **Módulo:** `vector_rag`
+- **Etiqueta OpenAPI:** `vector-rag-collections`
+- **Nombre:** Listar trabajos de embedding de una colección del tenant
+- **Operation ID:** `VectorRagCollectionsController_listCollectionEmbeddingJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [VectorRagCollectionsController.listCollectionEmbeddingJobs](../../src/modules/vector_rag/controllers/vector-rag-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos de embedding de una colección del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V59-02: listar trabajos de embedding de una colección del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /vector-rag/collections/{id}/embedding-jobs` en `VectorRagCollectionsController_listCollectionEmbeddingJobs`. El controlador delega en `VectorRagCollectionsService.listCollectionEmbeddingJobs`. No recibe body. El tipo de retorno estático es `Promise<VectorEmbeddingJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /vector-rag/collections/00000000-0000-4000-8000-000000000001/embedding-jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `RAG_COLLECTION_ADMIN`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /vector-rag/collections/00000000-0000-4000-8000-000000000001/embedding-jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VectorEmbeddingJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "vectorCollectionId": "00000000-0000-4000-8000-000000000001",
+      "jobType": "valor-ejemplo",
+      "sourceScope": {
+        "clave": "valor"
+      },
+      "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "totalChunks": 1,
+      "completedChunks": 1,
+      "failedChunks": 1,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<VectorEmbeddingJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","vectorCollectionId":"00000000-0000-4000-8000-000000000001","jobType":"valor-ejemplo","sourceScope":{"clave":"valor"},"requestedByUserId":"00000000-0000-4000-8000-000000000001","status":"ok","totalChunks":1,"completedChunks":1,"failedChunks":1,"createdAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].vectorCollectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].jobType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].sourceScope` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].requestedByUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].totalChunks` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].completedChunks` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].failedChunks` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/vector-rag/collections/{id}/embedding-jobs"
+}
+```
+
+---
+
+## 4. POST /vector-rag/collections/{id}/embedding-jobs
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -326,7 +627,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. PUT /vector-rag/collections/{id}/lifecycle
+## 5. PUT /vector-rag/collections/{id}/lifecycle
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -455,7 +756,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /vector-rag/collections/{id}/re-embed
+## 6. POST /vector-rag/collections/{id}/re-embed
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -592,7 +893,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /vector-rag/collections/{id}/reconciliation
+## 7. GET /vector-rag/collections/{id}/reconciliation
+
+- **Módulo:** `vector_rag`
+- **Etiqueta OpenAPI:** `vector-rag-collections`
+- **Nombre:** Listar conciliaciones de una colección del tenant
+- **Operation ID:** `VectorRagCollectionsController_listCollectionReconciliations`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [VectorRagCollectionsController.listCollectionReconciliations](../../src/modules/vector_rag/controllers/vector-rag-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar conciliaciones de una colección del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V59-04: listar conciliaciones de una colección del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /vector-rag/collections/{id}/reconciliation` en `VectorRagCollectionsController_listCollectionReconciliations`. El controlador delega en `VectorRagCollectionsService.listCollectionReconciliations`. No recibe body. El tipo de retorno estático es `Promise<VectorReconciliationRunPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /vector-rag/collections/00000000-0000-4000-8000-000000000001/reconciliation HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `RECONCILIATION_WORKER`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /vector-rag/collections/00000000-0000-4000-8000-000000000001/reconciliation?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<VectorReconciliationRunPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VectorReconciliationRunPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "vectorCollectionId": "00000000-0000-4000-8000-000000000001",
+      "missingCount": 1,
+      "orphanCount": 1,
+      "mismatchedCount": 1,
+      "status": "ok",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<VectorReconciliationRunItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","vectorCollectionId":"00000000-0000-4000-8000-000000000001","missingCount":1,"orphanCount":1,"mismatchedCount":1,"status":"ok","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].vectorCollectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].missingCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].orphanCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].mismatchedCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].startedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/vector-rag/collections/{id}/reconciliation"
+}
+```
+
+---
+
+## 8. POST /vector-rag/collections/{id}/reconciliation
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -737,7 +1181,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /vector-rag/deletion-jobs
+## 9. GET /vector-rag/deletion-jobs
+
+- **Módulo:** `vector_rag`
+- **Etiqueta OpenAPI:** `vector-rag-collections`
+- **Nombre:** Listar trabajos de borrado vectorial del tenant
+- **Operation ID:** `VectorRagCollectionsController_listDeletionJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [VectorRagCollectionsController.listDeletionJobs](../../src/modules/vector_rag/controllers/vector-rag-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos de borrado vectorial del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V59-10: listar trabajos de borrado vectorial del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /vector-rag/deletion-jobs` en `VectorRagCollectionsController_listDeletionJobs`. El controlador delega en `VectorRagCollectionsService.listDeletionJobs`. No recibe body. El tipo de retorno estático es `Promise<VectorDeletionJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /vector-rag/deletion-jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRIVACY_OFFICER`, `DPO`, `SYSTEM`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /vector-rag/deletion-jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<VectorDeletionJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<VectorDeletionJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<VectorDeletionJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<VectorDeletionJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<VectorDeletionJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<VectorDeletionJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VectorDeletionJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "sourceDocumentId": "00000000-0000-4000-8000-000000000001",
+      "deletionReason": "Texto descriptivo de ejemplo",
+      "status": "ok",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "verifiedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<VectorDeletionJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","sourceDocumentId":"00000000-0000-4000-8000-000000000001","deletionReason":"Texto descriptivo de ejemplo","status":"ok","requestedAt":"2026-07-31T12:00:00.000Z","verifiedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].sourceDocumentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].deletionReason` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].verifiedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/vector-rag/deletion-jobs"
+}
+```
+
+---
+
+## 10. POST /vector-rag/deletion-jobs
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -876,7 +1458,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /vector-rag/embedding-jobs/{id}/run
+## 11. GET /vector-rag/embedding-jobs
+
+- **Módulo:** `vector_rag`
+- **Etiqueta OpenAPI:** `vector-rag-collections`
+- **Nombre:** Listar trabajos de embedding del tenant
+- **Operation ID:** `VectorRagCollectionsController_listEmbeddingJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [VectorRagCollectionsController.listEmbeddingJobs](../../src/modules/vector_rag/controllers/vector-rag-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos de embedding del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V59-11: listar trabajos de embedding del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /vector-rag/embedding-jobs` en `VectorRagCollectionsController_listEmbeddingJobs`. El controlador delega en `VectorRagCollectionsService.listEmbeddingJobs`. No recibe body. El tipo de retorno estático es `Promise<VectorEmbeddingJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `vectorCollectionId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /vector-rag/embedding-jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `EMBEDDING_WORKER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /vector-rag/embedding-jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt&vectorCollectionId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<VectorEmbeddingJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VectorEmbeddingJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "vectorCollectionId": "00000000-0000-4000-8000-000000000001",
+      "jobType": "valor-ejemplo",
+      "sourceScope": {
+        "clave": "valor"
+      },
+      "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "totalChunks": 1,
+      "completedChunks": 1,
+      "failedChunks": 1,
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<VectorEmbeddingJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","vectorCollectionId":"00000000-0000-4000-8000-000000000001","jobType":"valor-ejemplo","sourceScope":{"clave":"valor"},"requestedByUserId":"00000000-0000-4000-8000-000000000001","status":"ok","totalChunks":1,"completedChunks":1,"failedChunks":1,"createdAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].vectorCollectionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].jobType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].sourceScope` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].requestedByUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].totalChunks` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].completedChunks` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].failedChunks` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/vector-rag/embedding-jobs"
+}
+```
+
+---
+
+## 12. POST /vector-rag/embedding-jobs/{id}/run
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1067,7 +1798,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /vector-rag/embedding-jobs/pending
+## 13. GET /vector-rag/embedding-jobs/pending
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1181,7 +1912,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /vector-rag/embedding-model-versions
+## 14. POST /vector-rag/embedding-model-versions
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1330,7 +2061,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /vector-rag/embedding-model-versions/{id}/retire
+## 15. POST /vector-rag/embedding-model-versions/{id}/retire
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1467,7 +2198,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /vector-rag/rag-access-policies
+## 16. GET /vector-rag/rag-access-policies
+
+- **Módulo:** `vector_rag`
+- **Etiqueta OpenAPI:** `vector-rag-collections`
+- **Nombre:** Listar políticas de acceso RAG del tenant
+- **Operation ID:** `VectorRagCollectionsController_listRagAccessPolicies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [VectorRagCollectionsController.listRagAccessPolicies](../../src/modules/vector_rag/controllers/vector-rag-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar políticas de acceso RAG del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V59-06: listar políticas de acceso rag del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /vector-rag/rag-access-policies` en `VectorRagCollectionsController_listRagAccessPolicies`. El controlador delega en `VectorRagCollectionsService.listRagAccessPolicies`. No recibe body. El tipo de retorno estático es `Promise<RagAccessPolicyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /vector-rag/rag-access-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRIVACY_OFFICER`, `DPO`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /vector-rag/rag-access-policies?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RagAccessPolicyPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<RagAccessPolicyPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RagAccessPolicyPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RagAccessPolicyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RagAccessPolicyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RagAccessPolicyPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RagAccessPolicyPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "allowedPrincipalTypes": [
+        "valor-ejemplo"
+      ],
+      "allowedPurposeCodes": [
+        "CODIGO_EJEMPLO"
+      ],
+      "allowedSecurityLabels": [
+        "valor-ejemplo"
+      ],
+      "patientScopeRequired": true,
+      "consentRequired": true,
+      "fieldRedactionProfile": "valor-ejemplo",
+      "state": "valor-ejemplo"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<RagAccessPolicyItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","allowedPrincipalTypes":["valor-ejemplo"],"allowedPurposeCodes":["CODIGO_EJEMPLO"],"allowedSecurityLabels":["valor-ejemplo"],"patientScopeRequired":true,"consentRequired":true,"fieldRedactionProfile":"valor-ejemplo","state":"valor-ejemplo"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].allowedPrincipalTypes` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `data[].allowedPurposeCodes` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["CODIGO_EJEMPLO"]` |
+| `data[].allowedSecurityLabels` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `data[].patientScopeRequired` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].consentRequired` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].fieldRedactionProfile` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/vector-rag/rag-access-policies"
+}
+```
+
+---
+
+## 17. POST /vector-rag/rag-access-policies
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1625,7 +2504,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. PUT /vector-rag/rag-access-policies/{id}/publish
+## 18. PUT /vector-rag/rag-access-policies/{id}/publish
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1758,7 +2637,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /vector-rag/retrieval-sessions
+## 19. POST /vector-rag/retrieval-sessions
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -1907,7 +2786,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /vector-rag/retrieval-sessions/{id}/evidence
+## 20. POST /vector-rag/retrieval-sessions/{id}/evidence
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -2052,7 +2931,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /vector-rag/retrieval-sessions/{id}/feedback
+## 21. POST /vector-rag/retrieval-sessions/{id}/feedback
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`
@@ -2187,7 +3066,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /vector-rag/retrieval-sessions/{id}/search
+## 22. POST /vector-rag/retrieval-sessions/{id}/search
 
 - **Módulo:** `vector_rag`
 - **Etiqueta OpenAPI:** `vector_rag`

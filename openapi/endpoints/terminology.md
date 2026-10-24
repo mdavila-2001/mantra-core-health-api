@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 25 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 26 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `terminology`
-- **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
+- **Etiquetas OpenAPI:** `terminology`, `terminology-collections`
+- **Controladores:** `TerminologyCodeSystemsController`, `TerminologyCollectionsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -27,15 +27,16 @@ Referencia exhaustiva de 25 operación(es) del módulo `terminology`, derivada d
 14. [POST /terminology/concepts/{conceptId}/relationships](#14-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
 15. [GET /terminology/concepts/glossary-graph](#15-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
 16. [GET /terminology/import-template](#16-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
-17. [PUT /terminology/tenants/{tenantId}/catalog-policies](#17-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-18. [GET /terminology/value-sets](#18-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-19. [POST /terminology/value-sets](#19-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-20. [GET /terminology/value-sets/{id}/$expand](#20-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-21. [GET /terminology/value-sets/$glossary-facets](#21-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
-22. [POST /terminology/ValueSet/{id}/$expand](#22-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-23. [POST /terminology/versions/{versionId}/import](#23-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-24. [POST /terminology/versions/{versionId}/import-file](#24-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
-25. [POST /terminology/versions/{versionId}/publish](#25-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+17. [GET /terminology/tenants/{tenantId}/catalog-policies](#17-get-terminology-tenants-tenantid-catalog-policies) — Listar las políticas de catálogo del tenant
+18. [PUT /terminology/tenants/{tenantId}/catalog-policies](#18-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+19. [GET /terminology/value-sets](#19-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+20. [POST /terminology/value-sets](#20-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+21. [GET /terminology/value-sets/{id}/$expand](#21-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+22. [GET /terminology/value-sets/$glossary-facets](#22-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
+23. [POST /terminology/ValueSet/{id}/$expand](#23-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+24. [POST /terminology/versions/{versionId}/import](#24-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+25. [POST /terminology/versions/{versionId}/import-file](#25-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
+26. [POST /terminology/versions/{versionId}/publish](#26-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -2278,7 +2279,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 17. GET /terminology/tenants/{tenantId}/catalog-policies
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology-collections`
+- **Nombre:** Listar las políticas de catálogo del tenant
+- **Operation ID:** `TerminologyCollectionsController_listCatalogPolicies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyCollectionsController.listCatalogPolicies](../../src/modules/terminology/controllers/terminology-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las políticas de catálogo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V03-12: listar las políticas de catálogo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/tenants/{tenantId}/catalog-policies` en `TerminologyCollectionsController_listCatalogPolicies`. El controlador delega en `TerminologyCollectionsService.listCatalogPolicies`. No recibe body. El tipo de retorno estático es `Promise<TenantCatalogPolicyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `valueSetId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/tenants/00000000-0000-4000-8000-000000000001/catalog-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `tenantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/tenants/00000000-0000-4000-8000-000000000001/catalog-policies?page=1&pageSize=20&order=DESC&sortBy=createdAt&valueSetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TenantCatalogPolicyPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantCatalogPolicyPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "modeConceptId": {},
+      "allowSubset": true,
+      "allowAlias": true,
+      "allowLocalConcepts": true,
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TenantCatalogPolicyItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","valueSetId":"00000000-0000-4000-8000-000000000001","modeConceptId":{},"allowSubset":true,"allowAlias":true,"allowLocalConcepts":true,"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].valueSetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].modeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].allowSubset` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].allowAlias` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].allowLocalConcepts` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/tenants/{tenantId}/catalog-policies"
+}
+```
+
+---
+
+## 18. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2445,7 +2594,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /terminology/value-sets
+## 19. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2577,7 +2726,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /terminology/value-sets
+## 20. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2723,7 +2872,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /terminology/value-sets/{id}/$expand
+## 21. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2869,7 +3018,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /terminology/value-sets/$glossary-facets
+## 22. GET /terminology/value-sets/$glossary-facets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3013,7 +3162,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /terminology/ValueSet/{id}/$expand
+## 23. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3155,7 +3304,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /terminology/versions/{versionId}/import
+## 24. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3299,7 +3448,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /terminology/versions/{versionId}/import-file
+## 25. POST /terminology/versions/{versionId}/import-file
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3465,7 +3614,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /terminology/versions/{versionId}/publish
+## 26. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

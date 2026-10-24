@@ -2,32 +2,38 @@
 
 # Endpoints del módulo `erp`
 
-Referencia exhaustiva de 17 operación(es) del módulo `erp`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 23 operación(es) del módulo `erp`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `erp`
-- **Controladores:** `ErpController`
+- **Etiquetas OpenAPI:** `erp`, `erp-collections`
+- **Controladores:** `ErpCollectionsController`, `ErpController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /erp/bills/{billId}/invoice-match-runs](#1-post-erp-bills-billid-invoice-match-runs) — Conciliar la factura contra orden y recepción (three-way match)
-2. [POST /erp/business-partners](#2-post-erp-business-partners) — Alta de socio de negocio con su cuenta bancaria
-3. [POST /erp/business-partners/{id}/bank-accounts/{accId}/verify](#3-post-erp-business-partners-id-bank-accounts-accid-verify) — Verificar la cuenta bancaria del socio
-4. [POST /erp/contracts](#4-post-erp-contracts) — Crear un contrato en borrador
-5. [POST /erp/contracts/{id}/amendments](#5-post-erp-contracts-id-amendments) — Enmendar el contrato
-6. [POST /erp/contracts/{id}/approval-requests](#6-post-erp-contracts-id-approval-requests) — Solicitar o resolver la aprobación del contrato
-7. [POST /erp/contracts/{id}/payment-schedules/generate](#7-post-erp-contracts-id-payment-schedules-generate) — Generar el cronograma de cuotas del contrato
-8. [POST /erp/contracts/{id}/renewals](#8-post-erp-contracts-id-renewals) — Renovar el contrato extendiendo su vigencia
-9. [POST /erp/contracts/{id}/terminations](#9-post-erp-contracts-id-terminations) — Terminar el contrato y liquidarlo
-10. [POST /erp/employees/{id}/time-off](#10-post-erp-employees-id-time-off) — Solicitar una ausencia
-11. [POST /erp/employees/{id}/time-off/{reqId}/approve](#11-post-erp-employees-id-time-off-reqid-approve) — Aprobar o rechazar la solicitud de ausencia
-12. [POST /erp/employees/onboard](#12-post-erp-employees-onboard) — Alta de empleado
-13. [POST /erp/lease-contracts/{id}/valuations](#13-post-erp-lease-contracts-id-valuations) — Registrar la valoración IFRS 16 del arrendamiento
-14. [POST /erp/purchase-orders](#14-post-erp-purchase-orders) — Emitir una orden de compra desde la requisición
-15. [POST /erp/purchase-orders/{id}/goods-receipts](#15-post-erp-purchase-orders-id-goods-receipts) — Registrar la recepción de mercancía
-16. [POST /erp/purchase-orders/{id}/service-entry-sheets](#16-post-erp-purchase-orders-id-service-entry-sheets) — Registrar la hoja de servicios prestados
-17. [POST /erp/sales-orders](#17-post-erp-sales-orders) — Crear una orden de venta
+2. [GET /erp/business-partners](#2-get-erp-business-partners) — Listar socios comerciales del tenant
+3. [POST /erp/business-partners](#3-post-erp-business-partners) — Alta de socio de negocio con su cuenta bancaria
+4. [POST /erp/business-partners/{id}/bank-accounts/{accId}/verify](#4-post-erp-business-partners-id-bank-accounts-accid-verify) — Verificar la cuenta bancaria del socio
+5. [GET /erp/contracts](#5-get-erp-contracts) — Listar contratos del tenant
+6. [POST /erp/contracts](#6-post-erp-contracts) — Crear un contrato en borrador
+7. [POST /erp/contracts/{id}/amendments](#7-post-erp-contracts-id-amendments) — Enmendar el contrato
+8. [POST /erp/contracts/{id}/approval-requests](#8-post-erp-contracts-id-approval-requests) — Solicitar o resolver la aprobación del contrato
+9. [POST /erp/contracts/{id}/payment-schedules/generate](#9-post-erp-contracts-id-payment-schedules-generate) — Generar el cronograma de cuotas del contrato
+10. [POST /erp/contracts/{id}/renewals](#10-post-erp-contracts-id-renewals) — Renovar el contrato extendiendo su vigencia
+11. [POST /erp/contracts/{id}/terminations](#11-post-erp-contracts-id-terminations) — Terminar el contrato y liquidarlo
+12. [POST /erp/employees/{id}/time-off](#12-post-erp-employees-id-time-off) — Solicitar una ausencia
+13. [POST /erp/employees/{id}/time-off/{reqId}/approve](#13-post-erp-employees-id-time-off-reqid-approve) — Aprobar o rechazar la solicitud de ausencia
+14. [POST /erp/employees/onboard](#14-post-erp-employees-onboard) — Alta de empleado
+15. [POST /erp/lease-contracts/{id}/valuations](#15-post-erp-lease-contracts-id-valuations) — Registrar la valoración IFRS 16 del arrendamiento
+16. [GET /erp/purchase-orders](#16-get-erp-purchase-orders) — Listar órdenes de compra del tenant
+17. [POST /erp/purchase-orders](#17-post-erp-purchase-orders) — Emitir una orden de compra desde la requisición
+18. [GET /erp/purchase-orders/{id}/goods-receipts](#18-get-erp-purchase-orders-id-goods-receipts) — Listar recepciones de una orden de compra del tenant
+19. [POST /erp/purchase-orders/{id}/goods-receipts](#19-post-erp-purchase-orders-id-goods-receipts) — Registrar la recepción de mercancía
+20. [GET /erp/purchase-orders/{id}/service-entry-sheets](#20-get-erp-purchase-orders-id-service-entry-sheets) — Listar hojas de servicio de una orden de compra del tenant
+21. [POST /erp/purchase-orders/{id}/service-entry-sheets](#21-post-erp-purchase-orders-id-service-entry-sheets) — Registrar la hoja de servicios prestados
+22. [GET /erp/sales-orders](#22-get-erp-sales-orders) — Listar órdenes de venta del tenant
+23. [POST /erp/sales-orders](#23-post-erp-sales-orders) — Crear una orden de venta
 
 ---
 
@@ -169,7 +175,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /erp/business-partners
+## 2. GET /erp/business-partners
+
+- **Módulo:** `erp`
+- **Etiqueta OpenAPI:** `erp-collections`
+- **Nombre:** Listar socios comerciales del tenant
+- **Operation ID:** `ErpCollectionsController_listBusinessPartners`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ErpCollectionsController.listBusinessPartners](../../src/modules/erp/controllers/erp-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar socios comerciales del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V38-02: listar socios comerciales del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /erp/business-partners` en `ErpCollectionsController_listBusinessPartners`. El controlador delega en `ErpCollectionsService.listBusinessPartners`. No recibe body. El tipo de retorno estático es `Promise<BusinessPartnerPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /erp/business-partners HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ERP_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /erp/business-partners?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BusinessPartnerPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<BusinessPartnerPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<BusinessPartnerPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<BusinessPartnerPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<BusinessPartnerPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<BusinessPartnerPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BusinessPartnerPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "partnerNumber": "valor-ejemplo",
+      "partnerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "legalName": "Nombre de ejemplo",
+      "taxId": "00000000-0000-4000-8000-000000000001",
+      "countryConceptId": {},
+      "linkedTenantId": {},
+      "linkedPersonId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<BusinessPartnerItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","partnerNumber":"valor-ejemplo","partnerCategoryConceptId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","legalName":"Nombre de ejemplo","taxId":"00000000-0000-4000-8000-000000000001","countryConceptId":{},"linkedTenantId":{},"linkedPersonId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].partnerNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].partnerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].legalName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].taxId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].countryConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].linkedTenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].linkedPersonId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/erp/business-partners"
+}
+```
+
+---
+
+## 3. POST /erp/business-partners
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -310,7 +465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /erp/business-partners/{id}/bank-accounts/{accId}/verify
+## 4. POST /erp/business-partners/{id}/bank-accounts/{accId}/verify
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -425,7 +580,190 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /erp/contracts
+## 5. GET /erp/contracts
+
+- **Módulo:** `erp`
+- **Etiqueta OpenAPI:** `erp-collections`
+- **Nombre:** Listar contratos del tenant
+- **Operation ID:** `ErpCollectionsController_listContracts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ErpCollectionsController.listContracts](../../src/modules/erp/controllers/erp-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar contratos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V38-04: listar contratos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /erp/contracts` en `ErpCollectionsController_listContracts`. El controlador delega en `ErpCollectionsService.listContracts`. No recibe body. El tipo de retorno estático es `Promise<ContractPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /erp/contracts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ERP_ADMIN`, `CONTRACT_MANAGER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /erp/contracts?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ContractPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ContractPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ContractPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ContractPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ContractPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ContractPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContractPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "contractNumber": "valor-ejemplo",
+      "contractTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "title": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "counterpartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "counterpartyRefType": "valor-ejemplo",
+      "counterpartyRefId": {},
+      "counterpartyName": "Nombre de ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "renewalTypeConceptId": {},
+      "noticePeriodDays": 1,
+      "totalValue": "valor-ejemplo",
+      "currencyConceptId": {},
+      "governingJurisdictionConceptId": {},
+      "ownerUserId": {},
+      "primaryBusinessPartnerId": {},
+      "currentVersionId": {},
+      "parentContractId": {},
+      "masterAgreementId": {},
+      "owningDepartmentId": {},
+      "owningCostCenterId": {},
+      "owningProfitCenterId": {},
+      "approvalStatusConceptId": {},
+      "signatureStatusConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ContractItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","contractNumber":"valor-ejemplo","contractTypeConceptId":"00000000-0000-4000-8000-000000000001","title":"valor-ejemplo","description":"Texto descriptivo de ejemplo","counterpartyTypeConceptId":"00000000-0000-4000-8000-000000000001","counterpartyRefType":"valor-ejemplo","counterpartyRefId":{},"counterpartyName":"Nombre de ejemplo","startDate":"2026-07-31","endDate":"2026-07-31","renewalTypeConceptId":{},"noticePeriodDays":1,"totalValue":"valor-ejemplo","currencyConceptId":{},"governingJurisdictionConceptId":{},"ownerUserId":{},"primaryBusinessPartnerId":{},"currentVersionId":{},"parentContractId":{},"masterAgreementId":{},"owningDepartmentId":{},"owningCostCenterId":{},"owningProfitCenterId":{},"approvalStatusConceptId":{},"signatureStatusConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].contractNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].contractTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].title` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].counterpartyTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].counterpartyRefType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].counterpartyRefId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].counterpartyName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].renewalTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].noticePeriodDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].totalValue` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].governingJurisdictionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].primaryBusinessPartnerId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].currentVersionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].parentContractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].masterAgreementId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].owningDepartmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].owningCostCenterId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].owningProfitCenterId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].approvalStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].signatureStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, CONTRACT_MANAGER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/erp/contracts"
+}
+```
+
+---
+
+## 6. POST /erp/contracts
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -576,7 +914,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /erp/contracts/{id}/amendments
+## 7. POST /erp/contracts/{id}/amendments
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -712,7 +1050,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /erp/contracts/{id}/approval-requests
+## 8. POST /erp/contracts/{id}/approval-requests
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -843,7 +1181,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /erp/contracts/{id}/payment-schedules/generate
+## 9. POST /erp/contracts/{id}/payment-schedules/generate
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -979,7 +1317,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /erp/contracts/{id}/renewals
+## 10. POST /erp/contracts/{id}/renewals
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1114,7 +1452,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /erp/contracts/{id}/terminations
+## 11. POST /erp/contracts/{id}/terminations
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1250,7 +1588,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /erp/employees/{id}/time-off
+## 12. POST /erp/employees/{id}/time-off
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1386,7 +1724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /erp/employees/{id}/time-off/{reqId}/approve
+## 13. POST /erp/employees/{id}/time-off/{reqId}/approve
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1514,7 +1852,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /erp/employees/onboard
+## 14. POST /erp/employees/onboard
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1646,7 +1984,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /erp/lease-contracts/{id}/valuations
+## 15. POST /erp/lease-contracts/{id}/valuations
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1783,7 +2121,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /erp/purchase-orders
+## 16. GET /erp/purchase-orders
+
+- **Módulo:** `erp`
+- **Etiqueta OpenAPI:** `erp-collections`
+- **Nombre:** Listar órdenes de compra del tenant
+- **Operation ID:** `ErpCollectionsController_listPurchaseOrders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ErpCollectionsController.listPurchaseOrders](../../src/modules/erp/controllers/erp-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar órdenes de compra del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V38-13: listar órdenes de compra del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /erp/purchase-orders` en `ErpCollectionsController_listPurchaseOrders`. El controlador delega en `ErpCollectionsService.listPurchaseOrders`. No recibe body. El tipo de retorno estático es `Promise<ErpPurchaseOrderPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /erp/purchase-orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ERP_ADMIN`, `BUYER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /erp/purchase-orders?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ErpPurchaseOrderPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ErpPurchaseOrderPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ErpPurchaseOrderPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ErpPurchaseOrderPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ErpPurchaseOrderPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ErpPurchaseOrderPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ErpPurchaseOrderPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "purchaseOrderNumber": "valor-ejemplo",
+      "supplierBusinessPartnerId": "00000000-0000-4000-8000-000000000001",
+      "contractId": {},
+      "purchaseRequisitionId": {},
+      "orderingDepartmentId": {},
+      "buyerEmployeeId": {},
+      "orderDate": "2026-07-31",
+      "expectedDeliveryDate": "2026-07-31",
+      "currencyConceptId": {},
+      "paymentTermsConceptId": {},
+      "incotermConceptId": {},
+      "approvalStatusConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ErpPurchaseOrderItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","purchaseOrderNumber":"valor-ejemplo","supplierBusinessPartnerId":"00000000-0000-4000-8000-000000000001","contractId":{},"purchaseRequisitionId":{},"orderingDepartmentId":{},"buyerEmployeeId":{},"orderDate":"2026-07-31","expectedDeliveryDate":"2026-07-31","currencyConceptId":{},"paymentTermsConceptId":{},"incotermConceptId":{},"approvalStatusConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].purchaseOrderNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].supplierBusinessPartnerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].contractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].purchaseRequisitionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].orderingDepartmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].buyerEmployeeId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].orderDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].expectedDeliveryDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].paymentTermsConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].incotermConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].approvalStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, BUYER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/erp/purchase-orders"
+}
+```
+
+---
+
+## 17. POST /erp/purchase-orders
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -1941,7 +2436,155 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /erp/purchase-orders/{id}/goods-receipts
+## 18. GET /erp/purchase-orders/{id}/goods-receipts
+
+- **Módulo:** `erp`
+- **Etiqueta OpenAPI:** `erp-collections`
+- **Nombre:** Listar recepciones de una orden de compra del tenant
+- **Operation ID:** `ErpCollectionsController_listGoodsReceipts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ErpCollectionsController.listGoodsReceipts](../../src/modules/erp/controllers/erp-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar recepciones de una orden de compra del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V38-14: listar recepciones de una orden de compra del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /erp/purchase-orders/{id}/goods-receipts` en `ErpCollectionsController_listGoodsReceipts`. El controlador delega en `ErpCollectionsService.listGoodsReceipts`. No recibe body. El tipo de retorno estático es `Promise<ErpGoodsReceiptPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /erp/purchase-orders/00000000-0000-4000-8000-000000000001/goods-receipts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ERP_ADMIN`, `BUYER`, `WAREHOUSE`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /erp/purchase-orders/00000000-0000-4000-8000-000000000001/goods-receipts?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ErpGoodsReceiptPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ErpGoodsReceiptPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "receiptNumber": "valor-ejemplo",
+      "purchaseOrderId": "00000000-0000-4000-8000-000000000001",
+      "receivingBranchId": {},
+      "receivedByEmployeeId": {},
+      "receivedAt": "2026-07-31T12:00:00.000Z",
+      "supplierDeliveryReference": "valor-ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ErpGoodsReceiptItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","receiptNumber":"valor-ejemplo","purchaseOrderId":"00000000-0000-4000-8000-000000000001","receivingBranchId":{},"receivedByEmployeeId":{},"receivedAt":"2026-07-31T12:00:00.000Z","supplierDeliveryReference":"valor-ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].receiptNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].purchaseOrderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].receivingBranchId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].receivedByEmployeeId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].receivedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].supplierDeliveryReference` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, BUYER, WAREHOUSE. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/erp/purchase-orders/{id}/goods-receipts"
+}
+```
+
+---
+
+## 19. POST /erp/purchase-orders/{id}/goods-receipts
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -2099,7 +2742,157 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /erp/purchase-orders/{id}/service-entry-sheets
+## 20. GET /erp/purchase-orders/{id}/service-entry-sheets
+
+- **Módulo:** `erp`
+- **Etiqueta OpenAPI:** `erp-collections`
+- **Nombre:** Listar hojas de servicio de una orden de compra del tenant
+- **Operation ID:** `ErpCollectionsController_listServiceEntrySheets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ErpCollectionsController.listServiceEntrySheets](../../src/modules/erp/controllers/erp-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar hojas de servicio de una orden de compra del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V38-15: listar hojas de servicio de una orden de compra del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /erp/purchase-orders/{id}/service-entry-sheets` en `ErpCollectionsController_listServiceEntrySheets`. El controlador delega en `ErpCollectionsService.listServiceEntrySheets`. No recibe body. El tipo de retorno estático es `Promise<ServiceEntrySheetPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /erp/purchase-orders/00000000-0000-4000-8000-000000000001/service-entry-sheets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ERP_ADMIN`, `BUYER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /erp/purchase-orders/00000000-0000-4000-8000-000000000001/service-entry-sheets?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceEntrySheetPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceEntrySheetPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "sheetNumber": "valor-ejemplo",
+      "purchaseOrderId": "00000000-0000-4000-8000-000000000001",
+      "supplierBusinessPartnerId": {},
+      "performedFrom": "2026-07-31",
+      "performedTo": "2026-07-31",
+      "acceptedByEmployeeId": {},
+      "approvalStatusConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ServiceEntrySheetItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","sheetNumber":"valor-ejemplo","purchaseOrderId":"00000000-0000-4000-8000-000000000001","supplierBusinessPartnerId":{},"performedFrom":"2026-07-31","performedTo":"2026-07-31","acceptedByEmployeeId":{},"approvalStatusConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].sheetNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].purchaseOrderId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].supplierBusinessPartnerId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].performedFrom` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].performedTo` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].acceptedByEmployeeId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].approvalStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, BUYER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/erp/purchase-orders/{id}/service-entry-sheets"
+}
+```
+
+---
+
+## 21. POST /erp/purchase-orders/{id}/service-entry-sheets
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`
@@ -2234,7 +3027,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /erp/sales-orders
+## 22. GET /erp/sales-orders
+
+- **Módulo:** `erp`
+- **Etiqueta OpenAPI:** `erp-collections`
+- **Nombre:** Listar órdenes de venta del tenant
+- **Operation ID:** `ErpCollectionsController_listSalesOrders`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ErpCollectionsController.listSalesOrders](../../src/modules/erp/controllers/erp-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar órdenes de venta del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V38-16: listar órdenes de venta del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /erp/sales-orders` en `ErpCollectionsController_listSalesOrders`. El controlador delega en `ErpCollectionsService.listSalesOrders`. No recibe body. El tipo de retorno estático es `Promise<SalesOrderPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /erp/sales-orders HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ERP_ADMIN`, `SALES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /erp/sales-orders?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SalesOrderPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<SalesOrderPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SalesOrderPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SalesOrderPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SalesOrderPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SalesOrderPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SalesOrderPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "salesOrderNumber": "valor-ejemplo",
+      "customerBusinessPartnerId": "00000000-0000-4000-8000-000000000001",
+      "contractId": {},
+      "opportunityId": {},
+      "orderDate": "2026-07-31",
+      "requestedServiceDate": "2026-07-31",
+      "currencyConceptId": {},
+      "paymentTermsConceptId": {},
+      "ownerEmployeeId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<SalesOrderItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","salesOrderNumber":"valor-ejemplo","customerBusinessPartnerId":"00000000-0000-4000-8000-000000000001","contractId":{},"opportunityId":{},"orderDate":"2026-07-31","requestedServiceDate":"2026-07-31","currencyConceptId":{},"paymentTermsConceptId":{},"ownerEmployeeId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].salesOrderNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].customerBusinessPartnerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].contractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].opportunityId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].orderDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].requestedServiceDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].paymentTermsConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].ownerEmployeeId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ERP_ADMIN, SALES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/erp/sales-orders"
+}
+```
+
+---
+
+## 23. POST /erp/sales-orders
 
 - **Módulo:** `erp`
 - **Etiqueta OpenAPI:** `erp`

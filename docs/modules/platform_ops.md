@@ -9,7 +9,7 @@
 # Módulo `platform_ops`
 
 **Fuente:** [`src/modules/platform_ops/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/platform_ops/README.md)
-· 1 controllers · 4 services · 5 repositories · 38 entidades · 1 DTO
+· 2 controllers · 5 services · 5 repositories · 38 entidades · 2 DTO
 
 ---
 

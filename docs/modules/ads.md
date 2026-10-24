@@ -9,7 +9,7 @@
 # Módulo `ads`
 
 **Fuente:** [`src/modules/ads/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/ads/README.md)
-· 1 controllers · 4 services · 5 repositories · 73 entidades · 1 DTO
+· 2 controllers · 5 services · 5 repositories · 73 entidades · 2 DTO
 
 ---
 

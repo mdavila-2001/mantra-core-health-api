@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `organization_extensions`
 
-Referencia exhaustiva de 9 operación(es) del módulo `organization_extensions`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 12 operación(es) del módulo `organization_extensions`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals`
-- **Controladores:** `OrgextAffiliationsController`, `OrgextDataBoundariesController`, `OrgextFacilityLicensesController`, `OrgextHospitalsController`
+- **Etiquetas OpenAPI:** `organization-extensions-collections`, `orgext-affiliations`, `orgext-data-boundaries`, `orgext-facility-licenses`, `orgext-hospitals`
+- **Controladores:** `OrganizationExtensionsCollectionsController`, `OrgextAffiliationsController`, `OrgextDataBoundariesController`, `OrgextFacilityLicensesController`, `OrgextHospitalsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,13 +13,16 @@ Referencia exhaustiva de 9 operación(es) del módulo `organization_extensions`,
 
 1. [POST /orgext/affiliations](#1-post-orgext-affiliations) — Declarar afiliación entre organizaciones
 2. [POST /orgext/affiliations/{id}/terminate](#2-post-orgext-affiliations-id-terminate) — Terminar afiliación y revocar acceso
-3. [POST /orgext/data-boundaries](#3-post-orgext-data-boundaries) — Definir frontera de datos (residencia/RLS)
-4. [POST /orgext/facility-licenses](#4-post-orgext-facility-licenses) — Registrar licencia de instalación
-5. [POST /orgext/facility-licenses/{id}/verify](#5-post-orgext-facility-licenses-id-verify) — Verificar / rechazar licencia
-6. [POST /orgext/hospitals](#6-post-orgext-hospitals) — Especializar practice/tenant como hospital
-7. [POST /orgext/hospitals/{id}/activate](#7-post-orgext-hospitals-id-activate) — Activar hospital y publicar perfil
-8. [POST /orgext/hospitals/{id}/service-lines](#8-post-orgext-hospitals-id-service-lines) — Definir línea de servicio hospitalaria
-9. [DELETE /orgext/hospitals/{id}/service-lines/{lineId}](#9-delete-orgext-hospitals-id-service-lines-lineid) — Retirar (soft-delete) línea de servicio
+3. [GET /orgext/data-boundaries](#3-get-orgext-data-boundaries) — Listar fronteras de datos del tenant
+4. [POST /orgext/data-boundaries](#4-post-orgext-data-boundaries) — Definir frontera de datos (residencia/RLS)
+5. [GET /orgext/facility-licenses](#5-get-orgext-facility-licenses) — Listar licencias de establecimiento del tenant
+6. [POST /orgext/facility-licenses](#6-post-orgext-facility-licenses) — Registrar licencia de instalación
+7. [POST /orgext/facility-licenses/{id}/verify](#7-post-orgext-facility-licenses-id-verify) — Verificar / rechazar licencia
+8. [GET /orgext/hospitals](#8-get-orgext-hospitals) — Listar hospitales del tenant
+9. [POST /orgext/hospitals](#9-post-orgext-hospitals) — Especializar practice/tenant como hospital
+10. [POST /orgext/hospitals/{id}/activate](#10-post-orgext-hospitals-id-activate) — Activar hospital y publicar perfil
+11. [POST /orgext/hospitals/{id}/service-lines](#11-post-orgext-hospitals-id-service-lines) — Definir línea de servicio hospitalaria
+12. [DELETE /orgext/hospitals/{id}/service-lines/{lineId}](#12-delete-orgext-hospitals-id-service-lines-lineid) — Retirar (soft-delete) línea de servicio
 
 ---
 
@@ -298,7 +301,160 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /orgext/data-boundaries
+## 3. GET /orgext/data-boundaries
+
+- **Módulo:** `organization_extensions`
+- **Etiqueta OpenAPI:** `organization-extensions-collections`
+- **Nombre:** Listar fronteras de datos del tenant
+- **Operation ID:** `OrganizationExtensionsCollectionsController_listDataBoundaries`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrganizationExtensionsCollectionsController.listDataBoundaries](../../src/modules/organization_extensions/controllers/organization-extensions-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar fronteras de datos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V22-05: listar fronteras de datos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /orgext/data-boundaries` en `OrganizationExtensionsCollectionsController_listDataBoundaries`. El controlador delega en `OrganizationExtensionsCollectionsService.listDataBoundaries`. No recibe body. El tipo de retorno estático es `Promise<OrganizationDataBoundaryPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /orgext/data-boundaries HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /orgext/data-boundaries?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OrganizationDataBoundaryPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OrganizationDataBoundaryPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OrganizationDataBoundaryPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OrganizationDataBoundaryPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OrganizationDataBoundaryPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OrganizationDataBoundaryPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OrganizationDataBoundaryPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "boundaryTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "dataControllerTenantId": "00000000-0000-4000-8000-000000000001",
+      "dataProcessorTenantId": {},
+      "jurisdictionConceptId": {},
+      "residencyRegionConceptId": {},
+      "allowedPurposeValueSetId": {},
+      "isolationSchemaName": "Nombre de ejemplo",
+      "isolationPolicyVersion": "valor-ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "effectiveFrom": "2026-07-31T12:00:00.000Z",
+      "effectiveTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<OrganizationDataBoundaryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","boundaryTypeConceptId":"00000000-0000-4000-8000-000000000001","dataControllerTenantId":"00000000-0000-4000-8000-000000000001","dataProcessorTenantId":{},"jurisdictionConceptId":{},"residencyRegionConceptId":{},"allowedPurposeValueSetId":{},"isolationSchemaName":"Nombre de ejemplo","isolationPolicyVersion":"valor-ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","effectiveFrom":"2026-07-31T12:00:00.000Z","effectiveTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].boundaryTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataControllerTenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].dataProcessorTenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].jurisdictionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].residencyRegionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].allowedPurposeValueSetId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].isolationSchemaName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].isolationPolicyVersion` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].effectiveFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].effectiveTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/orgext/data-boundaries"
+}
+```
+
+---
+
+## 4. POST /orgext/data-boundaries
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-data-boundaries`
@@ -445,7 +601,161 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /orgext/facility-licenses
+## 5. GET /orgext/facility-licenses
+
+- **Módulo:** `organization_extensions`
+- **Etiqueta OpenAPI:** `organization-extensions-collections`
+- **Nombre:** Listar licencias de establecimiento del tenant
+- **Operation ID:** `OrganizationExtensionsCollectionsController_listFacilityLicenses`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrganizationExtensionsCollectionsController.listFacilityLicenses](../../src/modules/organization_extensions/controllers/organization-extensions-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar licencias de establecimiento del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V22-02: listar licencias de establecimiento del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /orgext/facility-licenses` en `OrganizationExtensionsCollectionsController_listFacilityLicenses`. El controlador delega en `OrganizationExtensionsCollectionsService.listFacilityLicenses`. No recibe body. El tipo de retorno estático es `Promise<FacilityLicensePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `practiceSiteId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /orgext/facility-licenses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /orgext/facility-licenses?page=1&pageSize=20&order=DESC&sortBy=createdAt&practiceSiteId=00000000-0000-4000-8000-000000000001&verificationStatusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FacilityLicensePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<FacilityLicensePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FacilityLicensePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FacilityLicensePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FacilityLicensePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FacilityLicensePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FacilityLicensePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteId": {},
+      "facilityTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "licenseTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "licenseNumber": "valor-ejemplo",
+      "issuingAuthorityTenantId": {},
+      "issuingAuthorityName": "Nombre de ejemplo",
+      "jurisdictionConceptId": {},
+      "validFrom": "2026-07-31",
+      "validTo": "2026-07-31",
+      "evidenceFileId": {},
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<FacilityLicenseItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","practiceSiteId":{},"facilityTypeConceptId":"00000000-0000-4000-8000-000000000001","licenseTypeConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","issuingAuthorityTenantId":{},"issuingAuthorityName":"Nombre de ejemplo","jurisdictionConceptId":{},"validFrom":"2026-07-31","validTo":"2026-07-31","evidenceFileId":{},"verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].facilityTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].licenseTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].issuingAuthorityTenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].issuingAuthorityName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].jurisdictionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].validFrom` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].validTo` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].evidenceFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/orgext/facility-licenses"
+}
+```
+
+---
+
+## 6. POST /orgext/facility-licenses
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-facility-licenses`
@@ -594,7 +904,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /orgext/facility-licenses/{id}/verify
+## 7. POST /orgext/facility-licenses/{id}/verify
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-facility-licenses`
@@ -719,7 +1029,160 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /orgext/hospitals
+## 8. GET /orgext/hospitals
+
+- **Módulo:** `organization_extensions`
+- **Etiqueta OpenAPI:** `organization-extensions-collections`
+- **Nombre:** Listar hospitales del tenant
+- **Operation ID:** `OrganizationExtensionsCollectionsController_listHospitals`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrganizationExtensionsCollectionsController.listHospitals](../../src/modules/organization_extensions/controllers/organization-extensions-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar hospitales del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V22-03: listar hospitales del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /orgext/hospitals` en `OrganizationExtensionsCollectionsController_listHospitals`. El controlador delega en `OrganizationExtensionsCollectionsService.listHospitals`. No recibe body. El tipo de retorno estático es `Promise<HospitalPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /orgext/hospitals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /orgext/hospitals?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<HospitalPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<HospitalPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<HospitalPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<HospitalPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<HospitalPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<HospitalPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HospitalPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "practiceId": "00000000-0000-4000-8000-000000000001",
+      "primaryPracticeSiteId": {},
+      "publicProfileId": {},
+      "hospitalTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "careLevelConceptId": {},
+      "ownershipTypeConceptId": {},
+      "teachingStatusConceptId": {},
+      "emergencyCapabilityConceptId": {},
+      "licensedBedCapacity": 1,
+      "operationalBedCapacity": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<HospitalItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","primaryPracticeSiteId":{},"publicProfileId":{},"hospitalTypeConceptId":"00000000-0000-4000-8000-000000000001","careLevelConceptId":{},"ownershipTypeConceptId":{},"teachingStatusConceptId":{},"emergencyCapabilityConceptId":{},"licensedBedCapacity":1,"operationalBedCapacity":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].primaryPracticeSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].publicProfileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].hospitalTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].careLevelConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].ownershipTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].teachingStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].emergencyCapabilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].licensedBedCapacity` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].operationalBedCapacity` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/orgext/hospitals"
+}
+```
+
+---
+
+## 9. POST /orgext/hospitals
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-hospitals`
@@ -864,7 +1327,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /orgext/hospitals/{id}/activate
+## 10. POST /orgext/hospitals/{id}/activate
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-hospitals`
@@ -998,7 +1461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /orgext/hospitals/{id}/service-lines
+## 11. POST /orgext/hospitals/{id}/service-lines
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-hospitals`
@@ -1137,7 +1600,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. DELETE /orgext/hospitals/{id}/service-lines/{lineId}
+## 12. DELETE /orgext/hospitals/{id}/service-lines/{lineId}
 
 - **Módulo:** `organization_extensions`
 - **Etiqueta OpenAPI:** `orgext-hospitals`

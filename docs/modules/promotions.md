@@ -9,7 +9,7 @@
 # Módulo `promotions`
 
 **Fuente:** [`src/modules/promotions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/promotions/README.md)
-· 2 controllers · 3 services · 2 repositories · 11 entidades · 1 DTO
+· 3 controllers · 4 services · 2 repositories · 11 entidades · 2 DTO
 
 ---
 

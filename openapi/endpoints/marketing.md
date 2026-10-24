@@ -2,29 +2,32 @@
 
 # Endpoints del módulo `marketing`
 
-Referencia exhaustiva de 14 operación(es) del módulo `marketing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `marketing`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `marketing`
-- **Controladores:** `MarketingController`, `TrackedLinkRedirectController`
+- **Etiquetas OpenAPI:** `marketing`, `marketing-collections`
+- **Controladores:** `MarketingCollectionsController`, `MarketingController`, `TrackedLinkRedirectController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /marketing/attribution/compute](#1-post-marketing-attribution-compute) — Calcular la atribución multi-touch de una conversión
-2. [POST /marketing/campaigns](#2-post-marketing-campaigns) — Lanzar una campaña multicanal desde un segmento
-3. [POST /marketing/campaigns/{id}/members/materialize](#3-post-marketing-campaigns-id-members-materialize) — Materializar la audiencia de la campaña desde su segmento
-4. [POST /marketing/content-templates/{code}/versions](#4-post-marketing-content-templates-code-versions) — Publicar una versión de plantilla de contenido
-5. [POST /marketing/enrollments/{id}/advance](#5-post-marketing-enrollments-id-advance) — Avanzar la inscripción al siguiente paso
-6. [POST /marketing/enrollments/{id}/exit](#6-post-marketing-enrollments-id-exit) — Cerrar la inscripción por meta, baja o rebote
-7. [POST /marketing/journeys](#7-post-marketing-journeys) — Crear un journey en borrador
-8. [POST /marketing/journeys/{id}/activate](#8-post-marketing-journeys-id-activate) — Activar el journey e inscribir la cohorte inicial
-9. [POST /marketing/journeys/{id}/steps](#9-post-marketing-journeys-id-steps) — Añadir pasos al journey
-10. [POST /marketing/segments](#10-post-marketing-segments) — Crear un segmento y ligarlo a su read model
-11. [POST /marketing/segments/{id}/refresh](#11-post-marketing-segments-id-refresh) — Recomputar la membresía del segmento
-12. [POST /marketing/touchpoints](#12-post-marketing-touchpoints) — Registrar un touchpoint de marketing
-13. [POST /marketing/tracked-links](#13-post-marketing-tracked-links) — Crear un enlace rastreable con parámetros UTM
-14. [GET /r/{code}](#14-get-r-code) — Resolver un enlace rastreable y registrar el click
+2. [GET /marketing/campaigns](#2-get-marketing-campaigns) — Listar campañas de marketing del tenant
+3. [POST /marketing/campaigns](#3-post-marketing-campaigns) — Lanzar una campaña multicanal desde un segmento
+4. [POST /marketing/campaigns/{id}/members/materialize](#4-post-marketing-campaigns-id-members-materialize) — Materializar la audiencia de la campaña desde su segmento
+5. [POST /marketing/content-templates/{code}/versions](#5-post-marketing-content-templates-code-versions) — Publicar una versión de plantilla de contenido
+6. [POST /marketing/enrollments/{id}/advance](#6-post-marketing-enrollments-id-advance) — Avanzar la inscripción al siguiente paso
+7. [POST /marketing/enrollments/{id}/exit](#7-post-marketing-enrollments-id-exit) — Cerrar la inscripción por meta, baja o rebote
+8. [GET /marketing/journeys](#8-get-marketing-journeys) — Listar recorridos de marketing del tenant
+9. [POST /marketing/journeys](#9-post-marketing-journeys) — Crear un journey en borrador
+10. [POST /marketing/journeys/{id}/activate](#10-post-marketing-journeys-id-activate) — Activar el journey e inscribir la cohorte inicial
+11. [POST /marketing/journeys/{id}/steps](#11-post-marketing-journeys-id-steps) — Añadir pasos al journey
+12. [GET /marketing/segments](#12-get-marketing-segments) — Listar segmentos de marketing del tenant
+13. [POST /marketing/segments](#13-post-marketing-segments) — Crear un segmento y ligarlo a su read model
+14. [POST /marketing/segments/{id}/refresh](#14-post-marketing-segments-id-refresh) — Recomputar la membresía del segmento
+15. [POST /marketing/touchpoints](#15-post-marketing-touchpoints) — Registrar un touchpoint de marketing
+16. [POST /marketing/tracked-links](#16-post-marketing-tracked-links) — Crear un enlace rastreable con parámetros UTM
+17. [GET /r/{code}](#17-get-r-code) — Resolver un enlace rastreable y registrar el click
 
 ---
 
@@ -190,7 +193,182 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /marketing/campaigns
+## 2. GET /marketing/campaigns
+
+- **Módulo:** `marketing`
+- **Etiqueta OpenAPI:** `marketing-collections`
+- **Nombre:** Listar campañas de marketing del tenant
+- **Operation ID:** `MarketingCollectionsController_listCampaigns`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MarketingCollectionsController.listCampaigns](../../src/modules/marketing/controllers/marketing-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar campañas de marketing del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V50-06: listar campañas de marketing del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /marketing/campaigns` en `MarketingCollectionsController_listCampaigns`. El controlador delega en `MarketingCollectionsService.listCampaigns`. No recibe body. El tipo de retorno estático es `Promise<MarketingCampaignPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /marketing/campaigns HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `MARKETING_MANAGER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /marketing/campaigns?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MarketingCampaignPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MarketingCampaignPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MarketingCampaignPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MarketingCampaignPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MarketingCampaignPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MarketingCampaignPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MarketingCampaignPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "campaignTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "objectiveConceptId": "00000000-0000-4000-8000-000000000001",
+      "channelConceptId": {},
+      "segmentId": {},
+      "budgetAmount": "valor-ejemplo",
+      "currencyConceptId": {},
+      "adCampaignRefId": {},
+      "promotionId": {},
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "ownerUserId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z",
+      "governanceScopeConceptId": {},
+      "requiresExplicitPublish": true,
+      "publishedVersion": 1,
+      "publishedAt": "2026-07-31T12:00:00.000Z",
+      "publishedByUserId": {},
+      "cancellationReason": "Texto descriptivo de ejemplo",
+      "cancelledAt": "2026-07-31T12:00:00.000Z",
+      "cancelledByUserId": {}
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<MarketingCampaignItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","campaignTypeConceptId":"00000000-0000-4000-8000-000000000001","objectiveConceptId":"00000000-0000-4000-8000-000000000001","channelConceptId":{},"segmentId":{},"budgetAmount":"valor-ejemplo","currencyConceptId":{},"adCampaignRefId":{},"promotionId":{},"startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","ownerUserId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z","governanceScopeConceptId":{},"requiresExplicitPublish":true,"publishedVersion":1,"publishedAt":"2026-07-31T12:00:00.000Z","publishedByUserId":{},"cancellationReason":"Texto descriptivo de ejemplo","cancelledAt":"2026-07-31T12:00:00.000Z","cancelledByUserId":{}}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].campaignTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].objectiveConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].channelConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].segmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].budgetAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].adCampaignRefId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].promotionId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].startAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].endAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].governanceScopeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].requiresExplicitPublish` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].publishedVersion` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].publishedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].publishedByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].cancellationReason` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].cancelledAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].cancelledByUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/marketing/campaigns"
+}
+```
+
+---
+
+## 3. POST /marketing/campaigns
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -344,7 +522,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /marketing/campaigns/{id}/members/materialize
+## 4. POST /marketing/campaigns/{id}/members/materialize
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -476,7 +654,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /marketing/content-templates/{code}/versions
+## 5. POST /marketing/content-templates/{code}/versions
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -620,7 +798,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /marketing/enrollments/{id}/advance
+## 6. POST /marketing/enrollments/{id}/advance
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -752,7 +930,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /marketing/enrollments/{id}/exit
+## 7. POST /marketing/enrollments/{id}/exit
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -883,7 +1061,154 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /marketing/journeys
+## 8. GET /marketing/journeys
+
+- **Módulo:** `marketing`
+- **Etiqueta OpenAPI:** `marketing-collections`
+- **Nombre:** Listar recorridos de marketing del tenant
+- **Operation ID:** `MarketingCollectionsController_listJourneys`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MarketingCollectionsController.listJourneys](../../src/modules/marketing/controllers/marketing-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar recorridos de marketing del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V50-02: listar recorridos de marketing del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /marketing/journeys` en `MarketingCollectionsController_listJourneys`. El controlador delega en `MarketingCollectionsService.listJourneys`. No recibe body. El tipo de retorno estático es `Promise<JourneyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /marketing/journeys HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `MARKETING_MANAGER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /marketing/journeys?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<JourneyPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<JourneyPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<JourneyPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<JourneyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<JourneyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<JourneyPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JourneyPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "entryTriggerConceptId": "00000000-0000-4000-8000-000000000001",
+      "entrySegmentId": {},
+      "goalMetricConceptId": {},
+      "definitionJson": {
+        "clave": "valor"
+      },
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<JourneyItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","entryTriggerConceptId":"00000000-0000-4000-8000-000000000001","entrySegmentId":{},"goalMetricConceptId":{},"definitionJson":{"clave":"valor"},"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].entryTriggerConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].entrySegmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].goalMetricConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].definitionJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/marketing/journeys"
+}
+```
+
+---
+
+## 9. POST /marketing/journeys
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1026,7 +1351,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /marketing/journeys/{id}/activate
+## 10. POST /marketing/journeys/{id}/activate
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1163,7 +1488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /marketing/journeys/{id}/steps
+## 11. POST /marketing/journeys/{id}/steps
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1316,7 +1641,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /marketing/segments
+## 12. GET /marketing/segments
+
+- **Módulo:** `marketing`
+- **Etiqueta OpenAPI:** `marketing-collections`
+- **Nombre:** Listar segmentos de marketing del tenant
+- **Operation ID:** `MarketingCollectionsController_listSegments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MarketingCollectionsController.listSegments](../../src/modules/marketing/controllers/marketing-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar segmentos de marketing del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V50-04: listar segmentos de marketing del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /marketing/segments` en `MarketingCollectionsController_listSegments`. El controlador delega en `MarketingCollectionsService.listSegments`. No recibe body. El tipo de retorno estático es `Promise<MarketingSegmentPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /marketing/segments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `MARKETING_MANAGER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /marketing/segments?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MarketingSegmentPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<MarketingSegmentPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MarketingSegmentPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MarketingSegmentPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MarketingSegmentPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MarketingSegmentPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MarketingSegmentPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "segmentTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "definitionJson": {
+        "clave": "valor"
+      },
+      "sourceReadModelId": {},
+      "estimatedSize": "valor-ejemplo",
+      "lastRefreshedAt": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<MarketingSegmentItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","segmentTypeConceptId":"00000000-0000-4000-8000-000000000001","definitionJson":{"clave":"valor"},"sourceReadModelId":{},"estimatedSize":"valor-ejemplo","lastRefreshedAt":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].segmentTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].definitionJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].sourceReadModelId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].estimatedSize` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].lastRefreshedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: MARKETING_MANAGER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/marketing/segments"
+}
+```
+
+---
+
+## 13. POST /marketing/segments
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1453,7 +1927,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /marketing/segments/{id}/refresh
+## 14. POST /marketing/segments/{id}/refresh
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1598,7 +2072,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /marketing/touchpoints
+## 15. POST /marketing/touchpoints
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1743,7 +2217,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /marketing/tracked-links
+## 16. POST /marketing/tracked-links
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`
@@ -1880,7 +2354,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /r/{code}
+## 17. GET /r/{code}
 
 - **Módulo:** `marketing`
 - **Etiqueta OpenAPI:** `marketing`

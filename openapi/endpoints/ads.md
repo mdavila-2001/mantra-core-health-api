@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `ads`
 
-Referencia exhaustiva de 18 operación(es) del módulo `ads`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `ads`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `ads`
-- **Controladores:** `AdsController`
+- **Etiquetas OpenAPI:** `ads`, `ads-collections`
+- **Controladores:** `AdsCollectionsController`, `AdsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -23,12 +23,14 @@ Referencia exhaustiva de 18 operación(es) del módulo `ads`, derivada del contr
 10. [POST /ads/business-managers/{bmId}/partners](#10-post-ads-business-managers-bmid-partners) — Vincular un socio y compartir el alcance de assets
 11. [POST /ads/catalogs/{id}/feeds/{feedId}/run](#11-post-ads-catalogs-id-feeds-feedid-run) — Sincronizar el catálogo de productos con el feed
 12. [POST /ads/datasets/{id}/events](#12-post-ads-datasets-id-events) — Enviar una conversión server-side
-13. [POST /ads/event-data-policies](#13-post-ads-event-data-policies) — Publicar la política de datos de evento con sus reglas de campo
-14. [POST /ads/ingest/insights](#14-post-ads-ingest-insights) — Ingerir entrega e insights y consolidar el gasto
-15. [POST /ads/lead-forms/{id}/submissions](#15-post-ads-lead-forms-id-submissions) — Recibir un lead del formulario y encolar su entrega al CRM
-16. [POST /ads/offline-conversion-sets/upload](#16-post-ads-offline-conversion-sets-upload) — Subir conversiones offline con reporte de coincidencia
-17. [POST /ads/platform-connections](#17-post-ads-platform-connections) — Conectar la plataforma externa e importar identidades
-18. [POST /ads/policy-violations/{id}/appeals](#18-post-ads-policy-violations-id-appeals) — Apelar una infracción de política
+13. [GET /ads/event-data-policies](#13-get-ads-event-data-policies) — Listar políticas de datos de evento del tenant
+14. [POST /ads/event-data-policies](#14-post-ads-event-data-policies) — Publicar la política de datos de evento con sus reglas de campo
+15. [POST /ads/ingest/insights](#15-post-ads-ingest-insights) — Ingerir entrega e insights y consolidar el gasto
+16. [POST /ads/lead-forms/{id}/submissions](#16-post-ads-lead-forms-id-submissions) — Recibir un lead del formulario y encolar su entrega al CRM
+17. [POST /ads/offline-conversion-sets/upload](#17-post-ads-offline-conversion-sets-upload) — Subir conversiones offline con reporte de coincidencia
+18. [GET /ads/platform-connections](#18-get-ads-platform-connections) — Listar conexiones con plataformas de anuncios del tenant
+19. [POST /ads/platform-connections](#19-post-ads-platform-connections) — Conectar la plataforma externa e importar identidades
+20. [POST /ads/policy-violations/{id}/appeals](#20-post-ads-policy-violations-id-appeals) — Apelar una infracción de política
 
 ---
 
@@ -1986,7 +1988,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /ads/event-data-policies
+## 13. GET /ads/event-data-policies
+
+- **Módulo:** `ads`
+- **Etiqueta OpenAPI:** `ads-collections`
+- **Nombre:** Listar políticas de datos de evento del tenant
+- **Operation ID:** `AdsCollectionsController_listEventDataPolicies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdsCollectionsController.listEventDataPolicies](../../src/modules/ads/controllers/ads-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar políticas de datos de evento del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V43-13: listar políticas de datos de evento del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ads/event-data-policies` en `AdsCollectionsController_listEventDataPolicies`. El controlador delega en `AdsCollectionsService.listEventDataPolicies`. No recibe body. El tipo de retorno estático es `Promise<AdEventDataPolicyPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ads/event-data-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_PRIVACY_OFFICER`, `ADS_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ads/event-data-policies?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdEventDataPolicyPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AdEventDataPolicyPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AdEventDataPolicyPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AdEventDataPolicyPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AdEventDataPolicyPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AdEventDataPolicyPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdEventDataPolicyPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
+      "purposeOfUseConceptId": "00000000-0000-4000-8000-000000000001",
+      "requiresConsent": true,
+      "consentScopeConceptId": {},
+      "defaultActionConceptId": "00000000-0000-4000-8000-000000000001",
+      "prohibitedDataClassesJson": {
+        "clave": "valor"
+      },
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<AdEventDataPolicyItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","purposeOfUseConceptId":"00000000-0000-4000-8000-000000000001","requiresConsent":true,"consentScopeConceptId":{},"defaultActionConceptId":"00000000-0000-4000-8000-000000000001","prohibitedDataClassesJson":{"clave":"valor"},"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].purposeOfUseConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requiresConsent` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].consentScopeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].defaultActionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].prohibitedDataClassesJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_PRIVACY_OFFICER, ADS_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ads/event-data-policies"
+}
+```
+
+---
+
+## 14. POST /ads/event-data-policies
 
 - **Módulo:** `ads`
 - **Etiqueta OpenAPI:** `ads`
@@ -2156,7 +2309,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /ads/ingest/insights
+## 15. POST /ads/ingest/insights
 
 - **Módulo:** `ads`
 - **Etiqueta OpenAPI:** `ads`
@@ -2335,7 +2488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /ads/lead-forms/{id}/submissions
+## 16. POST /ads/lead-forms/{id}/submissions
 
 - **Módulo:** `ads`
 - **Etiqueta OpenAPI:** `ads`
@@ -2500,7 +2653,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /ads/offline-conversion-sets/upload
+## 17. POST /ads/offline-conversion-sets/upload
 
 - **Módulo:** `ads`
 - **Etiqueta OpenAPI:** `ads`
@@ -2663,7 +2816,156 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /ads/platform-connections
+## 18. GET /ads/platform-connections
+
+- **Módulo:** `ads`
+- **Etiqueta OpenAPI:** `ads-collections`
+- **Nombre:** Listar conexiones con plataformas de anuncios del tenant
+- **Operation ID:** `AdsCollectionsController_listPlatformConnections`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdsCollectionsController.listPlatformConnections](../../src/modules/ads/controllers/ads-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar conexiones con plataformas de anuncios del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V43-16: listar conexiones con plataformas de anuncios del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /ads/platform-connections` en `AdsCollectionsController_listPlatformConnections`. El controlador delega en `AdsCollectionsService.listPlatformConnections`. No recibe body. El tipo de retorno estático es `Promise<AdPlatformConnectionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /ads/platform-connections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `ADS_ADMIN`, `BUSINESS_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /ads/platform-connections?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AdPlatformConnectionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AdPlatformConnectionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AdPlatformConnectionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AdPlatformConnectionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AdPlatformConnectionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AdPlatformConnectionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AdPlatformConnectionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "businessManagerId": "00000000-0000-4000-8000-000000000001",
+      "adAccountId": {},
+      "platformConceptId": "00000000-0000-4000-8000-000000000001",
+      "connectionName": "Nombre de ejemplo",
+      "apiVersion": "valor-ejemplo",
+      "externalBusinessId": "00000000-0000-4000-8000-000000000001",
+      "externalAdAccountId": "00000000-0000-4000-8000-000000000001",
+      "lastSuccessfulSyncAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<AdPlatformConnectionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","businessManagerId":"00000000-0000-4000-8000-000000000001","adAccountId":{},"platformConceptId":"00000000-0000-4000-8000-000000000001","connectionName":"Nombre de ejemplo","apiVersion":"valor-ejemplo","externalBusinessId":"00000000-0000-4000-8000-000000000001","externalAdAccountId":"00000000-0000-4000-8000-000000000001","lastSuccessfulSyncAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].businessManagerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].adAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].platformConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].connectionName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].apiVersion` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].externalBusinessId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].externalAdAccountId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].lastSuccessfulSyncAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ADS_ADMIN, BUSINESS_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/ads/platform-connections"
+}
+```
+
+---
+
+## 19. POST /ads/platform-connections
 
 - **Módulo:** `ads`
 - **Etiqueta OpenAPI:** `ads`
@@ -2830,7 +3132,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /ads/policy-violations/{id}/appeals
+## 20. POST /ads/policy-violations/{id}/appeals
 
 - **Módulo:** `ads`
 - **Etiqueta OpenAPI:** `ads`

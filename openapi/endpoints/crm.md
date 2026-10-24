@@ -2,35 +2,200 @@
 
 # Endpoints del módulo `crm`
 
-Referencia exhaustiva de 16 operación(es) del módulo `crm`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 22 operación(es) del módulo `crm`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `crm`
-- **Controladores:** `CrmController`
+- **Etiquetas OpenAPI:** `crm`, `crm-collections`
+- **Controladores:** `CrmCollectionsController`, `CrmController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /crm/accounts](#1-post-crm-accounts) — Crear una cuenta con su contacto principal
-2. [GET /crm/accounts/{id}/360](#2-get-crm-accounts-id-360) — Vista 360 de la cuenta
-3. [POST /crm/accounts/{id}/team-members](#3-post-crm-accounts-id-team-members) — Sumar un usuario al equipo de la cuenta
-4. [POST /crm/activities](#4-post-crm-activities) — Registrar una actividad y su subtipo
-5. [POST /crm/cases](#5-post-crm-cases) — Abrir un caso de servicio
-6. [POST /crm/cases/{id}/comments](#6-post-crm-cases-id-comments) — Comentar el caso
-7. [POST /crm/cases/{id}/resolve](#7-post-crm-cases-id-resolve) — Resolver el caso
-8. [PATCH /crm/cases/{id}/status](#8-patch-crm-cases-id-status) — Transicionar el estado del caso
-9. [PATCH /crm/contacts/{id}/channels/{cid}/opt-in](#9-patch-crm-contacts-id-channels-cid-opt-in) — Registrar el consentimiento del canal de contacto
-10. [POST /crm/leads](#10-post-crm-leads) — Capturar un lead
-11. [POST /crm/leads/{id}/convert](#11-post-crm-leads-id-convert) — Convertir el lead en oportunidad
-12. [PATCH /crm/leads/{id}/qualify](#12-patch-crm-leads-id-qualify) — Calificar o descartar el lead
-13. [POST /crm/opportunities/{id}/advance-stage](#13-post-crm-opportunities-id-advance-stage) — Avanzar la oportunidad de etapa
-14. [POST /crm/opportunities/{id}/lose](#14-post-crm-opportunities-id-lose) — Marcar la oportunidad como perdida con su motivo
-15. [POST /crm/opportunities/{id}/win](#15-post-crm-opportunities-id-win) — Marcar la oportunidad como ganada
-16. [POST /crm/partnerships](#16-post-crm-partnerships) — Registrar una alianza y su acuerdo marco
+1. [GET /crm/accounts](#1-get-crm-accounts) — Listar cuentas de CRM del tenant
+2. [POST /crm/accounts](#2-post-crm-accounts) — Crear una cuenta con su contacto principal
+3. [GET /crm/accounts/{id}/360](#3-get-crm-accounts-id-360) — Vista 360 de la cuenta
+4. [POST /crm/accounts/{id}/team-members](#4-post-crm-accounts-id-team-members) — Sumar un usuario al equipo de la cuenta
+5. [GET /crm/activities](#5-get-crm-activities) — Listar actividades de CRM del tenant
+6. [POST /crm/activities](#6-post-crm-activities) — Registrar una actividad y su subtipo
+7. [GET /crm/cases](#7-get-crm-cases) — Listar casos de CRM del tenant
+8. [POST /crm/cases](#8-post-crm-cases) — Abrir un caso de servicio
+9. [POST /crm/cases/{id}/comments](#9-post-crm-cases-id-comments) — Comentar el caso
+10. [POST /crm/cases/{id}/resolve](#10-post-crm-cases-id-resolve) — Resolver el caso
+11. [PATCH /crm/cases/{id}/status](#11-patch-crm-cases-id-status) — Transicionar el estado del caso
+12. [PATCH /crm/contacts/{id}/channels/{cid}/opt-in](#12-patch-crm-contacts-id-channels-cid-opt-in) — Registrar el consentimiento del canal de contacto
+13. [GET /crm/leads](#13-get-crm-leads) — Listar prospectos del tenant
+14. [POST /crm/leads](#14-post-crm-leads) — Capturar un lead
+15. [POST /crm/leads/{id}/convert](#15-post-crm-leads-id-convert) — Convertir el lead en oportunidad
+16. [PATCH /crm/leads/{id}/qualify](#16-patch-crm-leads-id-qualify) — Calificar o descartar el lead
+17. [GET /crm/opportunities](#17-get-crm-opportunities) — Listar oportunidades del tenant
+18. [POST /crm/opportunities/{id}/advance-stage](#18-post-crm-opportunities-id-advance-stage) — Avanzar la oportunidad de etapa
+19. [POST /crm/opportunities/{id}/lose](#19-post-crm-opportunities-id-lose) — Marcar la oportunidad como perdida con su motivo
+20. [POST /crm/opportunities/{id}/win](#20-post-crm-opportunities-id-win) — Marcar la oportunidad como ganada
+21. [GET /crm/partnerships](#21-get-crm-partnerships) — Listar alianzas del tenant
+22. [POST /crm/partnerships](#22-post-crm-partnerships) — Registrar una alianza y su acuerdo marco
 
 ---
 
-## 1. POST /crm/accounts
+## 1. GET /crm/accounts
+
+- **Módulo:** `crm`
+- **Etiqueta OpenAPI:** `crm-collections`
+- **Nombre:** Listar cuentas de CRM del tenant
+- **Operation ID:** `CrmCollectionsController_listAccounts`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrmCollectionsController.listAccounts](../../src/modules/crm/controllers/crm-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar cuentas de CRM del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V49-06: listar cuentas de crm del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /crm/accounts` en `CrmCollectionsController_listAccounts`. El controlador delega en `CrmCollectionsService.listAccounts`. No recibe body. El tipo de retorno estático es `Promise<CrmAccountPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /crm/accounts HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CRM_ADMIN`, `CRM_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /crm/accounts?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CrmAccountPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CrmAccountPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CrmAccountPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CrmAccountPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CrmAccountPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CrmAccountPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CrmAccountPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "accountTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "industryConceptId": {},
+      "parentAccountId": {},
+      "website": "valor-ejemplo",
+      "taxId": "00000000-0000-4000-8000-000000000001",
+      "linkedTenantId": {},
+      "businessPartnerId": {},
+      "linkedOrgRefType": "valor-ejemplo",
+      "linkedOrgRefId": {},
+      "ownerUserId": {},
+      "annualValue": "valor-ejemplo",
+      "currencyConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CrmAccountItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","accountTypeConceptId":"00000000-0000-4000-8000-000000000001","industryConceptId":{},"parentAccountId":{},"website":"valor-ejemplo","taxId":"00000000-0000-4000-8000-000000000001","linkedTenantId":{},"businessPartnerId":{},"linkedOrgRefType":"valor-ejemplo","linkedOrgRefId":{},"ownerUserId":{},"annualValue":"valor-ejemplo","currencyConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].accountTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].industryConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].parentAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].website` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].taxId` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].linkedTenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].businessPartnerId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].linkedOrgRefType` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].linkedOrgRefId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].annualValue` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/crm/accounts"
+}
+```
+
+---
+
+## 2. POST /crm/accounts
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -171,7 +336,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. GET /crm/accounts/{id}/360
+## 3. GET /crm/accounts/{id}/360
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -284,7 +449,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /crm/accounts/{id}/team-members
+## 4. POST /crm/accounts/{id}/team-members
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -420,7 +585,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /crm/activities
+## 5. GET /crm/activities
+
+- **Módulo:** `crm`
+- **Etiqueta OpenAPI:** `crm-collections`
+- **Nombre:** Listar actividades de CRM del tenant
+- **Operation ID:** `CrmCollectionsController_listActivities`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrmCollectionsController.listActivities](../../src/modules/crm/controllers/crm-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar actividades de CRM del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V49-09: listar actividades de crm del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /crm/activities` en `CrmCollectionsController_listActivities`. El controlador delega en `CrmCollectionsService.listActivities`. No recibe body. El tipo de retorno estático es `Promise<CrmActivityPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /crm/activities HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CRM_ADMIN`, `CRM_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /crm/activities?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CrmActivityPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CrmActivityPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CrmActivityPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CrmActivityPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CrmActivityPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CrmActivityPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CrmActivityPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "activityTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "subjectRefId": "00000000-0000-4000-8000-000000000001",
+      "contactId": {},
+      "crmAccountId": {},
+      "directionConceptId": "00000000-0000-4000-8000-000000000001",
+      "subject": "valor-ejemplo",
+      "bodyText": "valor-ejemplo",
+      "outcomeConceptId": {},
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z",
+      "ownerUserId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CrmActivityItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","activityTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectTypeConceptId":"00000000-0000-4000-8000-000000000001","subjectRefId":"00000000-0000-4000-8000-000000000001","contactId":{},"crmAccountId":{},"directionConceptId":"00000000-0000-4000-8000-000000000001","subject":"valor-ejemplo","bodyText":"valor-ejemplo","outcomeConceptId":{},"dueAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z","ownerUserId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].activityTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectRefId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].contactId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].crmAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].directionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subject` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].bodyText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].outcomeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].dueAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/crm/activities"
+}
+```
+
+---
+
+## 6. POST /crm/activities
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -567,7 +889,170 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /crm/cases
+## 7. GET /crm/cases
+
+- **Módulo:** `crm`
+- **Etiqueta OpenAPI:** `crm-collections`
+- **Nombre:** Listar casos de CRM del tenant
+- **Operation ID:** `CrmCollectionsController_listCases`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrmCollectionsController.listCases](../../src/modules/crm/controllers/crm-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar casos de CRM del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V49-03: listar casos de crm del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /crm/cases` en `CrmCollectionsController_listCases`. El controlador delega en `CrmCollectionsService.listCases`. No recibe body. El tipo de retorno estático es `Promise<CrmCasePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /crm/cases HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CRM_ADMIN`, `CRM_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /crm/cases?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CrmCasePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CrmCasePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CrmCasePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CrmCasePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CrmCasePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CrmCasePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CrmCasePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "caseNumber": "valor-ejemplo",
+      "subject": "valor-ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "crmAccountId": {},
+      "primaryContactId": {},
+      "businessPartnerId": {},
+      "contractId": {},
+      "invoiceId": {},
+      "caseTypeConceptId": {},
+      "originConceptId": {},
+      "priorityConceptId": {},
+      "ownerUserId": {},
+      "parentCaseId": {},
+      "openedAt": "2026-07-31T12:00:00.000Z",
+      "closedAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CrmCaseItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","caseNumber":"valor-ejemplo","subject":"valor-ejemplo","description":"Texto descriptivo de ejemplo","crmAccountId":{},"primaryContactId":{},"businessPartnerId":{},"contractId":{},"invoiceId":{},"caseTypeConceptId":{},"originConceptId":{},"priorityConceptId":{},"ownerUserId":{},"parentCaseId":{},"openedAt":"2026-07-31T12:00:00.000Z","closedAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].caseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].subject` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].crmAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].primaryContactId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].businessPartnerId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].contractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].invoiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].caseTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].originConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].priorityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].parentCaseId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].openedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].closedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/crm/cases"
+}
+```
+
+---
+
+## 8. POST /crm/cases
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -711,7 +1196,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /crm/cases/{id}/comments
+## 9. POST /crm/cases/{id}/comments
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -840,7 +1325,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /crm/cases/{id}/resolve
+## 10. POST /crm/cases/{id}/resolve
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -955,7 +1440,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PATCH /crm/cases/{id}/status
+## 11. PATCH /crm/cases/{id}/status
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1087,7 +1572,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /crm/contacts/{id}/channels/{cid}/opt-in
+## 12. PATCH /crm/contacts/{id}/channels/{cid}/opt-in
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1216,7 +1701,166 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /crm/leads
+## 13. GET /crm/leads
+
+- **Módulo:** `crm`
+- **Etiqueta OpenAPI:** `crm-collections`
+- **Nombre:** Listar prospectos del tenant
+- **Operation ID:** `CrmCollectionsController_listLeads`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrmCollectionsController.listLeads](../../src/modules/crm/controllers/crm-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar prospectos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V49-01: listar prospectos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /crm/leads` en `CrmCollectionsController_listLeads`. El controlador delega en `CrmCollectionsService.listLeads`. No recibe body. El tipo de retorno estático es `Promise<LeadPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /crm/leads HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CRM_ADMIN`, `CRM_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /crm/leads?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LeadPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<LeadPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LeadPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LeadPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LeadPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LeadPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LeadPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "leadSourceConceptId": "00000000-0000-4000-8000-000000000001",
+      "contactId": {},
+      "crmAccountId": {},
+      "fullName": "Nombre de ejemplo",
+      "email": "usuario@example.com",
+      "phone": "+59170000000",
+      "interestText": "valor-ejemplo",
+      "leadScore": "valor-ejemplo",
+      "leadStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "ownerUserId": {},
+      "campaignRefId": {},
+      "convertedOpportunityId": {},
+      "convertedAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<LeadItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","leadSourceConceptId":"00000000-0000-4000-8000-000000000001","contactId":{},"crmAccountId":{},"fullName":"Nombre de ejemplo","email":"usuario@example.com","phone":"+59170000000","interestText":"valor-ejemplo","leadScore":"valor-ejemplo","leadStatusConceptId":"00000000-0000-4000-8000-000000000001","ownerUserId":{},"campaignRefId":{},"convertedOpportunityId":{},"convertedAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].leadSourceConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].contactId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].crmAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].fullName` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].email` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `data[].phone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `data[].interestText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].leadScore` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].leadStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].campaignRefId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].convertedOpportunityId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].convertedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/crm/leads"
+}
+```
+
+---
+
+## 14. POST /crm/leads
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1350,7 +1994,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /crm/leads/{id}/convert
+## 15. POST /crm/leads/{id}/convert
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1490,7 +2134,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. PATCH /crm/leads/{id}/qualify
+## 16. PATCH /crm/leads/{id}/qualify
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1622,7 +2266,168 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /crm/opportunities/{id}/advance-stage
+## 17. GET /crm/opportunities
+
+- **Módulo:** `crm`
+- **Etiqueta OpenAPI:** `crm-collections`
+- **Nombre:** Listar oportunidades del tenant
+- **Operation ID:** `CrmCollectionsController_listOpportunities`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrmCollectionsController.listOpportunities](../../src/modules/crm/controllers/crm-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar oportunidades del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V49-02: listar oportunidades del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /crm/opportunities` en `CrmCollectionsController_listOpportunities`. El controlador delega en `CrmCollectionsService.listOpportunities`. No recibe body. El tipo de retorno estático es `Promise<OpportunityPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /crm/opportunities HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CRM_ADMIN`, `CRM_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /crm/opportunities?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OpportunityPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OpportunityPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OpportunityPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OpportunityPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OpportunityPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OpportunityPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OpportunityPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "pipelineId": "00000000-0000-4000-8000-000000000001",
+      "stageId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "crmAccountId": {},
+      "primaryContactId": {},
+      "amount": "valor-ejemplo",
+      "currencyConceptId": {},
+      "expectedCloseDate": "2026-07-31",
+      "probabilityPercent": "valor-ejemplo",
+      "ownerUserId": {},
+      "contractId": {},
+      "salesOrderId": {},
+      "lostReasonConceptId": {},
+      "wonAt": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<OpportunityItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","pipelineId":"00000000-0000-4000-8000-000000000001","stageId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","crmAccountId":{},"primaryContactId":{},"amount":"valor-ejemplo","currencyConceptId":{},"expectedCloseDate":"2026-07-31","probabilityPercent":"valor-ejemplo","ownerUserId":{},"contractId":{},"salesOrderId":{},"lostReasonConceptId":{},"wonAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].pipelineId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].stageId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].crmAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].primaryContactId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].amount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].expectedCloseDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].probabilityPercent` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].contractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].salesOrderId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].lostReasonConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].wonAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN, CRM_AGENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/crm/opportunities"
+}
+```
+
+---
+
+## 18. POST /crm/opportunities/{id}/advance-stage
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1753,7 +2558,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /crm/opportunities/{id}/lose
+## 19. POST /crm/opportunities/{id}/lose
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1882,7 +2687,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /crm/opportunities/{id}/win
+## 20. POST /crm/opportunities/{id}/win
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`
@@ -1996,7 +2801,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /crm/partnerships
+## 21. GET /crm/partnerships
+
+- **Módulo:** `crm`
+- **Etiqueta OpenAPI:** `crm-collections`
+- **Nombre:** Listar alianzas del tenant
+- **Operation ID:** `CrmCollectionsController_listPartnerships`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrmCollectionsController.listPartnerships](../../src/modules/crm/controllers/crm-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar alianzas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V49-11: listar alianzas del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /crm/partnerships` en `CrmCollectionsController_listPartnerships`. El controlador delega en `CrmCollectionsService.listPartnerships`. No recibe body. El tipo de retorno estático es `Promise<PartnershipPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /crm/partnerships HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CRM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /crm/partnerships?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PartnershipPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PartnershipPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PartnershipPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PartnershipPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PartnershipPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PartnershipPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartnershipPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "partnershipTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "partnerRefType": "valor-ejemplo",
+      "partnerRefId": "00000000-0000-4000-8000-000000000001",
+      "crmAccountId": {},
+      "adPartnerId": {},
+      "contractId": {},
+      "tierConceptId": {},
+      "revenueSharePercent": "valor-ejemplo",
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "ownerUserId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PartnershipItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","partnershipTypeConceptId":"00000000-0000-4000-8000-000000000001","partnerRefType":"valor-ejemplo","partnerRefId":"00000000-0000-4000-8000-000000000001","crmAccountId":{},"adPartnerId":{},"contractId":{},"tierConceptId":{},"revenueSharePercent":"valor-ejemplo","startDate":"2026-07-31","endDate":"2026-07-31","ownerUserId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].partnershipTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].partnerRefType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].partnerRefId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].crmAccountId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].adPartnerId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].contractId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tierConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].revenueSharePercent` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `data[].ownerUserId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CRM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/crm/partnerships"
+}
+```
+
+---
+
+## 22. POST /crm/partnerships
 
 - **Módulo:** `crm`
 - **Etiqueta OpenAPI:** `crm`

@@ -2,34 +2,185 @@
 
 # Endpoints del módulo `graph_intelligence`
 
-Referencia exhaustiva de 15 operación(es) del módulo `graph_intelligence`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `graph_intelligence`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `graph_intelligence`
-- **Controladores:** `GraphProjectionController`, `GraphQueryController`
+- **Etiquetas OpenAPI:** `graph-intelligence-collections`, `graph_intelligence`
+- **Controladores:** `GraphIntelligenceCollectionsController`, `GraphProjectionController`, `GraphQueryController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /graph/access-scopes](#1-post-graph-access-scopes) — Definir un alcance de acceso al grafo
-2. [PATCH /graph/access-scopes/{id}](#2-patch-graph-access-scopes-id) — Ajustar o suspender el alcance de acceso
-3. [POST /graph/analytics/community-detection](#3-post-graph-analytics-community-detection) — Registrar las comunidades detectadas
-4. [POST /graph/analytics/risk-scoring](#4-post-graph-analytics-risk-scoring) — Registrar puntajes de riesgo por nodo
-5. [POST /graph/deletion-jobs](#5-post-graph-deletion-jobs) — Propagar el borrado al grafo (derecho al olvido)
-6. [POST /graph/edges/{id}/expire](#6-post-graph-edges-id-expire) — Expirar la arista y decaer su confianza
-7. [POST /graph/paths](#7-post-graph-paths) — Buscar el camino entre dos nodos
-8. [POST /graph/projection-definitions/{id}/runs](#8-post-graph-projection-definitions-id-runs) — Arrancar una corrida de proyección
-9. [POST /graph/projection-runs/{id}/advance](#9-post-graph-projection-runs-id-advance) — Avanzar el checkpoint de la corrida
-10. [POST /graph/projections/edges/upsert](#10-post-graph-projections-edges-upsert) — Proyectar una arista con su evidencia
-11. [POST /graph/projections/nodes/upsert](#11-post-graph-projections-nodes-upsert) — Proyectar un nodo y sus identificadores
-12. [POST /graph/projections/reconcile](#12-post-graph-projections-reconcile) — Reconciliar la versión canónica del nodo
-13. [PATCH /graph/rule-hits/{id}](#13-patch-graph-rule-hits-id) — Mover el hallazgo por su triage
-14. [POST /graph/rules/{id}/evaluate](#14-post-graph-rules-id-evaluate) — Registrar los hallazgos de una regla
-15. [POST /graph/traverse](#15-post-graph-traverse) — Recorrer el grafo desde un nodo
+1. [GET /graph/access-scopes](#1-get-graph-access-scopes) — Listar alcances de acceso al grafo del tenant
+2. [POST /graph/access-scopes](#2-post-graph-access-scopes) — Definir un alcance de acceso al grafo
+3. [PATCH /graph/access-scopes/{id}](#3-patch-graph-access-scopes-id) — Ajustar o suspender el alcance de acceso
+4. [POST /graph/analytics/community-detection](#4-post-graph-analytics-community-detection) — Registrar las comunidades detectadas
+5. [POST /graph/analytics/risk-scoring](#5-post-graph-analytics-risk-scoring) — Registrar puntajes de riesgo por nodo
+6. [GET /graph/deletion-jobs](#6-get-graph-deletion-jobs) — Listar trabajos de borrado del grafo del tenant
+7. [POST /graph/deletion-jobs](#7-post-graph-deletion-jobs) — Propagar el borrado al grafo (derecho al olvido)
+8. [POST /graph/edges/{id}/expire](#8-post-graph-edges-id-expire) — Expirar la arista y decaer su confianza
+9. [POST /graph/paths](#9-post-graph-paths) — Buscar el camino entre dos nodos
+10. [GET /graph/projection-definitions/{id}/runs](#10-get-graph-projection-definitions-id-runs) — Listar ejecuciones de una proyección del tenant
+11. [POST /graph/projection-definitions/{id}/runs](#11-post-graph-projection-definitions-id-runs) — Arrancar una corrida de proyección
+12. [GET /graph/projection-runs](#12-get-graph-projection-runs) — Listar ejecuciones de proyección del tenant
+13. [POST /graph/projection-runs/{id}/advance](#13-post-graph-projection-runs-id-advance) — Avanzar el checkpoint de la corrida
+14. [POST /graph/projections/edges/upsert](#14-post-graph-projections-edges-upsert) — Proyectar una arista con su evidencia
+15. [POST /graph/projections/nodes/upsert](#15-post-graph-projections-nodes-upsert) — Proyectar un nodo y sus identificadores
+16. [POST /graph/projections/reconcile](#16-post-graph-projections-reconcile) — Reconciliar la versión canónica del nodo
+17. [GET /graph/rule-hits](#17-get-graph-rule-hits) — Listar coincidencias de reglas del grafo del tenant
+18. [PATCH /graph/rule-hits/{id}](#18-patch-graph-rule-hits-id) — Mover el hallazgo por su triage
+19. [POST /graph/rules/{id}/evaluate](#19-post-graph-rules-id-evaluate) — Registrar los hallazgos de una regla
+20. [POST /graph/traverse](#20-post-graph-traverse) — Recorrer el grafo desde un nodo
 
 ---
 
-## 1. POST /graph/access-scopes
+## 1. GET /graph/access-scopes
+
+- **Módulo:** `graph_intelligence`
+- **Etiqueta OpenAPI:** `graph-intelligence-collections`
+- **Nombre:** Listar alcances de acceso al grafo del tenant
+- **Operation ID:** `GraphIntelligenceCollectionsController_listAccessScopes`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GraphIntelligenceCollectionsController.listAccessScopes](../../src/modules/graph_intelligence/controllers/graph-intelligence-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar alcances de acceso al grafo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V61-02: listar alcances de acceso al grafo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /graph/access-scopes` en `GraphIntelligenceCollectionsController_listAccessScopes`. El controlador delega en `GraphIntelligenceCollectionsService.listAccessScopes`. No recibe body. El tipo de retorno estático es `Promise<GraphAccessScopePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /graph/access-scopes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_GOVERNANCE_ADMIN`, `COMPLIANCE_OFFICER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /graph/access-scopes?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GraphAccessScopePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<GraphAccessScopePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GraphAccessScopePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GraphAccessScopePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GraphAccessScopePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GraphAccessScopePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GraphAccessScopePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "scopeCode": "CODIGO_EJEMPLO",
+      "allowedNodeTypes": [
+        "valor-ejemplo"
+      ],
+      "allowedRelationshipTypes": [
+        "valor-ejemplo"
+      ],
+      "purposeOfUseCodes": [
+        "CODIGO_EJEMPLO"
+      ],
+      "maxHops": 1,
+      "requiresPatientContext": true,
+      "state": "valor-ejemplo"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<GraphAccessScopeItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","scopeCode":"CODIGO_EJEMPLO","allowedNodeTypes":["valor-ejemplo"],"allowedRelationshipTypes":["valor-ejemplo"],"purposeOfUseCodes":["CODIGO_EJEMPLO"],"maxHops":1,"requiresPatientContext":true,"state":"valor-ejemplo"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].scopeCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].allowedNodeTypes` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `data[].allowedRelationshipTypes` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `data[].purposeOfUseCodes` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["CODIGO_EJEMPLO"]` |
+| `data[].maxHops` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].requiresPatientContext` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/graph/access-scopes"
+}
+```
+
+---
+
+## 2. POST /graph/access-scopes
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -185,7 +336,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. PATCH /graph/access-scopes/{id}
+## 3. PATCH /graph/access-scopes/{id}
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -330,7 +481,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /graph/analytics/community-detection
+## 4. POST /graph/analytics/community-detection
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -480,7 +631,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /graph/analytics/risk-scoring
+## 5. POST /graph/analytics/risk-scoring
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -634,7 +785,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /graph/deletion-jobs
+## 6. GET /graph/deletion-jobs
+
+- **Módulo:** `graph_intelligence`
+- **Etiqueta OpenAPI:** `graph-intelligence-collections`
+- **Nombre:** Listar trabajos de borrado del grafo del tenant
+- **Operation ID:** `GraphIntelligenceCollectionsController_listDeletionJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GraphIntelligenceCollectionsController.listDeletionJobs](../../src/modules/graph_intelligence/controllers/graph-intelligence-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos de borrado del grafo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V61-05: listar trabajos de borrado del grafo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /graph/deletion-jobs` en `GraphIntelligenceCollectionsController_listDeletionJobs`. El controlador delega en `GraphIntelligenceCollectionsService.listDeletionJobs`. No recibe body. El tipo de retorno estático es `Promise<GraphDeletionJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /graph/deletion-jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_GOVERNANCE_ADMIN`, `SYSTEM`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /graph/deletion-jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GraphDeletionJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<GraphDeletionJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GraphDeletionJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GraphDeletionJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GraphDeletionJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GraphDeletionJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GraphDeletionJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "sourceEntityType": "valor-ejemplo",
+      "sourceEntityId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "nodesDeleted": 1,
+      "edgesDeleted": 1,
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "verifiedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<GraphDeletionJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","sourceEntityType":"valor-ejemplo","sourceEntityId":"00000000-0000-4000-8000-000000000001","status":"ok","nodesDeleted":1,"edgesDeleted":1,"requestedAt":"2026-07-31T12:00:00.000Z","verifiedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].sourceEntityType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].sourceEntityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].nodesDeleted` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].edgesDeleted` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].verifiedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/graph/deletion-jobs"
+}
+```
+
+---
+
+## 7. POST /graph/deletion-jobs
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -775,7 +1066,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /graph/edges/{id}/expire
+## 8. POST /graph/edges/{id}/expire
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -913,7 +1204,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /graph/paths
+## 9. POST /graph/paths
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1073,7 +1364,150 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /graph/projection-definitions/{id}/runs
+## 10. GET /graph/projection-definitions/{id}/runs
+
+- **Módulo:** `graph_intelligence`
+- **Etiqueta OpenAPI:** `graph-intelligence-collections`
+- **Nombre:** Listar ejecuciones de una proyección del tenant
+- **Operation ID:** `GraphIntelligenceCollectionsController_listDefinitionRuns`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GraphIntelligenceCollectionsController.listDefinitionRuns](../../src/modules/graph_intelligence/controllers/graph-intelligence-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar ejecuciones de una proyección del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V61-08: listar ejecuciones de una proyección del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /graph/projection-definitions/{id}/runs` en `GraphIntelligenceCollectionsController_listDefinitionRuns`. El controlador delega en `GraphIntelligenceCollectionsService.listDefinitionRuns`. No recibe body. El tipo de retorno estático es `Promise<GraphProjectionRunPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /graph/projection-definitions/00000000-0000-4000-8000-000000000001/runs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `GRAPH_ANALYST`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /graph/projection-definitions/00000000-0000-4000-8000-000000000001/runs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GraphProjectionRunPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GraphProjectionRunPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "graphProjectionDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "sourceCheckpoint": "valor-ejemplo",
+      "nodesWritten": "valor-ejemplo",
+      "edgesWritten": "valor-ejemplo",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<GraphProjectionRunItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","graphProjectionDefinitionId":"00000000-0000-4000-8000-000000000001","status":"ok","sourceCheckpoint":"valor-ejemplo","nodesWritten":"valor-ejemplo","edgesWritten":"valor-ejemplo","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].graphProjectionDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].sourceCheckpoint` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].nodesWritten` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].edgesWritten` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, GRAPH_ANALYST, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/graph/projection-definitions/{id}/runs"
+}
+```
+
+---
+
+## 11. POST /graph/projection-definitions/{id}/runs
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1207,7 +1641,148 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /graph/projection-runs/{id}/advance
+## 12. GET /graph/projection-runs
+
+- **Módulo:** `graph_intelligence`
+- **Etiqueta OpenAPI:** `graph-intelligence-collections`
+- **Nombre:** Listar ejecuciones de proyección del tenant
+- **Operation ID:** `GraphIntelligenceCollectionsController_listProjectionRuns`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GraphIntelligenceCollectionsController.listProjectionRuns](../../src/modules/graph_intelligence/controllers/graph-intelligence-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar ejecuciones de proyección del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V61-09: listar ejecuciones de proyección del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /graph/projection-runs` en `GraphIntelligenceCollectionsController_listProjectionRuns`. El controlador delega en `GraphIntelligenceCollectionsService.listProjectionRuns`. No recibe body. El tipo de retorno estático es `Promise<GraphProjectionRunPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `graphProjectionDefinitionId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /graph/projection-runs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `GRAPH_PROJECTION_WORKER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /graph/projection-runs?page=1&pageSize=20&order=DESC&sortBy=createdAt&graphProjectionDefinitionId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GraphProjectionRunPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GraphProjectionRunPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GraphProjectionRunPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "graphProjectionDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "sourceCheckpoint": "valor-ejemplo",
+      "nodesWritten": "valor-ejemplo",
+      "edgesWritten": "valor-ejemplo",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<GraphProjectionRunItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","graphProjectionDefinitionId":"00000000-0000-4000-8000-000000000001","status":"ok","sourceCheckpoint":"valor-ejemplo","nodesWritten":"valor-ejemplo","edgesWritten":"valor-ejemplo","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].graphProjectionDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].sourceCheckpoint` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].nodesWritten` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].edgesWritten` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].startedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/graph/projection-runs"
+}
+```
+
+---
+
+## 13. POST /graph/projection-runs/{id}/advance
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1352,7 +1927,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /graph/projections/edges/upsert
+## 14. POST /graph/projections/edges/upsert
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1517,7 +2092,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /graph/projections/nodes/upsert
+## 15. POST /graph/projections/nodes/upsert
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1680,7 +2255,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /graph/projections/reconcile
+## 16. POST /graph/projections/reconcile
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1823,7 +2398,152 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PATCH /graph/rule-hits/{id}
+## 17. GET /graph/rule-hits
+
+- **Módulo:** `graph_intelligence`
+- **Etiqueta OpenAPI:** `graph-intelligence-collections`
+- **Nombre:** Listar coincidencias de reglas del grafo del tenant
+- **Operation ID:** `GraphIntelligenceCollectionsController_listRuleHits`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GraphIntelligenceCollectionsController.listRuleHits](../../src/modules/graph_intelligence/controllers/graph-intelligence-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar coincidencias de reglas del grafo del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V61-11: listar coincidencias de reglas del grafo del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /graph/rule-hits` en `GraphIntelligenceCollectionsController_listRuleHits`. El controlador delega en `GraphIntelligenceCollectionsService.listRuleHits`. No recibe body. El tipo de retorno estático es `Promise<GraphRuleHitPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `graphRuleDefinitionId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /graph/rule-hits HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `COMPLIANCE_OFFICER`, `GRAPH_ANALYST`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /graph/rule-hits?page=1&pageSize=20&order=DESC&sortBy=createdAt&graphRuleDefinitionId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GraphRuleHitPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<GraphRuleHitPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GraphRuleHitPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GraphRuleHitPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GraphRuleHitPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GraphRuleHitPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GraphRuleHitPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "graphRuleDefinitionId": "00000000-0000-4000-8000-000000000001",
+      "primaryNodeId": "00000000-0000-4000-8000-000000000001",
+      "relatedNodeIds": [
+        "valor-ejemplo"
+      ],
+      "evidenceEdgeIds": [
+        "valor-ejemplo"
+      ],
+      "status": "ok",
+      "detectedAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<GraphRuleHitItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","graphRuleDefinitionId":"00000000-0000-4000-8000-000000000001","primaryNodeId":"00000000-0000-4000-8000-000000000001","relatedNodeIds":["valor-ejemplo"],"evidenceEdgeIds":["valor-ejemplo"],"status":"ok","detectedAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].graphRuleDefinitionId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].primaryNodeId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].relatedNodeIds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `data[].evidenceEdgeIds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].detectedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resolvedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: COMPLIANCE_OFFICER, GRAPH_ANALYST, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/graph/rule-hits"
+}
+```
+
+---
+
+## 18. PATCH /graph/rule-hits/{id}
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -1956,7 +2676,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /graph/rules/{id}/evaluate
+## 19. POST /graph/rules/{id}/evaluate
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`
@@ -2115,7 +2835,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /graph/traverse
+## 20. POST /graph/traverse
 
 - **Módulo:** `graph_intelligence`
 - **Etiqueta OpenAPI:** `graph_intelligence`

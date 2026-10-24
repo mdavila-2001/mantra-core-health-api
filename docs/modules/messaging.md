@@ -9,7 +9,7 @@
 # Módulo `messaging`
 
 **Fuente:** [`src/modules/messaging/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/messaging/README.md)
-· 3 controllers · 3 services · 4 repositories · 22 entidades · 2 DTO
+· 4 controllers · 4 services · 4 repositories · 22 entidades · 3 DTO
 
 ---
 

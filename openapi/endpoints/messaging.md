@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `messaging`
 
-Referencia exhaustiva de 17 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `messaging`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `messaging`, `messaging-internal`, `messaging-webhooks`
-- **Controladores:** `MessagingController`, `MessagingInternalController`, `ProviderWebhooksController`
+- **Etiquetas OpenAPI:** `messaging`, `messaging-collections`, `messaging-internal`, `messaging-webhooks`
+- **Controladores:** `MessagingCollectionsController`, `MessagingController`, `MessagingInternalController`, `ProviderWebhooksController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -27,7 +27,8 @@ Referencia exhaustiva de 17 operación(es) del módulo `messaging`, derivada del
 14. [POST /notifications/requests](#14-post-notifications-requests) — Crear una solicitud de notificación
 15. [POST /queues/{code}/jobs](#15-post-queues-code-jobs) — Encolar un trabajo
 16. [POST /queues/dead-letter/{deadLetterJobId}/redrive](#16-post-queues-dead-letter-deadletterjobid-redrive) — Reencolar un trabajo desde la cola muerta
-17. [POST /webhooks/providers/{providerCode}/receipts](#17-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
+17. [GET /queues/jobs](#17-get-queues-jobs) — Listar trabajos encolados del tenant
+18. [POST /webhooks/providers/{providerCode}/receipts](#18-post-webhooks-providers-providercode-receipts) — Conciliar el acuse de entrega que envía el proveedor
 
 ---
 
@@ -2209,7 +2210,163 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /webhooks/providers/{providerCode}/receipts
+## 17. GET /queues/jobs
+
+- **Módulo:** `messaging`
+- **Etiqueta OpenAPI:** `messaging-collections`
+- **Nombre:** Listar trabajos encolados del tenant
+- **Operation ID:** `MessagingCollectionsController_listJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MessagingCollectionsController.listJobs](../../src/modules/messaging/controllers/messaging-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos encolados del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V35-04: listar trabajos encolados del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /queues/jobs` en `MessagingCollectionsController_listJobs`. El controlador delega en `MessagingCollectionsService.listJobs`. No recibe body. El tipo de retorno estático es `Promise<QueuedJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `queueId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /queues/jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `MESSAGING_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /queues/jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt&queueId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<QueuedJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<QueuedJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<QueuedJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<QueuedJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<QueuedJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<QueuedJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QueuedJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "queueId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "jobType": "valor-ejemplo",
+      "dedupeKey": "valor-ejemplo",
+      "priority": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "availableAt": "2026-07-31T12:00:00.000Z",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z",
+      "attempts": 1,
+      "maxAttempts": 1,
+      "lockedBy": "valor-ejemplo",
+      "lockExpiresAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<QueuedJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","queueId":"00000000-0000-4000-8000-000000000001","tenantId":{},"jobType":"valor-ejemplo","dedupeKey":"valor-ejemplo","priority":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","availableAt":"2026-07-31T12:00:00.000Z","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z","attempts":1,"maxAttempts":1,"lockedBy":"valor-ejemplo","lockExpiresAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].queueId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].jobType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].dedupeKey` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].priority` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].availableAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].startedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].attempts` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].maxAttempts` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].lockedBy` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].lockExpiresAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MESSAGING_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/queues/jobs"
+}
+```
+
+---
+
+## 18. POST /webhooks/providers/{providerCode}/receipts
 
 - **Módulo:** `messaging`
 - **Etiqueta OpenAPI:** `messaging-webhooks`

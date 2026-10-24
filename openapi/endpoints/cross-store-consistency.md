@@ -2,31 +2,38 @@
 
 # Endpoints del módulo `cross_store_consistency`
 
-Referencia exhaustiva de 16 operación(es) del módulo `cross_store_consistency`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 23 operación(es) del módulo `cross_store_consistency`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `cross_store_consistency`
-- **Controladores:** `CrossStoreAdminController`, `CrossStoreWorkerController`
+- **Etiquetas OpenAPI:** `cross-store-consistency-collections`, `cross_store_consistency`
+- **Controladores:** `CrossStoreAdminController`, `CrossStoreConsistencyCollectionsController`, `CrossStoreWorkerController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /admin/archive-jobs](#1-post-admin-archive-jobs) — Archivar por retención y purgar la copia caliente
-2. [POST /admin/data-movement-jobs](#2-post-admin-data-movement-jobs) — Mover datos entre zonas de almacenamiento
-3. [POST /admin/deletion-requests](#3-post-admin-deletion-requests) — Solicitar el borrado de un sujeto
-4. [PATCH /admin/deletion-requests/{id}](#4-patch-admin-deletion-requests-id) — Cerrar la solicitud de borrado
-5. [POST /admin/projections/dead-letters/{id}/replay](#5-post-admin-projections-dead-letters-id-replay) — Reprocesar una entrega de la cola muerta
-6. [POST /admin/projections/definitions](#6-post-admin-projections-definitions) — Registrar la definición de proyección con sus suscripciones y su SLO
-7. [POST /admin/projections/drift/{id}/repair-jobs](#7-post-admin-projections-drift-id-repair-jobs) — Encolar la reparación de una deriva
-8. [POST /admin/reconciliation/runs](#8-post-admin-reconciliation-runs) — Registrar la corrida de reconciliación y abrir las derivas
-9. [POST /workers/cache/invalidations](#9-post-workers-cache-invalidations) — Encolar la invalidación de caché
-10. [POST /workers/deletion-requests/{id}/expand](#10-post-workers-deletion-requests-id-expand) — Expandir la solicitud a objetivos por store
-11. [POST /workers/deletion-targets/{id}/executions](#11-post-workers-deletion-targets-id-executions) — Ejecutar el borrado en el store destino
-12. [POST /workers/deletion-targets/{id}/verifications](#12-post-workers-deletion-targets-id-verifications) — Verificar la ausencia en el store
-13. [GET /workers/deletion-targets/executed](#13-get-workers-deletion-targets-executed) — Listar objetivos ejecutados pendientes de verificación
-14. [GET /workers/deletion-targets/pending](#14-get-workers-deletion-targets-pending) — Listar objetivos de borrado pendientes de ejecución
-15. [POST /workers/projections/dead-letters](#15-post-workers-projections-dead-letters) — Mandar el intento fallido a la cola muerta
-16. [POST /workers/projections/deliveries/process](#16-post-workers-projections-deliveries-process) — Registrar la entrega y avanzar el checkpoint
+2. [GET /admin/data-movement-jobs](#2-get-admin-data-movement-jobs) — Listar trabajos de movimiento de datos del tenant
+3. [POST /admin/data-movement-jobs](#3-post-admin-data-movement-jobs) — Mover datos entre zonas de almacenamiento
+4. [GET /admin/deletion-requests](#4-get-admin-deletion-requests) — Listar solicitudes de borrado del tenant
+5. [POST /admin/deletion-requests](#5-post-admin-deletion-requests) — Solicitar el borrado de un sujeto
+6. [PATCH /admin/deletion-requests/{id}](#6-patch-admin-deletion-requests-id) — Cerrar la solicitud de borrado
+7. [GET /admin/projections/dead-letters](#7-get-admin-projections-dead-letters) — Listar mensajes fallidos de proyección del tenant
+8. [POST /admin/projections/dead-letters/{id}/replay](#8-post-admin-projections-dead-letters-id-replay) — Reprocesar una entrega de la cola muerta
+9. [POST /admin/projections/definitions](#9-post-admin-projections-definitions) — Registrar la definición de proyección con sus suscripciones y su SLO
+10. [GET /admin/projections/drift/{id}/repair-jobs](#10-get-admin-projections-drift-id-repair-jobs) — Listar trabajos de reparación de una deriva del tenant
+11. [POST /admin/projections/drift/{id}/repair-jobs](#11-post-admin-projections-drift-id-repair-jobs) — Encolar la reparación de una deriva
+12. [POST /admin/reconciliation/runs](#12-post-admin-reconciliation-runs) — Registrar la corrida de reconciliación y abrir las derivas
+13. [GET /workers/cache/invalidations](#13-get-workers-cache-invalidations) — Listar invalidaciones de caché del tenant
+14. [POST /workers/cache/invalidations](#14-post-workers-cache-invalidations) — Encolar la invalidación de caché
+15. [GET /workers/deletion-requests](#15-get-workers-deletion-requests) — Listar solicitudes de borrado para workers del tenant
+16. [POST /workers/deletion-requests/{id}/expand](#16-post-workers-deletion-requests-id-expand) — Expandir la solicitud a objetivos por store
+17. [POST /workers/deletion-targets/{id}/executions](#17-post-workers-deletion-targets-id-executions) — Ejecutar el borrado en el store destino
+18. [POST /workers/deletion-targets/{id}/verifications](#18-post-workers-deletion-targets-id-verifications) — Verificar la ausencia en el store
+19. [GET /workers/deletion-targets/executed](#19-get-workers-deletion-targets-executed) — Listar objetivos ejecutados pendientes de verificación
+20. [GET /workers/deletion-targets/pending](#20-get-workers-deletion-targets-pending) — Listar objetivos de borrado pendientes de ejecución
+21. [GET /workers/projections/dead-letters](#21-get-workers-projections-dead-letters) — Listar mensajes fallidos de proyección para workers del tenant
+22. [POST /workers/projections/dead-letters](#22-post-workers-projections-dead-letters) — Mandar el intento fallido a la cola muerta
+23. [POST /workers/projections/deliveries/process](#23-post-workers-projections-deliveries-process) — Registrar la entrega y avanzar el checkpoint
 
 ---
 
@@ -172,7 +179,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /admin/data-movement-jobs
+## 2. GET /admin/data-movement-jobs
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar trabajos de movimiento de datos del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listDataMovementJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listDataMovementJobs](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos de movimiento de datos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-02: listar trabajos de movimiento de datos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/data-movement-jobs` en `CrossStoreConsistencyCollectionsController_listDataMovementJobs`. El controlador delega en `CrossStoreConsistencyCollectionsService.listDataMovementJobs`. No recibe body. El tipo de retorno estático es `Promise<DataMovementJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/data-movement-jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_GOVERNANCE_ADMIN`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/data-movement-jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DataMovementJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DataMovementJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DataMovementJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<DataMovementJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DataMovementJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DataMovementJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DataMovementJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "datasetId": "00000000-0000-4000-8000-000000000001",
+      "sourcePlacementId": "00000000-0000-4000-8000-000000000001",
+      "targetPlacementId": "00000000-0000-4000-8000-000000000001",
+      "movementMode": "valor-ejemplo",
+      "status": "ok",
+      "startedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<DataMovementJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","datasetId":"00000000-0000-4000-8000-000000000001","sourcePlacementId":"00000000-0000-4000-8000-000000000001","targetPlacementId":"00000000-0000-4000-8000-000000000001","movementMode":"valor-ejemplo","status":"ok","startedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].datasetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].sourcePlacementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetPlacementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].movementMode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].startedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/data-movement-jobs"
+}
+```
+
+---
+
+## 3. POST /admin/data-movement-jobs
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -323,7 +470,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /admin/deletion-requests
+## 4. GET /admin/deletion-requests
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar solicitudes de borrado del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listDeletionRequests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listDeletionRequests](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar solicitudes de borrado del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-03: listar solicitudes de borrado del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/deletion-requests` en `CrossStoreConsistencyCollectionsController_listDeletionRequests`. El controlador delega en `CrossStoreConsistencyCollectionsService.listDeletionRequests`. No recibe body. El tipo de retorno estático es `Promise<CrossStoreDeletionRequestPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/deletion-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRIVACY_OFFICER`, `DPO`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/deletion-requests?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CrossStoreDeletionRequestPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "subjectType": "valor-ejemplo",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "legalBasisCode": "CODIGO_EJEMPLO",
+      "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "state": "valor-ejemplo",
+      "dueAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CrossStoreDeletionRequestItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","subjectType":"valor-ejemplo","subjectId":"00000000-0000-4000-8000-000000000001","reasonCode":"CODIGO_EJEMPLO","legalBasisCode":"CODIGO_EJEMPLO","requestedByUserId":"00000000-0000-4000-8000-000000000001","requestedAt":"2026-07-31T12:00:00.000Z","state":"valor-ejemplo","dueAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].subjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reasonCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].legalBasisCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].requestedByUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/deletion-requests"
+}
+```
+
+---
+
+## 5. POST /admin/deletion-requests
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -462,7 +751,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. PATCH /admin/deletion-requests/{id}
+## 6. PATCH /admin/deletion-requests/{id}
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -596,7 +885,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /admin/projections/dead-letters/{id}/replay
+## 7. GET /admin/projections/dead-letters
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar mensajes fallidos de proyección del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listDeadLetters`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listDeadLetters](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar mensajes fallidos de proyección del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-04: listar mensajes fallidos de proyección del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/projections/dead-letters` en `CrossStoreConsistencyCollectionsController_listDeadLetters`. El controlador delega en `CrossStoreConsistencyCollectionsService.listDeadLetters`. No recibe body. El tipo de retorno estático es `Promise<ProjectionDeadLetterPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/projections/dead-letters HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_GOVERNANCE_ADMIN`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/projections/dead-letters?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProjectionDeadLetterPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "projectionDeliveryAttemptId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "payloadObjectId": "00000000-0000-4000-8000-000000000001",
+      "state": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ProjectionDeadLetterItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","projectionDeliveryAttemptId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","reasonCode":"CODIGO_EJEMPLO","payloadObjectId":"00000000-0000-4000-8000-000000000001","state":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].projectionDeliveryAttemptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reasonCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].payloadObjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resolvedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/projections/dead-letters"
+}
+```
+
+---
+
+## 8. POST /admin/projections/dead-letters/{id}/replay
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -727,7 +1154,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /admin/projections/definitions
+## 9. POST /admin/projections/definitions
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -909,7 +1336,146 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /admin/projections/drift/{id}/repair-jobs
+## 10. GET /admin/projections/drift/{id}/repair-jobs
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar trabajos de reparación de una deriva del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listRepairJobs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listRepairJobs](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar trabajos de reparación de una deriva del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-06: listar trabajos de reparación de una deriva del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/projections/drift/{id}/repair-jobs` en `CrossStoreConsistencyCollectionsController_listRepairJobs`. El controlador delega en `CrossStoreConsistencyCollectionsService.listRepairJobs`. No recibe body. El tipo de retorno estático es `Promise<ProjectionRepairJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/projections/drift/00000000-0000-4000-8000-000000000001/repair-jobs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `DATA_GOVERNANCE_ADMIN`, `SYSTEM`, `PLATFORM_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/projections/drift/00000000-0000-4000-8000-000000000001/repair-jobs?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProjectionRepairJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProjectionRepairJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "projectionDriftEventId": "00000000-0000-4000-8000-000000000001",
+      "repairAction": "valor-ejemplo",
+      "status": "ok",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ProjectionRepairJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","projectionDriftEventId":"00000000-0000-4000-8000-000000000001","repairAction":"valor-ejemplo","status":"ok","requestedAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].projectionDriftEventId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].repairAction` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/projections/drift/{id}/repair-jobs"
+}
+```
+
+---
+
+## 11. POST /admin/projections/drift/{id}/repair-jobs
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1048,7 +1614,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /admin/reconciliation/runs
+## 12. POST /admin/reconciliation/runs
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1216,7 +1782,147 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /workers/cache/invalidations
+## 13. GET /workers/cache/invalidations
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar invalidaciones de caché del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listInvalidations`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listInvalidations](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar invalidaciones de caché del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-08: listar invalidaciones de caché del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /workers/cache/invalidations` en `CrossStoreConsistencyCollectionsController_listInvalidations`. El controlador delega en `CrossStoreConsistencyCollectionsService.listInvalidations`. No recibe body. El tipo de retorno estático es `Promise<CacheInvalidationJobPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /workers/cache/invalidations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `MAINTENANCE_WORKER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /workers/cache/invalidations?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CacheInvalidationJobPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CacheInvalidationJobPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CacheInvalidationJobPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CacheInvalidationJobPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CacheInvalidationJobPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CacheInvalidationJobPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheInvalidationJobPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "datasetId": "00000000-0000-4000-8000-000000000001",
+      "entityId": "00000000-0000-4000-8000-000000000001",
+      "entityVersion": "valor-ejemplo",
+      "cacheScope": "valor-ejemplo",
+      "status": "ok",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CacheInvalidationJobItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","datasetId":"00000000-0000-4000-8000-000000000001","entityId":"00000000-0000-4000-8000-000000000001","entityVersion":"valor-ejemplo","cacheScope":"valor-ejemplo","status":"ok","createdAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].datasetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].entityId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].entityVersion` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].cacheScope` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].completedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/workers/cache/invalidations"
+}
+```
+
+---
+
+## 14. POST /workers/cache/invalidations
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1351,7 +2057,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /workers/deletion-requests/{id}/expand
+## 15. GET /workers/deletion-requests
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar solicitudes de borrado para workers del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listWorkerDeletionRequests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listWorkerDeletionRequests](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar solicitudes de borrado para workers del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-09: listar solicitudes de borrado para workers del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /workers/deletion-requests` en `CrossStoreConsistencyCollectionsController_listWorkerDeletionRequests`. El controlador delega en `CrossStoreConsistencyCollectionsService.listWorkerDeletionRequests`. No recibe body. El tipo de retorno estático es `Promise<CrossStoreDeletionRequestPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /workers/deletion-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `DELETION_WORKER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /workers/deletion-requests?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CrossStoreDeletionRequestPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CrossStoreDeletionRequestPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "subjectType": "valor-ejemplo",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "legalBasisCode": "CODIGO_EJEMPLO",
+      "requestedByUserId": "00000000-0000-4000-8000-000000000001",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "state": "valor-ejemplo",
+      "dueAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CrossStoreDeletionRequestItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","subjectType":"valor-ejemplo","subjectId":"00000000-0000-4000-8000-000000000001","reasonCode":"CODIGO_EJEMPLO","legalBasisCode":"CODIGO_EJEMPLO","requestedByUserId":"00000000-0000-4000-8000-000000000001","requestedAt":"2026-07-31T12:00:00.000Z","state":"valor-ejemplo","dueAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].subjectType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].subjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reasonCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].legalBasisCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].requestedByUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/workers/deletion-requests"
+}
+```
+
+---
+
+## 16. POST /workers/deletion-requests/{id}/expand
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1504,7 +2352,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /workers/deletion-targets/{id}/executions
+## 17. POST /workers/deletion-targets/{id}/executions
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1640,7 +2488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /workers/deletion-targets/{id}/verifications
+## 18. POST /workers/deletion-targets/{id}/verifications
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1777,7 +2625,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. GET /workers/deletion-targets/executed
+## 19. GET /workers/deletion-targets/executed
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -1897,7 +2745,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /workers/deletion-targets/pending
+## 20. GET /workers/deletion-targets/pending
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -2017,7 +2865,145 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /workers/projections/dead-letters
+## 21. GET /workers/projections/dead-letters
+
+- **Módulo:** `cross_store_consistency`
+- **Etiqueta OpenAPI:** `cross-store-consistency-collections`
+- **Nombre:** Listar mensajes fallidos de proyección para workers del tenant
+- **Operation ID:** `CrossStoreConsistencyCollectionsController_listWorkerDeadLetters`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CrossStoreConsistencyCollectionsController.listWorkerDeadLetters](../../src/modules/cross_store_consistency/controllers/cross-store-consistency-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar mensajes fallidos de proyección para workers del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V62-14: listar mensajes fallidos de proyección para workers del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /workers/projections/dead-letters` en `CrossStoreConsistencyCollectionsController_listWorkerDeadLetters`. El controlador delega en `CrossStoreConsistencyCollectionsService.listWorkerDeadLetters`. No recibe body. El tipo de retorno estático es `Promise<ProjectionDeadLetterPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /workers/projections/dead-letters HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `PROJECTION_WORKER`, `PLATFORM_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /workers/projections/dead-letters?page=1&pageSize=20&order=DESC&sortBy=createdAt HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProjectionDeadLetterPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProjectionDeadLetterPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "projectionDeliveryAttemptId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "reasonCode": "CODIGO_EJEMPLO",
+      "payloadObjectId": "00000000-0000-4000-8000-000000000001",
+      "state": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "resolvedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ProjectionDeadLetterItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","projectionDeliveryAttemptId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","reasonCode":"CODIGO_EJEMPLO","payloadObjectId":"00000000-0000-4000-8000-000000000001","state":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","resolvedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].projectionDeliveryAttemptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].reasonCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].payloadObjectId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].resolvedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/workers/projections/dead-letters"
+}
+```
+
+---
+
+## 22. POST /workers/projections/dead-letters
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`
@@ -2148,7 +3134,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /workers/projections/deliveries/process
+## 23. POST /workers/projections/deliveries/process
 
 - **Módulo:** `cross_store_consistency`
 - **Etiqueta OpenAPI:** `cross_store_consistency`

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `qa_lab`
 
-Referencia exhaustiva de 21 operación(es) del módulo `qa_lab`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 22 operación(es) del módulo `qa_lab`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `qa`, `qa-internal`, `qa-lab-read`
-- **Controladores:** `QaLabController`, `QaLabInternalController`, `QaLabReadController`
+- **Etiquetas OpenAPI:** `qa`, `qa-internal`, `qa-lab-collections`, `qa-lab-read`
+- **Controladores:** `QaLabCollectionsController`, `QaLabController`, `QaLabInternalController`, `QaLabReadController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,9 +29,10 @@ Referencia exhaustiva de 21 operación(es) del módulo `qa_lab`, derivada del co
 16. [POST /qa/runs/{runId}/cases/{caseId}/execute](#16-post-qa-runs-runid-cases-caseid-execute) — Registrar la ejecución del caso con sus payloads
 17. [POST /qa/runs/{runId}/finalize](#17-post-qa-runs-runid-finalize) — Cerrar la corrida y consolidar totales
 18. [POST /qa/runs/{runId}/link-release](#18-post-qa-runs-runid-link-release) — Enlazar la evidencia de la corrida a un release
-19. [POST /qa/schedules](#19-post-qa-schedules) — Programar la ejecución automática de la suite
-20. [POST /qa/suites/{suiteId}/cases](#20-post-qa-suites-suiteid-cases) — Definir un caso de prueba con sus aserciones
-21. [POST /qa/suites/{suiteId}/publish](#21-post-qa-suites-suiteid-publish) — Publicar la suite y activar sus casos
+19. [GET /qa/schedules](#19-get-qa-schedules) — Listar agendas de QA del tenant
+20. [POST /qa/schedules](#20-post-qa-schedules) — Programar la ejecución automática de la suite
+21. [POST /qa/suites/{suiteId}/cases](#21-post-qa-suites-suiteid-cases) — Definir un caso de prueba con sus aserciones
+22. [POST /qa/suites/{suiteId}/publish](#22-post-qa-suites-suiteid-publish) — Publicar la suite y activar sus casos
 
 ---
 
@@ -2154,7 +2155,166 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /qa/schedules
+## 19. GET /qa/schedules
+
+- **Módulo:** `qa_lab`
+- **Etiqueta OpenAPI:** `qa-lab-collections`
+- **Nombre:** Listar agendas de QA del tenant
+- **Operation ID:** `QaLabCollectionsController_listSchedules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [QaLabCollectionsController.listSchedules](../../src/modules/qa_lab/controllers/qa-lab-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar agendas de QA del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V36-07: listar agendas de qa del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /qa/schedules` en `QaLabCollectionsController_listSchedules`. El controlador delega en `QaLabCollectionsService.listSchedules`. No recibe body. El tipo de retorno estático es `Promise<TestSchedulePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /qa/schedules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /qa/schedules?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TestSchedulePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<TestSchedulePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TestSchedulePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TestSchedulePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TestSchedulePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TestSchedulePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TestSchedulePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "suiteId": "00000000-0000-4000-8000-000000000001",
+      "environmentId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "cronExpression": "valor-ejemplo",
+      "timezone": "America/La_Paz",
+      "triggerConceptId": "00000000-0000-4000-8000-000000000001",
+      "concurrencyPolicyConceptId": {},
+      "isEnabled": true,
+      "lastRunId": {},
+      "lastRunAt": "2026-07-31T12:00:00.000Z",
+      "nextRunAt": "2026-07-31T12:00:00.000Z",
+      "notifyChannelConceptId": {},
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<TestScheduleItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","suiteId":"00000000-0000-4000-8000-000000000001","environmentId":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","cronExpression":"valor-ejemplo","timezone":"America/La_Paz","triggerConceptId":"00000000-0000-4000-8000-000000000001","concurrencyPolicyConceptId":{},"isEnabled":true,"lastRunId":{},"lastRunAt":"2026-07-31T12:00:00.000Z","nextRunAt":"2026-07-31T12:00:00.000Z","notifyChannelConceptId":{},"stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].suiteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].environmentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].cronExpression` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].timezone` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `data[].triggerConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].concurrencyPolicyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].isEnabled` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].lastRunId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].lastRunAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].nextRunAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].notifyChannelConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/qa/schedules"
+}
+```
+
+---
+
+## 20. POST /qa/schedules
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -2305,7 +2465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /qa/suites/{suiteId}/cases
+## 21. POST /qa/suites/{suiteId}/cases
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`
@@ -2481,7 +2641,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /qa/suites/{suiteId}/publish
+## 22. POST /qa/suites/{suiteId}/publish
 
 - **Módulo:** `qa_lab`
 - **Etiqueta OpenAPI:** `qa`

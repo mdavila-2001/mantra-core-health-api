@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 98 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 99 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
+- **Etiquetas OpenAPI:** `community`, `community-collections`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
+- **Controladores:** `CommunityCollectionsController`, `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -71,44 +71,45 @@ Referencia exhaustiva de 98 operación(es) del módulo `community`, derivada del
 58. [GET /community/profiles/me](#58-get-community-profiles-me) — Consultar la vitrina pública propia
 59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
 60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
-61. [POST /community/public-profiles](#61-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-62. [GET /community/ratings](#62-get-community-ratings) — Calificaciones de un médico, paciente u organización
-63. [PUT /community/ratings](#63-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
-64. [GET /community/ratings/mine](#64-get-community-ratings-mine) — Mis calificaciones
-65. [GET /community/ratings/summary](#65-get-community-ratings-summary) — Nota media de un médico, paciente u organización
-66. [PUT /community/reactions](#66-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-67. [POST /community/reports](#67-post-community-reports) — Reportar contenido y encolar moderación
-68. [GET /community/topics](#68-get-community-topics) — Temas de la comunidad
-69. [GET /f/{slug}](#69-get-f-slug) — Ficha pública de una farmacia
-70. [GET /internal/community/feed/pending](#70-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-71. [POST /internal/community/feed/ranking/apply](#71-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
-72. [GET /internal/community/feed/ranking/pending](#72-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
-73. [POST /internal/community/feed/rebuild](#73-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-74. [GET /internal/community/search/health](#74-get-internal-community-search-health) — Estado del índice del directorio público
-75. [POST /internal/community/search/reindex](#75-post-internal-community-search-reindex) — Reindexar el directorio público
-76. [POST /internal/community/verification/badges](#76-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-77. [POST /internal/community/verification/badges/{targetId}/revoke](#77-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-78. [POST /internal/community/verification/badges/expire-sweep](#78-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-79. [GET /l/{slug}](#79-get-l-slug) — Ficha pública de un laboratorio
-80. [GET /o/{slug}](#80-get-o-slug) — Ficha pública de una organización
-81. [GET /p/{slug}](#81-get-p-slug) — Ficha pública de un profesional
-82. [POST /patients/me/reviews](#82-post-patients-me-reviews) — Calificar una atención recibida
-83. [GET /public/comments/{commentId}/replies](#83-get-public-comments-commentid-replies) — Respuestas de un comentario público
-84. [GET /public/media/{id}](#84-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-85. [GET /public/nearby](#85-get-public-nearby) — Prestadores cercanos, en línea recta
-86. [GET /public/posts](#86-get-public-posts) — Últimas publicaciones de todos los profesionales
-87. [GET /public/posts/{postId}/comments](#87-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-88. [GET /public/posts/{postId}/reactions](#88-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-89. [GET /public/profiles/{prefijo}/{slug}](#89-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-90. [GET /public/profiles/{prefijo}/{slug}/reviews](#90-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-91. [GET /public/search](#91-get-public-search) — Buscador público unificado
-92. [GET /public/search/diagnostic-units](#92-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-93. [GET /public/search/insurers](#93-get-public-search-insurers) — Aseguradoras en el directorio público
-94. [GET /public/search/medications](#94-get-public-search-medications) — Medicamentos ofertados públicamente
-95. [GET /public/search/organizations](#95-get-public-search-organizations) — Organizaciones en el directorio público
-96. [GET /public/search/pharmacies](#96-get-public-search-pharmacies) — Farmacias en el directorio público
-97. [GET /public/search/practitioners](#97-get-public-search-practitioners) — Profesionales en el directorio público
-98. [GET /s/{slug}](#98-get-s-slug) — Ficha pública de una aseguradora
+61. [GET /community/public-profiles](#61-get-community-public-profiles) — Listar perfiles públicos del tenant
+62. [POST /community/public-profiles](#62-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+63. [GET /community/ratings](#63-get-community-ratings) — Calificaciones de un médico, paciente u organización
+64. [PUT /community/ratings](#64-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
+65. [GET /community/ratings/mine](#65-get-community-ratings-mine) — Mis calificaciones
+66. [GET /community/ratings/summary](#66-get-community-ratings-summary) — Nota media de un médico, paciente u organización
+67. [PUT /community/reactions](#67-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+68. [POST /community/reports](#68-post-community-reports) — Reportar contenido y encolar moderación
+69. [GET /community/topics](#69-get-community-topics) — Temas de la comunidad
+70. [GET /f/{slug}](#70-get-f-slug) — Ficha pública de una farmacia
+71. [GET /internal/community/feed/pending](#71-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+72. [POST /internal/community/feed/ranking/apply](#72-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
+73. [GET /internal/community/feed/ranking/pending](#73-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
+74. [POST /internal/community/feed/rebuild](#74-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+75. [GET /internal/community/search/health](#75-get-internal-community-search-health) — Estado del índice del directorio público
+76. [POST /internal/community/search/reindex](#76-post-internal-community-search-reindex) — Reindexar el directorio público
+77. [POST /internal/community/verification/badges](#77-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+78. [POST /internal/community/verification/badges/{targetId}/revoke](#78-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+79. [POST /internal/community/verification/badges/expire-sweep](#79-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+80. [GET /l/{slug}](#80-get-l-slug) — Ficha pública de un laboratorio
+81. [GET /o/{slug}](#81-get-o-slug) — Ficha pública de una organización
+82. [GET /p/{slug}](#82-get-p-slug) — Ficha pública de un profesional
+83. [POST /patients/me/reviews](#83-post-patients-me-reviews) — Calificar una atención recibida
+84. [GET /public/comments/{commentId}/replies](#84-get-public-comments-commentid-replies) — Respuestas de un comentario público
+85. [GET /public/media/{id}](#85-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+86. [GET /public/nearby](#86-get-public-nearby) — Prestadores cercanos, en línea recta
+87. [GET /public/posts](#87-get-public-posts) — Últimas publicaciones de todos los profesionales
+88. [GET /public/posts/{postId}/comments](#88-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+89. [GET /public/posts/{postId}/reactions](#89-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+90. [GET /public/profiles/{prefijo}/{slug}](#90-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+91. [GET /public/profiles/{prefijo}/{slug}/reviews](#91-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+92. [GET /public/search](#92-get-public-search) — Buscador público unificado
+93. [GET /public/search/diagnostic-units](#93-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+94. [GET /public/search/insurers](#94-get-public-search-insurers) — Aseguradoras en el directorio público
+95. [GET /public/search/medications](#95-get-public-search-medications) — Medicamentos ofertados públicamente
+96. [GET /public/search/organizations](#96-get-public-search-organizations) — Organizaciones en el directorio público
+97. [GET /public/search/pharmacies](#97-get-public-search-pharmacies) — Farmacias en el directorio público
+98. [GET /public/search/practitioners](#98-get-public-search-practitioners) — Profesionales en el directorio público
+99. [GET /s/{slug}](#99-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -8339,7 +8340,164 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. POST /community/public-profiles
+## 61. GET /community/public-profiles
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-collections`
+- **Nombre:** Listar perfiles públicos del tenant
+- **Operation ID:** `CommunityCollectionsController_listPublicProfiles`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunityCollectionsController.listPublicProfiles](../../src/modules/community/controllers/community-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar perfiles públicos del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V19-15: listar perfiles públicos del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/public-profiles` en `CommunityCollectionsController_listPublicProfiles`. El controlador delega en `CommunityCollectionsService.listPublicProfiles`. No recibe body. El tipo de retorno estático es `Promise<PublicProfilePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/public-profiles HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/public-profiles?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PublicProfilePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PublicProfilePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PublicProfilePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PublicProfilePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PublicProfilePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PublicProfilePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicProfilePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "targetTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "targetId": "00000000-0000-4000-8000-000000000001",
+      "slug": "valor-ejemplo",
+      "displayName": "Nombre de ejemplo",
+      "headline": "valor-ejemplo",
+      "biography": "valor-ejemplo",
+      "avatarFileId": {},
+      "coverFileId": {},
+      "verificationStatusConceptId": {},
+      "visibilityConceptId": {},
+      "acceptsReviews": true,
+      "commentsDefaultEnabled": true,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PublicProfileItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","targetTypeConceptId":"00000000-0000-4000-8000-000000000001","targetId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","displayName":"Nombre de ejemplo","headline":"valor-ejemplo","biography":"valor-ejemplo","avatarFileId":{},"coverFileId":{},"verificationStatusConceptId":{},"visibilityConceptId":{},"acceptsReviews":true,"commentsDefaultEnabled":true,"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].targetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].headline` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].biography` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].avatarFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].coverFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].verificationStatusConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].visibilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].acceptsReviews` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].commentsDefaultEnabled` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/public-profiles"
+}
+```
+
+---
+
+## 62. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8484,7 +8642,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. GET /community/ratings
+## 63. GET /community/ratings
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8603,7 +8761,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. PUT /community/ratings
+## 64. PUT /community/ratings
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8753,7 +8911,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /community/ratings/mine
+## 65. GET /community/ratings/mine
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8869,7 +9027,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /community/ratings/summary
+## 66. GET /community/ratings/summary
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8977,7 +9135,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. PUT /community/reactions
+## 67. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -9109,7 +9267,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. POST /community/reports
+## 68. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -9238,7 +9396,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. GET /community/topics
+## 69. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -9356,7 +9514,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. GET /f/{slug}
+## 70. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9566,7 +9724,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. GET /internal/community/feed/pending
+## 71. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9682,7 +9840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. POST /internal/community/feed/ranking/apply
+## 72. POST /internal/community/feed/ranking/apply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9814,7 +9972,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /internal/community/feed/ranking/pending
+## 73. GET /internal/community/feed/ranking/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9938,7 +10096,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. POST /internal/community/feed/rebuild
+## 74. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -10066,7 +10224,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. GET /internal/community/search/health
+## 75. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10176,7 +10334,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. POST /internal/community/search/reindex
+## 76. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10305,7 +10463,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. POST /internal/community/verification/badges
+## 77. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10429,7 +10587,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. POST /internal/community/verification/badges/{targetId}/revoke
+## 78. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10550,7 +10708,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. POST /internal/community/verification/badges/expire-sweep
+## 79. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10656,7 +10814,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /l/{slug}
+## 80. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10866,7 +11024,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /o/{slug}
+## 81. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11076,7 +11234,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /p/{slug}
+## 82. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11286,7 +11444,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. POST /patients/me/reviews
+## 83. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -11435,7 +11593,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /public/comments/{commentId}/replies
+## 84. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11527,7 +11685,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/media/{id}
+## 85. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11620,7 +11778,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/nearby
+## 86. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11714,7 +11872,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/posts
+## 87. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11801,7 +11959,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/posts/{postId}/comments
+## 88. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11892,7 +12050,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/posts/{postId}/reactions
+## 89. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11983,7 +12141,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/profiles/{prefijo}/{slug}
+## 90. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12194,7 +12352,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/profiles/{prefijo}/{slug}/reviews
+## 91. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12299,7 +12457,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/search
+## 92. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12398,7 +12556,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /public/search/diagnostic-units
+## 93. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12497,7 +12655,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 93. GET /public/search/insurers
+## 94. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12596,7 +12754,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 94. GET /public/search/medications
+## 95. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12695,7 +12853,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 95. GET /public/search/organizations
+## 96. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12797,7 +12955,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 96. GET /public/search/pharmacies
+## 97. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12896,7 +13054,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 97. GET /public/search/practitioners
+## 98. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12999,7 +13157,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 98. GET /s/{slug}
+## 99. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`

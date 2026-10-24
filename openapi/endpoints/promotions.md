@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `promotions`
 
-Referencia exhaustiva de 19 operación(es) del módulo `promotions`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 20 operación(es) del módulo `promotions`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `loyalty`, `promotions`
-- **Controladores:** `LoyaltyController`, `PromotionsController`
+- **Etiquetas OpenAPI:** `loyalty`, `promotions`, `promotions-collections`
+- **Controladores:** `LoyaltyController`, `PromotionsCollectionsController`, `PromotionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -23,13 +23,14 @@ Referencia exhaustiva de 19 operación(es) del módulo `promotions`, derivada de
 10. [GET /loyalty/programs](#10-get-loyalty-programs) — Listar programas de lealtad activos
 11. [POST /loyalty/programs](#11-post-loyalty-programs) — Crear un programa de lealtad con niveles y reglas
 12. [POST /loyalty/programs/{id}/memberships](#12-post-loyalty-programs-id-memberships) — Inscribir a un miembro en el programa
-13. [POST /promotions](#13-post-promotions) — Crear una promoción con sus reglas de descuento
-14. [POST /promotions/{id}/coupons/batch](#14-post-promotions-id-coupons-batch) — Emitir un lote de cupones
-15. [GET /promotions/me](#15-get-promotions-me) — Mis promociones vigentes
-16. [POST /redemptions](#16-post-redemptions) — Redimir un cupón y registrar la redención
-17. [POST /redemptions/{id}/reverse](#17-post-redemptions-id-reverse) — Revertir una redención por devolución o cancelación
-18. [POST /referral-programs/{id}/referrals](#18-post-referral-programs-id-referrals) — Generar el código de referido del miembro
-19. [POST /referrals/{id}/qualify](#19-post-referrals-id-qualify) — Calificar el referido y premiar a ambas partes
+13. [GET /promotions](#13-get-promotions) — Listar promociones del tenant
+14. [POST /promotions](#14-post-promotions) — Crear una promoción con sus reglas de descuento
+15. [POST /promotions/{id}/coupons/batch](#15-post-promotions-id-coupons-batch) — Emitir un lote de cupones
+16. [GET /promotions/me](#16-get-promotions-me) — Mis promociones vigentes
+17. [POST /redemptions](#17-post-redemptions) — Redimir un cupón y registrar la redención
+18. [POST /redemptions/{id}/reverse](#18-post-redemptions-id-reverse) — Revertir una redención por devolución o cancelación
+19. [POST /referral-programs/{id}/referrals](#19-post-referral-programs-id-referrals) — Generar el código de referido del miembro
+20. [POST /referrals/{id}/qualify](#20-post-referrals-id-qualify) — Calificar el referido y premiar a ambas partes
 
 ---
 
@@ -1725,7 +1726,166 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /promotions
+## 13. GET /promotions
+
+- **Módulo:** `promotions`
+- **Etiqueta OpenAPI:** `promotions-collections`
+- **Nombre:** Listar promociones del tenant
+- **Operation ID:** `PromotionsCollectionsController_listPromotions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PromotionsCollectionsController.listPromotions](../../src/modules/promotions/controllers/promotions-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar promociones del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V51-08: listar promociones del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /promotions` en `PromotionsCollectionsController_listPromotions`. El controlador delega en `PromotionsCollectionsService.listPromotions`. No recibe body. El tipo de retorno estático es `Promise<PromotionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /promotions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PROMOTIONS_ADMIN`, `MARKETING_MANAGER`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /promotions?page=1&pageSize=20&order=DESC&sortBy=createdAt&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PromotionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PromotionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PromotionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PromotionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PromotionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PromotionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PromotionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "promotionTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "campaignRefId": {},
+      "priority": 1,
+      "stackable": true,
+      "budgetAmount": "valor-ejemplo",
+      "currencyConceptId": {},
+      "totalRedemptionLimit": 1,
+      "perUserLimit": 1,
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<PromotionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","promotionTypeConceptId":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","campaignRefId":{},"priority":1,"stackable":true,"budgetAmount":"valor-ejemplo","currencyConceptId":{},"totalRedemptionLimit":1,"perUserLimit":1,"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].promotionTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].campaignRefId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].priority` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].stackable` | No | `boolean` | admite null | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].budgetAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].currencyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].totalRedemptionLimit` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].perUserLimit` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PROMOTIONS_ADMIN, MARKETING_MANAGER. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/promotions"
+}
+```
+
+---
+
+## 14. POST /promotions
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -1919,7 +2079,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /promotions/{id}/coupons/batch
+## 15. POST /promotions/{id}/coupons/batch
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -2068,7 +2228,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /promotions/me
+## 16. GET /promotions/me
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -2238,7 +2398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /redemptions
+## 17. POST /redemptions
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -2387,7 +2547,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /redemptions/{id}/reverse
+## 18. POST /redemptions/{id}/reverse
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `promotions`
@@ -2521,7 +2681,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /referral-programs/{id}/referrals
+## 19. POST /referral-programs/{id}/referrals
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`
@@ -2651,7 +2811,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /referrals/{id}/qualify
+## 20. POST /referrals/{id}/qualify
 
 - **Módulo:** `promotions`
 - **Etiqueta OpenAPI:** `loyalty`

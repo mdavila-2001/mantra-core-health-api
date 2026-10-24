@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical_ext`
 
-Referencia exhaustiva de 27 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 30 operación(es) del módulo `clinical_ext`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
-- **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `OrderSetsController`, `PrescriptionFavoritesController`, `ReferralsController`, `VirtualEncountersController`
+- **Etiquetas OpenAPI:** `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-collections`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters`
+- **Controladores:** `CareGapsController`, `CareTeamsController`, `CdsController`, `ClinicalAlertsController`, `ClinicalExtCollectionsController`, `OrderSetsController`, `PrescriptionFavoritesController`, `ReferralsController`, `VirtualEncountersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -16,28 +16,31 @@ Referencia exhaustiva de 27 operación(es) del módulo `clinical_ext`, derivada 
 3. [GET /care-teams](#3-get-care-teams) — Listar equipos de cuidado de un paciente
 4. [POST /care-teams](#4-post-care-teams) — Crear un equipo de cuidado con sus miembros
 5. [PATCH /care-teams/{id}/members/{memberId}/set-responsible](#5-patch-care-teams-id-members-memberid-set-responsible) — Designar miembro responsable (transferir liderazgo)
-6. [POST /cds-rules](#6-post-cds-rules) — Crear una regla CDS en borrador
-7. [POST /cds-rules/{id}/versions/publish](#7-post-cds-rules-id-versions-publish) — Publicar una versión de la regla CDS
-8. [POST /cds-rules/{id}/versions/rollback](#8-post-cds-rules-id-versions-rollback) — Rollback de la versión activa de la regla CDS
-9. [POST /cds/check-interactions](#9-post-cds-check-interactions) — Detectar interacciones medicamentosas al prescribir
-10. [POST /cds/evaluate](#10-post-cds-evaluate) — Evaluar reglas CDS y generar alertas
-11. [PATCH /clinical-alerts/{id}/acknowledge](#11-patch-clinical-alerts-id-acknowledge) — Reconocer una alerta clínica
-12. [PATCH /clinical-alerts/{id}/override](#12-patch-clinical-alerts-id-override) — Override (sobreescribir) una alerta clínica
-13. [POST /drug-interactions](#13-post-drug-interactions) — Registrar un par de interacción medicamentosa
-14. [POST /immunization-schedules](#14-post-immunization-schedules) — Registrar una dosis del calendario de inmunización
-15. [POST /order-sets](#15-post-order-sets) — Crear una plantilla de órdenes (order set) con sus ítems
-16. [POST /order-sets/{id}/apply](#16-post-order-sets-id-apply) — Aplicar un order set (fan-out de órdenes)
-17. [POST /patients/{id}/immunization-plan/project](#17-post-patients-id-immunization-plan-project) — Proyectar el plan de inmunización y abrir brechas
-18. [GET /prescription-favorites](#18-get-prescription-favorites) — Listar mis favoritos de prescripción
-19. [POST /prescription-favorites](#19-post-prescription-favorites) — Guardar un favorito de prescripción
-20. [DELETE /prescription-favorites/{id}](#20-delete-prescription-favorites-id) — Borrar un favorito de prescripción propio
-21. [GET /referrals](#21-get-referrals) — Listar derivaciones de un paciente
-22. [POST /referrals](#22-post-referrals) — Emitir una referencia desde un encuentro
-23. [PATCH /referrals/{id}/respond](#23-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
-24. [GET /referrals/me](#24-get-referrals-me) — Mis derivaciones
-25. [POST /virtual-encounters](#25-post-virtual-encounters) — Iniciar una sesión de telesalud
-26. [PATCH /virtual-encounters/{id}/end](#26-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
-27. [PATCH /virtual-encounters/{id}/join](#27-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
+6. [GET /cds-rules](#6-get-cds-rules) — Listar las reglas de apoyo a la decisión clínica del tenant
+7. [POST /cds-rules](#7-post-cds-rules) — Crear una regla CDS en borrador
+8. [POST /cds-rules/{id}/versions/publish](#8-post-cds-rules-id-versions-publish) — Publicar una versión de la regla CDS
+9. [POST /cds-rules/{id}/versions/rollback](#9-post-cds-rules-id-versions-rollback) — Rollback de la versión activa de la regla CDS
+10. [POST /cds/check-interactions](#10-post-cds-check-interactions) — Detectar interacciones medicamentosas al prescribir
+11. [POST /cds/evaluate](#11-post-cds-evaluate) — Evaluar reglas CDS y generar alertas
+12. [PATCH /clinical-alerts/{id}/acknowledge](#12-patch-clinical-alerts-id-acknowledge) — Reconocer una alerta clínica
+13. [PATCH /clinical-alerts/{id}/override](#13-patch-clinical-alerts-id-override) — Override (sobreescribir) una alerta clínica
+14. [POST /drug-interactions](#14-post-drug-interactions) — Registrar un par de interacción medicamentosa
+15. [GET /immunization-schedules](#15-get-immunization-schedules) — Listar los esquemas de inmunización del tenant
+16. [POST /immunization-schedules](#16-post-immunization-schedules) — Registrar una dosis del calendario de inmunización
+17. [GET /order-sets](#17-get-order-sets) — Listar los conjuntos de órdenes del tenant
+18. [POST /order-sets](#18-post-order-sets) — Crear una plantilla de órdenes (order set) con sus ítems
+19. [POST /order-sets/{id}/apply](#19-post-order-sets-id-apply) — Aplicar un order set (fan-out de órdenes)
+20. [POST /patients/{id}/immunization-plan/project](#20-post-patients-id-immunization-plan-project) — Proyectar el plan de inmunización y abrir brechas
+21. [GET /prescription-favorites](#21-get-prescription-favorites) — Listar mis favoritos de prescripción
+22. [POST /prescription-favorites](#22-post-prescription-favorites) — Guardar un favorito de prescripción
+23. [DELETE /prescription-favorites/{id}](#23-delete-prescription-favorites-id) — Borrar un favorito de prescripción propio
+24. [GET /referrals](#24-get-referrals) — Listar derivaciones de un paciente
+25. [POST /referrals](#25-post-referrals) — Emitir una referencia desde un encuentro
+26. [PATCH /referrals/{id}/respond](#26-patch-referrals-id-respond) — Responder / aceptar una referencia inter-tenant
+27. [GET /referrals/me](#27-get-referrals-me) — Mis derivaciones
+28. [POST /virtual-encounters](#28-post-virtual-encounters) — Iniciar una sesión de telesalud
+29. [PATCH /virtual-encounters/{id}/end](#29-patch-virtual-encounters-id-end) — Finalizar una sesión de telesalud
+30. [PATCH /virtual-encounters/{id}/join](#30-patch-virtual-encounters-id-join) — Unirse a una sesión de telesalud
 
 ---
 
@@ -677,7 +680,159 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /cds-rules
+## 6. GET /cds-rules
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-collections`
+- **Nombre:** Listar las reglas de apoyo a la decisión clínica del tenant
+- **Operation ID:** `ClinicalExtCollectionsController_listCdsRules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalExtCollectionsController.listCdsRules](../../src/modules/clinical_ext/controllers/clinical-ext-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar las reglas de apoyo a la decisión clínica del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V18-09: listar las reglas de apoyo a la decisión clínica del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /cds-rules` en `ClinicalExtCollectionsController_listCdsRules`. El controlador delega en `ClinicalExtCollectionsService.listCdsRules`. No recibe body. El tipo de retorno estático es `Promise<CdsRulePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `ruleTypeConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /cds-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /cds-rules?page=1&pageSize=20&order=DESC&sortBy=createdAt&ruleTypeConceptId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CdsRulePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CdsRulePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CdsRulePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CdsRulePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CdsRulePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CdsRulePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CdsRulePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "ruleTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "severityConceptId": "00000000-0000-4000-8000-000000000001",
+      "logicJson": {
+        "clave": "valor"
+      },
+      "messageTemplate": "valor-ejemplo",
+      "isActive": true,
+      "version": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<CdsRuleItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","ruleTypeConceptId":"00000000-0000-4000-8000-000000000001","severityConceptId":"00000000-0000-4000-8000-000000000001","logicJson":{"clave":"valor"},"messageTemplate":"valor-ejemplo","isActive":true,"version":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].ruleTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].severityConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].logicJson` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `data[].messageTemplate` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `data[].version` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/cds-rules"
+}
+```
+
+---
+
+## 7. POST /cds-rules
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -820,7 +975,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /cds-rules/{id}/versions/publish
+## 8. POST /cds-rules/{id}/versions/publish
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -956,7 +1111,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /cds-rules/{id}/versions/rollback
+## 9. POST /cds-rules/{id}/versions/rollback
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1075,7 +1230,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /cds/check-interactions
+## 10. POST /cds/check-interactions
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1225,7 +1380,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /cds/evaluate
+## 11. POST /cds/evaluate
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1383,7 +1538,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PATCH /clinical-alerts/{id}/acknowledge
+## 12. PATCH /clinical-alerts/{id}/acknowledge
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-alerts`
@@ -1498,7 +1653,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. PATCH /clinical-alerts/{id}/override
+## 13. PATCH /clinical-alerts/{id}/override
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-alerts`
@@ -1627,7 +1782,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /drug-interactions
+## 14. POST /drug-interactions
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-cds`
@@ -1756,7 +1911,153 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /immunization-schedules
+## 15. GET /immunization-schedules
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-collections`
+- **Nombre:** Listar los esquemas de inmunización del tenant
+- **Operation ID:** `ClinicalExtCollectionsController_listImmunizationSchedules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalExtCollectionsController.listImmunizationSchedules](../../src/modules/clinical_ext/controllers/clinical-ext-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los esquemas de inmunización del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V18-12: listar los esquemas de inmunización del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /immunization-schedules` en `ClinicalExtCollectionsController_listImmunizationSchedules`. El controlador delega en `ClinicalExtCollectionsService.listImmunizationSchedules`. No recibe body. El tipo de retorno estático es `Promise<ImmunizationSchedulePageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `vaccineConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /immunization-schedules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /immunization-schedules?page=1&pageSize=20&order=DESC&sortBy=createdAt&vaccineConceptId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ImmunizationSchedulePageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ImmunizationSchedulePageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ImmunizationSchedulePageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ImmunizationSchedulePageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ImmunizationSchedulePageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ImmunizationSchedulePageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImmunizationSchedulePageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "vaccineConceptId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "recommendedAgeDays": 1,
+      "doseNumber": 1,
+      "intervalDays": 1,
+      "jurisdictionConceptId": {},
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<ImmunizationScheduleItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"vaccineConceptId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","recommendedAgeDays":1,"doseNumber":1,"intervalDays":1,"jurisdictionConceptId":{},"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].vaccineConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].recommendedAgeDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].doseNumber` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].intervalDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].jurisdictionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/immunization-schedules"
+}
+```
+
+---
+
+## 16. POST /immunization-schedules
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-care-gaps`
@@ -1889,7 +2190,153 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /order-sets
+## 17. GET /order-sets
+
+- **Módulo:** `clinical_ext`
+- **Etiqueta OpenAPI:** `clinical-ext-collections`
+- **Nombre:** Listar los conjuntos de órdenes del tenant
+- **Operation ID:** `ClinicalExtCollectionsController_listOrderSets`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalExtCollectionsController.listOrderSets](../../src/modules/clinical_ext/controllers/clinical-ext-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar los conjuntos de órdenes del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V18-05: listar los conjuntos de órdenes del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /order-sets` en `ClinicalExtCollectionsController_listOrderSets`. El controlador delega en `ClinicalExtCollectionsService.listOrderSets`. No recibe body. El tipo de retorno estático es `Promise<OrderSetPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `specialtyConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /order-sets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /order-sets?page=1&pageSize=20&order=DESC&sortBy=createdAt&specialtyConceptId=00000000-0000-4000-8000-000000000001&statusConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OrderSetPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OrderSetPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OrderSetPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OrderSetPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OrderSetPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OrderSetPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OrderSetPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": {},
+      "specialtyConceptId": {},
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "description": "Texto descriptivo de ejemplo",
+      "conditionConceptId": {},
+      "version": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<OrderSetItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":{},"specialtyConceptId":{},"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","description":"Texto descriptivo de ejemplo","conditionConceptId":{},"version":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].specialtyConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `data[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `data[].description` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `data[].conditionConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].version` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `data[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/order-sets"
+}
+```
+
+---
+
+## 18. POST /order-sets
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-order-sets`
@@ -2049,7 +2496,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /order-sets/{id}/apply
+## 19. POST /order-sets/{id}/apply
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-order-sets`
@@ -2201,7 +2648,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /patients/{id}/immunization-plan/project
+## 20. POST /patients/{id}/immunization-plan/project
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-care-gaps`
@@ -2333,7 +2780,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /prescription-favorites
+## 21. GET /prescription-favorites
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-prescription-favorites`
@@ -2444,7 +2891,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /prescription-favorites
+## 22. POST /prescription-favorites
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-prescription-favorites`
@@ -2601,7 +3048,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. DELETE /prescription-favorites/{id}
+## 23. DELETE /prescription-favorites/{id}
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-prescription-favorites`
@@ -2699,7 +3146,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /referrals
+## 24. GET /referrals
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2792,7 +3239,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /referrals
+## 25. POST /referrals
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -2934,7 +3381,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PATCH /referrals/{id}/respond
+## 26. PATCH /referrals/{id}/respond
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3059,7 +3506,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /referrals/me
+## 27. GET /referrals/me
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-referrals`
@@ -3149,7 +3596,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /virtual-encounters
+## 28. POST /virtual-encounters
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3283,7 +3730,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. PATCH /virtual-encounters/{id}/end
+## 29. PATCH /virtual-encounters/{id}/end
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`
@@ -3414,7 +3861,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. PATCH /virtual-encounters/{id}/join
+## 30. PATCH /virtual-encounters/{id}/join
 
 - **Módulo:** `clinical_ext`
 - **Etiqueta OpenAPI:** `clinical-ext-virtual-encounters`

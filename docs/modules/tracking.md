@@ -9,7 +9,7 @@
 # Módulo `tracking`
 
 **Fuente:** [`src/modules/tracking/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/tracking/README.md)
-· 1 controllers · 1 services · 1 repositories · 8 entidades · 1 DTO
+· 2 controllers · 2 services · 1 repositories · 8 entidades · 2 DTO
 
 ---
 

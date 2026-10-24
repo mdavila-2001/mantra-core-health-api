@@ -9,7 +9,7 @@
 # Módulo `authz`
 
 **Fuente:** [`src/modules/authz/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/authz/README.md)
-· 9 controllers · 11 services · 15 repositories · 15 entidades · 21 DTO
+· 10 controllers · 12 services · 15 repositories · 15 entidades · 22 DTO
 
 ---
 

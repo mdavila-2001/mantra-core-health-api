@@ -2,34 +2,179 @@
 
 # Endpoints del módulo `integrations`
 
-Referencia exhaustiva de 15 operación(es) del módulo `integrations`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `integrations`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks`
-- **Controladores:** `IntegrationsConnectionsController`, `IntegrationsMessagesController`, `IntegrationsProvidersController`, `IntegrationsWebhooksController`
+- **Etiquetas OpenAPI:** `integrations-collections`, `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks`
+- **Controladores:** `IntegrationsCollectionsController`, `IntegrationsConnectionsController`, `IntegrationsMessagesController`, `IntegrationsProvidersController`, `IntegrationsWebhooksController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /integrations/connections/{id}:pause](#1-post-integrations-connections-id-pause) — Pausar una conexión en fallo (circuit breaker)
-2. [POST /integrations/connections/{id}/credentials:rotate](#2-post-integrations-connections-id-credentials-rotate) — Rotar/expirar la credencial de una conexión
-3. [POST /integrations/messages:outbound](#3-post-integrations-messages-outbound) — Encolar un mensaje saliente (idempotente)
-4. [POST /integrations/messages/{id}:correlate](#4-post-integrations-messages-id-correlate) — Procesar callback/respuesta asíncrona del proveedor
-5. [POST /integrations/messages/{id}:dead-letter](#5-post-integrations-messages-id-dead-letter) — Enviar a dead-letter tras agotar reintentos
-6. [POST /integrations/messages/{id}:dispatch](#6-post-integrations-messages-id-dispatch) — Despachar un mensaje y registrar su respuesta
-7. [POST /integrations/messages/{id}:retry](#7-post-integrations-messages-id-retry) — Programar un reintento con backoff exponencial
-8. [GET /integrations/messages/pending-correlation](#8-get-integrations-messages-pending-correlation) — Listar mensajes entrantes RECEIVED listos para correlacionar
-9. [GET /integrations/messages/pending-dispatch](#9-get-integrations-messages-pending-dispatch) — Listar mensajes QUEUED listos para despachar
-10. [GET /integrations/messages/pending-retry](#10-get-integrations-messages-pending-retry) — Listar mensajes FAILED candidatos a reintento o dead-letter
-11. [POST /integrations/providers](#11-post-integrations-providers) — Registrar un proveedor externo
-12. [POST /integrations/providers/{id}/connections](#12-post-integrations-providers-id-connections) — Aprovisionar una conexión de tenant y su credencial
-13. [POST /integrations/providers/{id}/endpoints](#13-post-integrations-providers-id-endpoints) — Publicar un endpoint versionado y su mapeo de campos
-14. [POST /integrations/providers/{id}/webhook-subscriptions](#14-post-integrations-providers-id-webhook-subscriptions) — Gestionar (crear/actualizar) una suscripción de webhook
-15. [POST /integrations/webhooks/inbound](#15-post-integrations-webhooks-inbound) — Recibir un mensaje entrante (idempotencia por firma)
+1. [GET /integrations/connections](#1-get-integrations-connections) — Listar conexiones con proveedores del tenant
+2. [POST /integrations/connections/{id}:pause](#2-post-integrations-connections-id-pause) — Pausar una conexión en fallo (circuit breaker)
+3. [POST /integrations/connections/{id}/credentials:rotate](#3-post-integrations-connections-id-credentials-rotate) — Rotar/expirar la credencial de una conexión
+4. [POST /integrations/messages:outbound](#4-post-integrations-messages-outbound) — Encolar un mensaje saliente (idempotente)
+5. [POST /integrations/messages/{id}:correlate](#5-post-integrations-messages-id-correlate) — Procesar callback/respuesta asíncrona del proveedor
+6. [POST /integrations/messages/{id}:dead-letter](#6-post-integrations-messages-id-dead-letter) — Enviar a dead-letter tras agotar reintentos
+7. [POST /integrations/messages/{id}:dispatch](#7-post-integrations-messages-id-dispatch) — Despachar un mensaje y registrar su respuesta
+8. [POST /integrations/messages/{id}:retry](#8-post-integrations-messages-id-retry) — Programar un reintento con backoff exponencial
+9. [GET /integrations/messages/pending-correlation](#9-get-integrations-messages-pending-correlation) — Listar mensajes entrantes RECEIVED listos para correlacionar
+10. [GET /integrations/messages/pending-dispatch](#10-get-integrations-messages-pending-dispatch) — Listar mensajes QUEUED listos para despachar
+11. [GET /integrations/messages/pending-retry](#11-get-integrations-messages-pending-retry) — Listar mensajes FAILED candidatos a reintento o dead-letter
+12. [POST /integrations/providers](#12-post-integrations-providers) — Registrar un proveedor externo
+13. [GET /integrations/providers/{id}/connections](#13-get-integrations-providers-id-connections) — Listar conexiones de un proveedor del tenant
+14. [POST /integrations/providers/{id}/connections](#14-post-integrations-providers-id-connections) — Aprovisionar una conexión de tenant y su credencial
+15. [POST /integrations/providers/{id}/endpoints](#15-post-integrations-providers-id-endpoints) — Publicar un endpoint versionado y su mapeo de campos
+16. [GET /integrations/providers/{id}/webhook-subscriptions](#16-get-integrations-providers-id-webhook-subscriptions) — Listar suscripciones de webhook de un proveedor del tenant
+17. [POST /integrations/providers/{id}/webhook-subscriptions](#17-post-integrations-providers-id-webhook-subscriptions) — Gestionar (crear/actualizar) una suscripción de webhook
+18. [POST /integrations/webhooks/inbound](#18-post-integrations-webhooks-inbound) — Recibir un mensaje entrante (idempotencia por firma)
 
 ---
 
-## 1. POST /integrations/connections/{id}:pause
+## 1. GET /integrations/connections
+
+- **Módulo:** `integrations`
+- **Etiqueta OpenAPI:** `integrations-collections`
+- **Nombre:** Listar conexiones con proveedores del tenant
+- **Operation ID:** `IntegrationsCollectionsController_listConnections`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IntegrationsCollectionsController.listConnections](../../src/modules/integrations/controllers/integrations-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar conexiones con proveedores del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V12-08: listar conexiones con proveedores del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /integrations/connections` en `IntegrationsCollectionsController_listConnections`. El controlador delega en `IntegrationsCollectionsService.listConnections`. No recibe body. El tipo de retorno estático es `Promise<IntegrationProviderConnectionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `providerId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /integrations/connections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /integrations/connections?page=1&pageSize=20&order=DESC&sortBy=createdAt&providerId=00000000-0000-4000-8000-000000000001&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IntegrationProviderConnectionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "providerId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "environmentConceptId": {},
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<IntegrationProviderConnectionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","providerId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","environmentConceptId":{},"stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].environmentConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/integrations/connections"
+}
+```
+
+---
+
+## 2. POST /integrations/connections/{id}:pause
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-connections`
@@ -143,7 +288,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /integrations/connections/{id}/credentials:rotate
+## 3. POST /integrations/connections/{id}/credentials:rotate
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-connections`
@@ -276,7 +421,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /integrations/messages:outbound
+## 4. POST /integrations/messages:outbound
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -419,7 +564,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /integrations/messages/{id}:correlate
+## 5. POST /integrations/messages/{id}:correlate
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -536,7 +681,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /integrations/messages/{id}:dead-letter
+## 6. POST /integrations/messages/{id}:dead-letter
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -651,7 +796,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /integrations/messages/{id}:dispatch
+## 7. POST /integrations/messages/{id}:dispatch
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -780,7 +925,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /integrations/messages/{id}:retry
+## 8. POST /integrations/messages/{id}:retry
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -898,7 +1043,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /integrations/messages/pending-correlation
+## 9. GET /integrations/messages/pending-correlation
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -1008,7 +1153,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /integrations/messages/pending-dispatch
+## 10. GET /integrations/messages/pending-dispatch
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -1118,7 +1263,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /integrations/messages/pending-retry
+## 11. GET /integrations/messages/pending-retry
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-messages`
@@ -1232,7 +1377,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /integrations/providers
+## 12. POST /integrations/providers
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-providers`
@@ -1372,7 +1517,151 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /integrations/providers/{id}/connections
+## 13. GET /integrations/providers/{id}/connections
+
+- **Módulo:** `integrations`
+- **Etiqueta OpenAPI:** `integrations-collections`
+- **Nombre:** Listar conexiones de un proveedor del tenant
+- **Operation ID:** `IntegrationsCollectionsController_listProviderConnections`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IntegrationsCollectionsController.listProviderConnections](../../src/modules/integrations/controllers/integrations-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar conexiones de un proveedor del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V12-11: listar conexiones de un proveedor del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /integrations/providers/{id}/connections` en `IntegrationsCollectionsController_listProviderConnections`. El controlador delega en `IntegrationsCollectionsService.listProviderConnections`. No recibe body. El tipo de retorno estático es `Promise<IntegrationProviderConnectionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /integrations/providers/00000000-0000-4000-8000-000000000001/connections HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /integrations/providers/00000000-0000-4000-8000-000000000001/connections?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IntegrationProviderConnectionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IntegrationProviderConnectionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "providerId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "environmentConceptId": {},
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<IntegrationProviderConnectionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","providerId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","environmentConceptId":{},"stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].environmentConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].validFrom` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].validTo` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/integrations/providers/{id}/connections"
+}
+```
+
+---
+
+## 14. POST /integrations/providers/{id}/connections
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-providers`
@@ -1517,7 +1806,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /integrations/providers/{id}/endpoints
+## 15. POST /integrations/providers/{id}/endpoints
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-providers`
@@ -1684,7 +1973,149 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /integrations/providers/{id}/webhook-subscriptions
+## 16. GET /integrations/providers/{id}/webhook-subscriptions
+
+- **Módulo:** `integrations`
+- **Etiqueta OpenAPI:** `integrations-collections`
+- **Nombre:** Listar suscripciones de webhook de un proveedor del tenant
+- **Operation ID:** `IntegrationsCollectionsController_listProviderWebhookSubscriptions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IntegrationsCollectionsController.listProviderWebhookSubscriptions](../../src/modules/integrations/controllers/integrations-collections.controller.ts)
+
+### Descripción de negocio
+
+Listar suscripciones de webhook de un proveedor del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: V12-13: listar suscripciones de webhook de un proveedor del tenant.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /integrations/providers/{id}/webhook-subscriptions` en `IntegrationsCollectionsController_listProviderWebhookSubscriptions`. El controlador delega en `IntegrationsCollectionsService.listProviderWebhookSubscriptions`. No recibe body. El tipo de retorno estático es `Promise<IntegrationWebhookSubscriptionPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `page` | query | No | `number` | mínimo 1 | Página (1-based) | `1` |
+| `pageSize` | query | No | `number` | mínimo 1; máximo 100 | Tamaño de página | `20` |
+| `order` | query | No | `string` | valores: `ASC`, `DESC` | Sin descripción específica en OpenAPI. | `DESC` |
+| `sortBy` | query | No | `string` | Sin restricción adicional declarada | Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables | `createdAt` |
+| `stateConceptId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /integrations/providers/00000000-0000-4000-8000-000000000001/webhook-subscriptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /integrations/providers/00000000-0000-4000-8000-000000000001/webhook-subscriptions?page=1&pageSize=20&order=DESC&sortBy=createdAt&stateConceptId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IntegrationWebhookSubscriptionPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IntegrationWebhookSubscriptionPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "providerId": {},
+      "tenantId": {},
+      "eventType": "valor-ejemplo",
+      "callbackUrl": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "pageSize": 1,
+    "total": 1,
+    "totalPages": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `data` | Sí | `array<IntegrationWebhookSubscriptionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","providerId":{},"tenantId":{},"eventType":"valor-ejemplo","callbackUrl":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `data[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].providerId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].tenantId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `data[].eventType` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].callbackUrl` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `data[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `data[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `data[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `meta` | Sí | `PageMetaDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"page":1,"pageSize":1,"total":1,"totalPages":1}` |
+| `meta.page` | Sí | `number` | Sin restricción adicional declarada | Página devuelta (1-based) | `1` |
+| `meta.pageSize` | Sí | `number` | Sin restricción adicional declarada | Tamaño de página pedido | `1` |
+| `meta.total` | Sí | `number` | Sin restricción adicional declarada | Total de filas que cumplen los filtros | `1` |
+| `meta.totalPages` | Sí | `number` | Sin restricción adicional declarada | Total de páginas con ese tamaño | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/integrations/providers/{id}/webhook-subscriptions"
+}
+```
+
+---
+
+## 17. POST /integrations/providers/{id}/webhook-subscriptions
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-providers`
@@ -1778,8 +2209,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "integrationContractId": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001"
+  "providerId": "00000000-0000-4000-8000-000000000001",
+  "eventType": "valor-ejemplo",
+  "state": "00000000-0000-4000-8000-000000000001",
+  "updated": true
 }
 ```
 
@@ -1788,8 +2221,10 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `integrationContractId` | Sí | `string` | formato `uuid` | Identificador asociado a integration contract. | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Concepto de estado de la suscripción | `00000000-0000-4000-8000-000000000001` |
+| `providerId` | Sí | `string` | formato `uuid` | Identificador asociado a provider. | `00000000-0000-4000-8000-000000000001` |
+| `eventType` | Sí | `string` | Sin restricción adicional declarada | Valor de event type mantenido por la instancia. | `valor-ejemplo` |
+| `state` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `updated` | Sí | `boolean` | Sin restricción adicional declarada | true si se actualizó una suscripción existente | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1820,7 +2255,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /integrations/webhooks/inbound
+## 18. POST /integrations/webhooks/inbound
 
 - **Módulo:** `integrations`
 - **Etiqueta OpenAPI:** `integrations-webhooks`

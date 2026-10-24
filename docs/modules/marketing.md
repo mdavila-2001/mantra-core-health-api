@@ -9,7 +9,7 @@
 # Módulo `marketing`
 
 **Fuente:** [`src/modules/marketing/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/marketing/README.md)
-· 2 controllers · 2 services · 2 repositories · 14 entidades · 1 DTO
+· 3 controllers · 3 services · 2 repositories · 14 entidades · 2 DTO
 
 ---
 
