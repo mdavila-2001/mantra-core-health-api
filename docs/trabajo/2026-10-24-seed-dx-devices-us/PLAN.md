@@ -3,6 +3,7 @@
 - Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` (sólo `tools/` y `docs/`) · Predecesor: ninguno (sesiones hermanas `-eu`, `-row`, `-master` en paralelo)
 - Rama: `claude/compassionate-brown-tr71nn` (asignada por el entorno), espejada a `justin/seed-dx-devices-us` (nombre pedido por el propietario; la consolidación lee esa).
 - Resultado observable: la sesión de consolidación (`justin/seed-dx-devices-master`) puede leer de esta rama un NDJSON con una línea por equipo de diagnóstico registrado ante FDA, con procedencia por fila, y un importador que carga los tipos de dispositivo (product codes FDA de alcance diagnóstico) en `terminology.*`, que es a donde apunta `diagnostic_units.diagnostic_equipment.equipment_type_concept_id`.
+- Estados finales: ver [REPORTE.md](./REPORTE.md).
 - Kill-test: `zcat tools/terminology-import/diagnostic-devices/us/out/*.ndjson.gz | wc -l` da 0, o una fila sin `source`/`sourceRecordId`/`sourceUrl`/`retrievedAt`.
 
 ## Alcance
