@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { RouteIndexModule } from '../../observability/route-index/route-index.module';
 import * as entities from './entities';
 import {
   AuditController,
+  AuditQueryController,
   ComplianceController,
   PrivacyController,
   ModerationController,
@@ -10,6 +12,7 @@ import {
 import {
   AuditEventsService,
   AuditHistoryService,
+  AuditQueryService,
   AuditTrailService,
   ComplianceService,
   ModerationService,
@@ -17,6 +20,7 @@ import {
 } from './services';
 import {
   AuditLogRepository,
+  AuditQueryRepository,
   DataAccessLogRepository,
   AnalyticsGovernanceLogRepository,
   DsarRequestsRepository,
@@ -32,9 +36,13 @@ import {
  * tercero gobernado. Las entidades son mayormente append-only (solo `recorded_at`).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    RouteIndexModule,
+  ],
   controllers: [
     AuditController,
+    AuditQueryController,
     ComplianceController,
     PrivacyController,
     ModerationController,
@@ -42,6 +50,7 @@ import {
   providers: [
     // Repositorios
     AuditLogRepository,
+    AuditQueryRepository,
     DataAccessLogRepository,
     AnalyticsGovernanceLogRepository,
     DsarRequestsRepository,
@@ -51,6 +60,7 @@ import {
     // Servicios
     AuditEventsService,
     AuditHistoryService,
+    AuditQueryService,
     AuditTrailService,
     ComplianceService,
     ModerationService,

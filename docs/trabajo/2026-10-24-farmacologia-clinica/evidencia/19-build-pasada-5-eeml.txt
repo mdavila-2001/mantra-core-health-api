@@ -1,0 +1,54 @@
+# Pasada 5 — WHO eEML (2026-10-24). Base = pasada 4 re-armada con el mismo código (--no-dailymed --no-eml).
+
+$ node fetch-eml.mjs  (salida literal, sin el aviso UNDICI de Node)
+[eml] 1132 recomendaciones enlazadas desde la portada
+[eml:recomendaciones] 200/1132 (73s)
+[eml:recomendaciones] 400/1132 (150s)
+[eml:recomendaciones] 600/1132 (253s)
+[eml:recomendaciones] 800/1132 (324s)
+[eml:recomendaciones] 1000/1132 (406s)
+[eml:recomendaciones] 1132/1132 (461s)
+{
+  "source": "who-eeml",
+  "url": "https://list.essentialmeds.org/",
+  "homeSha256": "621a832edc014c4a5ae34d051ee9333978335825d825e02b3beebd9fb2a2a405",
+  "recommendations": 1132,
+  "fetched": 1132,
+  "byStatus": {
+    "AddedToEml": 1132
+  },
+  "currentWithAtc5": 948,
+  "currentWithoutAtc5": 184,
+  "atc5": 509,
+  "latestGuidelineDate": "2025-05-09",
+  "http": {
+    "requests": 1133,
+    "retries": 0,
+    "cacheHits": 0,
+    "failures": 0,
+    "bytes": 10026809
+  },
+  "segundos": 462
+}
+
+$ node --max-old-space-size=8192 build-monographs.mjs --no-dailymed --no-eml   (base)
+sources = "CIMA, EMA, sin eEML, sin DailyMed, openFDA, GSRS, RxNav"
+universe = 6236
+monographs = 2621
+sections = 67499
+sectionsBySource = {"aemps-cima": 41998, "openfda-label": 24100, "ema-epar": 1401}
+cimaDuplicateSections = 1107
+
+$ node --max-old-space-size=8192 build-monographs.mjs --no-dailymed   (con eEML)
+sources = "CIMA, EMA, eEML, sin DailyMed, openFDA, GSRS, RxNav"
+universe = 6242
+monographs = 2709
+sections = 69067
+sectionsBySource = {"aemps-cima": 41998, "who-eeml": 1568, "openfda-label": 24100, "ema-epar": 1401}
+eml = {"recommendations": 1132, "current": 1132, "withoutAtc5": 184, "duplicateSections": 408}
+
+# Aporte nuevo (dedupe por código ATC 5 y por (ATC5, clave, sha256 del texto)):
+ATC 5 nuevos = 88
+A01AA04 A07EA01 A07EA02 A11AA01 A11HA04 A12AA20 A12CB01 B03AA02 B05AA02 B05AA05 B05AX01 B05AX02 B05AX03 B05CX01 C01BB01 C05AA09 C09BB03 D01AE12 D01BA01 D02AE01 D08AX06 D08AX08 G02AB03 G03AA05 G03AA08 G03AC01 G03AC03 G03AC06 G03XB51 J01GB14 J01XB02 J02AX01 J04AD03 J05AP07 J05AP13 J05AR23 J05AR27 J06AA01 J07AF01 J07AH01 J07AH02 J07AH03 J07AH04 J07AH05 J07AH06 J07AH10 J07AM01 J07BA01 J07BA03 J07BD01 J07BE01 J07BF01 J07BF02 J07BF04 J07BJ01 J07BX01 J07XA01 P01AC01 P01BA06 P01BD51 P01BE02 P01BF02 P01BF03 P01BF06 P01BF09 P01CB02 P01CD01 P01CX02 P01CX03 P01CX04 P02BA02 P02CB02 P02CE01 P02DA01 P03AX01 R03AA01 R06AE03 S01AA09 S01AA10 S01EA01 S01HA03 S02AA10 S02AA14 V03AB03 V03AB09 V03AB21 V03AH01 V08AC02
+ATC 5 perdidos = 0
+secciones nuevas = 1568 {'pharmaceutical_form': 606, 'indications': 962}

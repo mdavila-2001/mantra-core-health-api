@@ -1,117 +1,141 @@
 # Reporte — Vademécum de farmacología clínica (monografías por ATC 5)
 
-- Fecha: 2026-10-24 (actualizado 16:05 UTC) · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/seed-clinical-pharmacology`
-- PRs: #679 y #705, ya mergeados en `dev`; la pasada 1 va en https://github.com/mdavila-2001/mantra-core-health-api/pull/710, sin mergear
+- Fecha: 2026-10-24 (actualizado 18:40 UTC) · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/seed-clinical-pharmacology`
+- PRs:
+  - Mergeados en `dev`: #679, #705 y #710 (pasada 1).
+  - Este estado (pasadas 2–5): https://github.com/mdavila-2001/mantra-core-health-api/pull/730, sin mergear.
 - Peldaño de evidencia alcanzado:
-  - `VERIFIED` para la carga del corpus openFDA + GSRS en un Postgres 16 desechable: filas, tamaño, idempotencia y retiro de filas superadas.
-  - `TESTED` para el resto.
-  - No llega a `REGRESSION_VERIFIED`: CIMA y RxNav siguen bloqueados y no se corrió la suite completa.
-- Avance: 20 HECHO / 28 microtareas = **71 %**. Quedan 2 A MEDIAS y 6 BLOQUEADO.
+  - **`VERIFIED`** para la carga del corpus de la pasada 5 en un Postgres 16 desechable: filas,
+    tamaño, idempotencia, integridad del texto (sha256) y enlaces a `vademecum`.
+  - **`TESTED`** para el resto. No llega a `REGRESSION_VERIFIED`:
+    - Las pasadas 6 y 7 siguen descargando.
+    - No se cargó en la base real del stack.
+    - La suite Jest completa no se corrió; sólo la dirigida.
+- Avance: **35 HECHO / 40 microtareas = 87,5 %** (35 ÷ 40). Quedan 4 EN CURSO y 1 TODO.
 
 ## Completado
 
 | ID | Qué se logró | Comando | Resultado |
 |---|---|---|---|
-| H1.S1.M1 | La monografía por secciones cabe sin DDL | `grep -n -i unique database/SQL/03_terminology/04_indexes.sql` | ningún índice único sobre `concept_properties` |
-| H1.S1.M2 | Ramas hermanas comprobadas | `git branch -r \| grep -E "seed-(diseases\|drug-treatments)"` | vacío |
-| H2.S1.M1–M3, M5, M6 | Secciones literales; CIMA (fixture real); openFDA, GSRS y streaming con datos REALES | `node --test …/clinical-pharmacology/test/*.test.mjs` | 20/20 |
-| H2.S2.M3 | Descarga openFDA | `NODE_USE_ENV_PROXY=1 node fetch-openfda.mjs` | 14/14 particiones, export 2026-10-23, sha256 en meta |
-| H2.S2.M4 | Descarga y normalización GSRS | `NODE_USE_ENV_PROXY=1 node fetch-gsrs.mjs` | 167 385 registros leídos (= declarados); 4 730 ATC 5 |
-| H2.S3.M1 | Armado | `node --max-old-space-size=8192 build-monographs.mjs` | evidencia/13: 1 033 monografías, 18 853 secciones, 143 s |
-| H2.S3.M2 | Carga idempotente a escala | `load-clinical-pharmacology.mjs` ×4 | evidencia/11: 1 696 / 969 / 1 682 / 24 137 / 199 → 0 → reemplazo 18 853 → 0 |
-| H2.S3.M3 | Cobertura | `coverage-report.mjs` | evidencia/14 |
-| H2.S3.M4 | Validación de enlaces | `validate-links.mjs` | evidencia/12: 199 ATC 5 de `vademecum` con monografía y `concept_map` |
-| H2.S3.M5 | Datos normalizados en git | `pack-data.mjs` | `data/`: monografías 20,9 MB gz (1 parte), GSRS 4,7 MB gz, MANIFEST con sha256 |
-| H3.S1.M1 | Pasada 0 | build + coverage | universo inicial 483 ATC 5 |
-| H3.S1.M3 | Pasada 1: openFDA + GSRS | build + coverage | +1 033 ATC 5 con monografía, +18 853 secciones |
+| H1.S1.M1–M2 | La monografía cabe sin DDL; ramas hermanas comprobadas | `grep` sobre el DDL; `git ls-remote` | sin índice único en `concept_properties`; `seed-drug-treatments` ya en `dev` |
+| H2.S1.M1–M9 | Normalizadores CIMA, openFDA, GSRS, RxNav, EMA, DailyMed (SPL) y eEML, todos con datos **reales** | `node --test …/clinical-pharmacology/test/*.test.mjs` | 28/28 |
+| H2.S2.M1–M5, M7 | Descargas CIMA (referencias + maestra ATC), RxNav, openFDA, GSRS, EMA y eEML | fetchers con `NODE_USE_ENV_PROXY=1` | metas con URL, sha256 y fecha; eEML 1 132/1 132, 0 fallos |
+| H2.S3.M1 | Armado | `build-monographs.mjs` | 2 709 monografías, 69 067 secciones (evidencia/19) |
+| H2.S3.M2 | Carga idempotente a escala | `load-clinical-pharmacology.mjs` ×2 en base nueva | 3 773 / 3 757 / 3 759 / 90 102 / 425 → 0 (evidencia/21) |
+| H2.S3.M3–M4 | Cobertura y enlaces | `coverage-report.mjs`, `validate-links.mjs` | evidencia/20 y 21 |
+| H2.S3.M5 | Datos normalizados en git | `pack-data.mjs` | `data/`: 4 partes de monografías (24–40 MB gz), MANIFEST con sha256 |
+| H2.S3.M6 | NDJSON > 512 MB | test `ndjsonLines` + `coverage-report.mjs` | verde; 549 MB leídos |
+| H3.S1.M1–M7 | Pasadas 0–5 medidas | build por pasada con `--no-*` | ver tabla de pasadas |
+| H3.S2.M1 | Enlace con `drug-treatments` por código | `python3 -I evidencia/22-enlace-drug-treatments.py` | 3 032 de 4 842 fármacos (12 008 de 18 032 afirmaciones) llegan a una monografía |
+| H4.S1.M1 | Licencias leídas en su página | lectura 2026-10-24 | AEMPS, openFDA, RxNav, EMA, eEML, NLM |
 | H4.S1.M2 | Registro de pasadas | — | `docs/seed-research/clinical-pharmacology.md` |
-| H4.S1.M3 | Gates | `yarn typecheck`, `yarn lint` (sobre `dev` `ab5fb64c`); `node --test` (tras el merge con `dev` `d34fae53`) | exit=0, exit=0, 107/107 (evidencia/05, 08, 09) |
-| H4.S1.M4 | PR | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/710 |
+| H4.S1.M3 | Gates sobre HEAD `1b07eb16` (con `dev` `025e3e37` mergeado) | `node --test` (3 suites), `yarn typecheck`, `yarn lint`, `yarn build`, Jest dirigido | 115/115, exit 0, exit 0, exit 0, 12/12 (evidencia/23–27). `docs:validate` y `docs:build --strict` fallan sólo por 3 enlaces de otros reportes ya en `dev` (evidencia/28–29) |
+| H4.S1.M4 | PR contra `dev` | — | https://github.com/mdavila-2001/mantra-core-health-api/pull/730 |
 | H4.S1.M5 | Plan y reporte | — | este directorio |
+
+Pasadas (ATC 5 nuevos con monografía / secciones nuevas):
+
+| # | Fuente | ATC 5 | Secciones |
+|---|---|---:|---:|
+| 1 | openFDA + GSRS | 1 033 | 18 853 |
+| 2 | RxNav | +104 (−7) | +2 252 |
+| 3 | CIMA | +1 432 | +46 100 |
+| 4 | EMA | +59 | +1 401 |
+| 5 | eEML de la OMS | +88 | +1 568 |
 
 ## A medias
 
-### H2.S1.M4 — Parsers RxNav
-- Qué anda: parsers defensivos (forma desconocida → vacío) y probados con objetos sintéticos.
-- Qué no anda: no hay respuestas reales; `rxnav.nlm.nih.gov` sigue en 403.
-- Qué falta exactamente: correr `NODE_USE_ENV_PROXY=1 node fetch-rxnorm.mjs --limit-atc 5`, guardar las respuestas como fixture y validar `idtype=ATC`.
-- Dónde quedó: `lib/rxnorm.mjs`, `fetch-rxnorm.mjs`.
-
-### H4.S1.M1 — Licencias
-- Qué anda:
-  - openFDA declara su licencia (`meta.license`) y su aviso (`meta.disclaimer`); el aviso viaja literal en cada sección.
-  - La licencia de CIMA está citada desde 2026-09-30.
-- Qué no anda: no se pudieron leer las páginas de licencia (`open.fda.gov` y las demás en 403).
-- Qué falta exactamente: abrir cada página citada en `SOURCES.md` y marcarla verificada con fecha.
-- Dónde quedó: `tools/terminology-import/clinical-pharmacology/SOURCES.md`.
+Ninguna microtarea en A MEDIAS. Las EN CURSO son descargas que siguen corriendo; se detallan en
+Pendiente.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H2.S2.M1 `fetch-cima` / H3.S1.M2 pasada CIMA | BLOQUEADO | Habilitar `cima.aemps.es` |
-| H2.S2.M2 `fetch-rxnorm` / H3.S1.M5 pasada RxNav | BLOQUEADO | Habilitar `rxnav.nlm.nih.gov`; destraba 26 744 etiquetas ambiguas |
-| H3.S1.M4 pasadas 3–6 | BLOQUEADO | `dailymed.nlm.nih.gov`, `www.ema.europa.eu`, `www.minsalud.gob.bo` |
-| H3.S2.M1 enlace con ramas hermanas | BLOQUEADO | Que existan `justin/seed-drug-treatments` y `justin/seed-diseases` |
+| H2.S2.M6 / H3.S1.M8 — DailyMed | EN CURSO | Termina la descarga: 12 500 de 17 729 identidades a las 18:15 UTC. Después, build con y sin `--no-dailymed`. |
+| H2.S2.M8 / H3.S1.M9 — CIMA exhaustiva | EN CURSO | Termina la descarga: 11 200 de 22 506 fichas a las 18:15 UTC. Después, build con `--granularity product`. |
+| H3.S1.M10 — dos pasadas en 0 | TODO | Las pasadas 6 y 7 medidas. Si alguna aporta, buscar otra fuente libre y oficial. |
 
 ## Evidencia
 
-Salidas literales en [`evidencia/`](./evidencia/):
+Salidas literales en la carpeta `evidencia/` de este directorio:
 
-- 01–10: primera sesión.
-- 05: rehecho tras el merge con `dev`, 107/107.
-- 15: comprobación de hosts de las 16:01 UTC.
-- 11: carga completa e idempotencia.
-- 12: validación de enlaces.
-- 13: armado de la pasada 1.
-- 14: cobertura de la pasada 1.
+- 01–15: primera sesión y pasada 1.
+- 16–19: pasadas 2–5.
+- 20: cobertura tras la pasada 5.
+- 21: carga y `validate-links`.
+- 22: enlace con `drug-treatments`.
+- 23–29: gates (28–29: documentación).
 
 Extractos:
 
 ```
-# 13-build-pasada-1-openfda-gsrs.txt
-"monographs": 1033, "sections": 18853
-"scanned": 262901, "humanRxOrOtc": 82884, "withoutUnii": 1522,
-"gsrs": { "unique": 21570, "who-atc-50-series": 4267, "ambiguous": 26744, "none": 28778, "unknown-unii": 3 }
+# 21-postgres-carga-pasada-5.txt
+1.ª: "concepts": 3773, "designations": 3757, "relationships": 3759, "properties": 90102, "vademecumMaps": 425  (39 s)
+2.ª: todo 0 (19 s)
+concept_properties: 342 MB
+secciones con textSha256 ≠ sha256(texto): 0 ; filas eEML sin atribución o advertencia: 0
 
-# 11-postgres-carga-completa-openfda.txt
-1.ª: "concepts": 1696, "designations": 969, "relationships": 1682, "properties": 24137, "vademecumMaps": 199  (9 s)
-2.ª: todo 0 (4 s)
-aviso agregado: "prunedProperties": 18853, "properties": 18853 ; siguiente: 0 / 0
-propiedades openFDA sin aviso: 0
+# 23–27
+node --test: tests 115, pass 115, fail 0 · typecheck exit=0 · lint exit=0 · build exit=0 · jest vademecum-seed 12/12
 ```
 
 ## No cubierto
 
-- No hay texto en castellano: CIMA está bloqueada y las secciones de openFDA están en inglés (no se traducen).
-- Los niveles ATC 1–4 no tienen nombre: sólo los publica CIMA en castellano, y los de la OMS no se copian.
-- El cruce con el catálogo de productos (`medicines-*.ndjson`) no se midió en esta sesión.
-- `yarn build`, `yarn test` completo, `yarn docs:validate` y `yarn docs:build` no se corrieron. No hay cambios en `src/`.
-- La carga no se hizo contra la base real del stack: sólo contra el DDL del módulo 03 en una base desechable con conceptos internos mínimos.
+- **Aplicaciones:** la base real del stack y la API no se tocaron; la carga se midió sólo contra el
+  DDL del módulo 03 en una base desechable.
+- **Lint:** `yarn lint` cubre `src`, `apps`, `libs` y `test` en TypeScript, no los `.mjs` de `tools/`.
+  Sobre esos archivos sólo corren `node --check` y los tests.
+- **Catálogo de productos:** no se midió el cruce con `medicines-*.ndjson`; los archivos no están en
+  la sesión.
+- **Enfermedades:** no se validó el enlace con `diseases`, que no usa ATC. El enlace fármaco →
+  enfermedad pasa por `drug-treatments`.
+- **Jest completo:** no se corrió `yarn test`; no hay cambios en `src/`.
+- **`yarn docs:validate` y `yarn docs:build`:** OpenAPI y AsyncAPI son válidos, pero los dos
+  comandos salen con 1. La causa son 3 enlaces `./evidencia/` (carpeta sin `index.md`) en reportes
+  de otros trabajos que ya están en `dev`: `diccionarios-medicos`, `marcelo-lane16-protection` y
+  `seed-dx-devices-eu-oficial`. El mismo enlace en este REPORTE se arregló en este PR. Los otros
+  quedan fuera de alcance (evidencia/28–29).
 
 ## Desvíos del plan
 
 - El plan se escribió después del código (ver PLAN.md).
-- RxNav seguía bloqueado. Se agregó el GSRS de la FDA (por openFDA) como puente UNII ↔ WHO-ATC, sólo por códigos. No estaba en el plan original; queda como microtareas H2.S1.M6 y H2.S2.M4.
-- La regla de referencia de openFDA cambió: ahora se elige Rx antes que OTC **dentro de cada vía**. Antes una Rx intravenosa borraba la única etiqueta oral (OTC) del paracetamol.
-- Los ids de las secciones ahora incluyen la huella del valor completo, no sólo del texto. Así un cambio de procedencia (p. ej. el aviso) reemplaza la fila; está medido en evidencia/11.
-- PR #705 se mergeó a las 14:12 UTC. Esta pasada va en un PR nuevo, el #710.
-- La limpieza #708 borró en `dev` esta carpeta: plan, reporte y evidencia. Al traer `dev` a la rama se aceptó el borrado. Después, a pedido de Justin (16:00 UTC), se restauró la carpeta desde `aadcba8f`.
-- A las 16:00 UTC llegó otro aviso de que CIMA, RxNav, DailyMed y EMA estaban habilitados. Se probó con una petición real a cada host (evidencia/15) y los cuatro siguen en 403: «gateway answered 403 to CONNECT (policy denial or upstream failure)».
+- Fuentes agregadas a medida que se habilitaron los hosts:
+  - **GSRS** (pasada 1), mientras RxNav estaba bloqueado.
+  - **EMA**, **eEML** y **DailyMed**.
+  - La eEML figuraba como «no usada (CC BY-NC-SA)». Al leer su página el 2026-10-24 resultó
+    **CC BY 3.0 IGO**, con uso comercial permitido salvo publicidad.
+- **Re-medición por dedupe:** CIMA dejó de repetir textos idénticos dentro de un ATC. La base de la
+  pasada 4 pasó de 68 606 a 67 499 secciones; no se perdió ninguna sección distinta.
+- **Desempate por uso en España:** los conflictos GSRS/RxNav se desempatan por los ATC que la
+  AEMPS usa en CIMA, sólo por código. Así se recuperaron 7 ATC 5 que la pasada 2 había perdido por
+  códigos obsoletos del GSRS.
+- **NDJSON grande:** el corpus pasó de 512 MB y hubo que leerlo por líneas.
 
 ## Riesgos residuales
 
-- **openFDA advierte que sus datos no están validados** («assume all results are unvalidated»). El aviso va en cada sección; quien muestre estas secciones debe mostrarlo.
-- **La regla de las series 50/70** se basa en la convención de numeración de la ATC de la OMS, no en una marca por sustancia. En 4 267 etiquetas eligió el código < 50 frente a candidatos ≥ 50. Una sustancia cuyo único código válido fuera ≥ 50 no se enlazaría (queda ambigua, no mal enlazada).
-- **La posología (4.2 / `dosage_and_administration`)** es contenido profesional; no debe mostrarse a pacientes.
-- **`concept_properties` creció de 71 MB a 146 MB** tras un reemplazo masivo, por las tuplas muertas. Correr `VACUUM` después de recargas grandes.
+- **Avisos de las fuentes.** openFDA advierte que sus datos no están validados y la eEML dice que su
+  PDF es la versión vinculante. Los dos avisos van en cada fila; quien muestre estas secciones debe
+  mostrarlos.
+- **Posología** (4.2 / `dosage_and_administration`): contenido profesional, no para pacientes.
+- **788 fichas de CIMA sin fecha de revisión publicada**, frente a la obligación de fecha de la
+  AEMPS (ambigüedad 6).
+- **22 334 etiquetas de openFDA siguen sin enlazar.** Son principios con varios ATC según vía o
+  uso. Enlazarlas exigiría inferir; quedan contadas.
+- **Tamaño:** `concept_properties` ocupa 342 MB con la pasada 5. La CIMA exhaustiva lo hará crecer.
+  Correr `VACUUM` después de recargas grandes.
 
 ## Decisiones y ambigüedades
 
-- Concepto por código ATC de los 5 niveles en `clinical-pharmacology`, versión única `1`; la versión real de cada documento va en cada sección.
+- Concepto por código ATC de los 5 niveles en `clinical-pharmacology`, versión única `1`. La versión
+  real de cada documento va en cada sección.
 - Nombre mostrado, en este orden:
-  1. el de la LINAME (ES);
-  2. si no hay, el de la sustancia en el GSRS (EN), sólo para ATC 5 de un solo principio;
-  3. si tampoco, el código.
-- Etiquetas ambiguas: no se enlazan. Se cuentan y se listan las más frecuentes en el registro de pasadas.
-- Ambigüedades 1–4 del plan siguen abiertas para confirmar con Justin y el propietario.
+  1. el de la AEMPS (ES);
+  2. si no hay, el de la LINAME (ES);
+  3. si tampoco, el de la sustancia en el GSRS (EN), sólo para un principio;
+  4. si no, el código.
+- Sin ATC asignado por la fuente no se enlaza: 468 medicamentos de CIMA, 166 de la EMA y 184
+  recomendaciones de la eEML.
+- DailyMed: de las etiquetas que sólo están ahí se guarda el puntero, no el texto (posible copyright
+  de terceros según la NLM).
+- Ambigüedades 1–6 del plan, abiertas para confirmar con Justin y el propietario.

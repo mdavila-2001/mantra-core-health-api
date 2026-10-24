@@ -35,7 +35,7 @@ import { joinRouteTemplate } from './route-audit-identity';
  * Tamaño exacto del baseline. Al decorar rutas, se quitan del JSON y se baja
  * este número en el mismo cambio; subirlo es una decisión de revisión.
  */
-const BASELINE_SIZE = 721;
+const BASELINE_SIZE = 719;
 
 /** Ver `app.module.wiring.spec.ts`: importar `AppModule` valida estas variables. */
 const PLACEHOLDER_DB_ENV: Record<string, string> = {

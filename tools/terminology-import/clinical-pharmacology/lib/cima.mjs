@@ -30,8 +30,12 @@ export const sectionPublicUrl = (nregistro, section) =>
   `https://cima.aemps.es/cima/dochtml/ft/${encodeURIComponent(nregistro)}/${encodeURIComponent(section)}/FichaTecnica.html`;
 /** Notas de seguridad de la AEMPS asociadas a un medicamento. */
 export const safetyNotesUrl = (nregistro) => `${CIMA_REST}/notas/${encodeURIComponent(nregistro)}`;
-/** Maestra de códigos ATC de CIMA (nombres en castellano de la AEMPS), paginada. */
-export const atcMasterUrl = (page) => `${CIMA_REST}/maestras?maestra=7&pagina=${page}`;
+/**
+ * Maestra de códigos ATC de CIMA (nombres en castellano de la AEMPS), paginada.
+ * Observado el 2026-10-24: sin el parámetro `codigo` la API responde vacío; con
+ * cualquier valor devuelve la maestra completa (7 358 códigos), sin filtrar.
+ */
+export const atcMasterUrl = (page) => `${CIMA_REST}/maestras?maestra=7&codigo=A&pagina=${page}`;
 
 const ATC5 = /^[A-Z]\d{2}[A-Z]{2}\d{2}$/;
 export const isAtc5 = (code) => typeof code === 'string' && ATC5.test(code);
@@ -134,6 +138,9 @@ export function cimaSections(response, ref, retrievedAt) {
   const p = ref.product;
   const revision = parseRevisionDate(response);
   const version = p.fichaTecnicaDate ?? null;
+  // Medicamentos de autorización centralizada (EU/1/…): CIMA no publica la fecha de la ficha y su
+  // sección 10 sólo remite a la EMA. El texto es igualmente el oficial; se publica marcado.
+  const versionUnpublished = !version && !revision;
   const out = [];
   for (const [number, key] of Object.entries(CIMA_SECTIONS)) {
     const item = items.get(number);
@@ -153,6 +160,9 @@ export function cimaSections(response, ref, retrievedAt) {
         holder: p.holder ?? null,
         version,
         revisionDateInText: revision?.value ?? null,
+        ...(versionUnpublished
+          ? { versionUnpublished: true, versionNote: 'CIMA no publica la fecha de esta ficha técnica y su sección 10 no trae fecha de revisión; se cita la fecha de consulta.' }
+          : {}),
         url: p.fichaTecnicaUrl,
         pageUrl: cimaDetailPageUrl(p.nregistro),
       },
@@ -162,7 +172,7 @@ export function cimaSections(response, ref, retrievedAt) {
       license: CIMA_LICENSE,
       citation:
         `AEMPS. CIMA. Ficha técnica de ${p.name} (nº reg. ${p.nregistro}), sección ${number}` +
-        `${item.titulo ? ` «${item.titulo}»` : ''}${version ? `, versión del ${version.slice(0, 10)}` : ''}` +
+        `${item.titulo ? ` «${item.titulo}»` : ''}${version ? `, versión del ${version.slice(0, 10)}` : revision ? `, revisión del texto ${revision.value}` : ', sin fecha de versión publicada por CIMA'}` +
         `. ${sectionPublicUrl(p.nregistro, number)} (consultado el ${retrievedAt.slice(0, 10)}).`,
       selection: { criterion: ref.criterion, group: ref.group },
     });

@@ -1,0 +1,31 @@
+$ python3 -m mkdocs build --strict   (= yarn docs:build; mkdocs 1.6.1 de docs/requirements.txt en un venv; HEAD aaf040a2 + arreglo del enlace)
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Workflow': found 12 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '00 · Auditoría del estado actual (previa a OpenTelemetry)': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '01 · Diseño de la arquitectura de observabilidad': found 3 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page '03 · Topología de trazas para producción': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Trazas': found 1 diagrams, adding scripts
+INFO    -  MERMAID2  - Custom loader activated
+INFO    -  MERMAID2  - Page 'Arquitectura de seguridad': found 1 diagrams, adding scripts
+INFO    -  Doc file 'inventario/flujos/clinical.md' contains a link '#rutas-http-y-alcance-medido', but there is no such anchor on this page.
+INFO    -  Doc file 'operations/google-analytics-setup.md' contains a link '#diagnóstico', but there is no such anchor on this page.
+INFO    -  Doc file 'operations/runbooks/restore-from-backup.md' contains a link '#ensayo-local-lo-único-que-sí-se-ejecutó', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/costo-infraestructura-y-operacion-2026-08-07.md' contains a link '#parte-3--tres-topologías-completas-con-costo-total', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/mensajeria-whatsapp-vs-sms-costos-2026-08-07.md' contains a link '#cómo-verificar-antes-de-presupuestar', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/mensajeria-whatsapp-vs-sms-costos-2026-08-07.md' contains a link '#restricciones-no-monetarias-que-condicionan-el-diseño', but there is no such anchor on this page.
+INFO    -  Doc file 'reports/mensajeria-whatsapp-vs-sms-costos-2026-08-07.md' contains a link '#parte-4--aristas-de-contexto-boliviano-y-de-operación', but there is no such anchor on this page.
+INFO    -  Doc file 'resilience/01-matriz-de-riesgos.md' contains a link '00-auditoria.md#a-10--rate-limiting-en-memoria-por-instancia-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-10--rate-limiting-en-memoria-por-instancia-'.
+INFO    -  Doc file 'resilience/03-fmea-y-arbol-de-fallos.md' contains a link '00-auditoria.md#a-12--no-hay-métricas-prometheus-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-12--no-hay-métricas-prometheus-'.
+INFO    -  Doc file 'resilience/07-manual-de-incidentes.md' contains a link '00-auditoria.md#a-12--no-hay-métricas-prometheus-', but the doc 'resilience/00-auditoria.md' does not contain an anchor '#a-12--no-hay-métricas-prometheus-'.
+INFO    -  Doc file 'trabajo/2026-10-24-marcelo-lane16-protection/REPORTE.md' contains a link './PLAN.md#desvíos-del-plan', but the doc 'trabajo/2026-10-24-marcelo-lane16-protection/PLAN.md' does not contain an anchor '#desvíos-del-plan'.
+
+Aborted with 3 warnings in strict mode!
+exit=1
+
+# Los 3 WARNING que abortan --strict son enlaces './evidencia/' de OTROS reportes ya en origin/dev
+# (diccionarios-medicos, marcelo-lane16-protection, seed-dx-devices-eu-oficial). El de este REPORTE
+# se arregló en este PR. Fuera de alcance (AGENTS.md §1.3): se anota, no se toca.

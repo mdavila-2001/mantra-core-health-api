@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ANNOTATION_ORIGINS,
   EVIDENCE_KINDS,
   OBJECT_KINDS,
   OBSERVATION_STATUSES,
@@ -48,7 +49,7 @@ export class AnnotationDto {
   })
   version!: number;
   @ApiProperty({ enum: REVIEW_STATUSES }) reviewStatus!: string;
-  @ApiProperty() origin!: string;
+  @ApiProperty({ enum: ANNOTATION_ORIGINS }) origin!: string;
   @ApiProperty() currentRevisionNo!: number;
   @ApiPropertyOptional({ nullable: true }) approvedRevisionNo!: number | null;
   @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
@@ -236,9 +237,21 @@ export class EvidenceDto {
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: string;
 }
 
+/** Qué regla clasificó una columna y con cuánta confianza (sólo revisiones de la clasificación automática). */
+export class ClassificationRecordDto {
+  @ApiProperty({ minimum: 0, maximum: 1 }) confidence!: number;
+  @ApiProperty({ description: 'Identidad y versión del clasificador' })
+  classifiedBy!: string;
+  @ApiProperty() ruleId!: string;
+  @ApiProperty({ description: 'Norma o identificador que sustenta la regla' })
+  basis!: string;
+}
+
 export class RevisionDto {
   @ApiProperty() revisionNo!: number;
-  @ApiProperty() origin!: string;
+  @ApiProperty({ enum: ANNOTATION_ORIGINS }) origin!: string;
+  @ApiPropertyOptional({ nullable: true, type: ClassificationRecordDto })
+  classification!: ClassificationRecordDto | null;
   @ApiProperty() submittedStatus!: string;
   @ApiPropertyOptional({ nullable: true }) changeReason!: string | null;
   @ApiPropertyOptional({ nullable: true, format: 'uuid' }) authorUserId!:
@@ -431,4 +444,107 @@ export class ScanAcceptedDto {
   created!: boolean;
   @ApiProperty({ type: String, format: 'date-time' }) acceptedAt!: string;
   @ApiProperty({ example: '/admin/catalog/scans' }) statusUrl!: string;
+}
+
+/** Respuesta de la sonda al worker (`POST /internal/catalog/scans/run-next`). */
+export class RunNextResultDto {
+  @ApiProperty({
+    enum: [0, 1],
+    description: '1 si este tick tomó un escaneo; 0 si no había nada que hacer',
+  })
+  claimed!: 0 | 1;
+  @ApiPropertyOptional({ format: 'uuid' }) scanId?: string;
+  @ApiPropertyOptional({ enum: SCAN_STATUSES }) status?: string;
+  @ApiPropertyOptional({
+    description:
+      '`true` si el escaneo perdió su lease y no se pisó lo que otro proceso cerró',
+  })
+  fenced?: boolean;
+}
+
+/** Resultado de una corrida de la clasificación automática. */
+export class ClassificationRunResultDto {
+  @ApiProperty({ description: 'Columnas observadas que se miraron' })
+  examined!: number;
+  @ApiProperty({
+    description: 'Columnas que ninguna regla reconoció: quedan sin clasificar',
+  })
+  unclassified!: number;
+  @ApiProperty({ description: 'Fichas nuevas' }) created!: number;
+  @ApiProperty({
+    description: 'Fichas de la máquina subidas a un nivel más alto',
+  })
+  raised!: number;
+  @ApiProperty({
+    description:
+      'De las creadas o subidas, las que quedaron en NEEDS_REVIEW por duda',
+  })
+  sentToReview!: number;
+  @ApiProperty({ description: 'No tocadas: las escribió una persona' })
+  skippedManual!: number;
+  @ApiProperty({ description: 'No tocadas: ya salieron de AUTO_DETECTED' })
+  skippedReviewed!: number;
+  @ApiProperty({
+    description: 'No tocadas: la propuesta no era más alta (nunca baja)',
+  })
+  skippedNotHigher!: number;
+  @ApiProperty({
+    description: 'No escritas: otra petición cambió la ficha antes',
+  })
+  conflicts!: number;
+}
+
+export class DriftRouteRefDto {
+  @ApiProperty({ example: 'GET' }) method!: string;
+  @ApiProperty({ example: '/admin/catalog/objects/:id' }) template!: string;
+  @ApiProperty() controller!: string;
+  @ApiProperty() handler!: string;
+}
+
+export class RoutesSummaryDto {
+  @ApiProperty() total!: number;
+  @ApiProperty() public!: number;
+  @ApiProperty() withRoles!: number;
+  @ApiProperty({
+    description: 'Autenticadas sin `@Roles`: las pasa cualquier sesión',
+  })
+  withoutRoles!: number;
+}
+
+export class UsedNotSeededDto {
+  @ApiProperty() role!: string;
+  @ApiProperty({ description: 'Cuántas rutas lo exigen' }) routeCount!: number;
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Si hay fila en `authz.roles`; `null` si no se consultó',
+  })
+  inDatabase!: boolean | null;
+  @ApiProperty({ type: [DriftRouteRefDto] }) sample!: DriftRouteRefDto[];
+}
+
+/** Rutas contra roles: qué se exige que nadie siembra, qué se siembra que nadie exige. */
+export class PermissionDriftDto {
+  @ApiProperty({ type: String, format: 'date-time' }) generatedAt!: string;
+  @ApiProperty({ type: RoutesSummaryDto }) routes!: RoutesSummaryDto;
+  @ApiProperty({
+    type: [UsedNotSeededDto],
+    description:
+      'Roles que una ruta exige y la API no siembra: sólo `SUPERADMIN` (por comodín) ejerce esas rutas hasta que exista el rol',
+  })
+  usedNotSeeded!: UsedNotSeededDto[];
+  @ApiProperty({
+    type: [String],
+    description: 'Roles sembrados que ninguna ruta exige',
+  })
+  seededNotUsed!: string[];
+  @ApiProperty({
+    type: [DriftRouteRefDto],
+    description: 'Rutas autenticadas sin `@Roles` ni `@Public` (recortada)',
+  })
+  routesWithoutRoles!: DriftRouteRefDto[];
+  @ApiProperty({
+    description:
+      '`true` si `routesWithoutRoles` se recortó; el total está en `routes.withoutRoles`',
+  })
+  routesWithoutRolesTruncated!: boolean;
 }

@@ -1255,6 +1255,7 @@ Content-Type: application/json
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `birthDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `phone` | Sí | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
+| `additionalPhones` | No | `array<string>` | longitud máxima PHONE_MAX_LENGTH; máximo 4 elemento(s); patrón runtime `PHONE_PATTERN` | Otros teléfonos de la persona, además del principal; mismo formato que phone | `["+59170000000"]` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
@@ -1274,6 +1275,10 @@ Content-Type: application/json
 | `guardianName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del tutor o persona autorizada | `Nombre de ejemplo` |
 | `guardianPhone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del tutor, en formato E.164 o nacional | `+59170000000` |
 | `guardianRelationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto de emergencia (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
+| `additionalEmergencyContacts` | No | `array<AdditionalEmergencyContactDto>` | máximo 4 elemento(s) | Otros contactos de emergencia, además del primero | `[{"name":"Nombre de ejemplo","phone":"+59170000000","relationshipConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `additionalEmergencyContacts[].name` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del contacto | `Nombre de ejemplo` |
+| `additionalEmergencyContacts[].phone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del contacto, en formato E.164 o nacional | `+59170000000` |
+| `additionalEmergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
 | `privateInsurancePlanId` | No | `string` | formato `uuid` | Plan de la aseguradora privada declarada | `00000000-0000-4000-8000-000000000001` |
 | `publicInsurancePlanId` | No | `string` | formato `uuid` | Plan del seguro público declarado | `00000000-0000-4000-8000-000000000001` |
 | `billingTaxId` | No | `string` | longitud máxima 20; patrón runtime `/^[0-9]{4,20}$/` | NIT para facturación (sólo el número) | `00000000-0000-4000-8000-000000000001` |
@@ -1301,6 +1306,9 @@ Content-Type: application/json
   "email": "usuario@example.com",
   "birthDate": "2026-07-31",
   "phone": "+59170000000",
+  "additionalPhones": [
+    "+59170000000"
+  ],
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1320,6 +1328,13 @@ Content-Type: application/json
   "guardianName": "Nombre de ejemplo",
   "guardianPhone": "+59170000000",
   "guardianRelationshipConceptId": "00000000-0000-4000-8000-000000000001",
+  "additionalEmergencyContacts": [
+    {
+      "name": "Nombre de ejemplo",
+      "phone": "+59170000000",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
   "privateInsurancePlanId": "00000000-0000-4000-8000-000000000001",
   "publicInsurancePlanId": "00000000-0000-4000-8000-000000000001",
   "billingTaxId": "00000000-0000-4000-8000-000000000001",

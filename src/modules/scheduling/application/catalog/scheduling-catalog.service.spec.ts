@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { ForbiddenException } from '@nestjs/common';
+import { SCHED } from '../../domain/scheduling.concepts';
 import { createCatalogService } from './scheduling-catalog.testing';
 import {
   CONCEPTS,
@@ -79,6 +80,12 @@ function buildCatalog() {
       keptSlots: 0,
     }),
     findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
+    // Bloquear mira los cupos que PISAN la ventana, con bloqueo de escritura.
+    // Sin cupos no hay citas que cancelar, que es el caso de casi todo.
+    findSlotsOverlappingForUpdate: mockFn().mockResolvedValue([]),
+    // Retirar con cancelación y su vista previa miran los cupos de la plantilla.
+    findSlotsOfTemplate: mockFn().mockResolvedValue([]),
+    findSlotsOfTemplateForUpdate: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   // La regla de pertenencia vive en su propio servicio y tiene specs propios;
@@ -94,8 +101,22 @@ function buildCatalog() {
   const noticeRepo = {
     describeBooking: mockFn().mockResolvedValue(null),
     findAccountForProfile: mockFn().mockResolvedValue(null),
+    findDisplayNameForProfile: mockFn().mockResolvedValue(null),
   };
   const notices = { emit: mockFn().mockResolvedValue({ delivered: true }) };
+  // El caso de uso de cancelar, simulado: bloquear un rato con citas lo llama
+  // dentro de la transacción del bloqueo y avisa después. Devuelve lo que el
+  // real devuelve, para que el bloqueo pueda avisar con el mismo motivo.
+  const cancelBooking = {
+    cancelInTransaction: mockFn(
+      async (_tx: unknown, bookingId: string, dto: { reasonText: string }) => ({
+        result: { bookingId, capacityReleased: true },
+        reason: dto.reasonText,
+        releasedSlotId: null,
+      }),
+    ),
+    announceChange: mockFn(async () => undefined),
+  };
 
   const service = createCatalogService({
     em,
@@ -105,6 +126,7 @@ function buildCatalog() {
     professionalTime,
     noticeRepo,
     notices,
+    cancelBooking,
   });
   return {
     service,
@@ -115,6 +137,7 @@ function buildCatalog() {
     professionalTime: professionalTime,
     noticeRepo,
     notices,
+    cancelBooking,
   };
 }
 
@@ -1178,25 +1201,86 @@ describe('SchedulingCatalogService', () => {
         expect(new Date(res.to).getMinutes()).toBe(30);
       });
 
-      it('con un paciente citado NO cierra nada y dice cuáles', async () => {
-        // Cancelar el turno de alguien exige motivo y le avisa. Hacerlo de
-        // arrastre sería decidir por quien está esperando.
+      const booked = {
+        id: 'b-1',
+        patientProfileId: 'pp-1',
+        bookableSlotId: 's-1',
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      };
+
+      it('con un paciente citado y sin confirmación NO cierra nada y dice cuáles', async () => {
+        // Cancelar el turno de alguien exige motivo y le avisa. Sin la
+        // confirmación del profesional, el 409 trae la lista para que la
+        // pantalla la muestre antes de preguntar.
         const d = buildCatalog();
         withOwnResource(d);
         d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue([
           slot('s-1', 9),
         ]);
-        d.catalogRepo.findBookingsOfSlots.mockResolvedValue([{ id: 'b-1' }]);
+        d.catalogRepo.findBookingsOfSlots
+          .mockResolvedValueOnce([booked])
+          .mockResolvedValueOnce([]);
+        d.noticeRepo.findDisplayNameForProfile.mockResolvedValue('Rosa Quispe');
 
-        await expect(
-          d.service.closeSlots(
+        const error = await d.service
+          .closeSlots(
             RESOURCE,
             { exceptionType: 'ERRAND', slotIds: ['s-1'] },
             owner as never,
-          ),
-        ).rejects.toBeInstanceOf(ConflictException);
+          )
+          .then(
+            () => null,
+            (e: unknown) => e as ConflictException,
+          );
 
+        expect(error).toBeInstanceOf(ConflictException);
+        expect(error?.details).toMatchObject({
+          failureCode: 'BOOKINGS_REQUIRE_CONFIRMATION',
+          bookingIds: ['b-1'],
+          affectedBookings: [{ bookingId: 'b-1', patientName: 'Rosa Quispe' }],
+        });
+        expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
         expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+      });
+
+      it('confirmado: cierra el cupo, cancela su cita con el motivo y avisa después', async () => {
+        const d = buildCatalog();
+        withOwnResource(d);
+        const slots = [slot('s-1', 9)];
+        d.catalogRepo.findSlotsOfResourceForUpdate.mockResolvedValue(slots);
+        d.catalogRepo.findBookingsOfSlots
+          .mockResolvedValueOnce([booked])
+          .mockResolvedValueOnce([]);
+
+        const res = await d.service.closeSlots(
+          RESOURCE,
+          {
+            exceptionType: 'ERRAND',
+            slotIds: ['s-1'],
+            cancelAffectedBookings: true,
+          },
+          owner as never,
+        );
+
+        expect(res.closedSlots).toBe(1);
+        expect(res.cancelledBookings).toBe(1);
+        expect(slots[0].statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+        expect(d.cancelBooking.cancelInTransaction).toHaveBeenCalledWith(
+          d.tx,
+          'b-1',
+          {
+            cancelledBy: 'PROVIDER',
+            reasonText: 'Bloqueo de agenda: Trámite personal',
+          },
+          owner,
+          'CANCELLED',
+        );
+        expect(d.cancelBooking.announceChange).toHaveBeenCalledWith(
+          'b-1',
+          'CANCELLED',
+          'Bloqueo de agenda: Trámite personal',
+          'PROVIDER',
+        );
       });
 
       it('«Otro» sin explicación se rechaza, igual que al bloquear', async () => {
@@ -1691,6 +1775,161 @@ describe('SchedulingCatalogService', () => {
         expect(JSON.stringify(res)).not.toMatch(/name|nombre/i);
         // Hay 12 vivas y la muestra trae 2: la lista está recortada.
         expect(res.truncated).toBe(true);
+      });
+
+      /**
+       * Cambiar el horario avisa al paciente (pedido del propietario,
+       * 24/10/2026). El contrato de M4 —retirar conserva las citas— sigue
+       * siendo el de por omisión; lo nuevo es la opción de cancelarlas con
+       * aviso, elegida por el profesional después de ver a quién alcanza.
+       */
+      describe('retirar cancelando las citas (affectedBookings=cancel)', () => {
+        const slot = {
+          id: 's-1',
+          startAt: new Date('2026-06-02T09:00:00Z'),
+          endAt: new Date('2026-06-02T09:30:00Z'),
+        };
+        const confirmed = {
+          id: 'b1',
+          patientProfileId: 'pp-1',
+          bookableSlotId: 's-1',
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        };
+
+        function withLiveBooking(
+          d: ReturnType<typeof buildCatalog>,
+          booking = confirmed,
+        ) {
+          withOwnTemplate(d);
+          d.catalogRepo.findSlotsOfTemplateForUpdate.mockResolvedValue([slot]);
+          d.catalogRepo.findSlotsOfTemplate.mockResolvedValue([slot]);
+          d.catalogRepo.findBookingsOfSlots
+            .mockResolvedValueOnce([booking])
+            .mockResolvedValueOnce([]);
+          d.noticeRepo.findDisplayNameForProfile.mockResolvedValue(
+            'Rosa Quispe',
+          );
+          d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+            total: 1,
+            live: 0,
+            sample: [],
+          });
+          d.catalogRepo.retireTemplate.mockResolvedValue({
+            releasedSlots: 20,
+            keptSlots: 1,
+          });
+        }
+
+        it('por omisión NO cancela nada: el contrato de M4 sigue igual', async () => {
+          const d = buildCatalog();
+          withLiveBooking(d);
+          d.catalogRepo.findBookingsOfTemplate.mockResolvedValue({
+            total: 1,
+            live: 1,
+            sample: [confirmed],
+          });
+
+          const res = await d.service.retireTemplate('tpl-1', owner as never);
+
+          expect(res.liveBookings).toBe(1);
+          expect(res.cancelledBookings).toBe(0);
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+          expect(
+            d.catalogRepo.findSlotsOfTemplateForUpdate,
+          ).not.toHaveBeenCalled();
+        });
+
+        it('con cancel: cancela cada cita en la transacción, retira y avisa DESPUÉS con el motivo de cambio de horario', async () => {
+          const d = buildCatalog();
+          withLiveBooking(d);
+          const order: string[] = [];
+          d.em.transactional = mockFn(async (cb: any) => {
+            const out = await cb(d.tx);
+            order.push('commit');
+            return out;
+          });
+          d.cancelBooking.announceChange = mockFn(async () => {
+            order.push('announce');
+          });
+
+          const res = await d.service.retireTemplate('tpl-1', owner as never, {
+            cancelAffectedBookings: true,
+          });
+
+          expect(d.cancelBooking.cancelInTransaction).toHaveBeenCalledWith(
+            d.tx,
+            'b1',
+            {
+              cancelledBy: 'PROVIDER',
+              reasonText: 'Cambio en el horario de atención del profesional',
+            },
+            owner,
+            'CANCELLED',
+          );
+          expect(d.tx.flush).toHaveBeenCalled();
+          expect(d.catalogRepo.retireTemplate).toHaveBeenCalled();
+          expect(res.cancelledBookings).toBe(1);
+          expect(d.cancelBooking.announceChange).toHaveBeenCalledWith(
+            'b1',
+            'CANCELLED',
+            'Cambio en el horario de atención del profesional',
+            'PROVIDER',
+          );
+          expect(order).toEqual(['commit', 'announce']);
+        });
+
+        it('con cancel y un paciente ya recibido: 422 y no retira', async () => {
+          const d = buildCatalog();
+          withOwnTemplate(d);
+          d.catalogRepo.findSlotsOfTemplateForUpdate.mockResolvedValue([slot]);
+          d.catalogRepo.findBookingsOfSlots
+            .mockResolvedValueOnce([])
+            .mockResolvedValueOnce([
+              { ...confirmed, statusConceptId: CONCEPTS.BOOKING_CHECKED_IN },
+            ]);
+
+          await expect(
+            d.service.retireTemplate('tpl-1', owner as never, {
+              cancelAffectedBookings: true,
+            }),
+          ).rejects.toThrow(/ya recibido/);
+          expect(d.catalogRepo.retireTemplate).not.toHaveBeenCalled();
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+        });
+
+        it('la vista previa (live-bookings) nombra a cada paciente, sólo para quien administra la agenda', async () => {
+          const d = buildCatalog();
+          withLiveBooking(d);
+
+          const res = await d.service.listTemplateLiveBookings(
+            'tpl-1',
+            owner as never,
+          );
+
+          expect(res).toEqual({
+            templateId: 'tpl-1',
+            total: 1,
+            bookings: [
+              {
+                bookingId: 'b1',
+                startAt: '2026-06-02T09:00:00.000Z',
+                endAt: '2026-06-02T09:30:00.000Z',
+                patientName: 'Rosa Quispe',
+                pending: false,
+              },
+            ],
+            present: [],
+          });
+
+          await expect(
+            d.service.listTemplateLiveBookings('tpl-1', {
+              id: 'user-otro',
+              roles: ['PRACTITIONER'],
+              practitionerProfileId: 'hp-otro',
+              tenantIds: [TENANT],
+            } as never),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+        });
       });
 
       it('sin citas comprometidas retira, y dice qué soltó', async () => {
@@ -2618,6 +2857,278 @@ describe('SchedulingCatalogService', () => {
 
         expect(res.blockedSlots).toBe(0);
         expect(d.catalogRepo.findOpenSlotsInWindow).not.toHaveBeenCalled();
+      });
+
+      /**
+       * Bloquear cancela y avisa (pedido del propietario, 24/10/2026).
+       *
+       * Hasta acá, una cita confirmada en el rato frenaba el bloqueo. Ahora
+       * el bloqueo la cancela —por el mismo camino que una cancelación a
+       * mano— y le avisa al paciente, pero sólo si el profesional vio antes a
+       * quién deja sin cita y lo confirmó. Lo que estas pruebas fijan es ese
+       * orden: sin confirmación nada se cancela; con ella, se cancela dentro
+       * de la transacción y se avisa después.
+       */
+      describe('bloquear un rato con citas', () => {
+        const slot = {
+          id: 's-1',
+          startAt: new Date('2026-06-01T09:00:00Z'),
+          endAt: new Date('2026-06-01T09:30:00Z'),
+          capacity: 1,
+          remainingCapacity: 0,
+          statusConceptId: CONCEPTS.SLOT_OPEN,
+        };
+        const confirmed = {
+          id: 'bk-1',
+          patientProfileId: 'pp-1',
+          bookableSlotId: 's-1',
+          statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        };
+        // Quien administra agendas, de la organización de ésta: con citas de
+        // por medio, el administrador también tiene que ser de la organización.
+        const actor = {
+          id: 'user-1',
+          roles: ['SCHEDULING_ADMIN'],
+          tenantIds: [TENANT],
+        };
+        const adminWithoutTenant = {
+          id: 'user-1',
+          roles: ['SCHEDULING_ADMIN'],
+        };
+
+        function withBookedRange(
+          d: ReturnType<typeof buildCatalog>,
+          bookings: { cancellable: unknown[]; present?: unknown[] },
+        ) {
+          d.catalogRepo.findResourceById.mockResolvedValue({
+            id: RESOURCE,
+            tenantId: TENANT,
+            resourceRefId: 'hp-1',
+            resourceRefType: 'health_practitioner_profiles',
+          });
+          d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+          d.catalogRepo.findSlotsOverlappingForUpdate.mockResolvedValue([slot]);
+          d.catalogRepo.findBookingsOfSlots
+            .mockResolvedValueOnce(bookings.cancellable)
+            .mockResolvedValueOnce(bookings.present ?? []);
+          d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([slot]);
+          d.noticeRepo.findDisplayNameForProfile.mockResolvedValue(
+            'Rosa Quispe',
+          );
+          // La misma cita la ve también la vista del profesional: no es «otra
+          // sede», así que no debe frenar por AG-3.
+          d.professionalTime.confirmedBookings = mockFn(async () => [
+            {
+              id: 'bk-1',
+              startAt: slot.startAt,
+              endAt: slot.endAt,
+              resourceName: 'Consultorio Centro',
+              kind: 'cita',
+            },
+          ]);
+        }
+
+        it('sin confirmación: 422 con la lista de citas, y NADA se cancela ni se bloquea', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+
+          const error = await d.service
+            .createException(RESOURCE, dto, actor)
+            .then(
+              () => null,
+              (e: unknown) => e as PreconditionFailedException,
+            );
+
+          expect(error).toBeInstanceOf(PreconditionFailedException);
+          expect(error?.message).toMatch(/1 cita con paciente/);
+          expect(error?.details).toMatchObject({
+            failureCode: 'BOOKINGS_REQUIRE_CONFIRMATION',
+            affectedBookings: [
+              {
+                bookingId: 'bk-1',
+                patientName: 'Rosa Quispe',
+                startAt: '2026-06-01T09:00:00.000Z',
+                pending: false,
+              },
+            ],
+          });
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+          expect(d.cancelBooking.announceChange).not.toHaveBeenCalled();
+          expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+        });
+
+        it('confirmado: cancela la cita en la transacción, bloquea y avisa DESPUÉS, con el motivo del bloqueo', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+          const order: string[] = [];
+          d.em.transactional = mockFn(async (cb: any) => {
+            const out = await cb(d.tx);
+            order.push('commit');
+            return out;
+          });
+          d.cancelBooking.announceChange = mockFn(async () => {
+            order.push('announce');
+          });
+
+          const res = await d.service.createException(
+            RESOURCE,
+            { ...dto, reason: 'Viaje', cancelAffectedBookings: true },
+            actor,
+          );
+
+          expect(res).toEqual({
+            id: 'exc-1',
+            blockedSlots: 0,
+            cancelledBookings: 1,
+          });
+          expect(d.cancelBooking.cancelInTransaction).toHaveBeenCalledWith(
+            d.tx,
+            'bk-1',
+            {
+              cancelledBy: 'PROVIDER',
+              reasonText: 'Bloqueo de agenda (Ausencia): Viaje',
+            },
+            actor,
+            'CANCELLED',
+          );
+          // Lo cancelado se escribe antes de buscar qué bloquear.
+          expect(d.tx.flush).toHaveBeenCalled();
+          expect(d.cancelBooking.announceChange).toHaveBeenCalledWith(
+            'bk-1',
+            'CANCELLED',
+            'Bloqueo de agenda (Ausencia): Viaje',
+            'PROVIDER',
+          );
+          expect(order).toEqual(['commit', 'announce']);
+        });
+
+        it('una solicitud todavía sin responder se RECHAZA, no se cancela', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, {
+            cancellable: [
+              {
+                ...confirmed,
+                id: 'bk-2',
+                statusConceptId: SCHED.BOOKING_REQUESTED,
+              },
+            ],
+          });
+          // Una solicitud sin responder no es un compromiso del profesional:
+          // la vista de «citas confirmadas» no la trae.
+          d.professionalTime.confirmedBookings = mockFn(async () => []);
+
+          await d.service.createException(
+            RESOURCE,
+            { ...dto, cancelAffectedBookings: true },
+            actor,
+          );
+
+          expect(d.cancelBooking.cancelInTransaction).toHaveBeenCalledWith(
+            d.tx,
+            'bk-2',
+            expect.anything(),
+            actor,
+            'REJECTED',
+          );
+        });
+
+        it('un paciente ya recibido frena el bloqueo aunque se confirme', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, {
+            cancellable: [],
+            present: [
+              { ...confirmed, statusConceptId: CONCEPTS.BOOKING_CHECKED_IN },
+            ],
+          });
+
+          await expect(
+            d.service.createException(
+              RESOURCE,
+              { ...dto, cancelAffectedBookings: true },
+              actor,
+            ),
+          ).rejects.toThrow(/ya recibido/);
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+          expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+        });
+
+        it('un administrador de OTRA organización no ve nombres ni cancela: 403 antes de describir', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+
+          await expect(
+            d.service.createException(RESOURCE, dto, {
+              ...actor,
+              tenantIds: ['99999999-9999-9999-9999-999999999999'],
+            } as never),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(d.noticeRepo.findDisplayNameForProfile).not.toHaveBeenCalled();
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+          expect(d.catalogRepo.createException).not.toHaveBeenCalled();
+        });
+
+        it('un administrador SIN citas de por medio bloquea como siempre, sea o no de la organización', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({
+            id: RESOURCE,
+            tenantId: TENANT,
+            resourceRefId: 'hp-1',
+            resourceRefType: 'health_practitioner_profiles',
+          });
+          d.catalogRepo.createException.mockReturnValue({ id: 'exc-1' });
+          d.catalogRepo.findOpenSlotsInWindow.mockResolvedValue([]);
+
+          const res = await d.service.createException(
+            RESOURCE,
+            dto,
+            adminWithoutTenant as never,
+          );
+
+          expect(res.id).toBe('exc-1');
+        });
+
+        it('la agenda de OTRO profesional: prohibido antes de mirar una sola cita', async () => {
+          // La vista previa trae nombres de pacientes. Sólo quien administra
+          // la agenda puede verlos; a cualquier otro se le cierra la puerta
+          // antes de describir o cancelar nada.
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+
+          await expect(
+            d.service.createException(RESOURCE, dto, {
+              id: 'user-otro',
+              roles: ['PRACTITIONER'],
+              practitionerProfileId: 'hp-otro',
+              tenantIds: [TENANT],
+            } as never),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+          expect(d.catalogRepo.findBookingsOfSlots).not.toHaveBeenCalled();
+          expect(d.noticeRepo.findDisplayNameForProfile).not.toHaveBeenCalled();
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+        });
+
+        it('una cita confirmada en OTRA sede sigue frenando (AG-3), aunque se confirme', async () => {
+          const d = buildCatalog();
+          withBookedRange(d, { cancellable: [confirmed] });
+          d.professionalTime.confirmedBookings = mockFn(async () => [
+            {
+              id: 'bk-otra-sede',
+              startAt: slot.startAt,
+              endAt: slot.endAt,
+              resourceName: 'Clínica Norte',
+              kind: 'cita',
+            },
+          ]);
+
+          await expect(
+            d.service.createException(
+              RESOURCE,
+              { ...dto, cancelAffectedBookings: true },
+              actor,
+            ),
+          ).rejects.toThrow(/cita confirmada.*Clínica Norte/);
+          expect(d.cancelBooking.cancelInTransaction).not.toHaveBeenCalled();
+        });
       });
     });
 

@@ -148,3 +148,13 @@ test('LINAME (archivo del repo): presentaciones por ATC 5 con su código y uso r
   assert.ok(vad.size >= 400);
   assert.match(vad.get('A02BC01').id, /^[0-9a-f-]{36}$/);
 });
+
+test('CIMA: ficha sin fecha publicada (autorización centralizada) se publica marcada, con la fecha de consulta', () => {
+  const p = { ...penicilinaProducts[0], fichaTecnicaDate: null };
+  const rows = cimaSections(penicilinaDoc, { product: p, criterion: 'prueba', group: {} }, WHEN).map(assertSection);
+  assert.equal(rows[0].document.version, null);
+  assert.equal(rows[0].document.versionUnpublished, true);
+  assert.match(rows[0].citation, /sin fecha de versión publicada por CIMA/);
+  const withDate = cimaSections(penicilinaDoc, referenceDocuments(penicilinaProducts)[0], WHEN);
+  assert.equal(withDate[0].document.versionUnpublished, undefined, 'con fecha no se marca');
+});

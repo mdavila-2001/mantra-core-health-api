@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1510 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1510 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1526 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1526 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -4723,7 +4723,7 @@
       ]
     },
     {
-      "name": "admin (101)",
+      "name": "admin (106)",
       "item": [
         {
           "name": "admin-catalog",
@@ -4839,7 +4839,7 @@
                     },
                     {
                       "key": "reviewStatus",
-                      "value": "DRAFT",
+                      "value": "AUTO_DETECTED",
                       "description": "`NONE`: objetos sin ficha",
                       "disabled": true
                     },
@@ -4876,6 +4876,54 @@
                       "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/permission-drift · Deriva de permisos: roles que las rutas exigen contra los que la API siembra",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/permission-drift",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "permission-drift"
+                  ]
+                },
+                "description": "Compara los `@Roles(...)` de todas las rutas (leídos al arrancar) con los roles de los `*.roles.ts` y con `authz.roles`: roles usados sin sembrar, sembrados sin usar y rutas autenticadas sin `@Roles`.\n\n`GET /admin/catalog/permission-drift`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AdminCatalogController_permissionDrift`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('permissionDriftId', first.id);",
                       "}"
                     ]
                   }
@@ -4986,6 +5034,67 @@
                       "  const list = Array.isArray(body) ? body : (body.schemas || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('schemaId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/classification/run · Corre la clasificación automática de sensibilidad sobre las columnas observadas",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/classification/run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "classification",
+                    "run"
+                  ]
+                },
+                "description": "Crea fichas de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda). Nunca baja un nivel ni pisa fichas escritas por una persona o que ya salieron de AUTO_DETECTED.\n\n`POST /admin/catalog/classification/run`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AdminCatalogController_runClassification`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"schema\": \"schema-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{runId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.runId);",
+                      "  if (id) pm.environment.set('runId', id);",
                       "}"
                     ]
                   }
@@ -5115,6 +5224,75 @@
               ]
             },
             {
+              "name": "POST /admin/catalog/columns/{id}/evidence · Enlaza evidencia a una columna",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Enlaza evidencia a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/catalog/columns/{id}/evidence`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AdminCatalogController_addColumnEvidence`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"SCHEMA_COMMENT\",\n  \"reference\": \"reference-ejemplo\",\n  \"excerpt\": \"excerpt-ejemplo\",\n  \"sourceRevision\": \"sourceRevision-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{columnId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.columnId);",
+                      "  if (id) pm.environment.set('columnId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /admin/catalog/objects/{id}/evidence · Enlaza evidencia a un objeto",
               "request": {
                 "method": "POST",
@@ -5177,6 +5355,63 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.objectId);",
                       "  if (id) pm.environment.set('objectId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/columns/{id}/evidence · Evidencia enlazada a una columna",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Evidencia enlazada a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/columns/{id}/evidence`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AdminCatalogController_columnEvidence`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.columns || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('columnId', first.id);",
                       "}"
                     ]
                   }
@@ -5603,6 +5838,68 @@
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('scanId', first.id);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /admin/catalog/columns/{id}/annotation · Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:id/annotation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":id",
+                    "annotation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /admin/catalog/columns/{id}/annotation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AdminCatalogController_saveColumnAnnotation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedVersion\": 0,\n  \"submit\": true,\n  \"changeReason\": \"changeReason-ejemplo\",\n  \"businessName\": {},\n  \"definition\": {},\n  \"purpose\": {},\n  \"existenceRationale\": {},\n  \"rowGrain\": {},\n  \"alternativesRationale\": {},\n  \"deletionImpact\": {},\n  \"businessOwner\": {},\n  \"dataSteward\": {},\n  \"technicalOwner\": {},\n  \"unit\": {},\n  \"valueDomain\": {},\n  \"nullSemantics\": {},\n  \"sensitivity\": \"UNKNOWN\",\n  \"consumers\": [\n    \"consumers-ejemplo\"\n  ],\n  \"openQuestions\": [\n    {\n      \"field\": \"field-ejemplo\",\n      \"question\": \"question-ejemplo\",\n      \"owner\": \"owner-ejemplo\",\n      \"dueDate\": \"2026-01-01T00:00:00.000Z\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -12481,8 +12778,226 @@
       ]
     },
     {
-      "name": "audit (7)",
+      "name": "audit (9)",
       "item": [
+        {
+          "name": "GET /audit/data-access · Lecturas de datos sensibles (`audit.data_access_log`), con filtros",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audit/data-access",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audit",
+                "data-access"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01T00:00:00.000Z",
+                  "description": "Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-24T00:00:00.000Z",
+                  "description": "Hasta (ISO 8601, excluido)",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "Quién actuó",
+                  "disabled": true
+                },
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "`nextCursor` de la página anterior",
+                  "disabled": true
+                },
+                {
+                  "key": "operation",
+                  "value": "READ",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "resourceType",
+                  "value": "resourceType-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "patientProfileId",
+                  "value": "{{patientProfileId}}",
+                  "description": "Paciente cuyo dato se leyó",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Filtra por actor, rango de fechas, tenant, paciente, tipo de recurso y operación. Sin rango, mira los últimos 30 días.\n\n`GET /audit/data-access`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AuditQueryController_dataAccess`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.dataAccess || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('dataAccessId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /audit/log · Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audit/log",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audit",
+                "log"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01T00:00:00.000Z",
+                  "description": "Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-24T00:00:00.000Z",
+                  "description": "Hasta (ISO 8601, excluido)",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "description": "Quién actuó",
+                  "disabled": true
+                },
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "cursor",
+                  "value": "cursor-ejemplo",
+                  "description": "`nextCursor` de la página anterior",
+                  "disabled": true
+                },
+                {
+                  "key": "result",
+                  "value": "SUCCESS",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "action",
+                  "value": "action-ejemplo",
+                  "description": "Acción exacta: el código de negocio (`CATALOG_ANNOTATION_SAVED`) o `HTTP <VERBO> <plantilla>`",
+                  "disabled": true
+                },
+                {
+                  "key": "method",
+                  "value": "POST",
+                  "description": "Verbo HTTP, derivado de la acción; las acciones de negocio salen del mapa de rutas armado al arrancar",
+                  "disabled": true
+                },
+                {
+                  "key": "route",
+                  "value": "/admin/catalog/objects/:id/annotation",
+                  "description": "Plantilla exacta de la ruta, con `:parámetros`",
+                  "disabled": true
+                },
+                {
+                  "key": "entity",
+                  "value": "entity-ejemplo",
+                  "description": "Entidad afectada",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Filtra por actor, rango de fechas, resultado, tenant, acción, verbo y ruta. El verbo y la ruta se derivan de la acción; para las acciones de negocio, del mapa de rutas armado al arrancar (`null` si la acción sella varias rutas). El riesgo se deriva al leer y no se guarda. Sin rango, mira los últimos 30 días.\n\n`GET /audit/log`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AuditQueryController_log`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('logId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "POST /audit/anomaly/scan · Detectar acceso anómalo",
           "request": {
@@ -13694,8 +14209,325 @@
       ]
     },
     {
-      "name": "authz (28)",
+      "name": "authz (33)",
       "item": [
+        {
+          "name": "authz-admin",
+          "item": [
+            {
+              "name": "GET /authz/internal-users · Usuarios internos con sus roles",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/authz/internal-users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "authz",
+                    "internal-users"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "`nextCursor` de la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "Texto a buscar en el nombre visible",
+                      "disabled": true
+                    },
+                    {
+                      "key": "roleCode",
+                      "value": "DPO",
+                      "description": "Sólo quienes tienen este rol activo, en cualquier ámbito. Sin él, la lista son los usuarios con un rol de ámbito global o un rol global de plataforma",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Sin `roleCode`: quienes tienen un rol activo de ámbito global o un rol global de plataforma (`SECURITY_ADMIN`, `SUPERADMIN`). Con `roleCode`: quienes tienen ese rol activo en cualquier ámbito.\n\n`GET /authz/internal-users`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AuthzAdminController_internalUsers`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.internalUsers || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('internalUserId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /authz/permissions · Catálogo de permisos, paginado por código",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/authz/permissions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "authz",
+                    "permissions"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "`nextCursor` de la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "q",
+                      "value": "q-ejemplo",
+                      "description": "Texto a buscar en el código, el nombre y el recurso",
+                      "disabled": true
+                    },
+                    {
+                      "key": "categoryId",
+                      "value": "{{categoryId}}",
+                      "description": "Categoría de permiso",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Catálogo de permisos, paginado por código. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /authz/permissions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AuthzAdminController_permissions`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.permissions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('permissionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /authz/roles/{roleId}/permissions · Permisos activos de un rol, con su efecto y ámbito",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/authz/roles/:roleId/permissions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "authz",
+                    "roles",
+                    ":roleId",
+                    "permissions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "roleId",
+                      "value": "{{roleId}}",
+                      "description": "Identificador de ruta · variable `{{roleId}}`"
+                    }
+                  ]
+                },
+                "description": "Permisos activos de un rol, con su efecto y ámbito. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /authz/roles/{roleId}/permissions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AuthzAdminController_rolePermissions`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.permissions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('permissionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /authz/users/{userId}/role-assignments · Asignaciones de rol de un usuario, activas o no",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/authz/users/:userId/role-assignments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "authz",
+                    "users",
+                    ":userId",
+                    "role-assignments"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    }
+                  ]
+                },
+                "description": "`isEffective` dice cuáles llegan hoy al token. `appliesGlobally` dice si un rol de ámbito global se asignó sin tenant, que es la condición para que autorice en las rutas sin tenant.\n\n`GET /authz/users/{userId}/role-assignments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AuthzAdminController_assignmentsOf`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.roleAssignments || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('roleAssignmentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /authz/users/{userId}/role-assignments/{assignmentId} · Revocar una asignación de rol (revocación lógica: la fila queda como historia)",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/authz/users/:userId/role-assignments/:assignmentId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "authz",
+                    "users",
+                    ":userId",
+                    "role-assignments",
+                    ":assignmentId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "userId",
+                      "value": "{{userId}}",
+                      "description": "Identificador de ruta · variable `{{userId}}`"
+                    },
+                    {
+                      "key": "assignmentId",
+                      "value": "{{assignmentId}}",
+                      "description": "Identificador de ruta · variable `{{assignmentId}}`"
+                    }
+                  ]
+                },
+                "description": "Revocar una asignación de rol (revocación lógica: la fila queda como historia). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /authz/users/{userId}/role-assignments/{assignmentId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 412, 422, 429, 500\n\noperationId: `AuthzAdminController_revoke`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
         {
           "name": "authz-care-relationships",
           "item": [
@@ -49128,7 +49960,7 @@
       ]
     },
     {
-      "name": "insurance-claims (7)",
+      "name": "insurance-claims (9)",
       "item": [
         {
           "name": "GET /insurance-claims · Listar las solicitudes de seguro presentadas (cursor)",
@@ -49273,6 +50105,65 @@
           ]
         },
         {
+          "name": "POST /insurance-claims/quote · Cotizar un cobro a la aseguradora (sin guardar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-claims/quote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-claims",
+                "quote"
+              ]
+            },
+            "description": "Cotizar un cobro a la aseguradora (sin guardar). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/quote`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_quote`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"patientCoverageId\": \"{{patientCoverageId}}\",\n  \"priorAuthorizationRequestId\": \"{{priorAuthorizationRequestId}}\",\n  \"lines\": [\n    {\n      \"lineSequence\": 1,\n      \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"quantity\": \"1\",\n      \"billedAmount\": \"100.00\",\n      \"inventoryReservationLineId\": \"<inventoryReservationLineId: uuid existente>\",\n      \"diagnosticStudyOfferingId\": \"{{diagnosticStudyOfferingId}}\",\n      \"supportingClinicalReference\": \"ENC-2026-00412\",\n      \"patientResponsibilityAmount\": \"20.00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{insuranceClaimId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.insuranceClaimId);",
+                  "  if (id) pm.environment.set('insuranceClaimId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "POST /insurance-claims/{id}/adjudications · Adjudicar reclamo por línea (835)",
           "request": {
             "method": "POST",
@@ -49376,7 +50267,7 @@
             "description": "Abrir disputa sobre adjudicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/disputes`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_openDispute`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"initiatedBy\": \"PROVIDER\",\n  \"filingDeadline\": \"2026-01-01\"\n}",
+              "raw": "{\n  \"initiatedBy\": \"PROVIDER\",\n  \"filingDeadline\": \"2026-01-01\",\n  \"objectionReason\": \"AMOUNT_DIFFERS\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -49441,6 +50332,73 @@
               ]
             },
             "description": "Publicar Explicación de Beneficios (EOB). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/eob`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_publishEob`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{insuranceClaimId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.insuranceClaimId);",
+                  "  if (id) pm.environment.set('insuranceClaimId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /insurance-claims/{id}/patient-invoice · Facturar al paciente su parte de un servicio reclamado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurance-claims/:id/patient-invoice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurance-claims",
+                ":id",
+                "patient-invoice"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{insuranceClaimId}}",
+                  "description": "Identificador de ruta · variable `{{insuranceClaimId}}`"
+                }
+              ]
+            },
+            "description": "Facturar al paciente su parte de un servicio reclamado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /insurance-claims/{id}/patient-invoice`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `ClaimsController_issuePatientInvoice`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"claimLineId\": \"<claimLineId: uuid existente>\",\n  \"patientAmount\": \"140.00\",\n  \"description\": \"description-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": [],
           "event": [
@@ -51654,7 +52612,7 @@
       ]
     },
     {
-      "name": "internal (43)",
+      "name": "internal (44)",
       "item": [
         {
           "name": "audio-assets-internal",
@@ -52665,6 +53623,59 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.rebuildId);",
                       "  if (id) pm.environment.set('rebuildId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "data-catalog-internal",
+          "item": [
+            {
+              "name": "POST /internal/catalog/scans/run-next · Sonda: reclama y ejecuta el siguiente escaneo (worker)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/catalog/scans/run-next",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "catalog",
+                    "scans",
+                    "run-next"
+                  ]
+                },
+                "description": "Cierra los escaneos abandonados, retoma el que está en cola o, si venció el intervalo de la sonda, pide uno nuevo. `claimed: 0` si no había nada que hacer. `fenced: true` si el escaneo perdió su lease.\n\n`POST /internal/catalog/scans/run-next`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `InternalCatalogScansController_runNext`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.scanId);",
+                      "  if (id) pm.environment.set('scanId', id);",
                       "}"
                     ]
                   }
@@ -81033,7 +82044,7 @@
       ]
     },
     {
-      "name": "scheduling (57)",
+      "name": "scheduling (58)",
       "item": [
         {
           "name": "scheduling",
@@ -81854,10 +82865,10 @@
                     }
                   ]
                 },
-                "description": "Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.\n\n`POST /scheduling/resources/{id}/close-slots`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_closeSlots`",
+                "description": "Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada paciente.\n\n`POST /scheduling/resources/{id}/close-slots`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_closeSlots`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"reason\": \"reason-ejemplo\",\n  \"slotIds\": [\n    \"<slotIds: uuid existente>\"\n  ]\n}",
+                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"reason\": \"reason-ejemplo\",\n  \"slotIds\": [\n    \"<slotIds: uuid existente>\"\n  ],\n  \"cancelAffectedBookings\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -81990,10 +83001,10 @@
                     }
                   ]
                 },
-                "description": "Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.\n\n`POST /scheduling/resources/{id}/exceptions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_createException`",
+                "description": "Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente y bloquea.\n\n`POST /scheduling/resources/{id}/exceptions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `SchedulingController_createException`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"endAt\": \"2026-01-01T00:00:00.000Z\",\n  \"reason\": \"reason-ejemplo\",\n  \"isAvailable\": false\n}",
+                  "raw": "{\n  \"exceptionType\": \"ABSENCE\",\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"endAt\": \"2026-01-01T00:00:00.000Z\",\n  \"reason\": \"reason-ejemplo\",\n  \"isAvailable\": false,\n  \"cancelAffectedBookings\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -82697,6 +83708,62 @@
               ]
             },
             {
+              "name": "GET /scheduling/templates/{id}/live-bookings · Listar las citas vivas de una plantilla antes de retirarla",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/templates/:id/live-bookings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "templates",
+                    ":id",
+                    "live-bookings"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{templateId}}",
+                      "description": "Identificador de ruta · variable `{{templateId}}`"
+                    }
+                  ]
+                },
+                "description": "Las citas confirmadas o pendientes que un retiro con affectedBookings=cancel cancelaría, y las de pacientes ya recibidos, que lo frenan. Sólo para quien administra la agenda.\n\n`GET /scheduling/templates/{id}/live-bookings`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `SchedulingController_listTemplateLiveBookings`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.liveBookings || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('liveBookingId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "PATCH /scheduling/exceptions/{id} · Editar una excepción de disponibilidad",
               "request": {
                 "method": "PATCH",
@@ -82951,9 +84018,17 @@
                       "value": "{{templateId}}",
                       "description": "Identificador de ruta · variable `{{templateId}}`"
                     }
+                  ],
+                  "query": [
+                    {
+                      "key": "affectedBookings",
+                      "value": "cancel",
+                      "description": "cancel: cancela las citas vivas del horario y avisa a cada paciente. keep o ausente: las conserva, como siempre.",
+                      "disabled": true
+                    }
                   ]
                 },
-                "description": "La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.\n\n`DELETE /scheduling/templates/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `SchedulingController_retireTemplate`"
+                "description": "La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Por omisión las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds. Con ?affectedBookings=cancel se cancelan con el motivo «cambio de horario» y se avisa a cada paciente (cancelledBookings).\n\n`DELETE /scheduling/templates/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `SchedulingController_retireTemplate`"
               },
               "response": [],
               "event": [
