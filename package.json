@@ -131,6 +131,7 @@
     "docs:modules:sync": "node tools/docs/sync-module-docs.mjs",
     "docs:data:sync": "node tools/docs/generate-data-catalog.mjs",
     "docs:coverage": "node tools/docs/check-doc-coverage.mjs",
+    "docs:coverage:test": "node --test tools/docs/check-doc-coverage.test.mjs",
     "docs:links": "node tools/docs/check-doc-links.mjs",
     "docs:asyncapi:validate": "node tools/asyncapi/validate.mjs asyncapi/asyncapi.yaml",
     "docs:validate": "yarn docs:openapi:lint && yarn docs:asyncapi:validate && yarn docs:coverage && yarn docs:links",
