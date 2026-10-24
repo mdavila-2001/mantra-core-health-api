@@ -33,6 +33,7 @@ import {
 } from '../dto';
 import { sumCents, fromCents } from './money';
 import { classify } from './journal-classification';
+import { flushJournalHeader } from './journal-number-conflict';
 import { AuditTrailService } from '../../audit/services';
 import {
   PracticeTenantLookupService,
@@ -173,7 +174,9 @@ export class LedgerService {
    *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
    *     rol con autoridad de aprobación; equivale a auto-aprobar el asiento.
    *   - IDEMPOTENCIA: `transactionNumber` es único por práctica (409 si se repite),
-   *     de modo que un reintento no duplica el asiento.
+   *     de modo que un reintento no duplica el asiento. El índice único del DDL
+   *     cubre hoy sólo `transaction_number`: su violación (otra práctica o una
+   *     carrera) se traduce al mismo 409 en `flushJournalHeader`.
    * El posteo efectivo (líneas del mayor + `postedAt`) ocurre aquí, igual que en
    * `post`, aplicando las mismas validaciones (balance de partida doble y periodo
    * ABIERTO).
@@ -253,7 +256,7 @@ export class LedgerService {
         postedByUserId: actor.id,
         actorUserId: actor.id,
       });
-      await tx.flush();
+      await flushJournalHeader(tx, number);
 
       await this.writeLines(
         tx,
@@ -332,7 +335,7 @@ export class LedgerService {
         sourceDocumentId: dto.sourceDocumentId,
         actorUserId: actor.id,
       });
-      await tx.flush();
+      await flushJournalHeader(tx, number);
 
       await this.writeLines(
         tx,

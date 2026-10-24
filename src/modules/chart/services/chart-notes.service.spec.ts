@@ -15,7 +15,13 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   ConflictException,
+  runWithTenant,
 } from '../../../common';
+import { ChartEncounterScopeService } from './chart-encounter-scope.service';
+import { ChartErrorReason } from '../chart.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
 const actor = {
   id: 'clin-1',
@@ -56,13 +62,42 @@ function build() {
   const clinicalRead = {
     assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
+  // CHART-01: el alcance real, con repositorios de prueba. Por defecto el
+  // encuentro `enc-1` existe, está abierto y es del paciente `p1`.
+  const encountersRepo = {
+    findById: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      sealedAt: undefined,
+    })),
+  };
+  const conditionsRepo = {
+    findById: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      patientProfileId: 'p1',
+    })),
+  };
+  const encounterScope = new ChartEncounterScopeService(
+    encountersRepo as any,
+    conditionsRepo as any,
+  );
   const service = new ChartNotesService(
     em as any,
     notesRepo,
     logger as any,
     clinicalRead as any,
+    encounterScope,
   );
-  return { service, tx, em, notesRepo, clinicalRead };
+  return {
+    service,
+    tx,
+    em,
+    notesRepo,
+    clinicalRead,
+    encountersRepo,
+    conditionsRepo,
+  };
 }
 
 describe('ChartNotesService', () => {
@@ -740,4 +775,132 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
       expect(d.tx.flush).not.toHaveBeenCalled();
     },
   );
+});
+
+/**
+ * Captura el rechazo para inspeccionar status, reason y details.
+ *
+ * @param promise - Operación que debe fallar.
+ * @returns La excepción lanzada.
+ */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('Se esperaba un rechazo');
+}
+
+describe('ChartNotesService.createNote · encuentro del paciente (CHART-01)', () => {
+  const dto = (extra: Record<string, unknown> = {}) =>
+    ({
+      patientProfileId: 'p1',
+      authorProfileId: 's1',
+      subjectiveText: 's',
+      ...extra,
+    }) as any;
+
+  /**
+   * Prepara la cabecera y la versión que devuelve el repositorio.
+   *
+   * @param d - Doble del servicio.
+   */
+  function withRepos(d: ReturnType<typeof build>) {
+    d.notesRepo.createHeader.mockReturnValue({
+      id: 'h1',
+      lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+      updatedAt: new Date(),
+    });
+    d.notesRepo.createVersion.mockReturnValue({
+      id: 'v1',
+      versionNumber: 1,
+      statusConceptId: CHART.VERSION_DRAFT,
+    });
+  }
+
+  it('correcto: la nota de A con un encuentro abierto de A conserva la relación', async () => {
+    const d = build();
+    withRepos(d);
+
+    await d.service.createNote(dto({ encounterId: 'enc-1' }), actor);
+
+    expect(d.notesRepo.createHeader.mock.calls[0][1]).toMatchObject({
+      patientProfileId: 'p1',
+      encounterId: 'enc-1',
+    });
+  });
+
+  it('límite: sin encounterId la nota se crea sin consultar encuentros', async () => {
+    const d = build();
+    withRepos(d);
+
+    await d.service.createNote(dto(), actor);
+
+    expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+    expect(d.notesRepo.createHeader).toHaveBeenCalledTimes(1);
+  });
+
+  it('error: el encuentro abierto de B usado desde A responde como un encuentro inexistente, sin cabecera', async () => {
+    const foreign = build();
+    foreign.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-b',
+      patientProfileId: 'p2',
+      tenantId: TENANT_A,
+    });
+    const absent = build();
+    absent.encountersRepo.findById.mockResolvedValue(null);
+
+    const a = await rejection(
+      foreign.service.createNote(dto({ encounterId: 'enc-b' }), actor),
+    );
+    const b = await rejection(
+      absent.service.createNote(dto({ encounterId: 'enc-b' }), actor),
+    );
+
+    expect(a).toBeInstanceOf(ResourceNotFoundException);
+    expect(a.getStatus()).toBe(404);
+    expect(a.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_OUT_OF_SCOPE);
+    expect(a.details).toBeUndefined();
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.notesRepo.createHeader).not.toHaveBeenCalled();
+    expect(foreign.notesRepo.createVersion).not.toHaveBeenCalled();
+  });
+
+  it('un encuentro del mismo paciente pero de otro tenant también es ajeno', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-1',
+      patientProfileId: 'p1',
+      tenantId: TENANT_B,
+    });
+
+    const error = await rejection(
+      runWithTenant(TENANT_A, () =>
+        d.service.createNote(dto({ encounterId: 'enc-1' }), actor),
+      ),
+    );
+
+    expect(error.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_OUT_OF_SCOPE);
+    expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
+  });
+
+  it('falla catalogada: un encuentro sellado responde 422 CHART_ENCOUNTER_SEALED y no escribe', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-1',
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      sealedAt: new Date(),
+    });
+
+    const error = await rejection(
+      d.service.createNote(dto({ encounterId: 'enc-1' }), actor),
+    );
+
+    expect(error).toBeInstanceOf(PreconditionFailedException);
+    expect(error.getStatus()).toBe(422);
+    expect(error.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_SEALED);
+    expect(d.notesRepo.createHeader).not.toHaveBeenCalled();
+  });
 });

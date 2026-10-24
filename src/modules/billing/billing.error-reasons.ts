@@ -123,4 +123,47 @@ export enum BillingErrorReason {
    * pausa hasta que se resuelva (carril 16, REQ-16-032).
    */
   PAYMENT_RECEIVED_INVOICE_ON_HOLD = 'PAYMENT_RECEIVED_INVOICE_ON_HOLD',
+
+  /**
+   * La práctica indicada no existe o no pertenece al tenant del actor. Ambos
+   * casos responden igual para no confirmar que el UUID existe en otra
+   * organización.
+   */
+  BILLING_PRACTICE_NOT_FOUND = 'BILLING_PRACTICE_NOT_FOUND',
+
+  /** Una asignación de cobro no es un importe positivo con a lo sumo dos decimales. */
+  PAYMENT_RECEIVED_ALLOCATION_AMOUNT_INVALID = 'PAYMENT_RECEIVED_ALLOCATION_AMOUNT_INVALID',
+
+  /** El descuento de una asignación de cobro no es un importe válido (cero o positivo). */
+  PAYMENT_RECEIVED_DISCOUNT_AMOUNT_INVALID = 'PAYMENT_RECEIVED_DISCOUNT_AMOUNT_INVALID',
+
+  /** Una asignación de pago a proveedor no es un importe positivo con a lo sumo dos decimales. */
+  PAYMENT_MADE_ALLOCATION_AMOUNT_INVALID = 'PAYMENT_MADE_ALLOCATION_AMOUNT_INVALID',
+
+  /** El descuento de una asignación de pago a proveedor no es un importe válido. */
+  PAYMENT_MADE_DISCOUNT_AMOUNT_INVALID = 'PAYMENT_MADE_DISCOUNT_AMOUNT_INVALID',
+
+  /** La retención de una asignación de pago a proveedor no es un importe válido. */
+  PAYMENT_MADE_WITHHOLDING_AMOUNT_INVALID = 'PAYMENT_MADE_WITHHOLDING_AMOUNT_INVALID',
+
+  /** Cantidad, precio, descuento o impuesto de una línea de factura no son importes válidos. */
+  INVOICE_LINE_AMOUNT_INVALID = 'INVOICE_LINE_AMOUNT_INVALID',
+
+  /** El descuento de una línea de factura supera su base (cantidad por precio). */
+  INVOICE_LINE_DISCOUNT_EXCEEDS_BASE = 'INVOICE_LINE_DISCOUNT_EXCEEDS_BASE',
+
+  /** Cantidad, precio o impuesto de una línea de nota de crédito no son importes válidos. */
+  CREDIT_NOTE_LINE_AMOUNT_INVALID = 'CREDIT_NOTE_LINE_AMOUNT_INVALID',
+
+  /** Cantidad, precio o impuesto de una línea de factura de proveedor no son importes válidos. */
+  BILL_LINE_AMOUNT_INVALID = 'BILL_LINE_AMOUNT_INVALID',
+
+  /** Una cuota del plan de pagos no es un importe positivo. */
+  INVOICE_PAYMENT_PLAN_INSTALLMENT_AMOUNT_INVALID = 'INVOICE_PAYMENT_PLAN_INSTALLMENT_AMOUNT_INVALID',
+
+  /** El monto del reembolso debe ser positivo. */
+  REIMBURSEMENT_AMOUNT_NOT_POSITIVE = 'REIMBURSEMENT_AMOUNT_NOT_POSITIVE',
+
+  /** La factura de un ítem de morosidad no existe o no es del tenant del actor. */
+  DUNNING_INVOICE_NOT_FOUND = 'DUNNING_INVOICE_NOT_FOUND',
 }

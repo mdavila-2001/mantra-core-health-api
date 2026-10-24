@@ -434,6 +434,7 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       em as never,
       new PaymentsReceivedRepository(),
       invoicesRepo,
+      practiceLookup as never,
       logger as never,
     );
   });
@@ -950,14 +951,16 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     let disputeId: string;
 
     const apply = (amount: string) =>
-      payments.apply(
-        {
-          practiceId: practice,
-          patientProfileId: patient,
-          amount,
-          allocations: [{ invoiceId, allocatedAmount: amount }],
-        } as never,
-        admin(),
+      inTenant(() =>
+        payments.apply(
+          {
+            practiceId: practice,
+            patientProfileId: patient,
+            amount,
+            allocations: [{ invoiceId, allocatedAmount: amount }],
+          } as never,
+          admin(),
+        ),
       );
     const paymentsCount = () =>
       count(

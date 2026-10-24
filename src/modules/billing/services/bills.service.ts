@@ -4,7 +4,6 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   CONCEPTS,
   type AuthenticatedUser,
 } from '../../../common';
@@ -15,13 +14,31 @@ import {
 } from '../repositories';
 import { RegisterBillDto, BillResponseDto } from '../dto';
 import { BILL } from '../billing.concepts';
-import { fromCents, toCents } from '../money.util';
+import { fromCents } from '../money.util';
+import { validateLineAmounts } from '../billing-lines';
+import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  activeTenantId,
+  assertDocumentInPractice,
+  assertPracticeInTenant,
+} from '../billing-scope';
+
+/** "No existe" del proveedor de la factura; el ajeno responde idéntico. */
+const VENDOR_NOT_FOUND = {
+  message: 'Proveedor no encontrado',
+  reason: BillingErrorReason.BILL_VENDOR_NOT_FOUND,
+};
 
 /**
  * UC-17-04: registra una factura de proveedor con verificación three-way match.
  * Valida que el vendor exista y esté activo, que no haya doble captura del mismo
  * `bill_number`, y que las líneas con orden de compra referencien su recepción de
  * bienes. Persiste cabecera y líneas en la misma transacción (flush intermedio).
+ *
+ * Alcance: la práctica tiene que ser del tenant del contexto y el proveedor de
+ * esa misma práctica; uno ajeno responde igual que uno inexistente. Los importes
+ * de las líneas se validan con decimal exacto (cantidad positiva, precio e
+ * impuesto no negativos). El tenant del vínculo de documento sale del contexto.
  */
 @Injectable()
 export class BillsService {
@@ -37,6 +54,7 @@ export class BillsService {
     private readonly em: EntityManager,
     private readonly billsRepo: BillsRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BillsService.name);
@@ -62,16 +80,18 @@ export class BillsService {
       },
       'Registering vendor bill',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const vendor = await this.billsRepo.findVendor(tx, dto.vendorId);
-      if (!vendor)
-        throw new ResourceNotFoundException(
-          'Proveedor no encontrado',
-          {
-            vendorId: dto.vendorId,
-          },
-          BillingErrorReason.BILL_VENDOR_NOT_FOUND,
-        );
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
+      const vendor = assertDocumentInPractice(
+        await this.billsRepo.findVendor(tx, dto.vendorId),
+        dto.practiceId,
+        VENDOR_NOT_FOUND,
+      );
       if (
         vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE &&
         vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE
@@ -116,11 +136,12 @@ export class BillsService {
       let subtotalCents = 0;
       let taxCents = 0;
       const lineTotals = dto.lines.map((l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const taxAmtCents = l.taxAmount ? toCents(l.taxAmount) : 0;
-        subtotalCents += baseCents;
-        taxCents += taxAmtCents;
-        return fromCents(baseCents + taxAmtCents);
+        const line = validateLineAmounts(l, {
+          amount: BillingErrorReason.BILL_LINE_AMOUNT_INVALID,
+        });
+        subtotalCents += line.netCents;
+        taxCents += line.taxCents;
+        return fromCents(line.lineTotalCents);
       });
       const totalCents = subtotalCents + taxCents;
 
@@ -161,9 +182,9 @@ export class BillsService {
         });
       });
 
-      if (dto.tenantId && (dto.purchaseOrderId || dto.contractId)) {
+      if (dto.purchaseOrderId || dto.contractId) {
         this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           relationTypeConceptId: BILL.REL_ENCOUNTER_OF,
           billId: bill.id,
           purchaseOrderId: dto.purchaseOrderId,

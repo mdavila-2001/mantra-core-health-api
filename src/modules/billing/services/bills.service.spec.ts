@@ -14,9 +14,47 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant dado, como lo
+ * hace `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/**
+ * Puerto de `practice` de prueba: la práctica `pr1` es del tenant A y `pr-b`
+ * del tenant B; cualquier otra no existe.
+ *
+ * @returns Doble de `PracticeTenantLookupService`.
+ */
+function buildLookup() {
+  return {
+    findTenantOfPractice: mockFn(async (practiceId: string) =>
+      practiceId === 'pr1' ? TENANT_A : practiceId === 'pr-b' ? TENANT_B : null,
+    ),
+  };
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -32,14 +70,24 @@ function build() {
     createLine: mockFn(),
   };
   const linksRepo = { create: mockFn() };
+  const lookup = buildLookup();
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new BillsService(
+  const raw = new BillsService(
     em as any,
     billsRepo as any,
     linksRepo,
+    lookup as any,
     logger as any,
   );
-  return { service, tx, billsRepo, linksRepo };
+  return {
+    service: inTenant(raw, TENANT_A),
+    raw,
+    asTenantB: inTenant(raw, TENANT_B),
+    tx,
+    billsRepo,
+    linksRepo,
+    lookup,
+  };
 }
 
 const activeVendor = {
@@ -148,5 +196,136 @@ describe('BillsService (UC-17-04)', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+});
+
+describe('BillsService · alcance de tenant (BILL-01)', () => {
+  /**
+   * Captura el rechazo para inspeccionar status, reason y details.
+   *
+   * @param promise - Operación que debe fallar.
+   * @returns La excepción lanzada.
+   */
+  async function rejection(promise: Promise<unknown>): Promise<any> {
+    try {
+      await promise;
+    } catch (error) {
+      return error;
+    }
+    throw new Error('Se esperaba un rechazo');
+  }
+
+  const dtoFor = (practiceId: string) =>
+    ({
+      practiceId,
+      vendorId: 'v1',
+      billNumber: 'B-1',
+      purchaseOrderId: '00000000-0000-4000-8000-000000000001',
+      lines: [{ quantity: '1', unitPrice: '100.00' }],
+    }) as any;
+
+  it('correcto: el bill se registra en la práctica de A y su vínculo lleva el tenant del contexto', async () => {
+    const d = build();
+    d.billsRepo.findVendor.mockResolvedValue(activeVendor);
+    d.billsRepo.findByNumber.mockResolvedValue(null);
+    d.billsRepo.create.mockReturnValue({ id: 'b1', total: '100.00' });
+
+    await d.service.register({ ...dtoFor('pr1'), tenantId: TENANT_B }, actor);
+
+    expect(d.linksRepo.create.mock.calls[0][1].tenantId).toBe(TENANT_A);
+  });
+
+  it('una práctica de otro tenant responde como práctica inexistente y no crea nada', async () => {
+    const d = build();
+    d.billsRepo.findVendor.mockResolvedValue({
+      ...activeVendor,
+      practiceId: 'pr-b',
+    });
+
+    const foreign = await rejection(d.service.register(dtoFor('pr-b'), actor));
+    const missing = await rejection(d.service.register(dtoFor('pr-x'), actor));
+
+    expect(foreign.getStatus()).toBe(404);
+    expect(foreign.reason).toBe(BillingErrorReason.BILLING_PRACTICE_NOT_FOUND);
+    expect(foreign.getResponse()).toEqual(missing.getResponse());
+    expect(d.billsRepo.create).not.toHaveBeenCalled();
+    expect(d.linksRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('el proveedor de otra práctica responde como proveedor inexistente', async () => {
+    const foreign = build();
+    foreign.billsRepo.findVendor.mockResolvedValue({
+      ...activeVendor,
+      practiceId: 'pr-b',
+    });
+    const absent = build();
+    absent.billsRepo.findVendor.mockResolvedValue(null);
+
+    const a = await rejection(foreign.service.register(dtoFor('pr1'), actor));
+    const b = await rejection(absent.service.register(dtoFor('pr1'), actor));
+
+    expect(a.getStatus()).toBe(404);
+    expect(a.reason).toBe(BillingErrorReason.BILL_VENDOR_NOT_FOUND);
+    expect(a.details).toBeUndefined();
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.billsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('sin tenant en el contexto no registra nada (denegar por defecto)', async () => {
+    const d = build();
+
+    const error = await rejection(d.raw.register(dtoFor('pr1'), actor));
+
+    expect(error.details).toEqual({ reason: 'TENANT_REQUIRED' });
+    expect(d.billsRepo.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('BillsService · importes de las líneas (BILL-03)', () => {
+  const register = (line: Record<string, string>) =>
+    ({
+      practiceId: 'pr1',
+      vendorId: 'v1',
+      billNumber: 'B-1',
+      lines: [{ quantity: '1', unitPrice: '100.00', ...line }],
+    }) as any;
+
+  it.each([
+    ['cantidad negativa', { quantity: '-2' }],
+    ['cantidad cero', { quantity: '0' }],
+    ['precio negativo', { unitPrice: '-100.00' }],
+    ['impuesto negativo', { taxAmount: '-10.00' }],
+    ['precio con más de dos decimales', { unitPrice: '1.005' }],
+  ])('rechaza %s y no crea el bill', async (_name, line) => {
+    const d = build();
+    d.billsRepo.findVendor.mockResolvedValue(activeVendor);
+    d.billsRepo.findByNumber.mockResolvedValue(null);
+
+    await expect(
+      d.service.register(register(line), actor),
+    ).rejects.toMatchObject({
+      reason: BillingErrorReason.BILL_LINE_AMOUNT_INVALID,
+    });
+    expect(d.billsRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('calcula el total con decimal exacto', async () => {
+    const d = build();
+    d.billsRepo.findVendor.mockResolvedValue(activeVendor);
+    d.billsRepo.findByNumber.mockResolvedValue(null);
+    d.billsRepo.create.mockImplementation((_tx: any, data: any) => ({
+      id: 'b1',
+      ...data,
+    }));
+
+    await d.service.register(
+      register({ quantity: '3', unitPrice: '0.10', taxAmount: '0.03' }),
+      actor,
+    );
+
+    const created = d.billsRepo.create.mock.calls[0][1];
+    expect(created.subtotal).toBe('0.30');
+    expect(created.total).toBe('0.33');
+    expect(created.balance).toBe('0.33');
   });
 });
