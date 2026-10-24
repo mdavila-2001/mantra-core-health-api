@@ -1,6 +1,6 @@
 # Plan — Catálogo de análisis: pasadas con la red abierta (LOINC, GTR)
 
-- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` · Predecesor: PR #681 (mergeado),
+- Fecha: 2026-10-24 · Repos afectados: `mantra-core-health-api` · Predecesor: PR mdavila-2001/mantra-core-health-api#681 (cerrado sin mergear; su contenido está en `dev` por los commits `500400eb` y `8a6165c3`),
   `tools/terminology-import/lab-tests/`, `docs/seed-research/lab-tests.md`
 - Resultado observable: el catálogo `lab-catalog-*` incluye LOINC (clase como categoría,
   CLASSTYPE, estado, pedible/observación, nombres en castellano oficiales, miembros de paneles,
@@ -57,13 +57,13 @@ es un concepto con laboratorio, país, métodos, categorías de método, genes y
 **CA:** Dada cada pasada, cuando termina, entonces está commiteada y empujada, y `data/` y el
 registro de pasadas están al día.
 **DoD:** `git push` por pasada; PR contra `dev` (no draft, sin mergear); REPORTE.md.
-**Estado:** EN CURSO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H7.S1.M1 | Push tras H5 | rama remota = local | `git rev-parse HEAD origin/<rama>` | HECHO |
 | H7.S1.M2 | Push tras H6 | idem | idem | HECHO |
-| H7.S1.M3 | PR y REPORTE | PR abierto, no draft | link | EN CURSO |
+| H7.S1.M3 | PR y REPORTE | PR abierto, no draft | link | HECHO: https://github.com/mdavila-2001/mantra-core-health-api/pull/729 |
 
 ## H8 — Trabajo no previsto, agregado al plan (§1.3)
 **CA:** Dado el catálogo con la red abierta, cuando se cotejan las redistribuciones y se agregan las

@@ -4,7 +4,7 @@
 - Peldaño de evidencia alcanzado: **VERIFIED: carga completa e idempotencia en Postgres 16 desechable**
   (camino real: `data/` → `load-lab-tests.mjs --apply` → filas contadas con `psql`). No es
   `REGRESSION_VERIFIED`: ver «No cubierto».
-- Avance: **22 / 22 microtareas HECHO (100 %)**, contando H7.S1.M3 (PR abierto). El pedido de fondo
+- Avance: **22 / 22 microtareas HECHO (100 %)**. El pedido de fondo
   («hasta que no se pueda encontrar más») **no está cerrado**: la saturación no se declara (ver Pendiente).
 
 ## Completado
@@ -18,7 +18,7 @@
 | H5.S3.M2, H8.S4.M2 | Carga completa desde `data/`, base nueva, 2 corridas | `load-lab-tests.mjs --apply` ×2 | corrida 1 = plan; corrida 2 = 0 (ver Evidencia) |
 | H6.S1.M1–M3 | NCBI GTR: 63 919 tests vigentes, categoría = categoría mayor de método | `fetch-gtr.mjs` + `node --test` | ok |
 | H7.S1.M1–M2 | Push por pasada | `git push` | rama remota = local en cada pasada (commits de las pasadas 10–13) |
-| H7.S1.M3 | PR contra `dev`, no draft, sin mergear | — | link en la descripción del PR de esta rama |
+| H7.S1.M3 | PR contra `dev`, no draft, sin mergear | `create_pull_request` | https://github.com/mdavila-2001/mantra-core-health-api/pull/729 |
 | H8.S1.M1–M2 | CUPS (2 158) y designaciones CIE-10-ES (4 397) | build + `node --test` | ok |
 | H8.S2.M1–M3 | TUSS cotejado (0 diferencias); PAMI y ICD-10-PCS FY2027 desde los archivos oficiales | build + `node --test` | ok |
 | H8.S3.M1 | Pasadas 14 y 15 registradas | lectura | `docs/seed-research/lab-tests.md` |
