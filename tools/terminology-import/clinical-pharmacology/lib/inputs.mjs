@@ -1,7 +1,7 @@
 // Lectura de lo YA descargado (sin red): productos de CIMA, maestra ATC, LINAME
 // y vademécum, y el universo de ATC 5 que se busca en las demás fuentes.
 
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
@@ -98,11 +98,31 @@ export function readEml() {
 }
 
 /**
+ * Registros de un libro de NCBI desde la caché (fetch-ncbi-books.mjs): iterador de `{ xml, retrievedAt }`
+ * (se leen de a uno) y Map(id de capítulo → accession NBK…). null si no se bajó.
+ */
+export function readNcbiBook(book, nbk) {
+  const dir = cpCache(book, 'nxml');
+  if (!existsSync(dir)) return null;
+  const names = readdirSync(dir).filter((n) => n.endsWith('.nxml')).sort();
+  const retrievedAt = retrievedAtOf(cpCache(book, `${book}_${nbk}.tar.gz`));
+  const accessions = new Map(Object.entries(readJsonIfExists(cpCache(book, 'accessions.json')) ?? {}));
+  return {
+    accessions,
+    *records() {
+      for (const n of names) yield { xml: readFileSync(join(dir, n), 'utf8'), retrievedAt };
+    },
+  };
+}
+
+export const readLactmed = () => readNcbiBook('lactmed', 'NBK501922');
+export const readLivertox = () => readNcbiBook('livertox', 'NBK547852');
+
+/**
  * set_id de openFDA → si la etiqueta trae UNII (`openfda.unii`). Recorre las
  * particiones bajadas en streaming. Vacío si openFDA no se bajó.
  */
 export async function openFdaSetIndex() {
-  const { readdirSync } = await import('node:fs');
   const { zipResults } = await import('./json-stream.mjs');
   const dir = join(cpCache('openfda'), 'label');
   const out = new Map();

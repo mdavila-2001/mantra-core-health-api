@@ -1,2 +1,0 @@
-$ corepack yarn typecheck   (HEAD 1b07eb16, tras merge de origin/dev 025e3e37)
-exit=0

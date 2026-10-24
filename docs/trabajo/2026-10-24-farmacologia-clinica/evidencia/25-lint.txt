@@ -1,2 +1,0 @@
-$ corepack yarn lint   (HEAD 1b07eb16)
-exit=0
