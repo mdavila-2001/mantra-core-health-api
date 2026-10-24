@@ -23,7 +23,9 @@ function walkMd(dir) {
 }
 
 // 1. TODO/FIXME/TBD markers — literal placeholder markers, not the word
-// "pendiente" used honestly to describe real, verified gaps in the system.
+// "pendiente" used as a business state (an appointment PENDIENTE, a pending
+// payment). Docs describe what exists; work still to do lives in GitHub
+// issues, never in docs/ (docs/governance/documentation-policy.md).
 // Requires the colon-suffixed form (TODO:/FIXME:) or standalone TBD, because
 // this is a Spanish-language corpus where bare "TODO" is also the Spanish
 // word for "all/everything" (e.g. "sólo si TODO verificado") — a bare-word

@@ -2,7 +2,7 @@
 
 Prohibiciones duras que aplican a **todo** trabajo en cualquier repo de la empresa, sin excepción
 por tamaño, urgencia, obviedad ni pedido explícito de saltearlas. Si una instrucción de sesión
-contradice esta regla, esta regla gana y el conflicto se registra en el `REPORTE.md`.
+contradice esta regla, esta regla gana y el conflicto se registra en la descripción del PR.
 
 ## 1. Anti-invención
 
@@ -18,8 +18,8 @@ contradice esta regla, esta regla gana y el conflicto se registra en el `REPORTE
 5. Si no existe patrón previo, **registrá la decisión técnica** y aplicá el alcance mínimo.
 6. **Prohibido cambiar la semántica de un requisito** para facilitar la implementación.
 7. **Prohibido resolver una ambigüedad por conveniencia.** Una frase ambigua se registra como
-   ambigüedad en el `PLAN.md` y en el `REPORTE.md`, con el supuesto tomado y a quién confirmárselo.
-   Nunca se presenta como hecho.
+   ambigüedad en el plan y en la descripción del PR, con el supuesto tomado. Si la confirmación
+   depende de otra persona, va a un issue que la nombra. Nunca se presenta como hecho.
 
 ## 2. Datos
 
@@ -28,16 +28,16 @@ contradice esta regla, esta regla gana y el conflicto se registra en el `REPORTE
    (fuente, referencia, fecha, licencia) o se declaran explícitamente sintéticos.
 2. **Prohibido usar datos clínicos generados como si fueran un catálogo real.**
 3. **Prohibido que datos personales o de salud (PII/PHI) aparezcan** en logs, trazas, URLs,
-   mensajes de error, analytics, capturas, tickets, `PLAN.md` o `REPORTE.md`. Si una salida que
+   mensajes de error, analytics, capturas, issues ni descripciones de PR. Si una salida que
    hay que pegar los contenía, se enmascara y se aclara que se enmascaró.
 4. **Prohibido copiar datos de producción a un entorno de prueba** sin anonimizar.
 5. **Prohibido sacar datos reales por túneles, servicios de terceros o entornos ajenos.**
 
 ## 3. Alcance
 
-1. **Prohibido tocar archivos fuera del alcance declarado** en el `PLAN.md` (regla 20).
+1. **Prohibido tocar archivos fuera del alcance declarado** en el plan (regla 20).
 2. **Prohibido el refactor, renombre, reformateo o upgrade no solicitado.** Lo que encontrás roto
-   o feo fuera de alcance se **anota**, no se arregla.
+   o feo fuera de alcance va a un **issue** en el repo que corresponde (regla 40), no se arregla.
 3. Todo trabajo no previsto que aparezca en el camino **se agrega al plan** como microtarea con su
    criterio de aceptación y su Definition of Done. Nada se hace "de paso".
 
@@ -52,12 +52,18 @@ contradice esta regla, esta regla gana y el conflicto se registra en el `REPORTE
 
 ## 5. Proceso
 
-1. **Prohibido escribir código antes de que exista el `PLAN.md`** (regla 20).
-2. **Prohibido cerrar la sesión sin `REPORTE.md`** (regla 40), aunque el trabajo esté incompleto.
+1. **Prohibido escribir código antes de que exista el plan escrito** (regla 20), en el issue o
+   en la descripción del PR.
+2. **Prohibido cerrar un trabajo sin su reporte en la descripción del PR** (regla 40), aunque esté
+   incompleto.
 3. **Prohibido marcar `HECHO` una microtarea cuyo DoD no se ejecutó.**
-4. **Prohibido `TODO` en el código como sustituto de implementación** dentro del alcance.
-5. **Prohibido dejar microtareas en `EN CURSO`** al cerrar: pasan a `A MEDIAS` con el detalle de
-   qué anda, qué no anda y qué falta.
+4. **Prohibidos los comentarios `TODO` y `FIXME` en el código.** Una limitación intencional se
+   describe en presente y con su porqué; el trabajo que falta es un issue, y el comentario puede
+   apuntarlo (`// ver #123`).
+5. **Prohibido dejar microtareas en `EN CURSO`** al cerrar: pasan a `A MEDIAS`, con un issue que
+   dice qué anda, qué no anda y qué falta.
+6. **Prohibido versionar pendientes.** El repo describe lo que existe: ningún plan, reporte,
+   tablero de estado ni sección «Pendiente», «Próximos pasos» o «Falta» entra al repo (regla 40).
 
 ## 6. Afirmaciones
 
