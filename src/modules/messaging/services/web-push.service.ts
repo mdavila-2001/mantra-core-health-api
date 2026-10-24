@@ -33,7 +33,16 @@ const PUSH_TTL_SECONDS = 60 * 60;
 const GONE_STATUS_CODES: readonly number[] = [404, 410];
 /** Título fijo: la pantalla bloqueada no debe mostrar datos de la persona. */
 const PUSH_TITLE = 'AloVida';
+const PUSH_BODY = 'Tiene un aviso nuevo en AloVida';
 const DEFAULT_ROUTE = '/notifications';
+/** Ruta interna de la aplicación: segmentos simples, sin esquema ni `//`. */
+const INTERNAL_ROUTE =
+  /^\/(?:[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)*)?(?:\?[A-Za-z0-9_=&%.-]*)?$/;
+
+/** `route` si es una ruta interna segura, o `undefined`. */
+export function safeRoute(route: string | undefined): string | undefined {
+  return route !== undefined && INTERNAL_ROUTE.test(route) ? route : undefined;
+}
 
 /**
  * Servicios de push que emiten los navegadores. El servidor hace un POST a la
@@ -111,6 +120,18 @@ export class WebPushService {
     const fingerprint = fingerprintOf(input.endpoint);
     await this.em.transactional(async (tx) => {
       const now = new Date();
+      // Un navegador pertenece a una cuenta a la vez: si otra persona usó
+      // antes este mismo navegador, su suscripción se retira para que los
+      // avisos de ella no le lleguen a quien entra ahora.
+      const others = await tx.find(Devices, {
+        deviceFingerprint: fingerprint,
+        userId: { $ne: userId },
+        pushTokenEncrypted: { $ne: null },
+      });
+      for (const other of others) {
+        other.pushTokenEncrypted = undefined;
+        other.updatedAt = now;
+      }
       const existing = await tx.findOne(Devices, {
         userId,
         deviceFingerprint: fingerprint,
@@ -162,8 +183,10 @@ export class WebPushService {
       });
       const body = JSON.stringify({
         title: PUSH_TITLE,
-        body: message.subject,
-        route: message.route ?? DEFAULT_ROUTE,
+        // Genérico a propósito: el push viaja por el servicio del navegador y
+        // se ve en la pantalla bloqueada. El detalle se lee ya autenticado.
+        body: PUSH_BODY,
+        route: safeRoute(message.route) ?? DEFAULT_ROUTE,
         notificationId: message.notificationId,
       });
       for (const device of devices) {

@@ -5,9 +5,20 @@ jest.unstable_mockModule('web-push', () => ({
   default: { sendNotification },
 }));
 
-const { WebPushService, isAllowedPushEndpoint } =
-  await import('./web-push.service');
-const { decryptSecret } = await import('../../../common/crypto/secret-cipher');
+let WebPushService: typeof import('./web-push.service').WebPushService;
+let isAllowedPushEndpoint: typeof import('./web-push.service').isAllowedPushEndpoint;
+let safeRoute: typeof import('./web-push.service').safeRoute;
+let decryptSecret: typeof import('../../../common/crypto/secret-cipher').decryptSecret;
+beforeAll(async () => {
+  const serviceModule: string = './web-push.service';
+  const cipherModule: string = '../../../common/crypto/secret-cipher';
+  ({ WebPushService, isAllowedPushEndpoint, safeRoute } = (await import(
+    serviceModule
+  )) as typeof import('./web-push.service'));
+  ({ decryptSecret } = (await import(
+    cipherModule
+  )) as typeof import('../../../common/crypto/secret-cipher'));
+});
 
 const ENDPOINT = 'https://fcm.googleapis.com/fcm/send/abc123';
 const KEYS = { p256dh: 'p'.repeat(30), auth: 'a'.repeat(12) };
@@ -39,7 +50,18 @@ function build(devices: any[] = []) {
       created.push(data);
       devices.push({ id: `d${devices.length + 1}`, ...data });
     }),
-    find: jest.fn(async () => devices.filter((d) => d.pushTokenEncrypted)),
+    find: jest.fn(async (_e: unknown, where: any) =>
+      devices.filter(
+        (d) =>
+          d.pushTokenEncrypted &&
+          (where.userId === undefined ||
+            (typeof where.userId === 'string'
+              ? d.userId === where.userId
+              : d.userId !== where.userId.$ne)) &&
+          (where.deviceFingerprint === undefined ||
+            d.deviceFingerprint === where.deviceFingerprint),
+      ),
+    ),
   };
   const em: any = {
     transactional: (cb: any) => cb(tx),
@@ -65,6 +87,25 @@ describe('isAllowedPushEndpoint', () => {
     'https://127.0.0.1/x',
     'no es una url',
   ])('rechaza %s', (url) => expect(isAllowedPushEndpoint(url)).toBe(false));
+});
+
+describe('safeRoute', () => {
+  it.each(['/appointments', '/directory/abc-123', '/notifications?x=1'])(
+    'acepta %s',
+    (r) => expect(safeRoute(r)).toBe(r),
+  );
+  it.each([
+    '//evil.com',
+    '/\\evil.com',
+    'https://evil.com',
+    'javascript:alert(1)',
+    '/a:b',
+    '/../x',
+    '',
+  ])('rechaza %s', (r) => expect(safeRoute(r)).toBeUndefined());
+  it('rechaza lo que no es cadena', () => {
+    expect(safeRoute(undefined)).toBeUndefined();
+  });
 });
 
 describe('WebPushService', () => {
@@ -97,7 +138,7 @@ describe('WebPushService', () => {
     expect(JSON.parse(decryptSecret(token)).endpoint).toBe(ENDPOINT);
   });
 
-  it('envía el push con título fijo, sin datos de la persona', async () => {
+  it('envía el push con título y cuerpo fijos, sin datos de la persona', async () => {
     vapidOn();
     const { service } = build();
     await service.subscribe('u1', { endpoint: ENDPOINT, keys: KEYS });
@@ -112,7 +153,8 @@ describe('WebPushService', () => {
     expect(sendNotification).toHaveBeenCalledTimes(1);
     const body = JSON.parse(sendNotification.mock.calls[0][1] as string);
     expect(body.title).toBe('AloVida');
-    expect(body.body).toBe('Su cita fue cancelada');
+    expect(body.body).toBe('Tiene un aviso nuevo en AloVida');
+    expect(JSON.stringify(body)).not.toContain('cancelada');
     expect(body.route).toBe('/appointments');
   });
 
@@ -142,6 +184,17 @@ describe('WebPushService', () => {
     ).resolves.toBeUndefined();
     expect(devices[0].pushTokenEncrypted).toBeDefined();
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain(ENDPOINT);
+  });
+
+  it('si otra cuenta usa el mismo navegador, la suscripción anterior se retira', async () => {
+    vapidOn();
+    const { service, devices } = build();
+    await service.subscribe('u1', { endpoint: ENDPOINT, keys: KEYS });
+    await service.subscribe('u2', { endpoint: ENDPOINT, keys: KEYS });
+    const u1 = devices.find((d) => d.userId === 'u1');
+    const u2 = devices.find((d) => d.userId === 'u2');
+    expect(u1.pushTokenEncrypted).toBeUndefined();
+    expect(u2.pushTokenEncrypted).toBeDefined();
   });
 
   it('unsubscribe quita el token de ese navegador y es idempotente', async () => {

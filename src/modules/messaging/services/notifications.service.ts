@@ -18,12 +18,16 @@ import {
 } from '../../../common';
 import { NotificationsRepository } from '../repositories';
 import { NotificationsGateway } from '../gateways';
-import { WebPushService, type WebPushMessage } from './web-push.service';
+import {
+  safeRoute,
+  WebPushService,
+  type WebPushMessage,
+} from './web-push.service';
 
 /** La ruta a abrir, si el aviso la trae en su payload (`payload.route`). */
 function routeFromPayload(payload: unknown): string | undefined {
   const route = (payload as { route?: unknown } | null | undefined)?.route;
-  return typeof route === 'string' && route.startsWith('/') ? route : undefined;
+  return typeof route === 'string' ? safeRoute(route) : undefined;
 }
 import {
   CreateNotificationRequestDto,
