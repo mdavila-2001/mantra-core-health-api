@@ -316,7 +316,7 @@ Representa equipos de atención responsables de coordinar el cuidado de paciente
 |---|---|---|---|
 | `ix_care_teams_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_care_teams_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_care_teams_episode_id` | no | episode_id | Soporta la clave foránea fk_care_teams_episode_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_care_teams_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_teams_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_teams_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_teams_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_care_teams_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_care_teams_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_teams_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_care_teams_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_teams_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_care_teams_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

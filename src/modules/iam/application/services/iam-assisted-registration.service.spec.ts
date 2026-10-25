@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { UnauthorizedException } from '@nestjs/common';
 import { IamAssistedRegistrationService } from './iam-assisted-registration.service';
+import { profilesRegistration } from './iam-registration.testing';
 import { CONCEPTS, ConflictException } from '../../../../common';
 
 const actor = { id: 'clinician-1', roles: ['CLINICIAN'] };
@@ -52,10 +53,12 @@ function build() {
     rolesRepo as any,
     activationsRepo,
     eventsRepo as any,
-    personsRepo as any,
-    personProfilesRepo as any,
-    patientProfilesRepo as any,
-    accountLinksRepo as any,
+    profilesRegistration({
+      persons: personsRepo,
+      personProfiles: personProfilesRepo,
+      patientProfiles: patientProfilesRepo,
+      accountLinks: accountLinksRepo,
+    }),
     logger as any,
   );
   return {

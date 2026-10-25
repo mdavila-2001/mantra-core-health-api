@@ -3,6 +3,9 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamOrganizationSelfRegistrationService } from './iam-organization-self-registration.service';
 import { TracingService } from '../../../../observability';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
+import { PharmacyRegistrationAdapter } from '../../infrastructure/adapters/pharmacy-registration.adapter';
+import { directoryRegistration } from './iam-registration.testing';
 import {
   CONCEPTS,
   ConflictException,
@@ -92,12 +95,15 @@ describe('IamOrganizationSelfRegistrationService', () => {
       rolesRepo as never,
       eventsRepo as never,
       emailVerificationsRepo as never,
-      tenantsRepo as never,
-      membershipsRepo as never,
-      { create: () => undefined } as never,
-      notificationsService as never,
-      typeProfile as never,
-      affiliationDocuments as never,
+      directoryRegistration({
+        tenants: tenantsRepo,
+        memberships: membershipsRepo,
+        branches: { create: () => undefined },
+        typeProfile,
+        affiliationDocuments,
+      }),
+      new MessagingEmailNoticeAdapter(notificationsService as never),
+      new PharmacyRegistrationAdapter(),
       representatives as never,
       logger as never,
       new TracingService(),

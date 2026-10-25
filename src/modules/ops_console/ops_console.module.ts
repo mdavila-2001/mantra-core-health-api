@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { RouteIndexModule } from '../../observability/route-index/route-index.module';
-import { OpsConsoleController } from './ops-console.controller';
-import { OpsConsoleRepository } from './ops-console.repository';
-import { OpsConsoleService } from './ops-console.service';
-import { OpsTrafficRepository } from './ops-traffic.repository';
-import { OpsTrafficService } from './ops-traffic.service';
+import { OpsConsoleService } from './application/ops-console.service';
+import { OpsTrafficService } from './application/ops-traffic.service';
+import { OpsConsoleRepository } from './infrastructure/repositories/ops-console.repository';
+import { OpsTrafficRepository } from './infrastructure/repositories/ops-traffic.repository';
+import { OpsConsoleController } from './presentation/controllers/ops-console.controller';
 
 /**
  * Consola de operación y preparación para producción del portal

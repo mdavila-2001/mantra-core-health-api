@@ -40,6 +40,9 @@ export class ServiceCatalog {
   })
   descriptionText?: string;
 
+  @Property({ fieldName: 'terms_text', columnType: 'text', nullable: true })
+  termsText?: string;
+
   /**
    * Identificador asociado a image file.
    */

@@ -30,9 +30,9 @@ _Fuente: `src/modules/forms/README.md:3`_
 | `UC-09-05` | Upsert de localización i18n (es/en) | PUT /forms/fields/{id}/localizations/{lang} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
 | `UC-09-06` | Asigna campo a target con enforcement de política | POST /forms/assignments | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 5 |
 | `UC-09-07` | Abre instancia de formulario para un recurso | POST /forms/instances | CLINICIAN · PRACTITIONER | MEDIO | 3 |
-| `UC-09-08` | Captura valores (value[x] exclusivo) | POST /forms/instances/{id}/values | CLINICIAN · PRACTITIONER | MEDIO | 3 |
-| `UC-09-09` | Corrige valor con supersede y snapshot inmutable | PATCH /forms/values/{id} | CLINICIAN · PRACTITIONER | MEDIO | 4 |
-| `UC-09-10` | Importa valores externos (batch ETL) con procedencia | POST /forms/values/import | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+| `UC-09-08` | Captura valores (value[x] exclusivo) | POST /forms/instances/{id}/values | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+| `UC-09-09` | Corrige valor con supersede y snapshot inmutable | PATCH /forms/values/{id} | CLINICIAN · PRACTITIONER | MEDIO | 5 |
+| `UC-09-10` | Importa valores externos (batch ETL) con procedencia | POST /forms/values/import | CLINICIAN · PRACTITIONER | MEDIO | 5 |
 | `UC-09-11` | Cierra formulario y finaliza valores preliminares | POST /forms/instances/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 4 |
 | `UC-09-12` | Define regla de acceso / enmascarado por campo | POST /forms/fields/{id}/access-rules | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-09-13` | Ejecuta migración entre versiones | POST /forms/definition-sets/{id}/migrations/{migrationId}/run | SECURITY_ADMIN | MEDIO | 4 |
@@ -44,8 +44,8 @@ _Fuente: `src/modules/forms/README.md:3`_
 | `ctrl:FormsDefinitionSetsController` | Operaciones de FormsDefinitionSetsController que el README no asigna a un caso de uso | GET /forms/definition-sets | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 |  |  | GET /forms/definition-sets/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 8 |
 | `ctrl:FormsFieldsController` | Operaciones de FormsFieldsController que el README no asigna a un caso de uso | PATCH /forms/field-definitions/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
-| `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 2 |
-|  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 5 |
+| `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 20 |
+|  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 23 |
 | `ctrl:FormsMeController` | Operaciones de FormsMeController que el README no asigna a un caso de uso | GET /forms/me/instances | Cualquier sesión válida | BAJO | 2 |
 |  |  | GET /forms/me/instances/{id} | Cualquier sesión válida | BAJO | 5 |
 
@@ -158,15 +158,18 @@ flowchart LR
   o19 -->|"CREA"| t22
   o19 -->|"LEE"| t22
   a20 --> o23
+  o23 -->|"LEE"| t7
   o23 -->|"CREA"| t24
   o23 -->|"CREA"| t25
   o23 -->|"LEE"| t22
   a20 --> o26
+  o26 -->|"LEE"| t7
   o26 -->|"CREA"| t24
   o26 -->|"ACTUALIZA"| t25
   o26 -->|"CREA"| t25
   o26 -->|"LEE"| t25
   a20 --> o27
+  o27 -->|"LEE"| t7
   o27 -->|"CREA"| t24
   o27 -->|"CREA"| t28
   o27 -->|"CREA"| t25
@@ -220,23 +223,31 @@ flowchart LR
 flowchart LR
   a2(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
   a7(["CLINICIAN · PRACTITIONER"]):::actor
-  a13(["Cualquier sesión válida"]):::actor
+  a18(["Cualquier sesión válida"]):::actor
   t3[("forms.dynamic_field_definitions")]:::tabla
   t4[("forms.field_assignments")]:::tabla
   t5[("forms.field_values")]:::tabla
-  t8[("clinical.encounters")]:::tabla
-  t9[("forms.form_instances")]:::tabla
-  t11[("forms.field_value_access_rules")]:::tabla
+  t8[("authz.access_policies")]:::tabla
+  t9[("authz.care_relationships")]:::tabla
+  t10[("authz.clinical_access_grants")]:::tabla
+  t11[("authz.field_permissions")]:::tabla
+  t12[("authz.patient_legal_representations")]:::tabla
+  t13[("authz.permissions")]:::tabla
+  t19[("clinical.encounters")]:::tabla
+  t20[("forms.form_instances")]:::tabla
+  t22[("forms.field_value_access_rules")]:::tabla
   subgraph s0["ctrl:FormsFieldsController · Operaciones de FormsFieldsController que el README…"]
     o1["PATCH /forms/field-definitions/{id}"]:::op
   end
+  t14[("+14 tablas más")]
+  t16[("+17 tablas más")]
   subgraph s1["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
     o6["GET /forms/instances"]:::op
-    o10["GET /forms/instances/{id}"]:::op
+    o15["GET /forms/instances/{id}"]:::op
   end
   subgraph s2["ctrl:FormsMeController · Operaciones de FormsMeController que el README no asig…"]
-    o12["GET /forms/me/instances"]:::op
-    o14["GET /forms/me/instances/{id}"]:::op
+    o17["GET /forms/me/instances"]:::op
+    o21["GET /forms/me/instances/{id}"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -246,21 +257,28 @@ flowchart LR
   a7 --> o6
   o6 -->|"LEE"| t8
   o6 -->|"LEE"| t9
-  a7 --> o10
-  o10 -->|"LEE"| t8
-  o10 -->|"LEE"| t3
-  o10 -->|"LEE"| t11
-  o10 -->|"LEE"| t5
-  o10 -->|"LEE"| t9
-  a13 --> o12
-  o12 -->|"LEE"| t8
-  o12 -->|"LEE"| t9
-  a13 --> o14
-  o14 -->|"LEE"| t8
-  o14 -->|"LEE"| t3
-  o14 -->|"LEE"| t11
-  o14 -->|"LEE"| t5
-  o14 -->|"LEE"| t9
+  o6 -->|"LEE"| t10
+  o6 -->|"LEE"| t11
+  o6 -->|"LEE"| t12
+  o6 -->|"LEE"| t13
+  o6 -.-> t14
+  a7 --> o15
+  o15 -->|"LEE"| t8
+  o15 -->|"LEE"| t9
+  o15 -->|"LEE"| t10
+  o15 -->|"LEE"| t11
+  o15 -->|"LEE"| t12
+  o15 -->|"LEE"| t13
+  o15 -.-> t16
+  a18 --> o17
+  o17 -->|"LEE"| t19
+  o17 -->|"LEE"| t20
+  a18 --> o21
+  o21 -->|"LEE"| t19
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t20
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -776,6 +794,7 @@ Declarar una definición de campo con reglas de validación
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de campo ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options` sólo aplica a dataType "code"; PreconditionFailedException: `allowOther` sólo aplica a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -785,29 +804,68 @@ flowchart TD
   n1 --> n2
   n3["Llama a FormsFieldsService.createFieldDefinition"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a FormsFieldsService.validateChoiceField"]:::llamada
   n3 --> n4
-  n5["Llama a FieldDefinitionsRepository.findFieldByCode"]:::llamada
+  n5{"input.dataType !== 'code'"}:::decision
   n4 --> n5
-  n6[("LEE forms.dynamic_field_definitions")]:::efecto
-  n5 --> n6
-  n7{"clash"}:::decision
-  n6 --> n7
-  n8(["409 CONFLICT El código de campo ya existe"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a FieldDefinitionsRepository.createField"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA forms.dynamic_field_definitions")]:::efecto
-  n9 --> n10
-  n11["Repite: por cada const [i, rule] de (dto.validationRules ?? []).entries()"]:::bucle
-  n10 --> n11
-  n12["Llama a FieldDefinitionsRepository.createValidationRule"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA forms.field_validation_rules")]:::efecto
-  n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
-  n11 -->|"al terminar"| n14
+  n6{"input.options !== undefined"}:::decision
+  n5 -->|"sí"| n6
+  n7(["422 PRECONDITION_FAILED `options` sólo aplica a dataType 'code'"]):::error
+  n6 -->|"sí"| n7
+  n8{"input.allowOther"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED `allowOther` sólo aplica a dataType 'code'"]):::error
+  n8 -->|"sí"| n9
+  n10{"input.valueSetId !== undefined && input.options !== undefined"}:::decision
+  n8 -->|"no"| n10
+  n5 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED Un campo 'code' declara valueSetId u options, no los dos"]):::error
+  n10 -->|"sí"| n11
+  n12{"input.valueSetId !== undefined"}:::decision
+  n10 -->|"no"| n12
+  n13{"input.allowOther"}:::decision
+  n12 -->|"sí"| n13
+  n14(["422 PRECONDITION_FAILED `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología"]):::error
+  n13 -->|"sí"| n14
+  n15{"opciones.length ‹ 2"}:::decision
+  n13 -->|"no"| n15
+  n12 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Un campo 'code' sin valueSetId necesita al menos dos opciones"]):::error
+  n15 -->|"sí"| n16
+  n17["Repite: por cada const opcionCruda de opciones"]:::bucle
+  n15 -->|"no"| n17
+  n18{"opcion === ''"}:::decision
+  n17 -->|"cada elemento"| n18
+  n19(["422 PRECONDITION_FAILED Una opción no puede estar vacía"]):::error
+  n18 -->|"sí"| n19
+  n20{"vistas.has(opcion)"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED Las opciones no pueden repetirse"]):::error
+  n20 -->|"sí"| n21
+  n22["Transacción: transactional(…)"]:::transaccion
+  n20 -->|"no"| n22
+  n17 -->|"al terminar"| n22
+  n23["Llama a FieldDefinitionsRepository.findFieldByCode"]:::llamada
+  n22 --> n23
+  n24[("LEE forms.dynamic_field_definitions")]:::efecto
+  n23 --> n24
+  n25{"clash"}:::decision
+  n24 --> n25
+  n26(["409 CONFLICT El código de campo ya existe"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a FieldDefinitionsRepository.createField"]:::llamada
+  n25 -->|"no"| n27
+  n28[("CREA forms.dynamic_field_definitions")]:::efecto
+  n27 --> n28
+  n29["Repite: por cada const [i, rule] de (dto.validationRules ?? []).entries()"]:::bucle
+  n28 --> n29
+  n30["Llama a FieldDefinitionsRepository.createValidationRule"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31[("CREA forms.field_validation_rules")]:::efecto
+  n30 --> n31
+  n32(("201 Responde con éxito")):::ok
+  n31 --> n32
+  n29 -->|"al terminar"| n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -828,6 +886,7 @@ Corregir el nombre o el tipo de un campo propio
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
 | 409 | `CONFLICT` | ConflictException: El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options` sólo aplica a dataType "code"; PreconditionFailedException: `allowOther` sólo aplica a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse; PreconditionFailedException: No se puede quitar una opción que ya tiene respuestas capturadas |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -857,29 +916,100 @@ flowchart TD
   n11 --> n12
   n13(["403 FORBIDDEN Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan de…"]):::error
   n12 -->|"sí"| n13
-  n14{"dto.dataType !== undefined && dto.dataType !== field.dataType"}:::decision
+  n14["Llama a FormsFieldsService.validateChoiceField"]:::llamada
   n12 -->|"no"| n14
   n9 -->|"no"| n14
-  n15["Llama a FieldValuesRepository.countByField"]:::llamada
-  n14 -->|"sí"| n15
-  n16[("LEE forms.field_values")]:::efecto
-  n15 --> n16
-  n17{"captured › 0"}:::decision
-  n16 --> n17
-  n18(["409 CONFLICT El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia"]):::error
-  n17 -->|"sí"| n18
-  n19[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n17 -->|"no"| n19
-  n20[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n19 --> n20
-  n14 -->|"no"| n20
-  n21{"dto.name !== undefined"}:::decision
-  n20 --> n21
-  n22[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n21 -->|"sí"| n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
-  n21 -->|"no"| n23
+  n15{"input.dataType !== 'code'"}:::decision
+  n14 --> n15
+  n16{"input.options !== undefined"}:::decision
+  n15 -->|"sí"| n16
+  n17(["422 PRECONDITION_FAILED `options` sólo aplica a dataType 'code'"]):::error
+  n16 -->|"sí"| n17
+  n18{"input.allowOther"}:::decision
+  n16 -->|"no"| n18
+  n19(["422 PRECONDITION_FAILED `allowOther` sólo aplica a dataType 'code'"]):::error
+  n18 -->|"sí"| n19
+  n20{"input.valueSetId !== undefined && input.options !== undefined"}:::decision
+  n18 -->|"no"| n20
+  n15 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED Un campo 'code' declara valueSetId u options, no los dos"]):::error
+  n20 -->|"sí"| n21
+  n22{"input.valueSetId !== undefined"}:::decision
+  n20 -->|"no"| n22
+  n23{"input.allowOther"}:::decision
+  n22 -->|"sí"| n23
+  n24(["422 PRECONDITION_FAILED `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología"]):::error
+  n23 -->|"sí"| n24
+  n25{"opciones.length ‹ 2"}:::decision
+  n23 -->|"no"| n25
+  n22 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED Un campo 'code' sin valueSetId necesita al menos dos opciones"]):::error
+  n25 -->|"sí"| n26
+  n27["Repite: por cada const opcionCruda de opciones"]:::bucle
+  n25 -->|"no"| n27
+  n28{"opcion === ''"}:::decision
+  n27 -->|"cada elemento"| n28
+  n29(["422 PRECONDITION_FAILED Una opción no puede estar vacía"]):::error
+  n28 -->|"sí"| n29
+  n30{"vistas.has(opcion)"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED Las opciones no pueden repetirse"]):::error
+  n30 -->|"sí"| n31
+  n32{"dto.dataType !== undefined && dto.dataType !== field.dataType"}:::decision
+  n30 -->|"no"| n32
+  n27 -->|"al terminar"| n32
+  n33["Llama a FieldValuesRepository.countByField"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE forms.field_values")]:::efecto
+  n33 --> n34
+  n35{"captured › 0"}:::decision
+  n34 --> n35
+  n36(["409 CONFLICT El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia"]):::error
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n35 -->|"no"| n37
+  n38{"dto.options !== undefined"}:::decision
+  n37 --> n38
+  n32 -->|"no"| n38
+  n39["Llama a FieldValuesRepository.findCodesInUseByField"]:::llamada
+  n38 -->|"sí"| n39
+  n40[("LEE forms.field_values")]:::efecto
+  n39 --> n40
+  n41{"enUso.length › 0"}:::decision
+  n40 --> n41
+  n42(["422 PRECONDITION_FAILED No se puede quitar una opción que ya tiene respuestas capturadas"]):::error
+  n41 -->|"sí"| n42
+  n43[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n41 -->|"no"| n43
+  n44[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n43 --> n44
+  n38 -->|"no"| n44
+  n45{"dto.name !== undefined"}:::decision
+  n44 --> n45
+  n46[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n45 -->|"sí"| n46
+  n47[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n46 --> n47
+  n45 -->|"no"| n47
+  n48{"dto.multiple !== undefined"}:::decision
+  n47 --> n48
+  n49[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n48 -->|"sí"| n49
+  n50[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n49 --> n50
+  n48 -->|"no"| n50
+  n51{"dto.allowOther !== undefined"}:::decision
+  n50 --> n51
+  n52[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n51 -->|"sí"| n52
+  n53{"dto.description !== undefined"}:::decision
+  n52 --> n53
+  n51 -->|"no"| n53
+  n54[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n53 -->|"sí"| n54
+  n55(("200 Responde con éxito")):::ok
+  n54 --> n55
+  n53 -->|"no"| n55
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1065,8 +1195,8 @@ Listar las instancias de formulario de un encuentro
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada / Encuentro no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {failure.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1076,20 +1206,49 @@ flowchart TD
   n1 --> n2
   n3["Llama a FormsReadService.listInstancesByEncounter"]:::llamada
   n2 --> n3
-  n4["Llama a FormsReadService.loadOwnEncounter"]:::llamada
+  n4["Llama a FormsReadService.loadReadableEncounter"]:::llamada
   n3 --> n4
   n5[("LEE clinical.encounters")]:::efecto
   n4 --> n5
-  n6{"!encounter || encounter.tenantId !== tenantId"}:::decision
+  n6["Intenta"]:::intento
   n5 --> n6
-  n7(["404 NOT_FOUND Instancia no encontrada / Encuentro no encontrado"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a FormInstancesRepository.findByResourceId"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE forms.form_instances")]:::efecto
-  n8 --> n9
-  n10(("200 Responde con éxito")):::ok
+  n7["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n6 --> n7
+  n8{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n7 --> n8
+  n9["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n8 -->|"sí"| n9
+  n10{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n9 --> n10
+  n11(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n10 -->|"no"| n12
+  n8 -->|"no"| n12
+  n13[("LEE profiles.person_account_links")]:::efecto
+  n12 --> n13
+  n14["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n14 --> n15
+  n16["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n15 --> n16
+  n17{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n16 --> n17
+  n18(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n17 -->|"sí"| n18
+  n19{"error instanceof HttpException && error.getStatus() === FORBIDDEN_STATUS"}:::decision
+  n6 -->|"si falla"| n19
+  n20(["404 NOT_FOUND {failure.message}"]):::error
+  n19 -->|"sí"| n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"no"| n21
+  n22["Llama a FormInstancesRepository.findByResourceId"]:::llamada
+  n17 -->|"no"| n22
+  n23[("LEE forms.form_instances")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1155,8 +1314,8 @@ Leer una instancia con sus valores vigentes, por tipo resuelto
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada; ResourceNotFoundException: Instancia no encontrada / Encuentro no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {INSTANCE_NOT_FOUND.message}; ResourceNotFoundException: {failure.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1172,32 +1331,61 @@ flowchart TD
   n4 --> n5
   n6{"!instance"}:::decision
   n5 --> n6
-  n7(["404 NOT_FOUND Instancia no encontrada"]):::error
+  n7(["404 NOT_FOUND {INSTANCE_NOT_FOUND.message}"]):::error
   n6 -->|"sí"| n7
-  n8["Llama a FormsReadService.loadOwnEncounter"]:::llamada
+  n8["Llama a FormsReadService.loadReadableEncounter"]:::llamada
   n6 -->|"no"| n8
   n9[("LEE clinical.encounters")]:::efecto
   n8 --> n9
-  n10{"!encounter || encounter.tenantId !== tenantId"}:::decision
+  n10["Intenta"]:::intento
   n9 --> n10
-  n11(["404 NOT_FOUND Instancia no encontrada / Encuentro no encontrado"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a FormsReadService.composeInstanceDetail"]:::llamada
-  n10 -->|"no"| n12
-  n13["Llama a FieldValuesRepository.findCurrentByInstance"]:::llamada
-  n12 --> n13
-  n14[("LEE forms.field_values")]:::efecto
+  n11["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n10 --> n11
+  n12{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n11 --> n12
+  n13["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n12 -->|"sí"| n13
+  n14{"!link || !profile || profile.profileId !== link.personId"}:::decision
   n13 --> n14
-  n15["Llama a FieldDefinitionsRepository.findFieldsByIds"]:::llamada
-  n14 --> n15
-  n16[("LEE forms.dynamic_field_definitions")]:::efecto
-  n15 --> n16
-  n17["Llama a FieldDefinitionsRepository.findActiveAccessRulesByFieldIds"]:::llamada
+  n15(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n14 -->|"no"| n16
+  n12 -->|"no"| n16
+  n17[("LEE profiles.person_account_links")]:::efecto
   n16 --> n17
-  n18[("LEE forms.field_value_access_rules")]:::efecto
+  n18["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n17 --> n18
-  n19(("200 Responde con éxito")):::ok
+  n19[("LEE profiles.health_practitioner_profiles")]:::efecto
   n18 --> n19
+  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n19 --> n20
+  n21{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n20 --> n21
+  n22(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n21 -->|"sí"| n22
+  n23{"error instanceof HttpException && error.getStatus() === FORBIDDEN_STATUS"}:::decision
+  n10 -->|"si falla"| n23
+  n24(["404 NOT_FOUND {failure.message}"]):::error
+  n23 -->|"sí"| n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"no"| n25
+  n26["Llama a FormsReadService.composeInstanceDetail"]:::llamada
+  n21 -->|"no"| n26
+  n27["Llama a FieldValuesRepository.findCurrentByInstance"]:::llamada
+  n26 --> n27
+  n28[("LEE forms.field_values")]:::efecto
+  n27 --> n28
+  n29["Llama a FieldDefinitionsRepository.findFieldsByIds"]:::llamada
+  n28 --> n29
+  n30[("LEE forms.dynamic_field_definitions")]:::efecto
+  n29 --> n30
+  n31["Llama a FieldDefinitionsRepository.findActiveAccessRulesByFieldIds"]:::llamada
+  n30 --> n31
+  n32[("LEE forms.field_value_access_rules")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1273,7 +1461,7 @@ Capturar valores de formulario (value[x] exclusivo)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está abierta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está abierta; PreconditionFailedException: El campo no tiene opciones declaradas; PreconditionFailedException: El valor no está entre las opciones del campo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1297,19 +1485,44 @@ flowchart TD
   n7 -->|"no"| n9
   n10(["422 PRECONDITION_FAILED La instancia no está abierta"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a FieldValuesRepository.create"]:::llamada
+  n11["Llama a FormsValuesService.fieldsById"]:::llamada
   n9 -->|"no"| n11
-  n12[("CREA forms.field_values")]:::efecto
+  n12["Llama a FieldDefinitionsRepository.findFieldsByIds"]:::llamada
   n11 --> n12
-  n13["Repite: por cada const value de created"]:::bucle
+  n13[("LEE forms.dynamic_field_definitions")]:::efecto
   n12 --> n13
-  n14["Llama a FieldValuesRepository.createAudit"]:::llamada
-  n13 -->|"cada elemento"| n14
-  n15[("CREA forms.field_value_audit")]:::efecto
+  n14["Llama a FieldValuesRepository.create"]:::llamada
+  n13 --> n14
+  n15[("CREA forms.field_values")]:::efecto
   n14 --> n15
-  n16(("201 Responde con éxito")):::ok
+  n16["Llama a FormsValuesService.columnsFor"]:::llamada
   n15 --> n16
-  n13 -->|"al terminar"| n16
+  n17["Llama a FormsValuesService.validateCodeValue"]:::llamada
+  n16 --> n17
+  n18{"opciones.length === 0"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED El campo no tiene opciones declaradas"]):::error
+  n18 -->|"sí"| n19
+  n20(["422 PRECONDITION_FAILED El valor no está entre las opciones del campo"]):::error
+  n18 -->|"no"| n20
+  n21{"dataType === 'code' && field"}:::decision
+  n22["Llama a FormsValuesService.validateCodeValue"]:::llamada
+  n21 -->|"sí"| n22
+  n23{"opciones.length === 0"}:::decision
+  n22 --> n23
+  n24(["422 PRECONDITION_FAILED El campo no tiene opciones declaradas"]):::error
+  n23 -->|"sí"| n24
+  n25(["422 PRECONDITION_FAILED El valor no está entre las opciones del campo"]):::error
+  n23 -->|"no"| n25
+  n26["Repite: por cada const value de created"]:::bucle
+  n21 -->|"no"| n26
+  n27["Llama a FieldValuesRepository.createAudit"]:::llamada
+  n26 -->|"cada elemento"| n27
+  n28[("CREA forms.field_value_audit")]:::efecto
+  n27 --> n28
+  n29(("201 Responde con éxito")):::ok
+  n28 --> n29
+  n26 -->|"al terminar"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1435,7 +1648,7 @@ Corregir valor con supersede y snapshot inmutable
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Valor no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El valor ya fue superado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El valor ya fue superado; PreconditionFailedException: El campo no tiene opciones declaradas; PreconditionFailedException: El valor no está entre las opciones del campo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1459,18 +1672,41 @@ flowchart TD
   n7 -->|"no"| n9
   n10(["422 PRECONDITION_FAILED El valor ya fue superado"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a FieldValuesRepository.create"]:::llamada
+  n11["Llama a FieldDefinitionsRepository.findFieldById"]:::llamada
   n9 -->|"no"| n11
-  n12[("CREA forms.field_values")]:::efecto
+  n12[("LEE forms.dynamic_field_definitions")]:::efecto
   n11 --> n12
-  n13[("ACTUALIZA forms.field_values · ACTUALIZA forms.field_values")]:::efecto
+  n13["Llama a FieldValuesRepository.create"]:::llamada
   n12 --> n13
-  n14["Llama a FieldValuesRepository.createAudit"]:::llamada
+  n14[("CREA forms.field_values")]:::efecto
   n13 --> n14
-  n15[("CREA forms.field_value_audit")]:::efecto
+  n15["Llama a FormsValuesService.columnsFor"]:::llamada
   n14 --> n15
-  n16(("200 Responde con éxito")):::ok
+  n16["Llama a FormsValuesService.validateCodeValue"]:::llamada
   n15 --> n16
+  n17{"opciones.length === 0"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED El campo no tiene opciones declaradas"]):::error
+  n17 -->|"sí"| n18
+  n19(["422 PRECONDITION_FAILED El valor no está entre las opciones del campo"]):::error
+  n17 -->|"no"| n19
+  n20{"dataType === 'code' && field"}:::decision
+  n21["Llama a FormsValuesService.validateCodeValue"]:::llamada
+  n20 -->|"sí"| n21
+  n22{"opciones.length === 0"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED El campo no tiene opciones declaradas"]):::error
+  n22 -->|"sí"| n23
+  n24(["422 PRECONDITION_FAILED El valor no está entre las opciones del campo"]):::error
+  n22 -->|"no"| n24
+  n25[("ACTUALIZA forms.field_values · ACTUALIZA forms.field_values")]:::efecto
+  n20 -->|"no"| n25
+  n26["Llama a FieldValuesRepository.createAudit"]:::llamada
+  n25 --> n26
+  n27[("CREA forms.field_value_audit")]:::efecto
+  n26 --> n27
+  n28(("200 Responde con éxito")):::ok
+  n27 --> n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1490,6 +1726,7 @@ Registrar procedencia de valores importados (batch ETL)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El campo no tiene opciones declaradas; PreconditionFailedException: El valor no está entre las opciones del campo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1501,34 +1738,59 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Repite: por cada const item de dto.items"]:::bucle
+  n5["Llama a FormsValuesService.fieldsById"]:::llamada
   n4 --> n5
-  n6["Llama a FormInstancesRepository.findById"]:::llamada
-  n5 -->|"cada elemento"| n6
-  n7[("LEE forms.form_instances")]:::efecto
+  n6["Llama a FieldDefinitionsRepository.findFieldsByIds"]:::llamada
+  n5 --> n6
+  n7[("LEE forms.dynamic_field_definitions")]:::efecto
   n6 --> n7
-  n8{"!instance"}:::decision
+  n8["Repite: por cada const item de dto.items"]:::bucle
   n7 --> n8
-  n9(["404 NOT_FOUND Instancia no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a FieldValuesRepository.create"]:::llamada
-  n8 -->|"no"| n10
-  n11[("CREA forms.field_values")]:::efecto
+  n9["Llama a FormInstancesRepository.findById"]:::llamada
+  n8 -->|"cada elemento"| n9
+  n10[("LEE forms.form_instances")]:::efecto
+  n9 --> n10
+  n11{"!instance"}:::decision
   n10 --> n11
-  n12["Repite: por cada const c de created"]:::bucle
-  n11 --> n12
-  n5 -->|"al terminar"| n12
-  n13["Llama a FieldValuesRepository.createProvenance"]:::llamada
-  n12 -->|"cada elemento"| n13
-  n14[("CREA forms.field_value_provenance")]:::efecto
+  n12(["404 NOT_FOUND Instancia no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a FieldValuesRepository.create"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA forms.field_values")]:::efecto
   n13 --> n14
-  n15["Llama a FieldValuesRepository.createAudit"]:::llamada
+  n15["Llama a FormsValuesService.columnsFor"]:::llamada
   n14 --> n15
-  n16[("CREA forms.field_value_audit")]:::efecto
+  n16["Llama a FormsValuesService.validateCodeValue"]:::llamada
   n15 --> n16
-  n17(("201 Responde con éxito")):::ok
+  n17{"opciones.length === 0"}:::decision
   n16 --> n17
-  n12 -->|"al terminar"| n17
+  n18(["422 PRECONDITION_FAILED El campo no tiene opciones declaradas"]):::error
+  n17 -->|"sí"| n18
+  n19(["422 PRECONDITION_FAILED El valor no está entre las opciones del campo"]):::error
+  n17 -->|"no"| n19
+  n20{"dataType === 'code' && field"}:::decision
+  n21["Llama a FormsValuesService.validateCodeValue"]:::llamada
+  n20 -->|"sí"| n21
+  n22{"opciones.length === 0"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED El campo no tiene opciones declaradas"]):::error
+  n22 -->|"sí"| n23
+  n24(["422 PRECONDITION_FAILED El valor no está entre las opciones del campo"]):::error
+  n22 -->|"no"| n24
+  n25["Repite: por cada const c de created"]:::bucle
+  n20 -->|"no"| n25
+  n8 -->|"al terminar"| n25
+  n26["Llama a FieldValuesRepository.createProvenance"]:::llamada
+  n25 -->|"cada elemento"| n26
+  n27[("CREA forms.field_value_provenance")]:::efecto
+  n26 --> n27
+  n28["Llama a FieldValuesRepository.createAudit"]:::llamada
+  n27 --> n28
+  n29[("CREA forms.field_value_audit")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
+  n25 -->|"al terminar"| n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

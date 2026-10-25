@@ -14,12 +14,12 @@
 | [frontend_routes](#frontend_routes) | Registra rutas de aplicaciones cliente para relacionarlas con pantallas, permisos y modelos de lectura. | 20 | 9 | 4 | COINCIDE |
 | [frontend_view_actions](#frontend_view_actions) | Cataloga acciones habilitadas desde una vista para conectar lectura con operaciones autorizadas. | 19 | 10 | 3 | COINCIDE |
 | [frontend_view_fields](#frontend_view_fields) | Define campos disponibles en vistas para controlar qué atributos pueden mostrarse. | 23 | 7 | 3 | COINCIDE |
-| [frontend_view_filters](#frontend_view_filters) | Configura filtros permitidos en vistas para acotar resultados visibles según el contexto de uso. | 19 | 9 | 0 | COINCIDE |
+| [frontend_view_filters](#frontend_view_filters) | Configura filtros permitidos en vistas para acotar resultados visibles según el contexto de uso. | 19 | 9 | 1 | COINCIDE |
 | [frontend_view_kpis](#frontend_view_kpis) | Define indicadores resumidos que pueden presentarse en vistas de operación o gestión. | 17 | 5 | 1 | COINCIDE |
-| [frontend_view_sort_options](#frontend_view_sort_options) | Define criterios de ordenamiento disponibles en vistas para organizar resultados presentados. | 15 | 7 | 1 | COINCIDE |
+| [frontend_view_sort_options](#frontend_view_sort_options) | Define criterios de ordenamiento disponibles en vistas para organizar resultados presentados. | 15 | 7 | 2 | COINCIDE |
 | [frontend_view_states](#frontend_view_states) | Configura estados visuales de vistas para representar carga, vacío, error o resultados. | 15 | 6 | 1 | COINCIDE |
 | [portal_surfaces](#portal_surfaces) | Cataloga superficies del portal para asociar rutas de usuario con sus datos y capacidades de presentación. | 15 | 7 | 4 | COINCIDE |
-| [read_model_definitions](#read_model_definitions) | Define proyecciones optimizadas para lectura que alimentan portales y experiencias de usuarios. | 23 | 6 | 14 | COINCIDE |
+| [read_model_definitions](#read_model_definitions) | Define proyecciones optimizadas para lectura que alimentan portales y experiencias de usuarios. | 23 | 6 | 15 | COINCIDE |
 | [read_model_dependencies](#read_model_dependencies) | Relaciona modelos de lectura con sus fuentes para trazar dependencias de actualización y linaje. | 8 | 2 | 2 | COINCIDE |
 | [read_model_refresh_runs](#read_model_refresh_runs) | Registra ejecuciones de actualización de proyecciones para controlar frescura y fallos de lectura. | 11 | 4 | 6 | COINCIDE |
 | [user_view_preferences](#user_view_preferences) | Guarda preferencias de vista por usuario para personalizar presentación de información autorizada. | 16 | 8 | 3 | COINCIDE |
@@ -541,7 +541,7 @@ Configura filtros permitidos en vistas para acotar resultados visibles según el
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_30_read_models.puml: frontend_view_filters`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_30_read_models.puml` · **DDL:** `SQL/30_read_models/02_tables.sql`
 - **Entidad del ORM:** `FrontendViewFilters` — `src/modules/read_models/entities/frontend_view_filters.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -584,15 +584,15 @@ Configura filtros permitidos en vistas para acotar resultados visibles según el
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_frontend_view_filters_frontend_page_view_id` | no | frontend_page_view_id | Soporta la clave foránea fk_frontend_view_filters_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_frontend_view_filters_frontend_page_view_id` | no | frontend_page_view_id | Soporta la clave foránea fk_frontend_view_filters_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «frontend_page_view_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_frontend_view_filters_operator_value_set_id` | no | operator_value_set_id | Soporta la clave foránea fk_frontend_view_filters_operator_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_view_filters_input_type_concept_id` | no | input_type_concept_id | Soporta la clave foránea fk_frontend_view_filters_input_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_view_filters_value_set_id` | no | value_set_id | Soporta la clave foránea fk_frontend_view_filters_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_view_filters_dynamic_enum_definition_id` | no | dynamic_enum_definition_id | Soporta la clave foránea fk_frontend_view_filters_dynamic_enum_definition_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_frontend_view_filters_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_frontend_view_filters_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_frontend_view_filters_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_frontend_view_filters_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_frontend_view_filters_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_frontend_view_filters_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_view_filters_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_frontend_view_filters_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_frontend_view_filters_code` | sí | frontend_page_view_id, filter_code | Garantiza que no se repita la combinación (frontend_page_view_id, filter_code) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_view_filters_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_frontend_view_filters_code` | sí | frontend_page_view_id, filter_code | Garantiza que no se repita la combinación (frontend_page_view_id, filter_code) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_view_filters_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «frontend_page_view_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -602,7 +602,9 @@ Configura filtros permitidos en vistas para acotar resultados visibles según el
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -700,7 +702,7 @@ Define criterios de ordenamiento disponibles en vistas para organizar resultados
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_30_read_models.puml: frontend_view_sort_options`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_30_read_models.puml` · **DDL:** `SQL/30_read_models/02_tables.sql`
 - **Entidad del ORM:** `FrontendViewSortOptions` — `src/modules/read_models/entities/frontend_view_sort_options.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -737,13 +739,13 @@ Define criterios de ordenamiento disponibles en vistas para organizar resultados
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_frontend_view_sort_options_frontend_page_view_id` | no | frontend_page_view_id | Soporta la clave foránea fk_frontend_view_sort_options_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_frontend_view_sort_options_frontend_page_view_id` | no | frontend_page_view_id | Soporta la clave foránea fk_frontend_view_sort_options_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «frontend_page_view_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_frontend_view_sort_options_direction_concept_id` | no | direction_concept_id | Soporta la clave foránea fk_frontend_view_sort_options_direction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_view_sort_options_nulls_position_concept_id` | no | nulls_position_concept_id | Soporta la clave foránea fk_frontend_view_sort_options_nulls_position_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_frontend_view_sort_options_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_frontend_view_sort_options_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_frontend_view_sort_options_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_frontend_view_sort_options_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_frontend_view_sort_options_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_frontend_view_sort_options_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_view_sort_options_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_frontend_view_sort_options_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_frontend_view_sort_code` | sí | frontend_page_view_id, sort_code | Garantiza que no se repita la combinación (frontend_page_view_id, sort_code) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_view_sort_options_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_frontend_view_sort_code` | sí | frontend_page_view_id, sort_code | Garantiza que no se repita la combinación (frontend_page_view_id, sort_code) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_view_sort_options_frontend_page_view_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «frontend_page_view_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -756,6 +758,7 @@ Define criterios de ordenamiento disponibles en vistas para organizar resultados
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /portals/{portalCode}/routes/{routeCode}/views | CREA | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -935,7 +938,7 @@ Define proyecciones optimizadas para lectura que alimentan portales y experienci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_30_read_models.puml: read_model_definitions`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_30_read_models.puml` · **DDL:** `SQL/30_read_models/02_tables.sql`
 - **Entidad del ORM:** `ReadModelDefinitions` — `src/modules/read_models/entities/read_model_definitions.entity.ts`
-- **Resumen:** 23 columnas · 6 índices · 5 FK salientes · 5 entrantes · 14 operaciones
+- **Resumen:** 23 columnas · 6 índices · 5 FK salientes · 5 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -1002,6 +1005,7 @@ Define proyecciones optimizadas para lectura que alimentan portales y experienci
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /portals/{portalCode}/routes/{routeCode}/views | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | POST /read-models/{definitionId}/backfill | LEE | DIRECTA |
 | POST /read-models/{definitionId}/invalidate | LEE | DIRECTA |
 | POST /read-models/{definitionId}/reconcile | LEE | DIRECTA |

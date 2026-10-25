@@ -185,9 +185,8 @@ Asociar una encuesta a una consulta o servicio
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una asignación activa de esa versión a ese destino |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta; PreconditionFailedException: Solo se puede asignar una versión publicada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por servicio o por cita concreta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -201,46 +200,35 @@ flowchart TD
   n3 --> n4
   n5(["422 PRECONDITION_FAILED El modelo de agenda no lleva tipo de atención en la reserva: asigná la encuesta por s…"]):::error
   n4 -->|"sí"| n5
-  n6["Transacción: transactional(…)"]:::transaccion
+  n6["Llama a TemplatesRepository.findVersionById"]:::llamada
   n4 -->|"no"| n6
-  n7["Llama a TemplatesRepository.findVersionById"]:::llamada
+  n7[("LEE surveys.survey_versions")]:::efecto
   n6 --> n7
-  n8[("LEE surveys.survey_versions")]:::efecto
+  n8["Llama a TemplatesRepository.findTemplateById"]:::llamada
   n7 --> n8
-  n9{"!version"}:::decision
+  n9[("LEE surveys.survey_templates")]:::efecto
   n8 --> n9
-  n10(["404 NOT_FOUND Versión no encontrada"]):::error
-  n9 -->|"sí"| n10
-  n11{"version.publicationStatusConceptId !== SURVEYS.VERSION_PUBLISHED"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Solo se puede asignar una versión publicada"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a TemplatesRepository.findTemplateById"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE surveys.survey_templates")]:::efecto
+  n10["Llama a TemplatesRepository.lockVersion"]:::llamada
+  n9 --> n10
+  n11[("LEE surveys.survey_versions")]:::efecto
+  n10 --> n11
+  n12["Llama a AssignmentsRepository.findActiveDuplicate"]:::llamada
+  n11 --> n12
+  n13[("LEE surveys.survey_assignments")]:::efecto
+  n12 --> n13
+  n14["Llama a AssignmentsRepository.create"]:::llamada
   n13 --> n14
-  n15{"!template || template.tenantId !== tenantId"}:::decision
+  n15[("CREA surveys.survey_assignments")]:::efecto
   n14 --> n15
-  n16(["404 NOT_FOUND Versión no encontrada"]):::error
-  n15 -->|"sí"| n16
-  n17{"template.ownerPractitionerId !== actor.practitionerProfileId"}:::decision
-  n15 -->|"no"| n17
-  n18(["404 NOT_FOUND Versión no encontrada"]):::error
+  n16["Transacción: catch(…)"]:::transaccion
+  n15 --> n16
+  n17{"error instanceof UniqueConstraintViolationException"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT Ya existe una asignación activa de esa versión a ese destino"]):::error
   n17 -->|"sí"| n18
-  n19["Llama a AssignmentsRepository.findActiveDuplicate"]:::llamada
+  n19(["↩ (relanza el error capturado)"]):::error
   n17 -->|"no"| n19
-  n20[("LEE surveys.survey_assignments")]:::efecto
-  n19 --> n20
-  n21{"duplicate"}:::decision
-  n20 --> n21
-  n22(["409 CONFLICT Ya existe una asignación activa de esa versión a ese destino"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a AssignmentsRepository.create"]:::llamada
-  n21 -->|"no"| n23
-  n24[("CREA surveys.survey_assignments")]:::efecto
-  n23 --> n24
-  n25(("201 Responde con éxito")):::ok
-  n24 --> n25
+  n20(("201 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -259,8 +247,6 @@ Emitir los cuestionarios de una atención completada
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Reserva no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se emiten cuestionarios sobre una atención completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -270,50 +256,47 @@ flowchart TD
   n1 --> n2
   n3["Llama a SurveysAssignmentsService.issueForBooking"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4[("LEE scheduling.appointment_bookings")]:::efecto
   n3 --> n4
-  n5[("LEE scheduling.appointment_bookings")]:::efecto
+  n5["Llama a SurveysAssignmentsService.resolveTargets"]:::llamada
   n4 --> n5
-  n6{"!booking || booking.tenantId !== tenantId"}:::decision
+  n6{"!serviceConceptId"}:::decision
   n5 --> n6
-  n7(["404 NOT_FOUND Reserva no encontrada"]):::error
+  n7[("LEE scheduling.bookable_slots")]:::efecto
   n6 -->|"sí"| n7
-  n8{"booking.statusConceptId !== SCHED.BOOKING_COMPLETED"}:::decision
+  n8["Llama a AssignmentsRepository.listActiveByTargets"]:::llamada
+  n7 --> n8
   n6 -->|"no"| n8
-  n9(["422 PRECONDITION_FAILED Solo se emiten cuestionarios sobre una atención completada"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a SurveysAssignmentsService.resolveTargets"]:::llamada
-  n8 -->|"no"| n10
-  n11{"!serviceConceptId"}:::decision
+  n9[("LEE surveys.survey_assignments")]:::efecto
+  n8 --> n9
+  n10["Llama a InvitationsRepository.listByBooking"]:::llamada
+  n9 --> n10
+  n11[("LEE surveys.survey_invitations")]:::efecto
   n10 --> n11
-  n12[("LEE scheduling.bookable_slots")]:::efecto
-  n11 -->|"sí"| n12
-  n13["Llama a AssignmentsRepository.listActiveByTargets"]:::llamada
+  n12["Llama a TemplatesRepository.findVersionById"]:::llamada
+  n11 --> n12
+  n13[("LEE surveys.survey_versions")]:::efecto
   n12 --> n13
-  n11 -->|"no"| n13
-  n14[("LEE surveys.survey_assignments")]:::efecto
+  n14["Llama a TemplatesRepository.findTemplateById"]:::llamada
   n13 --> n14
-  n15["Llama a InvitationsRepository.listByBooking"]:::llamada
+  n15[("LEE surveys.survey_templates")]:::efecto
   n14 --> n15
-  n16[("LEE surveys.survey_invitations")]:::efecto
+  n16["Llama a InvitationsRepository.create"]:::llamada
   n15 --> n16
-  n17["Repite: por cada const assignment de assignments"]:::bucle
+  n17[("CREA surveys.survey_invitations")]:::efecto
   n16 --> n17
-  n18["Llama a TemplatesRepository.findVersionById"]:::llamada
-  n17 -->|"cada elemento"| n18
-  n19[("LEE surveys.survey_versions")]:::efecto
+  n18["Transacción: catch(…)"]:::transaccion
+  n17 --> n18
+  n19{"!(error instanceof UniqueConstraintViolationException)"}:::decision
   n18 --> n19
-  n20["Llama a TemplatesRepository.findTemplateById"]:::llamada
-  n19 --> n20
-  n21[("LEE surveys.survey_templates")]:::efecto
-  n20 --> n21
-  n22["Llama a InvitationsRepository.create"]:::llamada
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a InvitationsRepository.listByBooking"]:::llamada
+  n19 -->|"no"| n21
+  n22[("LEE surveys.survey_invitations")]:::efecto
   n21 --> n22
-  n23[("CREA surveys.survey_invitations")]:::efecto
+  n23(("201 Responde con éxito")):::ok
   n22 --> n23
-  n24(("201 Responde con éxito")):::ok
-  n23 --> n24
-  n17 -->|"al terminar"| n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -403,16 +386,16 @@ flowchart TD
   n5 -->|"sí"| n6
   n7["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
   n5 -->|"no"| n7
-  n8["Llama a InvitationsRepository.findById"]:::llamada
+  n8["Llama a InvitationsRepository.findByIdForUpdate"]:::llamada
   n7 --> n8
   n9[("LEE surveys.survey_invitations")]:::efecto
   n8 --> n9
-  n10{"!invitation || invitation.patientProfileId !== patientProfileId"}:::decision
+  n10["Llama a InvitationsRepository.findById"]:::llamada
   n9 --> n10
-  n11(["404 NOT_FOUND Cuestionario no encontrado"]):::error
-  n10 -->|"sí"| n11
+  n11[("LEE surveys.survey_invitations")]:::efecto
+  n10 --> n11
   n12["Llama a SurveysResponsesService.loadTemplateOfInvitation"]:::llamada
-  n10 -->|"no"| n12
+  n11 --> n12
   n13["Llama a TemplatesRepository.findVersionById"]:::llamada
   n12 --> n13
   n14[("LEE surveys.survey_versions")]:::efecto
@@ -449,8 +432,7 @@ Responder el cuestionario
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un paciente puede ver sus cuestionarios |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuestionario no encontrado |
-| 409 | `CONFLICT` | ConflictException: Este cuestionario ya fue respondido |
+| 409 | `CONFLICT` | ConflictException: La respuesta ya fue registrada para este cuestionario |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay más de una respuesta para la misma pregunta; PreconditionFailedException: La respuesta no corresponde a una pregunta de este cuestionario; PreconditionFailedException: Esta pregunta espera una respuesta de texto; PreconditionFailedException: Esta pregunta espera un valor numérico; PreconditionFailedException: El valor está fuera de la escala de la pregunta; PreconditionFailedException: Esta pregunta espera sí o no; PreconditionFailedException: Esta pregunta espera al menos una opción; PreconditionFailedException: Esta pregunta admite una sola opción; PreconditionFailedException: Se eligieron opciones que la pregunta no ofrece; PreconditionFailedException: Hay opciones repetidas en la respuesta; PreconditionFailedException: Tipo de pregunta desconocido; PreconditionFailedException: Faltan respuestas a preguntas obligatorias; PreconditionFailedException: El plazo para responder este cuestionario venció |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -467,108 +449,101 @@ flowchart TD
   n4 --> n5
   n6(["403 FORBIDDEN Solo un paciente puede ver sus cuestionarios"]):::error
   n5 -->|"sí"| n6
-  n7["Transacción: transactional(…)"]:::transaccion
+  n7["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
   n5 -->|"no"| n7
-  n8["Llama a SurveysResponsesService.loadOwnInvitation"]:::llamada
+  n8["Llama a InvitationsRepository.findByIdForUpdate"]:::llamada
   n7 --> n8
-  n9["Llama a InvitationsRepository.findById"]:::llamada
+  n9[("LEE surveys.survey_invitations")]:::efecto
   n8 --> n9
-  n10[("LEE surveys.survey_invitations")]:::efecto
+  n10["Llama a InvitationsRepository.findById"]:::llamada
   n9 --> n10
-  n11{"!invitation || invitation.patientProfileId !== patientProfileId"}:::decision
+  n11[("LEE surveys.survey_invitations")]:::efecto
   n10 --> n11
-  n12(["404 NOT_FOUND Cuestionario no encontrado"]):::error
-  n11 -->|"sí"| n12
-  n13{"invitation.statusConceptId === SURVEYS.INVITATION_ANSWERED"}:::decision
-  n11 -->|"no"| n13
-  n14(["409 CONFLICT Este cuestionario ya fue respondido"]):::error
-  n13 -->|"sí"| n14
-  n15{"now › invitation.expiresAt"}:::decision
-  n13 -->|"no"| n15
-  n16[("ACTUALIZA surveys.survey_invitations")]:::efecto
-  n15 -->|"sí"| n16
-  n17["Llama a TemplatesRepository.listQuestions"]:::llamada
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18[("LEE surveys.survey_questions")]:::efecto
-  n17 --> n18
-  n19["Llama a SurveysResponsesService.validateAnswers"]:::llamada
-  n18 --> n19
-  n20["Repite: por cada const answer de answers"]:::bucle
-  n19 --> n20
-  n21{"seen.has(answer.questionId)"}:::decision
-  n20 -->|"cada elemento"| n21
-  n22(["422 PRECONDITION_FAILED Hay más de una respuesta para la misma pregunta"]):::error
-  n21 -->|"sí"| n22
-  n23{"!question"}:::decision
-  n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED La respuesta no corresponde a una pregunta de este cuestionario"]):::error
+  n12[("ACTUALIZA surveys.survey_invitations")]:::efecto
+  n11 --> n12
+  n13["Llama a TemplatesRepository.listQuestions"]:::llamada
+  n12 --> n13
+  n14[("LEE surveys.survey_questions")]:::efecto
+  n13 --> n14
+  n15["Llama a SurveysResponsesService.validateAnswers"]:::llamada
+  n14 --> n15
+  n16["Repite: por cada const answer de answers"]:::bucle
+  n15 --> n16
+  n17{"seen.has(answer.questionId)"}:::decision
+  n16 -->|"cada elemento"| n17
+  n18(["422 PRECONDITION_FAILED Hay más de una respuesta para la misma pregunta"]):::error
+  n17 -->|"sí"| n18
+  n19{"!question"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED La respuesta no corresponde a una pregunta de este cuestionario"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a SurveysResponsesService.validateAnswerValue"]:::llamada
+  n19 -->|"no"| n21
+  n22{"según type"}:::decision
+  n21 --> n22
+  n23{"typeof answer.valueText !== 'string' || answer.valueText.trim() === ''"}:::decision
+  n22 -->|"'TEXT'"| n23
+  n24(["422 PRECONDITION_FAILED Esta pregunta espera una respuesta de texto"]):::error
   n23 -->|"sí"| n24
-  n25["Llama a SurveysResponsesService.validateAnswerValue"]:::llamada
-  n23 -->|"no"| n25
-  n26{"según type"}:::decision
-  n25 --> n26
-  n27{"typeof answer.valueText !== 'string' || answer.valueText.trim() === ''"}:::decision
-  n26 -->|"'TEXT'"| n27
-  n28(["422 PRECONDITION_FAILED Esta pregunta espera una respuesta de texto"]):::error
+  n25{"typeof answer.valueNumber !== 'number'"}:::decision
+  n22 -->|"'SCALE'"| n25
+  n26(["422 PRECONDITION_FAILED Esta pregunta espera un valor numérico"]):::error
+  n25 -->|"sí"| n26
+  n27{"answer.valueNumber ‹ min || answer.valueNumber › max"}:::decision
+  n25 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED El valor está fuera de la escala de la pregunta"]):::error
   n27 -->|"sí"| n28
-  n29{"typeof answer.valueNumber !== 'number'"}:::decision
-  n26 -->|"'SCALE'"| n29
-  n30(["422 PRECONDITION_FAILED Esta pregunta espera un valor numérico"]):::error
+  n29{"typeof answer.valueBoolean !== 'boolean'"}:::decision
+  n22 -->|"'BOOLEAN'"| n29
+  n30(["422 PRECONDITION_FAILED Esta pregunta espera sí o no"]):::error
   n29 -->|"sí"| n30
-  n31{"answer.valueNumber ‹ min || answer.valueNumber › max"}:::decision
-  n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED El valor está fuera de la escala de la pregunta"]):::error
+  n31{"chosen.length === 0"}:::decision
+  n22 -->|"'MULTIPLE_CHOICE'"| n31
+  n32(["422 PRECONDITION_FAILED Esta pregunta espera al menos una opción"]):::error
   n31 -->|"sí"| n32
-  n33{"typeof answer.valueBoolean !== 'boolean'"}:::decision
-  n26 -->|"'BOOLEAN'"| n33
-  n34(["422 PRECONDITION_FAILED Esta pregunta espera sí o no"]):::error
+  n33{"type === 'SINGLE_CHOICE' && chosen.length › 1"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED Esta pregunta admite una sola opción"]):::error
   n33 -->|"sí"| n34
-  n35{"chosen.length === 0"}:::decision
-  n26 -->|"'MULTIPLE_CHOICE'"| n35
-  n36(["422 PRECONDITION_FAILED Esta pregunta espera al menos una opción"]):::error
+  n35{"invalid.length › 0"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED Se eligieron opciones que la pregunta no ofrece"]):::error
   n35 -->|"sí"| n36
-  n37{"type === 'SINGLE_CHOICE' && chosen.length › 1"}:::decision
+  n37{"new Set(chosen).size !== chosen.length"}:::decision
   n35 -->|"no"| n37
-  n38(["422 PRECONDITION_FAILED Esta pregunta admite una sola opción"]):::error
+  n38(["422 PRECONDITION_FAILED Hay opciones repetidas en la respuesta"]):::error
   n37 -->|"sí"| n38
-  n39{"invalid.length › 0"}:::decision
-  n37 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED Se eligieron opciones que la pregunta no ofrece"]):::error
-  n39 -->|"sí"| n40
-  n41{"new Set(chosen).size !== chosen.length"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED Hay opciones repetidas en la respuesta"]):::error
-  n41 -->|"sí"| n42
-  n43(["422 PRECONDITION_FAILED Tipo de pregunta desconocido"]):::error
-  n26 -->|"por defecto"| n43
-  n44{"missing.length › 0"}:::decision
-  n27 -->|"no"| n44
-  n31 -->|"no"| n44
-  n33 -->|"no"| n44
-  n41 -->|"no"| n44
-  n20 -->|"al terminar"| n44
-  n45(["422 PRECONDITION_FAILED Faltan respuestas a preguntas obligatorias"]):::error
-  n44 -->|"sí"| n45
-  n46["Llama a ResponsesRepository.createResponse"]:::llamada
-  n44 -->|"no"| n46
-  n47[("CREA surveys.survey_responses")]:::efecto
+  n39(["422 PRECONDITION_FAILED Tipo de pregunta desconocido"]):::error
+  n22 -->|"por defecto"| n39
+  n40{"missing.length › 0"}:::decision
+  n23 -->|"no"| n40
+  n27 -->|"no"| n40
+  n29 -->|"no"| n40
+  n37 -->|"no"| n40
+  n16 -->|"al terminar"| n40
+  n41(["422 PRECONDITION_FAILED Faltan respuestas a preguntas obligatorias"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a ResponsesRepository.createResponse"]:::llamada
+  n40 -->|"no"| n42
+  n43[("CREA surveys.survey_responses")]:::efecto
+  n42 --> n43
+  n44["Llama a ResponsesRepository.createAnswer"]:::llamada
+  n43 --> n44
+  n45[("CREA surveys.survey_answers")]:::efecto
+  n44 --> n45
+  n46["Transacción: catch(…)"]:::transaccion
+  n45 --> n46
+  n47{"error instanceof UniqueConstraintViolationException"}:::decision
   n46 --> n47
-  n48["Repite: por cada const answer de dto.answers"]:::bucle
-  n47 --> n48
-  n49["Llama a ResponsesRepository.createAnswer"]:::llamada
-  n48 -->|"cada elemento"| n49
-  n50[("CREA surveys.survey_answers")]:::efecto
-  n49 --> n50
-  n51[("ACTUALIZA surveys.survey_invitations · ACTUALIZA surveys.survey_invitations")]:::efecto
-  n50 --> n51
-  n48 -->|"al terminar"| n51
-  n52{"'expiredAt' in outcome"}:::decision
-  n51 --> n52
-  n53(["422 PRECONDITION_FAILED El plazo para responder este cuestionario venció"]):::error
-  n52 -->|"sí"| n53
-  n54(("201 Responde con éxito")):::ok
-  n52 -->|"no"| n54
+  n48(["409 CONFLICT La respuesta ya fue registrada para este cuestionario"]):::error
+  n47 -->|"sí"| n48
+  n49(["↩ (relanza el error capturado)"]):::error
+  n47 -->|"no"| n49
+  n50{"'expiredAt' in outcome"}:::decision
+  n51(["422 PRECONDITION_FAILED El plazo para responder este cuestionario venció"]):::error
+  n50 -->|"sí"| n51
+  n52(("201 Responde con éxito")):::ok
+  n50 -->|"no"| n52
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1352,8 +1327,8 @@ Abrir una versión nueva del cuestionario
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones |
-| 409 | `CONFLICT` | ConflictException: Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: Otra solicitud abrió la versión siguiente; vuelva a consultar la plantilla |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1364,50 +1339,51 @@ flowchart TD
   n1 --> n2
   n3["Llama a SurveysTemplatesService.createNextVersion"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
   n3 --> n4
-  n5["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
+  n5["Llama a TemplatesRepository.findTemplateById"]:::llamada
   n4 --> n5
-  n6["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n6[("LEE surveys.survey_templates")]:::efecto
   n5 --> n6
-  n7[("LEE surveys.survey_templates")]:::efecto
+  n7{"!template"}:::decision
   n6 --> n7
-  n8{"!template"}:::decision
-  n7 --> n8
-  n9(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"template.tenantId !== tenantId"}:::decision
-  n8 -->|"no"| n10
-  n11(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
-  n10 -->|"no"| n12
-  n13{"!owner"}:::decision
-  n12 --> n13
-  n14(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
-  n13 -->|"sí"| n14
-  n15{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
-  n13 -->|"no"| n15
-  n16(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a TemplatesRepository.findLatestVersion"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE surveys.survey_versions")]:::efecto
+  n8(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"template.tenantId !== tenantId"}:::decision
+  n7 -->|"no"| n9
+  n10(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n9 -->|"no"| n11
+  n12{"!owner"}:::decision
+  n11 --> n12
+  n13(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n12 -->|"sí"| n13
+  n14{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
+  n12 -->|"no"| n14
+  n15(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a TemplatesRepository.lockTemplate"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE surveys.survey_templates")]:::efecto
+  n16 --> n17
+  n18["Llama a TemplatesRepository.findLatestVersion"]:::llamada
   n17 --> n18
-  n19{"!latest"}:::decision
+  n19[("LEE surveys.survey_versions")]:::efecto
   n18 --> n19
-  n20(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
-  n19 -->|"sí"| n20
-  n21{"latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT"}:::decision
-  n19 -->|"no"| n21
-  n22(["409 CONFLICT Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a TemplatesRepository.createVersion"]:::llamada
-  n21 -->|"no"| n23
-  n24[("CREA surveys.survey_versions")]:::efecto
-  n23 --> n24
-  n25(("201 Responde con éxito")):::ok
-  n24 --> n25
+  n20["Llama a TemplatesRepository.createVersion"]:::llamada
+  n19 --> n20
+  n21[("CREA surveys.survey_versions")]:::efecto
+  n20 --> n21
+  n22["Transacción: catch(…)"]:::transaccion
+  n21 --> n22
+  n23{"error instanceof UniqueConstraintViolationException"}:::decision
+  n22 --> n23
+  n24(["409 CONFLICT Otra solicitud abrió la versión siguiente; vuelva a consultar la plantilla"]):::error
+  n23 -->|"sí"| n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"no"| n25
+  n26(("201 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

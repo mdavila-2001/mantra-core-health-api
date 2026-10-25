@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 32 (32 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 26 · BAJO 6
-- **Tablas distintas que tocan:** 56
+- **Tablas distintas que tocan:** 75
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/procedures-perioperative.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,37 +13,37 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/dental-procedures` | Histórico odontológico del paciente | BAJO | 2 | CLINICIAN, PRACTITIONER |
-| 2 | POST | `/dental-procedures` | Registrar un procedimiento odontológico | MEDIO | 5 | CLINICIAN, PRACTITIONER |
+| 2 | POST | `/dental-procedures` | Registrar un procedimiento odontológico | MEDIO | 8 | CLINICIAN, PRACTITIONER |
 | 3 | GET | `/dental-procedures/catalog` | Catálogo odontológico: códigos, piezas (FDI) y cuadrantes | BAJO | 0 | CLINICIAN, PRACTITIONER |
 | 4 | POST | `/pacu-stays/{stayId}/assessments` | Registrar una valoración de recuperación | MEDIO | 2 | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN |
-| 5 | POST | `/pacu-stays/{stayId}/discharge` | Dar el alta de recuperación | MEDIO | 7 | ANESTHESIOLOGIST, PERIOP_ADMIN |
+| 5 | POST | `/pacu-stays/{stayId}/discharge` | Dar el alta de recuperación | MEDIO | 6 | ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 6 | GET | `/procedure-cases` | Listar casos quirúrgicos (agenda) | BAJO | 1 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
 | 7 | POST | `/procedure-cases` | Programar un caso quirúrgico y reservar el quirófano | MEDIO | 6 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
-| 8 | GET | `/procedure-cases/{id}` | Detalle completo del caso quirúrgico | BAJO | 12 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
-| 9 | PATCH | `/procedure-cases/{id}` | Modificar el caso quirúrgico | MEDIO | 9 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
-| 10 | POST | `/procedure-cases/{id}/anesthesia-events` | Anotar un evento intraoperatorio de anestesia | MEDIO | 8 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
-| 11 | POST | `/procedure-cases/{id}/anesthesia-plans` | Registrar el plan de anestesia y la valoración de vía aérea | MEDIO | 4 | ANESTHESIOLOGIST, PERIOP_ADMIN |
-| 12 | POST | `/procedure-cases/{id}/anesthesia-plans/{planId}/approve` | Aprobar el plan de anestesia | MEDIO | 4 | ANESTHESIOLOGIST, PERIOP_ADMIN |
-| 13 | POST | `/procedure-cases/{id}/cancel` | Cancelar el caso quirúrgico | MEDIO | 5 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
-| 14 | POST | `/procedure-cases/{id}/charge-items/post` | Generar los cargos y consolidar el uso del quirófano | MEDIO | 4 | PERIOP_ADMIN, BILLING |
-| 15 | POST | `/procedure-cases/{id}/confirm` | Confirmar la intervención verificando las credenciales del equipo | MEDIO | 11 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
-| 16 | POST | `/procedure-cases/{id}/diagnoses` | Registrar los diagnósticos del caso | MEDIO | 12 | SURGEON, PERIOP_ADMIN |
-| 17 | POST | `/procedure-cases/{id}/findings` | Registrar un hallazgo operatorio | MEDIO | 5 | SURGEON, PERIOP_ADMIN |
-| 18 | POST | `/procedure-cases/{id}/implants` | Registrar un implante con su trazabilidad UDI, lote o serie | MEDIO | 4 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
-| 19 | POST | `/procedure-cases/{id}/medication-uses` | Registrar el uso de un medicamento en la intervención | MEDIO | 3 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
-| 20 | POST | `/procedure-cases/{id}/operative-reports` | Redactar el reporte operatorio | MEDIO | 8 | SURGEON, PERIOP_ADMIN |
-| 21 | POST | `/procedure-cases/{id}/operative-reports/{reportId}/sign` | Firmar el reporte operatorio | MEDIO | 6 | SURGEON, PERIOP_ADMIN |
-| 22 | POST | `/procedure-cases/{id}/operative-steps` | Registrar un paso operatorio | MEDIO | 3 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
-| 23 | POST | `/procedure-cases/{id}/pacu-stays` | Admitir al paciente en recuperación | MEDIO | 4 | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN |
-| 24 | POST | `/procedure-cases/{id}/preoperative-assessments` | Registrar la valoración preoperatoria y sus puntuaciones de riesgo | MEDIO | 5 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
-| 25 | POST | `/procedure-cases/{id}/preoperative-orders` | Indicar una orden preoperatoria para el caso | MEDIO | 23 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
-| 26 | POST | `/procedure-cases/{id}/preoperative-orders/verify` | Verificar las órdenes preoperatorias | MEDIO | 4 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
+| 8 | GET | `/procedure-cases/{id}` | Detalle completo del caso quirúrgico | BAJO | 30 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
+| 9 | PATCH | `/procedure-cases/{id}` | Modificar el caso quirúrgico | MEDIO | 8 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 10 | POST | `/procedure-cases/{id}/anesthesia-events` | Anotar un evento intraoperatorio de anestesia | MEDIO | 6 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
+| 11 | POST | `/procedure-cases/{id}/anesthesia-plans` | Registrar el plan de anestesia y la valoración de vía aérea | MEDIO | 3 | ANESTHESIOLOGIST, PERIOP_ADMIN |
+| 12 | POST | `/procedure-cases/{id}/anesthesia-plans/{planId}/approve` | Aprobar el plan de anestesia | MEDIO | 2 | ANESTHESIOLOGIST, PERIOP_ADMIN |
+| 13 | POST | `/procedure-cases/{id}/cancel` | Cancelar el caso quirúrgico | MEDIO | 3 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 14 | POST | `/procedure-cases/{id}/charge-items/post` | Generar los cargos y consolidar el uso del quirófano | MEDIO | 3 | PERIOP_ADMIN, BILLING |
+| 15 | POST | `/procedure-cases/{id}/confirm` | Confirmar la intervención verificando las credenciales del equipo | MEDIO | 9 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 16 | POST | `/procedure-cases/{id}/diagnoses` | Registrar los diagnósticos del caso | MEDIO | 11 | SURGEON, PERIOP_ADMIN |
+| 17 | POST | `/procedure-cases/{id}/findings` | Registrar un hallazgo operatorio | MEDIO | 4 | SURGEON, PERIOP_ADMIN |
+| 18 | POST | `/procedure-cases/{id}/implants` | Registrar un implante con su trazabilidad UDI, lote o serie | MEDIO | 3 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
+| 19 | POST | `/procedure-cases/{id}/medication-uses` | Registrar el uso de un medicamento en la intervención | MEDIO | 2 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
+| 20 | POST | `/procedure-cases/{id}/operative-reports` | Redactar el reporte operatorio | MEDIO | 10 | SURGEON, PERIOP_ADMIN |
+| 21 | POST | `/procedure-cases/{id}/operative-reports/{reportId}/sign` | Firmar el reporte operatorio | MEDIO | 7 | SURGEON, PERIOP_ADMIN |
+| 22 | POST | `/procedure-cases/{id}/operative-steps` | Registrar un paso operatorio | MEDIO | 2 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
+| 23 | POST | `/procedure-cases/{id}/pacu-stays` | Admitir al paciente en recuperación | MEDIO | 3 | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN |
+| 24 | POST | `/procedure-cases/{id}/preoperative-assessments` | Registrar la valoración preoperatoria y sus puntuaciones de riesgo | MEDIO | 11 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
+| 25 | POST | `/procedure-cases/{id}/preoperative-orders` | Indicar una orden preoperatoria para el caso | MEDIO | 24 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
+| 26 | POST | `/procedure-cases/{id}/preoperative-orders/verify` | Verificar las órdenes preoperatorias | MEDIO | 2 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
 | 27 | POST | `/procedure-cases/{id}/safety-checklists/{checklistId}/responses` | Responder una fase del checklist quirúrgico | MEDIO | 6 | PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN |
-| 28 | POST | `/procedure-cases/{id}/specimens` | Registrar una muestra tomada en la intervención | MEDIO | 3 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
+| 28 | POST | `/procedure-cases/{id}/specimens` | Registrar una muestra tomada en la intervención | MEDIO | 2 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
 | 29 | GET | `/procedure-cases/{id}/team-members` | Listar el equipo del caso quirúrgico | BAJO | 2 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
-| 30 | POST | `/procedure-cases/{id}/team-members` | Asignar un miembro al equipo quirúrgico | MEDIO | 4 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
-| 31 | POST | `/procedure-cases/{id}/team-members/{memberId}/accept` | Aceptar la participación en el equipo quirúrgico | BAJO | 3 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
-| 32 | POST | `/procedure-cases/{id}/team-members/{memberId}/respond` | Rechazar, pedir cambios o informar indisponibilidad | MEDIO | 8 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
+| 30 | POST | `/procedure-cases/{id}/team-members` | Asignar un miembro al equipo quirúrgico | MEDIO | 8 | SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN |
+| 31 | POST | `/procedure-cases/{id}/team-members/{memberId}/accept` | Aceptar la participación en el equipo quirúrgico | BAJO | 2 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
+| 32 | POST | `/procedure-cases/{id}/team-members/{memberId}/respond` | Rechazar, pedir cambios o informar indisponibilidad | MEDIO | 7 | SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN |
 
 ---
 
@@ -54,7 +54,7 @@
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DentalController.listByPatient` — `src/modules/procedures_perioperative/controllers/dental.controller.ts:74`
+- **Implementación:** `DentalController.listByPatient` — `src/modules/procedures_perioperative/controllers/dental.controller.ts:75`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -64,14 +64,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /dental-procedures` la atiende `DentalController.listByPatient` (src/modules/procedures_perioperative/controllers/dental.controller.ts:74). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `PeriopDentalService.listByPatient`. Lee clinical.procedures, procedures_perioperative.procedure_body_sites.
+`GET /dental-procedures` la atiende `DentalController.listByPatient` (src/modules/procedures_perioperative/controllers/dental.controller.ts:75). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `PeriopDentalService.listByPatient`. Lee clinical.procedures, procedures_perioperative.procedure_body_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:74` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:75` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -146,7 +146,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DentalController.record` — `src/modules/procedures_perioperative/controllers/dental.controller.ts:88`
+- **Implementación:** `DentalController.record` — `src/modules/procedures_perioperative/controllers/dental.controller.ts:89`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -156,14 +156,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /dental-procedures` la atiende `DentalController.record` (src/modules/procedures_perioperative/controllers/dental.controller.ts:88). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateDentalProcedureDto` (8 campos, 2 obligatorios). Delega en `PeriopDentalService.record`. Crea filas en audit.audit_log, clinical.procedures, procedures_perioperative.procedure_body_sites. Lee audit.audit_log, iam.sessions.
+`POST /dental-procedures` la atiende `DentalController.record` (src/modules/procedures_perioperative/controllers/dental.controller.ts:89). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateDentalProcedureDto` (8 campos, 2 obligatorios). Delega en `PeriopDentalService.record`. Crea filas en audit.audit_log, clinical.procedures, clinical.received_services, procedures_perioperative.procedure_body_sites. Lee audit.audit_log, clinical.received_services, iam.sessions, procedures_perioperative.procedure_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:88` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:89` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -176,8 +176,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `clinical.procedures` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → PeriopDentalRepository.createProcedure | `src/modules/procedures_perioperative/repositories/periop-dental.repository.ts:101` |
+| `clinical.received_services` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
+| `clinical.received_services` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
 | `iam.sessions` | LEE | LEE | POR_SQL | DentalController.record → PeriopDentalService.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `procedures_perioperative.procedure_body_sites` | ESCRIBE | CREA | DIRECTA | DentalController.record → PeriopDentalService.record → PeriopDentalRepository.createSite | `src/modules/procedures_perioperative/repositories/periop-dental.repository.ts:133` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | DentalController.record → PeriopDentalService.record → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.findCaseByPrimaryProcedure | `src/modules/clinical/repositories/received-services.repository.ts:71` |
 
 ### Cuerpo — DTO `CreateDentalProcedureDto` · `application/json`
 
@@ -260,7 +263,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DentalController.catalog` — `src/modules/procedures_perioperative/controllers/dental.controller.ts:63`
+- **Implementación:** `DentalController.catalog` — `src/modules/procedures_perioperative/controllers/dental.controller.ts:64`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -270,14 +273,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /dental-procedures/catalog` la atiende `DentalController.catalog` (src/modules/procedures_perioperative/controllers/dental.controller.ts:63). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `PeriopDentalService.catalog`. No toca tablas relacionales: Devuelve catálogos que viven en constantes del código (códigos, piezas, cuadrantes)..
+`GET /dental-procedures/catalog` la atiende `DentalController.catalog` (src/modules/procedures_perioperative/controllers/dental.controller.ts:64). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `PeriopDentalService.catalog`. No toca tablas relacionales: Devuelve catálogos que viven en constantes del código (códigos, piezas, cuadrantes)..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:63` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/procedures_perioperative/controllers/dental.controller.ts:64` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -337,7 +340,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.recordPacuAssessment` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:544`
+- **Implementación:** `PeriopController.recordPacuAssessment` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:662`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -347,16 +350,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pacu-stays/{stayId}/assessments` la atiende `PeriopController.recordPacuAssessment` (src/modules/procedures_perioperative/controllers/periop.controller.ts:544). Exige sesión con alguno de los roles PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `RecordPacuAssessmentDto` (7 campos, 1 obligatorio). Delega en `PeriopIntraopService.recordPacuAssessment`. Crea filas en procedures_perioperative.pacu_assessments. Lee procedures_perioperative.pacu_stays.
+`POST /pacu-stays/{stayId}/assessments` la atiende `PeriopController.recordPacuAssessment` (src/modules/procedures_perioperative/controllers/periop.controller.ts:662). Exige sesión con alguno de los roles PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `RecordPacuAssessmentDto` (7 campos, 1 obligatorio). Delega en `PeriopIntraopService.recordPacuAssessment`. Crea filas en procedures_perioperative.pacu_assessments. Lee procedures_perioperative.pacu_stays.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:544` |
+| ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:662` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:544` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:662` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -365,8 +368,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.pacu_assessments` | ESCRIBE | CREA | DIRECTA | PeriopController.recordPacuAssessment → PeriopIntraopService.recordPacuAssessment → PeriopIntraopRepository.createPacuAssessment | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:928` |
-| `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.recordPacuAssessment → PeriopIntraopService.recordPacuAssessment → PeriopIntraopRepository.findPacuStayForUpdate | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:869` |
+| `procedures_perioperative.pacu_assessments` | ESCRIBE | CREA | DIRECTA | PeriopController.recordPacuAssessment → PeriopIntraopService.recordPacuAssessment → PeriopIntraopRepository.createPacuAssessment | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:940` |
+| `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.recordPacuAssessment → PeriopIntraopService.recordPacuAssessment → PeriopIntraopService.loadPacuStayInScope → PeriopIntraopRepository.findPacuStayById | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:867` |
 
 ### Parámetros
 
@@ -426,7 +429,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Estancia en recuperación no encontrada |
 | 409 | `CONFLICT` | ConflictException: El paciente ya salió de recuperación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -451,7 +453,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.dischargeFromPacu` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:560`
+- **Implementación:** `PeriopController.dischargeFromPacu` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:683`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -461,16 +463,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /pacu-stays/{stayId}/discharge` la atiende `PeriopController.dischargeFromPacu` (src/modules/procedures_perioperative/controllers/periop.controller.ts:560). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `DischargePacuDto` (10 campos, 1 obligatorio). Delega en `PeriopIntraopService.dischargeFromPacu`. Crea filas en procedures_perioperative.postoperative_followups, procedures_perioperative.postoperative_orders. Actualiza procedures_perioperative.pacu_stays, procedures_perioperative.procedure_case_locations. Lee procedures_perioperative.pacu_assessments, procedures_perioperative.pacu_stays, procedures_perioperative.procedure_case_locations.
+`POST /pacu-stays/{stayId}/discharge` la atiende `PeriopController.dischargeFromPacu` (src/modules/procedures_perioperative/controllers/periop.controller.ts:683). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `DischargePacuDto` (10 campos, 1 obligatorio). Delega en `PeriopIntraopService.dischargeFromPacu`. Crea filas en procedures_perioperative.postoperative_followups, procedures_perioperative.postoperative_orders. Actualiza procedures_perioperative.procedure_case_locations. Lee procedures_perioperative.pacu_assessments, procedures_perioperative.pacu_stays, procedures_perioperative.procedure_case_locations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:560` |
+| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:683` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:560` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: stayId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:683` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -479,13 +481,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.pacu_assessments` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.findAssessmentsByStay | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:951` |
-| `procedures_perioperative.pacu_stays` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:789` |
-| `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.findPacuStayForUpdate | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:869` |
-| `procedures_perioperative.postoperative_followups` | ESCRIBE | CREA | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.createFollowup | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:1044` |
-| `procedures_perioperative.postoperative_orders` | ESCRIBE | CREA | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.createPostoperativeOrder | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:990` |
-| `procedures_perioperative.procedure_case_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:801` |
-| `procedures_perioperative.procedure_case_locations` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopCasesRepository.findOpenLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:659` |
+| `procedures_perioperative.pacu_assessments` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.findAssessmentsByStay | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:963` |
+| `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopService.loadPacuStayInScope → PeriopIntraopRepository.findPacuStayById | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:867` |
+| `procedures_perioperative.postoperative_followups` | ESCRIBE | CREA | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.createFollowup | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:1056` |
+| `procedures_perioperative.postoperative_orders` | ESCRIBE | CREA | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.createPostoperativeOrder | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:1002` |
+| `procedures_perioperative.procedure_case_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:857` |
+| `procedures_perioperative.procedure_case_locations` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopCasesRepository.findOpenLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:672` |
 
 ### Parámetros
 
@@ -558,7 +559,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Estancia en recuperación no encontrada |
 | 409 | `CONFLICT` | ConflictException: El paciente ya salió de recuperación |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El alta de recuperación exige al menos una valoración; PreconditionFailedException: La última valoración no cumple el criterio de alta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -584,7 +584,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.listCases` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:104`
+- **Implementación:** `PeriopController.listCases` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -594,14 +594,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /procedure-cases` la atiende `PeriopController.listCases` (src/modules/procedures_perioperative/controllers/periop.controller.ts:104). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.listCases`. Lee procedures_perioperative.procedure_cases.
+`GET /procedure-cases` la atiende `PeriopController.listCases` (src/modules/procedures_perioperative/controllers/periop.controller.ts:105). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.listCases`. Lee procedures_perioperative.procedure_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:104` |
+| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:105` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -609,7 +609,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listCases → PeriopCasesService.listCases → PeriopCasesRepository.findCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:267` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listCases → PeriopCasesService.listCases → PeriopCasesRepository.findCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:280` |
 
 ### Parámetros
 
@@ -671,24 +671,24 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.scheduleCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:138`
+- **Implementación:** `PeriopController.scheduleCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:146`
 
 ### Qué es y para qué sirve (negocio)
 
 Programar un caso quirúrgico y reservar el quirófano. Caso de uso UC-53-01: Programar caso y reservar quirófano. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:83`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:85`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases` la atiende `PeriopController.scheduleCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:138). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `ScheduleCaseDto` (15 campos, 8 obligatorios). Delega en `PeriopCasesService.scheduleCase`. Crea filas en procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee procedures_perioperative.procedure_cases.
+`POST /procedure-cases` la atiende `PeriopController.scheduleCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:146). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `ScheduleCaseDto` (15 campos, 8 obligatorios). Delega en `PeriopCasesService.scheduleCase`. Crea filas en procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee procedures_perioperative.procedure_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:138` |
+| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:146` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -698,12 +698,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:712` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:455` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:588` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:601` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:153` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.findOverlappingCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:359` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.findOverlappingCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:372` |
 
 ### Cuerpo — DTO `ScheduleCaseDto` · `application/json`
 
@@ -807,7 +807,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.getCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:123`
+- **Implementación:** `PeriopController.getCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:124`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -817,22 +817,33 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /procedure-cases/{id}` la atiende `PeriopController.getCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:123). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.getCaseDetail`. Lee procedures_perioperative.anesthesia_plans, procedures_perioperative.implant_identifiers, procedures_perioperative.operative_findings, procedures_perioperative.operative_reports, procedures_perioperative.operative_steps, procedures_perioperative.preoperative_assessments, procedures_perioperative.preoperative_orders, procedures_perioperative.procedure_case_diagnoses y 4 más.
+`GET /procedure-cases/{id}` la atiende `PeriopController.getCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:124). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.getCaseDetail`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 22 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:123` |
+| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:124` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:123` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:124` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `procedures_perioperative.anesthesia_plans` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopPreopRepository.findAnesthesiaPlanByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:551` |
 | `procedures_perioperative.implant_identifiers` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findIdentifiersByImplants | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:749` |
 | `procedures_perioperative.operative_findings` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findFindingsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:706` |
@@ -840,11 +851,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `procedures_perioperative.operative_steps` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findStepsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:239` |
 | `procedures_perioperative.preoperative_assessments` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopPreopRepository.findAssessmentByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:178` |
 | `procedures_perioperative.preoperative_orders` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopPreopRepository.findOrdersByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:295` |
-| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:549` |
-| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findMilestonesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:330` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:187` |
+| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:562` |
+| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findMilestonesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:343` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:191` |
 | `procedures_perioperative.procedure_implants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findImplantsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:724` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Parámetros
 
@@ -950,8 +968,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
@@ -973,7 +990,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.updateCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:154`
+- **Implementación:** `PeriopController.updateCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:167`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -983,16 +1000,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /procedure-cases/{id}` la atiende `PeriopController.updateCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:154). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `UpdateCaseDto` (5 campos, 0 obligatorios). Delega en `PeriopCasesService.updateCase`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.outbox_messages, procedures_perioperative.procedure_case_diagnoses, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Publica periop.case.reacceptance_required.
+`PATCH /procedure-cases/{id}` la atiende `PeriopController.updateCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:167). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `UpdateCaseDto` (5 campos, 0 obligatorios). Delega en `PeriopCasesService.updateCase`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.outbox_messages, procedures_perioperative.procedure_case_diagnoses, procedures_perioperative.procedure_case_team_members. Publica periop.case.reacceptance_required.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:154` |
+| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:167` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:154` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:167` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1001,21 +1018,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:549` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase | `src/modules/procedures_perioperative/services/periop-cases.service.ts:446` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase | `src/modules/procedures_perioperative/services/periop-cases.service.ts:407` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:562` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:471` |
+| Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:121` |
 
 ### Parámetros
 
@@ -1072,7 +1088,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; cancele el caso y cree uno nuevo; PreconditionFailedException: CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidencias asociadas; PreconditionFailedException: El caso debe terminar después de empezar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1097,26 +1112,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.recordAnesthesiaEvent` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:407`
+- **Implementación:** `PeriopController.recordAnesthesiaEvent` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:480`
 
 ### Qué es y para qué sirve (negocio)
 
 Anotar un evento intraoperatorio de anestesia. Caso de uso UC-53-07: Eventos intraoperatorios. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:89`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:91`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/anesthesia-events` la atiende `PeriopController.recordAnesthesiaEvent` (src/modules/procedures_perioperative/controllers/periop.controller.ts:407). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordAnesthesiaEventDto` (8 campos, 2 obligatorios). Delega en `PeriopPreopService.recordAnesthesiaEvent`. Crea filas en procedures_perioperative.anesthesia_events, procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_cases. Lee procedures_perioperative.anesthesia_plans, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/anesthesia-events` la atiende `PeriopController.recordAnesthesiaEvent` (src/modules/procedures_perioperative/controllers/periop.controller.ts:480). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordAnesthesiaEventDto` (8 campos, 2 obligatorios). Delega en `PeriopPreopService.recordAnesthesiaEvent`. Crea filas en procedures_perioperative.anesthesia_events, procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history. Lee procedures_perioperative.anesthesia_plans, procedures_perioperative.procedure_case_milestones.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:407` |
+| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:480` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:407` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:480` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1127,12 +1142,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|---|---|---|
 | `procedures_perioperative.anesthesia_events` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopPreopRepository.createAnesthesiaEvent | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:651` |
 | `procedures_perioperative.anesthesia_plans` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopPreopRepository.findAnesthesiaPlanByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:551` |
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:712` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:455` |
-| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.findMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:484` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent | `src/modules/procedures_perioperative/services/periop-preop.service.ts:824` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
+| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.findMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:497` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
 
 ### Parámetros
 
@@ -1195,7 +1208,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La inducción exige un plan de anestesia aprobado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1220,26 +1232,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.createAnesthesiaPlan` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:377`
+- **Implementación:** `PeriopController.createAnesthesiaPlan` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:440`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar el plan de anestesia y la valoración de vía aérea. Caso de uso UC-53-06: Plan de anestesia. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:88`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:90`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/anesthesia-plans` la atiende `PeriopController.createAnesthesiaPlan` (src/modules/procedures_perioperative/controllers/periop.controller.ts:377). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `CreateAnesthesiaPlanDto` (13 campos, 5 obligatorios). Delega en `PeriopPreopService.createAnesthesiaPlan`. Crea filas en procedures_perioperative.anesthesia_airway_assessments, procedures_perioperative.anesthesia_plans. Lee procedures_perioperative.anesthesia_plans, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/anesthesia-plans` la atiende `PeriopController.createAnesthesiaPlan` (src/modules/procedures_perioperative/controllers/periop.controller.ts:440). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `CreateAnesthesiaPlanDto` (13 campos, 5 obligatorios). Delega en `PeriopPreopService.createAnesthesiaPlan`. Crea filas en procedures_perioperative.anesthesia_airway_assessments, procedures_perioperative.anesthesia_plans. Lee procedures_perioperative.anesthesia_plans.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:377` |
+| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:440` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:377` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:440` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1251,7 +1263,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `procedures_perioperative.anesthesia_airway_assessments` | ESCRIBE | CREA | DIRECTA | PeriopController.createAnesthesiaPlan → PeriopPreopService.createAnesthesiaPlan → PeriopPreopRepository.createAirwayAssessment | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:588` |
 | `procedures_perioperative.anesthesia_plans` | ESCRIBE | CREA | DIRECTA | PeriopController.createAnesthesiaPlan → PeriopPreopService.createAnesthesiaPlan → PeriopPreopRepository.createAnesthesiaPlan | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:504` |
 | `procedures_perioperative.anesthesia_plans` | LEE | LEE | DIRECTA | PeriopController.createAnesthesiaPlan → PeriopPreopService.createAnesthesiaPlan → PeriopPreopRepository.findAnesthesiaPlanByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:551` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.createAnesthesiaPlan → PeriopPreopService.createAnesthesiaPlan → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 
 ### Parámetros
 
@@ -1330,7 +1341,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso ya tiene plan de anestesia |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una vía aérea difícil anticipada necesita plan de rescate; PreconditionFailedException: El caso está cancelado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1356,7 +1366,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.approveAnesthesiaPlan` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:394`
+- **Implementación:** `PeriopController.approveAnesthesiaPlan` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:462`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1366,26 +1376,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve` la atiende `PeriopController.approveAnesthesiaPlan` (src/modules/procedures_perioperative/controllers/periop.controller.ts:394). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_ADMIN. Delega en `PeriopPreopService.approveAnesthesiaPlan`. Actualiza procedures_perioperative.anesthesia_plans, procedures_perioperative.procedure_cases. Lee procedures_perioperative.anesthesia_plans, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve` la atiende `PeriopController.approveAnesthesiaPlan` (src/modules/procedures_perioperative/controllers/periop.controller.ts:462). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_ADMIN. Delega en `PeriopPreopService.approveAnesthesiaPlan`. Actualiza procedures_perioperative.anesthesia_plans. Lee procedures_perioperative.anesthesia_plans.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:394` |
+| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:462` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, planId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:394` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, planId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:462` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.anesthesia_plans` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.approveAnesthesiaPlan → PeriopPreopService.approveAnesthesiaPlan | `src/modules/procedures_perioperative/services/periop-preop.service.ts:717` |
+| `procedures_perioperative.anesthesia_plans` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.approveAnesthesiaPlan → PeriopPreopService.approveAnesthesiaPlan | `src/modules/procedures_perioperative/services/periop-preop.service.ts:807` |
 | `procedures_perioperative.anesthesia_plans` | LEE | LEE | DIRECTA | PeriopController.approveAnesthesiaPlan → PeriopPreopService.approveAnesthesiaPlan → PeriopPreopRepository.findAnesthesiaPlanForUpdate | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:533` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.approveAnesthesiaPlan → PeriopPreopService.approveAnesthesiaPlan | `src/modules/procedures_perioperative/services/periop-preop.service.ts:721` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.approveAnesthesiaPlan → PeriopPreopService.approveAnesthesiaPlan → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 
 ### Parámetros
 
@@ -1414,7 +1422,7 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Plan de anestesia no encontrado; ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plan de anestesia no encontrado |
 | 409 | `CONFLICT` | ConflictException: El plan ya está aprobado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plan pertenece a otro caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1440,26 +1448,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.cancelCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:576`
+- **Implementación:** `PeriopController.cancelCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:704`
 
 ### Qué es y para qué sirve (negocio)
 
 Cancelar el caso quirúrgico. Caso de uso UC-53-13: Cancelar y liberar quirófano. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:97`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/cancel` la atiende `PeriopController.cancelCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:576). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CancelCaseDto` (5 campos, 3 obligatorios). Delega en `PeriopCasesService.cancelCase`. Crea filas en procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_cancellations, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_cases. Lee procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/cancel` la atiende `PeriopController.cancelCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:704). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CancelCaseDto` (5 campos, 3 obligatorios). Delega en `PeriopCasesService.cancelCase`. Crea filas en procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_cancellations, procedures_perioperative.procedure_case_status_history.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:576` |
+| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:704` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:576` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:704` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1468,11 +1476,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:712` |
-| `procedures_perioperative.procedure_cancellations` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createCancellation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:776` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.cancelCase → PeriopCasesService.cancelCase | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1423` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
+| `procedures_perioperative.procedure_cancellations` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createCancellation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:789` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
 
 ### Parámetros
 
@@ -1531,7 +1537,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso ya está cancelado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no admite cancelación en su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1557,26 +1562,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.postCharges` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:592`
+- **Implementación:** `PeriopController.postCharges` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:725`
 
 ### Qué es y para qué sirve (negocio)
 
 Generar los cargos y consolidar el uso del quirófano. Caso de uso UC-53-14: Cargos y utilización. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:96`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:98`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/charge-items/post` la atiende `PeriopController.postCharges` (src/modules/procedures_perioperative/controllers/periop.controller.ts:592). Exige sesión con alguno de los roles PERIOP_ADMIN, BILLING. Valida el cuerpo como `PostChargesDto` (8 campos, 4 obligatorios). Delega en `PeriopCasesService.postCharges`. Crea filas en procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_charge_items. Lee procedures_perioperative.procedure_cases, procedures_perioperative.procedure_charge_items.
+`POST /procedure-cases/{id}/charge-items/post` la atiende `PeriopController.postCharges` (src/modules/procedures_perioperative/controllers/periop.controller.ts:725). Exige sesión con alguno de los roles PERIOP_ADMIN, BILLING. Valida el cuerpo como `PostChargesDto` (8 campos, 4 obligatorios). Delega en `PeriopCasesService.postCharges`. Crea filas en procedures_perioperative.operating_room_utilization_events, procedures_perioperative.procedure_charge_items. Lee procedures_perioperative.procedure_charge_items.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PERIOP_ADMIN, BILLING | `src/modules/procedures_perioperative/controllers/periop.controller.ts:592` |
+| ROL | Alguno de: PERIOP_ADMIN, BILLING | `src/modules/procedures_perioperative/controllers/periop.controller.ts:725` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:592` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:725` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1585,10 +1590,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:712` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
-| `procedures_perioperative.procedure_charge_items` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createChargeItem | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:807` |
-| `procedures_perioperative.procedure_charge_items` | LEE | LEE | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.findChargeItemsForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:843` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
+| `procedures_perioperative.procedure_charge_items` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createChargeItem | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:820` |
+| `procedures_perioperative.procedure_charge_items` | LEE | LEE | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.findChargeItemsForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:856` |
 
 ### Parámetros
 
@@ -1661,7 +1665,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso ya tiene cargos emitidos |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se factura un caso completado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1687,7 +1690,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.confirmCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:171`
+- **Implementación:** `PeriopController.confirmCase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:189`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1697,16 +1700,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/confirm` la atiende `PeriopController.confirmCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:171). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Delega en `PeriopCasesService.confirmCase`. Crea filas en audit.audit_log, messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_cases. Lee audit.audit_log, iam.sessions, messaging.outbox_messages, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases, profiles.professional_credentials. Publica periop.case.confirmation_blocked.
+`POST /procedure-cases/{id}/confirm` la atiende `PeriopController.confirmCase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:189). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Delega en `PeriopCasesService.confirmCase`. Crea filas en audit.audit_log, messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history. Lee audit.audit_log, iam.sessions, messaging.outbox_messages, procedures_perioperative.procedure_case_team_members, profiles.professional_credentials. Publica periop.case.confirmation_blocked.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:171` |
+| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:189` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:171` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:189` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1717,19 +1720,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.confirmCase → PeriopCasesService.confirmCase → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.confirmCase → PeriopCasesService.confirmCase | `src/modules/procedures_perioperative/services/periop-cases.service.ts:613` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → ProfessionalCredentialsRepository.hasCurrentCredential | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:155` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:581` |
+| Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:596` |
 
 ### Parámetros
 
@@ -1757,7 +1758,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El caso no admite confirmación en su estado actual; PreconditionFailedException: CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1782,26 +1782,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.addDiagnoses` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:188`
+- **Implementación:** `PeriopController.addDiagnoses` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:211`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar los diagnósticos del caso. Caso de uso UC-53-02: Diagnósticos y equipo. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:84`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:86`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/diagnoses` la atiende `PeriopController.addDiagnoses` (src/modules/procedures_perioperative/controllers/periop.controller.ts:188). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `AddDiagnosesDto` (5 campos, 2 obligatorios). Delega en `PeriopCasesService.addDiagnoses`. Crea filas en audit.audit_log, audit.conditions_history, clinical.conditions, procedures_perioperative.procedure_case_diagnoses. Actualiza audit.conditions_history. Lee audit.audit_log, audit.conditions_history, clinical.conditions, clinical.encounters, iam.sessions, procedures_perioperative.procedure_case_diagnoses, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/diagnoses` la atiende `PeriopController.addDiagnoses` (src/modules/procedures_perioperative/controllers/periop.controller.ts:211). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `AddDiagnosesDto` (5 campos, 2 obligatorios). Delega en `PeriopCasesService.addDiagnoses`. Crea filas en audit.audit_log, audit.conditions_history, clinical.conditions, procedures_perioperative.procedure_case_diagnoses. Actualiza audit.conditions_history. Lee audit.audit_log, audit.conditions_history, clinical.conditions, clinical.encounters, iam.sessions, procedures_perioperative.procedure_case_diagnoses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:188` |
+| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:188` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1812,16 +1812,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|---|---|---|
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:273` |
-| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:273` |
-| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:273` |
+| `audit.conditions_history` | ESCRIBE | ACTUALIZA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
+| `audit.conditions_history` | ESCRIBE | CREA | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
+| `audit.conditions_history` | LEE | LEE | POR_REGISTRO | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create | `src/modules/clinical/services/conditions.service.ts:275` |
 | `clinical.conditions` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsRepository.create | `src/modules/clinical/repositories/conditions.repository.ts:153` |
 | `clinical.conditions` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsRepository.findActiveByCode | `src/modules/clinical/repositories/conditions.repository.ts:137` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 | `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `procedures_perioperative.procedure_case_diagnoses` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.createDiagnosis | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:524` |
-| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:549` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.procedure_case_diagnoses` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.createDiagnosis | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:537` |
+| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:562` |
 
 ### Parámetros
 
@@ -1884,7 +1883,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Encuentro no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso sólo admite un diagnóstico principal; ConflictException: El paciente ya tiene esa condición activa |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Indique la condición por `conditionId` o por `conditionCodeConceptId`; PreconditionFailedException: Un diagnóstico se registra presuntivo o confirmado. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1911,7 +1910,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.recordFinding` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:437`
+- **Implementación:** `PeriopController.recordFinding` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:520`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1921,16 +1920,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/findings` la atiende `PeriopController.recordFinding` (src/modules/procedures_perioperative/controllers/periop.controller.ts:437). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `RecordFindingDto` (8 campos, 2 obligatorios). Delega en `PeriopIntraopService.recordFinding`. Crea filas en procedures_perioperative.operative_findings, procedures_perioperative.procedure_body_sites. Lee procedures_perioperative.operative_steps, procedures_perioperative.procedure_body_sites, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/findings` la atiende `PeriopController.recordFinding` (src/modules/procedures_perioperative/controllers/periop.controller.ts:520). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `RecordFindingDto` (8 campos, 2 obligatorios). Delega en `PeriopIntraopService.recordFinding`. Crea filas en procedures_perioperative.operative_findings, procedures_perioperative.procedure_body_sites. Lee procedures_perioperative.operative_steps, procedures_perioperative.procedure_body_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:437` |
+| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:520` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:437` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:520` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1943,7 +1942,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `procedures_perioperative.operative_steps` | LEE | LEE | DIRECTA | PeriopController.recordFinding → PeriopIntraopService.recordFinding → PeriopIntraopRepository.findStepById | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:213` |
 | `procedures_perioperative.procedure_body_sites` | ESCRIBE | CREA | DIRECTA | PeriopController.recordFinding → PeriopIntraopService.recordFinding → PeriopIntraopRepository.createBodySite | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:339` |
 | `procedures_perioperative.procedure_body_sites` | LEE | LEE | DIRECTA | PeriopController.recordFinding → PeriopIntraopService.recordFinding → PeriopIntraopRepository.findBodySite | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:366` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.recordFinding → PeriopIntraopService.recordFinding → PeriopIntraopService.assertCaseInProgress → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 
 ### Parámetros
 
@@ -2005,7 +2003,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Paso operatorio no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paso operatorio no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso pertenece a otro caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2030,26 +2028,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.recordImplant` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:454`
+- **Implementación:** `PeriopController.recordImplant` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:542`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un implante con su trazabilidad UDI, lote o serie. Caso de uso UC-53-09: Implantes con UDI, lote y serie. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:91`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:93`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/implants` la atiende `PeriopController.recordImplant` (src/modules/procedures_perioperative/controllers/periop.controller.ts:454). Exige sesión con alguno de los roles SURGEON, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordImplantDto` (13 campos, 6 obligatorios). Delega en `PeriopIntraopService.recordImplant`. Crea filas en procedures_perioperative.implant_identifiers, procedures_perioperative.procedure_devices, procedures_perioperative.procedure_implants. Lee procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/implants` la atiende `PeriopController.recordImplant` (src/modules/procedures_perioperative/controllers/periop.controller.ts:542). Exige sesión con alguno de los roles SURGEON, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordImplantDto` (13 campos, 6 obligatorios). Delega en `PeriopIntraopService.recordImplant`. Crea filas en procedures_perioperative.implant_identifiers, procedures_perioperative.procedure_devices, procedures_perioperative.procedure_implants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:454` |
+| ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:542` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:454` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:542` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2059,7 +2057,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `procedures_perioperative.implant_identifiers` | ESCRIBE | CREA | DIRECTA | PeriopController.recordImplant → PeriopIntraopService.recordImplant → PeriopIntraopRepository.createImplantIdentifier | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:430` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.recordImplant → PeriopIntraopService.recordImplant → PeriopIntraopService.assertCaseInProgress → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 | `procedures_perioperative.procedure_devices` | ESCRIBE | CREA | DIRECTA | PeriopController.recordImplant → PeriopIntraopService.recordImplant → PeriopIntraopRepository.createDevice | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:482` |
 | `procedures_perioperative.procedure_implants` | ESCRIBE | CREA | DIRECTA | PeriopController.recordImplant → PeriopIntraopService.recordImplant → PeriopIntraopRepository.createImplant | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:379` |
 
@@ -2145,7 +2142,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2170,26 +2166,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.recordMedicationUse` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:470`
+- **Implementación:** `PeriopController.recordMedicationUse` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:563`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar el uso de un medicamento en la intervención. Caso de uso UC-53-10: Insumos y muestras. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/medication-uses` la atiende `PeriopController.recordMedicationUse` (src/modules/procedures_perioperative/controllers/periop.controller.ts:470). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordMedicationUseDto` (4 campos, 2 obligatorios). Delega en `PeriopIntraopService.recordMedicationUse`. Crea filas en procedures_perioperative.procedure_medication_uses. Lee procedures_perioperative.operative_steps, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/medication-uses` la atiende `PeriopController.recordMedicationUse` (src/modules/procedures_perioperative/controllers/periop.controller.ts:563). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordMedicationUseDto` (4 campos, 2 obligatorios). Delega en `PeriopIntraopService.recordMedicationUse`. Crea filas en procedures_perioperative.procedure_medication_uses. Lee procedures_perioperative.operative_steps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:470` |
+| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:563` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:470` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:563` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2199,7 +2195,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `procedures_perioperative.operative_steps` | LEE | LEE | DIRECTA | PeriopController.recordMedicationUse → PeriopIntraopService.recordMedicationUse → PeriopIntraopRepository.findStepById | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:213` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.recordMedicationUse → PeriopIntraopService.recordMedicationUse → PeriopIntraopService.assertCaseInProgress → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 | `procedures_perioperative.procedure_medication_uses` | ESCRIBE | CREA | DIRECTA | PeriopController.recordMedicationUse → PeriopIntraopService.recordMedicationUse → PeriopIntraopRepository.createMedicationUse | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:532` |
 
 ### Parámetros
@@ -2254,7 +2249,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso no pertenece al caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2279,26 +2273,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.draftReport` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:498`
+- **Implementación:** `PeriopController.draftReport` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:601`
 
 ### Qué es y para qué sirve (negocio)
 
 Redactar el reporte operatorio. Caso de uso UC-53-11: Reporte operatorio. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:93`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/operative-reports` la atiende `PeriopController.draftReport` (src/modules/procedures_perioperative/controllers/periop.controller.ts:498). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `DraftOperativeReportDto` (17 campos, 3 obligatorios). Delega en `PeriopIntraopService.draftReport`. Crea filas en clinical.procedures, procedures_perioperative.operative_reports, procedures_perioperative.procedure_complications. Actualiza clinical.service_requests. Lee clinical.procedures, clinical.service_requests, procedures_perioperative.operative_reports, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/operative-reports` la atiende `PeriopController.draftReport` (src/modules/procedures_perioperative/controllers/periop.controller.ts:601). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `DraftOperativeReportDto` (17 campos, 3 obligatorios). Delega en `PeriopIntraopService.draftReport`. Crea filas en clinical.procedures, clinical.received_services, procedures_perioperative.operative_reports, procedures_perioperative.procedure_complications. Actualiza clinical.service_requests. Lee clinical.procedures, clinical.received_services, clinical.service_requests, procedures_perioperative.operative_reports, procedures_perioperative.procedure_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:498` |
+| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:601` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:498` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:601` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2309,11 +2303,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|---|---|---|
 | `clinical.procedures` | ESCRIBE | CREA | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ProceduresRepository.create | `src/modules/clinical/repositories/procedures.repository.ts:106` |
 | `clinical.procedures` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ProceduresRepository.findById | `src/modules/clinical/repositories/procedures.repository.ts:95` |
-| `clinical.service_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create | `src/modules/clinical/services/procedures.service.ts:76` |
+| `clinical.received_services` | ESCRIBE | CREA | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
+| `clinical.received_services` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
+| `clinical.service_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create | `src/modules/clinical/services/procedures.service.ts:81` |
 | `clinical.service_requests` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ServiceRequestsRepository.findById | `src/modules/clinical/repositories/service-requests.repository.ts:81` |
 | `procedures_perioperative.operative_reports` | ESCRIBE | CREA | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopRepository.createReport | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:620` |
 | `procedures_perioperative.operative_reports` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopRepository.findLastReport | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:688` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopService.ensureProcedure → ProceduresService.create → ReceivedServicesProjector.projectProcedure → ReceivedServicesRepository.findCaseByPrimaryProcedure | `src/modules/clinical/repositories/received-services.repository.ts:71` |
 | `procedures_perioperative.procedure_complications` | ESCRIBE | CREA | DIRECTA | PeriopController.draftReport → PeriopIntraopService.draftReport → PeriopIntraopRepository.createComplication | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:792` |
 
 ### Parámetros
@@ -2400,7 +2396,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Orden de servicio no encontrada; ResourceNotFoundException: Procedimiento padre no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de servicio no encontrada; ResourceNotFoundException: Procedimiento padre no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Indique el procedimiento por `procedureId` o por `procedureCodeConceptId` |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2425,7 +2421,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.signReport` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:514`
+- **Implementación:** `PeriopController.signReport` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:622`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2435,16 +2431,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/operative-reports/{reportId}/sign` la atiende `PeriopController.signReport` (src/modules/procedures_perioperative/controllers/periop.controller.ts:514). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `SignReportDto` (2 campos, 1 obligatorio). Delega en `PeriopIntraopService.signReport`. Crea filas en procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.operative_reports, procedures_perioperative.procedure_cases. Lee procedures_perioperative.operative_reports, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/operative-reports/{reportId}/sign` la atiende `PeriopController.signReport` (src/modules/procedures_perioperative/controllers/periop.controller.ts:622). Exige sesión con alguno de los roles SURGEON, PERIOP_ADMIN. Valida el cuerpo como `SignReportDto` (2 campos, 1 obligatorio). Delega en `PeriopIntraopService.signReport`. Crea filas en clinical.received_services, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.operative_reports. Lee clinical.procedures, clinical.received_services, procedures_perioperative.operative_reports.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:514` |
+| ROL | Alguno de: SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:622` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, reportId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:514` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, reportId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:622` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2453,12 +2449,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operative_reports` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.signReport → PeriopIntraopService.signReport | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:592` |
+| `clinical.procedures` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → ReceivedServicesProjector.projectCompletedCase → ReceivedServicesRepository.isProcedureOf | `src/modules/clinical/repositories/received-services.repository.ts:177` |
+| `clinical.received_services` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → ReceivedServicesProjector.projectCompletedCase → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
+| `clinical.received_services` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → ReceivedServicesProjector.projectCompletedCase → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
+| `procedures_perioperative.operative_reports` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.signReport → PeriopIntraopService.signReport | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:636` |
 | `procedures_perioperative.operative_reports` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopIntraopRepository.findReportForUpdate | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:655` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:455` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.signReport → PeriopIntraopService.signReport | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:606` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
 
 ### Parámetros
 
@@ -2509,7 +2506,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Reporte operatorio no encontrado; ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reporte operatorio no encontrado |
 | 409 | `CONFLICT` | ConflictException: El reporte ya está firmado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El reporte pertenece a otro caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2535,26 +2532,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.createStep` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:424`
+- **Implementación:** `PeriopController.createStep` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:502`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un paso operatorio. Caso de uso UC-53-08: Pasos y hallazgos. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:90`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/operative-steps` la atiende `PeriopController.createStep` (src/modules/procedures_perioperative/controllers/periop.controller.ts:424). Exige sesión con alguno de los roles SURGEON, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `CreateOperativeStepDto` (6 campos, 2 obligatorios). Delega en `PeriopIntraopService.createStep`. Crea filas en procedures_perioperative.operative_steps. Lee procedures_perioperative.operative_steps, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/operative-steps` la atiende `PeriopController.createStep` (src/modules/procedures_perioperative/controllers/periop.controller.ts:502). Exige sesión con alguno de los roles SURGEON, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `CreateOperativeStepDto` (6 campos, 2 obligatorios). Delega en `PeriopIntraopService.createStep`. Crea filas en procedures_perioperative.operative_steps. Lee procedures_perioperative.operative_steps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:424` |
+| ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:502` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:424` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:502` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2565,7 +2562,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|---|---|---|
 | `procedures_perioperative.operative_steps` | ESCRIBE | CREA | DIRECTA | PeriopController.createStep → PeriopIntraopService.createStep → PeriopIntraopRepository.createStep | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:186` |
 | `procedures_perioperative.operative_steps` | LEE | LEE | DIRECTA | PeriopController.createStep → PeriopIntraopService.createStep → PeriopIntraopRepository.findStepsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:239` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.createStep → PeriopIntraopService.createStep → PeriopIntraopService.assertCaseInProgress → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 
 ### Parámetros
 
@@ -2624,7 +2620,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2649,26 +2644,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.admitToPacu` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:531`
+- **Implementación:** `PeriopController.admitToPacu` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:644`
 
 ### Qué es y para qué sirve (negocio)
 
 Admitir al paciente en recuperación. Caso de uso UC-53-12: Recuperación. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:96`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/pacu-stays` la atiende `PeriopController.admitToPacu` (src/modules/procedures_perioperative/controllers/periop.controller.ts:531). Exige sesión con alguno de los roles PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `AdmitToPacuDto` (2 campos, 1 obligatorio). Delega en `PeriopIntraopService.admitToPacu`. Crea filas en procedures_perioperative.pacu_stays, procedures_perioperative.procedure_case_locations. Lee procedures_perioperative.pacu_stays, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/pacu-stays` la atiende `PeriopController.admitToPacu` (src/modules/procedures_perioperative/controllers/periop.controller.ts:644). Exige sesión con alguno de los roles PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `AdmitToPacuDto` (2 campos, 1 obligatorio). Delega en `PeriopIntraopService.admitToPacu`. Crea filas en procedures_perioperative.pacu_stays, procedures_perioperative.procedure_case_locations. Lee procedures_perioperative.pacu_stays.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:531` |
+| ROL | Alguno de: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:644` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:531` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:644` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2678,9 +2673,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `procedures_perioperative.pacu_stays` | ESCRIBE | CREA | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopIntraopRepository.createPacuStay | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:844` |
-| `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopIntraopRepository.findPacuStayByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:887` |
-| `procedures_perioperative.procedure_case_locations` | ESCRIBE | CREA | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopCasesRepository.createLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:640` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopIntraopRepository.findPacuStayByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:899` |
+| `procedures_perioperative.procedure_case_locations` | ESCRIBE | CREA | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopCasesRepository.createLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:653` |
 
 ### Parámetros
 
@@ -2730,7 +2724,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso ya tiene estancia en recuperación |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2756,26 +2749,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.createAssessment` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:217`
+- **Implementación:** `PeriopController.createAssessment` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:250`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar la valoración preoperatoria y sus puntuaciones de riesgo. Caso de uso UC-53-03: Valoración y riesgo. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:85`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:87`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/preoperative-assessments` la atiende `PeriopController.createAssessment` (src/modules/procedures_perioperative/controllers/periop.controller.ts:217). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreopAssessmentDto` (15 campos, 5 obligatorios). Delega en `PeriopPreopService.createAssessment`. Crea filas en procedures_perioperative.preoperative_assessments, procedures_perioperative.preoperative_risk_scores, procedures_perioperative.procedure_case_milestones. Lee procedures_perioperative.preoperative_assessments, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/preoperative-assessments` la atiende `PeriopController.createAssessment` (src/modules/procedures_perioperative/controllers/periop.controller.ts:250). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreopAssessmentDto` (15 campos, 5 obligatorios). Delega en `PeriopPreopService.createAssessment`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.preoperative_assessments, procedures_perioperative.preoperative_risk_scores, procedures_perioperative.procedure_case_milestones, procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.outbox_messages, procedures_perioperative.preoperative_assessments, procedures_perioperative.procedure_case_team_members. Publica periop.case.reacceptance_required.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:217` |
+| ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:250` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:217` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:250` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2784,11 +2777,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `procedures_perioperative.preoperative_assessments` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.createAssessment | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:144` |
 | `procedures_perioperative.preoperative_assessments` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.findAssessmentByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:178` |
 | `procedures_perioperative.preoperative_risk_scores` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.createRiskScore | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:215` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:455` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:121` |
 
 ### Parámetros
 
@@ -2872,7 +2877,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso ya tiene valoración preoperatoria |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La valoración exige revisar alergias y medicación; PreconditionFailedException: El caso está cancelado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2898,7 +2902,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.createPreoperativeOrder` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:241`
+- **Implementación:** `PeriopController.createPreoperativeOrder` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:279`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2908,16 +2912,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/preoperative-orders` la atiende `PeriopController.createPreoperativeOrder` (src/modules/procedures_perioperative/controllers/periop.controller.ts:241). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreoperativeOrderDto` (4 campos, 1 obligatorio). Delega en `PeriopPreopService.createOrder`. Crea filas en clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.preoperative_orders. Lee clinical.diagnostic_reports, clinical.encounters, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants, forms.form_instances, messaging.in_app_notifications, messaging.message_channels y 8 más. Publica ServiceRequestPlaced.
+`POST /procedure-cases/{id}/preoperative-orders` la atiende `PeriopController.createPreoperativeOrder` (src/modules/procedures_perioperative/controllers/periop.controller.ts:279). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreoperativeOrderDto` (4 campos, 1 obligatorio). Delega en `PeriopPreopService.createOrder`. Crea filas en clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.preoperative_orders. Actualiza iam.devices. Lee clinical.diagnostic_reports, clinical.encounters, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants, forms.form_instances, iam.devices, messaging.in_app_notifications y 8 más. Publica ServiceRequestPlaced.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:241` |
+| ROL | Alguno de: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:279` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:241` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:279` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2933,6 +2937,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:375` |
 | `directory.tenants` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.describe → DuplicateStudyDetector.providerName | `src/modules/clinical/services/duplicate-study-detector.ts:425` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → FormInstanceOriginValidator.assertUsableOrigin | `src/modules/forms/services/form-instance-origin.validator.ts:43` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
@@ -2940,12 +2946,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `procedures_perioperative.preoperative_orders` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → PeriopPreopRepository.createOrder | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:266` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ClinicalNotificationsService.serviceRequestPlaced → ClinicalNotificationsService.emitToPatient → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.describe → DuplicateStudyDetector.designationOrDisplay | `src/modules/clinical/services/duplicate-study-detector.ts:415` |
 | `terminology.concept_designations` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.describe → DuplicateStudyDetector.designationOrDisplay → ConceptDesignationsRepository.findPreferredByLanguageForConcepts | `src/modules/terminology/repositories/concept-designations.repository.ts:176` |
@@ -2954,7 +2959,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:279` |
+| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:282` |
 
 ### Parámetros
 
@@ -3008,7 +3013,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Encuentro no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3031,26 +3036,26 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.verifyOrders` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:343`
+- **Implementación:** `PeriopController.verifyOrders` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:396`
 
 ### Qué es y para qué sirve (negocio)
 
 Verificar las órdenes preoperatorias. Caso de uso UC-53-04: Clearance de órdenes. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:86`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:88`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/preoperative-orders/verify` la atiende `PeriopController.verifyOrders` (src/modules/procedures_perioperative/controllers/periop.controller.ts:343). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `VerifyOrdersDto` (2 campos, 2 obligatorios). Delega en `PeriopPreopService.verifyOrders`. Crea filas en procedures_perioperative.procedure_case_status_history. Actualiza procedures_perioperative.procedure_cases. Lee procedures_perioperative.preoperative_orders, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/preoperative-orders/verify` la atiende `PeriopController.verifyOrders` (src/modules/procedures_perioperative/controllers/periop.controller.ts:396). Exige sesión con alguno de los roles ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `VerifyOrdersDto` (2 campos, 2 obligatorios). Delega en `PeriopPreopService.verifyOrders`. Crea filas en procedures_perioperative.procedure_case_status_history. Lee procedures_perioperative.preoperative_orders.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:343` |
+| ROL | Alguno de: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:396` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:343` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:396` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -3060,9 +3065,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `procedures_perioperative.preoperative_orders` | LEE | LEE | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopPreopRepository.findOrdersByCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:310` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:397` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.verifyOrders → PeriopPreopService.verifyOrders | `src/modules/procedures_perioperative/services/periop-preop.service.ts:420` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
 
 ### Parámetros
 
@@ -3118,7 +3121,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Orden preoperatoria no encontrada en el caso |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden preoperatoria no encontrada en el caso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un caso programado admite verificación de órdenes |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3143,26 +3146,26 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.submitChecklistPhase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:359`
+- **Implementación:** `PeriopController.submitChecklistPhase` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:417`
 
 ### Qué es y para qué sirve (negocio)
 
 Responder una fase del checklist quirúrgico. Caso de uso UC-53-05: Checklist por fases. Dentro del módulo (descripción del modelo, en inglés): «Models medical interventions and operations from request and scheduling through preoperative assessment, surgical safety, anesthesia, operative execution, devices/implants/specimens, complications, recovery, follow-up…» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:87`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedures_perioperative/README.md:89`) · MODELO (`Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses` la atiende `PeriopController.submitChecklistPhase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:359). Exige sesión con alguno de los roles PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `SubmitChecklistPhaseDto` (8 campos, 5 obligatorios). Delega en `PeriopPreopService.submitChecklistPhase`. Crea filas en procedures_perioperative.procedure_case_milestones, procedures_perioperative.surgical_safety_responses. Actualiza procedures_perioperative.surgical_safety_checklists. Lee procedures_perioperative.surgical_safety_checklists, procedures_perioperative.surgical_safety_items, procedures_perioperative.surgical_safety_responses.
+`POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses` la atiende `PeriopController.submitChecklistPhase` (src/modules/procedures_perioperative/controllers/periop.controller.ts:417). Exige sesión con alguno de los roles PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN. Valida el cuerpo como `SubmitChecklistPhaseDto` (8 campos, 5 obligatorios). Delega en `PeriopPreopService.submitChecklistPhase`. Crea filas en procedures_perioperative.procedure_case_milestones, procedures_perioperative.surgical_safety_responses. Actualiza procedures_perioperative.surgical_safety_checklists. Lee procedures_perioperative.surgical_safety_checklists, procedures_perioperative.surgical_safety_items, procedures_perioperative.surgical_safety_responses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:359` |
+| ROL | Alguno de: PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:417` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, checklistId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:359` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, checklistId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:417` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -3171,8 +3174,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:455` |
-| `procedures_perioperative.surgical_safety_checklists` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase | `src/modules/procedures_perioperative/services/periop-preop.service.ts:549` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
+| `procedures_perioperative.surgical_safety_checklists` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase | `src/modules/procedures_perioperative/services/periop-preop.service.ts:609` |
 | `procedures_perioperative.surgical_safety_checklists` | LEE | LEE | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopPreopRepository.findChecklistForUpdate | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:377` |
 | `procedures_perioperative.surgical_safety_items` | LEE | LEE | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopPreopRepository.findItemsByPhase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:406` |
 | `procedures_perioperative.surgical_safety_responses` | ESCRIBE | CREA | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopPreopRepository.createResponse | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:466` |
@@ -3277,7 +3280,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.recordSpecimen` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:485`
+- **Implementación:** `PeriopController.recordSpecimen` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:583`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3287,16 +3290,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/specimens` la atiende `PeriopController.recordSpecimen` (src/modules/procedures_perioperative/controllers/periop.controller.ts:485). Exige sesión con alguno de los roles SURGEON, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordSpecimenDto` (7 campos, 3 obligatorios). Delega en `PeriopIntraopService.recordSpecimen`. Crea filas en procedures_perioperative.procedure_specimens. Lee procedures_perioperative.operative_steps, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/specimens` la atiende `PeriopController.recordSpecimen` (src/modules/procedures_perioperative/controllers/periop.controller.ts:583). Exige sesión con alguno de los roles SURGEON, PERIOP_NURSE, PERIOP_ADMIN. Valida el cuerpo como `RecordSpecimenDto` (7 campos, 3 obligatorios). Delega en `PeriopIntraopService.recordSpecimen`. Crea filas en procedures_perioperative.procedure_specimens. Lee procedures_perioperative.operative_steps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:485` |
+| ROL | Alguno de: SURGEON, PERIOP_NURSE, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:583` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:485` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:583` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -3306,7 +3309,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `procedures_perioperative.operative_steps` | LEE | LEE | DIRECTA | PeriopController.recordSpecimen → PeriopIntraopService.recordSpecimen → PeriopIntraopRepository.findStepById | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:213` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.recordSpecimen → PeriopIntraopService.recordSpecimen → PeriopIntraopService.assertCaseInProgress → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
 | `procedures_perioperative.procedure_specimens` | ESCRIBE | CREA | DIRECTA | PeriopController.recordSpecimen → PeriopIntraopService.recordSpecimen → PeriopIntraopRepository.createSpecimen | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:590` |
 
 ### Parámetros
@@ -3368,7 +3370,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso no pertenece al caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3393,7 +3394,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.listTeamMembers` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:266`
+- **Implementación:** `PeriopController.listTeamMembers` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:309`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3403,24 +3404,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /procedure-cases/{id}/team-members` la atiende `PeriopController.listTeamMembers` (src/modules/procedures_perioperative/controllers/periop.controller.ts:266). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.listTeamMembers`. Lee procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases.
+`GET /procedure-cases/{id}/team-members` la atiende `PeriopController.listTeamMembers` (src/modules/procedures_perioperative/controllers/periop.controller.ts:309). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.listTeamMembers`. Lee procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:266` |
+| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:309` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:266` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:309` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:187` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:191` |
 
 ### Parámetros
 
@@ -3449,7 +3450,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
@@ -3471,7 +3471,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.assignTeamMember` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:204`
+- **Implementación:** `PeriopController.assignTeamMember` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:232`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3481,16 +3481,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/team-members` la atiende `PeriopController.assignTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:204). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `AssignTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.assignTeamMember`. Crea filas en procedures_perioperative.procedure_case_team_members. Actualiza procedures_perioperative.procedure_cases. Lee procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases.
+`POST /procedure-cases/{id}/team-members` la atiende `PeriopController.assignTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:232). Exige sesión con alguno de los roles SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `AssignTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.assignTeamMember`. Crea filas en messaging.domain_events, messaging.outbox_messages, procedures_perioperative.procedure_case_status_history, procedures_perioperative.procedure_case_team_members. Actualiza procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Lee messaging.outbox_messages, procedures_perioperative.procedure_case_team_members. Publica periop.case.reacceptance_required.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:204` |
+| ROL | Alguno de: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:232` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:204` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/procedures_perioperative/controllers/periop.controller.ts:232` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -3499,10 +3499,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:588` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember | `src/modules/procedures_perioperative/services/periop-cases.service.ts:876` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:601` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
+
+### Eventos y trabajos
+
+| Tipo | Nombre | Fuente |
+|---|---|---|
+| Evento de dominio | `periop.case.reacceptance_required` | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:121` |
 
 ### Parámetros
 
@@ -3554,7 +3564,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El profesional ya tiene ese rol en el caso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -3580,7 +3589,7 @@ El árbol de decisión completo está en [flujos](../flujos/procedures_periopera
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.acceptTeamMember` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:289`
+- **Implementación:** `PeriopController.acceptTeamMember` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:332`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3590,24 +3599,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/team-members/{memberId}/accept` la atiende `PeriopController.acceptTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:289). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.acceptTeamMember`. Lee procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases, profiles.professional_credentials.
+`POST /procedure-cases/{id}/team-members/{memberId}/accept` la atiende `PeriopController.acceptTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:332). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Delega en `PeriopCasesService.acceptTeamMember`. Lee procedures_perioperative.procedure_case_team_members, profiles.professional_credentials.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:289` |
+| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:332` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:289` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:332` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → ProfessionalCredentialsRepository.hasCurrentCredential | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:155` |
 
 ### Parámetros
@@ -3638,7 +3646,7 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: El integrante no pertenece al caso |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El integrante no pertenece al caso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Sólo el propio integrante puede aceptar su participación; PreconditionFailedException: CAN-INT-002: el integrante no tiene credencial profesional vigente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3661,7 +3669,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PeriopController.respondTeamMember` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:319`
+- **Implementación:** `PeriopController.respondTeamMember` — `src/modules/procedures_perioperative/controllers/periop.controller.ts:367`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3671,16 +3679,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/team-members/{memberId}/respond` la atiende `PeriopController.respondTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:319). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Valida el cuerpo como `RespondTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.respondTeamMember`. Crea filas en audit.audit_log, messaging.domain_events, messaging.outbox_messages. Lee audit.audit_log, iam.sessions, messaging.outbox_messages, procedures_perioperative.procedure_case_team_members, procedures_perioperative.procedure_cases. Publica periop.case.team_participation_declined.
+`POST /procedure-cases/{id}/team-members/{memberId}/respond` la atiende `PeriopController.respondTeamMember` (src/modules/procedures_perioperative/controllers/periop.controller.ts:367). Exige sesión con alguno de los roles SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. Valida el cuerpo como `RespondTeamMemberDto` (2 campos, 2 obligatorios). Delega en `PeriopCasesService.respondTeamMember`. Crea filas en audit.audit_log, messaging.domain_events, messaging.outbox_messages. Lee audit.audit_log, iam.sessions, messaging.outbox_messages, procedures_perioperative.procedure_case_team_members. Publica periop.case.team_participation_declined.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:319` |
+| ROL | Alguno de: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN | `src/modules/procedures_perioperative/controllers/periop.controller.ts:367` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:319` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/procedures_perioperative/controllers/periop.controller.ts:367` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -3693,16 +3701,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.audit_log` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:607` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopCasesRepository.findCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:195` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1322` |
+| Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1442` |
 
 ### Parámetros
 
@@ -3755,7 +3762,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: El integrante no pertenece al caso |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El integrante no pertenece al caso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Sólo el propio integrante puede responder a su participación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

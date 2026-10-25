@@ -1,8 +1,8 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { DomainException } from '../../common';
-import type { RouteIndexService } from '../../observability/route-index/route-index.service';
+import { DomainException } from '../../../common';
+import type { RouteIndexService } from '../../../observability/route-index/route-index.service';
 import { OpsTrafficService, parseSeriesId } from './ops-traffic.service';
-import type { OpsTrafficRepository } from './ops-traffic.repository';
+import type { OpsTrafficRepository } from '../infrastructure/repositories/ops-traffic.repository';
 
 const NOW = new Date('2026-10-17T15:00:00Z');
 
