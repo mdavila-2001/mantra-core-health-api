@@ -206,11 +206,24 @@ export class BillingServiceCatalogService {
           imageFileId,
           SERVICE_IMAGE_OPTIONS,
         );
-      if (file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL) {
-        return await this.fileUpload.downloadForAuthorizedContext(
+      // Pertenencia: el `imageFileId` guardado no prueba que el archivo sea de
+      // esta organización (el alta lo aceptaba sin validar). Un archivo de otro
+      // tenant no se sirve aunque el servicio ya lo apunte.
+      if (
+        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+        file.tenantId === tenantId
+      ) {
+        const content = await this.fileUpload.downloadForAuthorizedContext(
           imageFileId,
           SERVICE_IMAGE_OPTIONS.operation,
         );
+        // Se valida una versión y se descarga la vigente: se vuelve a comprobar
+        // sobre lo que de verdad se va a enviar.
+        const allowed: readonly string[] =
+          SERVICE_IMAGE_OPTIONS.allowedMimeTypes;
+        if (allowed.includes(content.mimeType)) {
+          return content;
+        }
       }
     } catch {
       // Archivo inexistente, borrado, infectado o de otro tipo: para quien
@@ -250,6 +263,9 @@ export class BillingServiceCatalogService {
       'Creating service catalog item',
     );
     await this.assertRegistrationCanRegister(actor, dto.practiceId);
+    if (dto.imageFileId !== undefined) {
+      await this.assertImageUsable(dto.imageFileId, actor);
+    }
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -291,6 +307,45 @@ export class BillingServiceCatalogService {
       );
       return toItemDto(item);
     });
+  }
+
+  /**
+   * Exige que el archivo que se quiere poner como imagen del servicio sea del
+   * actor, de su organización, una imagen de sensibilidad normal y utilizable.
+   *
+   * Es la misma regla que aplica el logo de la organización
+   * (`assertUsableBy`: propio, vivo, con versión vigente sin infectar y del tipo
+   * admitido) más la sensibilidad y el tenant. Sin esto, `imageFileId` apuntaba a
+   * cualquier uuid y la ruta de imagen lo habría servido a toda la organización.
+   * Cualquier incumplimiento —archivo inexistente, ajeno, de otro tenant o de
+   * otro tipo— responde el mismo 404, para no confirmar qué uuids existen.
+   */
+  private async assertImageUsable(
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const tenantId = requireTenantId();
+    try {
+      const { file } = await this.attachableFiles.assertUsableBy(
+        this.em.fork(),
+        fileId,
+        actor,
+        SERVICE_IMAGE_OPTIONS,
+      );
+      if (
+        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+        file.tenantId === tenantId
+      ) {
+        return;
+      }
+    } catch {
+      // Se uniforma abajo: el motivo concreto no sale en la respuesta.
+    }
+    throw new ResourceNotFoundException(
+      'Imagen no encontrada',
+      undefined,
+      BillingErrorReason.SERVICE_CATALOG_IMAGE_NOT_USABLE,
+    );
   }
 
   /**

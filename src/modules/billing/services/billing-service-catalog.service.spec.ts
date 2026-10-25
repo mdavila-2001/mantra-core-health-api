@@ -60,7 +60,16 @@ function build() {
   const assignmentsRepo = { create: mockFn() };
   const attachableFiles = {
     assertUsableForAuthorizedContext: mockFn().mockResolvedValue({
-      file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+      file: {
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+        tenantId: 't1',
+      },
+    }),
+    assertUsableBy: mockFn().mockResolvedValue({
+      file: {
+        sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+        tenantId: 't1',
+      },
     }),
   };
   const fileUpload = {
@@ -674,6 +683,142 @@ describe('BillingServiceCatalogService', () => {
 
       await expect(d.service.getImageContent('s1')).rejects.toBeDefined();
       expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un archivo de otro tenant no se sirve aunque el servicio ya lo tuviera guardado', async () => {
+      const d = visible();
+      d.attachableFiles.assertUsableForAuthorizedContext.mockResolvedValue({
+        file: {
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+          tenantId: 'otro-tenant',
+        },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('si la versión descargada no es una imagen de la lista, responde 404 y no envía los bytes', async () => {
+      const d = visible();
+      d.fileUpload.downloadForAuthorizedContext.mockResolvedValue({
+        buffer: Buffer.from('<html>'),
+        mimeType: 'text/html',
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('imageFileId en el alta (P-22-8)', () => {
+    const dto = {
+      practiceId: 'pr1',
+      code: 'CONS-01',
+      name: 'Consulta general',
+      defaultPrice: '100.00',
+      imageFileId: 'file-1',
+    } as any;
+
+    /** Alta de la administración sobre un código libre. */
+    function alta() {
+      const d = build();
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(
+        catalogRow({ id: 'nuevo', imageFileId: 'file-1' }),
+      );
+      return d;
+    }
+
+    it('acepta una imagen propia, de su organización y de sensibilidad normal', async () => {
+      const d = alta();
+
+      await runWithTenant('t1', () => d.service.create(dto, actor));
+
+      expect(d.attachableFiles.assertUsableBy).toHaveBeenCalledWith(
+        expect.anything(),
+        'file-1',
+        actor,
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        }),
+      );
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 un archivo de otro usuario y no crea nada', async () => {
+      const d = alta();
+      d.attachableFiles.assertUsableBy.mockRejectedValue(
+        new Error('El archivo no le pertenece'),
+      );
+
+      const err = await runWithTenant('t1', () =>
+        d.service.create(dto, actor),
+      ).catch((e) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 un archivo de otro tenant', async () => {
+      const d = alta();
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: {
+          sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+          tenantId: 'otro-tenant',
+        },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.create(dto, actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 404 un archivo que no es de sensibilidad normal', async () => {
+      const d = alta();
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: { sensitivityConceptId: 'phi', tenantId: 't1' },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.create(dto, actor)),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('el rechazo es el mismo 404 para inexistente, ajeno y de otro tenant', async () => {
+      const mensajes = new Set<string>();
+      for (const falla of [
+        () => Promise.reject(new Error('no existe')),
+        () => Promise.reject(new Error('no le pertenece')),
+        () =>
+          Promise.resolve({
+            file: {
+              sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL,
+              tenantId: 'otro-tenant',
+            },
+          }),
+      ]) {
+        const d = alta();
+        d.attachableFiles.assertUsableBy.mockImplementation(falla);
+        const err = await runWithTenant('t1', () =>
+          d.service.create(dto, actor),
+        ).catch((e) => e);
+        mensajes.add(`${err.constructor.name}:${err.message}`);
+      }
+      expect(mensajes.size).toBe(1);
+    });
+
+    it('sin imageFileId no consulta archivos', async () => {
+      const d = alta();
+
+      await runWithTenant('t1', () =>
+        d.service.create({ ...dto, imageFileId: undefined }, actor),
+      );
+
+      expect(d.attachableFiles.assertUsableBy).not.toHaveBeenCalled();
     });
   });
 });
