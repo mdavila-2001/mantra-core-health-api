@@ -118,6 +118,8 @@ function build() {
     createMilestone: mockFn(),
     createLocation: mockFn(),
     findOpenLocation: mockFn(),
+    // Por defecto el procedimiento es del paciente del caso.
+    findProcedureOfPatient: mockFn().mockResolvedValue({ id: PROCEDURE }),
   };
   // Por defecto el caso existe y es del tenant activo; los tests que prueban su
   // ausencia o un caso ajeno lo sobreescriben.
@@ -460,6 +462,42 @@ describe('PeriopIntraopService', () => {
         reportVersion: 1,
         statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
       });
+    });
+
+    it('proves the procedure belongs to the case patient before linking it', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        caseInProgress({
+          patientProfileId: PROFILE,
+          custodianTenantId: TENANT_A,
+        }),
+      );
+      d.intraopRepo.findLastReport.mockResolvedValue(null);
+      d.intraopRepo.createReport.mockReturnValue({ id: REPORT });
+
+      await d.service.draftReport(CASE, dto(), actor);
+
+      expect(d.casesRepo.findProcedureOfPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        PROCEDURE,
+        PROFILE,
+        TENANT_A,
+      );
+    });
+
+    it('refuses a procedure of another patient and writes no report', async () => {
+      const d = build();
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
+      d.casesRepo.findProcedureOfPatient.mockResolvedValue(null);
+      d.intraopRepo.findLastReport.mockResolvedValue(null);
+
+      await expect(
+        d.service.draftReport(CASE, dto(), actor),
+      ).rejects.toMatchObject({
+        reason:
+          ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+      });
+      expect(d.intraopRepo.createReport).not.toHaveBeenCalled();
     });
 
     it('drafts a new version instead of editing the previous one', async () => {

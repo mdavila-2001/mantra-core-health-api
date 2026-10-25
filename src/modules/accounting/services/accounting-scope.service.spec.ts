@@ -347,6 +347,31 @@ describe('AccountingScopeService (ACC-01)', () => {
       expect(foreign.getResponse()).toEqual(absent.getResponse());
     });
 
+    it('assetsInPractice acepta el activo de la práctica y rechaza el de otra con el mismo 404', async () => {
+      const own = buildScope({
+        assetRepo: { findById: async () => ({ id: 'a1', practiceId: 'p1' }) },
+      });
+      await expect(
+        inA(() =>
+          own.scope.assetsInPractice(em, ['a1', undefined, 'a1'], 'p1'),
+        ),
+      ).resolves.toBeUndefined();
+
+      const foreign = buildScope({
+        assetRepo: { findById: async () => ({ id: 'a1', practiceId: 'p2' }) },
+      });
+      const otherPractice = await expectScopeNotFound(
+        inA(() => foreign.scope.assetsInPractice(em, ['a1'], 'p1')),
+        AccountingErrorReason.ASSET_NOT_FOUND,
+      );
+      const absent = buildScope({ assetRepo: { findById: async () => null } });
+      const missing = await expectScopeNotFound(
+        inA(() => absent.scope.assetsInPractice(em, ['a1'], 'p1')),
+        AccountingErrorReason.ASSET_NOT_FOUND,
+      );
+      expect(otherPractice.getResponse()).toEqual(missing.getResponse());
+    });
+
     it('liabilityInPractice exige la práctica exacta, no sólo el tenant', async () => {
       const { scope } = buildScope({
         liabilityRepo: {

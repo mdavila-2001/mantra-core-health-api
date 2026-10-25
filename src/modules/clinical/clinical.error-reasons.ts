@@ -72,4 +72,16 @@ export enum ClinicalErrorReason {
   MEDICATION_REQUEST_FOR_ADMINISTRATION_NOT_FOUND = 'MEDICATION_REQUEST_FOR_ADMINISTRATION_NOT_FOUND',
   /** La prescripción no está emitida (ISSUED) y no puede dispensarse/administrarse. */
   MEDICATION_REQUEST_NOT_ISSUED = 'MEDICATION_REQUEST_NOT_ISSUED',
+  /** El modo de ejecutor indicado no es uno de los tres del conjunto. */
+  PERFORMER_SELECTION_INVALID = 'PERFORMER_SELECTION_INVALID',
+  /** El modo de ejecutor exige un dato que la orden no trae. */
+  PERFORMER_FIELD_REQUIRED = 'PERFORMER_FIELD_REQUIRED',
+  /** El modo de ejecutor prohíbe un dato que la orden trae. */
+  PERFORMER_FIELD_NOT_ALLOWED = 'PERFORMER_FIELD_NOT_ALLOWED',
+  /** «Lo hago yo» pide un médico ejecutor distinto del que pide la orden. */
+  PERFORMER_NOT_REQUESTER = 'PERFORMER_NOT_REQUESTER',
+  /** La sede sugerida no ofrece el procedimiento con precio publicado. */
+  SUGGESTED_SITE_DOES_NOT_OFFER_PROCEDURE = 'SUGGESTED_SITE_DOES_NOT_OFFER_PROCEDURE',
+  /** El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida. */
+  PRACTITIONER_NOT_AFFILIATED_AT_SITE = 'PRACTITIONER_NOT_AFFILIATED_AT_SITE',
 }

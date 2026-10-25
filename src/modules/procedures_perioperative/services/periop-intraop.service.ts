@@ -14,7 +14,11 @@ import {
   PeriopIntraopRepository,
 } from '../repositories';
 import { SEVERITY_CONCEPT } from './periop-preop.service';
-import { isCaseInScope, loadCaseForUpdateInScope } from './periop-scope';
+import {
+  assertProcedureOfCasePatient,
+  isCaseInScope,
+  loadCaseForUpdateInScope,
+} from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 // El procedimiento que el informe describe vive en la historia clínica: se pide
 // a su dueño en vez de escribir `clinical.procedures` desde este módulo.
@@ -481,6 +485,14 @@ export class PeriopIntraopService {
       // El informe describe el acto quirúrgico: si el procedimiento todavía no
       // está en la historia, se registra aquí en vez de exigir una llamada
       // previa a `clinical` que el cirujano ni siquiera puede hacer.
+      if (dto.procedureId) {
+        await assertProcedureOfCasePatient(
+          this.casesRepo,
+          tx,
+          dto.procedureId,
+          surgicalCase,
+        );
+      }
       const procedureId =
         dto.procedureId ??
         (await this.ensureProcedure(surgicalCase, dto, _actor));

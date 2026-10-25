@@ -65,6 +65,19 @@ Importa (`accounting.module.ts`): `AuditModule`, `PracticeModule`, `BillingModul
 | `GET /accounting/practitioner/liabilities/:id/schedule` | PRACTITIONER | `accounting-practitioner` |
 | `PATCH /accounting/practitioner/liabilities/:id/automation` | PRACTITIONER | `accounting-practitioner` |
 | `POST /accounting/practitioner/liabilities/:id/progress` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/summary` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/accounts` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/simple/accounts` | PRACTITIONER | `accounting-practitioner` |
+| `PUT /accounting/practitioner/simple/accounts/:id` | PRACTITIONER | `accounting-practitioner` |
+| `DELETE /accounting/practitioner/simple/accounts/:id` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/records` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/simple/records` | PRACTITIONER | `accounting-practitioner` |
+| `PUT /accounting/practitioner/simple/records/:id` | PRACTITIONER | `accounting-practitioner` |
+| `DELETE /accounting/practitioner/simple/records/:id` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/transactions` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/simple/transactions` | PRACTITIONER | `accounting-practitioner` |
+| `PUT /accounting/practitioner/simple/transactions/:id` | PRACTITIONER | `accounting-practitioner` |
+| `DELETE /accounting/practitioner/simple/transactions/:id` | PRACTITIONER | `accounting-practitioner` |
 | `POST /accounting/open-items` | SECURITY_ADMIN | `accounting-subledger` |
 | `POST /accounting/clearing-documents` | SECURITY_ADMIN | `accounting-subledger` |
 
@@ -79,7 +92,7 @@ conversión de entrada sigue pasando por `Number`, con sus límites de precisió
 
 ## Endpoints por caso de uso (UC-16-01..14, subconjunto)
 
-Sólo los 14 casos de uso originales más el alta de cuenta. El módulo expone además el cockpit (6 lecturas, sección siguiente) y el auto-servicio contable del profesional (`/accounting/practitioner/*`, 12 rutas, rol `PRACTITIONER`, controller `accounting-practitioner`); la lista completa está en [Rutas HTTP](#rutas-http-y-alcance-medido).
+Sólo los 14 casos de uso originales más el alta de cuenta. El módulo expone además el cockpit (6 lecturas, sección siguiente) y el auto-servicio contable del profesional (`/accounting/practitioner/*`, 12 rutas, rol `PRACTITIONER`, controller `accounting-practitioner`) y su contabilidad simple (P49, `/accounting/practitioner/simple/*`, 13 rutas, mismo rol); la lista completa está en [Rutas HTTP](#rutas-http-y-alcance-medido).
 
 | UC | Método y ruta | Descripción |
 |----|---------------|-------------|

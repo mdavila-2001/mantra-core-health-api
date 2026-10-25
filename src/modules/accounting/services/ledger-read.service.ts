@@ -33,6 +33,37 @@ import type {
 } from '../dto';
 import { LEDGER_DEFAULT_LIMIT } from '../dto';
 
+/** Código del estado del asiento en la máquina C-17, tal como lo lee la pantalla. */
+export type JournalStatusCode =
+  | 'DRAFT'
+  | 'AUTO_CLASSIFIED'
+  | 'PENDING_REVIEW'
+  | 'APPROVED'
+  | 'POSTED'
+  | 'REVERSED';
+
+/**
+ * Del concepto de estado (`status_concept_id`) a su código. El listado lo
+ * publica para que la pantalla distinga un borrador de un asiento
+ * contabilizado o reversado sin deducirlo de `postedAt`: un asiento reversado
+ * conserva su fecha de posteo y se leía como «posteado».
+ */
+const JOURNAL_STATUS_BY_CONCEPT: Readonly<Record<string, JournalStatusCode>> = {
+  [ACCT.TXN_DRAFT]: 'DRAFT',
+  [ACCT.TXN_AUTO_CLASSIFIED]: 'AUTO_CLASSIFIED',
+  [ACCT.TXN_PENDING_REVIEW]: 'PENDING_REVIEW',
+  [ACCT.TXN_APPROVED]: 'APPROVED',
+  [ACCT.TXN_POSTED]: 'POSTED',
+  [ACCT.TXN_REVERSED]: 'REVERSED',
+};
+
+/** Código del estado, o `null` si el concepto no es uno de la máquina C-17. */
+export function journalStatusCode(
+  statusConceptId: string,
+): JournalStatusCode | null {
+  return JOURNAL_STATUS_BY_CONCEPT[statusConceptId] ?? null;
+}
+
 /**
  * La cara de **lectura** del mayor: plan de cuentas, libro diario, el asiento
  * con sus líneas, y el balance de sumas y saldos.
@@ -241,6 +272,7 @@ export class LedgerReadService {
         transactionDate: a.transactionDate,
         fiscalPeriodId: a.fiscalPeriodId ?? null,
         statusConceptId: a.statusConceptId,
+        status: journalStatusCode(a.statusConceptId),
         transactionTypeConceptId: a.transactionTypeConceptId ?? null,
         currencyConceptId: a.currencyConceptId ?? null,
         totalAmount: a.totalAmount ?? null,
@@ -280,6 +312,14 @@ export class LedgerReadService {
       em,
       transactionId,
     );
+    const assignmentByEntry = new Map(
+      (
+        await this.journalRepo.assignmentsForEntries(
+          em,
+          lines.map((l) => l.id),
+        )
+      ).map((a) => [a.ledgerEntryId, a]),
+    );
 
     return {
       id: entry.id,
@@ -288,6 +328,7 @@ export class LedgerReadService {
       transactionDate: entry.transactionDate,
       fiscalPeriodId: entry.fiscalPeriodId ?? null,
       statusConceptId: entry.statusConceptId,
+      status: journalStatusCode(entry.statusConceptId),
       currencyConceptId: entry.currencyConceptId ?? null,
       totalAmount: entry.totalAmount ?? null,
       postedAt: entry.postedAt ?? null,
@@ -298,6 +339,8 @@ export class LedgerReadService {
         directionConceptId: l.directionConceptId,
         amountBase: amountInBase(l),
         costCenterId: l.costCenterId ?? null,
+        profitCenterId: assignmentByEntry.get(l.id)?.profitCenterId ?? null,
+        assetId: assignmentByEntry.get(l.id)?.assetId ?? null,
         currencyConceptId: l.currencyConceptId ?? null,
       })),
     };
