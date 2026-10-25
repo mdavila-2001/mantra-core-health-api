@@ -16,6 +16,8 @@ export * from './medical-aspects.service';
 export * from './prescription-signature-policies.service';
 export * from './procedures.service';
 export * from './immunizations.service';
+export * from './received-services-projector';
+export * from './received-services-read.service';
 export * from './clinical-read.service';
 // B.3 — el PDF oficial de receta y su verificación pública. `prescription-seal`,
 // `alovida-mark` y `prescription-qr` son colaboradores internos (funciones

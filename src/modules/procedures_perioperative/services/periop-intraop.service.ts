@@ -17,7 +17,10 @@ import { SEVERITY_CONCEPT } from './periop-preop.service';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 // El procedimiento que el informe describe vive en la historia clínica: se pide
 // a su dueño en vez de escribir `clinical.procedures` desde este módulo.
-import { ProceduresService } from '../../clinical/services';
+import {
+  ProceduresService,
+  ReceivedServicesProjector,
+} from '../../clinical/services';
 import {
   CreateOperativeStepDto,
   OperativeStepResponseDto,
@@ -127,6 +130,7 @@ export class PeriopIntraopService {
     private readonly intraopRepo: PeriopIntraopRepository,
     private readonly casesRepo: PeriopCasesRepository,
     private readonly procedures: ProceduresService,
+    private readonly receivedServices: ReceivedServicesProjector,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopIntraopService.name);
@@ -639,6 +643,16 @@ export class PeriopIntraopService {
           statusConceptId: CONCEPTS.MILESTONE_REACHED,
         });
         touch(surgicalCase, actor.id);
+        // El cierre del caso es la intervención realizada: entra a «Servicios
+        // recibidos» en esta misma transacción. El flush previo va porque las FK de
+        // la tabla son columnas, no relaciones, y el ORM no ordena los inserts.
+        await tx.flush();
+        await this.receivedServices.projectCompletedCase(
+          tx,
+          surgicalCase,
+          actor.id,
+          report.procedureId,
+        );
       }
 
       return {
