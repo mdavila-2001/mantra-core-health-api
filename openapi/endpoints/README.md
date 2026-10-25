@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1533 de 1533 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -62,7 +62,7 @@ Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `open
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
-| [data_catalog](data-catalog.md) | 37 | `admin-catalog`, `admin-portal`, `data-catalog-internal` | 3 |
+| [data_catalog](data-catalog.md) | 38 | `admin-catalog`, `admin-portal`, `data-catalog-internal` | 4 |
 | [delegated_access](delegated-access.md) | 12 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 31 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens` | 7 |
@@ -123,4 +123,4 @@ Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1532 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1533 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

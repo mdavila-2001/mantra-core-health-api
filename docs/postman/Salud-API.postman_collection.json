@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1532 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1532 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1533 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1533 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -52761,7 +52761,7 @@
       ]
     },
     {
-      "name": "internal (44)",
+      "name": "internal (45)",
       "item": [
         {
           "name": "audio-assets-internal",
@@ -53783,6 +53783,54 @@
         {
           "name": "data-catalog-internal",
           "item": [
+            {
+              "name": "POST /internal/catalog/inventory/import · Importa el inventario de la API a las tablas de operaciones y procesos (worker)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/catalog/inventory/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "catalog",
+                    "inventory",
+                    "import"
+                  ]
+                },
+                "description": "Lee `inventario/` y escribe `catalog_operations`, `catalog_operation_impacts`, `catalog_processes`, `catalog_process_steps` y `catalog_process_step_operations` en una transacción. Idempotente: lo que no cambió no se toca. Corre después de un escaneo, porque cada impacto apunta a un objeto de `catalog_objects`. Una operación que deja de aparecer queda `NOT_OBSERVED`. 503 si la instancia no tiene el inventario.\n\n`POST /internal/catalog/inventory/import`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500, 503, 504\n\noperationId: `InternalCatalogInventoryController_importInventory`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{importId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.importId);",
+                      "  if (id) pm.environment.set('importId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "POST /internal/catalog/scans/run-next · Sonda: reclama y ejecuta el siguiente escaneo (worker)",
               "request": {
