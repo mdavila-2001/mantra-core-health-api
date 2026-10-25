@@ -1310,7 +1310,7 @@ export class TrackingService {
 
     const secrets =
       carrier && carrier.stateConceptId === CONCEPTS.STATE_ACTIVE
-        ? carrierWebhookSecrets(carrierCode)
+        ? carrierWebhookSecrets(carrier.code)
         : null;
     const signature = normalizeCarrierSignature(auth.signature);
     const timestamp = auth.timestamp;
@@ -1321,7 +1321,7 @@ export class TrackingService {
       );
     }
 
-    const signed = carrierSignedString(timestamp, carrierCode, dto);
+    const signed = carrierSignedString(timestamp, carrier.code, dto);
     if (!secrets.some((secret) => verifySignature(secret, signed, signature))) {
       return reject(
         TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,

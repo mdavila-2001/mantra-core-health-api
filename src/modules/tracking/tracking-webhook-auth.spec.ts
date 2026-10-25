@@ -9,10 +9,18 @@ const SECRET = 's'.repeat(40);
 describe('carrierWebhookSecrets', () => {
   it('lee el secreto propio del transportista del entorno', () => {
     expect(
-      carrierWebhookSecrets('dhl-ec', {
+      carrierWebhookSecrets('DHL_EC', {
         WEBHOOK_SECRET_CARRIER_DHL_EC: SECRET,
       }),
     ).toEqual([SECRET]);
+  });
+
+  it('el mapeo es inyectivo: un código con otro formato no comparte variable con ninguno', () => {
+    const env = { WEBHOOK_SECRET_CARRIER_DHL_EC: SECRET };
+    expect(carrierWebhookSecrets('dhl-ec', env)).toBeNull();
+    expect(carrierWebhookSecrets('dhl_ec', env)).toBeNull();
+    expect(carrierWebhookSecrets('DHL-EC', env)).toBeNull();
+    expect(carrierWebhookSecrets('DHL EC', env)).toBeNull();
   });
 
   it('devuelve el nuevo y el anterior durante una rotación', () => {

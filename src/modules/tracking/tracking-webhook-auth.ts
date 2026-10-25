@@ -26,7 +26,7 @@ export interface CarrierSignedFields {
 const SIGNATURE_FORMAT = /^(?:sha256=)?([0-9a-f]{64})$/i;
 
 /** Parte del código de transportista que cabe en el nombre de la variable. */
-const MAX_CARRIER_ENV_NAME = 40;
+const CARRIER_ENV_CODE = /^[A-Z0-9_]{1,40}$/;
 
 /**
  * Forma única de la firma (64 hex en minúsculas, sin prefijo).
@@ -46,8 +46,9 @@ export function normalizeCarrierSignature(
  *
  * El secreto de cada transportista vive en el entorno (que en despliegue
  * alimenta el gestor de secretos), nunca en la base ni derivado de una raíz
- * común: `WEBHOOK_SECRET_CARRIER_<CÓDIGO>`, con el código en mayúsculas y los
- * caracteres que no son alfanuméricos como `_`. Durante una rotación basta
+ * común: `WEBHOOK_SECRET_CARRIER_<CÓDIGO>`, con el código tal cual lo guarda el
+ * catálogo, que sólo puede contener `A-Z`, `0-9` y `_` (hasta 40); otro formato no
+ * autentica. Durante una rotación basta
  * declarar además `WEBHOOK_SECRET_CARRIER_<CÓDIGO>_PREV`: valen ambos hasta
  * retirar el anterior. Fail-closed: sin variable, o con un secreto de menos de
  * 32 caracteres, el transportista no puede autenticarse.
@@ -60,10 +61,11 @@ export function carrierWebhookSecrets(
   carrierCode: string,
   env: NodeJS.ProcessEnv = process.env,
 ): string[] | null {
-  const name = carrierCode.toUpperCase().replace(/[^A-Z0-9]/g, '_');
-  if (name.length === 0 || name.length > MAX_CARRIER_ENV_NAME) return null;
+  // Inyectivo: ni plegado de mayúsculas ni reemplazo de caracteres, para que dos
+  // códigos distintos nunca compartan variable (`a-b` y `a_b`, `dhl` y `DHL`).
+  if (!CARRIER_ENV_CODE.test(carrierCode)) return null;
 
-  const current = `WEBHOOK_SECRET_CARRIER_${name}`;
+  const current = `WEBHOOK_SECRET_CARRIER_${carrierCode}`;
   const previous = `${current}_PREV`;
   const ref = env[previous]
     ? `env:${current},env:${previous}`
