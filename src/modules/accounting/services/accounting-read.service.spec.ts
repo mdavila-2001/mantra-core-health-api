@@ -77,6 +77,7 @@ function build(
     findPostedEntriesWithAssignments: mockFn(() => Promise.resolve([])),
     ledgerEntriesForTransaction: mockFn(),
     assignmentForEntry: mockFn(),
+    assignmentsForEntries: mockFn(),
     createFile: mockFn(),
   };
   const accountsRepo = {

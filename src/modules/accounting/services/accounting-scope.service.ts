@@ -105,6 +105,7 @@ export interface PostingScopeInput {
     readonly accountId: string;
     readonly costCenterId?: string;
     readonly profitCenterId?: string;
+    readonly assetId?: string;
   }[];
 }
 
@@ -334,6 +335,31 @@ export class AccountingScopeService {
         center?.practiceId,
         practiceId,
         FAILURE.costCenter,
+      );
+    }
+  }
+
+  /**
+   * Exige que cada activo fijo referenciado por una línea exista y sea de
+   * **esa** práctica. Mismo 404 uniforme que las cuentas: no revela si el
+   * activo existe en otra práctica.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Activos referenciados (los `undefined` se ignoran).
+   * @param practiceId - Práctica ya verificada del asiento.
+   */
+  async assetsInPractice(
+    em: EntityManager,
+    ids: readonly (string | undefined)[],
+    practiceId: string,
+  ): Promise<void> {
+    for (const id of unique(ids)) {
+      const asset = await this.assetRepo.findById(em, id);
+      assertResourceInTenant(
+        asset,
+        asset?.practiceId,
+        practiceId,
+        FAILURE.asset,
       );
     }
   }
@@ -569,6 +595,11 @@ export class AccountingScopeService {
     await this.profitCentersInTenant(
       em,
       input.lines.map((l) => l.profitCenterId),
+    );
+    await this.assetsInPractice(
+      em,
+      input.lines.map((l) => l.assetId),
+      input.practiceId,
     );
     return period;
   }
