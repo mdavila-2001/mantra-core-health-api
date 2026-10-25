@@ -32,6 +32,8 @@ function build(rows: any[] = [row()]) {
     findByPatient: mockFn().mockResolvedValue(rows),
     findInvoiceLineAmounts: mockFn().mockResolvedValue([]),
     findChargeLines: mockFn().mockResolvedValue([]),
+    findPerformerNames: mockFn().mockResolvedValue(new Map()),
+    findSiteNames: mockFn().mockResolvedValue(new Map()),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new ReceivedServicesReadService(
@@ -81,6 +83,44 @@ describe('ReceivedServicesReadService', () => {
     ]);
     // El concepto viaja siempre, para que el cliente resuelva la etiqueta del tipo nuevo.
     expect(res.items[2].typeConceptId).toBe('un-tipo-nuevo');
+  });
+
+  describe('nombres ya resueltos', () => {
+    it('devuelve el nombre del profesional y de la sede, porque el paciente no puede resolverlos', async () => {
+      const d = build([row()]);
+      d.repository.findPerformerNames.mockResolvedValue(
+        new Map([['doc-1', 'Dra. Ana Rojas']]),
+      );
+      d.repository.findSiteNames.mockResolvedValue(
+        new Map([['site-1', 'Clínica Central']]),
+      );
+      const res = await d.service.list(PATIENT, 50, patient);
+      expect(res.items[0]).toMatchObject({
+        performerName: 'Dra. Ana Rojas',
+        practiceSiteName: 'Clínica Central',
+      });
+      expect(d.repository.findPerformerNames).toHaveBeenCalledWith(em, [
+        'doc-1',
+      ]);
+      expect(d.repository.findSiteNames).toHaveBeenCalledWith(em, ['site-1']);
+    });
+
+    it('pide cada nombre una sola vez aunque se repita', async () => {
+      const d = build([row({ id: 'a' }), row({ id: 'b' })]);
+      await d.service.list(PATIENT, 50, patient);
+      expect(d.repository.findPerformerNames).toHaveBeenCalledWith(em, [
+        'doc-1',
+      ]);
+    });
+
+    it('sin nombre registrado no inventa uno', async () => {
+      const d = build([
+        row({ performerProfileId: undefined, practiceSiteId: undefined }),
+      ]);
+      const res = await d.service.list(PATIENT, 50, patient);
+      expect(res.items[0].performerName).toBeUndefined();
+      expect(res.items[0].practiceSiteName).toBeUndefined();
+    });
   });
 
   describe('quién ve el dinero', () => {
