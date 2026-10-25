@@ -19,7 +19,7 @@ La API (`src/main.ts`) y los workers son procesos separados. Cada archivo `src/w
 | `identity_assurance` | `dispatch-identity-checks`, `expire-sweep`, `evidence-lifecycle` | `identity_assurance` |
 | `integrations` | `message-retry`, `message-correlation`, `message-dispatch` | `integrations` |
 | `lakehouse` | `release-expiry` | Sin script; Compose usa Node directo |
-| `messaging` | `outbox-relay`, `queue`, `notification-delivery` | `messaging` |
+| `messaging` | `outbox-relay`, `queue`, `notification-delivery`, `prescription-expiry-notice` | `messaging` |
 | `pharmacy_inventory` | `expire-reservations` | `pharmacy_inventory` |
 | `promotions` | `expire-points` | `promotions` |
 | `qa_lab` | `schedule-tick`, `plan-run-tick` | `qa_lab` |

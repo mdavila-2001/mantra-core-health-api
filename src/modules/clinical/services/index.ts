@@ -21,6 +21,7 @@ export * from './clinical-read.service';
 // `alovida-mark` y `prescription-qr` son colaboradores internos (funciones
 // puras y helpers de `pdfkit`, no providers de Nest) y no se exportan acá.
 export * from './prescription-pdf.service';
+export * from './prescription-expiry-notices.service';
 // Carril P1: los disparadores in-app de receta y encuentro. Va al final porque
 // es el único servicio de `clinical` que no registra nada clínico — sólo avisa.
 export { ClinicalNotificationsService } from './clinical-notifications.service';

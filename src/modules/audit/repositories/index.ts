@@ -6,3 +6,4 @@ export * from './moderation.repository';
 export * from './third-party-access.repository';
 export * from './history.repository';
 export * from './audit-query.repository';
+export * from './patient-access-log.repository';
