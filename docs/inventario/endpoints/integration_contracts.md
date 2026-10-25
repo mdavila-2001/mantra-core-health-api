@@ -1098,8 +1098,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/integration_contracts/dto/responses.dto.ts:102` |
-| `integrationContractId` | `string` | Sí | formato uuid | — | Identificador asociado a integration contract. | `src/modules/integration_contracts/dto/responses.dto.ts:108` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado de la suscripción | `src/modules/integration_contracts/dto/responses.dto.ts:117` |
+| `providerId` | `string` | Sí | formato uuid | — | Identificador asociado a provider. | sin fuente |
+| `eventType` | `string` | Sí | — | — | Valor de event type mantenido por la instancia. | sin fuente |
+| `state` | `string` | Sí | formato uuid | — | Concept id del estado | sin fuente |
+| `updated` | `boolean` | Sí | — | — | true si se actualizó una suscripción existente | sin fuente |
 
 ### Respuestas posibles
 

@@ -3,13 +3,13 @@
 # Flujos del módulo `telemetry`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 22 (19 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 25 (19 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [telemetry](../endpoints/telemetry.md)
 
 ## Proceso: Módulo Telemetry (28)
 
-- **Código:** `telemetry` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 22
-- **Actores:** Cualquier sesión válida · DATA_PLATFORM_ADMIN · DPO · MARKETING_MANAGER · PLATFORM_ADMIN · SECURITY_ADMIN
+- **Código:** `telemetry` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 25
+- **Actores:** Cualquier sesión válida · DATA_PLATFORM_ADMIN · DPO · MARKETING_MANAGER · PLATFORM_ADMIN · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/telemetry/README.md`
 
@@ -45,6 +45,9 @@ _Fuente: `src/modules/telemetry/README.md:3`_
 |  |  | POST /telemetry/event-schemas | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /telemetry/funnels | SECURITY_ADMIN | MEDIO | 5 |
 |  |  | POST /telemetry/tracking-purposes | SECURITY_ADMIN | MEDIO | 2 |
+| `ctrl:TelemetryOnboardingAnalyticsController` | Operaciones de TelemetryOnboardingAnalyticsController que el README no asigna a un caso de uso | GET /admin/analytics/onboarding/funnel | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 0 |
+|  |  | GET /admin/analytics/onboarding/heatmap | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 0 |
+|  |  | POST /telemetry/onboarding-events | Público (sin sesión) | BAJO | 0 |
 
 ### Diagrama — etapas `ctrl:TelemetryAnalyticsController`, `ctrl:TelemetryConsentController`, `ctrl:TelemetryEventsController`…
 
@@ -54,6 +57,7 @@ flowchart LR
   a14(["PLATFORM_ADMIN · SECURITY_ADMIN · DPO"]):::actor
   a21(["SECURITY_ADMIN"]):::actor
   a24(["Cualquier sesión válida"]):::actor
+  a47(["Público (sin sesión)"]):::actor
   t3[("telemetry.activity_event_schema_definitions")]:::tabla
   t4[("telemetry.funnel_definitions")]:::tabla
   t5[("telemetry.funnel_steps")]:::tabla
@@ -100,6 +104,11 @@ flowchart LR
     o41["POST /telemetry/event-schemas"]:::op
     o42["POST /telemetry/funnels"]:::op
     o43["POST /telemetry/tracking-purposes"]:::op
+  end
+  subgraph s4["ctrl:TelemetryOnboardingAnalyticsController · Operaciones de TelemetryOnboardin…"]
+    o44["GET /admin/analytics/onboarding/funnel"]:::op
+    o45["GET /admin/analytics/onboarding/heatmap"]:::op
+    o46["POST /telemetry/onboarding-events"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -198,6 +207,9 @@ flowchart LR
   a21 --> o43
   o43 -->|"CREA"| t29
   o43 -->|"LEE"| t29
+  a2 --> o44
+  a2 --> o45
+  a47 --> o46
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1443,5 +1455,8 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | GET /admin/analytics/funnels | 200, 401, 403, 429 | 3 |
+| GET /admin/analytics/onboarding/funnel | 200, 401, 403, 429 | 0 |
+| GET /admin/analytics/onboarding/heatmap | 200, 400, 401, 403, 429 | 0 |
 | POST /telemetry/analytics-subjects | 201, 400, 401, 403, 429 | 2 |
+| POST /telemetry/onboarding-events | 200, 400, 401, 429 | 0 |
 | GET /telemetry/tracking-consents/me | 200, 400, 401, 403, 429 | 1 |

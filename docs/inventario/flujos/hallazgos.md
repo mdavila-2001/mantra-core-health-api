@@ -12,8 +12,8 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 121 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1055 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 18 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1063 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 17 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
 | [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 107 |
 
@@ -366,7 +366,7 @@ _Ninguno._
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1055 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1063 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
@@ -386,6 +386,7 @@ _Ninguno._
 | POST /accounting/liabilities/{id}/payments | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/open-items | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/postings/determine-accounts | accounting | ningún cliente del frontend la declara | — |
+| GET /accounting/practitioner/assets/{id}/depreciations | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/liabilities/{id}/schedule | accounting | ningún cliente del frontend la declara | — |
 | POST /ads/ad-accounts/{id}/campaigns/launch | ads | ningún cliente del frontend la declara | — |
 | POST /ads/ad-accounts/{id}/experiments | ads | ningún cliente del frontend la declara | — |
@@ -571,19 +572,17 @@ _Ninguno._
 | POST /common/files | common | ningún cliente del frontend la declara | — |
 | POST /common/files/{id}/versions | common | ningún cliente del frontend la declara | — |
 | POST /common/files/{id}/versions/{vid}/derivatives | common | ningún cliente del frontend la declara | — |
-| POST /common/identifiers | common | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1055; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1063; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 18 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 17 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| GET /clinical/patients/{patientProfileId}/received-services | clinical | handler sin operación en openapi.json | `src/modules/clinical/controllers/clinical-read.controller.ts:110` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:582` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:589` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:602` |
