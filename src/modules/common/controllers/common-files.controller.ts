@@ -12,6 +12,7 @@ import {
   Post,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -26,6 +27,7 @@ import {
 import { CurrentUser, loadStorageEnv } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { FileUploadService, FilesService } from '../services';
+import { FileLinkTargetGuard } from './file-link-target.guard';
 import type { UploadedFileBytes } from '../services';
 import {
   CreateFileDerivativeDto,
@@ -178,8 +180,15 @@ export class CommonFilesController {
     return this.filesService.createDerivative(id, vid, dto, user);
   }
 
-  /** UC-02-08: vincula un archivo a un propietario. */
+  /**
+   * UC-02-08: vincula un archivo a un propietario.
+   *
+   * El destino se autoriza en `FileLinkTargetGuard` (sólo `USER` propio y
+   * `TENANT` actual en la ruta genérica) y la propiedad del archivo, en el
+   * servicio; los recursos clínicos se vinculan por su ruta clínica.
+   */
   @Post(':id/links')
+  @UseGuards(FileLinkTargetGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Vincular un archivo a un propietario (UC-02-08)' })
   createLink(
