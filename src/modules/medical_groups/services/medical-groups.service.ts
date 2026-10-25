@@ -752,7 +752,7 @@ export class MedicalGroupsService {
     em: EntityManager,
     group: MedicalGroups,
   ): Promise<boolean> {
-    if (group.closedAt !== undefined) {
+    if (group.closedAt != null) {
       return false;
     }
     if (!isPastCloseWindowNow(group)) {
@@ -785,7 +785,7 @@ export class MedicalGroupsService {
         ...members.map((m) => m.practitionerProfileId),
         ...groups
           .map((g) => g.patientProfileId)
-          .filter((id): id is string => id !== undefined),
+          .filter((id): id is string => typeof id === 'string'),
       ]),
     ];
     const services =
@@ -855,8 +855,7 @@ export class MedicalGroupsService {
               MEDICAL_GROUP_MEMBER_INVITATION_STATUS.ACCEPTED,
         ));
     const isRealized = isRealizedNow(group);
-    const isClosed =
-      group.closedAt !== undefined || isPastCloseWindowNow(group);
+    const isClosed = group.closedAt != null || isPastCloseWindowNow(group);
     return {
       id: group.id,
       serviceCatalogId: group.serviceCatalogId,
@@ -864,7 +863,7 @@ export class MedicalGroupsService {
       requestingPractitionerId: group.requestingPractitionerId,
       patientProfileId: group.patientProfileId,
       patientName:
-        group.patientProfileId === undefined || !viewerIsInTeam
+        group.patientProfileId == null || !viewerIsInTeam
           ? null
           : (names.people.get(group.patientProfileId) ?? null),
       conditionId: group.conditionId,
@@ -912,6 +911,12 @@ function personName(person: Persons): string | null {
   return person.displayName ?? (composed === '' ? null : composed);
 }
 
+/*
+ * Las columnas opcionales llegan `null` de la base, no `undefined`, aunque la
+ * entidad las declare `?:`. Por eso las comparaciones de abajo y las de
+ * `toDto` usan `!= null`: con `!== undefined` un grupo recién leído figuraba
+ * cerrado (closed_at null) y nadie podía operar sobre él.
+ */
 function isRealizedNow(group: MedicalGroups, now: Date = new Date()): boolean {
   return now.getTime() >= group.scheduledAt.getTime();
 }
@@ -928,5 +933,5 @@ function isPastCloseWindowNow(
 }
 
 function isClosedNow(group: MedicalGroups, now: Date = new Date()): boolean {
-  return group.closedAt !== undefined || isPastCloseWindowNow(group, now);
+  return group.closedAt != null || isPastCloseWindowNow(group, now);
 }
