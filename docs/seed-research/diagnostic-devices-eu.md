@@ -213,7 +213,7 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
   BD/RDM y CND de dati.salute.gov.it. Términos leídos en vivo: EMDN (CC BY 4.0 de la Comisión),
   IODL 2.0, Swissmedic (prohíbe la extracción automatizada) y PARD (solo Crown Copyright).
 - Resultado: **+303 085 equipos de EUDAMED y +200 563 de la BD/RDM**; 0 huecos de descarga.
-  Evidencia en `docs/trabajo/2026-10-24-seed-dx-devices-eu-oficial/evidencia/`.
+  Evidencia en el historial de git (commit `6bed69e1`, carpeta `evidencia/` de la corrida).
 - Arreglos que salieron al usar datos reales: espacio inicial en `NOMENCLATURE_CODE`; `$after`
   que cambia en cada página; encabezado del Excel v2026; la deduplicación colapsaba UDI-DI
   distintos con el mismo modelo (ahora el UDI-DI manda); 21 páginas sin metadatos de corridas
