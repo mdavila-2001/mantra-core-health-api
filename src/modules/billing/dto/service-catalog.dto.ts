@@ -33,10 +33,15 @@ export class CreateServiceCatalogItemDto {
 
   /**
    * Valor de code mantenido por la instancia.
+   *
+   * Hasta 120: los servicios importados del arancel guardan el código del
+   * concepto como procedencia (`procedure:bo:BO_ARM_…`), y 4237 de los 4408
+   * pasan de 60 (el más largo, 71). Con 60 la importación respondía 400 en
+   * casi todos. La columna es `varchar` sin largo.
    */
-  @ApiProperty({ description: 'Código interno del servicio' })
+  @ApiProperty({ description: 'Código interno del servicio', maxLength: 120 })
   @IsString()
-  @MaxLength(60)
+  @MaxLength(120)
   code!: string;
 
   /**
