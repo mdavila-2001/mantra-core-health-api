@@ -15,6 +15,7 @@ import type { Response } from 'express';
 import {
   ApiHeader,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
@@ -29,7 +30,7 @@ import {
 } from '../../application/services/iam-onboarding-drafts.service';
 
 const SECRET_HEADER_DOC = {
-  name: 'X-Onboarding-Draft-Secret',
+  name: 'x-onboarding-draft-secret',
   required: false,
   description:
     'Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.',
@@ -48,6 +49,7 @@ export class IamOnboardingDraftsController {
   @TenantAgnostic()
   @Throttle({ default: { limit: 120, ttl: 60_000 } })
   @ApiHeader(SECRET_HEADER_DOC)
+  @ApiOkResponse({ description: 'El borrador guardado.' })
   @ApiNotFoundResponse({ description: NOT_FOUND_DOC })
   @ApiOperation({
     summary:
@@ -70,6 +72,10 @@ export class IamOnboardingDraftsController {
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiHeader(SECRET_HEADER_DOC)
+  @ApiOkResponse({
+    description:
+      '`{ ok, savedAt }`; al crear el borrador agrega `draftSecret`, que no se vuelve a mostrar.',
+  })
   @ApiNotFoundResponse({ description: NOT_FOUND_DOC })
   @ApiOperation({
     summary: 'Guarda o actualiza el avance del formulario de alta en borrador',
@@ -103,6 +109,7 @@ export class IamOnboardingDraftsController {
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiHeader(SECRET_HEADER_DOC)
+  @ApiOkResponse({ description: '`{ ok: true }`.' })
   @ApiNotFoundResponse({ description: NOT_FOUND_DOC })
   @ApiOperation({
     summary:
