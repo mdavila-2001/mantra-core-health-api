@@ -13,6 +13,7 @@ import { AccountingErrorReason } from '../accounting.error-reasons';
 import { ACCT } from '../accounting.concepts';
 import { flushJournalHeader } from './journal-number-conflict';
 import { LedgerService } from './ledger.service';
+import { buildScope, inTenant } from './accounting-scope.testing';
 
 const NUMBER_INDEX = 'uq_journal_transactions_transaction_number';
 
@@ -143,19 +144,27 @@ describe('LedgerService · número de asiento duplicado en la base (ACC-02)', ()
     const fiscalRepo = {
       findPeriodById: mockFn().mockResolvedValue({
         id: 'fp1',
+        fiscalYearId: 'fy1',
         statusConceptId: ACCT.PERIOD_OPEN,
+      }),
+      findYearById: mockFn().mockResolvedValue({
+        id: 'fy1',
+        practiceId: 'p1',
       }),
     };
     const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
     const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
-    const service = new LedgerService(
-      em as any,
-      journalRepo as any,
-      {} as any,
-      fiscalRepo as any,
-      auditTrail as any,
-      { findActivePracticeIdsForPractitioner: mockFn() } as any,
-      logger as any,
+    const { scope } = buildScope({ journalRepo, fiscalRepo });
+    const service = inTenant(
+      new LedgerService(
+        em as any,
+        journalRepo as any,
+        {} as any,
+        auditTrail as any,
+        { findActivePracticeIdsForPractitioner: mockFn() } as any,
+        scope,
+        logger as any,
+      ),
     );
     return { service, journalRepo, auditTrail };
   }
