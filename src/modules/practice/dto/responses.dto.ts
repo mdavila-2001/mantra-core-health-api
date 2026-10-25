@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PracticeRoleAssignmentItemDto } from './role-assignment-row.dto';
 
 /** Respuesta de creación de una práctica (bootstrap). */
 export class PracticeResponseDto {
@@ -196,8 +197,8 @@ export class ListPracticeRoleAssignmentsResponseDto {
   /**
    * Vinculaciones de esta página, ordenadas por `id`.
    */
-  @ApiProperty({ type: [RoleAssignmentResponseDto] })
-  items!: RoleAssignmentResponseDto[];
+  @ApiProperty({ type: [PracticeRoleAssignmentItemDto] })
+  items!: PracticeRoleAssignmentItemDto[];
 
   /**
    * Cantidad devuelta en esta página.

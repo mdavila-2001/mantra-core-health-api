@@ -171,14 +171,12 @@ describe('PracticesController', () => {
     );
   });
 
-  it('pasa el tenant del contexto al listar vinculaciones (CV-14)', async () => {
+  it('pasa el actor al listar vinculaciones: el servicio autoriza por administración de la organización (CV-14, A-6)', async () => {
     const d = build();
-    await runWithTenant('tenant-1', () =>
-      d.controller.listRoleAssignments('p1', 'PENDING', 'cur1', 10),
-    );
+    await d.controller.listRoleAssignments('p1', actor, 'PENDING', 'cur1', 10);
     expect(d.workforceService.listPracticeAssignments).toHaveBeenCalledWith(
       'p1',
-      'tenant-1',
+      actor,
       { statusConceptId: 'PENDING', cursor: 'cur1', limit: 10 },
     );
   });
