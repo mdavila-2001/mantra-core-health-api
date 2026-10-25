@@ -58,6 +58,17 @@ function build() {
     createQuestion: mockFn(),
   };
   const assignmentsRepo = { create: mockFn() };
+  const attachableFiles = {
+    assertUsableForAuthorizedContext: mockFn().mockResolvedValue({
+      file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+    }),
+  };
+  const fileUpload = {
+    downloadForAuthorizedContext: mockFn().mockResolvedValue({
+      buffer: Buffer.from('png'),
+      mimeType: 'image/png',
+    }),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new BillingServiceCatalogService(
     em as any,
@@ -65,6 +76,8 @@ function build() {
     practiceTenantLookup as any,
     templatesRepo as any,
     assignmentsRepo as any,
+    attachableFiles as any,
+    fileUpload as any,
     logger as any,
   );
   return {
@@ -75,6 +88,8 @@ function build() {
     practiceTenantLookup,
     templatesRepo,
     assignmentsRepo,
+    attachableFiles,
+    fileUpload,
     logger,
   };
 }
@@ -531,6 +546,134 @@ describe('BillingServiceCatalogService', () => {
           roles: ['PATIENT'],
         } as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+  describe('getImageContent (P-22-8, opción 1)', () => {
+    const row = () =>
+      catalogRow({ id: 's1', practiceId: 'pr1', imageFileId: 'file-1' });
+
+    /** Servicio visible: activo, con imagen y de una práctica del tenant activo. */
+    function visible() {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(row());
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('t1');
+      return d;
+    }
+
+    it('sirve la imagen a cualquier sesión del tenant de la práctica, sin ser quien la subió', async () => {
+      const d = visible();
+
+      const res = await runWithTenant('t1', () =>
+        d.service.getImageContent('s1'),
+      );
+
+      expect(res.mimeType).toBe('image/png');
+      expect(
+        d.attachableFiles.assertUsableForAuthorizedContext,
+      ).toHaveBeenCalledWith(
+        expect.anything(),
+        'file-1',
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        }),
+      );
+      expect(d.fileUpload.downloadForAuthorizedContext).toHaveBeenCalledWith(
+        'file-1',
+        'billing.service-catalog.image',
+      );
+    });
+
+    it('un servicio de una práctica de otro tenant responde 404 y no toca el archivo', async () => {
+      const d = visible();
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('otro');
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un servicio inexistente responde el mismo 404 que uno ajeno', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+      const ajeno = visible();
+      ajeno.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('otro');
+
+      const a = await runWithTenant('t1', () =>
+        d.service.getImageContent('x'),
+      ).catch((e) => e);
+      const b = await runWithTenant('t1', () =>
+        ajeno.service.getImageContent('s1'),
+      ).catch((e) => e);
+
+      expect(a).toBeInstanceOf(ResourceNotFoundException);
+      expect(b).toBeInstanceOf(ResourceNotFoundException);
+      expect(a.message).toBe(b.message);
+      expect(a.getResponse?.() ?? a.reason).toEqual(
+        b.getResponse?.() ?? b.reason,
+      );
+    });
+
+    it('un servicio inactivo responde 404', async () => {
+      const d = visible();
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...row(),
+        isActive: false,
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un servicio sin imagen responde 404', async () => {
+      const d = visible();
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...row(),
+        imageFileId: undefined,
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('un archivo que no es de sensibilidad normal responde 404 aunque el servicio apunte a él', async () => {
+      const d = visible();
+      d.attachableFiles.assertUsableForAuthorizedContext.mockResolvedValue({
+        file: { sensitivityConceptId: 'phi' },
+      });
+
+      await expect(
+        runWithTenant('t1', () => d.service.getImageContent('s1')),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('un archivo no utilizable (otro tipo, borrado o infectado) responde 404 sin filtrar el uuid', async () => {
+      const d = visible();
+      d.attachableFiles.assertUsableForAuthorizedContext.mockRejectedValue(
+        new Error('File type not allowed file-1'),
+      );
+
+      const err = await runWithTenant('t1', () =>
+        d.service.getImageContent('s1'),
+      ).catch((e) => e);
+
+      expect(err).toBeInstanceOf(ResourceNotFoundException);
+      expect(JSON.stringify(err.getResponse?.() ?? err.message)).not.toContain(
+        'file-1',
+      );
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant verificado en el contexto no sirve nada', async () => {
+      const d = visible();
+
+      await expect(d.service.getImageContent('s1')).rejects.toBeDefined();
+      expect(d.fileUpload.downloadForAuthorizedContext).not.toHaveBeenCalled();
     });
   });
 });
