@@ -2767,6 +2767,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | La autorización previa debe pertenecer a la misma cobertura y pedido | Excepción explícita en src/modules/insurance/application/services/claims.service.ts |
 | 422 | `PRECONDITION_FAILED` | La moneda de la cobertura y del pedido debe coincidir | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cobertura debe estar activa y vigente para presentar el reclamo | Excepción explícita en src/modules/insurance/application/services/linked-claim-access.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no corresponde al plan del cobro | Excepción explícita en src/modules/insurance/application/services/claim-coverage-policy.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3833,6 +3834,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | outcome.message | Excepción explícita en src/modules/insurance/application/services/claim-patient-invoice.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no corresponde al plan del cobro | Excepción explícita en src/modules/insurance/application/services/claim-coverage-policy.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4160,6 +4162,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Las secuencias de líneas deben ser únicas | Excepción explícita en src/modules/insurance/application/services/claim-quote.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/application/services/claim-quote.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no corresponde al plan del cobro | Excepción explícita en src/modules/insurance/application/services/claim-coverage-policy.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
