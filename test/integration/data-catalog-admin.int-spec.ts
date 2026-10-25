@@ -17,6 +17,7 @@ import { TokenService } from '../../src/common/auth/token.service';
 import { AllExceptionsFilter } from '../../src/common/filters/all-exceptions.filter';
 import { AdminCatalogController } from '../../src/modules/data_catalog/controllers/admin-catalog.controller';
 import { CatalogRepository } from '../../src/modules/data_catalog/repositories/catalog.repository';
+import { CatalogClassificationService } from '../../src/modules/data_catalog/services/catalog-classification.service';
 import { CatalogGovernanceService } from '../../src/modules/data_catalog/services/catalog-governance.service';
 import { CatalogReadService } from '../../src/modules/data_catalog/services/catalog-read.service';
 import { CatalogScanService } from '../../src/modules/data_catalog/services/catalog-scan.service';
@@ -121,6 +122,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
         CatalogRepository,
         CatalogReadService,
         CatalogGovernanceService,
+        CatalogClassificationService,
         CatalogScanService,
         JwtStrategy,
         // Lo que se prueba es el catálogo, no la sesión: se da por activa.
