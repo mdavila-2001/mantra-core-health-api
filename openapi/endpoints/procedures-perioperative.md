@@ -111,6 +111,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DentalProcedureListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DentalProcedureListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -279,6 +280,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DentalProcedureResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DentalProcedureResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -391,6 +393,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `DentalCatalogDto` | No |
 | 429 | Consulta completada correctamente. | `DentalCatalogDto` | No |
 | 500 | Consulta completada correctamente. | `DentalCatalogDto` | No |
+| 504 | Consulta completada correctamente. | `DentalCatalogDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DentalCatalogDto`. Ejemplo completo derivado de ese DTO:
 
@@ -555,6 +558,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PacuAssessmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PacuAssessmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PacuAssessmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PacuAssessmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PacuAssessmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -583,7 +587,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Estancia en recuperación no encontrada | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 409 | `CONFLICT` | El paciente ya salió de recuperación | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -708,6 +711,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DischargePacuResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DischargePacuResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DischargePacuResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DischargePacuResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DischargePacuResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -738,7 +742,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Estancia en recuperación no encontrada | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 409 | `CONFLICT` | El paciente ya salió de recuperación | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El alta de recuperación exige al menos una valoración | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
@@ -831,6 +834,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CaseListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CaseListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CaseListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CaseListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1005,6 +1009,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1070,7 +1075,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Detalle completo del caso quirúrgico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Acotado al tenant del contexto. Un caso de otro tenant, inexistente o sin base de acceso para el actor responde el mismo 404.
 
 Contexto declarado en el controlador: Detalle agregado del caso: equipo, diagnósticos, órdenes, plan e informes.
 
@@ -1125,6 +1130,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<CaseDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CaseDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CaseDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CaseDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CaseDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1341,7 +1347,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
+| 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1447,6 +1453,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UpdateCaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UpdateCaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UpdateCaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UpdateCaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UpdateCaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1481,7 +1488,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; cancele el caso y cree uno nuevo | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
@@ -1600,6 +1606,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AnesthesiaEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AnesthesiaEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AnesthesiaEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AnesthesiaEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnesthesiaEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1628,7 +1635,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 422 | `PRECONDITION_FAILED` | La inducción exige un plan de anestesia aprobado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
@@ -1760,6 +1766,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AnesthesiaPlanResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AnesthesiaPlanResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AnesthesiaPlanResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AnesthesiaPlanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnesthesiaPlanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1790,7 +1797,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 409 | `CONFLICT` | El caso ya tiene plan de anestesia | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Una vía aérea difícil anticipada necesita plan de rescate | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
@@ -1880,6 +1886,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ApprovePlanResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApprovePlanResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApprovePlanResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApprovePlanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApprovePlanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1909,7 +1916,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plan de anestesia no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 409 | `CONFLICT` | El plan ya está aprobado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 422 | `PRECONDITION_FAILED` | El plan pertenece a otro caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2020,6 +2026,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CancelCaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CancelCaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CancelCaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CancelCaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CancelCaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2050,7 +2057,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 409 | `CONFLICT` | El caso ya está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso no admite cancelación en su estado actual | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
@@ -2175,6 +2181,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PostChargesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PostChargesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PostChargesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PostChargesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PostChargesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2207,7 +2214,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_ADMIN, BILLING. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 409 | `CONFLICT` | El caso ya tiene cargos emitidos | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Sólo se factura un caso completado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
@@ -2296,6 +2302,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ConfirmCaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConfirmCaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConfirmCaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmCaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmCaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2324,7 +2331,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso no admite confirmación en su estado actual | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
@@ -2441,6 +2447,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DiagnosesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2471,7 +2478,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
 | 409 | `CONFLICT` | El caso sólo admite un diagnóstico principal | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 409 | `CONFLICT` | El paciente ya tiene esa condición activa | Excepción explícita en src/modules/clinical/services/conditions.service.ts |
@@ -2593,6 +2599,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FindingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2620,7 +2627,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Paso operatorio no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paso pertenece a otro caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso no está en curso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
@@ -2757,6 +2763,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ImplantResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImplantResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImplantResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImplantResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImplantResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2789,7 +2796,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_NURSE, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso no está en curso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2897,6 +2903,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SuppliesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2923,7 +2930,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paso no pertenece al caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso no está en curso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
@@ -3062,6 +3068,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OperativeReportResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperativeReportResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperativeReportResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperativeReportResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperativeReportResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3094,7 +3101,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 404 | `NOT_FOUND` | Orden de servicio no encontrada | Excepción explícita en src/modules/clinical/services/procedures.service.ts |
 | 404 | `NOT_FOUND` | Procedimiento padre no encontrado | Excepción explícita en src/modules/clinical/services/procedures.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -3201,6 +3207,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SignReportResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SignReportResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SignReportResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SignReportResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SignReportResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3230,7 +3237,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Reporte operatorio no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 409 | `CONFLICT` | El reporte ya está firmado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El reporte pertenece a otro caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
@@ -3343,6 +3349,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OperativeStepResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperativeStepResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperativeStepResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperativeStepResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperativeStepResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3371,7 +3378,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_NURSE, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso no está en curso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3474,6 +3480,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PacuStayResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PacuStayResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PacuStayResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PacuStayResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PacuStayResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3502,7 +3509,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 409 | `CONFLICT` | El caso ya tiene estancia en recuperación | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
@@ -3639,6 +3645,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PreopAssessmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PreopAssessmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PreopAssessmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PreopAssessmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PreopAssessmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3671,7 +3678,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 409 | `CONFLICT` | El caso ya tiene valoración preoperatoria | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La valoración exige revisar alergias y medicación | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
@@ -3781,6 +3787,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PreoperativeOrderResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PreoperativeOrderResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PreoperativeOrderResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PreoperativeOrderResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PreoperativeOrderResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3809,7 +3816,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -3926,6 +3932,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerifyOrdersResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerifyOrdersResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerifyOrdersResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerifyOrdersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerifyOrdersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3956,7 +3963,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 404 | `NOT_FOUND` | Orden preoperatoria no encontrada en el caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Sólo un caso programado admite verificación de órdenes | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
@@ -4083,6 +4089,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChecklistPhaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChecklistPhaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChecklistPhaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChecklistPhaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChecklistPhaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4235,6 +4242,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SuppliesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SuppliesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4261,7 +4269,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, PERIOP_NURSE, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paso no pertenece al caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso no está en curso | Excepción explícita en src/modules/procedures_perioperative/services/periop-intraop.service.ts |
@@ -4348,6 +4355,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<TeamMemberSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TeamMemberSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TeamMemberSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TeamMemberSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TeamMemberSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -4375,7 +4383,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4477,6 +4484,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TeamMemberResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4507,7 +4515,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGERY_SCHEDULER, SURGEON, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 409 | `CONFLICT` | El profesional ya tiene ese rol en el caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
@@ -4597,6 +4604,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TeamMemberResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4627,7 +4635,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 404 | `NOT_FOUND` | El integrante no pertenece al caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo el propio integrante puede aceptar su participación | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
@@ -4735,6 +4742,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TeamMemberResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TeamMemberResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4765,7 +4773,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SURGERY_SCHEDULER, PERIOP_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Caso quirúrgico no encontrado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 404 | `NOT_FOUND` | El integrante no pertenece al caso | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-cases.service.ts |

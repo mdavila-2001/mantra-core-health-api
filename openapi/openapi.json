@@ -11309,6 +11309,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
@@ -11364,6 +11367,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
@@ -11417,6 +11423,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
@@ -48897,6 +48906,7 @@
     },
     "/diagnostics/patients/{patientProfileId}/imaging-studies": {
       "get": {
+        "description": "Exige un vínculo asistencial vigente entre el profesional y el paciente: sin él responde 404, igual que un paciente inexistente.",
         "operationId": "DiagnosticsImagingController_listStudies",
         "parameters": [
           {
@@ -48958,8 +48968,7 @@
         "summary": "Listar los estudios de imagen del paciente",
         "tags": [
           "diagnostics-imaging"
-        ],
-        "description": "Listar los estudios de imagen del paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       }
     },
     "/diagnostics/imaging-endpoints": {
@@ -56743,7 +56752,7 @@
             "name": "custodian",
             "required": false,
             "in": "query",
-            "description": "Custodio por el que se acota la búsqueda",
+            "description": "Obsoleto: el custodio sale de la sesión (X-Tenant-Id). Si llega y difiere del tenant activo, el paciente no está disponible (404).",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -59793,16 +59802,7 @@
     "/integrations/messages/pending-dispatch": {
       "get": {
         "operationId": "IntegrationsMessagesController_listPendingDispatch",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -59911,16 +59911,7 @@
     "/integrations/messages/pending-retry": {
       "get": {
         "operationId": "IntegrationsMessagesController_listPendingRetry",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -60073,16 +60064,7 @@
     "/integrations/messages/pending-correlation": {
       "get": {
         "operationId": "IntegrationsMessagesController_listPendingCorrelation",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -60924,16 +60906,7 @@
     "/research/dataset-releases/expired": {
       "get": {
         "operationId": "ResearchController_listExpiredReleases",
-        "parameters": [
-          {
-            "name": "limit",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -61761,6 +61734,76 @@
         "description": "Crear un enlace rastreable con parámetros UTM. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/marketing/tracked-links/{id}/recipient-tokens": {
+      "post": {
+        "description": "El token es opaco, firmado, con vencimiento y ligado al enlace y al destinatario, que debe ser miembro de la campaña del enlace. El click público lo presenta como `?t=`.",
+        "operationId": "MarketingController_issueTrackedLinkToken",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueTrackedLinkTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Emitir el token de destinatario de un enlace rastreable",
+        "tags": [
+          "marketing"
+        ]
+      }
+    },
     "/marketing/touchpoints": {
       "post": {
         "description": "Log append-only; actualiza el estado del miembro de campaña cuando procede.",
@@ -61879,7 +61922,7 @@
     },
     "/r/{code}": {
       "get": {
-        "description": "El contador se incrementa de forma atómica; el touchpoint sólo se registra si se identifica al miembro.",
+        "description": "El contador se incrementa de forma atómica. El touchpoint sólo se registra si el click trae un token de destinatario firmado y vigente; el destinatario nunca se declara en parámetros públicos.",
         "operationId": "TrackedLinkRedirectController_resolve",
         "parameters": [
           {
@@ -61891,23 +61934,11 @@
             }
           },
           {
-            "name": "memberType",
+            "name": "t",
             "required": false,
             "in": "query",
+            "description": "Token opaco emitido por POST /marketing/tracked-links/:id/recipient-tokens",
             "schema": {
-              "enum": [
-                "CONTACT",
-                "PATIENT"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "name": "memberRefId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
               "type": "string"
             }
           }
@@ -75179,6 +75210,7 @@
     },
     "/procedure-cases/{id}": {
       "get": {
+        "description": "Acotado al tenant del contexto. Un caso de otro tenant, inexistente o sin base de acceso para el actor responde el mismo 404.",
         "operationId": "PeriopController_getCase",
         "parameters": [
           {
@@ -75224,8 +75256,7 @@
         "summary": "Detalle completo del caso quirúrgico",
         "tags": [
           "procedure-cases"
-        ],
-        "description": "Detalle completo del caso quirúrgico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       },
       "patch": {
         "description": "El paciente sólo puede corregirse con el caso en borrador y sin dependencias (CAN-INT-001).",
@@ -80481,6 +80512,7 @@
     },
     "/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data": {
       "get": {
+        "description": "Exige cumplir el contrato de acceso de la vista (audiencia, permiso, propósito, feature flag y contextos de tenant/paciente); si no, responde el mismo 404 que una vista inexistente. Los parámetros distintos de los reservados son filtros declarados en el contrato de la vista.",
         "operationId": "FrontendViewsController_serveData",
         "parameters": [
           {
@@ -80506,6 +80538,40 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "patientProfileId",
+            "required": false,
+            "in": "query",
+            "description": "Paciente de las vistas con contexto de paciente",
+            "schema": {}
+          },
+          {
+            "name": "purposeOfUse",
+            "required": false,
+            "in": "query",
+            "description": "Propósito de uso (concepto) que la ruta exige",
+            "schema": {}
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Código de orden",
+            "schema": {}
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Se recorta al máximo de página de la definición",
+            "schema": {}
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {}
           }
         ],
         "responses": {
@@ -80542,8 +80608,7 @@
         "summary": "Servir el read model al frontend (consent-aware, masking heredado)",
         "tags": [
           "read-models-views"
-        ],
-        "description": "Servir el read model al frontend (consent-aware, masking heredado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       }
     },
     "/portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions": {
@@ -80570,6 +80635,22 @@
             "name": "viewCode",
             "required": true,
             "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purposeOfUse",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -93137,13 +93218,31 @@
     },
     "/tracking/webhooks/carriers/{carrierCode}": {
       "post": {
-        "description": "Ruta pública: el transportista no presenta sesión. Idempotente por identificador del evento externo.",
+        "description": "Ruta pública: el transportista no presenta sesión, se autentica con una firma HMAC-SHA256 sobre `[timestamp, carrierCode, trackingNumber, externalStatusCode, externalEventId, occurredAt, locationText]` (arreglo JSON; los opcionales ausentes van como `null`) con su secreto propio, dentro de una ventana de 5 minutos. Idempotente por identificador del evento externo.",
         "operationId": "TrackingController_ingestCarrierWebhook",
         "parameters": [
           {
             "name": "carrierCode",
             "required": true,
             "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-carrier-signature",
+            "required": true,
+            "in": "header",
+            "description": "HMAC-SHA256 en hexadecimal (prefijo `sha256=` opcional)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-carrier-timestamp",
+            "required": true,
+            "in": "header",
+            "description": "Segundos desde la época o ISO-8601 con zona; es parte de lo firmado",
             "schema": {
               "type": "string"
             }
@@ -96548,9 +96647,9 @@
           },
           {
             "name": "tenantId",
-            "required": true,
+            "required": false,
             "in": "query",
-            "description": "Tenant cuyos documentos se listan",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -96627,9 +96726,9 @@
           },
           {
             "name": "tenantId",
-            "required": true,
+            "required": false,
             "in": "query",
-            "description": "Tenant propietario del documento",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -96772,9 +96871,9 @@
           },
           {
             "name": "tenantId",
-            "required": true,
+            "required": false,
             "in": "query",
-            "description": "Tenant propietario del documento",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -103779,8 +103878,7 @@
           },
           "limit": {
             "type": "number",
-            "description": "Máximo de eslabones a recorrer",
-            "default": 1000
+            "description": "Modo diagnóstico acotado: máximo de eslabones a recorrer. Si se omite, se verifica la partición completa. Un límite menor al total devuelve un resultado parcial (`complete: false`) sin atestación positiva. Debe ser un entero entre 1 y 100000 (`400 AUDIT_INTEGRITY_RANGE_INVALID`)."
           }
         },
         "additionalProperties": false
@@ -104336,11 +104434,11 @@
           "recipientUserId": {
             "type": "string",
             "format": "uuid",
-            "description": "Destinatario interno"
+            "description": "Usuario destinatario. Obligatorio: sin él la solicitud se rechaza con 422 NOTIFICATION_RECIPIENT_INVALID"
           },
           "recipientAddress": {
             "type": "string",
-            "description": "Dirección de destino si el canal es externo",
+            "description": "Dirección de destino del canal externo; complementa a `recipientUserId`, no lo sustituye",
             "maxLength": 300
           },
           "tenantId": {
@@ -114776,7 +114874,7 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario de la unidad",
+            "description": "Se ignora como propietario: la unidad pertenece al tenant activo (X-Tenant-Id). Si se envía y no coincide, responde 404.",
             "format": "uuid"
           },
           "code": {
@@ -114829,7 +114927,6 @@
           }
         },
         "required": [
-          "tenantId",
           "code",
           "name"
         ],
@@ -122346,7 +122443,7 @@
           "birthDate": {
             "type": "string",
             "format": "date",
-            "description": "Fecha de nacimiento del paciente"
+            "description": "Opcional y sólo de contraste: la fecha de nacimiento se toma del perfil del paciente; si se envía y difiere, se rechaza"
           },
           "jurisdictionConceptId": {
             "type": "string",
@@ -122356,12 +122453,9 @@
           "tenantId": {
             "type": "string",
             "format": "uuid",
-            "description": "Tenant del calendario"
+            "description": "Opcional y sólo de contraste: el calendario es el del tenant activo; si se envía y difiere, se rechaza"
           }
         },
-        "required": [
-          "birthDate"
-        ],
         "additionalProperties": false
       },
       "CreateImmunizationScheduleDto": {
@@ -123935,6 +124029,11 @@
             "description": "Delegación a evaluar",
             "format": "uuid"
           },
+          "effectiveUserId": {
+            "type": "string",
+            "description": "Usuario que ejercería el acceso. Si se omite se evalúa al usuario autenticado. Tiene que ser el titular de la asignación del delegado; si no, el acceso no se permite",
+            "format": "uuid"
+          },
           "purpose": {
             "type": "string",
             "description": "Propósito de uso del acceso",
@@ -123986,7 +124085,7 @@
           "custodianTenantId": {
             "type": "string",
             "format": "uuid",
-            "description": "Tenant custodio"
+            "description": "Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "specimenTypeConceptId": {
             "type": "string",
@@ -124020,7 +124119,6 @@
         },
         "required": [
           "patientProfileId",
-          "custodianTenantId",
           "specimenTypeConceptId"
         ],
         "additionalProperties": false
@@ -124036,7 +124134,7 @@
           "custodianTenantId": {
             "type": "string",
             "format": "uuid",
-            "description": "Tenant custodio (por defecto el del token)"
+            "description": "Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "specimenIds": {
             "description": "Especímenes a acesionar",
@@ -125389,7 +125487,8 @@
           },
           "learnerRefId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Aprendiz que se inscribe. Un LEARNER no lo declara: se deriva de su sesión y uno ajeno responde 403 (LEARNER_ENROLLMENT_OWNER_REQUIRED). Un administrador debe indicarlo"
           },
           "source": {
             "type": "string",
@@ -125414,7 +125513,6 @@
         "required": [
           "courseId",
           "learnerType",
-          "learnerRefId",
           "source"
         ],
         "additionalProperties": false
@@ -125644,7 +125742,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "partnerNumber": {
             "type": "string",
@@ -125681,7 +125780,6 @@
           }
         },
         "required": [
-          "tenantId",
           "partnerNumber",
           "category",
           "displayName"
@@ -125693,7 +125791,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "contractNumber": {
             "type": "string",
@@ -125734,7 +125833,6 @@
           }
         },
         "required": [
-          "tenantId",
           "contractNumber",
           "contractType",
           "title",
@@ -125988,7 +126086,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "purchaseOrderNumber": {
             "type": "string",
@@ -126021,7 +126120,6 @@
           }
         },
         "required": [
-          "tenantId",
           "purchaseOrderNumber",
           "supplierBusinessPartnerId",
           "items"
@@ -126057,7 +126155,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "receiptNumber": {
             "type": "string",
@@ -126076,7 +126175,6 @@
           }
         },
         "required": [
-          "tenantId",
           "receiptNumber",
           "items"
         ],
@@ -126087,7 +126185,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "sheetNumber": {
             "type": "string",
@@ -126103,7 +126202,6 @@
           }
         },
         "required": [
-          "tenantId",
           "sheetNumber"
         ],
         "additionalProperties": false
@@ -126113,7 +126211,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "purchaseOrderId": {
             "type": "string",
@@ -126132,7 +126231,6 @@
           }
         },
         "required": [
-          "tenantId",
           "purchaseOrderId",
           "invoicedAmount"
         ],
@@ -126143,7 +126241,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404"
           },
           "salesOrderNumber": {
             "type": "string",
@@ -126164,7 +126263,6 @@
           }
         },
         "required": [
-          "tenantId",
           "salesOrderNumber",
           "customerBusinessPartnerId"
         ],
@@ -126986,8 +127084,9 @@
           },
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario (RLS)",
-            "format": "uuid"
+            "description": "Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad.",
+            "format": "uuid",
+            "deprecated": true
           }
         },
         "required": [
@@ -127104,8 +127203,9 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario (RLS)",
-            "format": "uuid"
+            "description": "Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad.",
+            "format": "uuid",
+            "deprecated": true
           },
           "name": {
             "type": "string",
@@ -127138,7 +127238,6 @@
           }
         },
         "required": [
-          "tenantId",
           "name",
           "shapeType"
         ],
@@ -128130,12 +128229,12 @@
           "agentId": {
             "type": "string",
             "format": "uuid",
-            "description": "Agente; por defecto, el de la programación"
+            "description": "Agente. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH)"
           },
           "countryConceptId": {
             "type": "string",
             "format": "uuid",
-            "description": "País; por defecto, el de la programación"
+            "description": "País. Con `scheduleId` sale de la programación y, si se envía, debe coincidir (422 HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH)"
           },
           "nextRunAt": {
             "type": "string",
@@ -128422,7 +128521,8 @@
           "tenantId": {
             "type": "string",
             "format": "uuid",
-            "description": "Tenant propietario del origen"
+            "deprecated": true,
+            "description": "Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad."
           },
           "sourceSystemCode": {
             "type": "string",
@@ -128456,7 +128556,6 @@
           }
         },
         "required": [
-          "tenantId",
           "sourceSystemCode",
           "sourceSystemName",
           "sourceTypeConceptId",
@@ -128486,7 +128585,9 @@
           },
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "deprecated": true,
+            "description": "Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad."
           },
           "sourcePeriodStart": {
             "type": "string",
@@ -128584,7 +128685,9 @@
           },
           "custodianTenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "deprecated": true,
+            "description": "Obsoleto: el custodio se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; nunca es fuente de verdad."
           },
           "patientProfileId": {
             "type": "string",
@@ -129129,8 +129232,9 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario de la autoridad",
-            "format": "uuid"
+            "description": "Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad.",
+            "format": "uuid",
+            "deprecated": true
           },
           "authorityCode": {
             "type": "string",
@@ -129159,7 +129263,6 @@
           }
         },
         "required": [
-          "tenantId",
           "authorityCode",
           "name",
           "authorityTypeConceptId"
@@ -130122,7 +130225,7 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario de la conexión",
+            "description": "Opcional: el tenant propietario sale del contexto autenticado; si se envía debe coincidir con él",
             "format": "uuid"
           },
           "environment": {
@@ -130157,7 +130260,6 @@
           }
         },
         "required": [
-          "tenantId",
           "secretType",
           "secretRef"
         ],
@@ -130264,7 +130366,7 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant al que aplica la suscripción",
+            "description": "Opcional: la suscripción pertenece al tenant del contexto autenticado; si se envía debe coincidir con él",
             "format": "uuid"
           },
           "eventType": {
@@ -130440,7 +130542,10 @@
         "required": [
           "code",
           "name",
-          "zoneType"
+          "zoneType",
+          "namespaceId",
+          "encryptionProfileCode",
+          "retentionPolicyCode"
         ],
         "additionalProperties": false
       },
@@ -130889,7 +130994,9 @@
         },
         "required": [
           "ruleCode",
-          "issueCount"
+          "partitionId",
+          "issueCount",
+          "sampleObjectManifestId"
         ],
         "additionalProperties": false
       },
@@ -130918,6 +131025,7 @@
         },
         "required": [
           "tenantId",
+          "transformationRunId",
           "evaluatedRecordCount"
         ],
         "additionalProperties": false
@@ -131034,6 +131142,7 @@
           "approvedTo",
           "cohortCode",
           "cohortVersion",
+          "inclusionExpression",
           "deidentificationProfileId"
         ],
         "additionalProperties": false
@@ -131107,7 +131216,9 @@
         "required": [
           "purposeConceptId",
           "recordCount",
-          "contentHash"
+          "contentHash",
+          "objectManifestId",
+          "schemaVersion"
         ],
         "additionalProperties": false
       },
@@ -131132,7 +131243,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él"
           },
           "code": {
             "type": "string",
@@ -131161,7 +131273,6 @@
           }
         },
         "required": [
-          "tenantId",
           "code",
           "name",
           "segmentType"
@@ -131214,7 +131325,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él"
           },
           "code": {
             "type": "string",
@@ -131281,7 +131393,6 @@
           }
         },
         "required": [
-          "tenantId",
           "code",
           "name",
           "campaignType",
@@ -131308,7 +131419,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él"
           },
           "name": {
             "type": "string",
@@ -131345,7 +131457,6 @@
           }
         },
         "required": [
-          "tenantId",
           "name",
           "channel"
         ],
@@ -131356,7 +131467,8 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Opcional: el tenant sale del contexto autenticado; si se envía debe coincidir con él"
           },
           "code": {
             "type": "string",
@@ -131389,7 +131501,6 @@
           }
         },
         "required": [
-          "tenantId",
           "code",
           "name",
           "entryTrigger"
@@ -131562,6 +131673,33 @@
         "required": [
           "code",
           "targetUrl"
+        ],
+        "additionalProperties": false
+      },
+      "IssueTrackedLinkTokenDto": {
+        "type": "object",
+        "properties": {
+          "memberType": {
+            "type": "string",
+            "enum": [
+              "CONTACT",
+              "PATIENT"
+            ]
+          },
+          "memberRefId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ttlSeconds": {
+            "type": "number",
+            "minimum": 60,
+            "maximum": 2592000,
+            "default": 604800
+          }
+        },
+        "required": [
+          "memberType",
+          "memberRefId"
         ],
         "additionalProperties": false
       },
@@ -133020,6 +133158,11 @@
           "signature": {
             "type": "string",
             "description": "Firma del proveedor para verificar el origen"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Instante de emisión del evento (ISO-8601), firmado junto con el resto",
+            "format": "date-time"
           }
         },
         "required": [
@@ -147800,6 +147943,11 @@
           "maxBatchSize": {
             "type": "number",
             "description": "Tamaño máximo de lote a barrer"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Cursor devuelto por la corrida anterior (`nextCursor`); continúa tras esa fila",
+            "format": "uuid"
           }
         },
         "required": [
@@ -148836,11 +148984,6 @@
             "description": "Versión de disclosure aceptada",
             "format": "uuid"
           },
-          "userId": {
-            "type": "string",
-            "description": "Usuario que acepta (por defecto el autenticado)",
-            "format": "uuid"
-          },
           "sessionId": {
             "type": "string",
             "description": "Sesión asociada",
@@ -148868,11 +149011,6 @@
           "purposeDefinitionId": {
             "type": "string",
             "description": "Propósito de tracking (requiere consentimiento)",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string",
-            "description": "Usuario que consiente (por defecto el autenticado)",
             "format": "uuid"
           },
           "jurisdictionConceptId": {
@@ -148958,8 +149096,9 @@
           },
           "dataClassificationConceptId": {
             "type": "string",
-            "description": "Clasificación de dato (concept id)",
-            "format": "uuid"
+            "description": "Ignorado: la clasificación del dato la fija el servidor desde el esquema del evento",
+            "format": "uuid",
+            "deprecated": true
           }
         },
         "required": [
@@ -148987,27 +149126,12 @@
           },
           "analyticsSubjectId": {
             "type": "string",
-            "description": "Sujeto de analítica pseudónimo",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string",
-            "description": "Usuario (para gate de consentimiento)",
-            "format": "uuid"
-          },
-          "sessionId": {
-            "type": "string",
-            "description": "Sesión asociada",
+            "description": "Sujeto de analítica pseudónimo; debe ser del usuario autenticado",
             "format": "uuid"
           },
           "sessionJourneyId": {
             "type": "string",
-            "description": "Journey de sesión existente a enlazar",
-            "format": "uuid"
-          },
-          "tenantId": {
-            "type": "string",
-            "description": "Tenant",
+            "description": "Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado",
             "format": "uuid"
           },
           "portalTypeConceptId": {
@@ -149030,7 +149154,8 @@
             "format": "uuid"
           },
           "properties": {
-            "description": "Propiedades permitidas y minimizadas",
+            "maxItems": 25,
+            "description": "Propiedades declaradas por el esquema del evento (máximo 25, el tope del proveedor)",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ActivityEventPropertyDto"
@@ -149063,17 +149188,12 @@
         "properties": {
           "sessionJourneyId": {
             "type": "string",
-            "description": "Journey de sesión existente a enlazar",
-            "format": "uuid"
-          },
-          "sessionId": {
-            "type": "string",
-            "description": "Sesión (se usa para crear el journey si no existe)",
+            "description": "Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado. Si falta, se usa el journey abierto de la sesión autenticada",
             "format": "uuid"
           },
           "analyticsSubjectId": {
             "type": "string",
-            "description": "Sujeto de analítica",
+            "description": "Sujeto de analítica; debe ser del usuario autenticado",
             "format": "uuid"
           },
           "portalTypeConceptId": {
@@ -149279,10 +149399,6 @@
       "OpenSubjectDto": {
         "type": "object",
         "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "subjectType": {
             "type": "string",
             "enum": [
@@ -149375,10 +149491,6 @@
       "DefineMilestonesDto": {
         "type": "object",
         "properties": {
-          "tenantId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "subjectType": {
             "type": "string",
             "enum": [
@@ -149950,6 +150062,11 @@
             "type": "string",
             "maxLength": 100,
             "description": "Máquina de estado que gobierna el agregado"
+          },
+          "purposeOfUseConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Propósito de uso con el que se dispara el comando. Debe coincidir con el que exige la transición; si ésta lo exige y falta o difiere, 403 WORKFLOW_PURPOSE_NOT_ALLOWED"
           },
           "actorTenantId": {
             "type": "string",
@@ -151384,7 +151501,7 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario del documento",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404",
             "format": "uuid"
           },
           "documentType": {
@@ -151399,7 +151516,6 @@
           }
         },
         "required": [
-          "tenantId",
           "documentType",
           "payload"
         ],
@@ -151410,7 +151526,7 @@
         "properties": {
           "tenantId": {
             "type": "string",
-            "description": "Tenant propietario del documento",
+            "description": "Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404",
             "format": "uuid"
           },
           "expectedVersion": {
@@ -151429,7 +151545,6 @@
           }
         },
         "required": [
-          "tenantId",
           "expectedVersion"
         ],
         "additionalProperties": false

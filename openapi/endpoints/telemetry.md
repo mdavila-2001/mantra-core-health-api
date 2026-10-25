@@ -97,6 +97,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -194,6 +195,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -290,6 +292,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -385,6 +388,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -482,6 +486,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -576,6 +581,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -672,6 +678,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -769,6 +776,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -848,26 +856,23 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `events` | Sí | `array<ActivityEventItemDto>` | mínimo 1 elemento(s); máximo 500 elemento(s) | Lote de eventos de actividad | `[{"eventSchemaDefinitionId":"00000000-0000-4000-8000-000000000001","eventName":"Nombre de ejemplo","eventIdempotencyKey":"valor-ejemplo","analyticsSubjectId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","sessionId":"00000000-0000-4000-8000-000000000001","sessionJourneyId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","portalTypeConceptId":"00000000-0000-4000-8000-000000000001","routeTemplate":"valor-ejemplo","occurredAt":"valor-ejemplo","correlationId":"00000000-0000-4000-8000-000000000001","properties":[{"propertyName":"Nombre de ejemplo","valueType":"STRING","valueString":"valor-ejemplo","valueNumber":1,"valueBoolean":true,"dataClassificationConceptId":"00000000-0000-4000-8000-000000000001"}]}]` |
+| `events` | Sí | `array<ActivityEventItemDto>` | mínimo 1 elemento(s); máximo 500 elemento(s) | Lote de eventos de actividad | `[{"eventSchemaDefinitionId":"00000000-0000-4000-8000-000000000001","eventName":"Nombre de ejemplo","eventIdempotencyKey":"valor-ejemplo","analyticsSubjectId":"00000000-0000-4000-8000-000000000001","sessionJourneyId":"00000000-0000-4000-8000-000000000001","portalTypeConceptId":"00000000-0000-4000-8000-000000000001","routeTemplate":"valor-ejemplo","occurredAt":"valor-ejemplo","correlationId":"00000000-0000-4000-8000-000000000001","properties":[{"propertyName":"Nombre de ejemplo","valueType":"STRING","valueString":"valor-ejemplo","valueNumber":1,"valueBoolean":true,"dataClassificationConceptId":"00000000-0000-4000-8000-000000000001"}]}]` |
 | `events[].eventSchemaDefinitionId` | Sí | `string` | formato `uuid` | Esquema de evento activo | `00000000-0000-4000-8000-000000000001` |
 | `events[].eventName` | No | `string` | longitud máxima 200 | Nombre del evento (override del esquema) | `Nombre de ejemplo` |
 | `events[].eventIdempotencyKey` | No | `string` | longitud máxima 200 | Clave de idempotencia del evento | `valor-ejemplo` |
-| `events[].analyticsSubjectId` | No | `string` | formato `uuid` | Sujeto de analítica pseudónimo | `00000000-0000-4000-8000-000000000001` |
-| `events[].userId` | No | `string` | formato `uuid` | Usuario (para gate de consentimiento) | `00000000-0000-4000-8000-000000000001` |
-| `events[].sessionId` | No | `string` | formato `uuid` | Sesión asociada | `00000000-0000-4000-8000-000000000001` |
-| `events[].sessionJourneyId` | No | `string` | formato `uuid` | Journey de sesión existente a enlazar | `00000000-0000-4000-8000-000000000001` |
-| `events[].tenantId` | No | `string` | formato `uuid` | Tenant | `00000000-0000-4000-8000-000000000001` |
+| `events[].analyticsSubjectId` | No | `string` | formato `uuid` | Sujeto de analítica pseudónimo; debe ser del usuario autenticado | `00000000-0000-4000-8000-000000000001` |
+| `events[].sessionJourneyId` | No | `string` | formato `uuid` | Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado | `00000000-0000-4000-8000-000000000001` |
 | `events[].portalTypeConceptId` | No | `string` | formato `uuid` | Tipo de portal (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `events[].routeTemplate` | No | `string` | longitud máxima 300 | Plantilla de ruta (sin ids en claro) | `valor-ejemplo` |
 | `events[].occurredAt` | No | `string` | Sin restricción adicional declarada | Instante de ocurrencia (ISO-8601) | `valor-ejemplo` |
 | `events[].correlationId` | No | `string` | formato `uuid` | Correlation id | `00000000-0000-4000-8000-000000000001` |
-| `events[].properties` | No | `array<ActivityEventPropertyDto>` | Sin restricción adicional declarada | Propiedades permitidas y minimizadas | `[{"propertyName":"Nombre de ejemplo","valueType":"STRING","valueString":"valor-ejemplo","valueNumber":1,"valueBoolean":true,"dataClassificationConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `events[].properties` | No | `array<ActivityEventPropertyDto>` | máximo 25 elemento(s) | Propiedades declaradas por el esquema del evento (máximo 25, el tope del proveedor) | `[{"propertyName":"Nombre de ejemplo","valueType":"STRING","valueString":"valor-ejemplo","valueNumber":1,"valueBoolean":true,"dataClassificationConceptId":"00000000-0000-4000-8000-000000000001"}]` |
 | `events[].properties[].propertyName` | No | `string` | longitud máxima 200 | Nombre de la propiedad | `Nombre de ejemplo` |
 | `events[].properties[].valueType` | No | `string` | valores: `STRING`, `NUMBER`, `BOOLEAN` | Tipo de valor | `STRING` |
 | `events[].properties[].valueString` | No | `string` | longitud máxima 4000 | Valor string | `valor-ejemplo` |
 | `events[].properties[].valueNumber` | No | `number` | Sin restricción adicional declarada | Valor numérico | `1` |
 | `events[].properties[].valueBoolean` | No | `boolean` | Sin restricción adicional declarada | Valor booleano | `true` |
-| `events[].properties[].dataClassificationConceptId` | No | `string` | formato `uuid` | Clasificación de dato (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `events[].properties[].dataClassificationConceptId` | No | `string` | formato `uuid` | Ignorado: la clasificación del dato la fija el servidor desde el esquema del evento | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -886,10 +891,7 @@ Content-Type: application/json
       "eventName": "Nombre de ejemplo",
       "eventIdempotencyKey": "valor-ejemplo",
       "analyticsSubjectId": "00000000-0000-4000-8000-000000000001",
-      "userId": "00000000-0000-4000-8000-000000000001",
-      "sessionId": "00000000-0000-4000-8000-000000000001",
       "sessionJourneyId": "00000000-0000-4000-8000-000000000001",
-      "tenantId": "00000000-0000-4000-8000-000000000001",
       "portalTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "routeTemplate": "valor-ejemplo",
       "occurredAt": "valor-ejemplo",
@@ -922,6 +924,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivityEventsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivityEventsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivityEventsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivityEventsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivityEventsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -955,8 +958,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Esquema de evento no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La sesión autenticada no está registrada | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1058,6 +1063,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AnalyticsSubjectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AnalyticsSubjectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AnalyticsSubjectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AnalyticsSubjectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnalyticsSubjectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1152,9 +1158,8 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `sessionJourneyId` | No | `string` | formato `uuid` | Journey de sesión existente a enlazar | `00000000-0000-4000-8000-000000000001` |
-| `sessionId` | No | `string` | formato `uuid` | Sesión (se usa para crear el journey si no existe) | `00000000-0000-4000-8000-000000000001` |
-| `analyticsSubjectId` | No | `string` | formato `uuid` | Sujeto de analítica | `00000000-0000-4000-8000-000000000001` |
+| `sessionJourneyId` | No | `string` | formato `uuid` | Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado. Si falta, se usa el journey abierto de la sesión autenticada | `00000000-0000-4000-8000-000000000001` |
+| `analyticsSubjectId` | No | `string` | formato `uuid` | Sujeto de analítica; debe ser del usuario autenticado | `00000000-0000-4000-8000-000000000001` |
 | `portalTypeConceptId` | No | `string` | formato `uuid` | Tipo de portal (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `deviceTypeConceptId` | No | `string` | formato `uuid` | Tipo de dispositivo (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `osFamilyConceptId` | No | `string` | formato `uuid` | Familia de SO (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -1183,7 +1188,6 @@ Content-Type: application/json
 
 {
   "sessionJourneyId": "00000000-0000-4000-8000-000000000001",
-  "sessionId": "00000000-0000-4000-8000-000000000001",
   "analyticsSubjectId": "00000000-0000-4000-8000-000000000001",
   "portalTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "deviceTypeConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1216,6 +1220,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClientContextResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClientContextResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClientContextResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClientContextResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClientContextResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1244,8 +1249,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La sesión autenticada no está registrada | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1348,6 +1355,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConversionEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConversionEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConversionEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConversionEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConversionEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1380,6 +1388,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Funnel no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1445,7 +1455,6 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `trackingDisclosureVersionId` | Sí | `string` | formato `uuid` | Versión de disclosure aceptada | `00000000-0000-4000-8000-000000000001` |
-| `userId` | No | `string` | formato `uuid` | Usuario que acepta (por defecto el autenticado) | `00000000-0000-4000-8000-000000000001` |
 | `sessionId` | No | `string` | formato `uuid` | Sesión asociada | `00000000-0000-4000-8000-000000000001` |
 | `ipPrefixHash` | No | `string` | longitud máxima 200 | Hash del prefijo de IP (sin PII en claro) | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
 | `userAgentHash` | No | `string` | longitud máxima 200 | Hash del user agent (sin PII en claro) | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
@@ -1462,7 +1471,6 @@ Content-Type: application/json
 
 {
   "trackingDisclosureVersionId": "00000000-0000-4000-8000-000000000001",
-  "userId": "00000000-0000-4000-8000-000000000001",
   "sessionId": "00000000-0000-4000-8000-000000000001",
   "ipPrefixHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "userAgentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -1482,6 +1490,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DisclosureAcceptanceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DisclosureAcceptanceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DisclosureAcceptanceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DisclosureAcceptanceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DisclosureAcceptanceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1616,6 +1625,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DisclosureVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DisclosureVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DisclosureVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DisclosureVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DisclosureVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1759,6 +1769,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EventSchemaResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EventSchemaResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EventSchemaResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EventSchemaResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EventSchemaResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1917,6 +1928,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FunnelResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FunnelResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FunnelResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FunnelResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FunnelResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2052,6 +2064,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JourneyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JourneyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2083,6 +2096,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El journey ya está cerrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2149,7 +2163,6 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `purposeDefinitionId` | Sí | `string` | formato `uuid` | Propósito de tracking (requiere consentimiento) | `00000000-0000-4000-8000-000000000001` |
-| `userId` | No | `string` | formato `uuid` | Usuario que consiente (por defecto el autenticado) | `00000000-0000-4000-8000-000000000001` |
 | `jurisdictionConceptId` | No | `string` | formato `uuid` | Jurisdicción (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `consentVersion` | No | `string` | longitud máxima 50 | Versión del consentimiento | `valor-ejemplo` |
 | `evidenceHash` | No | `string` | longitud máxima 200 | Hash de la evidencia de consentimiento | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
@@ -2166,7 +2179,6 @@ Content-Type: application/json
 
 {
   "purposeDefinitionId": "00000000-0000-4000-8000-000000000001",
-  "userId": "00000000-0000-4000-8000-000000000001",
   "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
   "consentVersion": "valor-ejemplo",
   "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -2186,6 +2198,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingConsentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2306,6 +2319,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingConsentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingConsentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2422,6 +2436,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyTrackingConsentStatusDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyTrackingConsentStatusDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyTrackingConsentStatusDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyTrackingConsentStatusDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyTrackingConsentStatusDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2559,6 +2574,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackingPurposeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingPurposeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingPurposeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingPurposeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingPurposeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2714,6 +2730,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WebVitalsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WebVitalsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WebVitalsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WebVitalsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WebVitalsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2743,6 +2760,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Journey de sesión no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Sujeto de analítica no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Evento de actividad no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
+| 404 | `NOT_FOUND` | Contexto de cliente no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-events.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

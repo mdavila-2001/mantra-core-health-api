@@ -143,6 +143,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PharmacyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PharmacyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PharmacyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PharmacyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -264,6 +265,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacyCategoryListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyCategoryListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -405,6 +407,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConnectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -437,7 +440,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 409 | `CONFLICT` | Ya existe una conexión para esa integración | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-integration.service.ts |
@@ -547,6 +549,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MappingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MappingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -689,6 +692,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -713,7 +717,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacies.service.ts |
 | 404 | `NOT_FOUND` | Licencia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacies.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La licencia no está pendiente de verificación | Excepción explícita en src/modules/pharmacy/services/pharmacies.service.ts |
@@ -830,6 +833,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PriceListResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PriceListResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PriceListResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PriceListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PriceListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -864,7 +868,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 409 | `CONFLICT` | Ya existe una lista con ese código en la farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-pricing.service.ts |
@@ -954,6 +957,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1090,6 +1094,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PriceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PriceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PriceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PriceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PriceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1266,6 +1271,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProductResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProductResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProductResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProductResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProductResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1304,7 +1310,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | catalogPresentationCode no es una presentación de ese producto | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 404 | `NOT_FOUND` | Producto del catálogo no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 409 | `CONFLICT` | Ya existe un producto con ese código en la farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 409 | `CONFLICT` | Ya cargó ese producto y presentación | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
@@ -1396,6 +1401,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1528,6 +1534,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PharmacyProductReadDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyProductReadDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1583,7 +1590,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | ${changed.join(', ')} vienen del catálogo oficial y no se editan | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 404 | `NOT_FOUND` | Producto no encontrado | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El producto no está activo | Excepción explícita en src/modules/pharmacy/services/pharmacy-products.service.ts |
@@ -1671,6 +1677,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<CatalogProjectionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CatalogProjectionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CatalogProjectionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CatalogProjectionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CatalogProjectionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1721,7 +1728,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1836,6 +1842,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SiteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1870,7 +1877,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Farmacia no encontrada | Excepción explícita en src/modules/pharmacy/services/pharmacy-sites.service.ts |
 | 409 | `CONFLICT` | Ya existe una sede con ese código en la farmacia | Excepción explícita en src/modules/pharmacy/services/pharmacy-sites.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La farmacia no está activa | Excepción explícita en src/modules/pharmacy/services/pharmacy-sites.service.ts |
@@ -1957,6 +1963,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CatalogProductPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CatalogProductPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CatalogProductPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CatalogProductPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CatalogProductPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2129,6 +2136,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PharmacyDirectoryResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacyDirectoryResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacyDirectoryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacyDirectoryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyDirectoryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2262,6 +2270,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacyDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacyDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacyDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacyDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2436,6 +2445,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacyContactsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacyContactsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacyContactsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacyContactsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyContactsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2567,6 +2577,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacyLicenseListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacyLicenseListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacyLicenseListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacyLicenseListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyLicenseListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2716,6 +2727,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacySummaryDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacySummaryDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2856,6 +2868,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PharmacyProductSearchResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacyProductSearchResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacyProductSearchResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacyProductSearchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacyProductSearchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3002,6 +3015,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PharmacySiteListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacySiteListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacySiteListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacySiteListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacySiteListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3136,6 +3150,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PharmacySitePricesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PharmacySitePricesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PharmacySitePricesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PharmacySitePricesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PharmacySitePricesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3299,6 +3314,7 @@ Host: localhost:3000
 | 400 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicMedicationPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicMedicationPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3441,6 +3457,7 @@ Host: localhost:3000
 | 404 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicMedicationAvailabilityDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicMedicationAvailabilityDto`. Ejemplo completo derivado de ese DTO:
 

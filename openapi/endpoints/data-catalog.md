@@ -136,6 +136,7 @@ Content-Type: application/json
 | 422 | No está en revisión, falta evidencia o el rechazo no explica | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -245,6 +246,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClassificationRunResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -432,6 +434,7 @@ Content-Type: application/json
 | 422 | No puede enviarse a revisión: falta la definición (`VALIDATION_FAILED`, `details.violations`) | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -528,6 +531,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe la columna | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -645,6 +649,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -739,6 +744,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -838,6 +844,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -932,6 +939,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe el objeto | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1091,6 +1099,7 @@ Content-Type: application/json
 | 422 | No puede enviarse a revisión: faltan respuestas (`VALIDATION_FAILED`, `details.violations`) | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1189,6 +1198,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1283,6 +1293,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1377,6 +1388,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1494,6 +1506,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1589,6 +1602,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1685,6 +1699,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1776,6 +1791,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1868,6 +1884,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1964,6 +1981,7 @@ Idempotency-Key: valor-ejemplo
 | 422 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ScanAcceptedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2078,6 +2096,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2169,6 +2188,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2260,6 +2280,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 | 500 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `DerivaCatalogoDto` | No |
+| 504 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DerivaCatalogoDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2376,6 +2397,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `TablasPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TablasPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2511,6 +2533,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `TablaFichaDto` | No |
 | 500 | Consulta completada correctamente. | `TablaFichaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `TablaFichaDto` | No |
+| 504 | Consulta completada correctamente. | `TablaFichaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TablaFichaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2679,6 +2702,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ProcesosPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcesosPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2821,6 +2845,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ProcesoDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcesoDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3015,6 +3040,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `GrafoDto` | No |
 | 500 | Consulta completada correctamente. | `GrafoDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `GrafoDto` | No |
+| 504 | Consulta completada correctamente. | `GrafoDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GrafoDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3138,6 +3164,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 | 500 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `HallazgoResumenDto[]` | No |
+| 504 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HallazgoResumenDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -3250,6 +3277,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `HallazgoDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HallazgoDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3383,6 +3411,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `MapaPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MapaPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3531,6 +3560,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `GlosarioPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlosarioPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3654,6 +3684,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `LinajeDto` | No |
 | 500 | Consulta completada correctamente. | `LinajeDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `LinajeDto` | No |
+| 504 | Consulta completada correctamente. | `LinajeDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinajeDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3774,6 +3805,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 | 500 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `LinajeTablaDto` | No |
+| 504 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinajeTablaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3903,6 +3935,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `OperacionesPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperacionesPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4058,6 +4091,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `OperacionDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperacionDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4377,6 +4411,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ArbolDto` | No |
 | 500 | Consulta completada correctamente. | `ArbolDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ArbolDto` | No |
+| 504 | Consulta completada correctamente. | `ArbolDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArbolDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4504,6 +4539,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `PortalVersionDto` | No |
 | 500 | Consulta completada correctamente. | `PortalVersionDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `PortalVersionDto` | No |
+| 504 | Consulta completada correctamente. | `PortalVersionDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PortalVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4617,6 +4653,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunNextResultDto`. Ejemplo completo derivado de ese DTO:
 

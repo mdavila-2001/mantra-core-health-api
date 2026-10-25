@@ -106,6 +106,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AnomalyScanResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnomalyScanResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -223,6 +224,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -345,6 +347,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DataAccessResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DataAccessResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -487,6 +490,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuditEventResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuditEventResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -602,6 +606,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<HistoryTimelineDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HistoryTimelineDto`. Ejemplo completo derivado de ese DTO:
 
@@ -715,7 +720,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `tenantId` | No | `string` | formato `uuid` | Partición de tenant a verificar | `00000000-0000-4000-8000-000000000001` |
-| `limit` | No | `number` | Sin restricción adicional declarada | Máximo de eslabones a recorrer | `1000` |
+| `limit` | No | `number` | Sin restricción adicional declarada | Modo diagnóstico acotado: máximo de eslabones a recorrer. Si se omite, se verifica la partición completa. Un límite menor al total devuelve un resultado parcial (`complete: false`) sin atestación positiva. Debe ser un entero entre 1 y 100000 (`400 AUDIT_INTEGRITY_RANGE_INVALID`). | `1` |
 
 ### Payload completo de ejemplo
 
@@ -729,7 +734,7 @@ Content-Type: application/json
 
 {
   "tenantId": "00000000-0000-4000-8000-000000000001",
-  "limit": 1000
+  "limit": 1
 }
 ```
 
@@ -746,12 +751,14 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IntegrityReportDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IntegrityReportDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
   "verified": true,
+  "complete": true,
   "checkedCount": 1,
   "brokenAt": "valor-ejemplo",
   "attestationId": "00000000-0000-4000-8000-000000000001"
@@ -762,10 +769,11 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `verified` | Sí | `boolean` | Sin restricción adicional declarada | true si la cadena está íntegra | `true` |
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | true sólo si se recorrió la partición completa y está íntegra. Un | `true` |
+| `complete` | Sí | `boolean` | Sin restricción adicional declarada | true si se examinaron todos los eslabones de la partición; false si el | `true` |
 | `checkedCount` | Sí | `number` | Sin restricción adicional declarada | Nº de eslabones verificados | `1` |
 | `brokenAt` | Sí | `string` | admite null | Id del primer eslabón roto, si lo hay | `valor-ejemplo` |
-| `attestationId` | Sí | `string` | Sin restricción adicional declarada | Id del evento de atestación registrado | `00000000-0000-4000-8000-000000000001` |
+| `attestationId` | Sí | `string` | admite null | Id del evento de atestación registrado. null cuando el resultado es | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -867,6 +875,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -975,6 +984,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetentionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetentionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1125,6 +1135,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ThirdPartyAccessResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ThirdPartyAccessResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1257,6 +1268,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuditExportResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuditExportResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1399,6 +1411,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ModerationDecisionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ModerationDecisionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1529,6 +1542,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DsarResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1667,6 +1681,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DsarResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DsarResponseDto`. Ejemplo completo derivado de ese DTO:
 

@@ -111,6 +111,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareRelationshipView[]`. Ejemplo completo derivado de ese DTO:
 
@@ -252,6 +253,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -386,6 +388,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -501,6 +504,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -631,6 +635,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -745,6 +750,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareRelationshipView[]`. Ejemplo completo derivado de ese DTO:
 
@@ -859,6 +865,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1001,6 +1008,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1132,6 +1140,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1227,6 +1236,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LegalRepresentationView[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1368,6 +1378,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1484,6 +1495,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1591,6 +1603,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyClinicalAccessResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1743,6 +1756,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1857,6 +1871,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1991,6 +2006,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2139,6 +2155,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2267,6 +2284,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
 | 429 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
 | 500 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
+| 504 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheInvalidationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2397,6 +2415,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2510,6 +2529,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2640,6 +2660,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2786,6 +2807,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2896,6 +2918,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignableRoleDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -3034,6 +3057,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3189,6 +3213,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3299,6 +3324,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe el rol | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -3428,6 +3454,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3570,6 +3597,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3714,6 +3742,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3826,6 +3855,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe el usuario | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -3947,6 +3977,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4067,6 +4098,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
