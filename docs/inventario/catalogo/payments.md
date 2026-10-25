@@ -30,7 +30,7 @@
 | [payment_debts](#payment_debts) | Representa obligaciones pendientes de pago relacionadas con facturas, servicios o acuerdos de financiación. | 22 | 14 | 2 | COINCIDE |
 | [payment_disputes](#payment_disputes) | Gestiona disputas iniciadas sobre pagos para reunir estado, evidencia y resolución. | 16 | 8 | 0 | COINCIDE |
 | [payment_gateways](#payment_gateways) | Cataloga pasarelas de pago que procesan cargos y reembolsos asociados a servicios de salud. | 13 | 6 | 0 | COINCIDE |
-| [payment_intents](#payment_intents) | Representa la intención de cobrar un monto antes de completar su procesamiento en una pasarela. | 22 | 13 | 11 | COINCIDE |
+| [payment_intents](#payment_intents) | Representa la intención de cobrar un monto antes de completar su procesamiento en una pasarela. | 22 | 13 | 12 | COINCIDE |
 | [payment_mandates](#payment_mandates) | Registra autorizaciones permanentes para iniciar pagos bajo condiciones acordadas por el titular. | 16 | 10 | 0 | COINCIDE |
 | [payment_methods](#payment_methods) | Registra medios de pago que pacientes, prestadores o comercios pueden utilizar en transacciones. | 20 | 9 | 0 | COINCIDE |
 | [payment_receipts](#payment_receipts) | Cataloga recibos emitidos por pagos para ofrecer comprobantes trazables a pacientes u organizaciones. | 18 | 10 | 0 | COINCIDE |
@@ -46,7 +46,7 @@
 | [plan_quotas](#plan_quotas) | Define límites de uso incluidos en cada plan para administrar consumo y capacidad contratada. | 13 | 3 | 0 | COINCIDE |
 | [provider_api_attempts](#provider_api_attempts) | Registra intentos de llamadas a APIs de pago para investigar resultados, latencias y reintentos. | 17 | 8 | 0 | COINCIDE |
 | [provider_api_operations](#provider_api_operations) | Cataloga operaciones API invocadas en proveedores de pago para gobernar solicitudes externas. | 16 | 5 | 0 | COINCIDE |
-| [provider_callback_endpoints](#provider_callback_endpoints) | Define endpoints que reciben callbacks de proveedores financieros para actualizar el estado de pagos. | 14 | 8 | 0 | COINCIDE |
+| [provider_callback_endpoints](#provider_callback_endpoints) | Define endpoints que reciben callbacks de proveedores financieros para actualizar el estado de pagos. | 14 | 8 | 1 | COINCIDE |
 | [provider_callback_events](#provider_callback_events) | Conserva eventos recibidos desde callbacks para procesar notificaciones financieras con trazabilidad. | 15 | 11 | 0 | COINCIDE |
 | [provider_invoice_artifacts](#provider_invoice_artifacts) | Conserva referencias a facturas o comprobantes emitidos por proveedores de pago. | 18 | 10 | 0 | COINCIDE |
 | [provider_reconciliation_records](#provider_reconciliation_records) | Almacena registros de conciliación importados desde proveedores para compararlos con operaciones internas. | 17 | 9 | 1 | COINCIDE |
@@ -2261,7 +2261,7 @@ Representa la intención de cobrar un monto antes de completar su procesamiento 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_42_payments.puml: payment_intents`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_42_payments.puml` · **DDL:** `SQL/42_payments/02_tables.sql`
 - **Entidad del ORM:** `PaymentIntents` — `src/modules/payments/entities/payment_intents.entity.ts`
-- **Resumen:** 22 columnas · 13 índices · 11 FK salientes · 13 entrantes · 11 operaciones
+- **Resumen:** 22 columnas · 13 índices · 11 FK salientes · 13 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -2324,7 +2324,7 @@ Representa la intención de cobrar un monto antes de completar su procesamiento 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_payment_intents_idempotency_key` | sí | idempotency_key | Garantiza que no se repita la combinación (idempotency_key) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «idempotency_key», la primera columna del índice _(CONSULTA)_ |
-| `ix_payment_intents_tenant_id` | no | tenant_id | Soporta la clave foránea fk_payment_intents_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_payment_intents_tenant_id` | no | tenant_id | Soporta la clave foránea fk_payment_intents_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_payment_intents_practice_id` | no | practice_id | Soporta la clave foránea fk_payment_intents_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_intents_gateway_id` | no | gateway_id | Soporta la clave foránea fk_payment_intents_gateway_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_intents_gateway_connection_id` | no | gateway_connection_id | Soporta la clave foránea fk_payment_intents_gateway_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2349,6 +2349,7 @@ Representa la intención de cobrar un monto antes de completar su procesamiento 
 |---|---|---|
 | POST /payments/callbacks/{callbackPath} | ACTUALIZA | POR_TIPO |
 | POST /payments/callbacks/{callbackPath} | LEE | DIRECTA |
+| POST /payments/checkout-sessions | LEE | DIRECTA |
 | POST /payments/intents | CREA | DIRECTA |
 | POST /payments/intents | LEE | DIRECTA |
 | POST /payments/intents/{id}/fx-lock | ACTUALIZA | POR_TIPO |
@@ -3603,7 +3604,7 @@ Define endpoints que reciben callbacks de proveedores financieros para actualiza
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_42_payments.puml: provider_callback_endpoints`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_42_payments.puml` · **DDL:** `SQL/42_payments/02_tables.sql`
 - **Entidad del ORM:** `ProviderCallbackEndpoints` — `src/modules/payments/entities/provider_callback_endpoints.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 2 entrantes · 0 operaciones
+- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 2 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -3641,13 +3642,13 @@ Define endpoints que reciben callbacks de proveedores financieros para actualiza
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_provider_callback_endpoints_gateway_connection_id` | no | gateway_connection_id | Soporta la clave foránea fk_provider_callback_endpoints_gateway_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_provider_callback_endpoints_gateway_connection_id` | no | gateway_connection_id | Soporta la clave foránea fk_provider_callback_endpoints_gateway_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «gateway_connection_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_provider_callback_endpoints_verification_method_concept_id` | no | verification_method_concept_id | Soporta la clave foránea fk_provider_callback_endpoints_verification_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_callback_endpoints_verification_secret_id` | no | verification_secret_id | Soporta la clave foránea fk_provider_callback_endpoints_verification_secret_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_callback_endpoints_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_provider_callback_endpoints_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_callback_endpoints_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_provider_callback_endpoints_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_provider_callback_endpoints_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_provider_callback_endpoints_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uk_provider_callback_endpoints_connection_code` | sí | gateway_connection_id, code | Garantiza que no se repita la combinación (gateway_connection_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_provider_callback_endpoints_gateway_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uk_provider_callback_endpoints_connection_code` | sí | gateway_connection_id, code | Garantiza que no se repita la combinación (gateway_connection_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_provider_callback_endpoints_gateway_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «gateway_connection_id», la primera columna del índice _(CONSULTA)_ |
 | `uk_provider_callback_endpoints_path` | sí | callback_path | Garantiza que no se repita la combinación (callback_path) _(DOCUMENTO)_ |
 
 #### Restricciones
@@ -3659,7 +3660,9 @@ Define endpoints que reciben callbacks de proveedores financieros para actualiza
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /payments/callbacks/{callbackPath} | LEE | DIRECTA |
 
 #### Gobierno
 

@@ -4,7 +4,7 @@
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 - **Operaciones:** 10 (10 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 9 · BAJO 1
+- **Riesgo:** ALTO 0 · MEDIO 7 · BAJO 3
 - **Tablas distintas que tocan:** 6
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/geo.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -17,11 +17,11 @@
 | 3 | POST | `/geo/tracked-subjects` | Alta de sujeto rastreado con consentimiento de ubicación | MEDIO | 2 | SECURITY_ADMIN |
 | 4 | GET | `/geo/tracked-subjects/{id}/last-position` | Consultar la última posición conocida del sujeto | BAJO | 2 | SECURITY_ADMIN |
 | 5 | POST | `/geo/tracked-subjects/{id}/pings` | Ingerir un batch de pings de ubicación de alta frecuencia | MEDIO | 3 | SECURITY_ADMIN |
-| 6 | POST | `/geo/tracked-subjects/{id}/revoke-consent` | Revocar consentimiento de ubicación y pausar el rastreo | MEDIO | 4 | SECURITY_ADMIN |
+| 6 | POST | `/geo/tracked-subjects/{id}/revoke-consent` | Revocar consentimiento de ubicación y pausar el rastreo | MEDIO | 3 | SECURITY_ADMIN |
 | 7 | POST | `/geo/tracking-sessions` | Iniciar una sesión de tracking de un sujeto | MEDIO | 3 | SECURITY_ADMIN |
-| 8 | POST | `/geo/tracking-sessions/{id}/close` | Cerrar una sesión de tracking | MEDIO | 4 | SECURITY_ADMIN |
-| 9 | POST | `/geo/trips` | Iniciar un viaje (trip) | MEDIO | 3 | SECURITY_ADMIN |
-| 10 | POST | `/geo/trips/{id}/close` | Cerrar un viaje con distancia/duración | MEDIO | 2 | SECURITY_ADMIN |
+| 8 | POST | `/geo/tracking-sessions/{id}/close` | Cerrar una sesión de tracking | BAJO | 3 | SECURITY_ADMIN |
+| 9 | POST | `/geo/trips` | Iniciar un viaje (trip) | MEDIO | 4 | SECURITY_ADMIN |
+| 10 | POST | `/geo/trips/{id}/close` | Cerrar un viaje con distancia/duración | BAJO | 3 | SECURITY_ADMIN |
 
 ---
 
@@ -32,7 +32,7 @@
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoGeofencesController.recordEvent` — `src/modules/geo/controllers/geo-geofences.controller.ts:40`
+- **Implementación:** `GeoGeofencesController.recordEvent` — `src/modules/geo/controllers/geo-geofences.controller.ts:50`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -42,14 +42,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/geofence-events` la atiende `GeoGeofencesController.recordEvent` (src/modules/geo/controllers/geo-geofences.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordGeofenceEventDto` (5 campos, 3 obligatorios). Delega en `GeoGeofencesService.recordEvent`. Crea filas en geo.geofence_events. Lee geo.geofence_events, geo.geofences, geo.tracked_subjects.
+`POST /geo/geofence-events` la atiende `GeoGeofencesController.recordEvent` (src/modules/geo/controllers/geo-geofences.controller.ts:50). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordGeofenceEventDto` (5 campos, 3 obligatorios). Delega en `GeoGeofencesService.recordEvent`. Crea filas en geo.geofence_events. Lee geo.geofence_events, geo.geofences, geo.tracked_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-geofences.controller.ts:40` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-geofences.controller.ts:50` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -117,7 +117,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Geofence no encontrado; ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 409 | `CONFLICT` | ConflictException: El sujeto ya está en ese estado respecto al geofence |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El geofence no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -143,7 +142,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoGeofencesController.define` — `src/modules/geo/controllers/geo-geofences.controller.ts:28`
+- **Implementación:** `GeoGeofencesController.define` — `src/modules/geo/controllers/geo-geofences.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -153,14 +152,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/geofences` la atiende `GeoGeofencesController.define` (src/modules/geo/controllers/geo-geofences.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateGeofenceDto` (7 campos, 3 obligatorios). Delega en `GeoGeofencesService.define`. Crea filas en geo.geofences. Lee geo.geofences.
+`POST /geo/geofences` la atiende `GeoGeofencesController.define` (src/modules/geo/controllers/geo-geofences.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateGeofenceDto` (7 campos, 2 obligatorios). Delega en `GeoGeofencesService.define`. Crea filas en geo.geofences. Lee geo.geofences.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-geofences.controller.ts:28` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-geofences.controller.ts:33` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -177,19 +176,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant propietario (RLS) | `src/modules/geo/dto/create-geofence.dto.ts:30` |
-| `name` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre único del geofence dentro del tenant | `src/modules/geo/dto/create-geofence.dto.ts:42` |
-| `shapeType` | `string` | Sí | valores: CIRCLE, POLYGON | `@IsIn(['CIRCLE', 'POLYGON'])` | Forma del geofence | `src/modules/geo/dto/create-geofence.dto.ts:52` |
-| `radiusM` | `number` | No | mayor que 0 | `@IsOptional()` `@IsNumber()` `@IsPositive()` | Radio en metros (obligatorio si CIRCLE) | `src/modules/geo/dto/create-geofence.dto.ts:63` |
-| `centerLat` | `number` | No | — | `@IsOptional()` `@IsLatitude()` | Latitud del centro (obligatorio si CIRCLE) | `src/modules/geo/dto/create-geofence.dto.ts:73` |
-| `centerLng` | `number` | No | — | `@IsOptional()` `@IsLongitude()` | Longitud del centro (obligatorio si CIRCLE) | `src/modules/geo/dto/create-geofence.dto.ts:83` |
-| `geometryJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | GeoJSON del polígono (obligatorio si POLYGON) | `src/modules/geo/dto/create-geofence.dto.ts:94` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `src/modules/geo/dto/create-geofence.dto.ts:36` |
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre único del geofence dentro del tenant | `src/modules/geo/dto/create-geofence.dto.ts:48` |
+| `shapeType` | `string` | Sí | valores: CIRCLE, POLYGON | `@IsIn(['CIRCLE', 'POLYGON'])` | Forma del geofence | `src/modules/geo/dto/create-geofence.dto.ts:58` |
+| `radiusM` | `number` | No | mayor que 0 | `@IsOptional()` `@IsNumber()` `@IsPositive()` | Radio en metros (obligatorio si CIRCLE) | `src/modules/geo/dto/create-geofence.dto.ts:69` |
+| `centerLat` | `number` | No | — | `@IsOptional()` `@IsLatitude()` | Latitud del centro (obligatorio si CIRCLE) | `src/modules/geo/dto/create-geofence.dto.ts:79` |
+| `centerLng` | `number` | No | — | `@IsOptional()` `@IsLongitude()` | Longitud del centro (obligatorio si CIRCLE) | `src/modules/geo/dto/create-geofence.dto.ts:89` |
+| `geometryJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | GeoJSON del polígono (obligatorio si POLYGON) | `src/modules/geo/dto/create-geofence.dto.ts:100` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "shapeType": "CIRCLE"
 }
@@ -255,7 +253,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTrackedSubjectsController.enroll` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:39`
+- **Implementación:** `GeoTrackedSubjectsController.enroll` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:44`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -265,14 +263,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/tracked-subjects` la atiende `GeoTrackedSubjectsController.enroll` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:39). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTrackedSubjectDto` (4 campos, 1 obligatorio). Delega en `GeoTrackedSubjectsService.enroll`. Crea filas en geo.tracked_subjects. Lee geo.tracked_subjects.
+`POST /geo/tracked-subjects` la atiende `GeoTrackedSubjectsController.enroll` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:44). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTrackedSubjectDto` (4 campos, 1 obligatorio). Delega en `GeoTrackedSubjectsService.enroll`. Crea filas en geo.tracked_subjects. Lee geo.tracked_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:39` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:44` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -292,7 +290,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `subjectId` | `string` | Sí | formato uuid | `@IsUUID()` | Id del recurso rastreado (ambulancia/persona) | `src/modules/geo/dto/create-tracked-subject.dto.ts:17` |
 | `subjectType` | `string` | No | valores: PERSON, VEHICLE | `@IsOptional()` `@IsIn(['PERSON', 'VEHICLE'])` | Tipo de sujeto (discriminador polimórfico) | `src/modules/geo/dto/create-tracked-subject.dto.ts:29` |
 | `deviceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Dispositivo GPS asociado | `src/modules/geo/dto/create-tracked-subject.dto.ts:40` |
-| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant propietario (RLS) | `src/modules/geo/dto/create-tracked-subject.dto.ts:51` |
+| `tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `src/modules/geo/dto/create-tracked-subject.dto.ts:53` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -357,7 +355,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTrackedSubjectsController.lastPosition` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:68`
+- **Implementación:** `GeoTrackedSubjectsController.lastPosition` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:83`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -367,16 +365,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /geo/tracked-subjects/{id}/last-position` la atiende `GeoTrackedSubjectsController.lastPosition` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:68). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `GeoTrackedSubjectsService.lastPosition`. Lee geo.location_pings, geo.tracked_subjects.
+`GET /geo/tracked-subjects/{id}/last-position` la atiende `GeoTrackedSubjectsController.lastPosition` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:83). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `GeoTrackedSubjectsService.lastPosition`. Lee geo.location_pings, geo.tracked_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:68` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:83` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:68` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:83` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -416,7 +414,7 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado; ResourceNotFoundException: El sujeto no tiene posiciones registradas |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El sujeto no tiene posiciones registradas |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/geo.md).
@@ -440,7 +438,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTrackedSubjectsController.ingestPings` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:53`
+- **Implementación:** `GeoTrackedSubjectsController.ingestPings` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:63`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -450,16 +448,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/tracked-subjects/{id}/pings` la atiende `GeoTrackedSubjectsController.ingestPings` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IngestPingsDto` (11 campos, 3 obligatorios). Delega en `GeoTrackedSubjectsService.ingestPings`. Crea filas en geo.location_pings. Lee geo.tracked_subjects, geo.tracking_sessions.
+`POST /geo/tracked-subjects/{id}/pings` la atiende `GeoTrackedSubjectsController.ingestPings` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:63). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IngestPingsDto` (11 campos, 3 obligatorios). Delega en `GeoTrackedSubjectsService.ingestPings`. Crea filas en geo.location_pings. Lee geo.tracked_subjects, geo.tracking_sessions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:53` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:63` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:53` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:63` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -544,7 +542,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sujeto no está activo para rastreo; PreconditionFailedException: No hay una sesión de tracking abierta para el sujeto |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -569,7 +566,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTrackedSubjectsController.revokeConsent` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:78`
+- **Implementación:** `GeoTrackedSubjectsController.revokeConsent` — `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -579,25 +576,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/tracked-subjects/{id}/revoke-consent` la atiende `GeoTrackedSubjectsController.revokeConsent` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `GeoTrackedSubjectsService.revokeConsent`. Actualiza geo.tracked_subjects, geo.tracking_sessions. Lee geo.tracked_subjects, geo.tracking_sessions.
+`POST /geo/tracked-subjects/{id}/revoke-consent` la atiende `GeoTrackedSubjectsController.revokeConsent` (src/modules/geo/controllers/geo-tracked-subjects.controller.ts:93). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `GeoTrackedSubjectsService.revokeConsent`. Actualiza geo.tracking_sessions. Lee geo.tracked_subjects, geo.tracking_sessions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:78` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:93` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:78` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracked-subjects.controller.ts:93` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `geo.tracked_subjects` | ESCRIBE | ACTUALIZA | POR_TIPO | GeoTrackedSubjectsController.revokeConsent → GeoTrackedSubjectsService.revokeConsent | `src/modules/geo/services/geo-tracked-subjects.service.ts:250` |
 | `geo.tracked_subjects` | LEE | LEE | DIRECTA | GeoTrackedSubjectsController.revokeConsent → GeoTrackedSubjectsService.revokeConsent → TrackedSubjectsRepository.findById | `src/modules/geo/repositories/tracked-subjects.repository.ts:44` |
-| `geo.tracking_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | GeoTrackedSubjectsController.revokeConsent → GeoTrackedSubjectsService.revokeConsent | `src/modules/geo/services/geo-tracked-subjects.service.ts:261` |
+| `geo.tracking_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | GeoTrackedSubjectsController.revokeConsent → GeoTrackedSubjectsService.revokeConsent | `src/modules/geo/services/geo-tracked-subjects.service.ts:266` |
 | `geo.tracking_sessions` | LEE | LEE | DIRECTA | GeoTrackedSubjectsController.revokeConsent → GeoTrackedSubjectsService.revokeConsent → TrackingSessionsRepository.findAllOpenBySubject | `src/modules/geo/repositories/tracking-sessions.repository.ts:69` |
 
 ### Parámetros
@@ -624,7 +620,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rastreo del sujeto ya está suspendido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -649,7 +644,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTrackingSessionsController.start` — `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:30`
+- **Implementación:** `GeoTrackingSessionsController.start` — `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:35`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -659,14 +654,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/tracking-sessions` la atiende `GeoTrackingSessionsController.start` (src/modules/geo/controllers/geo-tracking-sessions.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `StartTrackingSessionDto` (4 campos, 1 obligatorio). Delega en `GeoTrackingSessionsService.start`. Crea filas en geo.tracking_sessions. Lee geo.tracked_subjects, geo.tracking_sessions.
+`POST /geo/tracking-sessions` la atiende `GeoTrackingSessionsController.start` (src/modules/geo/controllers/geo-tracking-sessions.controller.ts:35). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `StartTrackingSessionDto` (4 campos, 1 obligatorio). Delega en `GeoTrackingSessionsService.start`. Crea filas en geo.tracking_sessions. Lee geo.tracked_subjects, geo.tracking_sessions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:30` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:35` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -728,7 +723,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 409 | `CONFLICT` | ConflictException: El sujeto ya tiene una sesión de tracking abierta |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sujeto no está activo para rastreo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -752,9 +746,9 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar una sesión de tracking
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTrackingSessionsController.close` — `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:42`
+- **Implementación:** `GeoTrackingSessionsController.close` — `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:52`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -764,16 +758,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/tracking-sessions/{id}/close` la atiende `GeoTrackingSessionsController.close` (src/modules/geo/controllers/geo-tracking-sessions.controller.ts:42). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `GeoTrackingSessionsService.close`. Actualiza geo.tracking_sessions. Lee geo.tracked_subjects, geo.tracking_sessions, geo.trips.
+`POST /geo/tracking-sessions/{id}/close` la atiende `GeoTrackingSessionsController.close` (src/modules/geo/controllers/geo-tracking-sessions.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `GeoTrackingSessionsService.close`. Lee geo.tracked_subjects, geo.tracking_sessions, geo.trips.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:42` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:52` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:42` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-tracking-sessions.controller.ts:52` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -781,7 +775,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `geo.tracked_subjects` | LEE | LEE | DIRECTA | GeoTrackingSessionsController.close → GeoTrackingSessionsService.close → TrackedSubjectsRepository.findById | `src/modules/geo/repositories/tracked-subjects.repository.ts:44` |
-| `geo.tracking_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | GeoTrackingSessionsController.close → GeoTrackingSessionsService.close | `src/modules/geo/services/geo-tracking-sessions.service.ts:156` |
 | `geo.tracking_sessions` | LEE | LEE | DIRECTA | GeoTrackingSessionsController.close → GeoTrackingSessionsService.close → TrackingSessionsRepository.findById | `src/modules/geo/repositories/tracking-sessions.repository.ts:46` |
 | `geo.trips` | LEE | LEE | DIRECTA | GeoTrackingSessionsController.close → GeoTrackingSessionsService.close → TripsRepository.countBySessionAndStatus | `src/modules/geo/repositories/trips.repository.ts:64` |
 
@@ -813,7 +806,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de tracking no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está abierta; PreconditionFailedException: La sesión tiene viajes en progreso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -838,7 +830,7 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTripsController.start` — `src/modules/geo/controllers/geo-trips.controller.ts:30`
+- **Implementación:** `GeoTripsController.start` — `src/modules/geo/controllers/geo-trips.controller.ts:35`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -848,14 +840,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/trips` la atiende `GeoTripsController.start` (src/modules/geo/controllers/geo-trips.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `StartTripDto` (3 campos, 1 obligatorio). Delega en `GeoTripsService.start`. Crea filas en geo.trips. Lee geo.tracking_sessions, geo.trips.
+`POST /geo/trips` la atiende `GeoTripsController.start` (src/modules/geo/controllers/geo-trips.controller.ts:35). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `StartTripDto` (3 campos, 1 obligatorio). Delega en `GeoTripsService.start`. Crea filas en geo.trips. Lee geo.tracked_subjects, geo.tracking_sessions, geo.trips.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-trips.controller.ts:30` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-trips.controller.ts:35` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -865,7 +857,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `geo.tracking_sessions` | LEE | LEE | DIRECTA | GeoTripsController.start → GeoTripsService.start → TrackingSessionsRepository.findById | `src/modules/geo/repositories/tracking-sessions.repository.ts:46` |
+| `geo.tracked_subjects` | LEE | LEE | DIRECTA | GeoTripsController.start → GeoTripsService.start → GeoTripsService.loadSessionInTenant → GeoTripsService.sessionTenant → TrackedSubjectsRepository.findById | `src/modules/geo/repositories/tracked-subjects.repository.ts:44` |
+| `geo.tracking_sessions` | LEE | LEE | DIRECTA | GeoTripsController.start → GeoTripsService.start → GeoTripsService.loadSessionInTenant → TrackingSessionsRepository.findById | `src/modules/geo/repositories/tracking-sessions.repository.ts:46` |
 | `geo.trips` | ESCRIBE | CREA | DIRECTA | GeoTripsController.start → GeoTripsService.start → TripsRepository.create | `src/modules/geo/repositories/trips.repository.ts:69` |
 | `geo.trips` | LEE | LEE | DIRECTA | GeoTripsController.start → GeoTripsService.start → TripsRepository.findInProgressBySession | `src/modules/geo/repositories/trips.repository.ts:52` |
 
@@ -917,7 +910,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de tracking no encontrada |
 | 409 | `CONFLICT` | ConflictException: La sesión ya tiene un viaje en progreso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión de tracking no está abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -941,9 +933,9 @@ El árbol de decisión completo está en [flujos](../flujos/geo.md).
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar un viaje con distancia/duración
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `GeoTripsController.close` — `src/modules/geo/controllers/geo-trips.controller.ts:42`
+- **Implementación:** `GeoTripsController.close` — `src/modules/geo/controllers/geo-trips.controller.ts:52`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -953,16 +945,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /geo/trips/{id}/close` la atiende `GeoTripsController.close` (src/modules/geo/controllers/geo-trips.controller.ts:42). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CloseTripDto` (2 campos, 0 obligatorios). Delega en `GeoTripsService.close`. Actualiza geo.trips. Lee geo.trips.
+`POST /geo/trips/{id}/close` la atiende `GeoTripsController.close` (src/modules/geo/controllers/geo-trips.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CloseTripDto` (2 campos, 0 obligatorios). Delega en `GeoTripsService.close`. Lee geo.tracked_subjects, geo.tracking_sessions, geo.trips.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-trips.controller.ts:42` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/geo/controllers/geo-trips.controller.ts:52` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-trips.controller.ts:42` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/geo/controllers/geo-trips.controller.ts:52` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -971,7 +963,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `geo.trips` | ESCRIBE | ACTUALIZA | POR_TIPO | GeoTripsController.close → GeoTripsService.close | `src/modules/geo/services/geo-trips.service.ts:128` |
+| `geo.tracked_subjects` | LEE | LEE | DIRECTA | GeoTripsController.close → GeoTripsService.close → GeoTripsService.sessionTenant → TrackedSubjectsRepository.findById | `src/modules/geo/repositories/tracked-subjects.repository.ts:44` |
+| `geo.tracking_sessions` | LEE | LEE | DIRECTA | GeoTripsController.close → GeoTripsService.close → TrackingSessionsRepository.findById | `src/modules/geo/repositories/tracking-sessions.repository.ts:46` |
 | `geo.trips` | LEE | LEE | DIRECTA | GeoTripsController.close → GeoTripsService.close → TripsRepository.findById | `src/modules/geo/repositories/trips.repository.ts:41` |
 
 ### Parámetros
@@ -1024,7 +1017,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Viaje no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El viaje no está en progreso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

@@ -379,6 +379,42 @@ describe('BillingServiceCatalogService', () => {
    * servicios tiene la organización de al lado.
    */
   describe('update', () => {
+    it('términos propios: se guardan, y null o vacío vuelven a los de por defecto', async () => {
+      const d = build();
+      const row = catalogRow();
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const propios = await d.service.update(
+        's1',
+        { termsText: '  La consulta incluye un control a los 15 días.  ' },
+        doctor,
+      );
+      expect(propios.termsText).toBe(
+        'La consulta incluye un control a los 15 días.',
+      );
+
+      // Sin la clave, los términos no se tocan.
+      const precio = await d.service.update(
+        's1',
+        { defaultPrice: '120.00' },
+        doctor,
+      );
+      expect(precio.termsText).toBe(
+        'La consulta incluye un control a los 15 días.',
+      );
+
+      expect(
+        (await d.service.update('s1', { termsText: null }, doctor)).termsText,
+      ).toBeUndefined();
+      await d.service.update('s1', { termsText: 'Otro' }, doctor);
+      expect(
+        (await d.service.update('s1', { termsText: '   ' }, doctor)).termsText,
+      ).toBeUndefined();
+    });
+
     it('quien atiende en esa práctica corrige el precio y su moneda', async () => {
       const d = build();
       const row = catalogRow();

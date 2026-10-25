@@ -13,9 +13,9 @@
 | [contract_webhook_subscriptions](#contract_webhook_subscriptions) | Asocia suscripciones de webhook con contratos para definir qué eventos se notifican a cada consumidor. | 14 | 5 | 3 | COINCIDE |
 | [integration_auth_profiles](#integration_auth_profiles) | Configura perfiles de autenticación exigidos por contratos para controlar identidad y seguridad de conexiones. | 17 | 6 | 3 | COINCIDE |
 | [integration_contract_versions](#integration_contract_versions) | Preserva versiones de contratos para mantener compatibilidad y reproducibilidad de intercambios. | 13 | 8 | 10 | COINCIDE |
-| [integration_contracts](#integration_contracts) | Define contratos de intercambio entre el sistema médico y sus socios técnicos para acordar estructura y comportamiento de datos. | 14 | 9 | 11 | COINCIDE |
+| [integration_contracts](#integration_contracts) | Define contratos de intercambio entre el sistema médico y sus socios técnicos para acordar estructura y comportamiento de datos. | 14 | 9 | 13 | DIVERGE |
 | [integration_exchange_attempts](#integration_exchange_attempts) | Mantiene intentos de intercambio para conservar respuestas, fallos y reintentos técnicos. | 13 | 6 | 5 | COINCIDE |
-| [integration_exchange_records](#integration_exchange_records) | Registra intercambios ejecutados bajo contratos para conocer qué operación se solicitó y su contexto. | 16 | 8 | 6 | COINCIDE |
+| [integration_exchange_records](#integration_exchange_records) | Registra intercambios ejecutados bajo contratos para conocer qué operación se solicitó y su contexto. | 16 | 8 | 4 | COINCIDE |
 | [integration_idempotency_records](#integration_idempotency_records) | Evita procesar dos veces la misma operación externa mediante claves y resultados de idempotencia. | 10 | 5 | 6 | COINCIDE |
 | [integration_sync_cursors](#integration_sync_cursors) | Guarda cursores de sincronización para continuar intercambios incrementales desde el punto procesado. | 10 | 3 | 3 | COINCIDE |
 | [webhook_delivery_evidence](#webhook_delivery_evidence) | Conserva evidencia de entrega de webhooks para verificar qué se notificó y qué respuesta recibió el sistema. | 9 | 5 | 1 | COINCIDE |
@@ -365,7 +365,7 @@ Define contratos de intercambio entre el sistema médico y sus socios técnicos 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_31_integration_contracts.puml: integration_contracts`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_31_integration_contracts.puml` · **DDL:** `SQL/31_integration_contracts/02_tables.sql`
 - **Entidad del ORM:** `IntegrationContracts` — `src/modules/integration_contracts/entities/integration_contracts.entity.ts`
-- **Resumen:** 14 columnas · 9 índices · 8 FK salientes · 5 entrantes · 11 operaciones
+- **Resumen:** 14 columnas · 9 índices · 8 FK salientes · 5 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -380,11 +380,11 @@ Define contratos de intercambio entre el sistema médico y sus socios técnicos 
 | 7 | `allowed_purpose_value_set_id` | `uuid` | Clave foránea → terminology.value_sets.id; Opcional | _sin dato_ | coincide |
 | 8 | `data_use_agreement_id` | `uuid` | Opcional | _sin dato_ | coincide |
 | 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:82`)_ | coincide |
-| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:88`)_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:91`)_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:97`)_ | coincide |
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:106`)_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/integration_contracts/entities/integration_contracts.entity.ts:115`)_ | coincide |
 
 #### Relaciones
 
@@ -425,14 +425,16 @@ Define contratos de intercambio entre el sistema médico y sus socios técnicos 
 | POST /integration/contracts | CREA | DIRECTA |
 | POST /integration/contracts | LEE | DIRECTA |
 | POST /integration/contracts/{id}/auth-profiles | LEE | DIRECTA |
+| POST /integration/contracts/{id}/auth-profiles/{apId}/rotate | LEE | DIRECTA |
 | POST /integration/contracts/{id}/exchanges | LEE | DIRECTA |
-| POST /integration/contracts/{id}/retire | ACTUALIZA | POR_TIPO |
+| POST /integration/contracts/{id}/exchanges/{recordId}/attempts | LEE | DIRECTA |
 | POST /integration/contracts/{id}/retire | LEE | DIRECTA |
 | POST /integration/contracts/{id}/sync-cursors/{scope}/advance | LEE | DIRECTA |
 | POST /integration/contracts/{id}/versions | LEE | DIRECTA |
-| POST /integration/contracts/{id}/versions/{versionId}/activate | ACTUALIZA | POR_TIPO |
 | POST /integration/contracts/{id}/versions/{versionId}/activate | LEE | DIRECTA |
 | POST /integration/contracts/{id}/webhook-subscriptions | LEE | DIRECTA |
+| POST /integration/exchanges/{recordId}/retry | LEE | DIRECTA |
+| POST /integration/webhooks/{subscriptionId}/deliveries | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -536,7 +538,7 @@ Registra intercambios ejecutados bajo contratos para conocer qué operación se 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_31_integration_contracts.puml: integration_exchange_records`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_31_integration_contracts.puml` · **DDL:** `SQL/31_integration_contracts/02_tables.sql`
 - **Entidad del ORM:** `IntegrationExchangeRecords` — `src/modules/integration_contracts/entities/integration_exchange_records.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 4 entrantes · 6 operaciones
+- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 4 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -598,9 +600,7 @@ Registra intercambios ejecutados bajo contratos para conocer qué operación se 
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /integration/contracts/{id}/exchanges | CREA | DIRECTA |
-| POST /integration/contracts/{id}/exchanges/{recordId}/attempts | ACTUALIZA | POR_TIPO |
 | POST /integration/contracts/{id}/exchanges/{recordId}/attempts | LEE | DIRECTA |
-| POST /integration/exchanges/{recordId}/retry | ACTUALIZA | POR_TIPO |
 | POST /integration/exchanges/{recordId}/retry | LEE | DIRECTA |
 | POST /integration/webhooks/{subscriptionId}/deliveries | CREA | DIRECTA |
 

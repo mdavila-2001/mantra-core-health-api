@@ -17,7 +17,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['automation', 48, 'automation', 16],
   ['billing', 17, 'billing', 22],
   ['chart', 15, 'chart', 11],
-  ['clinical', 8, 'clinical', 22],
+  ['clinical', 8, 'clinical', 23],
   ['clinical_ext', 18, 'clinical_ext', 13],
   ['common', 2, 'common', 7],
   ['community', 19, 'community', 40],

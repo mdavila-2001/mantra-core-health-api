@@ -5,7 +5,7 @@
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 - **Operaciones:** 12 (12 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 10 · BAJO 1
-- **Tablas distintas que tocan:** 7
+- **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/delegated-access.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,16 +13,16 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/access-requests/{id}/decision` | Aprobar/Denegar solicitud y emitir grant scoped | MEDIO | 4 | SECURITY_ADMIN |
-| 2 | POST | `/authz/effective-actor/evaluate` | Evaluar actor efectivo por propósito (step-up) | MEDIO | 4 | SECURITY_ADMIN |
+| 2 | POST | `/authz/effective-actor/evaluate` | Evaluar actor efectivo por propósito (step-up) | MEDIO | 7 | SECURITY_ADMIN |
 | 3 | POST | `/delegated-access/expiry-sweep` | Expirar delegaciones y grants vencidos (barrido) | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
 | 4 | GET | `/delegated-permission-sets` | Listar los sets de permisos delegados del tenant | BAJO | 1 | SECURITY_ADMIN |
 | 5 | POST | `/delegated-permission-sets` | Publicar set de permisos delegados (scoped) | MEDIO | 3 | SECURITY_ADMIN |
 | 6 | POST | `/delegated-permission-sets/{id}/versions` | Versionar set de permisos delegados | ALTO | 4 | SECURITY_ADMIN |
 | 7 | POST | `/org/{tenantMembershipId}/user-assignments` | Asignar usuario de organización con alcance y vigencia | MEDIO | 2 | SECURITY_ADMIN |
 | 8 | PATCH | `/org/user-assignments/{id}` | Reasignar supervisor / suspender asignación de organización | MEDIO | 3 | SECURITY_ADMIN |
-| 9 | POST | `/practitioner-delegates` | Crear asignación de delegado de practitioner | MEDIO | 4 | SECURITY_ADMIN |
+| 9 | POST | `/practitioner-delegates` | Crear asignación de delegado de practitioner | MEDIO | 7 | SECURITY_ADMIN |
 | 10 | POST | `/practitioner-delegates/{id}/access-requests` | Solicitar acceso delegado (aprobación previa) | MEDIO | 4 | SECURITY_ADMIN |
-| 11 | POST | `/practitioner-delegates/{id}/grants` | Otorgar grant delegado por-propósito y temporal | MEDIO | 3 | SECURITY_ADMIN |
+| 11 | POST | `/practitioner-delegates/{id}/grants` | Otorgar grant delegado por-propósito y temporal | MEDIO | 6 | SECURITY_ADMIN |
 | 12 | POST | `/practitioner-delegates/{id}/revoke` | Revocar delegación de forma inmediata (cascada authz) | MEDIO | 5 | SECURITY_ADMIN |
 
 ---
@@ -156,7 +156,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Cómo se atiende (sistema)
 
-`POST /authz/effective-actor/evaluate` la atiende `DelegatedAccessAuthzController.evaluate` (src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `EvaluateActorDto` (6 campos, 2 obligatorios). Delega en `DelegatedAccessEvaluationService.evaluate`. Crea filas en delegated_access.delegation_events. Lee delegated_access.delegated_access_grants, delegated_access.delegated_permission_set_items, delegated_access.practitioner_delegate_assignments.
+`POST /authz/effective-actor/evaluate` la atiende `DelegatedAccessAuthzController.evaluate` (src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `EvaluateActorDto` (7 campos, 2 obligatorios). Delega en `DelegatedAccessEvaluationService.evaluate`. Crea filas en delegated_access.delegation_events. Lee delegated_access.delegated_access_grants, delegated_access.delegated_permission_set_items, delegated_access.delegated_permission_sets, delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, directory.tenant_memberships.
 
 ### Requerimientos
 
@@ -175,19 +175,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|---|---|---|
 | `delegated_access.delegated_access_grants` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → DelegatedAccessGrantsRepository.findActiveMatch | `src/modules/delegated_access/repositories/delegated-access-grants.repository.ts:118` |
 | `delegated_access.delegated_permission_set_items` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → DelegatedPermissionSetItemsRepository.findBySetAndPermission | `src/modules/delegated_access/repositories/delegated-permission-set-items.repository.ts:75` |
+| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → DelegationScopeService.loadDelegationInTenant → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
 | `delegated_access.delegation_events` | ESCRIBE | CREA | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → DelegationEventsRepository.record | `src/modules/delegated_access/repositories/delegation-events.repository.ts:52` |
-| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → PractitionerDelegateAssignmentsRepository.findById | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:76` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → OrganizationUserAssignmentsRepository.findById | `src/modules/delegated_access/repositories/organization-user-assignments.repository.ts:84` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → DelegationScopeService.loadDelegationInTenant → PractitionerDelegateAssignmentsRepository.findById | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:76` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | DelegatedAccessAuthzController.evaluate → DelegatedAccessEvaluationService.evaluate → DelegationScopeService.membershipOfAssignment → DelegationScopeRepository.membershipOf | `src/modules/delegated_access/repositories/delegation-scope.repository.ts:46` |
 
 ### Cuerpo — DTO `EvaluateActorDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `practitionerDelegateAssignmentId` | `string` | Sí | formato uuid | `@IsUUID()` | Delegación a evaluar | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:18` |
-| `purpose` | `string` | Sí | valores: TREATMENT, BILLING, OPERATIONS | `@IsIn(PURPOSES)` | Propósito de uso del acceso | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:25` |
-| `permissionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Permiso concreto que se ejerce | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:36` |
-| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente sobre el que se accede | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:47` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro sobre el que se accede | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:58` |
-| `resourceType` | `string` | No | valores: CLINICAL_NOTE, APPOINTMENT, PRESCRIPTION | `@IsOptional()` `@IsIn(RESOURCE_TYPES)` | Tipo de recurso | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:66` |
+| `effectiveUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Usuario que ejercería el acceso. Si se omite se evalúa al usuario autenticado. Tiene que ser el titular de la asignación del delegado; si no, el acceso no se permite | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:30` |
+| `purpose` | `string` | Sí | valores: TREATMENT, BILLING, OPERATIONS | `@IsIn(PURPOSES)` | Propósito de uso del acceso | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:37` |
+| `permissionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Permiso concreto que se ejerce | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:48` |
+| `patientProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Paciente sobre el que se accede | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:59` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro sobre el que se accede | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:70` |
+| `resourceType` | `string` | No | valores: CLINICAL_NOTE, APPOINTMENT, PRESCRIPTION | `@IsOptional()` `@IsIn(RESOURCE_TYPES)` | Tipo de recurso | `src/modules/delegated_access/dto/evaluate-actor.dto.ts:78` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -203,6 +207,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 ```json
 {
   "practitionerDelegateAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "effectiveUserId": "00000000-0000-4000-8000-000000000001",
   "purpose": "TREATMENT",
   "permissionId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
@@ -229,8 +234,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
 
@@ -512,6 +517,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe un set con ese código en el tenant |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
 
@@ -564,8 +570,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|---|---|---|
 | `delegated_access.delegated_permission_set_items` | BORRA | BORRA | DIRECTA | DelegatedPermissionSetsController.publishVersion → PermissionSetsService.publishVersion → DelegatedPermissionSetItemsRepository.deleteBySet | `src/modules/delegated_access/repositories/delegated-permission-set-items.repository.ts:83` |
 | `delegated_access.delegated_permission_set_items` | ESCRIBE | CREA | DIRECTA | DelegatedPermissionSetsController.publishVersion → PermissionSetsService.publishVersion → DelegatedPermissionSetItemsRepository.create | `src/modules/delegated_access/repositories/delegated-permission-set-items.repository.ts:39` |
-| `delegated_access.delegated_permission_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | DelegatedPermissionSetsController.publishVersion → PermissionSetsService.publishVersion | `src/modules/delegated_access/services/permission-sets.service.ts:181` |
-| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | DelegatedPermissionSetsController.publishVersion → PermissionSetsService.publishVersion → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
+| `delegated_access.delegated_permission_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | DelegatedPermissionSetsController.publishVersion → PermissionSetsService.publishVersion | `src/modules/delegated_access/services/permission-sets.service.ts:183` |
+| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | DelegatedPermissionSetsController.publishVersion → PermissionSetsService.publishVersion → DelegationScopeService.loadSetInTenant → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
 
 ### Parámetros
 
@@ -626,8 +632,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Set de permisos no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
 
@@ -885,7 +891,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Cómo se atiende (sistema)
 
-`POST /practitioner-delegates` la atiende `PractitionerDelegatesController.create` (src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePractitionerDelegateDto` (10 campos, 3 obligatorios). Delega en `PractitionerDelegatesService.createDelegate`. Crea filas en delegated_access.delegation_events, delegated_access.practitioner_delegate_assignments. Lee delegated_access.delegated_permission_sets, delegated_access.organization_user_assignments.
+`POST /practitioner-delegates` la atiende `PractitionerDelegatesController.create` (src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePractitionerDelegateDto` (10 campos, 3 obligatorios). Delega en `PractitionerDelegatesService.createDelegate`. Crea filas en delegated_access.delegation_events, delegated_access.practitioner_delegate_assignments. Lee delegated_access.delegated_permission_sets, delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -902,10 +908,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
+| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegationScopeService.loadSetInTenant → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
 | `delegated_access.delegation_events` | ESCRIBE | CREA | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegationEventsRepository.record | `src/modules/delegated_access/repositories/delegation-events.repository.ts:52` |
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → OrganizationUserAssignmentsRepository.findById | `src/modules/delegated_access/repositories/organization-user-assignments.repository.ts:84` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegationScopeService.loadOrgAssignmentInTenant → OrganizationUserAssignmentsRepository.findById | `src/modules/delegated_access/repositories/organization-user-assignments.repository.ts:84` |
 | `delegated_access.practitioner_delegate_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → PractitionerDelegateAssignmentsRepository.create | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:90` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegationScopeService.loadOrgAssignmentInTenant → DelegationScopeService.membershipOfAssignment → DelegationScopeRepository.membershipOf | `src/modules/delegated_access/repositories/delegation-scope.repository.ts:46` |
+| `practice.practices` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegationScopeService.assertRoleAssignmentInTenant → DelegationScopeRepository.roleAssignmentTenant | `src/modules/delegated_access/repositories/delegation-scope.repository.ts:69` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.create → PractitionerDelegatesService.createDelegate → DelegationScopeService.assertRoleAssignmentInTenant → DelegationScopeRepository.roleAssignmentTenant | `src/modules/delegated_access/repositories/delegation-scope.repository.ts:65` |
 
 ### Cuerpo — DTO `CreatePractitionerDelegateDto` · `application/json`
 
@@ -966,9 +975,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación de usuario de organización no encontrada; ResourceNotFoundException: Set de permisos no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El usuario de organización no está activo; PreconditionFailedException: El set de permisos no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
 
@@ -1111,7 +1120,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Cómo se atiende (sistema)
 
-`POST /practitioner-delegates/{id}/grants` la atiende `PractitionerDelegatesController.issueGrant` (src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateGrantDto` (6 campos, 2 obligatorios). Delega en `PractitionerDelegatesService.issueGrant`. Crea filas en delegated_access.delegated_access_grants, delegated_access.delegation_events. Lee delegated_access.practitioner_delegate_assignments.
+`POST /practitioner-delegates/{id}/grants` la atiende `PractitionerDelegatesController.issueGrant` (src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateGrantDto` (6 campos, 2 obligatorios). Delega en `PractitionerDelegatesService.issueGrant`. Crea filas en delegated_access.delegated_access_grants, delegated_access.delegation_events. Lee clinical.encounters, delegated_access.delegated_permission_sets, delegated_access.practitioner_delegate_assignments, profiles.patient_profiles.
 
 ### Requerimientos
 
@@ -1129,9 +1138,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `clinical.encounters` | LEE | LEE | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → DelegationScopeService.assertGrantTarget → DelegationScopeRepository.encounterScope | `src/modules/delegated_access/repositories/delegation-scope.repository.ts:84` |
 | `delegated_access.delegated_access_grants` | ESCRIBE | CREA | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → DelegatedAccessGrantsRepository.create | `src/modules/delegated_access/repositories/delegated-access-grants.repository.ts:79` |
+| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → DelegationScopeService.loadDelegationInTenant → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
 | `delegated_access.delegation_events` | ESCRIBE | CREA | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → DelegationEventsRepository.record | `src/modules/delegated_access/repositories/delegation-events.repository.ts:52` |
-| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → PractitionerDelegateAssignmentsRepository.findById | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:76` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → DelegationScopeService.loadDelegationInTenant → PractitionerDelegateAssignmentsRepository.findById | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:76` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PractitionerDelegatesController.issueGrant → PractitionerDelegatesService.issueGrant → DelegationScopeService.assertGrantTarget → DelegationScopeRepository.patientExists | `src/modules/delegated_access/repositories/delegation-scope.repository.ts:104` |
 
 ### Parámetros
 
@@ -1189,9 +1201,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La delegación no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
 
@@ -1224,7 +1236,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Cómo se atiende (sistema)
 
-`POST /practitioner-delegates/{id}/revoke` la atiende `PractitionerDelegatesController.revoke` (src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RevokeDelegationDto` (1 campo, 0 obligatorios). Delega en `PractitionerDelegatesService.revoke`. Crea filas en delegated_access.delegation_events. Actualiza delegated_access.delegated_access_approval_requests, delegated_access.delegated_access_grants, delegated_access.practitioner_delegate_assignments. Lee delegated_access.practitioner_delegate_assignments.
+`POST /practitioner-delegates/{id}/revoke` la atiende `PractitionerDelegatesController.revoke` (src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RevokeDelegationDto` (1 campo, 0 obligatorios). Delega en `PractitionerDelegatesService.revoke`. Crea filas en delegated_access.delegation_events. Actualiza delegated_access.delegated_access_approval_requests, delegated_access.delegated_access_grants. Lee delegated_access.delegated_permission_sets, delegated_access.practitioner_delegate_assignments.
 
 ### Requerimientos
 
@@ -1244,9 +1256,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 |---|---|---|---|---|---|
 | `delegated_access.delegated_access_approval_requests` | ESCRIBE | ACTUALIZA | DIRECTA | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke → DelegatedAccessApprovalRequestsRepository.cancelOpenByAssignment | `src/modules/delegated_access/repositories/delegated-access-approval-requests.repository.ts:107` |
 | `delegated_access.delegated_access_grants` | ESCRIBE | ACTUALIZA | DIRECTA | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke → DelegatedAccessGrantsRepository.revokeActiveByAssignment | `src/modules/delegated_access/repositories/delegated-access-grants.repository.ts:130` |
+| `delegated_access.delegated_permission_sets` | LEE | LEE | DIRECTA | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke → DelegationScopeService.loadDelegationInTenant → DelegatedPermissionSetsRepository.findById | `src/modules/delegated_access/repositories/delegated-permission-sets.repository.ts:52` |
 | `delegated_access.delegation_events` | ESCRIBE | CREA | DIRECTA | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke → DelegationEventsRepository.record | `src/modules/delegated_access/repositories/delegation-events.repository.ts:52` |
-| `delegated_access.practitioner_delegate_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke | `src/modules/delegated_access/services/practitioner-delegates.service.ts:250` |
-| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke → PractitionerDelegateAssignmentsRepository.findById | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:76` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | PractitionerDelegatesController.revoke → PractitionerDelegatesService.revoke → DelegationScopeService.loadDelegationInTenant → PractitionerDelegateAssignmentsRepository.findById | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:76` |
 
 ### Parámetros
 
@@ -1291,8 +1303,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
 

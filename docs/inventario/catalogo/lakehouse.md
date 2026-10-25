@@ -10,24 +10,24 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [cohort_definitions](#cohort_definitions) | Define cohortes de investigación con criterios explícitos para estudios y análisis de salud. | 8 | 2 | 4 | COINCIDE |
+| [cohort_definitions](#cohort_definitions) | Define cohortes de investigación con criterios explícitos para estudios y análisis de salud. | 8 | 2 | 5 | COINCIDE |
 | [data_lake_zones](#data_lake_zones) | Define zonas para separar datos crudos, estandarizados, curados y preparados para investigación. | 8 | 2 | 4 | COINCIDE |
 | [data_product_versions](#data_product_versions) | Preserva versiones de productos para reproducir contenido, linaje y controles aplicados. | 8 | 3 | 5 | COINCIDE |
-| [data_products](#data_products) | Representa productos de datos versionados y con contratos de calidad para consumo analítico o sanitario. | 9 | 2 | 4 | COINCIDE |
+| [data_products](#data_products) | Representa productos de datos versionados y con contratos de calidad para consumo analítico o sanitario. | 9 | 2 | 5 | COINCIDE |
 | [dataset_release_manifests](#dataset_release_manifests) | Enumera contenido, versiones y controles aplicados a datasets liberados para investigación o consumo autorizado. | 9 | 3 | 5 | COINCIDE |
-| [dataset_release_requests](#dataset_release_requests) | Gestiona solicitudes para liberar datasets analíticos tras revisión de privacidad, calidad y propósito. | 9 | 2 | 6 | COINCIDE |
+| [dataset_release_requests](#dataset_release_requests) | Gestiona solicitudes para liberar datasets analíticos tras revisión de privacidad, calidad y propósito. | 9 | 2 | 4 | COINCIDE |
 | [lakehouse_catalogs](#lakehouse_catalogs) | Cataloga datasets y tablas analíticas gobernadas para habilitar descubrimiento y consumo controlado. | 7 | 2 | 3 | COINCIDE |
-| [lakehouse_datasets](#lakehouse_datasets) | Registra datasets alojados en el lakehouse para separar analítica de bases operacionales. | 11 | 3 | 6 | COINCIDE |
+| [lakehouse_datasets](#lakehouse_datasets) | Registra datasets alojados en el lakehouse para separar analítica de bases operacionales. | 11 | 3 | 5 | COINCIDE |
 | [lakehouse_files](#lakehouse_files) | Relaciona archivos de almacenamiento con datasets y particiones analíticas. | 9 | 3 | 4 | COINCIDE |
 | [lakehouse_lineage_edges](#lakehouse_lineage_edges) | Representa dependencias y linaje entre fuentes, transformaciones y productos de datos. | 8 | 2 | 2 | COINCIDE |
-| [lakehouse_partitions](#lakehouse_partitions) | Cataloga particiones de datasets para organizar almacenamiento y consulta analítica. | 9 | 3 | 4 | COINCIDE |
+| [lakehouse_partitions](#lakehouse_partitions) | Cataloga particiones de datasets para organizar almacenamiento y consulta analítica. | 9 | 3 | 5 | COINCIDE |
 | [lakehouse_quality_issues](#lakehouse_quality_issues) | Detalla problemas detectados por controles de calidad para resolverlos antes de publicar datos. | 8 | 2 | 1 | COINCIDE |
 | [lakehouse_quality_rules](#lakehouse_quality_rules) | Define contratos de calidad que datasets analíticos deben cumplir antes de liberarse. | 8 | 2 | 2 | COINCIDE |
 | [lakehouse_quality_runs](#lakehouse_quality_runs) | Conserva ejecuciones de controles de calidad aplicados a datasets y productos. | 9 | 2 | 2 | COINCIDE |
 | [lakehouse_schema_versions](#lakehouse_schema_versions) | Versiona esquemas analíticos para mantener compatibilidad y reproducibilidad de transformaciones. | 7 | 3 | 1 | COINCIDE |
 | [research_projects](#research_projects) | Agrupa proyectos de investigación que consumen datasets aprobados bajo controles de uso. | 10 | 2 | 5 | COINCIDE |
 | [transformation_definitions](#transformation_definitions) | Define transformaciones explícitas y versionadas que preparan datos para análisis o investigación. | 9 | 2 | 1 | COINCIDE |
-| [transformation_runs](#transformation_runs) | Registra ejecuciones reproducibles de transformaciones y sus resultados. | 10 | 2 | 3 | COINCIDE |
+| [transformation_runs](#transformation_runs) | Registra ejecuciones reproducibles de transformaciones y sus resultados. | 10 | 2 | 4 | COINCIDE |
 
 ### Tablas sin relaciones dentro del schema
 
@@ -44,7 +44,7 @@ Define cohortes de investigación con criterios explícitos para estudios y aná
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_63_lakehouse.puml: cohort_definitions`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_63_lakehouse.puml` · **DDL:** `SQL/63_lakehouse/02_tables.sql`
 - **Entidad del ORM:** `CohortDefinitions` — `src/modules/lakehouse/entities/cohort_definitions.entity.ts`
-- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 1 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -76,6 +76,7 @@ Define cohortes de investigación con criterios explícitos para estudios y aná
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /fhir/r5/$export | LEE | DIRECTA |
 | POST /research/dataset-releases | LEE | DIRECTA |
 | POST /research/dataset-releases/{id}/approve | LEE | DIRECTA |
 | POST /research/projects/{id}/cohorts | CREA | DIRECTA |
@@ -214,7 +215,7 @@ Representa productos de datos versionados y con contratos de calidad para consum
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_63_lakehouse.puml: data_products`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_63_lakehouse.puml` · **DDL:** `SQL/63_lakehouse/02_tables.sql`
 - **Entidad del ORM:** `DataProducts` — `src/modules/lakehouse/entities/data_products.entity.ts`
-- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -234,7 +235,7 @@ Representa productos de datos versionados y con contratos de calidad para consum
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_data_product_tenant_code` | no | tenant_id, code | 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_data_product_tenant_code` | no | tenant_id, code | 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_data_product_owner_state` | no | owner_team_id, lifecycle_state | _sin uso detectado estáticamente_ |
 
 #### Operaciones que la tocan
@@ -244,6 +245,7 @@ Representa productos de datos versionados y con contratos de calidad para consum
 | POST /lakehouse/data-products/{id}/versions | ACTUALIZA | POR_TIPO |
 | POST /lakehouse/data-products/{id}/versions | CREA | DIRECTA |
 | POST /lakehouse/data-products/{id}/versions | LEE | DIRECTA |
+| POST /lakehouse/datasets | LEE | DIRECTA |
 | POST /research/dataset-releases | LEE | DIRECTA |
 
 #### Gobierno
@@ -326,7 +328,7 @@ Gestiona solicitudes para liberar datasets analíticos tras revisión de privaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_63_lakehouse.puml: dataset_release_requests; BIZ note`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_63_lakehouse.puml` · **DDL:** `SQL/63_lakehouse/02_tables.sql`
 - **Entidad del ORM:** `DatasetReleaseRequests` — `src/modules/lakehouse/entities/dataset_release_requests.entity.ts`
-- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 9 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -354,9 +356,7 @@ Gestiona solicitudes para liberar datasets analíticos tras revisión de privaci
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /research/dataset-releases | CREA | DIRECTA |
-| POST /research/dataset-releases/{id}/approve | ACTUALIZA | POR_TIPO |
 | POST /research/dataset-releases/{id}/approve | LEE | DIRECTA |
-| POST /research/dataset-releases/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /research/dataset-releases/{id}/revoke | LEE | DIRECTA |
 | GET /research/dataset-releases/expired | LEE | DIRECTA |
 
@@ -435,7 +435,7 @@ Registra datasets alojados en el lakehouse para separar analítica de bases oper
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_63_lakehouse.puml: lakehouse_datasets; BIZ note`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_63_lakehouse.puml` · **DDL:** `SQL/63_lakehouse/02_tables.sql`
 - **Entidad del ORM:** `LakehouseDatasets` — `src/modules/lakehouse/entities/lakehouse_datasets.entity.ts`
-- **Resumen:** 11 columnas · 3 índices · 0 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 11 columnas · 3 índices · 0 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -467,7 +467,6 @@ Registra datasets alojados en el lakehouse para separar analítica de bases oper
 |---|---|---|
 | POST /lakehouse/datasets | CREA | DIRECTA |
 | POST /lakehouse/datasets | LEE | DIRECTA |
-| POST /lakehouse/datasets/{id}/quality-runs | ACTUALIZA | POR_TIPO |
 | POST /lakehouse/datasets/{id}/quality-runs | LEE | DIRECTA |
 | POST /lakehouse/ingestion/curated-runs | LEE | DIRECTA |
 | POST /lakehouse/transformations/{defId}/runs | LEE | DIRECTA |
@@ -603,7 +602,7 @@ Cataloga particiones de datasets para organizar almacenamiento y consulta analí
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_63_lakehouse.puml: lakehouse_partitions`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_63_lakehouse.puml` · **DDL:** `SQL/63_lakehouse/02_tables.sql`
 - **Entidad del ORM:** `LakehousePartitions` — `src/modules/lakehouse/entities/lakehouse_partitions.entity.ts`
-- **Resumen:** 9 columnas · 3 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 9 columnas · 3 índices · 0 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -631,6 +630,7 @@ Cataloga particiones de datasets para organizar almacenamiento y consulta analí
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /lakehouse/datasets/{id}/quality-runs | LEE | DIRECTA |
 | POST /lakehouse/ingestion/curated-runs | CREA | DIRECTA |
 | POST /lakehouse/ingestion/curated-runs | LEE | DIRECTA |
 | POST /lakehouse/transformations/{defId}/runs | CREA | DIRECTA |
@@ -887,7 +887,7 @@ Agrupa proyectos de investigación que consumen datasets aprobados bajo controle
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_research_project_tenant_code` | no | tenant_id, code | 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_research_project_tenant_code` | no | tenant_id, code | 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_research_project_state_period` | no | state, approved_to | _sin uso detectado estáticamente_ |
 
 #### Operaciones que la tocan
@@ -943,7 +943,7 @@ Define transformaciones explícitas y versionadas que preparan datos para análi
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_transformation_version` | no | tenant_id, code, version | _sin uso detectado estáticamente_ |
+| `uq_transformation_version` | no | tenant_id, code, version | 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_transformation_target_state` | no | target_dataset_id, state | _sin uso detectado estáticamente_ |
 
 #### Operaciones que la tocan
@@ -975,7 +975,7 @@ Registra ejecuciones reproducibles de transformaciones y sus resultados.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_63_lakehouse.puml: transformation_runs`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_63_lakehouse.puml` · **DDL:** `SQL/63_lakehouse/02_tables.sql`
 - **Entidad del ORM:** `TransformationRuns` — `src/modules/lakehouse/entities/transformation_runs.entity.ts`
-- **Resumen:** 10 columnas · 2 índices · 0 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 10 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -1003,6 +1003,7 @@ Registra ejecuciones reproducibles de transformaciones y sus resultados.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /lakehouse/datasets/{id}/quality-runs | LEE | DIRECTA |
 | POST /lakehouse/transformations/{defId}/runs | ACTUALIZA | POR_TIPO |
 | POST /lakehouse/transformations/{defId}/runs | CREA | DIRECTA |
 | POST /lakehouse/transformations/{defId}/runs | LEE | DIRECTA |
