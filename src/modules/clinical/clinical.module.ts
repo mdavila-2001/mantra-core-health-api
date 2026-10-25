@@ -83,7 +83,6 @@ import {
   ImmunizationsRepository,
   ReceivedServicesRepository,
   PrescriptionExpiryRepository,
-  ReceivedServicesRepository,
 } from './repositories';
 // Los dos repositorios con los que la lectura comprueba que una historia es de
 // quien la pide (carril 09). Se proveen acá —y no se importa el módulo de
@@ -209,7 +208,6 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ImmunizationsRepository,
     ReceivedServicesRepository,
     PrescriptionExpiryRepository,
-    ReceivedServicesRepository,
     ClinicalNotesRepository,
     CarePlansRepository,
     DocumentsRepository,
