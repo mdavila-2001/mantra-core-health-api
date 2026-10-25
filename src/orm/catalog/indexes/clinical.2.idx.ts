@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 56 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 58 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
@@ -47,6 +47,8 @@ export const clinicalIndexes2: readonly IndexTuple[] = [
   ['service_requests', 'ix_service_requests_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_requester_profile_id', ['requester_profile_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_performer_tenant_id', ['performer_tenant_id'], false, 'btree'],
+  ['service_requests', 'ix_service_requests_performer_practitioner_profile_id', ['performer_practitioner_profile_id'], false, 'btree'],
+  ['service_requests', 'ix_service_requests_suggested_practice_site_id', ['suggested_practice_site_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_form_instance_id', ['form_instance_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
