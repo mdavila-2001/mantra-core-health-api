@@ -68,7 +68,7 @@ _Fuente: `src/modules/time_series/README.md:78`_
 | `UC-58-10` | Eventos de publicidad con dedupe | POST /ts/ads/events/batch-ingest | INGEST_GATEWAY · SYSTEM · PLATFORM_ADMIN | MEDIO | 6 |
 | `UC-58-11` | Métricas de runtime y pipeline | POST /ts/metrics/{dataset}/batch-ingest | INGEST_GATEWAY · SYSTEM · PLATFORM_ADMIN | MEDIO | 4 |
 | `UC-58-12` | Corrección append-only gobernada | POST /ts/series/{seriesId}/backfill/governed | DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 4 |
-| `UC-58-13` | Pings de ubicación con consentimiento | POST /ts/location/pings/batch-ingest | INGEST_GATEWAY · SYSTEM · PLATFORM_ADMIN | MEDIO | 5 |
+| `UC-58-13` | Pings de ubicación con consentimiento | POST /ts/location/pings/batch-ingest | INGEST_GATEWAY · SYSTEM · PLATFORM_ADMIN | MEDIO | 9 |
 
 ### Diagrama — etapas `UC-58-01`, `UC-58-02`, `UC-58-03`…
 
@@ -95,8 +95,10 @@ flowchart LR
   e31>"AdsEventsIngested"]:::evento
   e33>"RuntimeMetricsIngested"]:::evento
   e35>"GovernedBackfillApplied"]:::evento
-  t37[("time_series.location_ping_series")]:::tabla
-  e38>"LocationPingsIngested"]:::evento
+  t37[("consent.consents")]:::tabla
+  t38[("consent.processing_purposes")]:::tabla
+  t39[("iam.devices")]:::tabla
+  e41>"LocationPingsIngested"]:::evento
   subgraph s0["UC-58-01 · Lote append-only de puntos"]
     o1["POST /ts/series/{seriesId}/points/batch-ingest"]:::op
   end
@@ -135,6 +137,7 @@ flowchart LR
   subgraph s11["UC-58-12 · Corrección append-only gobernada"]
     o34["POST /ts/series/{seriesId}/backfill/governed"]:::op
   end
+  t40[("+3 tablas más")]
   subgraph s12["UC-58-13 · Pings de ubicación con consentimiento"]
     o36["POST /ts/location/pings/batch-ingest"]:::op
   end
@@ -209,12 +212,14 @@ flowchart LR
   o34 -->|"CREA"| t5
   o34 -->|"evento"| e35
   a2 --> o36
+  o36 -->|"LEE"| t37
+  o36 -->|"LEE"| t38
+  o36 -->|"LEE"| t39
   o36 -->|"CREA"| t3
   o36 -->|"CREA"| t4
   o36 -->|"LEE"| t4
-  o36 -->|"CREA"| t5
-  o36 -->|"CREA"| t37
-  o36 -->|"evento"| e38
+  o36 -.-> t40
+  o36 -->|"evento"| e41
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -755,6 +760,7 @@ Ingerir pings de ubicación
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 ```mermaid
 flowchart TD
@@ -765,47 +771,96 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Repite: por cada const ping de dto.pings"]:::bucle
+  n5["Llama a LocationConsentPolicy.assertAllowed"]:::llamada
   n4 --> n5
-  n6["Llama a SeriesIngestRepository.createLocationPing"]:::llamada
-  n5 -->|"cada elemento"| n6
-  n7[("CREA time_series.location_ping_series")]:::efecto
+  n6[("LEE consent.consents")]:::efecto
+  n5 --> n6
+  n7["Llama a LocationConsentPolicy.deny"]:::llamada
   n6 --> n7
-  n8["Llama a SeriesIngestService.recordPipelineMetric"]:::llamada
+  n8(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
   n7 --> n8
-  n5 -->|"al terminar"| n8
-  n9["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
-  n8 --> n9
-  n10[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
-  n9 --> n10
-  n11["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n9{"!consent"}:::decision
+  n10["Llama a LocationConsentPolicy.deny"]:::llamada
+  n9 -->|"sí"| n10
+  n11(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
   n10 --> n11
-  n12["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n11 --> n12
-  n13["Transacción: startActiveSpan(…)"]:::transaccion
-  n12 --> n13
-  n14["Intenta"]:::intento
+  n12{"!consent.tenantId || consent.tenantId !== query.tenantId"}:::decision
+  n9 -->|"no"| n12
+  n13["Llama a LocationConsentPolicy.deny"]:::llamada
+  n12 -->|"sí"| n13
+  n14(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
   n13 --> n14
-  n15(["↩ (relanza el error capturado)"]):::error
-  n14 -->|"si falla"| n15
-  n16["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n14 --> n16
-  n17["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n15{"consent.statusConceptId !== CONS.CONSENT_ACTIVE || consent.withdrawnAt"}:::decision
+  n12 -->|"no"| n15
+  n16["Llama a LocationConsentPolicy.deny"]:::llamada
+  n15 -->|"sí"| n16
+  n17(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
   n16 --> n17
-  n18[("LEE messaging.outbox_messages")]:::efecto
-  n17 --> n18
-  n19["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n18 --> n19
-  n20[("CREA messaging.domain_events")]:::efecto
+  n18{"(consent.validFrom && consent.validFrom › now) || (consent.validTo && consent.validTo ‹= now) || (consent.val…"}:::decision
+  n15 -->|"no"| n18
+  n19["Llama a LocationConsentPolicy.deny"]:::llamada
+  n18 -->|"sí"| n19
+  n20(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
   n19 --> n20
-  n21["Llama a OutboxRepository.createOutboxMessage"]:::llamada
-  n20 --> n21
-  n22[("CREA messaging.outbox_messages")]:::efecto
+  n21[("LEE consent.processing_purposes")]:::efecto
+  n18 -->|"no"| n21
+  n22{"!purpose || purpose.statusConceptId !== CONCEPTS.STATE_ACTIVE || !LOCATION_CONSENT_PURPOSE_CODES.includes(pur…"}:::decision
   n21 --> n22
-  n23>"Evento LocationPingsIngested"]:::evento
-  n22 --> n23
-  n24(("201 Responde con éxito")):::ok
+  n23["Llama a LocationConsentPolicy.deny"]:::llamada
+  n22 -->|"sí"| n23
+  n24(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
   n23 --> n24
+  n25["Llama a LocationConsentPolicy.holderSubjectIds"]:::llamada
+  n22 -->|"no"| n25
+  n26[("LEE profiles.person_account_links · LEE iam.devices")]:::efecto
+  n25 --> n26
+  n27{"!query.subjectIds.every((subjectId) =› holders.has(subjectId))"}:::decision
+  n26 --> n27
+  n28["Llama a LocationConsentPolicy.deny"]:::llamada
+  n27 -->|"sí"| n28
+  n29(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n28 --> n29
+  n30["Repite: por cada const ping de dto.pings"]:::bucle
+  n27 -->|"no"| n30
+  n31["Llama a SeriesIngestRepository.createLocationPing"]:::llamada
+  n30 -->|"cada elemento"| n31
+  n32[("CREA time_series.location_ping_series")]:::efecto
+  n31 --> n32
+  n33["Llama a SeriesIngestService.recordPipelineMetric"]:::llamada
+  n32 --> n33
+  n30 -->|"al terminar"| n33
+  n34["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n33 --> n34
+  n35[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
+  n34 --> n35
+  n36["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n35 --> n36
+  n37["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n36 --> n37
+  n38["Transacción: startActiveSpan(…)"]:::transaccion
+  n37 --> n38
+  n39["Intenta"]:::intento
+  n38 --> n39
+  n40(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"si falla"| n40
+  n41["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n39 --> n41
+  n42["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n41 --> n42
+  n43[("LEE messaging.outbox_messages")]:::efecto
+  n42 --> n43
+  n44["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n43 --> n44
+  n45[("CREA messaging.domain_events")]:::efecto
+  n44 --> n45
+  n46["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n45 --> n46
+  n47[("CREA messaging.outbox_messages")]:::efecto
+  n46 --> n47
+  n48>"Evento LocationPingsIngested"]:::evento
+  n47 --> n48
+  n49(("201 Responde con éxito")):::ok
+  n48 --> n49
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

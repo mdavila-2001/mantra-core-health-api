@@ -13,40 +13,40 @@
 | [account_determination_rules](#account_determination_rules) | Define reglas que seleccionan cuentas contables según tipo de transacción y contexto operativo. | 20 | 14 | 1 | COINCIDE |
 | [account_groups](#account_groups) | Agrupa cuentas contables para organizar estados financieros y análisis institucionales. | 13 | 5 | 0 | COINCIDE |
 | [accounting_document_links](#accounting_document_links) | Relaciona documentos de origen con asientos para preservar trazabilidad entre operación y contabilidad. | 10 | 8 | 3 | COINCIDE |
-| [accounts](#accounts) | Cataloga cuentas del libro mayor donde se clasifican transacciones de la organización sanitaria. | 18 | 9 | 12 | COINCIDE |
+| [accounts](#accounts) | Cataloga cuentas del libro mayor donde se clasifican transacciones de la organización sanitaria. | 18 | 9 | 26 | COINCIDE |
 | [accrual_objects](#accrual_objects) | Representa devengamientos financieros que deben distribuirse entre períodos contables. | 20 | 15 | 4 | COINCIDE |
 | [accrual_postings](#accrual_postings) | Conserva asientos producidos por reconocimiento de devengamientos en el libro contable. | 8 | 6 | 1 | COINCIDE |
 | [accrual_schedule_lines](#accrual_schedule_lines) | Detalla períodos e importes de calendarios de devengamiento para reconocer ingresos o gastos progresivamente. | 12 | 7 | 4 | COINCIDE |
 | [asset_assignments](#asset_assignments) | Vincula activos con unidades, ubicaciones o responsables para controlar su asignación institucional. | 17 | 12 | 2 | COINCIDE |
 | [asset_classes](#asset_classes) | Agrupa activos por tratamiento contable para aplicar reglas consistentes de valoración y depreciación. | 17 | 12 | 0 | COINCIDE |
 | [asset_components](#asset_components) | Desglosa activos compuestos en componentes con vida útil o valoración diferenciada. | 15 | 7 | 0 | COINCIDE |
-| [asset_depreciations](#asset_depreciations) | Registra depreciaciones calculadas para distribuir el valor de activos a lo largo de su vida contable. | 11 | 5 | 4 | COINCIDE |
+| [asset_depreciations](#asset_depreciations) | Registra depreciaciones calculadas para distribuir el valor de activos a lo largo de su vida contable. | 11 | 5 | 5 | COINCIDE |
 | [asset_postings](#asset_postings) | Conserva asientos generados por altas, bajas y depreciaciones de activos. | 11 | 9 | 4 | COINCIDE |
 | [asset_valuations](#asset_valuations) | Registra valores contables de activos en fechas y áreas de valoración determinadas. | 17 | 7 | 2 | COINCIDE |
-| [assets](#assets) | Cataloga activos institucionales para administrar su valor, ubicación y ciclo contable. | 20 | 8 | 12 | COINCIDE |
+| [assets](#assets) | Cataloga activos institucionales para administrar su valor, ubicación y ciclo contable. | 20 | 8 | 13 | COINCIDE |
 | [clearing_documents](#clearing_documents) | Representa documentos que compensan partidas abiertas dentro de procesos contables. | 10 | 8 | 2 | COINCIDE |
 | [clearing_items](#clearing_items) | Detalla partidas incluidas en una compensación para verificar qué saldos quedaron conciliados. | 10 | 6 | 1 | COINCIDE |
-| [company_bank_accounts](#company_bank_accounts) | Registra cuentas bancarias institucionales usadas para cobros y pagos de la organización sanitaria. | 18 | 10 | 0 | COINCIDE |
+| [company_bank_accounts](#company_bank_accounts) | Registra cuentas bancarias institucionales usadas para cobros y pagos de la organización sanitaria. | 18 | 10 | 1 | COINCIDE |
 | [controlling_areas](#controlling_areas) | Define ámbitos de control de gestión para consolidar información financiera de una o más unidades. | 13 | 7 | 0 | COINCIDE |
 | [cost_center_maps](#cost_center_maps) | Relaciona centros de costo con estructuras contables o institucionales para integrar reportes financieros. | 11 | 5 | 0 | COINCIDE |
-| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 1 | COINCIDE |
-| [depreciation_areas](#depreciation_areas) | Define áreas de valoración donde se calculan depreciaciones con criterios contables o fiscales distintos. | 13 | 8 | 0 | COINCIDE |
+| [cost_centers](#cost_centers) | Representa centros responsables de costos para atribuir gastos de operación y prestación de salud. | 12 | 6 | 14 | COINCIDE |
+| [depreciation_areas](#depreciation_areas) | Define áreas de valoración donde se calculan depreciaciones con criterios contables o fiscales distintos. | 13 | 8 | 2 | COINCIDE |
 | [employee_payments](#employee_payments) | Registra pagos al personal para sostener contabilidad de remuneraciones institucionales. | 14 | 6 | 0 | COINCIDE |
 | [exchange_rates](#exchange_rates) | Conserva tasas de cambio utilizadas para registrar y comparar operaciones financieras en distintas monedas. | 11 | 4 | 3 | COINCIDE |
-| [fiscal_periods](#fiscal_periods) | Desglosa ejercicios en períodos contables para registrar y reportar movimientos financieros por fecha. | 11 | 4 | 8 | COINCIDE |
-| [fiscal_years](#fiscal_years) | Define ejercicios fiscales de la organización para ordenar períodos contables y cierres financieros. | 11 | 4 | 4 | COINCIDE |
+| [fiscal_periods](#fiscal_periods) | Desglosa ejercicios en períodos contables para registrar y reportar movimientos financieros por fecha. | 11 | 4 | 21 | COINCIDE |
+| [fiscal_years](#fiscal_years) | Define ejercicios fiscales de la organización para ordenar períodos contables y cierres financieros. | 11 | 4 | 19 | COINCIDE |
 | [functional_areas](#functional_areas) | Define áreas funcionales para clasificar gastos y resultados según actividad institucional. | 11 | 7 | 0 | COINCIDE |
 | [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 0 | COINCIDE |
 | [internal_orders](#internal_orders) | Agrupa costos y compromisos de iniciativas internas para facilitar seguimiento presupuestario. | 20 | 14 | 0 | COINCIDE |
 | [journal_entry_assignments](#journal_entry_assignments) | Asocia asientos con dimensiones contables para clasificar movimientos por unidad y propósito. | 30 | 32 | 15 | COINCIDE |
-| [journal_transactions](#journal_transactions) | Agrupa asientos contables de una operación para conservar su registro financiero balanceado. | 22 | 9 | 37 | COINCIDE |
-| [ledger_entries](#ledger_entries) | Registra líneas de débito y crédito en cuentas para reflejar operaciones del libro mayor. | 16 | 7 | 21 | COINCIDE |
+| [journal_transactions](#journal_transactions) | Agrupa asientos contables de una operación para conservar su registro financiero balanceado. | 22 | 9 | 38 | COINCIDE |
+| [ledger_entries](#ledger_entries) | Registra líneas de débito y crédito en cuentas para reflejar operaciones del libro mayor. | 16 | 7 | 22 | COINCIDE |
 | [liabilities](#liabilities) | Representa obligaciones financieras de la organización para controlar vencimientos, pagos y saldos. | 19 | 7 | 10 | COINCIDE |
 | [liability_payments](#liability_payments) | Conserva pagos aplicados a obligaciones para mantener su saldo y estado financiero. | 12 | 4 | 2 | COINCIDE |
 | [liability_postings](#liability_postings) | Registra movimientos contables asociados a obligaciones y sus pagos. | 10 | 9 | 2 | COINCIDE |
 | [liability_schedules](#liability_schedules) | Define calendarios de vencimientos de obligaciones para planificar pagos y previsiones financieras. | 15 | 7 | 4 | COINCIDE |
 | [open_items](#open_items) | Conserva partidas pendientes de compensación para seguir cobros y pagos aún no aplicados. | 20 | 13 | 3 | COINCIDE |
-| [profit_centers](#profit_centers) | Representa unidades responsables de resultados para analizar ingresos y costos por operación. | 16 | 10 | 1 | COINCIDE |
+| [profit_centers](#profit_centers) | Representa unidades responsables de resultados para analizar ingresos y costos por operación. | 16 | 10 | 14 | COINCIDE |
 | [purchases](#purchases) | Registra adquisiciones institucionales para relacionar compras con pagos, activos y gastos. | 15 | 7 | 0 | COINCIDE |
 | [sales](#sales) | Conserva operaciones de venta de servicios o productos de salud para reflejar ingresos institucionales. | 16 | 7 | 0 | COINCIDE |
 | [segments](#segments) | Cataloga segmentos de reporte financiero para analizar resultados por línea organizacional o actividad. | 11 | 7 | 1 | COINCIDE |
@@ -775,7 +775,7 @@ Cataloga cuentas del libro mayor donde se clasifican transacciones de la organiz
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: accounts`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `Accounts` — `src/modules/accounting/entities/accounts.entity.ts`
-- **Resumen:** 18 columnas · 9 índices · 9 FK salientes · 37 entrantes · 12 operaciones
+- **Resumen:** 18 columnas · 9 índices · 9 FK salientes · 37 entrantes · 26 operaciones
 
 #### Columnas
 
@@ -873,12 +873,26 @@ Cataloga cuentas del libro mayor donde se clasifican transacciones de la organiz
 | POST /accounting/accounts | CREA | DIRECTA |
 | POST /accounting/accounts | LEE | DIRECTA |
 | GET /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accruals/run | LEE | DIRECTA |
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
 | GET /accounting/balance-sheet | LEE | DIRECTA |
+| POST /accounting/clearing-documents | LEE | DIRECTA |
+| POST /accounting/depreciation/run | LEE | DIRECTA |
 | GET /accounting/general-ledger | LEE | DIRECTA |
 | GET /accounting/income-statement | LEE | DIRECTA |
+| POST /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
 | GET /accounting/open-items | LEE | DIRECTA |
 | GET /accounting/practitioner/assets | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
+| POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
 | GET /accounting/practitioner/liabilities | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 | GET /accounting/practitioner/liabilities/{id}/schedule | LEE | DIRECTA |
 | GET /accounting/trial-balance | LEE | DIRECTA |
 
@@ -1420,7 +1434,7 @@ Registra depreciaciones calculadas para distribuir el valor de activos a lo larg
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: asset_depreciations`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `AssetDepreciations` — `src/modules/accounting/entities/asset_depreciations.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1452,7 +1466,7 @@ Registra depreciaciones calculadas para distribuir el valor de activos a lo larg
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_asset_depreciations_asset_id` | no | asset_id | Soporta la clave foránea fk_asset_depreciations_asset_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «asset_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_asset_depreciations_asset_id` | no | asset_id | Soporta la clave foránea fk_asset_depreciations_asset_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «asset_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_asset_depreciations_fiscal_period_id` | no | fiscal_period_id | Soporta la clave foránea fk_asset_depreciations_fiscal_period_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «fiscal_period_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_asset_depreciations_transaction_id` | no | transaction_id | Soporta la clave foránea fk_asset_depreciations_transaction_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_asset_depreciations_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_asset_depreciations_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1464,6 +1478,7 @@ Registra depreciaciones calculadas para distribuir el valor de activos a lo larg
 |---|---|---|
 | POST /accounting/depreciation/run | CREA | DIRECTA |
 | POST /accounting/depreciation/run | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | CREA | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
 
@@ -1648,7 +1663,7 @@ Cataloga activos institucionales para administrar su valor, ubicación y ciclo c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: assets`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `Assets` — `src/modules/accounting/entities/assets.entity.ts`
-- **Resumen:** 20 columnas · 8 índices · 7 FK salientes · 14 entrantes · 12 operaciones
+- **Resumen:** 20 columnas · 8 índices · 7 FK salientes · 14 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -1728,6 +1743,7 @@ Cataloga activos institucionales para administrar su valor, ubicación y ciclo c
 | POST /accounting/practitioner/assets | LEE | DIRECTA |
 | PATCH /accounting/practitioner/assets/{id}/automation | ACTUALIZA | POR_TIPO |
 | PATCH /accounting/practitioner/assets/{id}/automation | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | ACTUALIZA | POR_TIPO |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
 
@@ -1910,7 +1926,7 @@ Registra cuentas bancarias institucionales usadas para cobros y pagos de la orga
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: company_bank_accounts`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `CompanyBankAccounts` — `src/modules/accounting/entities/company_bank_accounts.entity.ts`
-- **Resumen:** 18 columnas · 10 índices · 8 FK salientes · 7 entrantes · 0 operaciones
+- **Resumen:** 18 columnas · 10 índices · 8 FK salientes · 7 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -1978,7 +1994,9 @@ Registra cuentas bancarias institucionales usadas para cobros y pagos de la orga
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /accounting/clearing-documents | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2145,7 +2163,7 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: cost_centers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `CostCenters` — `src/modules/accounting/entities/cost_centers.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 1 operaciones
+- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 20 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -2210,7 +2228,20 @@ Representa centros responsables de costos para atribuir gastos de operación y p
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accruals/run | LEE | DIRECTA |
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
+| POST /accounting/clearing-documents | LEE | DIRECTA |
+| POST /accounting/depreciation/run | LEE | DIRECTA |
 | GET /accounting/dimensions | LEE | DIRECTA |
+| POST /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
+| POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2235,7 +2266,7 @@ Define áreas de valoración donde se calculan depreciaciones con criterios cont
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: depreciation_areas`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `DepreciationAreas` — `src/modules/accounting/entities/depreciation_areas.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 6 FK salientes · 1 entrantes · 0 operaciones
+- **Resumen:** 13 columnas · 8 índices · 6 FK salientes · 1 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -2288,7 +2319,10 @@ Define áreas de valoración donde se calculan depreciaciones con criterios cont
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2450,7 +2484,7 @@ Desglosa ejercicios en períodos contables para registrar y reportar movimientos
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: fiscal_periods`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `FiscalPeriods` — `src/modules/accounting/entities/fiscal_periods.entity.ts`
-- **Resumen:** 11 columnas · 4 índices · 4 FK salientes · 6 entrantes · 8 operaciones
+- **Resumen:** 11 columnas · 4 índices · 4 FK salientes · 6 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -2497,13 +2531,26 @@ Desglosa ejercicios en períodos contables para registrar y reportar movimientos
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accruals/run | LEE | DIRECTA |
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
+| POST /accounting/clearing-documents | LEE | DIRECTA |
+| POST /accounting/depreciation/run | LEE | DIRECTA |
 | POST /accounting/fiscal-periods/{id}/lock | ACTUALIZA | POR_TIPO |
 | POST /accounting/fiscal-periods/{id}/lock | LEE | DIRECTA |
 | GET /accounting/fiscal-years | LEE | DIRECTA |
 | POST /accounting/fiscal-years | CREA | DIRECTA |
 | POST /accounting/journal-transactions | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/post | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/reverse | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2528,7 +2575,7 @@ Define ejercicios fiscales de la organización para ordenar períodos contables 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: fiscal_years`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `FiscalYears` — `src/modules/accounting/entities/fiscal_years.entity.ts`
-- **Resumen:** 11 columnas · 4 índices · 4 FK salientes · 2 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 4 índices · 4 FK salientes · 2 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -2570,10 +2617,25 @@ Define ejercicios fiscales de la organización para ordenar períodos contables 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accruals/run | LEE | DIRECTA |
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
+| POST /accounting/clearing-documents | LEE | DIRECTA |
+| POST /accounting/depreciation/run | LEE | DIRECTA |
+| POST /accounting/fiscal-periods/{id}/lock | LEE | DIRECTA |
 | GET /accounting/fiscal-years | LEE | DIRECTA |
 | POST /accounting/fiscal-years | CREA | DIRECTA |
 | POST /accounting/fiscal-years | LEE | DIRECTA |
+| POST /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/post | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/reverse | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2996,7 +3058,7 @@ Agrupa asientos contables de una operación para conservar su registro financier
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: journal_transactions`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `JournalTransactions` — `src/modules/accounting/entities/journal_transactions.entity.ts`
-- **Resumen:** 22 columnas · 9 índices · 9 FK salientes · 21 entrantes · 37 operaciones
+- **Resumen:** 22 columnas · 9 índices · 9 FK salientes · 21 entrantes · 38 operaciones
 
 #### Columnas
 
@@ -3112,6 +3174,7 @@ Agrupa asientos contables de una operación para conservar su registro financier
 | POST /accounting/journal-transactions/drafts | CREA | DIRECTA |
 | POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
 | POST /accounting/liabilities/{id}/payments | CREA | DIRECTA |
+| POST /accounting/open-items | LEE | DIRECTA |
 | POST /accounting/practitioner/assets | CREA | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | CREA | DIRECTA |
 | POST /accounting/practitioner/consultation-income | CREA | DIRECTA |
@@ -3145,7 +3208,7 @@ Registra líneas de débito y crédito en cuentas para reflejar operaciones del 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: ledger_entries`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `LedgerEntries` — `src/modules/accounting/entities/ledger_entries.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 7 FK salientes · 9 entrantes · 21 operaciones
+- **Resumen:** 16 columnas · 7 índices · 7 FK salientes · 9 entrantes · 22 operaciones
 
 #### Columnas
 
@@ -3220,6 +3283,7 @@ Registra líneas de débito y crédito en cuentas para reflejar operaciones del 
 | POST /accounting/journal-transactions/{id}/reverse | LEE | DIRECTA |
 | POST /accounting/journal-transactions/drafts | CREA | DIRECTA |
 | POST /accounting/liabilities/{id}/payments | CREA | DIRECTA |
+| POST /accounting/open-items | LEE | DIRECTA |
 | POST /accounting/practitioner/assets | CREA | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | CREA | DIRECTA |
 | POST /accounting/practitioner/consultation-income | CREA | DIRECTA |
@@ -3663,7 +3727,7 @@ Representa unidades responsables de resultados para analizar ingresos y costos p
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: profit_centers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `ProfitCenters` — `src/modules/accounting/entities/profit_centers.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 14 entrantes · 1 operaciones
+- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 14 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -3738,7 +3802,20 @@ Representa unidades responsables de resultados para analizar ingresos y costos p
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /accounting/accrual-objects | LEE | DIRECTA |
+| POST /accounting/accruals/run | LEE | DIRECTA |
+| POST /accounting/assets/capitalize | LEE | DIRECTA |
+| POST /accounting/clearing-documents | LEE | DIRECTA |
+| POST /accounting/depreciation/run | LEE | DIRECTA |
 | GET /accounting/dimensions | LEE | DIRECTA |
+| POST /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
+| POST /accounting/practitioner/assets | LEE | DIRECTA |
+| POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 
 #### Gobierno
 

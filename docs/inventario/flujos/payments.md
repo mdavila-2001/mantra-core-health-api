@@ -43,11 +43,11 @@ _Fuente: `src/modules/payments/README.md:70`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `UC-42-01` | Crear intención de pago idempotente | POST /payments/intents | PAYMENTS_ADMIN · CASHIER | MEDIO | 2 |
-| `UC-42-02` | Abrir sesión de checkout con contexto de cajero | POST /payments/checkout-sessions | PAYMENTS_ADMIN · CASHIER | MEDIO | 4 |
+| `UC-42-02` | Abrir sesión de checkout con contexto de cajero | POST /payments/checkout-sessions | PAYMENTS_ADMIN · CASHIER | MEDIO | 5 |
 | `UC-42-03` | Bloquear tipo de cambio | POST /payments/intents/{id}/fx-lock | PAYMENTS_ADMIN | MEDIO | 4 |
 | `UC-42-04` | Evaluar riesgo y 3-D Secure | POST /payments/intents/{id}/risk-assessment | PAYMENTS_ADMIN | MEDIO | 3 |
 | `UC-42-05` | Procesar transacción (authorize/capture/sale) | POST /payments/intents/{id}/transactions | PAYMENTS_ADMIN · CASHIER | MEDIO | 5 |
-| `UC-42-06` | Recibir callback del gateway (idempotente) | POST /payments/callbacks/{callbackPath} | Público (sin sesión) | ALTO | 6 |
+| `UC-42-06` | Recibir callback del gateway (idempotente) | POST /payments/callbacks/{callbackPath} | Público (sin sesión) | ALTO | 7 |
 | `UC-42-07` | Consulta independiente de estado | POST /payments/transactions/{id}/status-inquiry | PAYMENTS_ADMIN | BAJO | 1 |
 | `UC-42-08` | Reembolso total o parcial | POST /payments/transactions/{id}/refunds | PAYMENTS_ADMIN | MEDIO | 3 |
 | `UC-42-09` | Solicitar anulación | POST /payments/transactions/{id}/cancellation-requests | PAYMENTS_ADMIN · CASHIER | MEDIO | 2 |
@@ -72,17 +72,17 @@ flowchart LR
   t12[("payments.risk_assessments")]:::tabla
   t14[("payments.payment_transactions")]:::tabla
   t17[("payments.payment_webhook_events")]:::tabla
-  t20[("payments.refunds")]:::tabla
-  t22[("payments.payment_cancellation_requests")]:::tabla
-  t24[("payments.fee_schedules")]:::tabla
-  t26[("payments.payment_splits")]:::tabla
-  t28[("payments.gateway_settlements")]:::tabla
-  t29[("payments.settlement_lines")]:::tabla
-  t31[("payments.payout_items")]:::tabla
-  t32[("payments.payouts")]:::tabla
-  t34[("payments.provider_reconciliation_records")]:::tabla
-  t35[("payments.reconciliation_exceptions")]:::tabla
-  t36[("payments.reconciliation_runs")]:::tabla
+  t21[("payments.refunds")]:::tabla
+  t23[("payments.payment_cancellation_requests")]:::tabla
+  t25[("payments.fee_schedules")]:::tabla
+  t27[("payments.payment_splits")]:::tabla
+  t29[("payments.gateway_settlements")]:::tabla
+  t30[("payments.settlement_lines")]:::tabla
+  t32[("payments.payout_items")]:::tabla
+  t33[("payments.payouts")]:::tabla
+  t35[("payments.provider_reconciliation_records")]:::tabla
+  t36[("payments.reconciliation_exceptions")]:::tabla
+  t37[("payments.reconciliation_runs")]:::tabla
   subgraph s0["UC-42-01 · Crear intención de pago idempotente"]
     o1["POST /payments/intents"]:::op
   end
@@ -98,32 +98,33 @@ flowchart LR
   subgraph s4["UC-42-05 · Procesar transacción (authorize/capture/sale)"]
     o13["POST /payments/intents/{id}/transactions"]:::op
   end
+  t18[("+1 tablas más")]
   subgraph s5["UC-42-06 · Recibir callback del gateway (idempotente)"]
     o15["POST /payments/callbacks/{callbackPath}"]:::op
   end
   subgraph s6["UC-42-07 · Consulta independiente de estado"]
-    o18["POST /payments/transactions/{id}/status-inquiry"]:::op
+    o19["POST /payments/transactions/{id}/status-inquiry"]:::op
   end
   subgraph s7["UC-42-08 · Reembolso total o parcial"]
-    o19["POST /payments/transactions/{id}/refunds"]:::op
+    o20["POST /payments/transactions/{id}/refunds"]:::op
   end
   subgraph s8["UC-42-09 · Solicitar anulación"]
-    o21["POST /payments/transactions/{id}/cancellation-requests"]:::op
+    o22["POST /payments/transactions/{id}/cancellation-requests"]:::op
   end
   subgraph s9["UC-42-10 · Publicar versión del tarifario"]
-    o23["POST /payments/fee-schedules"]:::op
+    o24["POST /payments/fee-schedules"]:::op
   end
   subgraph s10["UC-42-11 · Reparto multi-party"]
-    o25["POST /payments/intents/{id}/splits"]:::op
+    o26["POST /payments/intents/{id}/splits"]:::op
   end
   subgraph s11["UC-42-12 · Importar liquidación del gateway"]
-    o27["POST /payments/settlements/import"]:::op
+    o28["POST /payments/settlements/import"]:::op
   end
   subgraph s12["UC-42-13 · Ejecutar payout a cuenta conectada"]
-    o30["POST /payments/payouts"]:::op
+    o31["POST /payments/payouts"]:::op
   end
   subgraph s13["UC-42-14 · Conciliar gateway vs ledger"]
-    o33["POST /payments/reconciliation-runs"]:::op
+    o34["POST /payments/reconciliation-runs"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -133,6 +134,7 @@ flowchart LR
   o4 -->|"CREA"| t6
   o4 -->|"ACTUALIZA"| t7
   o4 -->|"LEE"| t7
+  o4 -->|"LEE"| t3
   a9 --> o8
   o8 -->|"CREA"| t10
   o8 -->|"LEE"| t10
@@ -155,38 +157,39 @@ flowchart LR
   o15 -->|"LEE"| t14
   o15 -->|"CREA"| t17
   o15 -->|"LEE"| t17
-  a9 --> o18
-  o18 -->|"LEE"| t14
+  o15 -.-> t18
   a9 --> o19
   o19 -->|"LEE"| t14
-  o19 -->|"CREA"| t20
-  o19 -->|"LEE"| t20
-  a2 --> o21
-  o21 -->|"CREA"| t22
-  o21 -->|"LEE"| t14
-  a9 --> o23
-  o23 -->|"ACTUALIZA"| t24
-  o23 -->|"CREA"| t24
-  o23 -->|"LEE"| t24
-  a9 --> o25
-  o25 -->|"LEE"| t3
-  o25 -->|"CREA"| t26
-  o25 -->|"LEE"| t26
-  a9 --> o27
-  o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t28
-  o27 -->|"ACTUALIZA"| t14
-  o27 -->|"LEE"| t14
-  o27 -->|"CREA"| t29
-  a9 --> o30
-  o30 -->|"CREA"| t31
-  o30 -->|"CREA"| t32
-  a9 --> o33
-  o33 -->|"LEE"| t14
-  o33 -->|"CREA"| t34
-  o33 -->|"CREA"| t35
-  o33 -->|"ACTUALIZA"| t36
-  o33 -->|"CREA"| t36
+  a9 --> o20
+  o20 -->|"LEE"| t14
+  o20 -->|"CREA"| t21
+  o20 -->|"LEE"| t21
+  a2 --> o22
+  o22 -->|"CREA"| t23
+  o22 -->|"LEE"| t14
+  a9 --> o24
+  o24 -->|"ACTUALIZA"| t25
+  o24 -->|"CREA"| t25
+  o24 -->|"LEE"| t25
+  a9 --> o26
+  o26 -->|"LEE"| t3
+  o26 -->|"CREA"| t27
+  o26 -->|"LEE"| t27
+  a9 --> o28
+  o28 -->|"CREA"| t29
+  o28 -->|"LEE"| t29
+  o28 -->|"ACTUALIZA"| t14
+  o28 -->|"LEE"| t14
+  o28 -->|"CREA"| t30
+  a9 --> o31
+  o31 -->|"CREA"| t32
+  o31 -->|"CREA"| t33
+  a9 --> o34
+  o34 -->|"LEE"| t14
+  o34 -->|"CREA"| t35
+  o34 -->|"CREA"| t36
+  o34 -->|"ACTUALIZA"| t37
+  o34 -->|"CREA"| t37
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -235,7 +238,7 @@ Recibir el callback/webhook del gateway (idempotente)
 |---|---|---|
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del webhook inválida |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del webhook inválida; UnauthorizedException: Callback no autorizado para este endpoint |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: No hay transacción para la referencia informada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -260,43 +263,51 @@ flowchart TD
   n7 -->|"no"| n9
   n10(["401 UNAUTHENTICATED Firma del webhook inválida"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a PaymentTransactionsRepository.findWebhookEventByRef"]:::llamada
+  n11["Llama a PaymentTransactionsRepository.findCallbackEndpoints"]:::llamada
   n9 -->|"no"| n11
-  n12[("LEE payments.payment_webhook_events")]:::efecto
+  n12[("LEE payments.provider_callback_endpoints")]:::efecto
   n11 --> n12
-  n13{"!archived"}:::decision
+  n13{"!endpointDecision.allowed"}:::decision
   n12 --> n13
-  n14["Llama a PaymentTransactionsRepository.recordWebhookEvent"]:::llamada
+  n14(["401 UNAUTHENTICATED Callback no autorizado para este endpoint"]):::error
   n13 -->|"sí"| n14
-  n15[("CREA payments.payment_webhook_events")]:::efecto
-  n14 --> n15
-  n16[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n15["Llama a PaymentTransactionsRepository.findWebhookEventByRef"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE payments.payment_webhook_events")]:::efecto
   n15 --> n16
-  n13 -->|"no"| n16
-  n17{"dto.authorizationCode"}:::decision
+  n17{"!archived"}:::decision
   n16 --> n17
-  n18[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n18["Llama a PaymentTransactionsRepository.recordWebhookEvent"]:::llamada
   n17 -->|"sí"| n18
-  n19[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n19[("CREA payments.payment_webhook_events")]:::efecto
   n18 --> n19
-  n17 -->|"no"| n19
-  n20["Llama a PaymentIntentsRepository.findByIdForUpdate"]:::llamada
+  n20[("ACTUALIZA payments.payment_transactions")]:::efecto
   n19 --> n20
-  n21[("LEE payments.payment_intents")]:::efecto
+  n17 -->|"no"| n20
+  n21{"dto.authorizationCode"}:::decision
   n20 --> n21
-  n22{"intent"}:::decision
-  n21 --> n22
-  n23["Llama a PaymentsTransactionsService.intentCaptured"]:::llamada
-  n22 -->|"sí"| n23
-  n24["Llama a PaymentTransactionsRepository.findByIntent"]:::llamada
+  n22[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n21 -->|"sí"| n22
+  n23[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24["Llama a PaymentIntentsRepository.findByIdForUpdate"]:::llamada
   n23 --> n24
-  n25[("LEE payments.payment_transactions")]:::efecto
+  n25[("LEE payments.payment_intents")]:::efecto
   n24 --> n25
-  n26[("ACTUALIZA payments.payment_intents")]:::efecto
+  n26{"intent"}:::decision
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
-  n26 --> n27
-  n22 -->|"no"| n27
+  n27["Llama a PaymentsTransactionsService.intentCaptured"]:::llamada
+  n26 -->|"sí"| n27
+  n28["Llama a PaymentTransactionsRepository.findByIntent"]:::llamada
+  n27 --> n28
+  n29[("LEE payments.payment_transactions")]:::efecto
+  n28 --> n29
+  n30[("ACTUALIZA payments.payment_intents")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  n26 -->|"no"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -315,8 +326,8 @@ Abrir una sesión de checkout con contexto de cajero
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Deuda no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La deuda ya tiene un checkout abierto; PreconditionFailedException: La deuda ya está saldada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Deuda no encontrada; ResourceNotFoundException: Intención de pago no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenantId del cuerpo no coincide con el tenant activo; PreconditionFailedException: La deuda ya tiene un checkout abierto; PreconditionFailedException: La deuda ya está saldada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -326,39 +337,54 @@ flowchart TD
   n1 --> n2
   n3["Llama a PaymentsCheckoutService.openSession"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"dto.tenantId !== tenantId"}:::decision
   n3 --> n4
-  n5["Llama a PaymentFlowRepository.findDebtForUpdate"]:::llamada
-  n4 --> n5
-  n6[("LEE payments.payment_debts")]:::efecto
-  n5 --> n6
-  n7{"!debt"}:::decision
+  n5(["422 PRECONDITION_FAILED El tenantId del cuerpo no coincide con el tenant activo"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PaymentFlowRepository.findDebtForUpdate"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Deuda no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"debt.statusConceptId === CONCEPTS.DEBT_IN_CHECKOUT"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La deuda ya tiene un checkout abierto"]):::error
+  n8[("LEE payments.payment_debts")]:::efecto
+  n7 --> n8
+  n9{"!debt"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Deuda no encontrada"]):::error
   n9 -->|"sí"| n10
-  n11{"debt.statusConceptId === CONCEPTS.DEBT_SETTLED"}:::decision
+  n11{"dto.paymentIntentId"}:::decision
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED La deuda ya está saldada"]):::error
+  n12["Llama a PaymentFlowRepository.findIntentForCheckout"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a PaymentFlowRepository.createCheckoutSession"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA payments.payment_checkout_sessions")]:::efecto
+  n13[("LEE payments.payment_intents")]:::efecto
+  n12 --> n13
+  n14{"!intent"}:::decision
   n13 --> n14
-  n15{"dto.cashierUserId || dto.cashRegisterId || dto.siteId"}:::decision
-  n14 --> n15
-  n16["Llama a PaymentFlowRepository.createCashierContext"]:::llamada
-  n15 -->|"sí"| n16
-  n17[("CREA payments.cashier_payment_contexts")]:::efecto
-  n16 --> n17
-  n18[("ACTUALIZA payments.payment_debts")]:::efecto
-  n17 --> n18
-  n15 -->|"no"| n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
+  n15(["404 NOT_FOUND Intención de pago no encontrada"]):::error
+  n14 -->|"sí"| n15
+  n16{"debt.statusConceptId === CONCEPTS.DEBT_IN_CHECKOUT"}:::decision
+  n14 -->|"no"| n16
+  n11 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED La deuda ya tiene un checkout abierto"]):::error
+  n16 -->|"sí"| n17
+  n18{"debt.statusConceptId === CONCEPTS.DEBT_SETTLED"}:::decision
+  n16 -->|"no"| n18
+  n19(["422 PRECONDITION_FAILED La deuda ya está saldada"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PaymentFlowRepository.createCheckoutSession"]:::llamada
+  n18 -->|"no"| n20
+  n21[("CREA payments.payment_checkout_sessions")]:::efecto
+  n20 --> n21
+  n22{"dto.cashierUserId || dto.cashRegisterId || dto.siteId"}:::decision
+  n21 --> n22
+  n23["Llama a PaymentFlowRepository.createCashierContext"]:::llamada
+  n22 -->|"sí"| n23
+  n24[("CREA payments.cashier_payment_contexts")]:::efecto
+  n23 --> n24
+  n25[("ACTUALIZA payments.payment_debts")]:::efecto
+  n24 --> n25
+  n22 -->|"no"| n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -545,7 +571,7 @@ Repartir el cobro entre cuentas conectadas
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
 | 409 | `CONFLICT` | ConflictException: Los repartos superan el importe de la intención |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reparto por importe exige `amount`; PreconditionFailedException: Un reparto por porcentaje exige `percentage` |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reparto por importe exige `amount`; PreconditionFailedException: Un reparto por porcentaje exige `percentage`; PreconditionFailedException: El reparto debe ser un importe positivo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -573,20 +599,24 @@ flowchart TD
   n10 --> n11
   n12(["404 NOT_FOUND Intención de pago no encontrada"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a PaymentFlowRepository.findSplitsByIntent"]:::llamada
+  n13{"!isPositiveAmount(amount)"}:::decision
   n11 -->|"no"| n13
-  n14[("LEE payments.payment_splits")]:::efecto
-  n13 --> n14
-  n15{"allocated + Number(amount) › Number(intent.amount)"}:::decision
-  n14 --> n15
-  n16(["409 CONFLICT Los repartos superan el importe de la intención"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PaymentFlowRepository.createSplit"]:::llamada
-  n15 -->|"no"| n17
-  n18[("CREA payments.payment_splits")]:::efecto
-  n17 --> n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
+  n14(["422 PRECONDITION_FAILED El reparto debe ser un importe positivo"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PaymentFlowRepository.findSplitsByIntent"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE payments.payment_splits")]:::efecto
+  n15 --> n16
+  n17{"compareAmounts(addAmounts([allocated, amount]), intent.amount) › 0"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT Los repartos superan el importe de la intención"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a PaymentFlowRepository.createSplit"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA payments.payment_splits")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -709,7 +739,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a PaymentsOperationsService.executePayout"]:::llamada
   n2 --> n3
-  n4{"total ‹= 0"}:::decision
+  n4{"!isPositiveAmount(total)"}:::decision
   n3 --> n4
   n5(["422 PRECONDITION_FAILED El importe neto del payout debe ser positivo"]):::error
   n4 -->|"sí"| n5
@@ -777,7 +807,7 @@ flowchart TD
   n12 -->|"sí"| n13
   n14[("CREA payments.reconciliation_exceptions")]:::efecto
   n13 --> n14
-  n15{"difference !== 0"}:::decision
+  n15{"compareAmounts(difference, '0') !== 0"}:::decision
   n14 --> n15
   n12 -->|"no"| n15
   n16["Llama a PaymentOperationsRepository.createReconciliationException"]:::llamada
