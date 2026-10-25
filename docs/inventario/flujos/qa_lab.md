@@ -289,7 +289,7 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| PATCH /qa/defects/{defectId} | IN_PROGRESS | QaRunsService.triageDefect |
+| PATCH /qa/defects/{defectId} | IN_PROGRESS | QaLabController.triageDefect → QaRunsService.triageDefect |
 
 ## Árbol de decisión por operación
 

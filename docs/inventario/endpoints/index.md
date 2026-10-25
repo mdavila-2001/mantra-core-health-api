@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1551 operaciones HTTP** en **72 módulos**: 1533 publicadas en el contrato OpenAPI y 18 que existen sólo en el código.
+Se inventarían **1550 operaciones HTTP** en **71 módulos**: 1541 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1479
-- Riesgo ALTO 179 · MEDIO 875 · BAJO 497
-- Mencionadas por al menos una prueba: 882
+- Con al menos una tabla identificada: 1488
+- Riesgo ALTO 186 · MEDIO 875 · BAJO 489
+- Mencionadas por al menos una prueba: 888
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -43,15 +43,14 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 36 | 18 | [iam.md](iam.md) |
+| `iam` | 39 | 18 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 5 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 63 | 20 | [insurance.md](insurance.md) |
-| `insurance-campaigns` | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
+| `insurance` | 71 | 27 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 2 | [integrations.md](integrations.md) |
 | `lakehouse` | 13 | 0 | [lakehouse.md](lakehouse.md) |
 | `marketing` | 15 | 2 | [marketing.md](marketing.md) |
-| `medical_groups` | 8 | 0 | [medical_groups.md](medical_groups.md) |
+| `medical_groups` | 9 | 0 | [medical_groups.md](medical_groups.md) |
 | `messaging` | 21 | 1 | [messaging.md](messaging.md) |
 | `object_storage` | 14 | 0 | [object_storage.md](object_storage.md) |
 | `ops_console` | 9 | 0 | [ops_console.md](ops_console.md) |
@@ -78,7 +77,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `surveys` | 17 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 24 | 1 | [system_ops.md](system_ops.md) |
-| `telemetry` | 22 | 8 | [telemetry.md](telemetry.md) |
+| `telemetry` | 25 | 8 | [telemetry.md](telemetry.md) |
 | `terminology` | 25 | 2 | [terminology.md](terminology.md) |
 | `time_series` | 14 | 0 | [time_series.md](time_series.md) |
 | `tracking` | 11 | 1 | [tracking.md](tracking.md) |
