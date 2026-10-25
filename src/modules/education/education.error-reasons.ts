@@ -25,6 +25,12 @@ export enum EducationErrorReason {
   ENROLLMENT_PAYMENT_REQUIRED = 'ENROLLMENT_PAYMENT_REQUIRED',
   /** Se envió un intento de pago en una inscripción que no es `PURCHASED`. */
   ENROLLMENT_PAYMENT_NOT_APPLICABLE = 'ENROLLMENT_PAYMENT_NOT_APPLICABLE',
+  /**
+   * El intento de pago no corresponde a esta compra: es de otro curso o de otro
+   * recurso, lo creó otra persona, o su monto o moneda no cubren el precio.
+   * Un único motivo para los cuatro casos: no es un oráculo de qué falló.
+   */
+  ENROLLMENT_PAYMENT_MISMATCH = 'ENROLLMENT_PAYMENT_MISMATCH',
   /** El intento de pago ya respalda otra inscripción. */
   ENROLLMENT_PAYMENT_ALREADY_USED = 'ENROLLMENT_PAYMENT_ALREADY_USED',
 }

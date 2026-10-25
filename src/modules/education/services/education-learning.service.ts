@@ -17,7 +17,8 @@ import {
   EducationCatalogRepository,
   EducationLearningRepository,
 } from '../repositories';
-import { AssessmentQuestions } from '../entities';
+import { AssessmentQuestions, type Courses } from '../entities';
+import type { PaymentIntents } from '../../payments/entities';
 import { EducationScopeService } from './education-scope.service';
 import { EducationErrorReason } from '../education.error-reasons';
 import {
@@ -66,6 +67,13 @@ const LIVE_ENROLLMENT_STATES: readonly string[] = [
   CONCEPTS.ENROLLMENT_STATE_ACTIVE,
   CONCEPTS.ENROLLMENT_STATE_COMPLETED,
 ];
+
+/**
+ * `source_ref_type` con el que un intento de pago declara que paga un curso
+ * (`source_ref_id` = el curso). El valor lo fija este módulo: el checkout de
+ * cursos tiene que escribirlo al crear el intento.
+ */
+export const COURSE_PAYMENT_SOURCE_REF = 'EDUCATION_COURSE';
 
 const FULL_PROGRESS = '100.00';
 const VERIFICATION_CODE_BYTES = 8;
@@ -186,7 +194,10 @@ export class EducationLearningService {
       if (dto.source === 'PURCHASED') {
         await this.assertPurchaseConfirmed(
           tx,
-          dto.courseId,
+          course,
+          actor,
+          dto.learnerType,
+          learnerRefId,
           dto.paymentIntentId as string,
         );
       }
@@ -272,18 +283,36 @@ export class EducationLearningService {
    * activo, esté confirmado y no respalde ya otra inscripción.
    *
    * Un intento ajeno o inexistente responde como «no encontrado», igual que el
-   * resto de recursos del módulo. El intento no registra de qué curso es ni
-   * quién pagó, así que esos dos vínculos no se comprueban acá.
+   * resto de recursos del módulo. Además el pago tiene que ser de ESTA compra:
+   *
+   * - **Pagador**: lo creó el actor, o es el usuario aprendiz (`learnerType`
+   *   `USER`). Para inscribir a un tercero con otro pago existe `ASSIGNED`.
+   * - **Importe**: monto no menor al precio del curso y, si el curso fija
+   *   moneda, la misma moneda.
+   * - **Curso**: si el intento declara un recurso de origen
+   *   (`source_ref_type`/`source_ref_id`) o una factura, tiene que ser este
+   *   curso ({@link COURSE_PAYMENT_SOURCE_REF}). Un intento sin referencia no se
+   *   puede atar al curso: hoy ningún flujo de checkout de cursos escribe esa
+   *   referencia, y el intento sólo queda atado por pagador e importe.
+   *
+   * Cualquier desajuste responde 422 `ENROLLMENT_PAYMENT_MISMATCH`.
    *
    * @param tx - Transacción activa.
-   * @param courseId - Curso de la inscripción (sólo para el detalle del error).
+   * @param course - Curso de la inscripción, ya acotado al tenant.
+   * @param actor - Quien inscribe.
+   * @param learnerType - Tipo del aprendiz.
+   * @param learnerRefId - Aprendiz que se inscribe.
    * @param paymentIntentId - Intento de pago citado.
    */
   private async assertPurchaseConfirmed(
     tx: EntityManager,
-    courseId: string,
+    course: Courses,
+    actor: AuthenticatedUser,
+    learnerType: LearnerType,
+    learnerRefId: string,
     paymentIntentId: string,
   ): Promise<void> {
+    const courseId = course.id;
     const unlocked = await this.learningRepo.findPaymentIntent(
       tx,
       paymentIntentId,
@@ -306,6 +335,13 @@ export class EducationLearningService {
         EducationErrorReason.ENROLLMENT_PAYMENT_NOT_CONFIRMED,
       );
     }
+    this.assertPaymentMatchesPurchase(
+      intent,
+      course,
+      actor,
+      learnerType,
+      learnerRefId,
+    );
     const used = await this.learningRepo.findEnrollmentByPaymentIntent(
       tx,
       paymentIntentId,
@@ -315,6 +351,41 @@ export class EducationLearningService {
         'El pago ya respalda otra inscripción',
         { courseId },
         EducationErrorReason.ENROLLMENT_PAYMENT_ALREADY_USED,
+      );
+    }
+  }
+
+  /** El pago, el pagador y el importe corresponden a la compra (ver arriba). */
+  private assertPaymentMatchesPurchase(
+    intent: PaymentIntents,
+    course: Courses,
+    actor: AuthenticatedUser,
+    learnerType: LearnerType,
+    learnerRefId: string,
+  ): void {
+    // Las columnas nulas llegan como `null` desde la base: se miran por valor.
+    const references = Boolean(
+      intent.sourceRefType || intent.sourceRefId || intent.invoiceId,
+    );
+    const sameCourse =
+      intent.sourceRefType === COURSE_PAYMENT_SOURCE_REF &&
+      intent.sourceRefId === course.id &&
+      !intent.invoiceId;
+    const payerOk =
+      Boolean(intent.createdByUserId) &&
+      (intent.createdByUserId === actor.id ||
+        (learnerType === 'USER' && intent.createdByUserId === learnerRefId));
+    const price = Number(course.price ?? '0');
+    const amountOk = Number(intent.amount) >= price;
+    const currencyOk =
+      !course.currencyConceptId ||
+      intent.currencyConceptId === course.currencyConceptId;
+
+    if ((references && !sameCourse) || !payerOk || !amountOk || !currencyOk) {
+      throw new PreconditionFailedException(
+        'El pago no corresponde a esta compra',
+        undefined,
+        EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
       );
     }
   }
