@@ -191,10 +191,10 @@ export class PracticesController {
    * Vinculaciones profesional-organización de la práctica, paginadas por
    * cursor (CV-14). Antes de esto, `POST …/role-assignments/:roleId/approve`
    * existía sin ninguna forma de ver qué había pendiente: el administrador
-   * tenía que conseguir el uuid por otro canal.
+   * tenía que conseguir el uuid por otro canal. Sin `@Roles`: la ve quien
+   * administra esa organización (A-6), que decide el servicio.
    */
   @Get(':practiceId/role-assignments')
-  @Roles('SECURITY_ADMIN')
   @ApiOperation({
     summary: 'Listar las vinculaciones profesional-organización de la práctica',
   })
@@ -215,15 +215,16 @@ export class PracticesController {
   })
   listRoleAssignments(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('status') statusConceptId?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ListPracticeRoleAssignmentsResponseDto> {
-    return this.workforceService.listPracticeAssignments(
-      practiceId,
-      requireTenantId(),
-      { statusConceptId, cursor, limit },
-    );
+    return this.workforceService.listPracticeAssignments(practiceId, actor, {
+      statusConceptId,
+      cursor,
+      limit,
+    });
   }
 
   @Audited({
