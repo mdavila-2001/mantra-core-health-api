@@ -36803,6 +36803,57 @@
         ]
       }
     },
+    "/billing/service-catalog/{id}/image": {
+      "get": {
+        "description": "Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.",
+        "operationId": "BillingServiceCatalogController_getImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descargar la imagen de un servicio que el actor puede ver",
+        "tags": [
+          "billing-service-catalog"
+        ]
+      }
+    },
     "/billing/service-catalog/{id}": {
       "patch": {
         "operationId": "BillingServiceCatalogController_update",

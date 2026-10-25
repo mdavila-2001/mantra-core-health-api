@@ -17618,7 +17618,7 @@
       ]
     },
     {
-      "name": "billing (34)",
+      "name": "billing (35)",
       "item": [
         {
           "name": "billing-operations",
@@ -18860,6 +18860,62 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.serviceCatalogId);",
                       "  if (id) pm.environment.set('serviceCatalogId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /billing/service-catalog/{id}/image · Descargar la imagen de un servicio que el actor puede ver",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/:id/image",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    ":id",
+                    "image"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{serviceCatalogId}}",
+                      "description": "Identificador de ruta · variable `{{serviceCatalogId}}`"
+                    }
+                  ]
+                },
+                "description": "Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.\n\n`GET /billing/service-catalog/{id}/image`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_getImage`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('imageId', first.id);",
                       "}"
                     ]
                   }
