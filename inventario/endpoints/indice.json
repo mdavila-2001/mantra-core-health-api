@@ -10,7 +10,7 @@
       "MEDIO": 879,
       "ALTO": 175
     },
-    "conTablas": 1480,
+    "conTablas": 1481,
     "sinTablasSinDeterminar": 25,
     "sinExplicacionDeNegocio": 0,
     "conPruebas": 888,
@@ -1301,7 +1301,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 0,
+      "tablas": 1,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -27734,7 +27734,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27792,7 +27792,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27812,7 +27812,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27832,7 +27832,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

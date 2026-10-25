@@ -78,7 +78,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/health/data-sources` | app (ctrl:DataSourcesController) | app | BAJO | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/health/data-sources/metrics` | app (ctrl:DataSourcesController) | app | BAJO | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
 | GET `/liveness` | app (ctrl:AppController) | app | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/readiness` | app (ctrl:AppController) | app | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/readiness` | app (ctrl:AppController) | app | BAJO | Pública | — | PUBLICA · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/audio-assets/{assetId}/content` | Audio Assets (ctrl:AudioAssetsController) | audio_assets | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/audio-assets/resolve` | Audio Assets (ctrl:AudioAssetsController) | audio_assets | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · ENCOLA_TRABAJO · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/audio-assets/{assetId}/deprecate` | Audio Assets (ctrl:AudioAssetsInternalController) | audio_assets | MEDIO | SYSTEM | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |

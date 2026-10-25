@@ -4,7 +4,7 @@
 
 Se inventarían **1558 operaciones HTTP** en **72 módulos**: 1541 publicadas en el contrato OpenAPI y 17 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1480
+- Con al menos una tabla identificada: 1481
 - Riesgo ALTO 175 · MEDIO 879 · BAJO 504
 - Mencionadas por al menos una prueba: 888
 

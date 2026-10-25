@@ -5,7 +5,7 @@
 - **Bloque:** —
 - **Operaciones:** 6 (6 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 0 · BAJO 6
-- **Tablas distintas que tocan:** 0
+- **Tablas distintas que tocan:** 1
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/app.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -17,7 +17,7 @@
 | 3 | GET | `/health/data-sources` | Estado y enrutado de las fuentes de datos (requiere autenticación) | BAJO | 0 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN |
 | 4 | GET | `/health/data-sources/metrics` | Contadores de operaciones por conexión y por ruta read/write | BAJO | 0 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN |
 | 5 | GET | `/liveness` | Sonda de liveness sin dependencias externas | BAJO | 0 | pública |
-| 6 | GET | `/readiness` | Sonda de readiness de dependencias obligatorias | BAJO | 0 | pública |
+| 6 | GET | `/readiness` | Sonda de readiness de dependencias obligatorias | BAJO | 1 | pública |
 
 ---
 
@@ -334,7 +334,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Sonda de readiness de dependencias obligatorias
 - **Bloque:** —
-- **Riesgo:** BAJO — No toca tablas relacionales
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `AppController.readiness` — `src/app.controller.ts:63`
 
@@ -346,7 +346,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /readiness` la atiende `AppController.readiness` (src/app.controller.ts:63). Es una ruta pública: no exige token. Delega en `AppReadinessService.check`. No toca tablas relacionales: Sondas de salud: `select 1` contra PostgreSQL y ping a MongoDB, Redis y OpenSearch; no lee tablas del modelo..
+`GET /readiness` la atiende `AppController.readiness` (src/app.controller.ts:63). Es una ruta pública: no exige token. Delega en `AppReadinessService.check`. Lee terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -357,7 +357,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Tablas que afecta
 
-No toca tablas relacionales: Sondas de salud: `select 1` contra PostgreSQL y ping a MongoDB, Redis y OpenSearch; no lee tablas del modelo.. _(manual, 2026-10-21; fuente: `src/app-readiness.service.ts:32`)_
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | AppController.readiness → AppReadinessService.check → AppReadinessService.checkSeedCore | `src/app-readiness.service.ts:212` |
 
 ### Cuerpo
 
@@ -374,7 +376,7 @@ _No se identificó un DTO de respuesta con campos._
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar; Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: El rol de runtime {violations.join('; ')}: las políticas no aíslan nada |
+| 500 | `INTERNAL` | SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar; SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')}; SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}; Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: El rol de runtime {violations.join('; ')}: las políticas no aíslan nada |
 
 El árbol de decisión completo está en [flujos](../flujos/app.md).
 

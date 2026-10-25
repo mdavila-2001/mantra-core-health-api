@@ -16,7 +16,7 @@
 | [tenant_legal_representatives](#tenant_legal_representatives) | Identifica representantes legales asociados a organizaciones para sostener trámites y responsabilidades institucionales. | 16 | 4 | 3 | COINCIDE |
 | [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 15 | 10 | 114 | COINCIDE |
 | [tenant_web_configs](#tenant_web_configs) | Almacena configuración web por tenant para presentar y dirigir servicios institucionales bajo sus dominios. | 18 | 3 | 0 | COINCIDE |
-| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 46 | COINCIDE |
+| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 50 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -741,7 +741,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenants`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `Tenants` — `src/modules/directory/entities/tenants.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 299 entrantes · 46 operaciones
+- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 299 entrantes · 50 operaciones
 
 #### Columnas
 
@@ -1156,6 +1156,10 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 | POST /admin/governance/tenant-residency-bindings | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
+| POST /ts/admin/compression/run | LEE | DIRECTA |
+| POST /ts/admin/retention/policies | LEE | DIRECTA |
+| POST /ts/admin/rollups/{name}/refresh | LEE | DIRECTA |
+| POST /ts/admin/rollups/audit-daily/refresh | LEE | DIRECTA |
 
 #### Gobierno
 

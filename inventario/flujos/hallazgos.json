@@ -11023,7 +11023,7 @@
         "metodo": "GET",
         "ruta": "/readiness",
         "modulo": "app",
-        "detalle": "Error: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:135) | Error: MongoDB no confirmó el ping (src/modules/document_store/repositories/mongo-connection.provider.ts:60) | Error: Redis no respondió PONG (src/modules/redis_runtime/services/redis-runtime.service.ts:63)",
+        "detalle": "SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:178) | SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')} (src/app-readiness.service.ts:202) | SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length} (src/app-readiness.service.ts:219)",
         "fuente": "src/app.controller.ts:63"
       },
       {
