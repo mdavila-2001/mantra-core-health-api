@@ -76,7 +76,11 @@ function build() {
       if (entity.name === 'PersonProfiles') {
         return ids.map((id) => ({ id, personId: `person-${id}` }));
       }
-      return ids.map((id) => ({ id, displayName: `Nombre de ${id}` }));
+      // Persons: sólo existen las `person-*`. Un id de profesional que fuera
+      // directamente una persona se prueba aparte.
+      return ids
+        .filter((id) => id.startsWith('person-') || id === 'pract-persona')
+        .map((id) => ({ id, displayName: `Nombre de ${id}` }));
     }),
   };
   const em: any = {
@@ -156,7 +160,11 @@ function build() {
   };
   const practiceTenantLookup = {
     findActivePracticeIdsForPractitioner: mockFn(async (id: string) => {
-      if (id === 'pract-creator' || id === 'pract-invitee') {
+      if (
+        id === 'pract-creator' ||
+        id === 'pract-invitee' ||
+        id === 'pract-persona'
+      ) {
         return [PRACTICE_A];
       }
       if (id === 'pract-foreign') return [PRACTICE_B];
@@ -581,6 +589,17 @@ describe('MedicalGroupsService', () => {
         invitee,
       );
       expect(rechazado.patientName).toBeNull();
+    });
+
+    it('un perfil profesional cuyo id es el de su persona se nombra sin pasar por person_profiles', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), {
+        ...creator,
+        practitionerProfileId: 'pract-persona',
+      });
+      expect(created.members[0]?.practitionerName).toBe(
+        'Nombre de pract-persona',
+      );
     });
 
     it('sin nombre cargado el miembro viaja con null, no con el id', async () => {
