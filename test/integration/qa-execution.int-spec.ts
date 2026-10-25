@@ -16,7 +16,12 @@ import {
 import { QaExecutionService } from '../../src/modules/qa_execution/services/qa-execution.service';
 import { GuardedHttpClient } from '../../src/modules/qa_execution/infrastructure/guarded-http.client';
 import { QaLabReadService } from '../../src/modules/qa_lab/services/qa-lab-read.service';
-import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
+import {
+  CONCEPTS,
+  SEED,
+  runWithTenant,
+  type AuthenticatedUser,
+} from '../../src/common';
 
 /**
  * Runner de QA en el servidor contra PostgreSQL real (DDL canónico del
@@ -45,6 +50,22 @@ const silent = {
   debug() {},
 } as never;
 const SECRET = 'qa-token-canario-7f3e9a';
+/**
+ * Corre cada método del objeto dentro del tenant de plataforma, como lo deja el
+ * `TenantContextInterceptor` para un usuario QA. Las suites del seed (y las que
+ * siembra esta prueba) son de ese tenant: `qa_lab` ya no resuelve por UUID lo que
+ * no es del tenant activo.
+ */
+function inPlatformTenant<T extends object>(target: T): T {
+  return new Proxy(target, {
+    get(object, property, receiver) {
+      const value = Reflect.get(object, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(SEED.tenantId, () => value.apply(object, args));
+    },
+  });
+}
 
 async function statusOf(promise: Promise<unknown>) {
   try {
@@ -132,21 +153,22 @@ describeIfDb('QA runner en el servidor (integración real)', () => {
     ]) {
       await sql(
         `INSERT INTO qa_lab.test_environments (id, code, name, environment_concept_id, base_url,
-           is_production_safe, state_concept_id, created_at, updated_at, row_version)
-         VALUES ($1, $2, $2, $3, $4, false, $5, now(), now(), 1)`,
+           is_production_safe, state_concept_id, tenant_id, created_at, updated_at, row_version)
+         VALUES ($1, $2, $2, $3, $4, false, $5, $6, now(), now(), 1)`,
         [
           id,
           code,
           CONCEPTS.QA_ENV_DEV,
           `http://127.0.0.1:${port}`,
           CONCEPTS.STATE_ACTIVE,
+          SEED.tenantId,
         ],
       );
     }
     await sql(
-      `INSERT INTO qa_lab.test_suites (id, code, name, version, state_concept_id, created_at, updated_at, row_version)
-       VALUES ($1, 'IT-SUITE', 'Suite IT', 1, $2, now(), now(), 1)`,
-      [ids.suite, CONCEPTS.SUITE_ACTIVE],
+      `INSERT INTO qa_lab.test_suites (id, code, name, version, state_concept_id, tenant_id, created_at, updated_at, row_version)
+       VALUES ($1, 'IT-SUITE', 'Suite IT', 1, $2, $3, now(), now(), 1)`,
+      [ids.suite, CONCEPTS.SUITE_ACTIVE, SEED.tenantId],
     );
     const addCase = async (
       id: string,
@@ -213,8 +235,10 @@ describeIfDb('QA runner en el servidor (integración real)', () => {
       new QaCatalogRepository(),
       silent,
     );
-    service = new QaExecutionService(em, runs, new GuardedHttpClient(), silent);
-    read = new QaLabReadService(orm.em.fork());
+    service = inPlatformTenant(
+      new QaExecutionService(em, runs, new GuardedHttpClient(), silent),
+    );
+    read = inPlatformTenant(new QaLabReadService(orm.em.fork()));
 
     await service.upsertTarget(
       ids.env,

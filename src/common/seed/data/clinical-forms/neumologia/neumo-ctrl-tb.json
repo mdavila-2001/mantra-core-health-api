@@ -2,14 +2,14 @@
   "code": "NEUMO_CTRL_TB",
   "name": "Control de tratamiento de tuberculosis",
   "specialty": { "code": "NEUMOLOGIA", "display": "Neumología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Programa Mundial contra la Tuberculosis — directrices consolidadas",
     "organization": "Organización Mundial de la Salud (OMS)",
     "url": "https://www.who.int/teams/global-tuberculosis-programme",
     "license": "CC BY-NC-SA 3.0 IGO",
     "retrievedAt": "2026-10-02",
-    "note": "Seguimiento del tratamiento: fase, baciloscopías de control, adherencia (tratamiento directamente observado) y reacciones adversas."
+    "note": "Seguimiento del tratamiento: fase, baciloscopías de control, adherencia (tratamiento directamente observado) y reacciones adversas. Ampliación internacional (2026-10-24): el resultado del tratamiento de tuberculosis desde la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735); instantánea en tools/clinical-forms/who-dak/dak-snapshot.json. Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
   },
   "fields": [
     {
@@ -119,6 +119,23 @@
       "dataType": "string",
       "required": true,
       "options": ["Intensiva", "Continuación", "Terminado"]
+    },
+    {
+      "section": "Evaluación: tuberculosis",
+      "code": "tb_resultado_tratamiento",
+      "name": "Resultado del tratamiento de tuberculosis",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Fracaso",
+        "Curado",
+        "Tratamiento completo",
+        "Fallecido",
+        "Pérdida en el seguimiento",
+        "No evaluado"
+      ],
+      "description": "Definiciones de resultado de la OMS para la tuberculosis. Fuente: elemento HIV.D.DE1002 «TB treatment outcome» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "tb_fase", "equals": "Terminado" }
     },
     {
       "section": "Evaluación: tuberculosis",

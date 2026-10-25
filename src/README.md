@@ -12,4 +12,4 @@
 | [`logging/`](./logging/README.md) | Logging estructurado. |
 | [`persistence/`](./persistence/README.md) | Soporte de persistencia de la aplicación. |
 
-`app.controller.ts` expone el saludo raíz y sondas `/health`, `/liveness`, `/readiness`; `app-readiness.service.ts` comprueba dependencias. El saludo raíz no representa un flujo funcional. Las rutas de cada dominio se explican en su README, y el [informe de revisión](../docs/revision-backend-2026-10-04/README.md) distingue lo auditado de lo pendiente.
+`app.controller.ts` expone el saludo raíz y sondas `/health`, `/liveness`, `/readiness`; `app-readiness.service.ts` comprueba dependencias. El saludo raíz no representa un flujo funcional. Las rutas de cada dominio se explican en su README.

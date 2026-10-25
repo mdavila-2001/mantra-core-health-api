@@ -86,6 +86,7 @@ import { bookingUseCases } from './application/bookings/use-cases';
 import {
   AgendaOverlapGuard,
   CatalogAccess,
+  BlockedBookingsCanceller,
   SlotMoveNotifier,
 } from './application/catalog/support';
 import { catalogUseCases } from './application/catalog/use-cases';
@@ -257,6 +258,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
     AgendaOverlapGuard,
+    BlockedBookingsCanceller,
     SlotMoveNotifier,
     ...catalogUseCases,
   ],

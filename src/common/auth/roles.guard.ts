@@ -1,10 +1,7 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import type {
@@ -94,7 +91,10 @@ export class RolesGuard implements CanActivate {
       roleAuthorizesInTenant(request.user, role, tenantId);
 
     if (!required.some(authorizes)) {
-      throw new ForbiddenException('Rol insuficiente para la operación');
+      throw forbiddenWithReason(
+        'Rol insuficiente para la operación',
+        SystemErrorReason.ROLE_INSUFFICIENT,
+      );
     }
     return true;
   }

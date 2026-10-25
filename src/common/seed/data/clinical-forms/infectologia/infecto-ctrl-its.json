@@ -1,0 +1,138 @@
+{
+  "code": "INFECTO_CTRL_ITS",
+  "name": "Infecciones de transmisión sexual: evaluación y control",
+  "specialty": { "code": "INFECTOLOGIA", "display": "Infectología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://github.com/WorldHealthOrganization/smart-hiv",
+    "sourceVersion": "HIV_DAK_2023-Web_Annex_A.Data_dictionary_231117_CLEAN.xlsx",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-24",
+    "note": "Estructura de cuadro agudo del catálogo (NT 022). Factores de riesgo de la DAK de planificación familiar y ITS (FP.DE.0183) y síndrome, pruebas y resultados de la DAK de VIH de la OMS (HIV.D.DE778, DE789, DE802, DE808). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección de transmisión sexual",
+      "code": "its_factores_de_riesgo",
+      "name": "Factores de riesgo de ITS",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Mujer adolescente",
+        "Vive con VIH",
+        "Cambia con frecuencia de pareja sexual",
+        "Varias parejas sexuales",
+        "Trabajo sexual",
+        "Cliente de trabajo sexual",
+        "Separado de su pareja habitual por largos periodos",
+        "Relaciones sin preservativo con una pareja que tiene una ITS",
+        "ITS en el último año",
+        "Perforaciones de la piel con agujas no estériles (tatuajes, piercing, inyecciones)",
+        "Pareja con conductas de riesgo"
+      ],
+      "multiple": true,
+      "description": "Fuente: elemento FP.DE.0183 «STI risk assessment factors» de la WHO Digital Adaptation Kit for family planning and STIs: data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-fp, commit b69bbec). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: infección de transmisión sexual",
+      "code": "its_sindrome",
+      "name": "Síndrome o ITS diagnosticada",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Síndrome de secreción uretral",
+        "Síndrome de flujo vaginal",
+        "Dolor abdominal bajo",
+        "Síndrome de úlcera genital",
+        "Secreción anorrectal",
+        "Muestra enviada a estudio"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento HIV.D.DE778 «Syndrome/STI diagnosed» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: infección de transmisión sexual",
+      "code": "its_pruebas",
+      "name": "ITS estudiadas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Neisseria gonorrhoeae",
+        "Chlamydia trachomatis",
+        "Trichomonas vaginalis",
+        "Sífilis (Treponema pallidum)",
+        "Virus del herpes simple (VHS-1, VHS-2)",
+        "Mycoplasma genitalium",
+        "Mpox",
+        "Hepatitis B",
+        "Hepatitis C"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Fuente: elemento HIV.D.DE789 «STI tested for» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud."
+    },
+    {
+      "section": "Evaluación: infección de transmisión sexual",
+      "code": "its_resultado_sifilis",
+      "name": "Resultado de la prueba de sífilis",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positivo", "Negativo", "No concluyente"],
+      "description": "Fuente: elemento HIV.D.DE802 «Syphilis test result» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": {
+        "field": "its_pruebas",
+        "equals": "Sífilis (Treponema pallidum)"
+      }
+    },
+    {
+      "section": "Evaluación: infección de transmisión sexual",
+      "code": "its_resultado_gonorrea",
+      "name": "Resultado de la prueba de gonorrea",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positivo", "Negativo", "No concluyente"],
+      "description": "Fuente: elemento HIV.D.DE808 «Gonorrhoea test result» de la WHO Digital Adaptation Kit for HIV (2023), Web Annex A: core data dictionary (OMS, CC BY-NC-SA 3.0 IGO; https://github.com/WorldHealthOrganization/smart-hiv, commit b1e7735). Traducción propia del inglés, no oficial. Esta adaptación no fue creada por la Organización Mundial de la Salud (OMS); la OMS no es responsable de su contenido ni de su exactitud.",
+      "showWhen": { "field": "its_pruebas", "equals": "Neisseria gonorrhoeae" }
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

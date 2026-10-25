@@ -72,6 +72,25 @@ export class CareRelationshipsRepository {
     });
   }
 
+  /**
+   * Relación asistencial ACTIVA concreta (paciente, practicante) dentro de un
+   * tenant: evita duplicados sin sondear otras organizaciones. Una relación de
+   * otro tenant no es duplicado de ésta ni debe poder delatarse con un 409.
+   */
+  findActiveInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
   /** Relaciones ACTIVAS de un practicante sobre un paciente (para el PDP). */
   findActiveForPractitionerPatient(
     em: EntityManager,
@@ -94,6 +113,21 @@ export class CareRelationshipsRepository {
     return em.findOne(CareRelationships, {
       patientProfileId,
       practitionerProfileId,
+      statusConceptId: CONCEPTS.STATE_PENDING,
+    });
+  }
+
+  /** Solicitud PENDIENTE concreta (paciente, practicante) dentro de un tenant. */
+  findPendingInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<CareRelationships | null> {
+    return em.findOne(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
       statusConceptId: CONCEPTS.STATE_PENDING,
     });
   }

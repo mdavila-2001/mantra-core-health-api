@@ -138,6 +138,12 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // sello SHA-256 (`insurance-portability-public.controller.ts`, `@Public()`
   // — subtarea 3.3, 2026-09-18).
   ['get', '/public/portability/verify/{manifestHash}'],
+  // Entraron con `@Public()` y sin sumarse acá; `docs:validate` los daba como
+  // `security-defined` (2026-10-24). Firma del alta (`iam-auth.controller.ts`) y
+  // catálogo de la ficha pública (`public-catalog.controller.ts`, líneas 30-45).
+  ['post', '/iam/auth/upload-registration-signature-image'],
+  ['get', '/public/profiles/o/{slug}/services'],
+  ['get', '/public/profiles/f/{slug}/products'],
 ];
 
 function markPublicOperations(document) {
@@ -227,7 +233,21 @@ const ERROR_RESPONSES = {
     'DEPENDENCY_UNAVAILABLE',
     'Una dependencia obligatoria no está disponible.',
   ],
+  // `TIMEOUT` es un 504 verdadero (SQLSTATE 57014 y plazos de dependencia): el
+  // trabajo pudo ejecutarse y sólo perderse la respuesta, así que el cliente
+  // reintenta con la misma clave de idempotencia. No se mezcla con el 503.
+  504: [
+    'GatewayTimeout',
+    'TIMEOUT',
+    'La operación excedió su plazo; reintente con la misma clave de idempotencia.',
+  ],
 };
+
+/**
+ * Rutas que no pueden devolver 504: la liveness no toca ninguna dependencia y
+ * la readiness convierte el plazo agotado de cada sonda en su 503 catalogado.
+ */
+const NO_TIMEOUT_PATHS = new Set(['/', '/health', '/liveness', '/readiness']);
 
 function errorResponse(code, errorCode, description) {
   return {
@@ -254,7 +274,7 @@ function errorResponse(code, errorCode, description) {
  * y descripción mínima de la operación. Se usan `$ref` para que el contrato no
  * replique 867 veces el mismo cuerpo y toda evolución del envelope sea atómica.
  */
-function enrichOperations(document) {
+function enrichOperations(document, errorCodes) {
   document.components ??= {};
   document.components.schemas ??= {};
   document.components.responses ??= {};
@@ -263,23 +283,18 @@ function enrichOperations(document) {
     additionalProperties: false,
     required: ['code', 'message', 'timestamp', 'path'],
     properties: {
-      code: {
-        type: 'string',
-        enum: [
-          'VALIDATION_FAILED',
-          'UNAUTHENTICATED',
-          'FORBIDDEN',
-          'NOT_FOUND',
-          'CONFLICT',
-          'PRECONDITION_FAILED',
-          'CONCURRENCY_CONFLICT',
-          'PAYLOAD_TOO_LARGE',
-          'RATE_LIMITED',
-          'DEPENDENCY_UNAVAILABLE',
-          'INTERNAL',
-        ],
-      },
+      // Derivado del catálogo `ErrorCode` (dist/src/common/errors): una lista
+      // escrita a mano dejó fuera `TIMEOUT`, `CIRCUIT_OPEN`, `CONCURRENCY_LIMIT`
+      // e `IDENTITY_VERIFICATION_REQUIRED`, que el filtro global sí emite.
+      code: { type: 'string', enum: errorCodes },
       message: { type: 'string' },
+      reason: {
+        type: 'string',
+        description:
+          'Sub-código de negocio o de sistema estable dentro de `code` ' +
+          '(p. ej. `ROLE_INSUFFICIENT`, `INVALID_CURSOR`). Ramificar sobre ' +
+          'él, no sobre `message`.',
+      },
       correlationId: { type: 'string' },
       details: {
         description:
@@ -319,6 +334,7 @@ function enrichOperations(document) {
       if (path.includes('{')) responseCodes.add('404');
       if (operation.requestBody) responseCodes.add('413');
       if (path === '/readiness') responseCodes.add('503');
+      if (!NO_TIMEOUT_PATHS.has(path)) responseCodes.add('504');
       if (['post', 'put', 'patch', 'delete'].includes(method)) {
         responseCodes.add('409').add('422');
       }
@@ -336,6 +352,8 @@ function enrichOperations(document) {
 
 async function main() {
   const { AppModule } = await import('../../dist/src/app.module.js');
+  const { ErrorCode } =
+    await import('../../dist/src/common/errors/error-codes.js');
 
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn'],
@@ -392,7 +410,7 @@ async function main() {
   }
   const publicCount = markPublicOperations(document);
   const tagCount = populateGlobalTags(document);
-  const enrichment = enrichOperations(document);
+  const enrichment = enrichOperations(document, Object.values(ErrorCode));
   console.log(
     `  ${publicCount}/${KNOWN_PUBLIC_OPERATIONS.length} rutas públicas marcadas, ` +
       `${tagCount} tags globales, ${enrichment.descriptionsAdded} descripciones y ` +

@@ -123,6 +123,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccreditationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -153,7 +154,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Acreditación no encontrada | Excepción explícita en src/modules/practice/services/practice-accreditations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La acreditación no está pendiente de verificación | Excepción explícita en src/modules/practice/services/practice-accreditations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -263,6 +263,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MovementResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MovementResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MovementResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MovementResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MovementResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -293,7 +294,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Insumo de inventario no encontrado | Excepción explícita en src/modules/practice/services/practice-inventory.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El insumo no está activo | Excepción explícita en src/modules/practice/services/practice-inventory.service.ts |
 | 422 | `PRECONDITION_FAILED` | Stock insuficiente para la salida | Excepción explícita en src/modules/practice/services/practice-inventory.service.ts |
@@ -325,7 +325,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Listar las prácticas activas del tenant. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.
 
 Contexto declarado en el controlador: Prácticas activas del tenant. Abierta a los actores clínicos y de programación, no sólo a `SECURITY_ADMIN`: es el primer paso para resolver el quirófano que exige programar una intervención, y sin él ese uuid había que averiguarlo fuera del sistema. Sólo devuelve identificación y estado, no configuración.
 
@@ -376,6 +376,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PracticeSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PracticeSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -510,6 +511,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PracticeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PracticeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PracticeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PracticeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PracticeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -651,6 +653,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccreditationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -681,7 +684,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-accreditations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sitio no pertenece a la práctica | Excepción explícita en src/modules/practice/services/practice-accreditations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -792,6 +794,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HealthcareServiceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HealthcareServiceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HealthcareServiceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HealthcareServiceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HealthcareServiceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -822,7 +825,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La práctica no está activa | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
 | 422 | `PRECONDITION_FAILED` | El sitio no pertenece a la práctica | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
@@ -935,6 +937,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<InventoryItemResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InventoryItemResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InventoryItemResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InventoryItemResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InventoryItemResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1000,7 +1003,7 @@ Ejemplo de error normalizado:
 
 Consola de organización médica: estructura, plantilla y legajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: El árbol completo de una organización médica — CARRIL 13. Sedes, áreas, infraestructura, servicios, plantilla, documentación legal e inventario en una sola lectura. Existe porque el módulo tenía once escrituras y tres lecturas: se podían dar de alta quirófanos, áreas, servicios y personal, y ninguna operación los volvía a mencionar. Los roles son los mismos que ya admite `GET /practices`: quien puede enumerar las prácticas del tenant puede ver la estructura de la suya. El aislamiento real lo hace el servicio, que responde 404 ante una práctica de otra organización.
+Contexto declarado en el controlador: El árbol completo de una organización médica — CARRIL 13. Sedes, áreas, infraestructura, servicios, plantilla, documentación legal e inventario en una sola lectura. Existe porque el módulo tenía once escrituras y tres lecturas: se podían dar de alta quirófanos, áreas, servicios y personal, y ninguna operación los volvía a mencionar. Los roles son los mismos que ya admite `GET /practices`: quien puede enumerar las prácticas del tenant puede ver la estructura de la suya. El aislamiento real lo hace el servicio, que responde 404 ante una práctica de otra organización o, para un `PRACTITIONER`, sin vinculación ACTIVE.
 
 ### Descripción del sistema
 
@@ -1053,6 +1056,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalOrganizationConsoleDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalOrganizationConsoleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1474,6 +1478,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPracticeRoleAssignmentsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1636,6 +1641,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1668,10 +1674,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La práctica no está activa | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 422 | `PRECONDITION_FAILED` | El sitio no pertenece a la práctica | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 422 | `PRECONDITION_FAILED` | La unidad no pertenece a la práctica | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 422 | `PRECONDITION_FAILED` | El servicio no pertenece a la práctica | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1777,6 +1784,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1915,6 +1923,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SettingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SettingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SettingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SettingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SettingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1945,7 +1954,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-settings.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2030,6 +2038,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SiteSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SiteSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2172,6 +2181,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SiteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2206,7 +2216,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-sites.service.ts |
 | 409 | `CONFLICT` | Ya existe un sitio con ese código en la práctica | Excepción explícita en src/modules/practice/services/practice-sites.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La práctica no está activa | Excepción explícita en src/modules/practice/services/practice-sites.service.ts |
@@ -2295,6 +2304,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2403,6 +2413,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PractitionerSitesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PractitionerSitesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PractitionerSitesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerSitesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSitesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2535,6 +2546,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyRoleAssignmentResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2687,6 +2699,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2820,6 +2833,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -2950,6 +2964,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3098,6 +3113,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3215,7 +3231,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `contactPhone` | Sí | `object` | longitud máxima 40; patrón runtime `SITE_CONTACT_PHONE_PATTERN`; admite null | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
+| `contactPhone` | Sí | `string` | longitud máxima 40; patrón runtime `SITE_CONTACT_PHONE_PATTERN`; admite null | Sin descripción específica en el contrato OpenAPI. | `+591 72123456` |
 
 ### Payload completo de ejemplo
 
@@ -3246,6 +3262,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3392,6 +3409,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3424,7 +3442,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3524,6 +3541,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3556,7 +3574,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3656,6 +3673,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3688,7 +3706,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3797,6 +3814,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SupportAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SupportAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SupportAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SupportAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3827,7 +3845,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Rol de profesional no encontrado | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El rol de profesional no está activo | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3927,6 +3944,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3959,7 +3977,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Vinculación profesional-organización no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La vinculación no admite esa transición desde su estado actual | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -4045,6 +4062,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CareSpaceSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareSpaceSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -4184,6 +4202,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareSpaceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4218,7 +4237,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
 | 409 | `CONFLICT` | Ya existe un espacio con ese código en el sitio | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sitio no está activo | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
@@ -4333,6 +4351,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClinicalUnitResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClinicalUnitResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClinicalUnitResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClinicalUnitResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClinicalUnitResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4365,7 +4384,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
 | 409 | `CONFLICT` | Ya existe una unidad con ese código en el sitio | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sitio no está activo | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |

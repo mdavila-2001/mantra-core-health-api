@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical` (parte 1/2).
- * 180 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 182 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
@@ -12,6 +12,7 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['allergy_intolerances', 'created_by_user_id', 'iam', 'users', 'id'],
   ['allergy_intolerances', 'criticality_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['allergy_intolerances', 'custodian_tenant_id', 'directory', 'tenants', 'id'],
+  ['allergy_intolerances', 'encounter_id', 'clinical', 'encounters', 'id'],
   ['allergy_intolerances', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
   ['allergy_intolerances', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['allergy_intolerances', 'substance_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -117,6 +118,7 @@ export const clinicalForeignKeys1: readonly ForeignKeyTuple[] = [
   ['medication_requests', 'created_by_user_id', 'iam', 'users', 'id'],
   ['medication_requests', 'custodian_tenant_id', 'directory', 'tenants', 'id'],
   ['medication_requests', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['medication_requests', 'form_instance_id', 'forms', 'form_instances', 'id'],
   ['medication_requests', 'indication_condition_id', 'clinical', 'conditions', 'id'],
   ['medication_requests', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['medication_requests', 'medication_concept_id', 'terminology', 'catalog_concepts', 'id'],

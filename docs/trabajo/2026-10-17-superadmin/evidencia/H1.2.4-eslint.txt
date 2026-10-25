@@ -1,2 +1,0 @@
-$ npx eslint src/modules/ops_console src/observability test/integration/ops-traffic.int-spec.ts
-exit=0

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 58 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 59 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda`
 - **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`, `SchedulingServiceOfferingsController`, `TenantAgendaController`
@@ -65,10 +65,11 @@ Referencia exhaustiva de 58 operación(es) del módulo `scheduling`, derivada de
 52. [DELETE /scheduling/templates/{id}](#52-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
 53. [PATCH /scheduling/templates/{id}](#53-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
 54. [POST /scheduling/templates/{id}/generate-slots](#54-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-55. [POST /scheduling/templates/{id}/reactivate](#55-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
-56. [GET /scheduling/waitlist](#56-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
-57. [POST /scheduling/waitlist](#57-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
-58. [GET /tenants/{tenantId}/agenda](#58-get-tenants-tenantid-agenda) — La agenda de la organización
+55. [GET /scheduling/templates/{id}/live-bookings](#55-get-scheduling-templates-id-live-bookings) — Listar las citas vivas de una plantilla antes de retirarla
+56. [POST /scheduling/templates/{id}/reactivate](#56-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
+57. [GET /scheduling/waitlist](#57-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
+58. [POST /scheduling/waitlist](#58-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+59. [GET /tenants/{tenantId}/agenda](#59-get-tenants-tenantid-agenda) — La agenda de la organización
 
 ---
 
@@ -134,6 +135,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `ActivityTypeListDto` | No |
 | 429 | Consulta completada correctamente. | `ActivityTypeListDto` | No |
 | 500 | Consulta completada correctamente. | `ActivityTypeListDto` | No |
+| 504 | Consulta completada correctamente. | `ActivityTypeListDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivityTypeListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -285,6 +287,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DirectAppointmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DirectAppointmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DirectAppointmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DirectAppointmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DirectAppointmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -468,6 +471,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WalkInAppointmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WalkInAppointmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -636,6 +640,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BookingPolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingPolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingPolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingPolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingPolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -753,6 +758,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchBookingsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchBookingsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchBookingsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchBookingsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchBookingsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -902,6 +908,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo se lista desde su propia cuenta. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil de paciente con citas que listar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Indique al menos patientProfileId o resourceId para listar citas | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/search-bookings.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -987,6 +995,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<BookingItemDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<BookingItemDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<BookingItemDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<BookingItemDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingItemDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1227,6 +1236,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1368,6 +1378,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CancelBookingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1486,6 +1497,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<CheckInResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CheckInResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CheckInResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CheckInResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CheckInResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1599,6 +1611,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1735,6 +1748,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DelayNoticeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1854,6 +1868,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PaymentStateDto | null>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PaymentStateDto | null>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PaymentStateDto | null>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PaymentStateDto | null>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentStateDto | null`. Ejemplo completo derivado de ese DTO:
 
@@ -1991,6 +2006,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentStateDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2131,6 +2147,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProposeScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProposeScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProposeScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProposeScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProposeScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2269,6 +2286,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CancelBookingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CancelBookingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2409,6 +2427,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ScheduleRemindersResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ScheduleRemindersResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ScheduleRemindersResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ScheduleRemindersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ScheduleRemindersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2539,6 +2558,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2677,6 +2697,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RescheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RescheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RescheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RescheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RescheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2799,6 +2820,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingDecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingDecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2916,6 +2938,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ConfirmationRuleResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ConfirmationRuleResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ConfirmationRuleResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ConfirmationRuleResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmationRuleResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -3059,6 +3082,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmationRuleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3181,6 +3205,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmationRuleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3303,6 +3328,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmationRuleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmationRuleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3444,6 +3470,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvaluateBookingResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluateBookingResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluateBookingResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluateBookingResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluateBookingResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3567,6 +3594,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `ExceptionTypeListDto` | No |
 | 429 | Consulta completada correctamente. | `ExceptionTypeListDto` | No |
 | 500 | Consulta completada correctamente. | `ExceptionTypeListDto` | No |
+| 504 | Consulta completada correctamente. | `ExceptionTypeListDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExceptionTypeListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3688,6 +3716,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -3805,6 +3834,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UpdateExceptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UpdateExceptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UpdateExceptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UpdateExceptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UpdateExceptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3951,6 +3981,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4096,6 +4127,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BookingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BookingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4226,6 +4258,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkerBatchResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4345,6 +4378,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkerBatchResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4468,6 +4502,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WorkerBatchResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WorkerBatchResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4577,6 +4612,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<WaitlistCandidateSlotsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<WaitlistCandidateSlotsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<WaitlistCandidateSlotsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<WaitlistCandidateSlotsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WaitlistCandidateSlotsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4687,6 +4723,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListResourcesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListResourcesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4861,6 +4898,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4921,7 +4959,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Bloquea los cupos nombrados y crea la excepción que cubre su rango. Rechaza si alguno tiene cita viva.
+Bloquea los cupos nombrados y crea la excepción que cubre su rango. Si alguno tiene cita viva responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION); con cancelAffectedBookings=true las cancela y avisa a cada paciente.
 
 Contexto declarado en el controlador: Cierra cupos sueltos y deja el bloqueo que impide que vuelvan. Lo que el pedido pone entre paréntesis es su razón de ser: cerrar un cupo **sin** dejar la excepción sirve hasta que alguien regenera, y ahí el rato que el profesional había cerrado se ofrece otra vez. Un cupo con cita viva NO se cierra por acá: se rechaza entero y se nombran cuáles. Cancelar el turno de alguien exige motivo y avisa a esa persona; hacerlo de arrastre sería decidir por quien está esperando.
 
@@ -4967,6 +5005,7 @@ Content-Type: application/json
 | `exceptionType` | Sí | `string` | valores: `ABSENCE`, `HOLIDAY`, `VACATION`, `CONFERENCE`, `ERRAND`, `EXTRA`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `ABSENCE` |
 | `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 | `slotIds` | Sí | `array<string>` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `cancelAffectedBookings` | No | `boolean` | Sin restricción adicional declarada | true: cancela las citas de esos cupos y avisa a cada paciente. Ausente o false: si hay citas, responde 409 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no cierra. | `false` |
 
 ### Payload completo de ejemplo
 
@@ -4983,7 +5022,8 @@ Content-Type: application/json
   "reason": "Texto descriptivo de ejemplo",
   "slotIds": [
     "00000000-0000-4000-8000-000000000001"
-  ]
+  ],
+  "cancelAffectedBookings": false
 }
 ```
 
@@ -5001,12 +5041,14 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CloseSlotsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CloseSlotsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CloseSlotsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CloseSlotsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CloseSlotsResponseDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
   "closedSlots": 1,
+  "cancelledBookings": 1,
   "exceptionId": "00000000-0000-4000-8000-000000000001",
   "from": "2026-07-31T12:00:00.000Z",
   "to": "2026-07-31T12:00:00.000Z"
@@ -5018,6 +5060,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `closedSlots` | Sí | `number` | Sin restricción adicional declarada | Cuántos cupos quedaron cerrados. | `1` |
+| `cancelledBookings` | Sí | `number` | Sin restricción adicional declarada | Citas canceladas (o rechazadas) al cerrar, con aviso al paciente. | `1` |
 | `exceptionId` | Sí | `string` | formato `uuid` | La excepción que se creó para que regenerar no los devuelva. Es la parte que el pedido pone entre paréntesis y que es su razón de ser: sin ella, cerrar un cupo dura hasta la próxima generación. | `00000000-0000-4000-8000-000000000001` |
 | `from` | Sí | `string` | formato `date-time` | Desde cuándo cubre la excepción. | `2026-07-31T12:00:00.000Z` |
 | `to` | Sí | `string` | formato `date-time` | Hasta cuándo. | `2026-07-31T12:00:00.000Z` |
@@ -5032,11 +5075,17 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
 | 404 | `NOT_FOUND` | Ninguno de esos cupos es de esta agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
-| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: cancele cada cita antes de cerrarlos | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 409 | `CONFLICT` | Esos ratos tienen pacientes citados: confirme para cancelar cada cita y avisar a cada persona | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/close-slots.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5142,6 +5191,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DelayNoticeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DelayNoticeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5264,6 +5314,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<AvailabilityExceptionListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AvailabilityExceptionListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AvailabilityExceptionListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AvailabilityExceptionListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AvailabilityExceptionListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5339,7 +5390,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Bloquea los slots libres que se solapan; las citas ya reservadas no se tocan.
+Bloquea los slots libres que se solapan. Si el rato tiene citas responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea; con cancelAffectedBookings=true las cancela, avisa a cada paciente y bloquea.
 
 
 ### Descripción del sistema
@@ -5385,6 +5436,7 @@ Content-Type: application/json
 | `endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `reason` | No | `string` | longitud máxima 500 | Texto libre del motivo. OBLIGATORIO cuando el tipo es OTHER; lo lee el profesional | `Texto descriptivo de ejemplo` |
 | `isAvailable` | No | `boolean` | Sin restricción adicional declarada | true cuando la excepción **añade** disponibilidad extraordinaria | `false` |
+| `cancelAffectedBookings` | No | `boolean` | Sin restricción adicional declarada | true: cancela las citas del rato y avisa a cada paciente. Ausente o false: si hay citas, responde 422 con la lista (failureCode BOOKINGS_REQUIRE_CONFIRMATION) y no bloquea. | `false` |
 
 ### Payload completo de ejemplo
 
@@ -5401,7 +5453,8 @@ Content-Type: application/json
   "startAt": "2026-07-31T12:00:00.000Z",
   "endAt": "2026-07-31T12:00:00.000Z",
   "reason": "Texto descriptivo de ejemplo",
-  "isAvailable": false
+  "isAvailable": false,
+  "cancelAffectedBookings": false
 }
 ```
 
@@ -5419,6 +5472,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExceptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExceptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5451,11 +5505,19 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Eligió «Otro» como motivo: escriba cuál es | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La excepción debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
-| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${               first.resourceName ? ` en «${first.resourceName}»` : ''             }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Tiene una cita confirmada en ese rato${           first.resourceName ? ` en «${first.resourceName}»` : ''         }. Reprográmela primero o elija otro horario. | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/create-exception.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Ese rato tiene ${n} ${n === 1 ? 'cita' : 'citas'} con paciente. Confirme para cancelarlas y avisar a cada persona. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5565,6 +5627,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ShiftSlotsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ShiftSlotsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ShiftSlotsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ShiftSlotsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ShiftSlotsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5685,6 +5748,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ResourceAgendaResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ResourceAgendaResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ResourceAgendaResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ResourceAgendaResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceAgendaResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5829,6 +5893,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<TemplateListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TemplateListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TemplateListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TemplateListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6023,6 +6088,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6144,6 +6210,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListWaitlistResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6275,6 +6342,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceAvailabilityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6398,6 +6466,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceOfferingListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6568,6 +6637,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceOfferingDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6736,6 +6806,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceOfferingDto`. Ejemplo completo derivado de ese DTO:
 
@@ -6893,6 +6964,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceHoldResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7023,6 +7095,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSlotsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSlotsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7172,6 +7245,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HoldResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HoldResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HoldResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HoldResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HoldResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7237,7 +7311,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds.
+La plantilla queda en TPL_RETIRED y deja de publicarse; los cupos con citas se conservan. Por omisión las citas confirmadas o presentadas no frenan el retiro: siguen en su cupo y se informan en liveBookings y liveBookingIds. Con ?affectedBookings=cancel se cancelan con el motivo «cambio de horario» y se avisa a cada paciente (cancelledBookings).
 
 Contexto declarado en el controlador: Retirar un horario publicado (TAREA-10, punto 6). `DELETE` y no `PATCH` porque para quien lo usa **es** el botón de dar de baja el horario; lo que cambia es qué significa dar de baja acá, y eso lo dice el cuerpo de la respuesta. No es `@HttpCode(NO_CONTENT)` como el borrado de una excepción: éste devuelve cuánto soltó y cuánto conservó. Con citas comprometidas **también retira** (M4 · H1.S2.M2): conserva sus cupos, no toca ninguna cita, y devuelve cuántas siguen vivas y sus ids.
 
@@ -7250,6 +7324,7 @@ NestJS resuelve `DELETE /scheduling/templates/{id}` en `SchedulingController_ret
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affectedBookings` | query | No | `string` | valores: `cancel`, `keep` | cancel: cancela las citas vivas del horario y avisa a cada paciente. keep o ausente: las conserva, como siempre. | `cancel` |
 
 ### Payload mínimo aceptable
 
@@ -7276,7 +7351,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-DELETE /scheduling/templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+DELETE /scheduling/templates/00000000-0000-4000-8000-000000000001?affectedBookings=cancel HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -7294,6 +7369,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RetireTemplateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetireTemplateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetireTemplateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetireTemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetireTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7307,7 +7383,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "liveBookingIds": [
     "valor-ejemplo"
   ],
-  "truncated": true
+  "truncated": true,
+  "cancelledBookings": 1
 }
 ```
 
@@ -7322,6 +7399,7 @@ Campos de la respuesta:
 | `liveBookings` | Sí | `number` | Sin restricción adicional declarada | Citas confirmadas o presentadas que siguen vivas en cupos conservados | `1` |
 | `liveBookingIds` | Sí | `array<string>` | formato `uuid` | Ids (nunca nombres) de esas citas, hasta un tope. | `["valor-ejemplo"]` |
 | `truncated` | Sí | `boolean` | Sin restricción adicional declarada | `true` si hay más citas vivas que las listadas en `liveBookingIds`. | `true` |
+| `cancelledBookings` | Sí | `number` | Sin restricción adicional declarada | Citas canceladas por este retiro, con aviso al paciente. Sólo es mayor que 0 cuando se pidió `?affectedBookings=cancel` (24/10/2026). | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -7333,8 +7411,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/retire-template.use-case.ts |
 | 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/retire-template.use-case.ts |
+| 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 409 | `CONFLICT` | La cita ya está cancelada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Hay un paciente ya recibido en ese rato. Atiéndalo o cancele su cita desde la agenda antes de bloquear. | Excepción explícita en src/modules/scheduling/application/catalog/support/blocked-bookings-canceller.ts |
+| 422 | `PRECONDITION_FAILED` | Puede cancelar hasta ${Math.round(windowMinutes / 60)} horas antes del turno. Si ya no puede asistir, comuníquese con el consultorio. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/cancel-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7459,6 +7543,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7595,6 +7680,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GenerateSlotsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GenerateSlotsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GenerateSlotsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GenerateSlotsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GenerateSlotsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7646,7 +7732,151 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /scheduling/templates/{id}/reactivate
+## 55. GET /scheduling/templates/{id}/live-bookings
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Listar las citas vivas de una plantilla antes de retirarla
+- **Operation ID:** `SchedulingController_listTemplateLiveBookings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingController.listTemplateLiveBookings](../../src/modules/scheduling/presentation/controllers/scheduling.controller.ts)
+
+### Descripción de negocio
+
+Las citas confirmadas o pendientes que un retiro con affectedBookings=cancel cancelaría, y las de pacientes ya recibidos, que lo frenan. Sólo para quien administra la agenda.
+
+Contexto declarado en el controlador: La vista previa del retiro: a quién alcanza, con nombre y hora, para que el profesional elija entre cancelar y avisar o conservar. Sólo para quien administra la agenda (trae nombres de pacientes).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/templates/{id}/live-bookings` en `SchedulingController_listTemplateLiveBookings`. El controlador delega en `SchedulingCatalogService.listTemplateLiveBookings`. No recibe body. El tipo de retorno estático es `Promise<TemplateLiveBookingsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/templates/00000000-0000-4000-8000-000000000001/live-bookings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SCHEDULING_ADMIN`, `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/templates/00000000-0000-4000-8000-000000000001/live-bookings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TemplateLiveBookingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateLiveBookingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "templateId": "00000000-0000-4000-8000-000000000001",
+  "total": 1,
+  "bookings": [
+    {
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "patientName": "Nombre de ejemplo",
+      "pending": true
+    }
+  ],
+  "present": [
+    {
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z",
+      "patientName": "Nombre de ejemplo",
+      "pending": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `templateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Citas vivas en total: las cancelables y las de pacientes ya recibidos. | `1` |
+| `bookings` | Sí | `array<AffectedBookingDto>` | Sin restricción adicional declarada | Las que un retiro con `affectedBookings=cancel` cancelaría (o rechazaría). | `[{"bookingId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","patientName":"Nombre de ejemplo","pending":true}]` |
+| `bookings[].bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `bookings[].startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bookings[].endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bookings[].patientName` | Sí | `string` | admite null | El nombre del paciente; `null` si no se pudo resolver. | `Nombre de ejemplo` |
+| `bookings[].pending` | Sí | `boolean` | Sin restricción adicional declarada | Solicitud sin responder: se rechaza en vez de cancelarse. | `true` |
+| `present` | Sí | `array<AffectedBookingDto>` | Sin restricción adicional declarada | Pacientes ya recibidos: frenan el retiro con cancelación (422). | `[{"bookingId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","patientName":"Nombre de ejemplo","pending":true}]` |
+| `present[].bookingId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `present[].startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `present[].endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `present[].patientName` | Sí | `string` | admite null | El nombre del paciente; `null` si no se pudo resolver. | `Nombre de ejemplo` |
+| `present[].pending` | Sí | `boolean` | Sin restricción adicional declarada | Solicitud sin responder: se rechaza en vez de cancelarse. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SCHEDULING_ADMIN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 403 | `FORBIDDEN` | Esta agenda es de otra organización: no puede ver ni cancelar sus citas. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-template-live-bookings.use-case.ts |
+| 404 | `NOT_FOUND` | Recurso de la plantilla no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-template-live-bookings.use-case.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/templates/{id}/live-bookings"
+}
+```
+
+---
+
+## 56. POST /scheduling/templates/{id}/reactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7714,6 +7944,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ReactivateTemplateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReactivateTemplateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReactivateTemplateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReactivateTemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReactivateTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7762,7 +7993,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. GET /scheduling/waitlist
+## 57. GET /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7828,6 +8059,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListWaitlistResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListWaitlistResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -7893,7 +8125,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. POST /scheduling/waitlist
+## 58. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7981,6 +8213,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WaitlistEntryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WaitlistEntryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WaitlistEntryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WaitlistEntryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WaitlistEntryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -8028,7 +8261,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. GET /tenants/{tenantId}/agenda
+## 59. GET /tenants/{tenantId}/agenda
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-tenant-agenda`
@@ -8097,6 +8330,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<TenantAgendaResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TenantAgendaResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TenantAgendaResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TenantAgendaResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantAgendaResponseDto`. Ejemplo completo derivado de ese DTO:
 

@@ -12,10 +12,9 @@ import { EncountersRepository } from '../repositories';
  * registrarse contra un encuentro ya sellado y el `content_hash` quedaba
  * describiendo un contenido que ya no era el real, sin que nada lo detectara.
  *
- * Decisión de producto (ver `docs/progress/DECISIONS.md`, D-BR14-01): opción
- * (a) del prompt BR-14 — rechazar con 422, no crear un addendum. Un addendum
- * append-only pediría una tabla nueva (prohibido: sin DDL en la API) y una
- * decisión de producto que nadie tomó todavía.
+ * Decisión D-BR14-01: opción (a) del prompt BR-14 — rechazar con 422, no
+ * crear un addendum. Un addendum append-only pediría una tabla nueva (sin DDL
+ * en la API) y una regla de producto que no existe.
  *
  * Vive como archivo y clase **nuevos**, independientes de
  * `encounter-seal.service.ts` (que sólo calcula el hash al cerrar) para no

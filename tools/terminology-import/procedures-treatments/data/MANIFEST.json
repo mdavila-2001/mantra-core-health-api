@@ -1,0 +1,279 @@
+{
+  "generatedFrom": "build.mjs",
+  "files": [
+    {
+      "path": "out/procedures.part001.ndjson.gz",
+      "bytes": 4670647,
+      "uncompressedBytes": 47328341,
+      "sha256Uncompressed": "be43d8ee9f14cadfba71587eacdf50e7174f97c74a2880f1f1a064002c751112",
+      "rows": 71909
+    },
+    {
+      "path": "out/procedures.part002.ndjson.gz",
+      "bytes": 849028,
+      "uncompressedBytes": 8620277,
+      "sha256Uncompressed": "5e4a5335a0c00e612232260d4ee12e95fdc6413b37b852286ac22c9d1fa0753b",
+      "rows": 13095
+    },
+    {
+      "path": "out/assertions.part001.ndjson.gz",
+      "bytes": 4924880,
+      "uncompressedBytes": 47528270,
+      "sha256Uncompressed": "b6e7998f9667f0882dd90f301b246f3c835948ebb3799e81ae2bbb36662c7aa7",
+      "rows": 37264
+    },
+    {
+      "path": "out/assertions.part002.ndjson.gz",
+      "bytes": 4905272,
+      "uncompressedBytes": 47527743,
+      "sha256Uncompressed": "06eb8e7fd305a127de5ebcb7f4b5d0f5a120575f53c359303ac532d9738b6c49",
+      "rows": 37294
+    },
+    {
+      "path": "out/assertions.part003.ndjson.gz",
+      "bytes": 4950096,
+      "uncompressedBytes": 47527616,
+      "sha256Uncompressed": "66069e21f9ba2a5aa1b91c5ca568f89b47ef3624d170b52445d04035d142ed64",
+      "rows": 37190
+    },
+    {
+      "path": "out/assertions.part004.ndjson.gz",
+      "bytes": 4951944,
+      "uncompressedBytes": 47527298,
+      "sha256Uncompressed": "cc0ff1485e46aa8ff97f27827c3ae87f563f3c54d749ef47a76468b94ad68b6a",
+      "rows": 37234
+    },
+    {
+      "path": "out/assertions.part005.ndjson.gz",
+      "bytes": 4932624,
+      "uncompressedBytes": 47527463,
+      "sha256Uncompressed": "e71301dfa3a710f26bd3a2926c38fcb546021fce6c7cda092619cc412342da46",
+      "rows": 37233
+    },
+    {
+      "path": "out/assertions.part006.ndjson.gz",
+      "bytes": 4916573,
+      "uncompressedBytes": 47526903,
+      "sha256Uncompressed": "89fc7a66a09680b2cff98d4144d2d715b0c544bd67ff8a53a57e0f508ec338e6",
+      "rows": 37245
+    },
+    {
+      "path": "out/assertions.part007.ndjson.gz",
+      "bytes": 4958443,
+      "uncompressedBytes": 47527148,
+      "sha256Uncompressed": "9500cd7e30f73b8acfe3cce592cfe91a3dae10f05bb2d4dee5460e9c3ef7af27",
+      "rows": 37154
+    },
+    {
+      "path": "out/assertions.part008.ndjson.gz",
+      "bytes": 4910116,
+      "uncompressedBytes": 47528076,
+      "sha256Uncompressed": "4091d9749817afad4526c12d92e6b502f35fd65e67f1307e56f804399823028e",
+      "rows": 37237
+    },
+    {
+      "path": "out/assertions.part009.ndjson.gz",
+      "bytes": 4939128,
+      "uncompressedBytes": 47527865,
+      "sha256Uncompressed": "f5e5696864673df89f8395203137e8ab0e03bb874db0612d3a1cf24b4046b909",
+      "rows": 37223
+    },
+    {
+      "path": "out/assertions.part010.ndjson.gz",
+      "bytes": 4903440,
+      "uncompressedBytes": 47528755,
+      "sha256Uncompressed": "eeb61a71e5fb2366c51eb4a72a992f6e18503633f61ff8e55d0828cd45c9614d",
+      "rows": 37284
+    },
+    {
+      "path": "out/assertions.part011.ndjson.gz",
+      "bytes": 4935334,
+      "uncompressedBytes": 47528131,
+      "sha256Uncompressed": "da693bcf051cd60aad075d24f7f95d93426b4a353f9733035702b21ce758bb1e",
+      "rows": 37239
+    },
+    {
+      "path": "out/assertions.part012.ndjson.gz",
+      "bytes": 2174886,
+      "uncompressedBytes": 21034825,
+      "sha256Uncompressed": "654d42cee9c7af04555d133996f226809e626f997e2c5a2eba5f112880c4d09e",
+      "rows": 16450
+    },
+    {
+      "path": "out/maps.ndjson.gz",
+      "bytes": 54349,
+      "uncompressedBytes": 668842,
+      "sha256Uncompressed": "bcf1ad4557b76863d8195890ff4fd27cfbcdd4c0ea2c3f65def1c873c65a342b",
+      "rows": 1170
+    },
+    {
+      "path": "out/coverage.json.gz",
+      "bytes": 4345,
+      "uncompressedBytes": 16240,
+      "sha256Uncompressed": "1505d614c7f0de24395b7875216650e11d6452f8aa5d378f91cf43705006ad5b"
+    },
+    {
+      "path": "out/load-plan.dry-run.json.gz",
+      "bytes": 1170,
+      "uncompressedBytes": 3170,
+      "sha256Uncompressed": "2137005ff156d5080b102eb1801b6460a876f3473a806f7763f9e6e016b909ff"
+    },
+    {
+      "path": "raw/ctgov/studies-mesh.part001.ndjson.gz",
+      "bytes": 5401502,
+      "uncompressedBytes": 47185878,
+      "sha256Uncompressed": "53aea6446df91c3dd71d6fbfc81e57ff1e9716f6f2f7e6aa77777d3c675f2a63",
+      "rows": 397530,
+      "source": "ctgov"
+    },
+    {
+      "path": "raw/ctgov/studies-mesh.part002.ndjson.gz",
+      "bytes": 908727,
+      "uncompressedBytes": 7926398,
+      "sha256Uncompressed": "83bd4b99c44641877610dccd2fc62f06851e4a2144a24695c6ed37e5804b8018",
+      "rows": 66723,
+      "source": "ctgov"
+    },
+    {
+      "path": "raw/icd10pcs/icd10pcs-tables-index-2027.zip.gz",
+      "bytes": 7829630,
+      "uncompressedBytes": 8078885,
+      "sha256Uncompressed": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84",
+      "source": "icd10pcs",
+      "sha256Original": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84"
+    },
+    {
+      "path": "raw/icd10pcs/icd10pcs-order-2027.zip.gz",
+      "bytes": 1314702,
+      "uncompressedBytes": 1322280,
+      "sha256Uncompressed": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439",
+      "source": "icd10pcs",
+      "sha256Original": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439"
+    },
+    {
+      "path": "raw/maxo/maxo.obo.gz",
+      "bytes": 806471,
+      "uncompressedBytes": 4180499,
+      "sha256Uncompressed": "005178e62f2b3a3a173bd10f38b4538d4252b9f6c309574113671469826c60d8",
+      "source": "maxo",
+      "sha256Original": "005178e62f2b3a3a173bd10f38b4538d4252b9f6c309574113671469826c60d8"
+    },
+    {
+      "path": "raw/maxo-annotations/annotations.tsv.gz",
+      "bytes": 11742,
+      "uncompressedBytes": 78294,
+      "sha256Uncompressed": "92e6dcfe79e4276fa561408f8eab8e7f656b69bd4e874e4ecba61ad3edc1b75e",
+      "source": "maxo-annotations",
+      "sha256Original": "92e6dcfe79e4276fa561408f8eab8e7f656b69bd4e874e4ecba61ad3edc1b75e"
+    },
+    {
+      "path": "raw/ohd/ohd.obo.gz",
+      "bytes": 237180,
+      "uncompressedBytes": 1511068,
+      "sha256Uncompressed": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c",
+      "source": "ohd",
+      "sha256Original": "f8518e5b59e7f5e7d3018849d782f0ae121cfbbd8a1f25fecddcbfec484be51c"
+    },
+    {
+      "path": "raw/pubmed-cochrane/records.ndjson.gz",
+      "bytes": 1505461,
+      "uncompressedBytes": 28350642,
+      "sha256Uncompressed": "8354fdad4e6b6728f8a643f3051b0d3c410c8a3f8493f5cf59eaefa1858e1cae",
+      "rows": 35108,
+      "source": "pubmed-cochrane"
+    },
+    {
+      "path": "raw/pubmed-guidelines/records.ndjson.gz",
+      "bytes": 2040477,
+      "uncompressedBytes": 33773476,
+      "sha256Uncompressed": "619a5c12c3d66fe18b07c7b3a21cb7b4251b4a051ed69ef1dab7ea45b38d3e51",
+      "rows": 42959,
+      "source": "pubmed-guidelines"
+    },
+    {
+      "path": "raw/wikidata-p924/p924.json.gz",
+      "bytes": 11353,
+      "uncompressedBytes": 134434,
+      "sha256Uncompressed": "f230c469aa47fe1c41cffb8ef9a62f6b25136f6c7a42f4b95420e400c2e2b32f",
+      "source": "wikidata-p924",
+      "sha256Original": "f230c469aa47fe1c41cffb8ef9a62f6b25136f6c7a42f4b95420e400c2e2b32f"
+    }
+  ],
+  "omittedRaw": [
+    {
+      "source": "ctgov",
+      "file": "pages/*.json.gz",
+      "pages": 465,
+      "studies": 464253,
+      "dataTimestamp": "2026-10-23T09:00:04",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch-ctgov.mjs (la API se actualiza a diario: otra fecha da otro corpus)"
+    },
+    {
+      "source": "mesh",
+      "file": "desc2026.xml.gz",
+      "bytes": 16812612,
+      "sha256": "ccd4d0d33bebfd4c836a59e7dd0c635b1d4e20c4f5a6abc55e2eb0ba4c8716dd",
+      "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs mesh"
+    },
+    {
+      "source": "mondo",
+      "file": "mondo.obo",
+      "bytes": 53320617,
+      "sha256": "2631e8e165d41def1a46749adb1ce0a336c8aba7f6bc0978729592cee8fed60b",
+      "url": "https://github.com/monarch-initiative/mondo/releases/download/v2026-10-06/mondo.obo",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs mondo"
+    },
+    {
+      "source": "ncit-evs",
+      "file": "Thesaurus.OWL.zip",
+      "bytes": 45866376,
+      "sha256": "a6b0897dc68ac9c9312e5d09db1c3d7caf1c6572452942e89cc4506c70f1877e",
+      "url": "https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/Thesaurus.OWL.zip",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs ncit-evs"
+    },
+    {
+      "source": "ncit-obo",
+      "file": "ncit.obo",
+      "bytes": 283269323,
+      "sha256": "e90ebb7e55f49cf2c43f14bbf9edc8969f0c327897547086187ed877998d5d1a",
+      "url": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition/releases/download/v2024-05-07/ncit.obo",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs ncit-obo"
+    },
+    {
+      "source": "pubmed-rct",
+      "file": "pages/*.json.gz",
+      "bytes": 51219980,
+      "records": 673366,
+      "query": "Randomized Controlled Trial[pt]",
+      "retrievedAt": "2026-10-24T17:52:28.314Z",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch-pubmed.mjs --subset rct (PubMed agrega registros a diario: otra fecha da otro corpus)"
+    },
+    {
+      "source": "pubmed-reviews",
+      "file": "pages/*.json.gz",
+      "bytes": 23052952,
+      "records": 423482,
+      "query": "(Systematic Review[pt] OR Meta-Analysis[pt]) NOT \"Cochrane Database Syst Rev\"[Journal]",
+      "retrievedAt": "2026-10-24T21:19:13.625Z",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch-pubmed.mjs --subset reviews (PubMed agrega registros a diario: otra fecha da otro corpus)"
+    },
+    {
+      "source": "pubmed-trials",
+      "file": "pages/*.json.gz",
+      "bytes": 29218986,
+      "records": 389365,
+      "query": "Clinical Trial[pt] NOT Randomized Controlled Trial[pt]",
+      "retrievedAt": "2026-10-24T19:53:50.407Z",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch-pubmed.mjs --subset trials (PubMed agrega registros a diario: otra fecha da otro corpus)"
+    },
+    {
+      "source": "uberon",
+      "file": "uberon.obo",
+      "bytes": 22529133,
+      "sha256": "d4751a15d7551a8414caee2628c62bf68301d567caf54ccfa3eef383ae7cbb61",
+      "url": "https://github.com/obophenotype/uberon/releases/download/v2026-10-01/uberon.obo",
+      "reproduce": "node tools/terminology-import/procedures-treatments/fetch.mjs uberon"
+    }
+  ]
+}

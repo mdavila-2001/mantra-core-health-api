@@ -12,7 +12,7 @@ deduplicados por firma de fallo y enlace de evidencia a un release.
   find src/modules/qa_lab -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 19 rutas HTTP, 13 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 19 rutas HTTP, 13 entidades y 3 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -20,44 +20,44 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `assertion_results`, `request_payloads`, `response_payloads`, `run_artifacts`, `test_assertions`, `test_case_results`, `test_cases`, `test_defects`, `test_environments`, `test_fixtures`, `test_runs`, `test_schedules`, `test_suites`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /internal/qa/schedules/run-due` | SYSTEM, QA_ADMIN | `qa-lab-internal` |
-| `GET /admin/qa/environments` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
-| `GET /admin/qa/suites` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
-| `GET /admin/qa/suites/:suiteId` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
-| `GET /admin/qa/runs` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
-| `GET /admin/qa/runs/:runId` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
-| `GET /admin/qa/defects` | ...QA_LAB_READ_ROLES | `qa-lab-read` |
-| `POST /qa/environments` | QA_ADMIN | `qa-lab` |
-| `POST /qa/suites/:suiteId/cases` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
-| `POST /qa/suites/:suiteId/publish` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
-| `POST /qa/runs` | QA_ADMIN, QA_ENGINEER, SYSTEM | `qa-lab` |
-| `POST /qa/runs/:runId/cases/:caseId/execute` | SYSTEM, QA_ENGINEER | `qa-lab` |
-| `POST /qa/case-results/:resultId/evaluate` | SYSTEM, QA_ENGINEER | `qa-lab` |
-| `POST /qa/runs/:runId/finalize` | SYSTEM, QA_ENGINEER | `qa-lab` |
-| `POST /qa/runs/:runId/artifacts` | SYSTEM, QA_ENGINEER | `qa-lab` |
-| `POST /qa/defects` | SYSTEM, QA_ENGINEER, QA_ADMIN | `qa-lab` |
-| `PATCH /qa/defects/:defectId` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
-| `POST /qa/schedules` | QA_ADMIN, QA_ENGINEER | `qa-lab` |
-| `POST /qa/runs/:runId/link-release` | RELEASE_MANAGER, QA_ADMIN | `qa-lab` |
+| Método y ruta                                | Acceso                        | Controller        |
+| -------------------------------------------- | ----------------------------- | ----------------- |
+| `POST /internal/qa/schedules/run-due`        | SYSTEM, QA_ADMIN              | `qa-lab-internal` |
+| `GET /admin/qa/environments`                 | ...QA_LAB_READ_ROLES          | `qa-lab-read`     |
+| `GET /admin/qa/suites`                       | ...QA_LAB_READ_ROLES          | `qa-lab-read`     |
+| `GET /admin/qa/suites/:suiteId`              | ...QA_LAB_READ_ROLES          | `qa-lab-read`     |
+| `GET /admin/qa/runs`                         | ...QA_LAB_READ_ROLES          | `qa-lab-read`     |
+| `GET /admin/qa/runs/:runId`                  | ...QA_LAB_READ_ROLES          | `qa-lab-read`     |
+| `GET /admin/qa/defects`                      | ...QA_LAB_READ_ROLES          | `qa-lab-read`     |
+| `POST /qa/environments`                      | QA_ADMIN                      | `qa-lab`          |
+| `POST /qa/suites/:suiteId/cases`             | QA_ADMIN, QA_ENGINEER         | `qa-lab`          |
+| `POST /qa/suites/:suiteId/publish`           | QA_ADMIN, QA_ENGINEER         | `qa-lab`          |
+| `POST /qa/runs`                              | QA_ADMIN, QA_ENGINEER, SYSTEM | `qa-lab`          |
+| `POST /qa/runs/:runId/cases/:caseId/execute` | SYSTEM, QA_ENGINEER           | `qa-lab`          |
+| `POST /qa/case-results/:resultId/evaluate`   | SYSTEM, QA_ENGINEER           | `qa-lab`          |
+| `POST /qa/runs/:runId/finalize`              | SYSTEM, QA_ENGINEER           | `qa-lab`          |
+| `POST /qa/runs/:runId/artifacts`             | SYSTEM, QA_ENGINEER           | `qa-lab`          |
+| `POST /qa/defects`                           | SYSTEM, QA_ENGINEER, QA_ADMIN | `qa-lab`          |
+| `PATCH /qa/defects/:defectId`                | QA_ADMIN, QA_ENGINEER         | `qa-lab`          |
+| `POST /qa/schedules`                         | QA_ADMIN, QA_ENGINEER         | `qa-lab`          |
+| `POST /qa/runs/:runId/link-release`          | RELEASE_MANAGER, QA_ADMIN     | `qa-lab`          |
 
 ## Casos de uso cubiertos (12)
 
-| UC | Endpoint | Descripción |
-| --- | --- | --- |
-| UC-36-01 | `POST /qa/environments` | Registrar entorno gobernado |
-| UC-36-02 | `POST /qa/suites/:suiteId/cases` | Definir caso con aserciones |
-| UC-36-03 | `POST /qa/suites/:suiteId/publish` | Publicar suite y activar casos |
-| UC-36-04 | `POST /qa/runs` | Disparar corrida |
-| UC-36-05 | `POST /qa/runs/:runId/cases/:caseId/execute` | Capturar ejecución y payloads |
-| UC-36-06 | `POST /qa/case-results/:resultId/evaluate` | Evaluar aserciones |
-| UC-36-07 | `POST /qa/runs/:runId/finalize` | Cerrar corrida y consolidar |
-| UC-36-08 | `POST /qa/runs/:runId/artifacts` | Adjuntar evidencia |
-| UC-36-09 | `POST /qa/defects` | Registrar y deduplicar defecto |
-| UC-36-10 | `PATCH /qa/defects/:defectId` | Triage y transición |
-| UC-36-11 | `POST /qa/schedules` | Programar ejecución automática |
-| UC-36-12 | `POST /qa/runs/:runId/link-release` | Enlazar evidencia a release |
+| UC       | Endpoint                                     | Descripción                    |
+| -------- | -------------------------------------------- | ------------------------------ |
+| UC-36-01 | `POST /qa/environments`                      | Registrar entorno gobernado    |
+| UC-36-02 | `POST /qa/suites/:suiteId/cases`             | Definir caso con aserciones    |
+| UC-36-03 | `POST /qa/suites/:suiteId/publish`           | Publicar suite y activar casos |
+| UC-36-04 | `POST /qa/runs`                              | Disparar corrida               |
+| UC-36-05 | `POST /qa/runs/:runId/cases/:caseId/execute` | Capturar ejecución y payloads  |
+| UC-36-06 | `POST /qa/case-results/:resultId/evaluate`   | Evaluar aserciones             |
+| UC-36-07 | `POST /qa/runs/:runId/finalize`              | Cerrar corrida y consolidar    |
+| UC-36-08 | `POST /qa/runs/:runId/artifacts`             | Adjuntar evidencia             |
+| UC-36-09 | `POST /qa/defects`                           | Registrar y deduplicar defecto |
+| UC-36-10 | `PATCH /qa/defects/:defectId`                | Triage y transición            |
+| UC-36-11 | `POST /qa/schedules`                         | Programar ejecución automática |
+| UC-36-12 | `POST /qa/runs/:runId/link-release`          | Enlazar evidencia a release    |
 
 ## Entidades
 
@@ -65,7 +65,7 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `assertion_results`, `
 `test_case_results`, `assertion_results`, `request_payloads`, `response_payloads`, `run_artifacts`,
 `test_defects`, `test_schedules`.
 
-`test_fixtures` existe en el modelo pero no se escribe desde aquí (ver *Pendiente*).
+`test_fixtures` existe en el modelo pero no se escribe desde aquí (ver _Fuera de este módulo_).
 
 ## Flujo general
 
@@ -137,24 +137,16 @@ loguean payloads ni valores capturados.
 `corepack yarn test src/modules/qa_lab --runInBand --silent` — 5 suites y 99 pruebas
 aprobadas durante la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Ejecución real de la petición**: este módulo captura y consolida evidencia, pero no llama al
   sistema bajo prueba. El runner lo hace y envía lo capturado a
   `POST /runs/:runId/cases/:caseId/execute`.
-- **Evaluación real de la aserción**: `evaluateResult` consolida el veredicto por aserción y decide
-  el estado del caso; comparar el valor real contra el esperado corresponde al runner, que conoce la
-  respuesta. Aquí se marca como aprobada la aserción cuyo valor esperado está declarado — es lo que
-  el modelo permite decidir sin ejecutar la petición.
-- **Fixtures**: `test_fixtures` (datos de preparación de casos) se poblará cuando el runner los
-  necesite; hoy `setup_json` y `teardown_json` del caso cubren el escenario simple.
-- **Disparo programado**: `test_schedules` guarda cron y `next_run_at`; el tick que las dispara
-  vivirá donde el planificador, igual que en reportes.
+- **Fixtures**: `test_fixtures` (datos de preparación de casos) no se escribe desde aquí;
+  `setup_json` y `teardown_json` del caso cubren el escenario simple.
 - **Enmascarado por registro de campos**: el caso de uso apunta a `system_ops.field_registry` para
   decidir qué campo es sensible. Aquí se enmascara **todo** el cuerpo cuando el entorno no es
-  seguro, que es la opción conservadora; afinar por campo llegará con ese registro.
-- **Outbox**: `TestRunQueued`, `TestCaseFailed`, `ReleaseEvidenceLinked` se emitirán cuando exista
-  el módulo 35.
+  seguro, que es la opción conservadora.
 
 ## Ejecución en el servidor y evaluación real (2026-09-18)
 
@@ -169,8 +161,7 @@ aprobadas durante la revisión.
 
 ## Revisión ALOVIDA
 
-Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_lab.md).
+Los recursos de QA y su evidencia cargados por UUID no se acotan al tenant activo.
 
 ## Catálogo de flujos (2026-10-17)
 

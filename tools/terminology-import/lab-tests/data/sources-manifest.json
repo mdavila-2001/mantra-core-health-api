@@ -1,0 +1,222 @@
+{
+  "hl7-tho": {
+    "retrievedAt": "2026-10-24T00:38:09.476Z",
+    "spec": "hl7.terminology.r4@7.0.1",
+    "tarball": "hl7.terminology.r4-7.0.1.tgz",
+    "sha256": "170c546f761fb51b3355788ca500206f6b772b21c57348c29205de85a6612baa",
+    "npm": {
+      "name": "hl7.terminology.r4",
+      "version": "7.0.1",
+      "integrity": "sha512-UamZUcARk/TEaJb7X0hDyANmC7bCv0Jof0u0uGIOB2O9VQX0uV45Vf4EyONHM6Sejv6q7sXEAzKAQsgw1Cld3A==",
+      "shasum": "821279c60ef8564f7bd61403738de1a3dd26afda"
+    },
+    "registryUrl": "https://registry.npmjs.org/hl7.terminology.r4/7.0.1",
+    "license": "CC0-1.0 (HL7 Terminology, https://terminology.hl7.org/license.html)."
+  },
+  "ucum": {
+    "retrievedAt": "2026-10-24T00:38:10.053Z",
+    "spec": "@lhncbc/ucum-lhc@8.0.1",
+    "tarball": "lhncbc-ucum-lhc-8.0.1.tgz",
+    "sha256": "cf64e6ad36b54954b52f2d77efba220a5aeb325bbca88b83f17b826b9fcca76e",
+    "npm": {
+      "name": "@lhncbc/ucum-lhc",
+      "version": "8.0.1",
+      "integrity": "sha512-tRcifNm0NPeu9hYrzNnzSFnerwv+sao1OptWR/iCPSAcQkL2LXu3y8YM0RlCAY/NaKmNvyeKmCuRf7hKWy7ieg==",
+      "shasum": "ecffd2a068f8399e952947b98599b216e030d1b4"
+    },
+    "registryUrl": "https://registry.npmjs.org/@lhncbc/ucum-lhc/8.0.1",
+    "license": "UCUM table and codes © 1995-2009 Regenstrief Institute, Inc. and the UCUM Organization, under https://ucum.org/license. Tabla `data/ucumDefs.min.json` de @lhncbc/ucum-lhc (NLM/LHNCBC; LICENSE.md tipo BSD: redistribución permitida conservando el aviso del dueño). Incluye combinaciones de unidades tomadas de LOINC: rige además https://loinc.org/terms-of-use."
+  },
+  "fonasa-mle": {
+    "retrievedAt": "2026-10-24T00:47:54.038Z",
+    "spec": "@mariohealthbits/fonasa-mle-open@1.0.0",
+    "tarball": "mariohealthbits-fonasa-mle-open-1.0.0.tgz",
+    "sha256": "b622019be7a3a1e3eb560c01415d991947ac21561ed074187f2b9ee687e9e05c",
+    "npm": {
+      "name": "@mariohealthbits/fonasa-mle-open",
+      "version": "1.0.0",
+      "integrity": "sha512-heMqNXY6n+BBghUC3d1/0h4Yg1FKV8HcyneyAV9qcTZMSoAXZwRHRqgehPWRTKt1VVLflyET0MjfuOGsOqI7RA==",
+      "shasum": "4b38cb8563d2b42f97275766e68a9c0a7c90ece7"
+    },
+    "registryUrl": "https://registry.npmjs.org/@mariohealthbits/fonasa-mle-open/1.0.0",
+    "license": "Arancel público de FONASA (información pública del Estado de Chile). Extraído de los XLSX oficiales y redistribuido por @mariohealthbits/fonasa-mle-open (licencia MIT del paquete). NO cotejado con el XLSX oficial: fonasa.cl responde 403 desde la sesión que lo cargó."
+  },
+  "sigtap-sus": {
+    "retrievedAt": "2026-10-24T00:47:54.419Z",
+    "spec": "@br-health-kit/sigtap@1.0.0",
+    "tarball": "br-health-kit-sigtap-1.0.0.tgz",
+    "sha256": "e5869f743a4b4a2b219dafe10724e2f2d49154d61d15e0d985c78b3b9e103d07",
+    "npm": {
+      "name": "@br-health-kit/sigtap",
+      "version": "1.0.0",
+      "integrity": "sha512-4k9TY5z1GEaMLo7EQcXVJUsmpCtwBFyMIEScImZXTeXzdc3NfdKg1yM0Umz1/1qTwQw24qDw1siOLir6YwrKHg==",
+      "shasum": "cdc5ebcbd9300387cd58023e99af3a0d81062818"
+    },
+    "registryUrl": "https://registry.npmjs.org/@br-health-kit/sigtap/1.0.0",
+    "license": "Dados públicos do Ministério da Saúde (DATASUS). Redistribuídos sem modificação de conteúdo por @br-health-kit/sigtap (MIT), desde ftp2.datasus.gov.br/pub/sistemas/tup/downloads/ (archivo y checksum en el metadata.json del paquete)."
+  },
+  "tuss-ans": {
+    "retrievedAt": "2026-10-24T00:47:55.025Z",
+    "spec": "@br-health-kit/tuss@1.0.0",
+    "tarball": "br-health-kit-tuss-1.0.0.tgz",
+    "sha256": "5c09f69cb82efc316f895c3986373d16815dda519bed8025336bf49ad8f4dd54",
+    "npm": {
+      "name": "@br-health-kit/tuss",
+      "version": "1.0.0",
+      "integrity": "sha512-RsE6vJtFDwu9G7GnQ/XiD5Ma/fXZWZVuFpcST4fXCvGWWvnItlVjF/CBzEgYC+cBrMeG+FYfE0O2VW0RF02Edw==",
+      "shasum": "9de9886dde68d48a70a65b7c66fb8be571d2c707"
+    },
+    "registryUrl": "https://registry.npmjs.org/@br-health-kit/tuss/1.0.0",
+    "license": "Dados abertos da ANS (Plano de Dados Abertos, PDA-049), redistribuídos sem modificação por @br-health-kit/tuss (MIT). La licencia del conjunto en el portal de la ANS no se pudo leer (403 desde la sesión): a confirmar."
+  },
+  "pami-nomenclador": {
+    "retrievedAt": "2026-10-24T00:47:55.407Z",
+    "spec": "nomenclador-salud-js@1.0.2",
+    "tarball": "nomenclador-salud-js-1.0.2.tgz",
+    "sha256": "cb19be3f93387b4b2b7d7ac1fb8862bd6a3d6f6dc8c6d25f24a2915eebf1039e",
+    "npm": {
+      "name": "nomenclador-salud-js",
+      "version": "1.0.2",
+      "integrity": "sha512-RTeWX2j2bBvQoi0ITSujl7tnQ/I1Jlkqoa0i5H3/L7Z55CgU8mZDRHzVPeq1wbRPpzjGBPKKBxjlFMJXE48xKA==",
+      "shasum": "b17189ed4e5f3673fd27434ebd8750db36832d01"
+    },
+    "registryUrl": "https://registry.npmjs.org/nomenclador-salud-js/1.0.2",
+    "license": "Datos abiertos de PAMI en datos.gob.ar (conjunto creado y modificado por última vez el 2022-08-03), redistribuidos por nomenclador-salud-js (ISC). La licencia del conjunto en el portal no se pudo leer (403 desde la sesión): a confirmar."
+  },
+  "icd10pcs-cms": {
+    "retrievedAt": "2026-10-24T00:51:24.693Z",
+    "spec": "@cyanheads/medical-codes-mcp-server@0.4.1",
+    "tarball": "cyanheads-medical-codes-mcp-server-0.4.1.tgz",
+    "sha256": "8b493ed2ce1ac94b975716548c0a2b66b5b9ecdf31480649368cce1d284a9cbe",
+    "npm": {
+      "name": "@cyanheads/medical-codes-mcp-server",
+      "version": "0.4.1",
+      "integrity": "sha512-tsSwHTJCcQue7kL5gUjT4aIEUR3hTWgzEilUZ8wLuhlmfK0EQHUT5Ax4sFCvjwNmlLmCXICji6vlfMfiMj98fw==",
+      "shasum": "3715c6a86dd771eadea0da57d1b227f71e4099a0"
+    },
+    "registryUrl": "https://registry.npmjs.org/@cyanheads/medical-codes-mcp-server/0.4.1",
+    "license": "Obra del gobierno federal de EE. UU. (CMS), dominio público. Tomado del índice SQLite que empaqueta @cyanheads/medical-codes-mcp-server (Apache-2.0), construido desde los order files oficiales de CMS (release y URL en su tabla build_meta)."
+  },
+  "gtr-ncbi": {
+    "retrievedAt": "2026-10-24T16:44:06.926Z",
+    "files": {
+      "test_version.gz": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_version.gz",
+        "bytes": 13075988,
+        "sha256": "b9d49d8284fe122245cd3bc39d31a7576702d1ad7a4bb04239906e0b55aec850",
+        "lastModified": "Thu, 22 Oct 2026 14:18:53 GMT"
+      },
+      "test_condition_gene.txt": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_condition_gene.txt",
+        "bytes": 47325875,
+        "sha256": "8ffb76349340ba0e3ad4c8f878206051cf07750b465865558bbc3aac868ab71d",
+        "lastModified": "Thu, 22 Oct 2026 14:18:20 GMT"
+      },
+      "tests_by_method_category.txt": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/tests_by_method_category.txt",
+        "bytes": 1613,
+        "sha256": "dbc40f16e290f8ffd39da2c714b7b2de52ae73f7b82302d8453a3de633f1a714",
+        "lastModified": "Thu, 22 Oct 2026 14:18:21 GMT"
+      }
+    },
+    "license": "Dominio público (NCBI/NLM); atribución pedida a GTR."
+  },
+  "cie10es-px": {
+    "dir": "cie10es",
+    "files": {
+      "Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx": {
+        "url": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx",
+        "bytes": 5039772,
+        "sha256": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3",
+        "lastModified": "Tue, 16 Dec 2025 09:01:37 GMT",
+        "retrievedAt": "2026-10-24T16:48:36.886Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:48:36.894Z"
+  },
+  "minsalud-co-laboratorio": {
+    "dir": "minsalud-co",
+    "files": {
+      "POSPOPULI-LABORATORIO-s5f2-yivs.csv": {
+        "url": "https://www.datos.gov.co/api/views/s5f2-yivs/rows.csv?accessType=DOWNLOAD",
+        "bytes": 1167902,
+        "sha256": "e41fda66022826c2802e5aa0c9f0848c0372bedf94c0f968b7b4966cfffe45f5",
+        "lastModified": "Thu, 27 Jul 2023 22:46:23 GMT",
+        "retrievedAt": "2026-10-24T16:50:37.923Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:50:37.924Z"
+  },
+  "minsalud-co-pbs": {
+    "dir": "minsalud-co",
+    "files": {
+      "Procedimiento-del-PBS-9zcz-bjue.csv": {
+        "url": "https://www.datos.gov.co/api/views/9zcz-bjue/rows.csv?accessType=DOWNLOAD",
+        "bytes": 5932078,
+        "sha256": "4a8ed7ff9c225a96427d884b4c683472e4c765cacc93a83f22229ebb80140636",
+        "lastModified": "Thu, 27 Jul 2023 23:19:23 GMT",
+        "retrievedAt": "2026-10-24T16:50:38.980Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:50:38.980Z"
+  },
+  "pami-nomenclador-oficial": {
+    "dir": "pami",
+    "files": {
+      "nomenclador-comun.csv": {
+        "url": "https://datos.pami.org.ar/dataset/9937b24d-abad-45fb-8158-c1c5684d2635/resource/5d32d7a8-3d6a-4ed4-9701-6d4fd024c657/download/nomenclador-comun.csv",
+        "bytes": 306799,
+        "sha256": "07370b31822789ce774f1f6632855a0e865ec23d65373a1c5e84aeefe96980b4",
+        "lastModified": "Wed, 03 Aug 2022 17:59:03 GMT",
+        "retrievedAt": "2026-10-24T16:58:02.211Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:58:02.211Z"
+  },
+  "cms-icd10pcs": {
+    "dir": "cms-icd10pcs",
+    "files": {
+      "2027-icd-10-pcs-order-file-long-abbreviated-titles.zip": {
+        "url": "https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip",
+        "bytes": 1322280,
+        "sha256": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439",
+        "lastModified": "Fri, 05 Jun 2026 17:08:03 GMT",
+        "retrievedAt": "2026-10-24T16:59:50.366Z"
+      },
+      "2027-icd-10-pcs-code-tables-index.zip": {
+        "url": "https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip",
+        "bytes": 8078885,
+        "sha256": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84",
+        "lastModified": "Fri, 05 Jun 2026 17:06:10 GMT",
+        "retrievedAt": "2026-10-24T16:59:51.432Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T16:59:51.432Z"
+  },
+  "nci-cdisc-sdtm": {
+    "dir": "cdisc",
+    "files": {
+      "SDTM Terminology.txt": {
+        "url": "https://evs.nci.nih.gov/ftp1/CDISC/SDTM/SDTM%20Terminology.txt",
+        "bytes": 13848826,
+        "sha256": "9e8117a90e28e5aade3ac2d52fe1b60adfcccc92a8894891f04ad05c7cf1f88d",
+        "lastModified": "Fri, 25 Sep 2026 15:43:39 GMT",
+        "retrievedAt": "2026-10-24T18:50:06.572Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T18:50:06.579Z"
+  },
+  "ifcc-npu": {
+    "dir": "npu",
+    "files": {
+      "npu-codes-latest.csv": {
+        "url": "https://cms.ifcc.org/wp-content/uploads/npu-codes-latest.csv",
+        "bytes": 11026108,
+        "sha256": "3aef05383e918cc1304c53c5ca6f8a9467b6d700fc3ba18563744c1fbe904353",
+        "lastModified": "Wed, 30 Sep 2026 14:38:51 GMT",
+        "retrievedAt": "2026-10-24T18:54:42.606Z"
+      }
+    },
+    "retrievedAt": "2026-10-24T18:54:42.607Z"
+  }
+}

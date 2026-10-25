@@ -22,6 +22,25 @@ donde el equipo guarde los adjuntos. Un formulario clínico guardado como imagen
 formulario: es un adjunto. Lo que sirve —y lo que este directorio contiene— es la transcripción a
 campos, que es lo que el motor captura.
 
+## Ampliación internacional (2026-10-24)
+
+**374 fichas, 6 373 campos** (antes 370 y 6 164): 29 fichas mejoradas —cada una sube `version`— y
+4 nuevas (colitis ulcerosa, ITS, vacunación y ESAVI, biopsia de próstata). Las escalas salen del
+CKM de openEHR (Apgar, HAS-BLED, Child-Pugh, SOFA, Bishop, Lee, Charlson, Wagner, Karnofsky,
+NIHSS, Mayo, HEART, ABCD², Downton, PADSS, Tanner, NRS 2002, Beighton, Gleason/ISUP,
+Ferriman-Gallwey, reflejos); las listas de puerperio, recién nacido, VIH, ITS, planificación,
+prenatal y vacunación, de los Digital Adaptation Kits de la OMS; la epicrisis suma las secciones
+del International Patient Summary de HL7.
+
+- Los campos nuevos se escriben en `tools/clinical-forms/mejoras-intl.mjs` sobre las fichas que ya
+  arma el generador; nunca cambian el tipo ni quitan opciones de un campo existente.
+- Las fuentes se congelan en el repo (`tools/clinical-forms/openehr/ckm-snapshot.json`,
+  `tools/clinical-forms/who-dak/dak-snapshot.json`): el generador no necesita red.
+- Cada campo nuevo cita en su ayuda la publicación, el arquetipo o el elemento de la DAK y su
+  licencia; toda traducción propia dice que no es oficial. Lo fija `catalog.spec.ts`.
+- Fuentes: [`SOURCES.md`](SOURCES.md). Pasadas, licencias y huecos:
+  [`docs/seed-research/clinical-forms.md`](../../../../../docs/seed-research/clinical-forms.md).
+
 ## Cobertura (v4.2.0 · 2026-10-04)
 
 **45 formularios**: 4 transversales —que sirven para cualquier consulta— y 41 repartidos entre las
@@ -155,8 +174,8 @@ de ministerios de salud. Lo que no cumple, no entra.
 
 **No se omitió nada en silencio.** Estos instrumentos son los que un médico esperaría encontrar y
 **no se cargaron** porque son propiedad de un tercero. El cliente decide: consigue la licencia, o
-se queda el reemplazo libre — que para SRQ-20 y AUDIT ya está cargado (v4.2.0); para MMSE sigue
-pendiente de definir con el cliente.
+se queda el reemplazo libre — que para SRQ-20 y AUDIT ya está cargado (v4.2.0); para MMSE no hay
+reemplazo cargado.
 
 | Instrumento                                                                 | Titular                | Por qué no entró                                                                                                                                                        | Reemplazo libre propuesto                                                                                                                  |
 | --------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |

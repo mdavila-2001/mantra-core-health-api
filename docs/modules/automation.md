@@ -3,7 +3,7 @@
   Fuente real: src/modules/automation/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `automation`
@@ -172,7 +172,19 @@ ha superado, o facturar de más al sumar.
 `record_automations` guarda `target_resource_type`, `field_mapping_json` y `dedupe_key_expr`
 precisamente para escribir en un destino que no se conoce al compilar. Como el identificador SQL no
 admite *bind*, esquema, tabla y columnas pasan por la lista blanca `^[a-z_][a-z0-9_]{0,62}$` antes de
-entrecomillarse.
+entrecomillarse. Además, el esquema de destino tiene que estar en una lista permitida
+(`crm`, `marketing`, `promotions`, `scheduling`, `surveys`, `education`, `tracking`): un destino
+clínico, de identidad o financiero se rechaza antes de ejecutar. Un destino, columna o mapeo inválido
+responde `400 VALIDATION_FAILED` con `reason` `AUTOMATION_RECORD_TARGET_INVALID` o
+`AUTOMATION_RECORD_MAPPING_EMPTY`, sin SQL ni identificadores en el mensaje.
+
+### El alcance de tenant
+
+Toda operación del módulo, salvo el barrido de calendario de `SYSTEM`, exige un tenant en el contexto
+y lo usa como único propietario: el `tenantId` del cuerpo se ignora. Workflow, disparador, agente,
+política, run y automatización de registro tienen que ser de ese tenant; el run de agente y la
+aprobación (que no tienen `tenant_id`) lo heredan de su agente y de su workflow run. Un recurso ajeno
+responde igual que uno inexistente: `404`, mismo mensaje y mismo `reason`, sin `details`.
 
 ### La gramática que el modelo no define
 
@@ -196,10 +208,8 @@ runs, registran pasos, piden aprobación y escriben registros. `CLINICAL_APPROVE
 
 Ninguna ruta es pública.
 
-La revisión ALOVIDA identificó que los servicios todavía no aplican el alcance de
-tenant de la identidad a la cadena de workflows, runs y automatizaciones de
-registro. Ver [informe del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/automation.md)
-antes de habilitar operaciones entre tenants.
+Los servicios no aplican el alcance de tenant de la identidad a la cadena de
+workflows, runs y automatizaciones de registro.
 
 ## Concurrencia
 
@@ -217,7 +227,7 @@ aprobación —los dos momentos en que una persona tiene que intervenir—. No s
 ## Pruebas
 
 `corepack yarn test src/modules/automation --runInBand --silent` — 6 suites y 133 pruebas
-aprobadas durante la revisión. Falta cobertura de dos tenants y de errores HTTP
+aprobadas durante la revisión. No cubren dos tenants ni los errores HTTP
 catalogados del escritor dinámico.
 
 ## Divergencias con el caso de uso v3.9
@@ -229,20 +239,18 @@ catalogados del escritor dinámico.
   `tool_call`*. Se expone bajo el `agent_run` que lo ejecuta, que es donde el modelo lo sitúa
   (`agent_run_steps — INSERT`), para que el runtime pueda invocarlo y quede la traza.
 
-## Pendiente
+## Fuera de este módulo
 
 - **La ejecución real del agente**: llamar al modelo, ejecutar la herramienta HTTP contra
   `integrations.integration_endpoints`. Este módulo gobierna, registra y bloquea; el runtime del
   agente ejecuta y va reportando cada paso.
 - **`input_tokens` / `output_tokens` / `cost_amount` del `agent_run`**: los reporta el runtime, que es
   quien habla con el modelo. El cierre suma lo que haya.
-- **`workflow.automation_run_machine` (módulo 32)**: el caso de uso mantiene una máquina de estados
-  paralela en el esquema `workflow`. Aquí el estado vive en `workflow_runs.status_concept_id`;
-  reflejarlo además como agregado gobernado del módulo 32 exige registrar la máquina y decidir su
-  `machine_code`, que el modelo no declara.
+- **`workflow.automation_run_machine` (módulo 32)**: el estado vive en
+  `workflow_runs.status_concept_id`; no se refleja como agregado gobernado del módulo 32 porque el
+  modelo no declara su `machine_code`.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-48-08, 13): aquí lo cubren
-  el `FOR UPDATE` y la búsqueda de run vivo por contexto. Ese esquema es del módulo 56, **sin
-  asignar**.
+  el `FOR UPDATE` y la búsqueda de run vivo por contexto; este módulo no usa ese esquema.
 - **`knowledge_sources`**: la tabla existe en el esquema pero ningún caso de uso del módulo 48 la
   cubre. No se ha inventado un endpoint para ella.
 - **Suscripción real del disparador al bus** (`messaging.domain_events`) y registro del cron en el

@@ -50,9 +50,19 @@ decisiones; revocar un consentimiento o una relación asistencial debe invalidar
 ## Aislamiento por tenant
 
 `TenantContextInterceptor` (`src/common/tenant/tenant-context.interceptor.ts`) — único interceptor
-del sistema — fija el tenant activo para la request/transacción. La aplicación real de Row-Level
-Security (`RLS_ENFORCE`) es una verificación operativa pendiente por entorno, no solo una
-propiedad del código — ver `SEC-001` en `docs/governance/traceability-matrix.md`.
+del sistema — fija el tenant activo para la request/transacción. Que Row-Level Security
+(`RLS_ENFORCE`) esté activo depende de la configuración de cada entorno, no sólo del código — ver
+[aislamiento por tenant](../security/tenant-isolation.md).
+
+### Prácticas visibles para un `PRACTITIONER`
+
+El tenant no basta para aislar a los médicos auto-registrados: todos comparten el tenant `DEFAULT`.
+`PracticeAccessService` (`src/modules/practice/services/practice-access.service.ts`) es el dueño
+único de la regla: `SECURITY_ADMIN` o `ACCOUNTING_APPROVER` ven todas las prácticas; quien no es
+`PRACTITIONER` no se filtra; un `PRACTITIONER` sólo ve las prácticas donde tiene una vinculación
+ACTIVE vigente. `GET /practices` filtra con ella y `GET /practices/:practiceId/organization`
+responde 404 —igual que ante una práctica inexistente o de otro tenant— cuando no se cumple.
+Contabilidad usa el mismo criterio (`practiceAccessScope`) y lo traduce a sus propios 422.
 
 ## Convención de mutaciones sin política explícita
 

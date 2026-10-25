@@ -1,0 +1,84 @@
+<devices>
+<device xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.fda.gov/cdrh/gudid">
+    <publicDeviceRecordKey>7d7f31e6-7e50-48f0-aa9f-cab3db942c5c</publicDeviceRecordKey>
+    <publicVersionStatus>Update</publicVersionStatus>
+    <deviceRecordStatus>Published</deviceRecordStatus>
+    <!--Note: publicVersionNumber is system generated and assigned to all device records to track public release updates to a device record-->
+    <publicVersionNumber>2</publicVersionNumber>
+    <publicVersionDate>2022-01-19</publicVersionDate>
+    <devicePublishDate>2020-08-10</devicePublishDate>
+    <deviceCommDistributionEndDate xsi:nil="true" />
+    <deviceCommDistributionStatus>In Commercial Distribution</deviceCommDistributionStatus>
+    <identifiers>
+      <identifier>
+        <deviceId>08904269400590</deviceId>
+        <deviceIdType>Primary</deviceIdType>
+        <deviceIdIssuingAgency>GS1</deviceIdIssuingAgency>
+        <containsDINumber xsi:nil="true" />
+        <pkgQuantity xsi:nil="true" />
+        <pkgDiscontinueDate xsi:nil="true" />
+        <pkgStatus xsi:nil="true" />
+        <pkgType xsi:nil="true" />
+      </identifier>
+    </identifiers>
+    <brandName>Imagescan HD</brandName>
+    <versionModelNumber>303-001204-0</versionModelNumber>
+    <catalogNumber xsi:nil="true" />
+    <dunsNumber>863358955</dunsNumber>
+    <companyName>SKANRAY TECHNOLOGIES LIMITED</companyName>
+    <deviceCount>1</deviceCount>
+    <deviceDescription>Imagescan HD Floor stand is High Frequency Extra oral X-Ray source to be used for Intra oral X-Ray in Dental
+Radiography for diagnostic purpose</deviceDescription>
+    <DMExempt>false</DMExempt>
+    <premarketExempt>false</premarketExempt>
+    <deviceHCTP>false</deviceHCTP>
+    <deviceKit>false</deviceKit>
+    <deviceCombinationProduct>false</deviceCombinationProduct>
+    <singleUse>false</singleUse>
+    <lotBatch>false</lotBatch>
+    <serialNumber>true</serialNumber>
+    <manufacturingDate>true</manufacturingDate>
+    <expirationDate>false</expirationDate>
+    <donationIdNumber>false</donationIdNumber>
+    <labeledContainsNRL>false</labeledContainsNRL>
+    <labeledNoNRL>false</labeledNoNRL>
+    <MRISafetyStatus>Labeling does not contain MRI Safety Information</MRISafetyStatus>
+    <rx>true</rx>
+    <otc>false</otc>
+    <contacts>
+      <customerContact>
+        <phone>914-592-6100</phone>
+        <phoneExtension xsi:nil="true" />
+        <email>custserv@imageworkscorporation.com</email>
+      </customerContact>
+    </contacts>
+    <premarketSubmissions>
+      <premarketSubmission>
+        <submissionNumber>K170967</submissionNumber>
+        <supplementNumber>000</supplementNumber>
+      </premarketSubmission>
+    </premarketSubmissions>
+    <gmdnTerms>
+      <gmdn>
+        <gmdnCode>33109</gmdnCode>
+        <gmdnPTName>Mobile intraoral dental x-ray system, digital</gmdnPTName>
+        <gmdnPTDefinition>A mobile (on wheels) diagnostic dental x-ray system designed to generate and control x-ray beams. It records the absorption pattern of x-ray beams used for general-purpose, routine, dental radiography examinations involving the diagnosis and treatment (e.g., surgical or interventional) of diseases of the teeth, jaw and oral cavity structures. The sensor is placed in the mouth, the purpose being to visualize a limited region in detail. The data is either from analogue-to-digital conversion techniques imaging or by digital imaging.</gmdnPTDefinition>
+        <implantable>false</implantable>
+        <gmdnCodeStatus>Active</gmdnCodeStatus>
+      </gmdn>
+    </gmdnTerms>
+    <productCodes>
+      <fdaProductCode>
+        <productCode>EHD</productCode>
+        <productCodeName>Unit, X-Ray, Extraoral With Timer</productCodeName>
+      </fdaProductCode>
+    </productCodes>
+    <deviceSizes />
+    <environmentalConditions />
+    <sterilization>
+      <deviceSterile>false</deviceSterile>
+      <sterilizationPriorToUse>false</sterilizationPriorToUse>
+      <methodTypes />
+    </sterilization>
+  </device>
+</devices>

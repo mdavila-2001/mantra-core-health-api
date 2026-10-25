@@ -351,7 +351,7 @@
 | `dunning_items` | `DunningItems` | 12 | `id` | — | dunning_items es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `dunning_runs` | `DunningRuns` | 9 | `id` | — | dunning_runs registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 17 · billing (dominio Financiero y ERP): responde a '¿qué está pasando ahora mismo?'. |
 | `financial_kpi_snapshots` | `FinancialKpiSnapshots` | 9 | `id` | — | financial_kpi_snapshots es un ledger inmutable (append-only) del módulo 17 · billing (dominio Financiero y ERP): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
-| `invoice_lines` | `InvoiceLines` | 19 | `id` | ✅ | invoice_lines es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
+| `invoice_lines` | `InvoiceLines` | 20 | `id` | ✅ | invoice_lines es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `invoices` | `Invoices` | 25 | `id` | ✅ | invoices es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `patient_statements` | `PatientStatements` | 15 | `id` | ✅ | patient_statements es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payable_payment_allocations` | `PayablePaymentAllocations` | 11 | `id` | — | payable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
@@ -362,6 +362,8 @@
 | `receivable_payment_allocations` | `ReceivablePaymentAllocations` | 11 | `id` | — | receivable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `reimbursements` | `Reimbursements` | 11 | `id` | ✅ | reimbursements es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `service_catalog` | `ServiceCatalog` | 17 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
+| `siat_simulated_invoices` | `SiatSimulatedInvoices` | 25 | `id` | ✅ | siat_simulated_invoices guarda la factura fiscal SIMULADA (SIAT) que cuelga de una factura real de 17 · billing. No es un documento tributario válido: el CUF, el CUFD y el XML son ficticios y deterministas, y cada fila d… |
+| `siat_simulated_outbox` | `SiatSimulatedOutbox` | 7 | `id` | — | siat_simulated_outbox es la bandeja de salida SIMULADA de las facturas SIAT simuladas: registra a quién *se enviaría* la factura y con qué adjuntos, pero nunca envía nada (el CHECK `ck_siat_simulated_outbox_status` fija … |
 | `tax_codes` | `TaxCodes` | 14 | `id` | ✅ | tax_codes es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `tax_periods` | `TaxPeriods` | 13 | `id` | ✅ | tax_periods es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `vendors` | `Vendors` | 14 | `id` | ✅ | vendors es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
@@ -1594,7 +1596,7 @@
 
 ## Entidades diseñadas, no implementadas
 
-148 entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en `src/modules/**/entities` al momento de esta generación. No se documentan como catálogo activo — es trabajo de modelo pendiente de materializar, no una entidad utilizable hoy.
+148 entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en `src/modules/**/entities` al momento de esta generación. No se documentan como catálogo activo: son diseño del modelo sin materializar, no entidades utilizables.
 
 <details><summary>Ver lista completa</summary>
 

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   CareSpaces,
@@ -27,6 +30,7 @@ import type {
   OrganizationStaffMemberDto,
   PracticeConceptDto,
 } from '../dto';
+import { PracticeAccessService } from './practice-access.service';
 
 /** Milisegundos de un día, para los días que faltan hasta un vencimiento. */
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -54,6 +58,13 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
  * leer nada, y una práctica ajena responde el mismo 404 que una inexistente:
  * distinguirlas convertiría el endpoint en un detector de qué identificadores
  * existen en otras organizaciones.
+ *
+ * ## Aislamiento por vinculación
+ *
+ * El tenant no alcanza para un `PRACTITIONER`: los médicos auto-registrados
+ * comparten el tenant `DEFAULT`. Un profesional sin vinculación ACTIVE con la
+ * práctica recibe también el mismo 404 (`PracticeAccessService`), por el mismo
+ * motivo: no debe poder sondear qué prácticas existen.
  */
 @Injectable()
 export class PracticeOrganizationReadService {
@@ -63,11 +74,13 @@ export class PracticeOrganizationReadService {
    * @param em - Contexto de persistencia.
    * @param practicesRepo - Lectura de la práctica y su tenant.
    * @param readRepo - Consultas por lote del árbol de la organización.
+   * @param access - Qué prácticas puede ver el actor.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly practicesRepo: PracticesRepository,
     private readonly readRepo: PracticeOrganizationReadRepository,
+    private readonly access: PracticeAccessService,
   ) {}
 
   /**
@@ -75,17 +88,23 @@ export class PracticeOrganizationReadService {
    *
    * @param practiceId - Práctica consultada.
    * @param tenantId - Tenant del contexto, que debe ser el dueño.
+   * @param actor - Actor autenticado; un profesional necesita vinculación ACTIVE.
    * @returns Su ficha, sedes, áreas, espacios, servicios, plantilla,
    *   documentación legal e inventario.
-   * @throws ResourceNotFoundException si la práctica no existe o es de otro tenant.
+   * @throws ResourceNotFoundException si la práctica no existe, es de otro
+   *   tenant o el profesional no tiene vinculación ACTIVE con ella.
    */
   async getConsole(
     practiceId: string,
     tenantId: string,
+    actor: AuthenticatedUser,
   ): Promise<MedicalOrganizationConsoleDto> {
     const em = this.em.fork();
-    const practice = await this.practicesRepo.findById(em, practiceId);
-    if (!practice || practice.tenantId !== tenantId) {
+    const [practice, allowed] = await Promise.all([
+      this.practicesRepo.findById(em, practiceId),
+      this.access.canAccess(actor, practiceId),
+    ]);
+    if (!practice || practice.tenantId !== tenantId || !allowed) {
       throw new ResourceNotFoundException('Práctica no encontrada', {
         practiceId,
       });

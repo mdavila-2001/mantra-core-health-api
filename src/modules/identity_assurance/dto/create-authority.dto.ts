@@ -12,12 +12,15 @@ export class RegisterAuthorityDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({
-    description: 'Tenant propietario de la autoridad',
+  @ApiPropertyOptional({
+    description:
+      'Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad.',
     format: 'uuid',
+    deprecated: true,
   })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de authority code mantenido por la instancia.

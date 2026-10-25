@@ -125,6 +125,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -252,6 +253,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChangePasswordResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -370,6 +372,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ForgotPasswordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -395,7 +398,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -494,6 +497,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TokenResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -604,6 +608,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LogoutResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -706,6 +711,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LogoutAllResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -800,7 +806,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
@@ -888,7 +894,7 @@ Content-Type: application/json
 | `organization.broker.agreements[].current` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `organization.broker.agreements[].contractFileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.broker.publicProfileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}}` |
+| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]}` |
 | `organization.diagnosticUnit.code` | No | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Sin descripción específica en el contrato OpenAPI. | `CENTRO_IMAGEN_CENTRAL` |
 | `organization.diagnosticUnit.name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Centro de Diagnóstico por Imágenes` |
 | `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -905,6 +911,15 @@ Content-Type: application/json
 | `organization.diagnosticUnit.primarySite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.primarySite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.primarySite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]` |
+| `organization.diagnosticUnit.branches[].name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sucursal Equipetrol` |
+| `organization.diagnosticUnit.branches[].address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `organization.diagnosticUnit.branches[].address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
+| `organization.diagnosticUnit.branches[].address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `organization.diagnosticUnit.branches[].address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.branches[].address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.branches[].address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `organization.diagnosticUnit.branches[].address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
@@ -1063,7 +1078,22 @@ Content-Type: application/json
           "latitude": 1,
           "longitude": 1
         }
-      }
+      },
+      "branches": [
+        {
+          "name": "Sucursal Equipetrol",
+          "address": {
+            "lines": [
+              "valor-ejemplo"
+            ],
+            "city": "valor-ejemplo",
+            "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+            "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+            "latitude": 1,
+            "longitude": 1
+          }
+        }
+      ]
     },
     "countryConceptId": "00000000-0000-4000-8000-000000000001",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1106,6 +1136,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterOrganizationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1149,7 +1180,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El código de organización ya existe | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1161,6 +1192,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El bloque `broker` sólo corresponde a un tenant de tipo BROKER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo ' +           'DIAGNOSTIC_CENTER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | El tipo de unidad diagnóstica declarado no es válido | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las sucursales sólo se declaran en una unidad de laboratorio clínico | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Los conceptos declarados no existen en el catálogo de terminología | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un mismo archivo no puede respaldar dos documentos distintos | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
@@ -1255,6 +1287,7 @@ Content-Type: application/json
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `birthDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `phone` | Sí | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
+| `additionalPhones` | No | `array<string>` | longitud máxima PHONE_MAX_LENGTH; máximo 4 elemento(s); patrón runtime `PHONE_PATTERN` | Otros teléfonos de la persona, además del principal; mismo formato que phone | `["+59170000000"]` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
@@ -1274,6 +1307,10 @@ Content-Type: application/json
 | `guardianName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del tutor o persona autorizada | `Nombre de ejemplo` |
 | `guardianPhone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del tutor, en formato E.164 o nacional | `+59170000000` |
 | `guardianRelationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto de emergencia (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
+| `additionalEmergencyContacts` | No | `array<AdditionalEmergencyContactDto>` | máximo 4 elemento(s) | Otros contactos de emergencia, además del primero | `[{"name":"Nombre de ejemplo","phone":"+59170000000","relationshipConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `additionalEmergencyContacts[].name` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del contacto | `Nombre de ejemplo` |
+| `additionalEmergencyContacts[].phone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del contacto, en formato E.164 o nacional | `+59170000000` |
+| `additionalEmergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
 | `privateInsurancePlanId` | No | `string` | formato `uuid` | Plan de la aseguradora privada declarada | `00000000-0000-4000-8000-000000000001` |
 | `publicInsurancePlanId` | No | `string` | formato `uuid` | Plan del seguro público declarado | `00000000-0000-4000-8000-000000000001` |
 | `billingTaxId` | No | `string` | longitud máxima 20; patrón runtime `/^[0-9]{4,20}$/` | NIT para facturación (sólo el número) | `00000000-0000-4000-8000-000000000001` |
@@ -1301,6 +1338,9 @@ Content-Type: application/json
   "email": "usuario@example.com",
   "birthDate": "2026-07-31",
   "phone": "+59170000000",
+  "additionalPhones": [
+    "+59170000000"
+  ],
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1320,6 +1360,13 @@ Content-Type: application/json
   "guardianName": "Nombre de ejemplo",
   "guardianPhone": "+59170000000",
   "guardianRelationshipConceptId": "00000000-0000-4000-8000-000000000001",
+  "additionalEmergencyContacts": [
+    {
+      "name": "Nombre de ejemplo",
+      "phone": "+59170000000",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
   "privateInsurancePlanId": "00000000-0000-4000-8000-000000000001",
   "publicInsurancePlanId": "00000000-0000-4000-8000-000000000001",
   "billingTaxId": "00000000-0000-4000-8000-000000000001",
@@ -1338,6 +1385,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterPatientResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1372,7 +1420,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1609,6 +1657,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterPractitionerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1678,7 +1727,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1774,6 +1823,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResendVerificationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1799,7 +1849,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1896,6 +1946,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResetPasswordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2004,6 +2055,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PurgeResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2116,6 +2168,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TokenResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2237,6 +2290,7 @@ Content-Type: multipart/form-data
 | 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegistrationDocumentUploadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2297,7 +2351,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Pre-cargar una imagen de firma o sello para el registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
 
 Contexto declarado en el controlador: Precarga de firma o sello: máximo 2 MB y sin lectura pública.
 
@@ -2354,13 +2408,12 @@ Content-Type: multipart/form-data
 |---:|---|---|---|
 | 201 | Recurso creado o acción registrada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 400 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegistrationDocumentUploadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2483,6 +2536,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerifyEmailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2589,6 +2643,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MySessionDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2700,6 +2755,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeMySessionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2809,6 +2865,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchUsersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2964,6 +3021,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3079,6 +3137,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserDetailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3206,6 +3265,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3314,6 +3374,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCredentialsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3445,6 +3506,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3571,6 +3633,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CredentialResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3687,6 +3750,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListDevicesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3832,6 +3896,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeviceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3945,6 +4010,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListGlobalRolesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4084,6 +4150,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4208,6 +4275,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4317,6 +4385,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListMfaFactorsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4460,6 +4529,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MfaFactorResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4586,6 +4656,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSessionsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4869,6 +4940,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssistedPractitionerRegistrationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4922,7 +4994,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -5042,6 +5114,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssistedRegistrationResponseDto`. Ejemplo completo derivado de ese DTO:
 

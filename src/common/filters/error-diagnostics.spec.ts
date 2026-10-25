@@ -116,6 +116,21 @@ describe('describeForDiagnostics', () => {
     });
   });
 
+  it('normaliza las rutas de Windows a `/`', () => {
+    const error = new TypeError('boom');
+    error.stack = [
+      'TypeError: boom',
+      '    at Object.<anonymous> (C:\\Users\\x\\repo\\src\\common\\filters\\error-traceability.http.spec.ts:39:11)',
+      '    at C:\\Users\\x\\repo\\node_modules\\express\\lib\\router\\layer.js:95:5',
+      '    at AppointmentsService.book (C:\\app\\dist\\src\\modules\\scheduling\\services\\appointments.service.js:120:31)',
+    ].join('\n');
+
+    expect(describeForDiagnostics(error).where).toEqual([
+      'src/common/filters/error-traceability.http.spec.ts:39:11',
+      'dist/src/modules/scheduling/services/appointments.service.js:120:31',
+    ]);
+  });
+
   it('incluye restricción, tabla y columna pero nunca el `detail` con el valor', () => {
     const diagnostics = describeForDiagnostics(new Error('fk'), {
       constraint: 'fk_appointments_patient_id',

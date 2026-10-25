@@ -1,7 +1,7 @@
 // Refleja los README.md reales de src/modules/<módulo>/ hacia
 // docs/modules/<módulo>.md para el portal MkDocs. No genera prosa nueva: cada
-// módulo ya tiene su "contrato por dominio" real (docs/progress/ESTADO-Y-PENDIENTES.md,
-// tabla "Mapa documental") — fuente de verdad = src/modules/<módulo>/README.md,
+// módulo ya tiene su "contrato por dominio" real (README.md de la raíz, tabla
+// "Arquitectura y mapa") — fuente de verdad = src/modules/<módulo>/README.md,
 // mantenida junto al código. Duplicar esa prosa a mano en docs/ sería
 // contenido genérico o desactualizado; este script la mantiene sincronizada.
 //
@@ -101,7 +101,7 @@ for (const name of modules) {
   Fuente real: src/modules/${name}/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo \`${name}\`

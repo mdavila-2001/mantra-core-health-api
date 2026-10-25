@@ -29,6 +29,7 @@ import {
 } from '../dto';
 import type { ClinicalNoteVersions } from '../entities';
 import { ClinicalReadService } from '../../clinical/services';
+import { ChartEncounterScopeService } from './chart-encounter-scope.service';
 
 /**
  * Casos de uso de la nota clínica versionada (UC-15-01..08).
@@ -48,12 +49,14 @@ export class ChartNotesService {
    * @param notesRepo - Valor de notes repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param encounterScope - Acota el encuentro del cuerpo al paciente del expediente (CHART-01).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly notesRepo: ClinicalNotesRepository,
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly encounterScope: ChartEncounterScopeService,
   ) {
     this.logger.setContext(ChartNotesService.name);
   }
@@ -83,6 +86,15 @@ export class ChartNotesService {
     // nada para que un 403 no deje cabecera.
     const authorProfileId = this.resolveAuthor(dto.authorProfileId, actor);
     return this.em.transactional(async (tx) => {
+      // CHART-01: el encuentro tiene que ser de ESTE paciente y seguir abierto;
+      // uno ajeno o inexistente responde igual y no deja cabecera.
+      if (dto.encounterId) {
+        await this.encounterScope.assertEncounterBelongsToPatientAndWritable(
+          tx,
+          dto.encounterId,
+          dto.patientProfileId,
+        );
+      }
       const header = this.notesRepo.createHeader(tx, {
         patientProfileId: dto.patientProfileId,
         encounterId: dto.encounterId,

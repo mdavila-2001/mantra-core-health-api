@@ -1,0 +1,1386 @@
+{
+  "generatedAt": "2026-10-24T20:12:37Z",
+  "regions": [
+    {
+      "region": "us",
+      "status": "consolidated",
+      "ref": "origin/justin/seed-dx-devices-us",
+      "commit": "b699958585e53ad25ee2d2f2db031a41dea7c26a",
+      "commitDate": "2026-10-24T14:00:48+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/inspiring-planck-xhpf4w",
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/claude/adoring-curie-xdkt83",
+        "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/dev",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/itzan/fix-forms-entity-registration"
+      ],
+      "manifestGeneratedAt": "2026-10-24T05:47:44.811Z",
+      "rowsRead": 215690,
+      "gaps": [
+        {
+          "source": "fda-gudid",
+          "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+          "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
+        }
+      ]
+    },
+    {
+      "region": "eu",
+      "status": "consolidated",
+      "ref": "origin/claude/adoring-curie-xdkt83",
+      "commit": "0ac247f88b6549dbb123fd0f9deff2d8f3298f31",
+      "commitDate": "2026-10-24T18:01:37+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/inspiring-planck-xhpf4w",
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/dev",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/test",
+        "origin/codex/upload-health-api-20261015",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/claude/adoring-curie-xdkt83-test",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/leonardo/carril-03-alta-paciente-test",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
+      ],
+      "manifestGeneratedAt": "2026-10-24T17:54:51Z",
+      "rowsRead": 503648,
+      "gaps": [
+        {
+          "source": "eudamed-certificates",
+          "reason": "sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "url": "https://ec.europa.eu/tools/eudamed/"
+        },
+        {
+          "source": "mhra-pard",
+          "reason": "sin descarga automática: Leído en vivo el 2026-10-24: pard.mhra.gov.uk solo muestra «© Crown Copyright» y no declara la Open Government Licence; los términos de GOV.UK (gov.uk/help/terms-conditions) dicen que la mayoría, no todo, del contenido de GOV.UK va bajo OGL, y PARD no está en GOV.UK. Además, los nombres de tipo GMDN son propiedad de la GMDN Agency con uso comercial restringido. Sin licencia abierta explícita: no se descarga (hueco).",
+          "url": "https://pard.mhra.gov.uk/"
+        },
+        {
+          "source": "swissmedic-swissdamed",
+          "reason": "sin descarga automática: Leído en vivo el 2026-10-24: las condiciones de uso de Swissmedic prohíben reproducir la información del sitio sin autorización expresa e incluyen expresamente toda extracción y almacenamiento automatizado (scraping/data mining), salvo las áreas pensadas para eso (RSS). No hay términos de reutilización propios de swissdamed. Sin autorización de Swissmedic NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "url": "https://swissdamed.ch/"
+        },
+        {
+          "source": "ec-nando",
+          "reason": "sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+        },
+        {
+          "source": "de-bfarm",
+          "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+        },
+        {
+          "source": "es-aemps-ccps",
+          "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.aemps.gob.es/"
+        },
+        {
+          "source": "fr-ansm",
+          "reason": "sin descarga automática: No aplica.",
+          "url": "https://ansm.sante.fr/"
+        }
+      ]
+    },
+    {
+      "region": "row",
+      "status": "consolidated",
+      "ref": "origin/claude/inspiring-planck-xhpf4w",
+      "commit": "24cbabb54cbb33bbce3580b21eb2dd4a81f69398",
+      "commitDate": "2026-10-24T19:00:53+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/claude/adoring-curie-xdkt83",
+        "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/dev",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
+      ],
+      "manifestGeneratedAt": "2026-10-24T18:30:58.088Z",
+      "rowsRead": 14239561,
+      "gaps": [
+        {
+          "source": "hc-mdall",
+          "reason": "503 en toda la API (health-products.canada.ca/api/medical-devices/…) al 2026-10-24; solo hay espejo de 2020-02-07",
+          "url": "https://health-products.canada.ca/api/documentation/mdall-documentation-en.html"
+        },
+        {
+          "source": "tga-artg",
+          "reason": "www.tga.gov.au no responde desde la nube (conexión cortada) al 2026-10-24; el ARTG completo no tiene espejo; solo hay DAEN parcial",
+          "url": "https://www.tga.gov.au/resources/artg"
+        },
+        {
+          "source": "mfds-devices",
+          "reason": "emedi.mfds.go.kr, udiportal.mfds.go.kr y www.data.go.kr no responden desde la nube (conexión cortada) al 2026-10-24",
+          "url": "https://udiportal.mfds.go.kr/"
+        },
+        {
+          "source": "amar-devices",
+          "reason": "data.gov.il no publica un conjunto de AMAR; el registro solo se consulta en gov.il",
+          "url": "https://data.gov.il/"
+        },
+        {
+          "source": "sfda-mdma",
+          "reason": "medicaldevice.sfda.gov.sa no responde desde la nube al 2026-10-24 (antes, 502)",
+          "url": "https://medicaldevice.sfda.gov.sa/"
+        },
+        {
+          "source": "thai-fda-devices",
+          "reason": "open.fda.moph.go.th no responde desde la nube al 2026-10-24 (antes, 502)",
+          "url": "https://open.fda.moph.go.th/"
+        },
+        {
+          "source": "mda-mdar",
+          "reason": "MDA publica el registro como buscador (mdar.mda.gov.my, «carian», exige un texto de búsqueda); el listado trae nombre, número de registro, establecimiento local y vigencia, pero no fabricante ni marca, que están en una ficha por registro",
+          "url": "https://mdar.mda.gov.my/"
+        },
+        {
+          "source": "cofepris-dispositivos",
+          "reason": "solo visor de consulta (registros.cofepris.gob.mx); datos.gob.mx no tiene conjuntos de dispositivos médicos (búsqueda CKAN, 0 resultados)",
+          "url": "https://registros.cofepris.gob.mx/"
+        },
+        {
+          "source": "anmat-productos-medicos",
+          "reason": "datos.gob.ar no tiene conjuntos de productos médicos de ANMAT (búsqueda CKAN «anmat»: solo vademécum y alimentos)",
+          "url": "https://datos.gob.ar/"
+        },
+        {
+          "source": "digemid-dispositivos",
+          "reason": "403 del propio servidor (www.digemid.minsa.gob.pe) al 2026-10-24",
+          "url": "https://www.digemid.minsa.gob.pe/"
+        },
+        {
+          "source": "isp-dispositivos",
+          "reason": "www.ispch.gob.cl no responde desde la nube al 2026-10-24",
+          "url": "https://www.ispch.gob.cl/"
+        },
+        {
+          "source": "agemed-dispositivos",
+          "reason": "el portal de AGEMED solo publica circulares y comunicados en PDF; sin listado de dispositivos registrados",
+          "url": "https://www.agemed.gob.bo/"
+        },
+        {
+          "source": "sahpra-devices",
+          "reason": "SAHPRA no publica un registro general de dispositivos descargable; solo las listas de kits de COVID-19 (cargadas) y licencias de establecimientos",
+          "url": "https://www.sahpra.org.za/medical-devices/"
+        },
+        {
+          "source": "unicef-supply",
+          "reason": "403 del propio servidor (supply.unicef.org → supplyhub.unicef.org) al 2026-10-24",
+          "url": "https://supply.unicef.org/"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source": "fda-ai-enabled-devices",
+      "region": "master",
+      "read": 1524,
+      "valid": 1524,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 1429,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-510k",
+      "region": "us",
+      "read": 71955,
+      "valid": 71955,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 71294,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-denovo",
+      "region": "us",
+      "read": 240,
+      "valid": 240,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 236,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-pma",
+      "region": "us",
+      "read": 2646,
+      "valid": 2646,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 2057,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-rl",
+      "region": "us",
+      "read": 110614,
+      "valid": 110614,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 108260,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-gudid",
+      "region": "us",
+      "read": 3130,
+      "valid": 3130,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 3130,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-maude",
+      "region": "us",
+      "read": 12930,
+      "valid": 12930,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 12241,
+      "attachedBySameModel": 24,
+      "invalidSamples": []
+    },
+    {
+      "source": "fda-recall",
+      "region": "us",
+      "read": 13692,
+      "valid": 13692,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 13222,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "cdc-livd-sars-cov-2",
+      "region": "us",
+      "read": 483,
+      "valid": 483,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 483,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "eudamed-udi",
+      "region": "eu",
+      "read": 303085,
+      "valid": 303085,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 240183,
+      "attachedBySameModel": 333,
+      "invalidSamples": []
+    },
+    {
+      "source": "it-salute-bdrdm",
+      "region": "eu",
+      "read": 200563,
+      "valid": 200563,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 118294,
+      "attachedBySameModel": 210,
+      "invalidSamples": []
+    },
+    {
+      "source": "anvisa-produtos",
+      "region": "row",
+      "read": 100681,
+      "valid": 100681,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 18627,
+      "attachedBySameModel": 352,
+      "invalidSamples": []
+    },
+    {
+      "source": "anvisa-produtos-modelos",
+      "region": "row",
+      "read": 3274089,
+      "valid": 3274089,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 96011,
+      "attachedBySameModel": 81,
+      "invalidSamples": []
+    },
+    {
+      "source": "pmda-approvals",
+      "region": "row",
+      "read": 35298,
+      "valid": 35298,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "hc-mdall",
+      "region": "row",
+      "read": 2333236,
+      "valid": 2333236,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 47732,
+      "attachedBySameModel": 589,
+      "invalidSamples": []
+    },
+    {
+      "source": "tga-daen",
+      "region": "row",
+      "read": 18917,
+      "valid": 18917,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 424,
+      "attachedBySameModel": 21,
+      "invalidSamples": []
+    },
+    {
+      "source": "cdsco-approved-devices",
+      "region": "row",
+      "read": 180124,
+      "valid": 180124,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 74428,
+      "attachedBySameModel": 420,
+      "invalidSamples": []
+    },
+    {
+      "source": "tfda-devices",
+      "region": "row",
+      "read": 93430,
+      "valid": 93430,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "tfda-tudid",
+      "region": "row",
+      "read": 688258,
+      "valid": 688258,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 4532,
+      "invalidSamples": []
+    },
+    {
+      "source": "invima-dispositivos",
+      "region": "row",
+      "read": 71434,
+      "valid": 71434,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 44794,
+      "attachedBySameModel": 129,
+      "invalidSamples": []
+    },
+    {
+      "source": "who-pq-ivd",
+      "region": "row",
+      "read": 435,
+      "valid": 435,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 435,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    },
+    {
+      "source": "hsa-smdr",
+      "region": "row",
+      "read": 20857,
+      "valid": 20857,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 45,
+      "invalidSamples": []
+    },
+    {
+      "source": "hsa-class-a",
+      "region": "row",
+      "read": 1127525,
+      "valid": 1127525,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 0,
+      "attachedBySameModel": 602,
+      "invalidSamples": []
+    },
+    {
+      "source": "nmpa-udi",
+      "region": "row",
+      "read": 6294994,
+      "valid": 6294994,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 249577,
+      "attachedBySameModel": 12,
+      "invalidSamples": []
+    },
+    {
+      "source": "sahpra-covid-ivd",
+      "region": "row",
+      "read": 283,
+      "valid": 283,
+      "invalid": 0,
+      "duplicates": 0,
+      "diagnostic": 283,
+      "attachedBySameModel": 0,
+      "invalidSamples": []
+    }
+  ],
+  "taxonomy": {
+    "nodes": 106607,
+    "bySystem": {
+      "in:cdsco-device-name": 75151,
+      "emdn": 8529,
+      "fda-product-code": 7099,
+      "jmdn": 3874,
+      "cn:nmpa-classification": 3216,
+      "br:anvisa-nome-tecnico": 2867,
+      "cnd": 2299,
+      "gmdn-pt": 1743,
+      "tw:tfda-classification": 1366,
+      "tw:tfda-category": 346,
+      "gmdn": 79,
+      "sg:hsa-speciality": 19,
+      "who:assay-format": 11,
+      "co:invima-grupo": 4,
+      "za:sahpra-covid-test-kit-list": 4
+    },
+    "diagnosticBySystem": {
+      "fda-product-code": 3123,
+      "emdn": 2520,
+      "cnd": 1681,
+      "gmdn": 79,
+      "co:invima-grupo": 2
+    },
+    "byDecision": {
+      "in:cdsco-device-name:null:null": 75151,
+      "emdn:null:null": 5831,
+      "jmdn:null:null": 3874,
+      "cn:nmpa-classification:null:null": 3216,
+      "fda-product-code:false:cfr-non-diagnostic-subpart": 3096,
+      "br:anvisa-nome-tecnico:null:null": 2867,
+      "emdn:true:emdn-category-w": 2275,
+      "fda-product-code:true:cfr-ivd-part": 2081,
+      "gmdn-pt:null:null": 1743,
+      "cnd:true:cnd-category-w": 1681,
+      "tw:tfda-classification:null:null": 1366,
+      "fda-product-code:true:cfr-subpart-title": 975,
+      "fda-product-code:null:no-regulation": 832,
+      "cnd:null:null": 618,
+      "tw:tfda-category:null:null": 346,
+      "emdn:true:emdn-group-title-inherited": 213,
+      "emdn:null:emdn-group-title-mixed-inherited": 174,
+      "gmdn:true:crosswalk-published": 79,
+      "fda-product-code:true:fda-review-panel-ivd": 67,
+      "fda-product-code:false:cfr-blood-establishment": 37,
+      "emdn:true:emdn-group-title": 32,
+      "sg:hsa-speciality:null:null": 19,
+      "who:assay-format:null:null": 11,
+      "fda-product-code:false:cfr-non-device-part": 5,
+      "emdn:null:emdn-group-title-mixed": 4,
+      "fda-product-code:null:cfr-section-outside-verified-ranges": 4,
+      "za:sahpra-covid-test-kit-list:null:null": 4,
+      "co:invima-grupo:null:null": 2,
+      "co:invima-grupo:true:invima-grupo-ivd": 2,
+      "fda-product-code:null:fda-code-not-in-pcd": 2
+    },
+    "diagnosticByBranch": {
+      "emdn:ivd": 2275,
+      "fda-product-code:ivd": 2148,
+      "cnd:ivd": 1681,
+      "fda-product-code:diagnostic": 777,
+      "emdn:diagnostic": 245,
+      "fda-product-code:monitoring": 198,
+      "gmdn:diagnostic": 78,
+      "co:invima-grupo:ivd": 2,
+      "gmdn:ivd": 1
+    },
+    "crosswalks": 218,
+    "crosswalksBySystems": {
+      "fda-product-code→gmdn": 109,
+      "gmdn→fda-product-code": 109
+    },
+    "diagnosticTypesWithModels": 6372,
+    "typesWithModels": 47946,
+    "ivdPanelsMeasured": [
+      "IM",
+      "MG",
+      "PA",
+      "TX"
+    ],
+    "panelParts": {
+      "DE": {
+        "872": 318,
+        "878": 3,
+        "880": 2,
+        "890": 3
+      },
+      "CV": {
+        "868": 1,
+        "870": 317,
+        "876": 1,
+        "878": 4,
+        "880": 1,
+        "892": 1
+      },
+      "AN": {
+        "868": 220,
+        "870": 8,
+        "872": 1,
+        "874": 1,
+        "876": 2,
+        "878": 3,
+        "882": 2,
+        "890": 1
+      },
+      "CH": {
+        "862": 473,
+        "864": 8,
+        "866": 4,
+        "868": 1,
+        "880": 5
+      },
+      "SU": {
+        "868": 1,
+        "870": 1,
+        "874": 2,
+        "876": 21,
+        "878": 466,
+        "880": 12,
+        "882": 2,
+        "890": 4,
+        "892": 2
+      },
+      "PM": {
+        "882": 3,
+        "888": 1,
+        "890": 199
+      },
+      "OR": {
+        "878": 16,
+        "882": 6,
+        "888": 269,
+        "890": 2
+      },
+      "MI": {
+        "610": 2,
+        "862": 5,
+        "864": 1,
+        "866": 508
+      },
+      "PA": {
+        "864": 268,
+        "866": 33
+      },
+      "TX": {
+        "862": 316,
+        "864": 2,
+        "866": 1
+      },
+      "GU": {
+        "870": 5,
+        "876": 529,
+        "878": 10,
+        "880": 1,
+        "882": 1,
+        "884": 5,
+        "890": 1,
+        "892": 1
+      },
+      "HE": {
+        "660": 3,
+        "862": 1,
+        "864": 223,
+        "866": 11,
+        "868": 1,
+        "880": 1
+      },
+      "IM": {
+        "862": 2,
+        "864": 6,
+        "866": 247
+      },
+      "OB": {
+        "862": 1,
+        "870": 2,
+        "876": 2,
+        "878": 2,
+        "884": 240,
+        "890": 1
+      },
+      "OP": {
+        "876": 3,
+        "878": 2,
+        "880": 1,
+        "886": 308,
+        "892": 5
+      },
+      "HO": {
+        "864": 2,
+        "868": 3,
+        "870": 7,
+        "872": 1,
+        "876": 7,
+        "878": 46,
+        "880": 296,
+        "882": 1,
+        "890": 6,
+        "892": 2
+      },
+      "RA": {
+        "872": 6,
+        "876": 1,
+        "884": 9,
+        "892": 184
+      },
+      "EN": {
+        "868": 3,
+        "872": 3,
+        "874": 229,
+        "878": 1,
+        "880": 2,
+        "882": 2,
+        "892": 4
+      },
+      "NE": {
+        "870": 9,
+        "874": 2,
+        "878": 2,
+        "882": 212,
+        "888": 6,
+        "890": 7
+      },
+      "MG": {
+        "864": 2,
+        "866": 4
+      }
+    }
+  },
+  "catalog": {
+    "rowsIncluded": 1110490,
+    "rowsNotDiagnostic": 2769,
+    "rowsAttachedBySameModel": 7350,
+    "rowsUndetermined": 13847164,
+    "rowsWithoutType": 3413059,
+    "undeterminedTopTypes": {
+      "(sin tipo)": 3413059,
+      "cn:nmpa-classification|16-06-01": 1541298,
+      "cn:nmpa-classification|13-01-01": 883931,
+      "br:anvisa-nome-tecnico|name:INSTRUMENTOS CIRÚRGICOS": 510063,
+      "cn:nmpa-classification|13-03-03": 303929,
+      "tw:tfda-category|M": 249133,
+      "br:anvisa-nome-tecnico|name:BROCAS CIRURGICAS": 185887,
+      "tw:tfda-classification|M.5925": 176869,
+      "cn:nmpa-classification|13-01-04": 173478,
+      "tw:tfda-category|N": 161322,
+      "cn:nmpa-classification|13-01-06": 148661,
+      "br:anvisa-nome-tecnico|name:INSTRUMENTAL PARA IMPLANTE ORTOPEDICO": 137914,
+      "cn:nmpa-classification|14-02-05": 128865,
+      "br:anvisa-nome-tecnico|name:PORCELANA/ CERÂMICA ODONTOLÓGICA": 127288,
+      "cn:nmpa-classification|13-03-04": 116654,
+      "tw:tfda-category|F": 102880,
+      "br:anvisa-nome-tecnico|name:SISTEMAS DE FIXAÇÃO ORTOPÉDICOS E DISPOSITIVOS ASSOCIADOS": 96572,
+      "br:anvisa-nome-tecnico|name:KIT INSTRUMENTAL": 89459,
+      "br:anvisa-nome-tecnico|name:AGULHAS DESCARTAVEIS": 73548,
+      "cn:nmpa-classification|13-06-01": 73441,
+      "tw:tfda-category|E": 73258,
+      "cn:nmpa-classification|01-03-04": 73030,
+      "cn:nmpa-classification|13-04-02": 71788,
+      "br:anvisa-nome-tecnico|name:COMPONENTES DE ORTESES E PROTESES EXTERNAS": 71261,
+      "br:anvisa-nome-tecnico|name:KIT CIRURGICO": 71000,
+      "cn:nmpa-classification|03-13-06": 68322,
+      "cn:nmpa-classification|02-13-06": 67738,
+      "br:anvisa-nome-tecnico|name:CANULAS": 67508,
+      "cn:nmpa-classification|04-12-02": 65981,
+      "cn:nmpa-classification|13-03-02": 65366,
+      "cn:nmpa-classification|13-03-01": 65262,
+      "cn:nmpa-classification|04-13-02": 64742,
+      "cn:nmpa-classification|04-05-02": 63798,
+      "cn:nmpa-classification|17-06-04": 62235,
+      "br:anvisa-nome-tecnico|name:CÂNULAS": 62200,
+      "cn:nmpa-classification|17-06-03": 61024,
+      "cn:nmpa-classification|13-04-01": 56580,
+      "tw:tfda-classification|M.3600": 55798,
+      "br:anvisa-nome-tecnico|name:BROCAS": 55102,
+      "br:anvisa-nome-tecnico|name:LAMINAS DESCARTAVEIS": 53855,
+      "tw:tfda-category|I": 51949,
+      "tw:tfda-classification|N.3030": 50669,
+      "br:anvisa-nome-tecnico|name:CATETERES": 50624,
+      "cn:nmpa-classification|17-08-02": 48903,
+      "br:anvisa-nome-tecnico|name:AGULHAS": 48148,
+      "cn:nmpa-classification|16-07-01": 47996,
+      "cn:nmpa-classification|17-06-02": 44721,
+      "br:anvisa-nome-tecnico|name:VESTIMENTA CIRURGICA": 43398,
+      "cn:nmpa-classification|02-13-01": 40125,
+      "cn:nmpa-classification|14-01-02": 39360
+    },
+    "manufacturers": 27736,
+    "brands": 316241,
+    "models": 729132,
+    "registrations": 1110490,
+    "modelsByJurisdictionCount": {
+      "1": 720310,
+      "2": 8611,
+      "3": 200,
+      "4": 11
+    },
+    "modelsByJurisdiction": {
+      "EU": 181668,
+      "US": 130393,
+      "IT": 118098,
+      "BR": 113974,
+      "CN": 95911,
+      "IN": 45419,
+      "CA": 44314,
+      "TW": 3797,
+      "CO": 3212,
+      "WHO": 435,
+      "AU": 420,
+      "SG": 318,
+      "ZA": 217
+    },
+    "manufacturersByCountry": {
+      "US": 13993,
+      "(sin país)": 3642,
+      "CN": 2411,
+      "DE": 879,
+      "IN": 647,
+      "CA": 552,
+      "IT": 472,
+      "GB": 435,
+      "KR": 402,
+      "FR": 372,
+      "IL": 326,
+      "TW": 314,
+      "JP": 292,
+      "CO": 218,
+      "BR": 209,
+      "NL": 200,
+      "ES": 183,
+      "CH": 164,
+      "SE": 152,
+      "AU": 139,
+      "UK": 136,
+      "TR": 127,
+      "IE": 115,
+      "DK": 111,
+      "FI": 100,
+      "BE": 96,
+      "MX": 88,
+      "AT": 79,
+      "PK": 75,
+      "PL": 71,
+      "SG": 69,
+      "HK": 61,
+      "CZ": 52,
+      "HU": 45,
+      "NO": 40,
+      "MY": 37,
+      "CR": 28,
+      "VN": 27,
+      "AR": 26,
+      "NZ": 21,
+      "PT": 20,
+      "LT": 19,
+      "RO": 17,
+      "ZA": 17,
+      "EG": 15,
+      "RU": 14,
+      "SI": 14,
+      "SK": 13,
+      "DO": 12,
+      "EL": 12,
+      "LU": 10,
+      "IR": 9,
+      "TH": 9,
+      "CL": 8,
+      "XI": 8,
+      "AE": 7,
+      "PR": 7,
+      "RS": 7,
+      "GR": 6,
+      "IS": 6,
+      "BG": 5,
+      "EE": 5,
+      "ID": 5,
+      "LV": 5,
+      "UY": 5,
+      "CU": 4,
+      "HR": 4,
+      "PA": 4,
+      "PH": 4,
+      "UA": 4,
+      "KP": 3,
+      "LB": 3,
+      "MC": 3,
+      "VG": 3,
+      "BB": 2,
+      "BY": 2,
+      "CY": 2,
+      "GT": 2,
+      "JO": 2,
+      "LI": 2,
+      "MU": 2,
+      "PE": 2,
+      "SA": 2,
+      "SC": 2,
+      "AL": 1,
+      "AM": 1,
+      "BA": 1,
+      "CS": 1,
+      "ET": 1,
+      "FL": 1,
+      "GA": 1,
+      "HN": 1,
+      "IM": 1,
+      "JM": 1,
+      "KE": 1,
+      "KH": 1,
+      "KN": 1,
+      "KY": 1,
+      "LK": 1,
+      "MA": 1,
+      "MM": 1,
+      "MT": 1,
+      "NI": 1,
+      "SM": 1,
+      "TN": 1,
+      "TT": 1,
+      "WS": 1
+    }
+  },
+  "manufacturers": {
+    "entitiesAll": 103678,
+    "mergesByRule": {
+      "same-name-same-country": 23715,
+      "same-name-no-country": 5758,
+      "same-name-unique-country": 4561,
+      "same-registry-id": 1019
+    },
+    "reviewByKind": {
+      "possible-group-shared-first-word": 8946,
+      "same-name-different-country": 2277,
+      "same-name-ambiguous-country": 1260,
+      "name-match-conflicting-ids": 510
+    }
+  },
+  "industry": {
+    "organizations": 46,
+    "mentions": 552,
+    "companies": 370,
+    "companiesMatchedToRegistry": 221,
+    "companiesOnlyInIndustryLists": 149
+  },
+  "emdnCopies": {
+    "rowsA": 8453,
+    "rowsB": 8454,
+    "onlyA": [],
+    "onlyB": [
+      "V020303"
+    ],
+    "differ": []
+  },
+  "emdnVersions": {
+    "latest": "v2026",
+    "previous": "V2",
+    "rowsLatest": 8516,
+    "rowsPrevious": 8454,
+    "onlyLatest": [
+      "A019017",
+      "A01901701",
+      "A01901702",
+      "A090102",
+      "C0104010206",
+      "C0104020210",
+      "C010404",
+      "C01040401",
+      "C0104040101",
+      "C0104040180",
+      "C0104040199",
+      "C01040402",
+      "C0104040201",
+      "C0104040202",
+      "C010404020201",
+      "C010404020202",
+      "C010404020280",
+      "C010404020299",
+      "C0104040203",
+      "C0104040204",
+      "C010404020401",
+      "C010404020402",
+      "C010404020480",
+      "C0104040280",
+      "C0104040299",
+      "C01901904",
+      "C0190190401",
+      "C0190190402",
+      "C0190190403",
+      "C01901905",
+      "C0404",
+      "C040401",
+      "C04040101",
+      "C04040102",
+      "C04040199",
+      "C040402",
+      "C04040201",
+      "C04040202",
+      "C04040299",
+      "H900803",
+      "J0304",
+      "K01010106",
+      "L031206",
+      "L1308",
+      "P9006",
+      "Q01010302",
+      "R010403",
+      "R010404",
+      "U14",
+      "V03010105",
+      "V080505",
+      "W01010132",
+      "W0102019018",
+      "W0102019019",
+      "W0105010306",
+      "W010501080301",
+      "W010501080302",
+      "W010501080303",
+      "W010501080304",
+      "W0105060304",
+      "W0106010118",
+      "W0106010306",
+      "W0106010402",
+      "Z110312",
+      "Z12030206",
+      "Z1203020601",
+      "Z1203020602",
+      "Z1203020603",
+      "Z1203020680",
+      "Z1203020682",
+      "Z1203020685",
+      "Z1203020692",
+      "Z1204021502",
+      "Z1204021599"
+    ],
+    "onlyPrevious": [
+      "C01901902",
+      "R01040101",
+      "R01040201",
+      "Z11030302",
+      "Z120306",
+      "Z12030601",
+      "Z12030602",
+      "Z12030603",
+      "Z12030680",
+      "Z12030682",
+      "Z12030685",
+      "Z12030692"
+    ],
+    "termChanged": [
+      "A01010502",
+      "A070101",
+      "A070102",
+      "A070103",
+      "A09",
+      "A0980",
+      "A0999",
+      "A1002",
+      "A10020201",
+      "B010403",
+      "B030201",
+      "B030204",
+      "C010401020199",
+      "L1112",
+      "L1199",
+      "L1204",
+      "C010401020502",
+      "C010502",
+      "C019019",
+      "C01901903",
+      "C01901999",
+      "C03010406",
+      "D020199",
+      "D060102",
+      "G0103",
+      "G010305",
+      "G030603",
+      "H0101010303",
+      "H010101030301",
+      "H010101030303",
+      "H010201020201",
+      "H010201020202",
+      "H010201020203",
+      "H0202020202",
+      "J010280",
+      "J010299",
+      "J02020202",
+      "J0301",
+      "J0302",
+      "J0303",
+      "K0102",
+      "L03140199",
+      "L06040501",
+      "L06060102",
+      "L0708010180",
+      "L11050399",
+      "L1304",
+      "L14010203",
+      "M0201050102",
+      "M030504",
+      "M04010203",
+      "P020399",
+      "Q01010101",
+      "Q01010103",
+      "Q010103",
+      "Q0210030203",
+      "R0104",
+      "R010401",
+      "R01040102",
+      "R01040103",
+      "R010402",
+      "R01040202",
+      "R01040203",
+      "R010480",
+      "R010499",
+      "R0105010102",
+      "R018099",
+      "U020102",
+      "V0301010201",
+      "W01010119",
+      "W0101060108",
+      "W0101060203",
+      "W010106020301",
+      "W0101060301",
+      "W0101060607",
+      "W0101070108",
+      "W0102050215",
+      "W0102060401",
+      "Z11020180",
+      "Z11020182",
+      "W0102100707",
+      "W01021102",
+      "W0103010105",
+      "W0103019001",
+      "W0103020103",
+      "W0103030301",
+      "W010306",
+      "W010399",
+      "W01040302",
+      "W0104030299",
+      "W0105010115",
+      "W0105010704",
+      "W01050108",
+      "W0105010803",
+      "W0105010899",
+      "W0105011203",
+      "W0105011608",
+      "W0105011708",
+      "W0105070202",
+      "W01050940",
+      "W0105094001",
+      "W0105094002",
+      "W0106010113",
+      "W0201020292",
+      "W020105010201",
+      "W0201050190",
+      "W020105019080",
+      "W020105019082",
+      "W020105019085",
+      "W020105019092",
+      "W020105019099",
+      "W0201060101",
+      "W0202030192",
+      "W0203010192",
+      "W020305",
+      "W02050116",
+      "Z11020285",
+      "Z11020292",
+      "Z110303",
+      "Z11030301",
+      "Z1103030101",
+      "Z1103030102",
+      "Z11030380",
+      "Z11030382",
+      "Z11030385",
+      "Z11030392",
+      "Z11050182",
+      "Z11069080",
+      "Z11900180",
+      "Z12011015",
+      "Z12039080",
+      "Z12040215",
+      "Z1204021580",
+      "Z1204021582",
+      "Z1204021585",
+      "Z1204021592",
+      "Z12062580",
+      "Z12062680",
+      "Z12080382",
+      "Z12140402",
+      "Z121590",
+      "Z12159080",
+      "Z12159082",
+      "Z12159085",
+      "Z12159092",
+      "Z12159099",
+      "Z121702",
+      "Z121703"
+    ],
+    "decisionChanged": []
+  },
+  "fdaCopies": {
+    "a": "openFDA 2026-10-21",
+    "b": "git:ej86/fda-ai-medical-device-analytics@8840a03632ff (2026-08-28)",
+    "countA": 7096,
+    "countB": 7088,
+    "onlyA": [
+      "QEO",
+      "SIW",
+      "SJA",
+      "SJB",
+      "SJD",
+      "SJH",
+      "SJJ",
+      "SJL"
+    ],
+    "onlyB": [],
+    "diffs": {
+      "name": [
+        {
+          "code": "QSE",
+          "a": "AlzheimerS Disease Pathology Assessment Test",
+          "b": "Alzheimer�S Disease Pathology Assessment Test"
+        },
+        {
+          "code": "SFH",
+          "a": "Pathology Software Algorithm Device Analyzing Digital Images For Prostate Cancer Prognosis",
+          "b": "Pathology Software Algorithm Device Analyzing Digital Images For Cancer Prognosis"
+        },
+        {
+          "code": "MNT",
+          "a": "Continuous, Minimal Ventilatory Support, Facility Use Ventilator",
+          "b": "Sv70 Ventilator"
+        },
+        {
+          "code": "PQV",
+          "a": "ß-Glucocerebrosidase (Gba) Newborn Screening Test System",
+          "b": "�-Glucocerebrosidase (Gba) Newborn Screening Test System"
+        },
+        {
+          "code": "QCM",
+          "a": "ß-Galactocerebrosidase (Galc) Newborn Screening Test System",
+          "b": "�-Galactocerebrosidase (Galc) Newborn Screening Test System"
+        },
+        {
+          "code": "SCG",
+          "a": "Modified Version Of Another ManufacturerS Fda-Authorized Test Within Scope Described In Preamble To Ldt Final Rule",
+          "b": "Modified Version Of Another Manufacturer�S Fda-Authorized Test Within Scope Described In Preamble To Ldt Final Rule"
+        },
+        {
+          "code": "ONG",
+          "a": "Powered Laser Surgical Instrument With MicrobeamFractional Output",
+          "b": "Powered Laser Surgical Instrument With Microbeam\\Fractional Output"
+        },
+        {
+          "code": "QMT",
+          "a": "Prep Kit  Vaccine Injection",
+          "b": "Prep Kit � Vaccine Injection"
+        },
+        {
+          "code": "PQO",
+          "a": "Anti-Müllerian Hormone Test System",
+          "b": "Anti-M�llerian Hormone Test System"
+        },
+        {
+          "code": "QEH",
+          "a": "Piston Syringe With Neuraxial Connector  Epidural, Peripheral, And/Or Indirect Cerebral Spinal Fluid Contact",
+          "b": "Piston Syringe With Neuraxial Connector � Epidural, Peripheral, And/Or Indirect Cerebral Spinal Fluid Contact"
+        }
+      ],
+      "class": [
+        {
+          "code": "OWE",
+          "a": "2",
+          "b": "3"
+        },
+        {
+          "code": "NYQ",
+          "a": "2",
+          "b": "3"
+        },
+        {
+          "code": "PNK",
+          "a": "2",
+          "b": "3"
+        },
+        {
+          "code": "MVD",
+          "a": "2",
+          "b": "3"
+        }
+      ],
+      "regulation": [
+        {
+          "code": "OWE",
+          "a": "864.1890",
+          "b": ""
+        },
+        {
+          "code": "NYQ",
+          "a": "864.1890",
+          "b": ""
+        },
+        {
+          "code": "PNK",
+          "a": "864.1890",
+          "b": ""
+        },
+        {
+          "code": "MVD",
+          "a": "864.1890",
+          "b": ""
+        }
+      ]
+    }
+  },
+  "actors": [
+    {
+      "region": "eu",
+      "files": [
+        {
+          "path": "actors/eudamed-actors-0001.ndjson.gz",
+          "declaredRows": 32753,
+          "sha256": "d6e12eb4b596b548c8af89d05b97741cab0d55c2e4b77be85a4d8519bd77f938",
+          "ok": true
+        }
+      ],
+      "valid": 32753,
+      "invalid": 0
+    }
+  ],
+  "official": {
+    "openfda-device-classification": {
+      "url": "https://download.open.fda.gov/device/classification/device-classification-0001-of-0001.json.zip",
+      "exportDate": "2026-10-21",
+      "downloadSha256": "0141400f49b9f2e8f075eabb8d0a841123e5904be061fab8addb42229b6bfa3d",
+      "path": "device-classification-0001-of-0001.json",
+      "sha256": "36518da242de3d516c2a3de7ba35bc1a1f97f5d3160740b42e3c072e181c04e4",
+      "license": "openFDA: dominio público, dedicación CC0 1.0 (https://open.fda.gov/license/)."
+    },
+    "ec-emdn-2026": {
+      "url": "https://webgate.ec.europa.eu/dyna2/emdn/build/EMDN%20v2026_EN..xlsx",
+      "exportDate": "v2026",
+      "downloadSha256": "a973dcdd8ae291248c9d06d355d3cc859d89a5584004db9354721c9c596bc1bd",
+      "path": "emdn-v2026.csv",
+      "sha256": "d6f512dc26230c0867e670646ba62d19eca12acca04b0600e1b7ca47ffd659c6",
+      "license": "© Unión Europea; CC BY 4.0 (aviso legal de la Comisión, https://commission.europa.eu/legal-notice_en, Decisión 2011/833/UE). Cambio: Excel → CSV con las columnas renombradas."
+    }
+  },
+  "mirrors": {
+    "ej86-fda-ai": {
+      "repo": "https://github.com/ej86/fda-ai-medical-device-analytics.git",
+      "commit": "8840a03632ffdc346a8bf05a459236c913b9198c",
+      "files": [
+        {
+          "path": "foiclass.csv",
+          "sha256": "ed54a12fe6ff0a5208146f1ec5829d248eac9b1dfec231db9677cc633d5b13de",
+          "officialUrl": "https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files"
+        },
+        {
+          "path": "aiml-devices-csv.csv",
+          "sha256": "4da0d15a1dcc7b6a7d45364f243e85aa4407ba3b63b6922a16fdbf96fea0d41d",
+          "officialUrl": "https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-enabled-medical-devices"
+        }
+      ]
+    },
+    "batirmedical-emdn": {
+      "repo": "https://github.com/BatirMedical/nomenclature-emdn.git",
+      "commit": "e0131762b3385c1085b97da9c5f74d32edb89df3",
+      "files": [
+        {
+          "path": "EMDN_BatirMedical.csv",
+          "sha256": "7972865360a3d8d61dcf6b2e4969e107a0413768febfd3f24ec00302d954e379",
+          "officialUrl": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        }
+      ]
+    },
+    "lisadonlon-emdn": {
+      "repo": "https://github.com/lisadonlon/GMDNEMDN.git",
+      "commit": "ef6086489b942d96ff0d2e18f9f1f8434a94f954",
+      "files": [
+        {
+          "path": "data/EMDN.txt",
+          "sha256": "033572eb47bb3f595c3fd9b1e8494680fd2dd189c4ee21261b4d64e3cab26f3f",
+          "officialUrl": "https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en"
+        }
+      ]
+    }
+  }
+}

@@ -18,6 +18,8 @@ import {
   deriveWebhookSecret,
   signPayload,
 } from '../../../common';
+import { MessagingErrorReason } from '../messaging.error-reasons';
+import { providerReceiptSignedString } from '../provider-receipt-signature';
 
 const actor = { id: 'user-1', roles: ['SYSTEM'] };
 const CHANNEL = '11111111-1111-1111-1111-111111111111';
@@ -290,6 +292,42 @@ describe('NotificationsService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
+    it('refuses an address-only request before touching persistence (recipient_user_id is NOT NULL)', async () => {
+      const d = build();
+
+      const attempt = d.service.createRequest(
+        { channelId: CHANNEL, recipientAddress: 'externo@example.com' } as any,
+        actor as any,
+      );
+
+      await expect(attempt).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: MessagingErrorReason.NOTIFICATION_RECIPIENT_INVALID,
+      });
+      expect(d.notificationsRepo.findChannelById).not.toHaveBeenCalled();
+      expect(
+        d.notificationsRepo.createNotificationRequest,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('persists the user together with the external address when both are given', async () => {
+      const d = build();
+      d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+
+      await d.service.createRequest(
+        { ...dto, recipientAddress: 'externo@example.com' },
+        actor,
+      );
+
+      expect(
+        d.notificationsRepo.createNotificationRequest.mock.calls[0][1],
+      ).toMatchObject({
+        recipientUserId: RECIPIENT,
+        recipientRefId: RECIPIENT,
+        recipientAddress: 'externo@example.com',
+      });
+    });
+
     it('refuses a template from another channel', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
@@ -322,6 +360,11 @@ describe('NotificationsService', () => {
       await expect(
         d.service.createRequest(dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(
+        d.service.createRequest(dto, actor as any),
+      ).rejects.toMatchObject({
+        reason: MessagingErrorReason.MESSAGE_CHANNEL_NOT_FOUND,
+      });
     });
   });
 
@@ -477,17 +520,24 @@ describe('NotificationsService', () => {
 
   describe('recordProviderReceipt (UC-35-12)', () => {
     // Cuerpo original del webhook y su firma HMAC válida bajo el secreto del
-    // proveedor (el mismo que deriva el servicio a partir de provider.id).
+    // proveedor (el mismo que deriva el servicio a partir de provider.id). La
+    // firma cubre el proveedor y todos los campos del acuse, no sólo el cuerpo.
     const RAW = { event: 'delivered' };
-    const SIGNATURE = signPayload(
-      deriveWebhookSecret('provider', PROVIDER),
-      canonicalJson(RAW),
-    );
-    const dto: any = {
+    const sign = (body: Record<string, unknown>) =>
+      signPayload(
+        deriveWebhookSecret('provider', PROVIDER),
+        providerReceiptSignedString('sendgrid', body as any),
+      );
+    const base = {
       providerMessageRef: 'prov-1',
       receiptType: 'DELIVERED',
       rawPayloadJson: RAW,
-      signature: SIGNATURE,
+    };
+    const dto: any = { ...base, signature: sign(base) };
+    /** Acuse con `changes` aplicados y firmado de nuevo, como lo haría el proveedor. */
+    const resigned = (changes: Record<string, unknown>): any => {
+      const body = { ...base, ...changes };
+      return { ...body, signature: sign(body) };
     };
 
     /**
@@ -528,10 +578,10 @@ describe('NotificationsService', () => {
       const d = build();
       wire(d);
 
-      const res = await d.service.recordProviderReceipt('sendgrid', {
-        ...dto,
-        receiptType: 'BOUNCED',
-      });
+      const res = await d.service.recordProviderReceipt(
+        'sendgrid',
+        resigned({ receiptType: 'BOUNCED' }),
+      );
 
       expect(res.deliveryStatusConceptId).toBe(CONCEPTS.NOTIF_DELIVERY_BOUNCED);
       expect(res.requestStatusConceptId).toBe(CONCEPTS.NOTIF_FAILED);
@@ -542,10 +592,10 @@ describe('NotificationsService', () => {
       const d = build();
       wire(d);
 
-      const res = await d.service.recordProviderReceipt('sendgrid', {
-        ...dto,
-        receiptType: 'READ',
-      });
+      const res = await d.service.recordProviderReceipt(
+        'sendgrid',
+        resigned({ receiptType: 'READ' }),
+      );
 
       expect(res.deliveryStatusConceptId).toBe(
         CONCEPTS.NOTIF_DELIVERY_DELIVERED,
@@ -583,6 +633,49 @@ describe('NotificationsService', () => {
       await expect(
         d.service.recordProviderReceipt('nope', dto),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('rejects a captured signature reused with a different receipt type or message (forgery)', async () => {
+      const d = build();
+      wire(d);
+
+      for (const tamper of [
+        { receiptType: 'BOUNCED' },
+        { providerMessageRef: 'prov-of-someone-else' },
+        { providerStatus: 'spam' },
+        { occurredAt: '2026-01-01T00:00:00Z' },
+        { rawPayloadJson: { event: 'bounced' } },
+      ]) {
+        await expect(
+          d.service.recordProviderReceipt('sendgrid', { ...dto, ...tamper }),
+        ).rejects.toBeInstanceOf(UnauthorizedException);
+      }
+      expect(d.notificationsRepo.createReceipt).not.toHaveBeenCalled();
+    });
+
+    it('rejects an acknowledgement signed for another provider code', async () => {
+      const d = build();
+      wire(d);
+
+      await expect(
+        d.service.recordProviderReceipt('mailgun', dto),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(d.notificationsRepo.createReceipt).not.toHaveBeenCalled();
+    });
+
+    it('rejects an acknowledgement without signature, with or without payload', async () => {
+      const d = build();
+      wire(d);
+
+      for (const body of [
+        { ...base, signature: undefined },
+        { providerMessageRef: 'prov-1', receiptType: 'DELIVERED' },
+      ]) {
+        await expect(
+          d.service.recordProviderReceipt('sendgrid', body as any),
+        ).rejects.toBeInstanceOf(UnauthorizedException);
+      }
+      expect(d.notificationsRepo.createReceipt).not.toHaveBeenCalled();
     });
 
     it('rejects an acknowledgement with an invalid signature (fail-closed)', async () => {

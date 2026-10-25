@@ -115,6 +115,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -239,6 +240,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<InvitationsIssuedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InvitationsIssuedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InvitationsIssuedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InvitationsIssuedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InvitationsIssuedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -348,6 +350,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PatientInvitationDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientInvitationDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientInvitationDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientInvitationDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientInvitationDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -461,6 +464,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientQuestionnaireDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientQuestionnaireDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientQuestionnaireDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientQuestionnaireDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientQuestionnaireDto`. Ejemplo completo derivado de ese DTO:
 
@@ -625,6 +629,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -650,8 +655,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Solo un paciente puede ver sus cuestionarios | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
-| 404 | `NOT_FOUND` | Cuestionario no encontrado | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 409 | `CONFLICT` | Este cuestionario ya fue respondido | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
+| 409 | `CONFLICT` | La respuesta ya fue registrada para este cuestionario | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El plazo para responder este cuestionario venció | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
 | 422 | `PRECONDITION_FAILED` | Hay más de una respuesta para la misma pregunta | Excepción explícita en src/modules/surveys/services/surveys-responses.service.ts |
@@ -745,6 +750,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<TemplateSummaryDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TemplateSummaryDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TemplateSummaryDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TemplateSummaryDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateSummaryDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -876,6 +882,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -989,6 +996,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<TemplateDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<TemplateDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<TemplateDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TemplateDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1146,6 +1154,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1260,6 +1269,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1400,6 +1410,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<QuestionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<QuestionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<QuestionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QuestionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuestionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1535,6 +1546,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1675,6 +1687,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1812,6 +1825,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1925,6 +1939,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<SurveyResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SurveyResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SurveyResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SurveyResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SurveyResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2051,6 +2066,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2082,6 +2098,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 409 | `CONFLICT` | Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 409 | `CONFLICT` | Otra solicitud abrió la versión siguiente; vuelva a consultar la plantilla | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2183,6 +2200,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
 

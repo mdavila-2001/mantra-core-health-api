@@ -45,5 +45,5 @@ no hay evidencia en esta fase de que eso esté ocurriendo.
 [mapa de integraciones](../architecture/integration-map.md) §2.
 
 ## Plan de revisión
-Revisar si el volumen real de eventos (medido en Fase 14, observabilidad) se acerca a los
-límites prácticos de una cola sobre PostgreSQL.
+Revisar si el volumen real de eventos se acerca a los límites prácticos de una cola sobre
+PostgreSQL.

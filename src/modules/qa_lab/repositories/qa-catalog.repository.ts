@@ -245,14 +245,20 @@ export class QaCatalogRepository {
     return em.findOne(TestSuites, { id });
   }
 
-  /** Añadir casos y publicar exigen la suite bloqueada. */
+  /**
+   * Añadir casos y publicar exigen la suite bloqueada.
+   *
+   * Con `tenantId` el filtro va en la consulta: no se bloquea (ni se espera el
+   * bloqueo de) una suite de otro tenant.
+   */
   findSuiteForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<TestSuites | null> {
     return em.findOne(
       TestSuites,
-      { id },
+      tenantId === undefined ? { id } : { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -479,6 +485,7 @@ export class QaCatalogRepository {
     now: Date,
     activeStateConceptId: string,
     limit: number,
+    tenantId?: string,
   ): Promise<TestSchedules[]> {
     return em.find(
       TestSchedules,
@@ -486,6 +493,7 @@ export class QaCatalogRepository {
         isEnabled: true,
         stateConceptId: activeStateConceptId,
         nextRunAt: { $lte: now },
+        ...(tenantId === undefined ? {} : { tenantId }),
       },
       {
         lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,

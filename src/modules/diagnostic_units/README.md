@@ -105,9 +105,14 @@ Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`
 Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
 activo y nunca reciben `tenantId` del cliente; los comandos requieren rol
 `SECURITY_ADMIN` (`@Roles('SECURITY_ADMIN')`) y `@CurrentUser()` como actor.
-Los identificadores de ruta se validan con `ParseUUIDPipe`. Los comandos todavía
-no comparan el tenant activo contra los recursos cargados por UUID; ver la
-[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/diagnostic_units.md).
+Los identificadores de ruta se validan con `ParseUUIDPipe`. Los comandos resuelven
+cada recurso con `DiagnosticUnitScopeService` dentro del tenant activo (hijo →
+sitio/cronograma → unidad → tenant): una unidad, sitio, acreditación, equipo, oferta,
+cronograma o precio de otro tenant responde igual que uno inexistente (`404`, `reason`
+`DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE`, sin `details`). El alta crea la unidad en el
+tenant del contexto; un `tenantId` del cuerpo solo se acepta si coincide. Los
+`practiceSiteId`, `practiceId` y `practitionerRoleAssignmentId` que declara el cuerpo
+pertenecen a `practice` y no se contrastan con el tenant desde este módulo.
 
 ## Conceptos
 

@@ -1,0 +1,85 @@
+{
+  "assertions": 18032,
+  "byType": {
+    "labeledin:expert-label-indication": {
+      "n": 1334,
+      "polarity": "positive"
+    },
+    "labeledin:crowd-label-indication": {
+      "n": 1516,
+      "polarity": "positive"
+    },
+    "pharmacotherapydb:DM": {
+      "n": 755,
+      "polarity": "positive"
+    },
+    "pharmacotherapydb:SYM": {
+      "n": 390,
+      "polarity": "positive"
+    },
+    "pharmacotherapydb:NOT": {
+      "n": 243,
+      "polarity": "negative"
+    },
+    "drugcentral-2016:indication": {
+      "n": 9094,
+      "polarity": "positive"
+    },
+    "drugmechdb:indication-mechanism-path": {
+      "n": 4662,
+      "polarity": "positive"
+    },
+    "maxo:treats": {
+      "n": 35,
+      "polarity": "positive"
+    },
+    "maxo:prevents": {
+      "n": 2,
+      "polarity": "positive"
+    },
+    "maxo:contraindicated": {
+      "n": 1,
+      "polarity": "negative"
+    }
+  },
+  "bySource": {
+    "labeledin": 2850,
+    "pharmacotherapydb": 1388,
+    "drugcentral-2016": 9094,
+    "drugmechdb": 4662,
+    "maxo": 38
+  },
+  "byPolarity": {
+    "positive": 17788,
+    "negative": 244
+  },
+  "passes": [
+    {
+      "number": 1,
+      "sources": [
+        "labeledin",
+        "pharmacotherapydb",
+        "drugcentral-2016",
+        "drugmechdb"
+      ],
+      "assertions": 17994,
+      "newPairs": 13939
+    },
+    {
+      "number": 2,
+      "sources": [
+        "maxo"
+      ],
+      "assertions": 38,
+      "newPairs": 33
+    }
+  ],
+  "distinctPositivePairs": 13972,
+  "distinctConditions": 2117,
+  "conditionsWithPositiveRelation": 2112,
+  "conditionsOnlyNegative": 5,
+  "distinctDrugs": 2414,
+  "assertionsWithDrugCentralDrug": 16890,
+  "assertionsWithMondoCondition": 12452,
+  "assertionsWithAtc": 0
+}

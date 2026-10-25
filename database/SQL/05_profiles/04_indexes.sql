@@ -124,6 +124,10 @@ CREATE INDEX IF NOT EXISTS "ix_health_practitioner_profiles_practice_status_conc
 
 CREATE INDEX IF NOT EXISTS "ix_health_practitioner_profiles_photo_file_id" ON "profiles"."health_practitioner_profiles" ("photo_file_id");
 
+CREATE INDEX IF NOT EXISTS "ix_health_practitioner_profiles_signature_file_id" ON "profiles"."health_practitioner_profiles" ("signature_file_id");
+
+CREATE INDEX IF NOT EXISTS "ix_health_practitioner_profiles_seal_file_id" ON "profiles"."health_practitioner_profiles" ("seal_file_id");
+
 CREATE INDEX IF NOT EXISTS "ix_health_practitioner_profiles_created_by_user_id" ON "profiles"."health_practitioner_profiles" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_health_practitioner_profiles_updated_by_user_id" ON "profiles"."health_practitioner_profiles" ("updated_by_user_id");
@@ -135,6 +139,8 @@ CREATE INDEX IF NOT EXISTS "ix_professional_credentials_credential_type_concept_
 CREATE INDEX IF NOT EXISTS "ix_professional_credentials_issuing_authority_tenant_id" ON "profiles"."professional_credentials" ("issuing_authority_tenant_id");
 
 CREATE INDEX IF NOT EXISTS "ix_professional_credentials_issuing_country_concept_id" ON "profiles"."professional_credentials" ("issuing_country_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_professional_credentials_profession_concept_id" ON "profiles"."professional_credentials" ("profession_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_professional_credentials_state_concept_id" ON "profiles"."professional_credentials" ("state_concept_id");
 

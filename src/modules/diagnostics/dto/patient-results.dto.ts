@@ -215,8 +215,7 @@ export class PatientOwnOrdersResponseDto {
  * `authz.resource_scope_grants` no tiene una columna para el motivo y este
  * carril no hace DDL. Un campo que se validaba pero no se guardaba en ningún
  * lado era peor que no tenerlo: quien lo mandaba creía que había quedado
- * registrado. Si el producto necesita el motivo, es un pedido a M1 para que lo
- * agregue al modelo (ver `docs/progress/DECISIONS.md`).
+ * registrado. Guardar el motivo exige una columna en el modelo.
  */
 export class ShareDiagnosticResultDto {
   /**

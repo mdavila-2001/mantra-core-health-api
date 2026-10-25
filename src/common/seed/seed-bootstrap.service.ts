@@ -28,7 +28,7 @@ import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
-import { loadSeedBootEnv } from './seed-boot.env';
+import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
 export interface SeedStepResult {
@@ -61,6 +61,13 @@ export interface SeedRunSummary {
    * normal: quien lo lea con el contenido encendido ve exactamente lo de antes.
    */
   skippedContent?: number;
+  /**
+   * Nombres de los pasos `core` que fallaron (SEED-01).
+   *
+   * Opcional por la misma razón que `skippedContent`: sólo aparece cuando hay
+   * algo que decir. Su presencia es lo que vuelve fatal el arranque.
+   */
+  coreFailed?: string[];
 }
 
 /**
@@ -219,7 +226,30 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       return;
     }
 
-    await this.run();
+    const summary = await this.run();
+    this.assertCoreSeedsComplete(summary);
+  }
+
+  /**
+   * SEED-01 · un paso `core` fallido no puede dejar que la API quede en pie.
+   *
+   * Sin el catálogo de conceptos, los roles o los departamentos, el proceso
+   * atiende HTTP pero toda escritura que dependa de ellos viola una FK NOT NULL.
+   * Se lanza **después** del resumen (ya registrado por `summarize`), así que el
+   * motivo queda en el log y `app.listen` no llega a ejecutarse.
+   *
+   * Es fatal siempre en `NODE_ENV=production` y, fuera de producción, sólo con
+   * `SEED_CORE_FAILURE_FATAL=true`: un desarrollador con una base a medio sembrar
+   * conserva su flujo local. Un fallo de contenido nunca es fatal; para degradarlo
+   * de forma explícita está `SEED_CONTENT_ON_BOOT=false`.
+   */
+  private assertCoreSeedsComplete(summary: SeedRunSummary): void {
+    if (!summary.coreFailed?.length) return;
+    if (!isCoreSeedFailureFatal()) return;
+    throw new Error(
+      'SYSTEM_SEED_CORE_INCOMPLETE: fallaron seeds núcleo: ' +
+        summary.coreFailed.join(', '),
+    );
   }
 
   /**
@@ -242,9 +272,11 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       this.terminology.run(),
     );
     steps.push(catalog);
+    const coreFailed: string[] = [];
 
     if (catalog.failed) {
-      const summary = this.summarize(steps, startup);
+      coreFailed.push(catalog.name);
+      const summary = this.summarize(steps, startup, 0, coreFailed);
       this.logger.error(
         { event: 'seed.aborted', ...summary },
         'Seeds estructurales omitidos: el catálogo de terminología no quedó ' +
@@ -264,10 +296,12 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         );
         continue;
       }
-      steps.push(await this.runStep(step.name, step.run));
+      const result = await this.runStep(step.name, step.run);
+      steps.push(result);
+      if (result.failed && step.kind === 'core') coreFailed.push(step.name);
     }
 
-    return this.summarize(steps, startup, skippedContent);
+    return this.summarize(steps, startup, skippedContent, coreFailed);
   }
 
   /**
@@ -561,12 +595,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param steps - Los pasos ya medidos.
    * @param startup - Marca de tiempo del inicio de la cadena.
    * @param skippedContent - Pasos de contenido que el entorno salteó.
+   * @param coreFailed - Nombres de los pasos `core` que fallaron.
    * @returns El resumen agregado.
    */
   private summarize(
     steps: SeedStepResult[],
     startup: number,
     skippedContent = 0,
+    coreFailed: readonly string[] = [],
   ): SeedRunSummary {
     const failed = steps.filter((step) => step.failed).length;
     const summary: SeedRunSummary = {
@@ -578,6 +614,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       // Solo cuando hubo salteados: con el contenido encendido el resumen
       // conserva exactamente la forma que tenía antes de que el flag existiera.
       ...(skippedContent > 0 ? { skippedContent } : {}),
+      ...(coreFailed.length > 0 ? { coreFailed: [...coreFailed] } : {}),
     };
 
     const line =

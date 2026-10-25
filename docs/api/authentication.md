@@ -48,9 +48,7 @@ con archivo y línea de cada `@Public()`, está en
 `POST /iam/auth/sessions/purge` es una operación administrativa de purga de sesiones (requiere rol,
 ver `docs/api/authorization.md`).
 
-## Brecha conocida
+## Documentación interactiva en producción
 
-`SwaggerModule`/Scalar (`/docs`, `/reference`) están deshabilitados en `NODE_ENV=production` sin
-una alternativa de exposición protegida definida — ver `SEC-002` en
-`docs/governance/traceability-matrix.md`. La estrategia de despliegue de la documentación
-interactiva en producción es una decisión pendiente, no una omisión de esta fase.
+`SwaggerModule`/Scalar (`/docs`, `/reference`) están deshabilitados en `NODE_ENV=production` y
+no hay una exposición protegida alternativa.

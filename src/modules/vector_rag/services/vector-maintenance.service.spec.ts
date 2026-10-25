@@ -1,4 +1,10 @@
 import { jest } from '@jest/globals';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  runWithTenant,
+} from '../../../common';
+import { VectorErrorReason } from '../vector_rag.error-reasons';
 
 /**
  * Ejecuta la operación mock fn.
@@ -30,6 +36,7 @@ function build() {
       ...data,
     })),
     findDocumentsForDeletion: mockFn(async () => []),
+    hasPriorDeletionJob: mockFn(async () => false),
     findChunksByDocuments: mockFn(async () => []),
     deleteEmbeddingsByChunks: mockFn(async () => 0),
     deleteChunks: mockFn(async () => 0),
@@ -59,7 +66,25 @@ function build() {
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, corpusRepo, catalogRepo, outbox, logger };
+  // Las operaciones exigen el tenant activo: estas pruebas actúan dentro de
+  // TENANT_ID. `raw` conserva la operación sin contexto para probar otro tenant.
+  const raw = service;
+  const scoped = Object.create(raw) as typeof service;
+  for (const name of ['propagateDeletion', 'reconcileCollection'] as const) {
+    (scoped as any)[name] = (...args: unknown[]) =>
+      runWithTenant(TENANT_ID, () => (raw as any)[name](...args));
+  }
+
+  return {
+    service: scoped,
+    raw,
+    em,
+    tx,
+    corpusRepo,
+    catalogRepo,
+    outbox,
+    logger,
+  };
 }
 
 describe('VectorMaintenanceService', () => {
@@ -126,6 +151,9 @@ describe('VectorMaintenanceService', () => {
 
     it('acepta borrar por paciente', async () => {
       const d = build();
+      d.corpusRepo.findDocumentsForDeletion.mockResolvedValue([
+        { id: 'doc-1' },
+      ]);
 
       await d.service.propagateDeletion(
         {
@@ -136,7 +164,7 @@ describe('VectorMaintenanceService', () => {
         actor,
       );
 
-      expect(d.corpusRepo.findDocumentsForDeletion.mock.calls[0][1]).toEqual({
+      expect(d.corpusRepo.findDocumentsForDeletion.mock.calls[0][2]).toEqual({
         sourceDocumentId: undefined,
         patientProfileId: PATIENT_ID,
       });
@@ -155,6 +183,9 @@ describe('VectorMaintenanceService', () => {
 
     it('avisa en el log y publica la purga', async () => {
       const d = build();
+      d.corpusRepo.findDocumentsForDeletion.mockResolvedValue([
+        { id: 'doc-1' },
+      ]);
 
       await d.service.propagateDeletion(DTO, actor);
 
@@ -304,6 +335,156 @@ describe('VectorMaintenanceService', () => {
         d2.corpusRepo.createReconciliationRun.mock.calls[0][1]
           .vectorManifestHash,
       );
+    });
+  });
+
+  describe('alcance de tenant del borrado (VEC-02)', () => {
+    const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+    const DTO = {
+      tenantId: TENANT_ID,
+      sourceDocumentId: DOC_A,
+      deletionReason: 'source_document_deleted',
+    } as any;
+
+    /** Falla esperada: devuelve la excepción o lanza si no hubo. */
+    async function failure(promise: Promise<unknown>) {
+      try {
+        await promise;
+      } catch (error) {
+        return error as ResourceNotFoundException;
+      }
+      throw new Error('debía rechazar');
+    }
+
+    it('Correcto: la selección del borrado se acota al tenant antes de tocar la primera fila', async () => {
+      const d = build();
+      d.corpusRepo.findDocumentsForDeletion.mockResolvedValue([
+        { id: 'doc-1' },
+      ]);
+      d.corpusRepo.findChunksByDocuments.mockResolvedValue([{ id: 'chunk-1' }]);
+      d.corpusRepo.deleteEmbeddingsByChunks.mockResolvedValue(2);
+      d.corpusRepo.deleteChunks.mockResolvedValue(1);
+      d.corpusRepo.deleteDocuments.mockResolvedValue(1);
+
+      const result = await d.service.propagateDeletion(DTO, actor);
+
+      expect(d.corpusRepo.findDocumentsForDeletion).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        { sourceDocumentId: DOC_A, patientProfileId: undefined },
+        expect.any(Number),
+      );
+      expect(d.corpusRepo.createDeletionJob).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: TENANT_ID }),
+      );
+      expect(result).toMatchObject({ documentsPurged: 1, verified: true });
+    });
+
+    it('Límite: con más documentos que el lote procesa sólo el lote y no da el borrado por verificado', async () => {
+      const d = build();
+      d.corpusRepo.findDocumentsForDeletion.mockResolvedValue([
+        { id: 'doc-1' },
+        { id: 'doc-2' },
+      ]);
+      d.corpusRepo.findChunksByDocuments.mockResolvedValue([]);
+
+      const result = await d.service.propagateDeletion(
+        { ...DTO, batchSize: 2 },
+        actor,
+      );
+
+      expect(d.corpusRepo.findDocumentsForDeletion.mock.calls[0][3]).toBe(2);
+      expect(result.verified).toBe(false);
+      expect(result.status).toBe('verifying');
+    });
+
+    it('Límite: la continuación de un borrado ya pedido por el tenant puede llegar a «no queda nada» y verificarse', async () => {
+      const d = build();
+      d.corpusRepo.hasPriorDeletionJob.mockResolvedValue(true);
+
+      const result = await d.service.propagateDeletion(DTO, actor);
+
+      expect(result).toMatchObject({ documentsPurged: 0, verified: true });
+    });
+
+    it('Error: una referencia que sólo coincide con la de otro tenant responde 404 sin borrar, sin job y sin evento', async () => {
+      const d = build();
+      // El repositorio acota por colecciones del tenant: la de B no aparece.
+      d.corpusRepo.findDocumentsForDeletion.mockResolvedValue([]);
+      d.corpusRepo.hasPriorDeletionJob.mockResolvedValue(false);
+
+      const error = await failure(d.service.propagateDeletion(DTO, actor));
+
+      expect(error.getStatus()).toBe(404);
+      expect(error.reason).toBe(VectorErrorReason.DELETION_TARGET_OUT_OF_SCOPE);
+      expect(error.details).toBeUndefined();
+      expect(d.corpusRepo.createDeletionJob).not.toHaveBeenCalled();
+      expect(d.corpusRepo.deleteEmbeddingsByChunks).not.toHaveBeenCalled();
+      expect(d.corpusRepo.deleteChunks).not.toHaveBeenCalled();
+      expect(d.corpusRepo.deleteDocuments).not.toHaveBeenCalled();
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('Falla catalogada: pedir el borrado a nombre de otro tenant responde 404 antes de consultar nada', async () => {
+      const d = build();
+
+      const error = await failure(
+        d.service.propagateDeletion({ ...DTO, tenantId: OTHER_TENANT }, actor),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.DELETION_TARGET_OUT_OF_SCOPE);
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.corpusRepo.findDocumentsForDeletion).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createDeletionJob).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo un actor corriente falla cerrado (412) y no consulta', async () => {
+      const d = build();
+
+      const error = await d.raw
+        .propagateDeletion(DTO, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(d.corpusRepo.findDocumentsForDeletion).not.toHaveBeenCalled();
+    });
+
+    it('SYSTEM sin tenant de petición borra en el tenant que declara el cuerpo', async () => {
+      const d = build();
+      d.corpusRepo.findDocumentsForDeletion.mockResolvedValue([
+        { id: 'doc-1' },
+      ]);
+
+      await d.raw.propagateDeletion({ ...DTO, tenantId: OTHER_TENANT }, {
+        id: 'svc',
+        roles: ['SYSTEM'],
+      } as any);
+
+      expect(d.corpusRepo.findDocumentsForDeletion.mock.calls[0][1]).toBe(
+        OTHER_TENANT,
+      );
+    });
+
+    it('reconciliar la colección de otro tenant responde 404 y no crea jobs ni corridas', async () => {
+      const d = build();
+      d.catalogRepo.findCollectionById.mockResolvedValue({
+        id: COLLECTION_ID,
+        tenantId: OTHER_TENANT,
+      });
+
+      const error = await failure(
+        d.service.reconcileCollection(
+          COLLECTION_ID,
+          { canonicalDocumentIds: [DOC_A], canonicalManifestHash: 'h' } as any,
+          actor,
+        ),
+      );
+
+      expect(error.reason).toBe(VectorErrorReason.RESOURCE_OUT_OF_SCOPE);
+      expect(d.catalogRepo.createJob).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createReconciliationRun).not.toHaveBeenCalled();
+      expect(d.corpusRepo.createDeletionJob).not.toHaveBeenCalled();
     });
   });
 });

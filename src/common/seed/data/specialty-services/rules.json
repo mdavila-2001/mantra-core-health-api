@@ -1,0 +1,886 @@
+{
+  "_nota": "Reglas de evidencia especialidad → servicio. Cada regla apunta a un texto que la FUENTE escribe (un encabezado de sección o la frase de quien presta el servicio dentro del propio descriptor). Nada se infiere por anatomía ni por parecido: si la fuente no nombra la especialidad, no hay relación. Las claves de frase se comparan normalizadas (mayúsculas, sin tildes, espacios simples). `null` = la fuente nombra una especialidad que VS_MEDICAL_SPECIALTY no tiene: se registra como hueco y NO se reasigna a la especialidad más parecida.",
+  "version": "2026.10.24",
+  "matchKinds": {
+    "exact": "El nombre de la fuente y el del modelo son el mismo, salvo tildes, mayúsculas o el artículo.",
+    "reordered": "Mismas palabras en otro orden o con «y»/«u» («Ortopedia y Traumatología» = «Traumatología y Ortopedia»).",
+    "national-name": "Nombre con que otro país llama a la misma especialidad (p. ej. «Enfermedades respiratorias» en Chile = Neumología; «Kinesiología» = Fisioterapia). Cada uno lleva su nota.",
+    "section-content": "El encabezado es ambiguo y el contenido de la sección lo desambigua; lleva nota con la razón."
+  },
+  "boArancelHeadings": {
+    "_fuente": "Arancel de Honorarios Médicos, Colegio Médico de Santa Cruz, julio 2025 (columna «especialidad» del dataset del repo). Todo procedimiento bajo el encabezado pertenece a esa especialidad según el arancel.",
+    "Anestesiología, Reanimación y Dolor (anexo)": {
+      "specialty": "ANESTESIOLOGIA",
+      "match": "exact",
+      "note": "Se asigna sólo Anestesiología: «Reanimación y Dolor» es parte del nombre de la sociedad, no una segunda especialidad declarada."
+    },
+    "Auditoría Médica": {
+      "specialty": null,
+      "note": "VS_MEDICAL_SPECIALTY no tiene Auditoría Médica."
+    },
+    "Cardiología": {
+      "specialty": "CARDIOLOGIA",
+      "match": "exact"
+    },
+    "Cirugía Cardíaca, Torácica y Vascular": {
+      "specialty": null,
+      "note": "Falta Cirugía Cardiovascular y de Tórax en el modelo."
+    },
+    "Cirugía General": {
+      "specialty": "CIRUGIA_GENERAL",
+      "match": "exact"
+    },
+    "Cirugía Pediátrica": {
+      "specialty": "CIRUGIA_PEDIATRICA",
+      "match": "exact"
+    },
+    "Cirugía Plástica, Estética y Reconstructiva": {
+      "specialty": null,
+      "note": "Falta Cirugía Plástica en el modelo."
+    },
+    "Coloproctología": {
+      "specialty": "COLOPROCTOLOGIA",
+      "match": "exact"
+    },
+    "Dermatología": {
+      "specialty": "DERMATOLOGIA",
+      "match": "exact"
+    },
+    "Emergenciología": {
+      "specialty": "MEDICINA_EMERGENCIA",
+      "match": "national-name",
+      "note": "En Bolivia la especialidad de Medicina de Emergencia se titula Emergenciología."
+    },
+    "Endocrinología, Metabolismo y Nutrición": {
+      "specialty": "ENDOCRINOLOGIA",
+      "match": "exact",
+      "note": "No se asigna NUTRICION: en el modelo es Nutrición y Dietética (licenciatura), otra profesión."
+    },
+    "Gastroenterología y Endoscopía Digestiva": {
+      "specialty": "GASTROENTEROLOGIA",
+      "match": "exact"
+    },
+    "Ginecología y Obstetricia": {
+      "specialty": "GINECOLOGIA_OBSTETRICIA",
+      "match": "exact"
+    },
+    "Hematología": {
+      "specialty": "HEMATOLOGIA",
+      "match": "exact"
+    },
+    "Mastología": {
+      "specialty": null,
+      "note": "Falta Mastología en el modelo."
+    },
+    "Medicina Crítica y Terapia Intensiva": {
+      "specialty": "MEDICINA_INTENSIVA",
+      "match": "national-name",
+      "note": "Nombre boliviano de la Medicina Intensiva de adultos."
+    },
+    "Medicina Física y Rehabilitación": {
+      "specialty": "MEDICINA_FISICA_REHABILITACION",
+      "match": "exact"
+    },
+    "Medicina General": {
+      "specialty": "MEDICINA_GENERAL",
+      "match": "exact"
+    },
+    "Medicina Interna": {
+      "specialty": "MEDICINA_INTERNA",
+      "match": "exact"
+    },
+    "Nefrología": {
+      "specialty": "NEFROLOGIA",
+      "match": "exact"
+    },
+    "Neurocirugía": {
+      "specialty": null,
+      "note": "Falta Neurocirugía en el modelo."
+    },
+    "Neurología": {
+      "specialty": "NEUROLOGIA",
+      "match": "exact"
+    },
+    "Neurología Pediátrica": {
+      "specialty": "NEUROLOGIA_PEDIATRICA",
+      "match": "exact"
+    },
+    "Oftalmología": {
+      "specialty": "OFTALMOLOGIA",
+      "match": "exact"
+    },
+    "Oncología": {
+      "specialty": "ONCOLOGIA",
+      "match": "exact"
+    },
+    "Otorrinolaringología y Cirugía de Cabeza y Cuello": {
+      "specialty": "OTORRINOLARINGOLOGIA",
+      "match": "exact",
+      "note": "La Cirugía de Cabeza y Cuello no existe aparte en el modelo; el arancel la agrupa bajo ORL."
+    },
+    "Patología": {
+      "specialty": "ANATOMIA_PATOLOGICA",
+      "match": "section-content",
+      "note": "La sección arancela biopsias, piezas quirúrgicas, citologías e inmunohistoquímica: es Anatomía Patológica, no Patología Clínica (laboratorio)."
+    },
+    "Pediatría": {
+      "specialty": "PEDIATRIA",
+      "match": "exact"
+    },
+    "Psiquiatría": {
+      "specialty": "PSIQUIATRIA",
+      "match": "exact"
+    },
+    "Radiología": {
+      "specialty": "RADIOLOGIA",
+      "match": "exact"
+    },
+    "Reumatología": {
+      "specialty": "REUMATOLOGIA",
+      "match": "exact"
+    },
+    "Salud Pública": {
+      "specialty": null,
+      "note": "Falta Salud Pública en el modelo; además arancela consultorías, no atención."
+    },
+    "Terapia Intensiva Pediátrica": {
+      "specialty": "TERAPIA_INTENSIVA_PEDIATRICA",
+      "match": "exact"
+    },
+    "Traumatología y Ortopedia": {
+      "specialty": "TRAUMATOLOGIA",
+      "match": "exact"
+    },
+    "Urología": {
+      "specialty": "UROLOGIA",
+      "match": "exact"
+    }
+  },
+  "boDentalSections": {
+    "_fuente": "Listado arancel odontológico 2026 (columna «seccion»). Todo el listado es odontológico: cada fila va a ODONTOLOGIA; las secciones que nombran una especialidad odontológica del modelo la suman.",
+    "_all": "ODONTOLOGIA",
+    "ENDODONCIA": {
+      "specialty": "ENDODONCIA",
+      "match": "exact"
+    },
+    "PERIODONCIA": {
+      "specialty": "PERIODONCIA",
+      "match": "exact"
+    },
+    "ODONTOPEDIATRIA": {
+      "specialty": "ODONTOPEDIATRIA",
+      "match": "exact"
+    },
+    "PROTESIS Y/O REHABILITACION ORAL": {
+      "specialty": "REHABILITACION_ORAL",
+      "match": "exact"
+    },
+    "CIRUGIA": {
+      "specialty": null,
+      "note": "«Cirugía» a secas dentro del arancel odontológico es cirugía bucal general (exodoncias); no nombra Cirugía Oral y Maxilofacial."
+    },
+    "DENTISTICA OPERATORIA": {
+      "specialty": null,
+      "note": "Sin especialidad propia en el modelo; queda sólo en ODONTOLOGIA."
+    },
+    "RADIOLOGIA": {
+      "specialty": null,
+      "note": "Radiología odontológica; RADIOLOGIA del modelo es la médica."
+    },
+    "DIAGNOSTICO": {
+      "specialty": null
+    },
+    "PREVENCION": {
+      "specialty": null
+    }
+  },
+  "fonasaGroups": {
+    "_fuente": "Arancel FONASA MLE 2026: el primer par de dígitos del código es el grupo. Sólo se asigna por grupo cuando el título oficial del grupo nombra UNA especialidad del modelo. Los grupos combinados no se reparten: se cubren sólo por el descriptor. Los títulos se corroboraron contra el conteo de prestaciones por grupo publicado por terceros (cliini.ai, búsqueda del 2026-10-24), que coincide exactamente con el XLSX; los que no se pudieron corroborar dicen «título no corroborado» y no asignan nada.",
+    "01": {
+      "title": "Atención abierta (consultas)",
+      "specialty": null,
+      "note": "Varias especialidades: por descriptor."
+    },
+    "02": {
+      "title": "Días cama",
+      "specialty": null
+    },
+    "03": {
+      "title": "Exámenes de laboratorio",
+      "specialty": null,
+      "excluded": "Lo cubre la sesión de análisis clínicos."
+    },
+    "04": {
+      "title": "Imagenología",
+      "specialty": "RADIOLOGIA",
+      "match": "exact",
+      "note": "VS: «Radiología e Imagenología»."
+    },
+    "05": {
+      "title": "Medicina nuclear y radioterapia",
+      "specialty": null,
+      "note": "Falta Medicina Nuclear / Radioterapia en el modelo."
+    },
+    "06": {
+      "title": "Kinesiología y terapia ocupacional",
+      "specialty": null,
+      "note": "Grupo combinado (kinesiología + terapia ocupacional)."
+    },
+    "07": {
+      "title": "Medicina transfusional y banco de tejidos",
+      "specialty": null
+    },
+    "08": {
+      "title": "Anatomía patológica",
+      "specialty": "ANATOMIA_PATOLOGICA",
+      "match": "exact"
+    },
+    "09": {
+      "title": "Psiquiatría y psicología clínica",
+      "specialty": null,
+      "note": "Grupo combinado: por descriptor."
+    },
+    "10": {
+      "title": "(título no corroborado)",
+      "specialty": null
+    },
+    "11": {
+      "title": "Neurología y neurocirugía",
+      "specialty": null,
+      "note": "Grupo combinado y Neurocirugía falta en el modelo."
+    },
+    "12": {
+      "title": "Oftalmología",
+      "specialty": "OFTALMOLOGIA",
+      "match": "exact"
+    },
+    "13": {
+      "title": "Otorrinolaringología",
+      "specialty": "OTORRINOLARINGOLOGIA",
+      "match": "exact"
+    },
+    "14": {
+      "title": "Cirugía de cabeza y cuello",
+      "specialty": null,
+      "note": "Falta en el modelo."
+    },
+    "15": {
+      "title": "Cirugía plástica y reparadora",
+      "specialty": null,
+      "note": "Falta en el modelo."
+    },
+    "16": {
+      "title": "Dermatología y tegumentos",
+      "specialty": "DERMATOLOGIA",
+      "match": "exact",
+      "note": "«Tegumentos» es el sistema, no otra especialidad."
+    },
+    "17": {
+      "title": "Cardiología, neumología y cirugía cardiovascular y de tórax",
+      "specialty": null,
+      "note": "Grupo combinado."
+    },
+    "18": {
+      "title": "Gastroenterología",
+      "specialty": "GASTROENTEROLOGIA",
+      "match": "exact"
+    },
+    "19": {
+      "title": "Urología y nefrología",
+      "specialty": null,
+      "note": "Grupo combinado."
+    },
+    "20": {
+      "title": "Obstetricia y ginecología",
+      "specialty": "GINECOLOGIA_OBSTETRICIA",
+      "match": "reordered"
+    },
+    "21": {
+      "title": "Ortopedia y traumatología",
+      "specialty": "TRAUMATOLOGIA",
+      "match": "reordered"
+    },
+    "22": {
+      "title": "Anestesia",
+      "specialty": "ANESTESIOLOGIA",
+      "match": "exact"
+    },
+    "23": {
+      "title": "Prótesis, órtesis y dispositivos médicos",
+      "specialty": null
+    },
+    "24": {
+      "title": "Traslados",
+      "specialty": null
+    },
+    "25": {
+      "title": "Pago asociado a diagnóstico (PAD)",
+      "specialty": null
+    },
+    "26": {
+      "title": "Atenciones integrales, otros profesionales y técnicos",
+      "specialty": null,
+      "note": "Por descriptor."
+    },
+    "28": {
+      "title": "Pago asociado a emergencia (PAE)",
+      "specialty": null
+    },
+    "29": {
+      "title": "(título no corroborado)",
+      "specialty": null
+    },
+    "33": {
+      "title": "(título no corroborado)",
+      "specialty": null
+    }
+  },
+  "performer": {
+    "_nota": "Patrones del descriptor que nombran a QUIEN presta el servicio. La captura (resto del descriptor) se recorta por los delimitadores y se busca EXACTA en `phrases`. Una captura que no está en la tabla queda en el reporte como «frase sin regla», sin relación.",
+    "patterns": {
+      "cups": [
+        "\\bPOR ESPECIALISTA EN (.+)$",
+        "\\bPOR (MEDICINA GENERAL|MEDICINA ESPECIALIZADA|OTRAS ESPECIALIDADES MEDICAS|ODONTOLOGIA GENERAL|ODONTOLOGIA ESPECIALIZADA|OTRAS ESPECIALIDADES EN ODONTOLOGIA|ODONTOLOGIA|HIGIENE ORAL|ENFERMERIA|NUTRICION Y DIETETICA|PSICOLOGIA|OTRAS ESPECIALIDADES DE PSICOLOGIA|FISIOTERAPIA|PSIQUIATRIA|TERAPIA OCUPACIONAL|TERAPIA RESPIRATORIA|FONIATRIA Y FONOAUDIOLOGIA|FONOAUDIOLOGIA|TRABAJO SOCIAL|OPTOMETRIA|TERAPIAS ALTERNATIVAS|EQUIPO INTERDISCIPLINARIO|AGENTE EDUCATIVO)\\b(.*)$"
+      ],
+      "fonasa": [
+        "^(?:TELE)?CONSULTA MEDICA DE ESPECIALIDAD EN (.+)$",
+        "^(?:TELE)?CONSULTA (MEDICINA GENERAL)$",
+        "\\b(PSICOLOGO CLINICO)\\b",
+        "\\bDE (CARDIOLOGO)\\b",
+        "^(?:TELECONSULTA: )?ATENCION INTEGRAL DE (ENFERMERIA|NUTRICIONISTA|MATRONERIA)\\b",
+        "\\bHONORARIO (?:DE )?(MATRONA)\\b",
+        "^(?:TELEREHABILITACION: )?(?:EVALUACION|ATENCION) (KINESIOLOGICA)\\b",
+        "^(?:TELEREHABILITACION: )?(?:ATENCION INTEGRAL DE|INTERVENCION(?: DE)?) (TERAPIA OCUPACIONAL)\\b",
+        "\\bINTEGRAL DE (FONOAUDIOLOGO)\\b",
+        "^ATENCION (ODONTOLOGICA) INTEGRAL\\b"
+      ]
+    },
+    "trailingCut": [
+      "\\s*\\(1RA CONSULTA\\)$",
+      "\\s+Y CASO \\(PACIENTE\\)$",
+      "\\s+(ADULTOS?|PEDIATRICOS?)$"
+    ],
+    "phrases": {
+      "MEDICINA GENERAL": {
+        "specialty": "MEDICINA_GENERAL",
+        "match": "exact"
+      },
+      "MEDICINA FAMILIAR": {
+        "specialty": "MEDICINA_FAMILIAR",
+        "match": "exact"
+      },
+      "MEDICINA INTERNA": {
+        "specialty": "MEDICINA_INTERNA",
+        "match": "exact"
+      },
+      "PEDIATRIA": {
+        "specialty": "PEDIATRIA",
+        "match": "exact"
+      },
+      "GINECOLOGIA Y OBSTETRICIA": {
+        "specialty": "GINECOLOGIA_OBSTETRICIA",
+        "match": "exact"
+      },
+      "OBSTETRICIA Y GINECOLOGIA": {
+        "specialty": "GINECOLOGIA_OBSTETRICIA",
+        "match": "reordered"
+      },
+      "CARDIOLOGIA": {
+        "specialty": "CARDIOLOGIA",
+        "match": "exact"
+      },
+      "CARDIOLOGO": {
+        "specialty": "CARDIOLOGIA",
+        "match": "exact",
+        "note": "FONASA 0101006: «asistencia de cardiólogo»."
+      },
+      "CARDIOLOGIA PEDIATRICA": {
+        "specialty": "CARDIOLOGIA_PEDIATRICA",
+        "match": "exact"
+      },
+      "NEUROLOGIA": {
+        "specialty": "NEUROLOGIA",
+        "match": "exact"
+      },
+      "NEUROLOGIA PEDIATRICA": {
+        "specialty": "NEUROLOGIA_PEDIATRICA",
+        "match": "exact"
+      },
+      "DERMATOLOGIA": {
+        "specialty": "DERMATOLOGIA",
+        "match": "exact"
+      },
+      "ENDOCRINOLOGIA": {
+        "specialty": "ENDOCRINOLOGIA",
+        "match": "exact"
+      },
+      "GASTROENTEROLOGIA": {
+        "specialty": "GASTROENTEROLOGIA",
+        "match": "exact"
+      },
+      "NEUMOLOGIA": {
+        "specialty": "NEUMOLOGIA",
+        "match": "exact"
+      },
+      "ENFERMEDADES RESPIRATORIAS": {
+        "specialty": "NEUMOLOGIA",
+        "match": "national-name",
+        "note": "Chile titula «Enfermedades Respiratorias» a la especialidad de Neumología (FONASA 0101321)."
+      },
+      "NEFROLOGIA": {
+        "specialty": "NEFROLOGIA",
+        "match": "exact"
+      },
+      "UROLOGIA": {
+        "specialty": "UROLOGIA",
+        "match": "exact"
+      },
+      "ORTOPEDIA Y TRAUMATOLOGIA": {
+        "specialty": "TRAUMATOLOGIA",
+        "match": "reordered"
+      },
+      "TRAUMATOLOGIA Y ORTOPEDIA": {
+        "specialty": "TRAUMATOLOGIA",
+        "match": "exact"
+      },
+      "ORTOPEDIA Y TRAUMATOLOGIA PEDIATRICA": {
+        "specialty": "ORTOPEDIA_PEDIATRICA",
+        "match": "reordered",
+        "note": "VS: «Ortopedia Pediátrica»."
+      },
+      "CIRUGIA GENERAL": {
+        "specialty": "CIRUGIA_GENERAL",
+        "match": "exact"
+      },
+      "CIRUGIA PEDIATRICA": {
+        "specialty": "CIRUGIA_PEDIATRICA",
+        "match": "exact"
+      },
+      "CIRUGIA ONCOLOGICA": {
+        "specialty": "CIRUGIA_ONCOLOGICA",
+        "match": "exact"
+      },
+      "COLOPROCTOLOGIA": {
+        "specialty": "COLOPROCTOLOGIA",
+        "match": "exact"
+      },
+      "OFTALMOLOGIA": {
+        "specialty": "OFTALMOLOGIA",
+        "match": "exact"
+      },
+      "OTORRINOLARINGOLOGIA": {
+        "specialty": "OTORRINOLARINGOLOGIA",
+        "match": "exact"
+      },
+      "PSIQUIATRIA": {
+        "specialty": "PSIQUIATRIA",
+        "match": "exact"
+      },
+      "PSICOLOGIA": {
+        "specialty": "PSICOLOGIA_CLINICA",
+        "match": "national-name",
+        "note": "CUPS nombra la profesión («por psicología»); el modelo sólo tiene Psicología Clínica para el psicólogo que atiende."
+      },
+      "PSICOLOGO CLINICO": {
+        "specialty": "PSICOLOGIA_CLINICA",
+        "match": "exact"
+      },
+      "ONCOLOGIA": {
+        "specialty": "ONCOLOGIA",
+        "match": "exact"
+      },
+      "ONCOLOGIA MEDICA": {
+        "specialty": "ONCOLOGIA",
+        "match": "exact"
+      },
+      "ONCOLOGIA PEDIATRICA": {
+        "specialty": "ONCOLOGIA_PEDIATRICA",
+        "match": "exact"
+      },
+      "HEMATOLOGIA": {
+        "specialty": "HEMATOLOGIA",
+        "match": "exact"
+      },
+      "REUMATOLOGIA": {
+        "specialty": "REUMATOLOGIA",
+        "match": "exact"
+      },
+      "INFECTOLOGIA": {
+        "specialty": "INFECTOLOGIA",
+        "match": "exact"
+      },
+      "INFECTOLOGIA PEDIATRICA": {
+        "specialty": "INFECTOLOGIA_PEDIATRICA",
+        "match": "exact"
+      },
+      "GERIATRIA": {
+        "specialty": "GERIATRIA",
+        "match": "exact"
+      },
+      "ANESTESIOLOGIA": {
+        "specialty": "ANESTESIOLOGIA",
+        "match": "exact"
+      },
+      "RADIOLOGIA E IMAGENES DIAGNOSTICAS": {
+        "specialty": "RADIOLOGIA",
+        "match": "exact",
+        "note": "VS: «Radiología e Imagenología»."
+      },
+      "MEDICINA DE URGENCIA": {
+        "specialty": "MEDICINA_EMERGENCIA",
+        "match": "national-name",
+        "note": "Nombre chileno de Medicina de Emergencia."
+      },
+      "URGENCIAS O EMERGENCIAS": {
+        "specialty": "MEDICINA_EMERGENCIA",
+        "match": "national-name",
+        "note": "CUPS 890793."
+      },
+      "NUTRICION Y DIETETICA": {
+        "specialty": "NUTRICION",
+        "match": "exact"
+      },
+      "NUTRICIONISTA": {
+        "specialty": "NUTRICION",
+        "match": "exact"
+      },
+      "ENFERMERIA": {
+        "specialty": "ENFERMERIA",
+        "match": "exact"
+      },
+      "MATRONERIA": {
+        "specialty": "OBSTETRICIA",
+        "match": "national-name",
+        "note": "La matrona chilena es la obstetriz boliviana (licenciatura en Obstetricia)."
+      },
+      "FISIOTERAPIA": {
+        "specialty": "FISIOTERAPIA",
+        "match": "exact"
+      },
+      "MEDICINA FISICA Y REHABILITACION": {
+        "specialty": "MEDICINA_FISICA_REHABILITACION",
+        "match": "exact"
+      },
+      "MEDICINA DEL DEPORTE": {
+        "specialty": "MEDICINA_DEPORTIVA",
+        "match": "exact"
+      },
+      "MEDICINA DEL TRABAJO O SEGURIDAD Y SALUD EN EL TRABAJO": {
+        "specialty": "MEDICINA_DEL_TRABAJO",
+        "match": "exact"
+      },
+      "MEDICINA MATERNO FETAL": {
+        "specialty": "MEDICINA_MATERNO_FETAL",
+        "match": "exact"
+      },
+      "NEONATOLOGIA": {
+        "specialty": "NEONATOLOGIA",
+        "match": "exact"
+      },
+      "ODONTOLOGIA GENERAL": {
+        "specialty": "ODONTOLOGIA",
+        "match": "exact"
+      },
+      "ODONTOLOGIA ESPECIALIZADA": {
+        "specialty": "ODONTOLOGIA",
+        "match": "exact"
+      },
+      "ENDODONCIA": {
+        "specialty": "ENDODONCIA",
+        "match": "exact"
+      },
+      "ODONTOPEDIATRIA": {
+        "specialty": "ODONTOPEDIATRIA",
+        "match": "exact"
+      },
+      "PERIODONCIA": {
+        "specialty": "PERIODONCIA",
+        "match": "exact"
+      },
+      "ORTODONCIA": {
+        "specialty": "ORTODONCIA",
+        "match": "exact"
+      },
+      "REHABILITACION ORAL": {
+        "specialty": "REHABILITACION_ORAL",
+        "match": "exact"
+      },
+      "NEUROCIRUGIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA PLASTICA, ESTETICA Y RECONSTRUCTIVA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA PLASTICA Y REPARADORA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA CARDIOVASCULAR": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA DE TORAX": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA VASCULAR": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA VASCULAR PERIFERICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA DE CABEZA Y CUELLO": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA DE CABEZA, CUELLO Y MAXILOFACIAL": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA DE MAMA Y TUMORES DE TEJIDOS BLANDOS": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA GASTROINTESTINAL": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "CIRUGIA MAXILOFACIAL": {
+        "specialty": null,
+        "note": "El modelo tiene CIRUGIA_BUCOMAXILOFACIAL y CIRUGIA_ORAL_MAXILOFACIAL; ninguna lleva este nombre exacto y elegir una sería inventar."
+      },
+      "CIRUGIA ORAL": {
+        "specialty": null,
+        "note": "Idem: no coincide con ninguna de las dos del modelo."
+      },
+      "ESTOMATOLOGIA Y CIRUGIA ORAL": {
+        "specialty": null,
+        "note": "Idem."
+      },
+      "RADIOLOGIA ORAL Y MAXILOFACIAL": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "ALERGOLOGIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "INMUNOLOGIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "ANESTESIOLOGIA CARDIOVASCULAR": {
+        "specialty": null,
+        "note": "Subespecialidad sin código en el modelo."
+      },
+      "DOLOR Y CUIDADOS PALIATIVOS": {
+        "specialty": null,
+        "note": "Más amplia que MEDICINA_DEL_DOLOR (incluye paliativos): no se asimila."
+      },
+      "ENDOCRINOLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "GASTROENTEROLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "HEMATOLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "NEFROLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "NEUMOLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "ENFERMEDADES RESPIRATORIAS PEDIATRICAS": {
+        "specialty": null,
+        "note": "Falta Neumología Pediátrica en el modelo."
+      },
+      "PSIQUIATRIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "PSIQUIATRIA PEDIATRICA Y DE LA ADOLESCENCIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "REUMATOLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "ONCOHEMATOLOGIA PEDIATRICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "GINECOLOGIA PEDIATRICA Y DE LA ADOLESCENCIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "GENETICA MEDICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "GENETICA CLINICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "HEPATOLOGIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "MASTOLOGIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "DIABETOLOGIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "MEDICINA NUCLEAR": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "RADIOTERAPIA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "RADIOTERAPIA ONCOLOGICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "MEDICINA FORENSE": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "MEDICINA AEROESPACIAL": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "MEDICINA ESTETICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "SALUD FAMILIAR Y COMUNITARIA": {
+        "specialty": null,
+        "note": "No es SALUD_FAMILIAR_COMUNITARIA_INTERCULTURAL (la SAFCI boliviana incluye el componente intercultural): no se asimila."
+      },
+      "SEXOLOGIA CLINICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "TOXICOLOGIA CLINICA": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "TRASPLANTES": {
+        "specialty": null,
+        "note": "Falta en el modelo."
+      },
+      "MEDICINA ALTERNATIVA (AYURVEDA)": {
+        "specialty": null
+      },
+      "MEDICINA ALTERNATIVA (HOMEOPATICA)": {
+        "specialty": null
+      },
+      "MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)": {
+        "specialty": null
+      },
+      "MEDICINA ALTERNATIVA (NATUROPATIA)": {
+        "specialty": null
+      },
+      "MEDICINA ALTERNATIVA (OSTEOPATICA)": {
+        "specialty": null
+      },
+      "MEDICINA ALTERNATIVA (NEURALTERAPEUTICA)": {
+        "specialty": null
+      },
+      "ODONTOLOGIA": {
+        "specialty": "ODONTOLOGIA",
+        "match": "exact"
+      },
+      "ODONTOLOGICA": {
+        "specialty": "ODONTOLOGIA",
+        "match": "exact",
+        "note": "FONASA 2503007: «atención odontológica integral»."
+      },
+      "MATRONA": {
+        "specialty": "OBSTETRICIA",
+        "match": "national-name",
+        "note": "La matrona chilena es la obstetriz boliviana (licenciatura en Obstetricia)."
+      },
+      "KINESIOLOGICA": {
+        "specialty": "FISIOTERAPIA",
+        "match": "national-name",
+        "note": "En Chile la fisioterapia se llama kinesiología; VS: «Fisioterapia y Rehabilitación»."
+      },
+      "MEDICINA ESPECIALIZADA": {
+        "specialty": null,
+        "note": "No nombra la especialidad."
+      },
+      "OTRAS ESPECIALIDADES MEDICAS": {
+        "specialty": null,
+        "note": "No nombra la especialidad."
+      },
+      "OTRAS ESPECIALIDADES EN ODONTOLOGIA": {
+        "specialty": null,
+        "note": "No nombra la especialidad."
+      },
+      "OTRAS ESPECIALIDADES DE PSICOLOGIA": {
+        "specialty": null,
+        "note": "No nombra la especialidad."
+      },
+      "HIGIENE ORAL": {
+        "specialty": null,
+        "note": "Profesión (higienista oral) que el modelo no tiene."
+      },
+      "TERAPIA OCUPACIONAL": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "TERAPIA RESPIRATORIA": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "FONIATRIA Y FONOAUDIOLOGIA": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "FONOAUDIOLOGIA": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "FONOAUDIOLOGO": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "TRABAJO SOCIAL": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "OPTOMETRIA": {
+        "specialty": null,
+        "note": "Profesión que el modelo no tiene."
+      },
+      "TERAPIAS ALTERNATIVAS": {
+        "specialty": null
+      },
+      "EQUIPO INTERDISCIPLINARIO": {
+        "specialty": null,
+        "note": "No es una especialidad."
+      },
+      "AGENTE EDUCATIVO": {
+        "specialty": null,
+        "note": "No es una especialidad."
+      }
+    }
+  }
+}

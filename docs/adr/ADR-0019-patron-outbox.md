@@ -48,4 +48,4 @@ Sin política de purga/archivado documentada para `messaging.message_queues` —
 `/internal/events/*`, `/internal/event-deliveries/*` en `openapi/openapi.yaml`.
 
 ## Plan de revisión
-Documentar el mecanismo de reclamo exclusivo y la política de retención en Fase 11-12.
+Sin fecha programada. El reclamo exclusivo y los reintentos están en [semántica de entrega](../events/delivery-semantics.md) y [reintentos y DLQ](../events/retries-and-dlq.md).

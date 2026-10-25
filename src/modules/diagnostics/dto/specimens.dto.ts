@@ -22,9 +22,14 @@ export class CreateSpecimenDto {
   /**
    * Identificador asociado a custodian tenant.
    */
-  @ApiProperty({ format: 'uuid', description: 'Tenant custodio' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404',
+  })
+  @IsOptional()
   @IsUUID()
-  custodianTenantId!: string;
+  custodianTenantId?: string;
 
   /**
    * Identificador asociado a specimen type concept.
@@ -103,7 +108,8 @@ export class CreateAccessionDto {
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Tenant custodio (por defecto el del token)',
+    description:
+      'Tenant custodio: el del contexto (X-Tenant-Id). Si se envía y no coincide, responde 404',
   })
   @IsOptional()
   @IsUUID()

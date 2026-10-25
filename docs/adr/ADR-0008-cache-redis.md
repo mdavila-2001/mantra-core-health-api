@@ -37,4 +37,4 @@ Sin verificación en esta fase del comportamiento del sistema ante indisponibili
 `InvalidateCacheDto` en `src/modules/authz/dto/`.
 
 ## Plan de revisión
-Verificar comportamiento de degradación ante caída de Redis en Fase 14.
+Sin fecha programada; la pérdida de Redis está descrita en [recuperación y continuidad](../resilience/05-recuperacion-y-continuidad.md) (DR-04).

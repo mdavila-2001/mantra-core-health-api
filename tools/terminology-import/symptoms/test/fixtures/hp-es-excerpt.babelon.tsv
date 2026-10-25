@@ -1,0 +1,11 @@
+source_language	translation_language	subject_id	source_value	predicate_id	translation_value	translation_status
+en	es	HP:0000001	All	rdfs:label	Todos	OFFICIAL
+en	es	HP:0000118	Phenotypic abnormality	rdfs:label	Anomalía fenotípica	OFFICIAL
+en	es	HP:0000707	Abnormality of the nervous system	rdfs:label	Anomalía del sistema nervioso	OFFICIAL
+en	es	HP:0001250	Seizures	rdfs:label	Convulsiones	OFFICIAL
+en	es	HP:0001871	Abnormality of blood and blood-forming tissues	rdfs:label	Alteración de la sangre y de los tejidos que forman la sangre	OFFICIAL
+en	es	HP:0001945	Fever	rdfs:label	Fiebre	OFFICIAL
+en	es	HP:0007269	Spinal muscular atrophy	rdfs:label	Atrofia muscular espinal	OFFICIAL
+en	es	HP:0012638	Abnormality of nervous system physiology	rdfs:label	Alteración en la función del sistema nervioso	OFFICIAL
+en	es	HP:0040279	Frequency	rdfs:label	Frecuencia	OFFICIAL
+en	es	HP:0040281	Very frequent	rdfs:label	Muy frecuente	OFFICIAL

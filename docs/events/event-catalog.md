@@ -21,8 +21,7 @@ contrato, fuera del alcance de este ejercicio documental).
 AsyncAPI (`asyncapi/asyncapi.yaml`) declara el sobre (envelope) real y verificable
 (`eventType`, `aggregateType`, `aggregateId`, `payloadJson`, metadatos), y modela `payloadJson`
 como `object` genérico — documentar el schema exacto de cada uno de los 79 eventos requeriría
-inspeccionar cada call site individualmente, fuera de alcance de esta fase. Ver `GAP-017` en
-[análisis de brechas](../reports/documentation-gap-analysis.md).
+inspeccionar cada call site individualmente.
 
 ## Catálogo por módulo productor
 
@@ -88,6 +87,27 @@ savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
 | `GraphRuleHitDetected` | `graph-analytics.service.ts` |
 | `GraphRuleHitResolved` | `graph-analytics.service.ts` |
 
+### `insurance` (4 eventos de la protección al paciente)
+
+Carril 16, REQ-16-034. `audit.audit_log` no tiene columnas de motivo ni de importes, así que lo que
+la bitácora `@Audited` no puede guardar viaja en estos eventos. `aggregateType`:
+`insurance.insurance_claims`; `aggregateId`: el reclamo.
+
+| Evento | Servicio productor |
+|---|---|
+| `InsuranceClaimPatientChargeObjected` | `patient-charge-objection.service.ts` |
+| `InsuranceClaimPatientInvoiceIssued` | `claim-patient-invoice.service.ts` |
+| `InsuranceClaimPatientInvoiceRejected` | `claim-patient-invoice.service.ts` |
+| `InsuranceClaimPatientObjectionRejected` | `patient-charge-objection.service.ts` |
+
+Payload: sólo identificadores e importes (`claimId`, `claimLineId`, `invoiceId`, `patientProfileId`,
+`practiceId`, motivo tipificado, importes decimales como cadena). Nunca texto libre ni datos
+clínicos; la objeción del paciente viaja con un motivo cerrado, sin comentario. Los eventos de
+rechazo se publican en su propia transacción: la del intento rechazado no se confirma.
+
+> Este catálogo es previo al módulo de seguros y todavía no lista `InsuranceClaimDecided`
+> (`insurer-received-claims.service.ts`); se documenta como omisión, no se corrige aquí.
+
 ### `lakehouse` (12 eventos)
 
 | Evento | Servicio productor |
@@ -111,11 +131,12 @@ savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
 |---|---|
 | `OrderPlaced` | `outbox.service.ts` |
 
-### `procedures_perioperative` (1 evento)
+### `procedures_perioperative` (2 eventos)
 
 | Evento | Servicio productor |
 |---|---|
 | `periop.case.confirmation_blocked` | `periop-cases.service.ts` |
+| `periop.case.reacceptance_required` | `periop-reacceptance.service.ts` |
 
 ### `time_series` (9 eventos)
 

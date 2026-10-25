@@ -8,6 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser, type AuthenticatedUser } from '../../../common';
 import { TelemetryEventsService } from '../services';
 import {
   CaptureActivityEventsDto,
@@ -24,8 +25,10 @@ import {
 import { Audited } from '../../../common';
 
 /**
- * Endpoints de ingesta de telemetría (SDK/portal y workers). Capa fina que delega
- * en `TelemetryEventsService`. Protegidos por el guard global (requieren token).
+ * Endpoints de ingesta de telemetría (SDK/portal). Capa fina que delega en
+ * `TelemetryEventsService`. Protegidos por el guard global (requieren token): la
+ * identidad, la sesión y el tenant del evento salen del actor autenticado y del
+ * contexto, nunca del cuerpo.
  */
 @ApiTags('telemetry-events')
 @ApiBearerAuth()
@@ -50,8 +53,9 @@ export class TelemetryEventsController {
   })
   captureActivityEvents(
     @Body() dto: CaptureActivityEventsDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ActivityEventsResponseDto> {
-    return this.events.captureActivityEvents(dto);
+    return this.events.captureActivityEvents(dto, actor);
   }
 
   /** UC-28-08. */
@@ -67,8 +71,9 @@ export class TelemetryEventsController {
   })
   captureClientContext(
     @Body() dto: CreateClientContextDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ClientContextResponseDto> {
-    return this.events.captureClientContext(dto);
+    return this.events.captureClientContext(dto, actor);
   }
 
   /** UC-28-09. */
@@ -83,8 +88,9 @@ export class TelemetryEventsController {
   })
   recordWebVitals(
     @Body() dto: RecordWebVitalsDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<WebVitalsResponseDto> {
-    return this.events.recordWebVitals(dto);
+    return this.events.recordWebVitals(dto, actor);
   }
 
   /** UC-28-11. */
@@ -98,8 +104,9 @@ export class TelemetryEventsController {
   @ApiOperation({ summary: 'Registrar evento de conversión con atribución' })
   recordConversion(
     @Body() dto: CreateConversionEventDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ConversionEventResponseDto> {
-    return this.events.recordConversion(dto);
+    return this.events.recordConversion(dto, actor);
   }
 
   /** UC-28-13. */
@@ -114,7 +121,8 @@ export class TelemetryEventsController {
   closeJourney(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CloseJourneyDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<JourneyResponseDto> {
-    return this.events.closeJourney(id, dto);
+    return this.events.closeJourney(id, dto, actor);
   }
 }

@@ -1,0 +1,13 @@
+GroupID|RecordID|SF|SFUI|NormSF|LF|LFUI|NormLF|Source|Modified
+G002754|R000001|AA|S003081|aa|achievement age|L037913|achievement age|UMLS|
+G002755|R000006|AA|S003081|aa|aortic arch|L045561|aortic arch|UMLS|
+G115934|R153428|HTN|S032865|htn|hypertensive|L091972|hypertensive|UMLS|
+G115934|R153429|HTN|S032865|htn|hyper-tensive|L091739||UMLS|
+G155730|R153430|HTN|S032865|htn|hypertension|L091967|hypertension|UMLS|
+G155730|R153431|HTN|S032865|htn|hyper tension|L091690|hypertension|UMLS|
+G155730|R153432|HTN|S032865|htn|hyper-tension|L091738|hypertension|UMLS|
+G166861|R153433|HTN|S032865|htn|Hantaan virus|L016473|Hantaan virus|UMLS|
+G035789|R153435|HTN|S032865|htn|hypertensive nephropathy|L091991|hypertensive nephropathy|UMLS|
+G035790|R153436|HTN|S032865|htn|histatin|L088406|histatin|UMLS|
+G166861|R330599|HTN|S032865|htn|Hantaan virus|L016473|Hantaan virus|ADAM|
+G155730|R330600|HTN|S032865|htn|hypertension|L091967|hypertension|ADAM|

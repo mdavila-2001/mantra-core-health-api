@@ -107,7 +107,15 @@ Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `contract_webhook_subscr
 - Smoke transversal: `test/smoke/modules/integration_contracts.smoke.ts`
   (`INTEGRATION_CONTRACTS_SMOKE`), encadena el ciclo completo del contrato.
 
-## Revisión ALOVIDA
+## Alcance por tenant
 
-Los recursos resueltos por UUID aún no se comparan contra el tenant activo; ver
-[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/integration_contracts.md).
+El contrato tiene un tenant propietario (`integration_contracts.tenant_id`), que el alta toma del
+contexto autenticado (`requireTenantId()`) y nunca del cuerpo. Versiones, perfiles de
+autenticación, suscripciones de webhook, intercambios y cursores se autorizan a través de su
+contrato: se carga el recurso hijo, luego el contrato por `id + tenantId`, y sólo entonces se lee o
+muta. Un recurso inexistente, de otro tenant o de un contrato sin tenant responde igual: `404
+RESOURCE_NOT_FOUND` con `reason` `INTEGRATION_RESOURCE_OUT_OF_SCOPE`, mismo mensaje y sin
+`details`. El reintento de un intercambio bloquea el registro (`FOR UPDATE`) para que dos reintentos
+simultáneos produzcan un único intento nuevo, y el avance de cursor bloquea el contrato. Los
+contratos anteriores a la columna quedan sin tenant y no son accesibles hasta que se les asigne uno
+(`database/SQL/patches/2026-10-24_integration_contracts_tenant_id.sql`).

@@ -2,14 +2,14 @@
   "code": "MEDINT_CTRL_MULTIMORBILIDAD",
   "name": "Control de multimorbilidad y polifarmacia",
   "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
     "organization": "Ministerio de Salud del Perú (MINSA)",
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "Revisión de problemas activos, fármacos (polifarmacia ≥ 5) y prioridades del paciente."
+    "note": "Revisión de problemas activos, fármacos (polifarmacia ≥ 5) y prioridades del paciente. Ampliación internacional (2026-10-24): índice de comorbilidad de Charlson (traducción al castellano del CKM, con una corrección documentada) desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -92,6 +92,85 @@
       ],
       "multiple": true,
       "allowOther": true
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "charlson_grupo_etario",
+      "name": "Charlson — grupo etario",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — < 50 años",
+        "1 — 50-59 años",
+        "2 — 60-69 años",
+        "3 — 70-79 años",
+        "4 — ≥ 80 años"
+      ],
+      "description": "Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM. Texto del CKM con una corrección propia de un defecto comprobado (ver docs/seed-research/clinical-forms.md)."
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "charlson_comorbilidades",
+      "name": "Charlson — comorbilidades presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Infarto de miocardio (1 punto)",
+        "Insuficiencia cardíaca congestiva (1 punto)",
+        "Enfermedad vascular periférica (1 punto)",
+        "Enfermedad cerebrovascular (1 punto)",
+        "Demencia (1 punto)",
+        "Enfermedad pulmonar crónica (1 punto)",
+        "Enfermedad ulcerosa (1 punto)",
+        "Enfermedad del tejido conectivo (1 punto)",
+        "Hemiplejía (2 puntos)",
+        "Enfermedad renal moderada o severa (2 puntos)",
+        "Leucemia (2 puntos)",
+        "Linfoma (2 puntos)",
+        "SIDA (6 puntos)",
+        "Ninguna de estas"
+      ],
+      "multiple": true,
+      "description": "Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "charlson_hepatopatia",
+      "name": "Charlson — enfermedad hepática",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Ninguna", "1 — Leve", "3 — Moderada a severa"],
+      "description": "Leve: hepatitis crónica o cirrosis sin hipertensión portal. Moderada a grave: cirrosis con hipertensión portal, con o sin sangrado variceal. (Traducción propia de la descripción inglesa del arquetipo, «cirrhosis without portal hypertension or chronic hepatitis»; la traducción al castellano del CKM la lee como «ni hepatitis crónica» y no se usa.) Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "charlson_diabetes",
+      "name": "Charlson — diabetes mellitus",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — Ausente o controlada con dieta",
+        "1 — No complicada",
+        "2 — Daño en órganos diana"
+      ],
+      "description": "Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "charlson_tumor_solido",
+      "name": "Charlson — tumor sólido",
+      "dataType": "string",
+      "required": false,
+      "options": ["0 — Ninguno", "2 — Localizado", "6 — Metastásico"],
+      "description": "Fuente: índice de comorbilidad de Charlson (Charlson ME et al. J Chronic Dis. 1987;40(5):373-83), según el arquetipo openEHR openEHR-EHR-OBSERVATION.charlson_comorbidity_index.v2 (rev. 2.0.0, publicado; CC BY-SA 4.0). Texto de la traducción al castellano (es) del CKM."
+    },
+    {
+      "section": "Evaluación: multimorbilidad",
+      "code": "charlson_total",
+      "name": "Charlson — puntaje total",
+      "dataType": "integer",
+      "required": false,
+      "description": "Suma de los puntos de cada ítem, incluido el grupo etario."
     },
     {
       "section": "Evaluación: multimorbilidad",

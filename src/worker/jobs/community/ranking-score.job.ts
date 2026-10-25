@@ -76,12 +76,11 @@ function interactionTerm(reactionCount: number, commentCount: number): number {
 /**
  * Afinidad entre el dueño del ítem (el lector) y el autor de la publicación.
  *
- * TODO(P12/afinidad): no existe todavía una señal de interacción histórica
- * entre dos perfiles (mensajes cruzados, reacciones repetidas, etc.) de la que
- * derivar esto, así que el término vale siempre 0 — el ranking hoy depende
- * sólo de recencia e interacción del post. Queda declarado como su propia
- * función y con su propio peso (`WEIGHT_AFFINITY`) para que sumar la señal,
- * el día que exista, sea cambiar esta función y no rediseñar la fórmula.
+ * No hay una señal de interacción histórica entre dos perfiles (mensajes
+ * cruzados, reacciones repetidas, etc.) de la que derivar esto, así que el
+ * término vale siempre 0 y el ranking depende sólo de recencia e interacción
+ * del post. Es una función con su propio peso (`WEIGHT_AFFINITY`): sumar una
+ * señal es cambiar esta función, no la fórmula.
  */
 function affinityTerm(_item: FeedRankingPendingItem): number {
   return 0;

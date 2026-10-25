@@ -1,0 +1,273 @@
+{
+ "fonasa": [
+  {
+   "code": "0101001",
+   "name": "CONSULTA MEDICINA GENERAL",
+   "level1_total": 12080,
+   "level1_copay": 4830,
+   "level2_total": 12930,
+   "level2_copay": 5680,
+   "level3_total": 15130,
+   "level3_copay": 7880
+  },
+  {
+   "code": "0301091",
+   "name": "PROTEÍNA C FUNCIONAL",
+   "level1_total": 31990,
+   "level1_copay": 15990,
+   "level2_total": 41590,
+   "level2_copay": 25590,
+   "level3_total": 51180,
+   "level3_copay": 35180
+  },
+  {
+   "code": "0402022",
+   "name": "ANGIOPLASTIA INTRALUMINAL CORONARIA. PROCEDIMIENTO RADIOLÓGICO. (A.C.17-01-031)",
+   "level1_total": 70520,
+   "level1_copay": 35260,
+   "level2_total": 91680,
+   "level2_copay": 56420,
+   "level3_total": 112830,
+   "level3_copay": 77570
+  },
+  {
+   "code": "1001012",
+   "name": "TEST DE SOBRECARGA O INFUSIÓN SALINA INTRAVENOSA (TEST CONFIRMATORIO HIPERALDOSTERONISMO)",
+   "level1_total": 2570,
+   "level1_copay": 1280,
+   "level2_total": 3340,
+   "level2_copay": 2050,
+   "level3_total": 4110,
+   "level3_copay": 2820
+  }
+ ],
+ "sigtap": {
+  "procedures": [
+   {
+    "ageMaxMonths": null,
+    "ageMinMonths": 0,
+    "ambulatoryValueCents": 351,
+    "code": "0202010015",
+    "complexity": "mediumComplexity",
+    "financingCode": "06",
+    "group": "02",
+    "hospitalValueCents": 0,
+    "maxExecutions": null,
+    "name": "CLEARANCE OSMOLAR",
+    "organizationForm": "020201",
+    "points": null,
+    "professionalValueCents": 0,
+    "rubricCode": null,
+    "sexRestriction": "any",
+    "stayDays": null,
+    "subGroup": "0202"
+   },
+   {
+    "ageMaxMonths": null,
+    "ageMinMonths": 0,
+    "ambulatoryValueCents": 18000,
+    "code": "0202100014",
+    "complexity": "mediumComplexity",
+    "financingCode": "06",
+    "group": "02",
+    "hospitalValueCents": 18000,
+    "maxExecutions": 1,
+    "name": "DETERMINACAO DE CARIOTIPO EM CULTURA DE LONGA DURACAO (C/ TECNICA DE BANDAS)",
+    "organizationForm": "020210",
+    "points": null,
+    "professionalValueCents": 0,
+    "rubricCode": null,
+    "sexRestriction": "any",
+    "stayDays": null,
+    "subGroup": "0202"
+   },
+   {
+    "ageMaxMonths": 731,
+    "ageMinMonths": 108,
+    "ambulatoryValueCents": 220,
+    "code": "0201010011",
+    "complexity": "mediumComplexity",
+    "financingCode": "06",
+    "group": "02",
+    "hospitalValueCents": 220,
+    "maxExecutions": 1,
+    "name": "AMNIOCENTESE",
+    "organizationForm": "020101",
+    "points": null,
+    "professionalValueCents": 0,
+    "rubricCode": null,
+    "sexRestriction": "any",
+    "stayDays": null,
+    "subGroup": "0201"
+   },
+   {
+    "ageMaxMonths": null,
+    "ageMinMonths": 0,
+    "ambulatoryValueCents": 0,
+    "code": "0301010021",
+    "complexity": "primaryCare",
+    "financingCode": "01",
+    "group": "03",
+    "hospitalValueCents": 0,
+    "maxExecutions": null,
+    "name": "CONSULTA COM IDENTIFICAÇÃO DE CASOS NOVOS DE TUBERCULOSE",
+    "organizationForm": "030101",
+    "points": null,
+    "professionalValueCents": 0,
+    "rubricCode": null,
+    "sexRestriction": "any",
+    "stayDays": null,
+    "subGroup": "0301"
+   }
+  ],
+  "subGroups": [
+   {
+    "code": "0201",
+    "group": "02",
+    "name": "Coleta de material"
+   },
+   {
+    "code": "0202",
+    "group": "02",
+    "name": "Diagnóstico em laboratório clínico"
+   }
+  ],
+  "organizationForms": [
+   {
+    "code": "020101",
+    "group": "02",
+    "name": "Coleta de material por meio de punção/biópsia",
+    "subGroup": "0201"
+   },
+   {
+    "code": "020201",
+    "group": "02",
+    "name": "Exames bioquimicos",
+    "subGroup": "0202"
+   },
+   {
+    "code": "020210",
+    "group": "02",
+    "name": "Exames de genética",
+    "subGroup": "0202"
+   }
+  ]
+ },
+ "tuss": [
+  {
+   "code": "40301010",
+   "endsAt": null,
+   "implementedUntil": "2010-10-15",
+   "name": "3-metil histidina, pesquisa e/ou dosagem no soro",
+   "startsAt": "2009-02-13",
+   "table": 22
+  },
+  {
+   "code": "40813010",
+   "endsAt": null,
+   "implementedUntil": "2010-10-15",
+   "name": "Ablação percutânea de tumor torácico (qualquer método)",
+   "startsAt": "2009-02-13",
+   "table": 22
+  },
+  {
+   "code": "10101012",
+   "endsAt": null,
+   "implementedUntil": "2010-10-15",
+   "name": "Consulta em consultório (no horário normal ou preestabelecido)",
+   "startsAt": "2009-02-13",
+   "table": 22
+  },
+  {
+   "code": "40502210",
+   "endsAt": null,
+   "implementedUntil": "2014-08-31",
+   "name": "Terapia de reposição enzimática por infusão endovenosa, por procedimento",
+   "startsAt": "2012-10-10",
+   "table": 22
+  }
+ ],
+ "pami": [
+  {
+   "name": "Radioscopia Simple (Como Unico Estudio)",
+   "code": 340101
+  },
+  {
+   "name": "Acetonuria",
+   "code": 660002
+  },
+  {
+   "name": "Toilette De Miembros Superiores (Escaras, Ulcera, Etc)",
+   "code": 77621
+  },
+  {
+   "name": "Drenajes Y/O Procedimientos Similares Bajo Eco",
+   "code": 187143
+  }
+ ],
+ "pcs": {
+  "codes": [
+   {
+    "code": "0016070",
+    "short_desc": "Bypass Cereb Vent to Nasophar with Autol Sub, Open Approach",
+    "long_desc": "Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Open Approach"
+   },
+   {
+    "code": "4A0002Z",
+    "short_desc": "Measurement of Central Nervous Conductivity, Open Approach",
+    "long_desc": "Measurement of Central Nervous Conductivity, Open Approach"
+   },
+   {
+    "code": "B00B0ZZ",
+    "short_desc": "Plain Radiography of Spinal Cord using High Osmolar Contrast",
+    "long_desc": "Plain Radiography of Spinal Cord using High Osmolar Contrast"
+   },
+   {
+    "code": "C0101ZZ",
+    "short_desc": "Planar Nucl Med Imag of Brain using Technetium 99m",
+    "long_desc": "Planar Nuclear Medicine Imaging of Brain using Technetium 99m (Tc-99m)"
+   },
+   {
+    "code": "CW70NZZ",
+    "short_desc": "Systemic Nuclear Medicine Therapy of Abd using Phosphorus 32",
+    "long_desc": "Systemic Nuclear Medicine Therapy of Abdomen using Phosphorus 32 (P-32)"
+   },
+   {
+    "code": "F003GKZ",
+    "short_desc": "Comm/Cognit Skill Assess Neuro Body w AV Equip",
+    "long_desc": "Communicative/Cognitive Integration Skills Assessment of Neurological System - Whole Body using Audiovisual Equipment"
+   }
+  ],
+  "sections": [
+   {
+    "value": "0",
+    "meaning": "Medical and Surgical"
+   },
+   {
+    "value": "4",
+    "meaning": "Measurement and Monitoring"
+   },
+   {
+    "value": "B",
+    "meaning": "Imaging"
+   },
+   {
+    "value": "C",
+    "meaning": "Nuclear Medicine"
+   },
+   {
+    "value": "F",
+    "meaning": "Physical Rehabilitation and Diagnostic Audiology"
+   }
+  ],
+  "build_meta": {
+   "system": "ICD10PCS",
+   "release_id": "ICD-10-PCS FY2026",
+   "effective_start": "2025-10-01",
+   "effective_end": "2026-09-30",
+   "code_count": 80029,
+   "source_url": "https://www.cms.gov/medicare/coding-billing/icd-10-codes",
+   "built_at": "2026-09-24T19:03:17.585Z"
+  }
+ }
+}

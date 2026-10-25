@@ -1,0 +1,50 @@
+format-version: 1.2
+data-version: releases/2026-10-06
+
+[Term]
+id: MONDO:0000032
+name: febrile seizures, familial
+subset: otar {source="MONDO:OTAR"}
+synonym: "seizures, familial febrile" EXACT [OMIMPS:121210]
+xref: DOID:0111297 {source="MONDO:equivalentTo"}
+xref: OMIMPS:121210 {source="MONDO:equivalentTo"}
+is_a: MONDO:0003847 {source="https://orcid.org/0000-0002-6601-2165"} ! hereditary disease
+relationship: disease_has_feature HP:0002373 ! Febrile seizure (within the age range of 3 months to 6 years)
+relationship: should_conform_to http://purl.obolibrary.org/obo/mondo/patterns/OMIM_phenotypic_series.yaml
+property_value: curated_content_resource "https://www.malacards.org/card/familial_febrile_seizures" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: skos:exactMatch DOID:0111297
+property_value: skos:exactMatch OMIMPS:121210
+
+[Term]
+id: MONDO:0000023
+name: infantile liver failure
+comment: OMIM series 615438. Plus one non-syndrome. OMIM series covers only syndromes but I left off "syndrome" from the series name (smb).
+subset: doid_rare {source="DOID:0080716"}
+subset: gard_rare {source="GARD:0017820", source="MONDO:GARD"}
+subset: nord_rare {source="MONDO:NORD"}
+subset: ordo_disorder {source="Orphanet:464724"}
+subset: orphanet_rare {source="Orphanet:464724"}
+subset: otar {source="MONDO:OTAR"}
+subset: rare
+synonym: "fever-associated acute infantile liver failure syndrome" EXACT [Orphanet:464724]
+synonym: "infantile liver failure syndrome" EXACT [DOID:0080716, OMIMPS:615438]
+synonym: "liver failure, infantile" EXACT []
+xref: DOID:0080716 {source="MONDO:equivalentTo"}
+xref: GARD:0017820 {source="MONDO:GARD"}
+xref: MEDGEN:1813021 {source="MONDO:equivalentTo", source="MONDO:MEDGEN"}
+xref: OMIMPS:615438 {source="MONDO:equivalentTo"}
+xref: Orphanet:464724 {source="MONDO:equivalentTo"}
+xref: UMLS:C5681094 {source="MONDO:equivalentTo", source="MONDO:MEDGEN", source="MEDGEN:1813021"}
+is_a: MONDO:0003847 {source="https://orcid.org/0000-0002-5002-8648"} ! hereditary disease
+is_a: MONDO:0100192 {source="https://orcid.org/0000-0001-5208-3432"} ! liver failure
+relationship: has_characteristic HP:0003593 ! Infantile onset
+relationship: should_conform_to http://purl.obolibrary.org/obo/mondo/patterns/OMIM_phenotypic_series.yaml
+property_value: curated_content_resource "https://www.malacards.org/card/infantile_liver_failure_syndrome" xsd:anyURI {source="MONDO:MalaCards"}
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/6651" xsd:anyURI
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/6743" xsd:anyURI
+property_value: IAO:0000233 "https://github.com/monarch-initiative/mondo/issues/6877" xsd:anyURI
+property_value: skos:exactMatch DOID:0080716
+property_value: skos:exactMatch MEDGEN:1813021
+property_value: skos:exactMatch OMIMPS:615438
+property_value: skos:exactMatch Orphanet:464724
+property_value: skos:exactMatch UMLS:C5681094

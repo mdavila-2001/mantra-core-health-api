@@ -23,7 +23,12 @@ import {
   suiteCode,
   type FlowDefinition,
 } from '../../src/modules/qa_lab/domain/flow-catalog';
-import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
+import {
+  CONCEPTS,
+  SEED,
+  runWithTenant,
+  type AuthenticatedUser,
+} from '../../src/common';
 
 /**
  * Catálogo de flujos sembrado en `qa_lab` y ejecutado por el runner M68, contra
@@ -32,8 +37,7 @@ import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
  * El destino es un servidor HTTP de prueba que **hace de la API** (regla 65: un
  * doble declarado). Contesta, para cada petición, el estado que el artefacto dice
  * haber observado en la API real; que esos estados sean los reales lo comprueba
- * otra cosa (los 27 casos se ejercieron contra la API el 2026-10-17, ver
- * `docs/trabajo/2026-10-17-superadmin/evidencia/H3.1.2-casos-contra-api-real.txt`).
+ * otra cosa (los 27 casos se ejercieron contra la API el 2026-10-17).
  * Acá se prueba la tubería: sembrar → planificar → aprobar → ejecutar → evaluar.
  *
  * Opt-in con `DATA_CATALOG_IT_DB_URL` (base desechable). Recrea `qa_lab` y `qa_execution`.
@@ -79,6 +83,23 @@ const OBSERVED = new Map(
     ]),
   ),
 );
+
+/**
+ * Corre cada método del objeto dentro del tenant de plataforma, como lo deja el
+ * `TenantContextInterceptor` para un usuario QA. Las suites del seed son de ese
+ * tenant (`SEED.tenantId`): `qa_lab` ya no resuelve por UUID lo que no es del
+ * tenant activo.
+ */
+function inPlatformTenant<T extends object>(target: T): T {
+  return new Proxy(target, {
+    get(object, property, receiver) {
+      const value = Reflect.get(object, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(SEED.tenantId, () => value.apply(object, args));
+    },
+  });
+}
 
 describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
   let client: pg.Client;
@@ -177,14 +198,15 @@ describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
     ]) {
       await sql(
         `INSERT INTO qa_lab.test_environments (id, code, name, environment_concept_id, base_url,
-           is_production_safe, state_concept_id, created_at, updated_at, row_version)
-         VALUES ($1, $2, $2, $3, $4, false, $5, now(), now(), 1)`,
+           is_production_safe, state_concept_id, tenant_id, created_at, updated_at, row_version)
+         VALUES ($1, $2, $2, $3, $4, false, $5, $6, now(), now(), 1)`,
         [
           id,
           code,
           CONCEPTS.QA_ENV_DEV,
           `http://127.0.0.1:${port}`,
           CONCEPTS.STATE_ACTIVE,
+          SEED.tenantId,
         ],
       );
     }
@@ -206,7 +228,9 @@ describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
       new QaCatalogRepository(),
       silent,
     );
-    service = new QaExecutionService(em, runs, new GuardedHttpClient(), silent);
+    service = inPlatformTenant(
+      new QaExecutionService(em, runs, new GuardedHttpClient(), silent),
+    );
     seed = new QaFlowsSeedService(orm, silent);
     // El índice de rutas no es lo que se prueba acá: lo prueba su propia suite.
     flows = new QaFlowsService(orm.em.fork(), { all: () => [] } as never);

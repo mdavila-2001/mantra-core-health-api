@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS "scheduling"."bookable_slots" (
     "resource_id" uuid NOT NULL,
     "schedule_template_id" uuid,
     "service_concept_id" uuid,
+    "practitioner_service_offering_id" uuid,
     "start_at" timestamptz NOT NULL,
     "end_at" timestamptz NOT NULL,
     "capacity" integer NOT NULL,
@@ -192,7 +193,31 @@ CREATE TABLE IF NOT EXISTS "scheduling"."appointment_bookings" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     "cancellation_policy_snapshot" jsonb,
+    "practitioner_service_offering_id" uuid,
+    "service_snapshot" jsonb,
+    "follow_up_of_booking_id" uuid,
+    "form_instance_id" uuid,
     CONSTRAINT "pk_appointment_bookings" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "scheduling"."practitioner_service_offerings" (
+    "id" uuid NOT NULL,
+    "practitioner_profile_id" uuid NOT NULL,
+    "service_catalog_id" uuid NOT NULL,
+    "min_duration_minutes" integer NOT NULL,
+    "max_duration_minutes" integer NOT NULL,
+    "prep_minutes" integer,
+    "cleanup_minutes" integer,
+    "is_patient_bookable" boolean NOT NULL,
+    "requires_approval" boolean NOT NULL,
+    "channel_concept_id" uuid,
+    "status_concept_id" uuid NOT NULL,
+    "created_at" timestamptz NOT NULL,
+    "updated_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    "updated_by_user_id" uuid,
+    "row_version" integer NOT NULL DEFAULT 1,
+    CONSTRAINT "pk_practitioner_service_offerings" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "scheduling"."booking_confirmation_rules" (

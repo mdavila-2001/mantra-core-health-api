@@ -3,7 +3,7 @@
   Fuente real: src/modules/qa_execution/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `qa_execution`
@@ -120,9 +120,7 @@ cliente HTTP contra un servidor local real, autorización por handler, y
 ## Auditoría vigente
 
 La revisión de octubre de 2026 confirmó las barreras de destino, SSRF, límites y
-segregación de aprobación en el alcance estático revisado. El informe con la
-matriz de regresión está en
-[`docs/revision-backend-2026-10-04/modulos/qa_execution.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_execution.md).
+segregación de aprobación en el alcance estático revisado.
 
 ```bash
 corepack yarn test src/modules/qa_execution --runInBand --silent

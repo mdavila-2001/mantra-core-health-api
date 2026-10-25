@@ -12,7 +12,10 @@
    internos, y `mkdocs build --strict`.
 3. El revisor humano confirma que la casilla marcada corresponde al cambio real — CI verifica
    *que* la documentación es válida, no *que* sea la documentación correcta para el cambio.
-4. `.github/CODEOWNERS` (ver [ownership](ownership.md), con marcadores pendientes de completar)
+   También rechaza el PR que agregue al repo un plan, un reporte, una sección de pendientes o un
+   `TODO`/`FIXME`, o que deje trabajo sin hacer sin su issue enlazado (ver
+   [política de documentación](documentation-policy.md#el-repo-describe-lo-que-existe)).
+4. `.github/CODEOWNERS` (ver [ownership](ownership.md); sus entradas son marcadores sin equipos reales)
    determina qué área debe revisar cambios en zonas críticas (autorización, datos, contrato de
    API).
 

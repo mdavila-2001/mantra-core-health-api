@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `authz`
 
-Referencia exhaustiva de 27 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 32 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles`
-- **Controladores:** `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
+- **Etiquetas OpenAPI:** `authz-admin`, `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles`
+- **Controladores:** `AuthzAdminController`, `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -19,25 +19,30 @@ Referencia exhaustiva de 27 operación(es) del módulo `authz`, derivada del con
 6. [GET /authz/care-relationships/requests/mine](#6-get-authz-care-relationships-requests-mine) — Mis solicitudes de relación asistencial pendientes de decidir
 7. [DELETE /authz/clinical-access-grants/{grantId}](#7-delete-authz-clinical-access-grants-grantid) — Revocar o expirar una concesión de acceso clínico
 8. [POST /authz/decisions/evaluate](#8-post-authz-decisions-evaluate) — Recalcular la decisión de autorización efectiva (PDP)
-9. [GET /authz/legal-representations](#9-get-authz-legal-representations) — Listar representaciones legales de un paciente
-10. [POST /authz/legal-representations](#10-post-authz-legal-representations) — Registrar una representación legal del paciente
-11. [POST /authz/legal-representations/{id}/revoke](#11-post-authz-legal-representations-id-revoke) — Revocar o expirar una representación legal
-12. [GET /authz/me/access](#12-get-authz-me-access) — Quién ve mi historia
-13. [POST /authz/me/care-relationships/{id}/revoke](#13-post-authz-me-care-relationships-id-revoke) — Revocar una de mis relaciones asistenciales
-14. [POST /authz/me/clinical-access-grants/{grantId}/revoke](#14-post-authz-me-clinical-access-grants-grantid-revoke) — Revocar uno de los accesos clínicos a mi historia
-15. [POST /authz/patients/{patientProfileId}/break-the-glass](#15-post-authz-patients-patientprofileid-break-the-glass) — Break-the-glass / anulación de emergencia
-16. [POST /authz/patients/{patientProfileId}/clinical-access-grants](#16-post-authz-patients-patientprofileid-clinical-access-grants) — Otorgar acceso clínico con propósito de uso
-17. [POST /authz/pdp/cache/invalidate](#17-post-authz-pdp-cache-invalidate) — Invalidar la cache de decisiones del PDP
-18. [POST /authz/permission-categories](#18-post-authz-permission-categories) — Definir una categoría de permiso
-19. [POST /authz/permissions](#19-post-authz-permissions) — Definir un permiso del catálogo global
-20. [POST /authz/resource-scope-grants](#20-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
-21. [GET /authz/roles](#21-get-authz-roles) — Listar los roles asignables
-22. [POST /authz/roles](#22-post-authz-roles) — Componer un rol (con herencia opcional)
-23. [PUT /authz/roles/{roleId}/field-permissions](#23-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
-24. [PUT /authz/roles/{roleId}/permissions](#24-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
-25. [POST /authz/tenants/{tenantId}/access-policies](#25-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
-26. [POST /authz/users/{userId}/permission-grants](#26-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
-27. [POST /authz/users/{userId}/role-assignments](#27-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
+9. [GET /authz/internal-users](#9-get-authz-internal-users) — Usuarios internos con sus roles
+10. [GET /authz/legal-representations](#10-get-authz-legal-representations) — Listar representaciones legales de un paciente
+11. [POST /authz/legal-representations](#11-post-authz-legal-representations) — Registrar una representación legal del paciente
+12. [POST /authz/legal-representations/{id}/revoke](#12-post-authz-legal-representations-id-revoke) — Revocar o expirar una representación legal
+13. [GET /authz/me/access](#13-get-authz-me-access) — Quién ve mi historia
+14. [POST /authz/me/care-relationships/{id}/revoke](#14-post-authz-me-care-relationships-id-revoke) — Revocar una de mis relaciones asistenciales
+15. [POST /authz/me/clinical-access-grants/{grantId}/revoke](#15-post-authz-me-clinical-access-grants-grantid-revoke) — Revocar uno de los accesos clínicos a mi historia
+16. [POST /authz/patients/{patientProfileId}/break-the-glass](#16-post-authz-patients-patientprofileid-break-the-glass) — Break-the-glass / anulación de emergencia
+17. [POST /authz/patients/{patientProfileId}/clinical-access-grants](#17-post-authz-patients-patientprofileid-clinical-access-grants) — Otorgar acceso clínico con propósito de uso
+18. [POST /authz/pdp/cache/invalidate](#18-post-authz-pdp-cache-invalidate) — Invalidar la cache de decisiones del PDP
+19. [POST /authz/permission-categories](#19-post-authz-permission-categories) — Definir una categoría de permiso
+20. [GET /authz/permissions](#20-get-authz-permissions) — Catálogo de permisos, paginado por código
+21. [POST /authz/permissions](#21-post-authz-permissions) — Definir un permiso del catálogo global
+22. [POST /authz/resource-scope-grants](#22-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
+23. [GET /authz/roles](#23-get-authz-roles) — Listar los roles asignables
+24. [POST /authz/roles](#24-post-authz-roles) — Componer un rol (con herencia opcional)
+25. [PUT /authz/roles/{roleId}/field-permissions](#25-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
+26. [GET /authz/roles/{roleId}/permissions](#26-get-authz-roles-roleid-permissions) — Permisos activos de un rol, con su efecto y ámbito
+27. [PUT /authz/roles/{roleId}/permissions](#27-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
+28. [POST /authz/tenants/{tenantId}/access-policies](#28-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
+29. [POST /authz/users/{userId}/permission-grants](#29-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
+30. [GET /authz/users/{userId}/role-assignments](#30-get-authz-users-userid-role-assignments) — Asignaciones de rol de un usuario, activas o no
+31. [POST /authz/users/{userId}/role-assignments](#31-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
+32. [DELETE /authz/users/{userId}/role-assignments/{assignmentId}](#32-delete-authz-users-userid-role-assignments-assignmentid) — Revocar una asignación de rol (revocación lógica: la fila queda como historia)
 
 ---
 
@@ -106,6 +111,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareRelationshipView[]`. Ejemplo completo derivado de ese DTO:
 
@@ -247,6 +253,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -381,6 +388,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -496,6 +504,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -522,7 +531,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Relación asistencial no encontrada | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
 | 422 | `PRECONDITION_FAILED` | La relación asistencial no está activa | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -626,6 +634,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -740,6 +749,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CareRelationshipView[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareRelationshipView[]`. Ejemplo completo derivado de ese DTO:
 
@@ -854,6 +864,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -880,7 +891,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICAL_APPROVER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Acceso clínico no encontrado | Excepción explícita en src/modules/authz/services/authz-clinical.service.ts |
 | 422 | `PRECONDITION_FAILED` | El acceso clínico no está activo | Excepción explícita en src/modules/authz/services/authz-clinical.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -996,6 +1006,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DecisionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DecisionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1061,7 +1072,104 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. GET /authz/legal-representations
+## 9. GET /authz/internal-users
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-admin`
+- **Nombre:** Usuarios internos con sus roles
+- **Operation ID:** `AuthzAdminController_internalUsers`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzAdminController.internalUsers](../../src/modules/authz/controllers/authz-admin.controller.ts)
+
+### Descripción de negocio
+
+Sin `roleCode`: quienes tienen un rol activo de ámbito global o un rol global de plataforma (`SECURITY_ADMIN`, `SUPERADMIN`). Con `roleCode`: quienes tienen ese rol activo en cualquier ámbito.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/internal-users` en `AuthzAdminController_internalUsers`. El controlador delega en `AuthzAdminReadService.internalUsers`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 400 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `q` | query | No | `string` | longitud máxima 100 | Texto a buscar en el nombre visible | `valor-ejemplo` |
+| `roleCode` | query | No | `string` | longitud máxima 100 | Sólo quienes tienen este rol activo, en cualquier ámbito. Sin él, la lista son los usuarios con un rol de ámbito global o un rol global de plataforma | `DPO` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/internal-users HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/internal-users?limit=50&cursor=valor-ejemplo&q=valor-ejemplo&roleCode=DPO HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | El cursor de paginación no es válido | Excepción explícita en src/modules/authz/services/authz-admin-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/internal-users"
+}
+```
+
+---
+
+## 10. GET /authz/legal-representations
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-care-relationships`
@@ -1126,6 +1234,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LegalRepresentationView[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LegalRepresentationView[]`. Ejemplo completo derivado de ese DTO:
 
@@ -1174,7 +1283,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /authz/legal-representations
+## 11. POST /authz/legal-representations
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-care-relationships`
@@ -1267,6 +1376,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1315,7 +1425,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /authz/legal-representations/{id}/revoke
+## 12. POST /authz/legal-representations/{id}/revoke
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-care-relationships`
@@ -1383,6 +1493,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1409,7 +1520,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Representación legal no encontrada | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
 | 422 | `PRECONDITION_FAILED` | La representación legal no está activa | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1428,7 +1538,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /authz/me/access
+## 13. GET /authz/me/access
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-me`
@@ -1490,6 +1600,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyClinicalAccessResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1574,7 +1685,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /authz/me/care-relationships/{id}/revoke
+## 14. POST /authz/me/care-relationships/{id}/revoke
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-me`
@@ -1642,6 +1753,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1668,7 +1780,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Relación asistencial no encontrada | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
+| 404 | `NOT_FOUND` | Relación asistencial no encontrada | Excepción explícita en src/modules/authz/services/authz-me.service.ts |
 | 422 | `PRECONDITION_FAILED` | La solicitud sigue pendiente: respóndala en lugar de revocarla | Excepción explícita en src/modules/authz/services/authz-me.service.ts |
 | 422 | `PRECONDITION_FAILED` | La relación asistencial no está activa | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1688,7 +1800,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /authz/me/clinical-access-grants/{grantId}/revoke
+## 15. POST /authz/me/clinical-access-grants/{grantId}/revoke
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-me`
@@ -1756,6 +1868,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1782,7 +1895,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Acceso clínico no encontrado | Excepción explícita en src/modules/authz/services/authz-clinical.service.ts |
+| 404 | `NOT_FOUND` | Acceso clínico no encontrado | Excepción explícita en src/modules/authz/services/authz-me.service.ts |
 | 422 | `PRECONDITION_FAILED` | El acceso clínico no está activo | Excepción explícita en src/modules/authz/services/authz-clinical.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1801,7 +1914,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /authz/patients/{patientProfileId}/break-the-glass
+## 16. POST /authz/patients/{patientProfileId}/break-the-glass
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -1890,6 +2003,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1936,7 +2050,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /authz/patients/{patientProfileId}/clinical-access-grants
+## 17. POST /authz/patients/{patientProfileId}/clinical-access-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -2038,6 +2152,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2087,7 +2202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /authz/pdp/cache/invalidate
+## 18. POST /authz/pdp/cache/invalidate
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-pdp`
@@ -2166,6 +2281,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
 | 429 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
 | 500 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
+| 504 | Operación completada correctamente. | `CacheInvalidationResultDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CacheInvalidationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2212,7 +2328,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /authz/permission-categories
+## 19. POST /authz/permission-categories
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-catalog`
@@ -2296,6 +2412,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2343,7 +2460,104 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /authz/permissions
+## 20. GET /authz/permissions
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-admin`
+- **Nombre:** Catálogo de permisos, paginado por código
+- **Operation ID:** `AuthzAdminController_permissions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzAdminController.permissions](../../src/modules/authz/controllers/authz-admin.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de permisos, paginado por código. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/permissions` en `AuthzAdminController_permissions`. El controlador delega en `AuthzAdminReadService.permissions`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | longitud máxima 400 | `nextCursor` de la página anterior | `valor-ejemplo` |
+| `q` | query | No | `string` | longitud máxima 100 | Texto a buscar en el código, el nombre y el recurso | `valor-ejemplo` |
+| `categoryId` | query | No | `string` | formato `uuid` | Categoría de permiso | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/permissions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/permissions?limit=50&cursor=valor-ejemplo&q=valor-ejemplo&categoryId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | El cursor de paginación no es válido | Excepción explícita en src/modules/authz/services/authz-admin-read.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/permissions"
+}
+```
+
+---
+
+## 21. POST /authz/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-catalog`
@@ -2443,6 +2657,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2491,7 +2706,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /authz/resource-scope-grants
+## 22. POST /authz/resource-scope-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -2589,6 +2804,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2637,7 +2853,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /authz/roles
+## 23. GET /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2699,6 +2915,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AssignableRoleDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignableRoleDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2743,7 +2960,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /authz/roles
+## 24. POST /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2837,6 +3054,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2889,7 +3107,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. PUT /authz/roles/{roleId}/field-permissions
+## 25. PUT /authz/roles/{roleId}/field-permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2992,6 +3210,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3038,7 +3257,102 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. PUT /authz/roles/{roleId}/permissions
+## 26. GET /authz/roles/{roleId}/permissions
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-admin`
+- **Nombre:** Permisos activos de un rol, con su efecto y ámbito
+- **Operation ID:** `AuthzAdminController_rolePermissions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzAdminController.rolePermissions](../../src/modules/authz/controllers/authz-admin.controller.ts)
+
+### Descripción de negocio
+
+Permisos activos de un rol, con su efecto y ámbito. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/roles/{roleId}/permissions` en `AuthzAdminController_rolePermissions`. El controlador delega en `AuthzAdminReadService.rolePermissions`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `roleId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/roles/00000000-0000-4000-8000-000000000001/permissions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/roles/00000000-0000-4000-8000-000000000001/permissions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | No existe el rol | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Rol no encontrado | Excepción explícita en src/modules/authz/services/authz-admin-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/roles/{roleId}/permissions"
+}
+```
+
+---
+
+## 27. PUT /authz/roles/{roleId}/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -3137,6 +3451,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RoleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RoleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3189,7 +3504,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /authz/tenants/{tenantId}/access-policies
+## 28. POST /authz/tenants/{tenantId}/access-policies
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-policies`
@@ -3279,6 +3594,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3326,7 +3642,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /authz/users/{userId}/permission-grants
+## 29. POST /authz/users/{userId}/permission-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -3423,6 +3739,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3471,7 +3788,102 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /authz/users/{userId}/role-assignments
+## 30. GET /authz/users/{userId}/role-assignments
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-admin`
+- **Nombre:** Asignaciones de rol de un usuario, activas o no
+- **Operation ID:** `AuthzAdminController_assignmentsOf`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzAdminController.assignmentsOf](../../src/modules/authz/controllers/authz-admin.controller.ts)
+
+### Descripción de negocio
+
+`isEffective` dice cuáles llegan hoy al token. `appliesGlobally` dice si un rol de ámbito global se asignó sin tenant, que es la condición para que autorice en las rutas sin tenant.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/users/{userId}/role-assignments` en `AuthzAdminController_assignmentsOf`. El controlador delega en `AuthzAdminReadService.assignmentsOf`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/users/00000000-0000-4000-8000-000000000001/role-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/users/00000000-0000-4000-8000-000000000001/role-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | No existe el usuario | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/authz/services/authz-admin-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/users/{userId}/role-assignments"
+}
+```
+
+---
+
+## 31. POST /authz/users/{userId}/role-assignments
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -3562,6 +3974,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AuthzIdResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzIdResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3595,6 +4008,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Indique el rol a asignar por `roleId` o por `roleCode` | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rol no es asignable | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un rol de ámbito global se asigna sin tenant, sede ni consultorio | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 422 | `PRECONDITION_FAILED` | validFrom debe ser anterior a validTo | Excepción explícita en src/modules/authz/services/authz-grants.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3608,6 +4022,106 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/authz/users/{userId}/role-assignments"
+}
+```
+
+---
+
+## 32. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-admin`
+- **Nombre:** Revocar una asignación de rol (revocación lógica: la fila queda como historia)
+- **Operation ID:** `AuthzAdminController_revoke`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzAdminController.revoke](../../src/modules/authz/controllers/authz-admin.controller.ts)
+
+### Descripción de negocio
+
+Revocar una asignación de rol (revocación lógica: la fila queda como historia). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /authz/users/{userId}/role-assignments/{assignmentId}` en `AuthzAdminController_revoke`. El controlador delega en `AuthzAssignmentRevocationService.revoke`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignmentId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /authz/users/00000000-0000-4000-8000-000000000001/role-assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /authz/users/00000000-0000-4000-8000-000000000001/role-assignments/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | No existe, o es de otro usuario | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 412 | La asignación no está activa | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Asignación de rol no encontrada | Excepción explícita en src/modules/authz/services/authz-assignment-revocation.service.ts |
+| 422 | `PRECONDITION_FAILED` | La asignación de rol no está activa | Excepción explícita en src/modules/authz/services/authz-assignment-revocation.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/users/{userId}/role-assignments/{assignmentId}"
 }
 ```
 

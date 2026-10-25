@@ -18,6 +18,7 @@ import {
   type AnalyticsScope,
 } from '../repositories/telemetry-analytics.repository';
 import { TELE } from '../telemetry.concepts';
+import { TelemetryErrorReason } from '../telemetry.error-reasons';
 
 export const PORTAL_CODES = ['WEB', 'MOBILE'] as const;
 export type PortalCode = (typeof PORTAL_CODES)[number];
@@ -95,7 +96,7 @@ const num = (value: string | null) =>
 export class TelemetryAnalyticsService {
   constructor(private readonly repo: TelemetryAnalyticsRepository) {}
 
-  private scope(query: WindowQuery): AnalyticsScope {
+  private scope(query: WindowQuery, tenantId: string): AnalyticsScope {
     let window: AnalyticsWindow;
     try {
       window = resolveWindow(query);
@@ -111,6 +112,7 @@ export class TelemetryAnalyticsService {
       throw error;
     }
     return {
+      tenantId,
       window,
       portalConceptId: query.portal ? PORTAL_ID[query.portal] : undefined,
     };
@@ -126,8 +128,8 @@ export class TelemetryAnalyticsService {
     };
   }
 
-  async overview(query: WindowQuery) {
-    const scope = this.scope(query);
+  async overview(query: WindowQuery, tenantId: string) {
+    const scope = this.scope(query, tenantId);
     const { totals, topRoutes, topEvents } = await this.repo.overview(scope);
     return {
       window: this.windowView(scope, query),
@@ -153,8 +155,8 @@ export class TelemetryAnalyticsService {
     };
   }
 
-  async timeseries(query: WindowQuery) {
-    const scope = this.scope(query);
+  async timeseries(query: WindowQuery, tenantId: string) {
+    const scope = this.scope(query, tenantId);
     const rows = await this.repo.timeseries(scope);
     return {
       window: this.windowView(scope, query),
@@ -169,8 +171,9 @@ export class TelemetryAnalyticsService {
 
   async webVitals(
     query: WindowQuery & { route?: string; metric?: VitalMetric },
+    tenantId: string,
   ) {
-    const scope = this.scope(query);
+    const scope = this.scope(query, tenantId);
     const { percentiles, ratings } = await this.repo.webVitals(
       scope,
       query.route,
@@ -217,8 +220,11 @@ export class TelemetryAnalyticsService {
     };
   }
 
-  async listSessions(query: WindowQuery & { cursor?: string; limit?: number }) {
-    const scope = this.scope(query);
+  async listSessions(
+    query: WindowQuery & { cursor?: string; limit?: number },
+    tenantId: string,
+  ) {
+    const scope = this.scope(query, tenantId);
     const limit = query.limit ?? 50;
     let after: { startedAt: string; id: string } | undefined;
     if (query.cursor) {
@@ -269,11 +275,21 @@ export class TelemetryAnalyticsService {
   }
 
   /** Timeline de una sesión: nombres de propiedad, nunca sus valores. */
-  async getSession(id: string) {
-    const session = await this.repo.findSession(id);
-    if (!session)
-      throw new ResourceNotFoundException('Sesión no encontrada', { id });
-    const events = await this.repo.sessionTimeline(session.session_id);
+  async getSession(id: string, tenantId: string) {
+    const session = await this.repo.findSession(id, tenantId);
+    // Una sesión de otro tenant (o que mezcla tenants) responde igual que una
+    // inexistente: mismo mensaje, mismo `reason`, sin `details`.
+    if (!session) {
+      throw new ResourceNotFoundException(
+        'Sesión no encontrada',
+        undefined,
+        TelemetryErrorReason.SESSION_OUT_OF_SCOPE,
+      );
+    }
+    const events = await this.repo.sessionTimeline(
+      session.session_id,
+      tenantId,
+    );
     return {
       ...this.sessionView(session),
       events: events.map((event) => ({
@@ -300,13 +316,14 @@ export class TelemetryAnalyticsService {
     }));
   }
 
-  async funnelReport(funnelId: string, query: WindowQuery) {
-    const scope = this.scope(query);
+  async funnelReport(funnelId: string, query: WindowQuery, tenantId: string) {
+    const scope = this.scope(query, tenantId);
     const funnel = (await this.listFunnels()).find((f) => f.id === funnelId);
     if (!funnel)
       throw new ResourceNotFoundException('Embudo no encontrado', { funnelId });
     const reach = await this.repo.funnelReach(
       scope.window,
+      tenantId,
       funnel.steps.map((step) => step.eventSchemaDefinitionId),
     );
     const report = assembleFunnel(
@@ -335,13 +352,14 @@ export class TelemetryAnalyticsService {
       },
       serverConfirmedConversions: await this.repo.serverConversions(
         scope.window,
+        tenantId,
         funnel.id,
       ),
     };
   }
 
-  async pipelineHealth(query: WindowQuery) {
-    const scope = this.scope(query);
+  async pipelineHealth(query: WindowQuery, tenantId: string) {
+    const scope = this.scope(query, tenantId);
     const { ingest, clients } = await this.repo.pipelineHealth(scope);
     const lastReceived = ingest?.last_received_at
       ? new Date(ingest.last_received_at)

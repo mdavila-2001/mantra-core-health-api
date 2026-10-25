@@ -3,13 +3,13 @@
   Fuente real: src/modules/organization_extensions/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `organization_extensions`
 
 **Fuente:** [`src/modules/organization_extensions/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/organization_extensions/README.md)
-· 4 controllers · 4 services · 5 repositories · 6 entidades · 8 DTO
+· 4 controllers · 4 services · 6 repositories · 6 entidades · 8 DTO
 
 ---
 
@@ -112,10 +112,8 @@ Pino estructurado por operación (`orgext.hospital.specialize`,
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 identificó que las mutaciones por UUID de
-hospital, licencia y afiliación necesitan comprobar el tenant propietario antes
-de cambiar estado. El detalle y la matriz de regresión están en
-[`docs/revision-backend-2026-10-04/modulos/organization_extensions.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/organization_extensions.md).
+Las mutaciones por UUID de hospital, licencia y afiliación no comprueban el
+tenant propietario antes de cambiar estado.
 
 ```bash
 corepack yarn test src/modules/organization_extensions --runInBand --silent

@@ -69,9 +69,10 @@ export class VectorRuntimeController {
   @Roles('SYSTEM', 'EMBEDDING_WORKER', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Listar jobs de embedding en cola' })
   listQueuedJobs(
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PendingEmbeddingJobsResponseDto> {
-    return this.pipelineService.listQueuedJobs(limit);
+    return this.pipelineService.listQueuedJobs(limit, actor);
   }
 
   /** UC-59-05. */

@@ -3,13 +3,13 @@
   Fuente real: src/modules/pharmacy_inventory/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `pharmacy_inventory`
 
 **Fuente:** [`src/modules/pharmacy_inventory/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy_inventory/README.md)
-· 6 controllers · 11 services · 16 repositories · 21 entidades · 17 DTO
+· 6 controllers · 11 services · 17 repositories · 21 entidades · 17 DTO
 
 ---
 
@@ -120,8 +120,7 @@ farmacia, sede, ubicación, lote y producto.
 
 ## Revisión backend 2026-10-05
 
-La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy_inventory.md)
-documenta que los comandos administrativos aceptan relaciones de inventario sin
-alcance de tenant y que los asientos de conteo/recall usan IDs de sede o ubicación
-como farmacia. Deben corregirse y validarse sobre PostgreSQL con FK activas antes
-de considerar confiable el movimiento de stock.
+Los comandos administrativos aceptan relaciones de inventario sin alcance de
+tenant, y los asientos de conteo/recall usan IDs de sede o ubicación como
+farmacia: el movimiento de stock no está validado sobre PostgreSQL con FK
+activas.

@@ -3,13 +3,13 @@
   Fuente real: src/modules/messaging/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `messaging`
 
 **Fuente:** [`src/modules/messaging/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/messaging/README.md)
-· 3 controllers · 3 services · 4 repositories · 22 entidades · 2 DTO
+· 4 controllers · 4 services · 4 repositories · 22 entidades · 3 DTO
 
 ---
 
@@ -19,9 +19,8 @@ Publicación transaccional de eventos de dominio, relay y fan-out a suscriptores
 con reintento y cola muerta, y notificación multicanal consciente del consentimiento con
 conciliación de acuses del proveedor.
 
-> **Este módulo es la pieza que desbloquea a los demás.** Los 17 módulos de la tanda A declaran sus
-> eventos en el "Pendiente" de su README porque no había dónde publicarlos. `OutboxService` es esa
-> API: ver *Cómo lo usa un módulo de negocio*, más abajo.
+> **Este módulo es la pieza que desbloquea a los demás.** `OutboxService` es la API con la que un
+> módulo publica sus eventos de dominio: ver _Cómo lo usa un módulo de negocio_, más abajo.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -32,7 +31,7 @@ conciliación de acuses del proveedor.
   find src/modules/messaging -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 17 rutas HTTP, 22 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 17 rutas HTTP, 22 entidades y 3 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -40,43 +39,43 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `adapter_event_mappings`, `adapter_inbound_events`, `adapter_tracking_capabilities`, `dead_letter_jobs`, `delivery_receipts`, `delivery_reconciliation_runs`, `delivery_status_transitions`, `delivery_tracking_events`, `domain_events`, `event_deliveries`, `event_subscriptions`, `in_app_notifications`, `message_channels`, `message_queues`, `message_templates`, `messaging_providers`, `notification_deliveries`, `notification_requests`, `outbox_messages`, `provider_channel_configs`, `queued_jobs`, `recipient_preferences`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /internal/outbox/relay/run` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /internal/events/:domainEventId/dispatch` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /internal/event-deliveries/:id/ack` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /internal/queues/:code/claim` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /internal/jobs/:id/complete` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /internal/jobs/:id/fail` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `GET /internal/notifications/pending` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /internal/notifications/:requestId/deliver` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
-| `POST /queues/:code/jobs` | SYSTEM, MESSAGING_ADMIN | `messaging` |
-| `POST /queues/dead-letter/:deadLetterJobId/redrive` | MESSAGING_ADMIN | `messaging` |
-| `POST /notifications/requests` | SYSTEM, MESSAGING_ADMIN | `messaging` |
-| `GET /notifications/me` | USER, MESSAGING_ADMIN | `messaging` |
-| `POST /notifications/in-app/read-all` | USER, MESSAGING_ADMIN | `messaging` |
-| `GET /notifications/preferences/me` | USER, MESSAGING_ADMIN | `messaging` |
-| `PUT /notifications/preferences/me` | USER, MESSAGING_ADMIN | `messaging` |
-| `POST /notifications/in-app/:id/read` | USER, MESSAGING_ADMIN | `messaging` |
-| `POST /webhooks/providers/:providerCode/receipts` | pública | `provider-webhooks` |
+| Método y ruta                                       | Acceso                  | Controller           |
+| --------------------------------------------------- | ----------------------- | -------------------- |
+| `POST /internal/outbox/relay/run`                   | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/events/:domainEventId/dispatch`     | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/event-deliveries/:id/ack`           | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/queues/:code/claim`                 | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/jobs/:id/complete`                  | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/jobs/:id/fail`                      | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `GET /internal/notifications/pending`               | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/notifications/:requestId/deliver`   | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /queues/:code/jobs`                           | SYSTEM, MESSAGING_ADMIN | `messaging`          |
+| `POST /queues/dead-letter/:deadLetterJobId/redrive` | MESSAGING_ADMIN         | `messaging`          |
+| `POST /notifications/requests`                      | SYSTEM, MESSAGING_ADMIN | `messaging`          |
+| `GET /notifications/me`                             | USER, MESSAGING_ADMIN   | `messaging`          |
+| `POST /notifications/in-app/read-all`               | USER, MESSAGING_ADMIN   | `messaging`          |
+| `GET /notifications/preferences/me`                 | USER, MESSAGING_ADMIN   | `messaging`          |
+| `PUT /notifications/preferences/me`                 | USER, MESSAGING_ADMIN   | `messaging`          |
+| `POST /notifications/in-app/:id/read`               | USER, MESSAGING_ADMIN   | `messaging`          |
+| `POST /webhooks/providers/:providerCode/receipts`   | pública                 | `provider-webhooks`  |
 
 ## Casos de uso cubiertos (13)
 
-| UC | Endpoint | Descripción |
-| --- | --- | --- |
-| UC-35-01 | *(interno)* `OutboxService.publishDomainEvent()` | Publicar evento de dominio vía outbox |
-| UC-35-02 | `POST /internal/outbox/relay/run` | Reclamar y publicar mensajes (relay) |
-| UC-35-03 | `POST /internal/events/:domainEventId/dispatch` | Despachar a suscriptores |
-| UC-35-04 | `POST /internal/event-deliveries/:id/ack` | Acuse de entrega del consumidor |
-| UC-35-05 | `POST /queues/:code/jobs` | Encolar job con deduplicación |
-| UC-35-06 | `POST /internal/queues/:code/claim` | Reclamar jobs (`SKIP LOCKED`) |
-| UC-35-07 | `POST /internal/jobs/:id/complete` | Completar job y liberar lock |
-| UC-35-08 | `POST /internal/jobs/:id/fail` | Reintento con backoff o cola muerta |
-| UC-35-09 | `POST /queues/dead-letter/:deadLetterJobId/redrive` | Reencolar desde cola muerta |
-| UC-35-10 | `POST /notifications/requests` | Solicitud consciente del consentimiento |
-| UC-35-11 | `POST /internal/notifications/:requestId/deliver` | Entrega multicanal |
-| UC-35-12 | `POST /webhooks/providers/:providerCode/receipts` | Conciliar acuse del proveedor |
-| UC-35-13 | `POST /notifications/in-app/:id/read` | Marcar in-app como leída |
+| UC       | Endpoint                                            | Descripción                             |
+| -------- | --------------------------------------------------- | --------------------------------------- |
+| UC-35-01 | _(interno)_ `OutboxService.publishDomainEvent()`    | Publicar evento de dominio vía outbox   |
+| UC-35-02 | `POST /internal/outbox/relay/run`                   | Reclamar y publicar mensajes (relay)    |
+| UC-35-03 | `POST /internal/events/:domainEventId/dispatch`     | Despachar a suscriptores                |
+| UC-35-04 | `POST /internal/event-deliveries/:id/ack`           | Acuse de entrega del consumidor         |
+| UC-35-05 | `POST /queues/:code/jobs`                           | Encolar job con deduplicación           |
+| UC-35-06 | `POST /internal/queues/:code/claim`                 | Reclamar jobs (`SKIP LOCKED`)           |
+| UC-35-07 | `POST /internal/jobs/:id/complete`                  | Completar job y liberar lock            |
+| UC-35-08 | `POST /internal/jobs/:id/fail`                      | Reintento con backoff o cola muerta     |
+| UC-35-09 | `POST /queues/dead-letter/:deadLetterJobId/redrive` | Reencolar desde cola muerta             |
+| UC-35-10 | `POST /notifications/requests`                      | Solicitud consciente del consentimiento |
+| UC-35-11 | `POST /internal/notifications/:requestId/deliver`   | Entrega multicanal                      |
+| UC-35-12 | `POST /webhooks/providers/:providerCode/receipts`   | Conciliar acuse del proveedor           |
+| UC-35-13 | `POST /notifications/in-app/:id/read`               | Marcar in-app como leída                |
 
 UC-35-01 **no tiene endpoint**: el caso de uso lo declara "(interno, misma tx del cambio de
 negocio)". Exponerlo por HTTP rompería justo lo que lo hace útil — el evento tiene que confirmarse
@@ -223,31 +222,29 @@ intento de entrega fallido y rebote del proveedor. No se loguea el contenido de 
 (ejecutado el 2026-10-05). Las pruebas dirigidas son unitarias; no sustituyen las pruebas de
 integración de restricciones DDL indicadas en la revisión.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Bucle del worker**: los endpoints `/internal/*` son el contrato; el proceso que los llama en
   bucle (relay, workers de cola, worker de notificaciones) es despliegue, no API.
 - **Llamada real al proveedor**: el worker la hace fuera de la transacción y aquí sólo se asienta el
   resultado. Elegir el proveedor por `rate_limit_per_min` y rotar a la siguiente configuración por
   prioridad vive en el worker.
-- **Secreto de webhook por proveedor**: la ruta pública verifica HMAC antes de conciliar, pero el
-  secreto actual se deriva de `WEBHOOK_SIGNING_KEY` y del id del proveedor. Falta integrar la
-  credencial rotatoria específica que ya contempla `provider_channel_configs`.
+- **Secreto de webhook por proveedor**: la ruta pública verifica HMAC antes de conciliar, con un
+  secreto derivado de `WEBHOOK_SIGNING_KEY` y del id del proveedor; no usa la credencial rotatoria
+  que contempla `provider_channel_configs`.
 - **Evaluación del consentimiento**: se guarda la referencia a la directiva (`consent_id`); evaluarla
   vive en `consent` y leerla desde aquí cruzaría la frontera del esquema. Las horas de silencio y el
   opt-in sí se evalúan, porque son tablas nuestras.
 - **Idempotencia en Redis** (`redis_runtime.idempotency_entries`,
   `distributed_lock_entries`): aquí está resuelta en tabla —clave de idempotencia, clave de
-  deduplicación, reserva por worker—; la capa en Redis llegará con el módulo 54.
+  deduplicación, reserva por worker—, sin Redis.
 - **Adaptador de proveedores**: `adapter_*`, `delivery_tracking_events` y
   `delivery_reconciliation_runs` tienen sus propios casos de uso, fuera de estos 13.
 - **Proyecciones**: `read_models.event_log_v`, `event_delivery_v`, `job_status_v`,
-  `notification_inbox_v`, `delivery_status_v` y las series de `time_series` las alimentará el propio
-  outbox una vez haya consumidores registrados.
+  `notification_inbox_v`, `delivery_status_v` y las series de `time_series` se alimentan desde el
+  outbox cuando hay consumidores registrados.
 
 ## Revisión backend 2026-10-04
-
-Informe de evidencia: [`docs/revision-backend-2026-10-04/modulos/messaging.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/messaging.md).
 
 Hallazgos confirmados: el índice único actual de `event_deliveries` impide el fan-out a más de
 una suscripción (MSG-01) y el contrato permite un destinatario externo que el esquema no puede

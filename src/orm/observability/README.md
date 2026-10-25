@@ -6,6 +6,7 @@ Dos archivos con una responsabilidad clara cada uno.
 |---|---|
 | `orm.logger.ts` | Enruta el logger interno de MikroORM al de NestJS y clasifica las consultas lentas |
 | `query-metrics.ts` | Contadores acumulados por proceso: volumen, latencia, fallos |
+| `sql-redaction.ts` | ORMN-02: clase de sentencia, hash de la forma y redacción de mensajes del driver; el SQL literal nunca llega al log en producción |
 
 ## El problema de partida
 
@@ -62,10 +63,7 @@ que exista el contenedor de NestJS. `OrmModule` la vuelve a exponer como proveed
 (`{ provide: QueryMetrics, useValue: ormQueryMetrics }`) para que cualquier servicio la
 inyecte con normalidad.
 
-## Lo que falta y sería el siguiente paso
+## Límites
 
-- Exponer `snapshot()` en un endpoint (`@nestjs/terminus` ya está en las dependencias).
-- Etiquetar cada consulta con el identificador de traza de la petición para poder atribuir
-  una consulta lenta a un endpoint concreto.
-- Detección de N+1: `QueryMetrics` tiene ya el volumen por familia, y comparar consultas por
-  petición contra una cota daría la señal.
+`snapshot()` no se expone en ningún endpoint, las consultas no llevan el identificador de traza
+de la petición y no hay detección de N+1.

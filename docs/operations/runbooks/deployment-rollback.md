@@ -38,7 +38,7 @@ camino de rollback verificado hoy.
 ## Comunicación
 
 Notificar al equipo dueño del cambio revertido — un rollback no es el cierre del incidente, es
-la mitigación; la causa raíz del cambio problemático sigue pendiente de corrección.
+la mitigación: no corrige la causa raíz del cambio problemático.
 
 ## Ver también
 

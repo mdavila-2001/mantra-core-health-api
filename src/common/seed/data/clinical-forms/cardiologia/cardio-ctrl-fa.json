@@ -2,14 +2,14 @@
   "code": "CARDIO_CTRL_FA",
   "name": "Control de fibrilación auricular y anticoagulación",
   "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
     "organization": "Ministerio de Salud del Perú (MINSA)",
     "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
     "license": "Norma técnica estatal de acceso público",
     "retrievedAt": "2026-10-02",
-    "note": "Estructura de la NT 022; riesgo embólico por CHA₂DS₂-VASc y de sangrado por HAS-BLED (puntajes publicados de uso libre)."
+    "note": "Estructura de la NT 022; riesgo embólico por CHA₂DS₂-VASc y de sangrado por HAS-BLED (puntajes publicados de uso libre). Ampliación internacional (2026-10-24): factores de la escala HAS-BLED desde el CKM internacional de openEHR (https://github.com/openEHR/CKM-mirror, instantánea en tools/clinical-forms/openehr/ckm-snapshot.json; arquetipos CC BY-SA 3.0 o 4.0 según cada uno, sin vínculos SNOMED CT). Cada campo nuevo cita la publicación original en su ayuda; las traducciones propias están marcadas."
   },
   "fields": [
     {
@@ -121,6 +121,27 @@
       "name": "CHA₂DS₂-VASc — puntaje",
       "dataType": "integer",
       "required": true
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "has_bled_factores",
+      "name": "HAS-BLED: factores presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hipertensión: presión sistólica > 160 mmHg (1 punto)",
+        "Función renal alterada: diálisis crónica, trasplante renal o creatinina ≥ 200 µmol/L (1 punto)",
+        "Función hepática alterada: hepatopatía crónica (p. ej. cirrosis) o bilirrubina > 2 veces el límite superior con AST/ALT/FA > 3 veces el límite superior (1 punto)",
+        "Accidente cerebrovascular previo (1 punto)",
+        "Antecedente de sangrado o predisposición al sangrado (1 punto)",
+        "INR lábil: inestable, alto o poco tiempo en rango terapéutico (1 punto)",
+        "Edad avanzada: más de 65 años (1 punto)",
+        "Fármacos concomitantes: antiagregantes, antiinflamatorios no esteroideos (1 punto)",
+        "Alcohol: 8 o más unidades por semana (1 punto)",
+        "Ninguno"
+      ],
+      "multiple": true,
+      "description": "Cada factor suma 1 punto (0 a 9). Fuente: escala HAS-BLED (Pisters R et al. Chest. 2010;138(5):1093-100; Lip GY et al. J Am Coll Cardiol. 2011;57(2):173-80), según el arquetipo openEHR openEHR-EHR-OBSERVATION.has_bled.v0 (rev. 0.0.1-alpha, en desarrollo; CC BY-SA 4.0). Traducción propia del inglés del arquetipo: no es una versión oficial ni validada en castellano."
     },
     {
       "section": "Evaluación: fibrilación auricular",

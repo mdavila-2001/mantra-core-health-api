@@ -1,7 +1,7 @@
 # Molde de módulo (DDD por capas)
 
 Decisión: [ADR-0026](../adr/ADR-0026-molde-de-modulo-ddd.md). Módulo piloto y referencia viva:
-[`src/modules/scheduling`](../../src/modules/scheduling/README.md). Lo hace cumplir
+[`src/modules/scheduling`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/scheduling/README.md). Lo hace cumplir
 `src/architecture/module-layering.spec.ts`, que sólo mira los módulos de `MIGRATED_MODULES`.
 
 ## Árbol objetivo

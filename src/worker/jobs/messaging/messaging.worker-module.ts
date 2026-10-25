@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { OutboxRelayJob } from './outbox-relay.job';
 import { QueueJob } from './queue.job';
 import { NotificationDeliveryJob } from './notification-delivery.job';
+import { PrescriptionExpiryNoticeJob } from './prescription-expiry-notice.job';
 import { MockProviderWiringService } from './mock-provider-wiring.service';
 import { GoogleProviderWiringService } from './google-provider-wiring.service';
 
@@ -23,6 +24,7 @@ export { NotificationDeliveryJob } from './notification-delivery.job';
     OutboxRelayJob,
     QueueJob,
     NotificationDeliveryJob,
+    PrescriptionExpiryNoticeJob,
     MockProviderWiringService,
     GoogleProviderWiringService,
   ],

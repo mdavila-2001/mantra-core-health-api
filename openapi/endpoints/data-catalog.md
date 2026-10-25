@@ -2,46 +2,52 @@
 
 # Endpoints del módulo `data_catalog`
 
-Referencia exhaustiva de 31 operación(es) del módulo `data_catalog`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 37 operación(es) del módulo `data_catalog`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `admin-catalog`, `admin-portal`
-- **Controladores:** `AdminCatalogController`, `AdminPortalController`
+- **Etiquetas OpenAPI:** `admin-catalog`, `admin-portal`, `data-catalog-internal`
+- **Controladores:** `AdminCatalogController`, `AdminPortalController`, `InternalCatalogScansController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /admin/catalog/annotations/{id}/review](#1-post-admin-catalog-annotations-id-review) — Aprueba o rechaza la revisión vigente de una ficha
-2. [GET /admin/catalog/coverage](#2-get-admin-catalog-coverage) — Cobertura del catálogo por dimensión, calculada por el servidor
-3. [GET /admin/catalog/objects](#3-get-admin-catalog-objects) — Objetos del catálogo, paginados por cursor
-4. [GET /admin/catalog/objects/{id}](#4-get-admin-catalog-objects-id) — Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto
-5. [PUT /admin/catalog/objects/{id}/annotation](#5-put-admin-catalog-objects-id-annotation) — Crea o edita la ficha de un objeto (con versión esperada)
-6. [GET /admin/catalog/objects/{id}/changes](#6-get-admin-catalog-objects-id-changes) — Cambios que los escaneos detectaron en un objeto
-7. [GET /admin/catalog/objects/{id}/columns](#7-get-admin-catalog-objects-id-columns) — Columnas observadas de un objeto, con su ficha si la tienen
-8. [GET /admin/catalog/objects/{id}/evidence](#8-get-admin-catalog-objects-id-evidence) — Evidencia enlazada a un objeto
-9. [POST /admin/catalog/objects/{id}/evidence](#9-post-admin-catalog-objects-id-evidence) — Enlaza evidencia a un objeto
-10. [GET /admin/catalog/objects/{id}/history](#10-get-admin-catalog-objects-id-history) — Revisiones y decisiones de la ficha de un objeto
-11. [GET /admin/catalog/objects/{id}/impact](#11-get-admin-catalog-objects-id-impact) — Quién referencia a un objeto y a quién referencia, por claves foráneas observadas
-12. [GET /admin/catalog/scans](#12-get-admin-catalog-scans) — Escaneos, del más reciente al más antiguo
-13. [POST /admin/catalog/scans](#13-post-admin-catalog-scans) — Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
-14. [GET /admin/catalog/scans/{id}](#14-get-admin-catalog-scans-id) — Un escaneo
-15. [GET /admin/catalog/schemas](#15-get-admin-catalog-schemas) — Schemas observados, con cuántos objetos tienen ficha y cuántos están aprobados
-16. [GET /admin/portal/catalogo/deriva](#16-get-admin-portal-catalogo-deriva) — Deriva entre el DDL del modelo y las entidades del ORM
-17. [GET /admin/portal/catalogo/tablas](#17-get-admin-portal-catalogo-tablas) — Listar las tablas del catálogo de datos
-18. [GET /admin/portal/catalogo/tablas/{schema}/{tabla}](#18-get-admin-portal-catalogo-tablas-schema-tabla) — Ver la ficha de una tabla
-19. [GET /admin/portal/flujos](#19-get-admin-portal-flujos) — Listar los procesos de negocio
-20. [GET /admin/portal/flujos/{codigo}](#20-get-admin-portal-flujos-codigo) — Ver un proceso con sus etapas y máquinas de estado
-21. [GET /admin/portal/flujos/{codigo}/grafo](#21-get-admin-portal-flujos-codigo-grafo) — Ver el grafo de un proceso
-22. [GET /admin/portal/flujos/hallazgos](#22-get-admin-portal-flujos-hallazgos) — Resumen de hallazgos del mapa
-23. [GET /admin/portal/flujos/hallazgos/{id}](#23-get-admin-portal-flujos-hallazgos-id) — Ver los casos de un hallazgo
-24. [GET /admin/portal/flujos/mapa](#24-get-admin-portal-flujos-mapa) — Mapa de operaciones con sus señales
-25. [GET /admin/portal/glosario](#25-get-admin-portal-glosario) — Buscar en el glosario
-26. [GET /admin/portal/linaje](#26-get-admin-portal-linaje) — Métricas del linaje de datos
-27. [GET /admin/portal/linaje/tablas/{schema}/{tabla}](#27-get-admin-portal-linaje-tablas-schema-tabla) — Linaje de una tabla
-28. [GET /admin/portal/operaciones](#28-get-admin-portal-operaciones) — Listar las operaciones HTTP del sistema
-29. [GET /admin/portal/operaciones/{id}](#29-get-admin-portal-operaciones-id) — Ver la ficha de una operación
-30. [GET /admin/portal/operaciones/{id}/arbol](#30-get-admin-portal-operaciones-id-arbol) — Ver el árbol de decisión de una operación
-31. [GET /admin/portal/version](#31-get-admin-portal-version) — Versión y tamaño del inventario publicado
+2. [POST /admin/catalog/classification/run](#2-post-admin-catalog-classification-run) — Corre la clasificación automática de sensibilidad sobre las columnas observadas
+3. [PUT /admin/catalog/columns/{id}/annotation](#3-put-admin-catalog-columns-id-annotation) — Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED
+4. [GET /admin/catalog/columns/{id}/evidence](#4-get-admin-catalog-columns-id-evidence) — Evidencia enlazada a una columna
+5. [POST /admin/catalog/columns/{id}/evidence](#5-post-admin-catalog-columns-id-evidence) — Enlaza evidencia a una columna
+6. [GET /admin/catalog/coverage](#6-get-admin-catalog-coverage) — Cobertura del catálogo por dimensión, calculada por el servidor
+7. [GET /admin/catalog/objects](#7-get-admin-catalog-objects) — Objetos del catálogo, paginados por cursor
+8. [GET /admin/catalog/objects/{id}](#8-get-admin-catalog-objects-id) — Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto
+9. [PUT /admin/catalog/objects/{id}/annotation](#9-put-admin-catalog-objects-id-annotation) — Crea o edita la ficha de un objeto (con versión esperada)
+10. [GET /admin/catalog/objects/{id}/changes](#10-get-admin-catalog-objects-id-changes) — Cambios que los escaneos detectaron en un objeto
+11. [GET /admin/catalog/objects/{id}/columns](#11-get-admin-catalog-objects-id-columns) — Columnas observadas de un objeto, con su ficha si la tienen
+12. [GET /admin/catalog/objects/{id}/evidence](#12-get-admin-catalog-objects-id-evidence) — Evidencia enlazada a un objeto
+13. [POST /admin/catalog/objects/{id}/evidence](#13-post-admin-catalog-objects-id-evidence) — Enlaza evidencia a un objeto
+14. [GET /admin/catalog/objects/{id}/history](#14-get-admin-catalog-objects-id-history) — Revisiones y decisiones de la ficha de un objeto
+15. [GET /admin/catalog/objects/{id}/impact](#15-get-admin-catalog-objects-id-impact) — Quién referencia a un objeto y a quién referencia, por claves foráneas observadas
+16. [GET /admin/catalog/permission-drift](#16-get-admin-catalog-permission-drift) — Deriva de permisos: roles que las rutas exigen contra los que la API siembra
+17. [GET /admin/catalog/scans](#17-get-admin-catalog-scans) — Escaneos, del más reciente al más antiguo
+18. [POST /admin/catalog/scans](#18-post-admin-catalog-scans) — Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
+19. [GET /admin/catalog/scans/{id}](#19-get-admin-catalog-scans-id) — Un escaneo
+20. [GET /admin/catalog/schemas](#20-get-admin-catalog-schemas) — Schemas observados, con cuántos objetos tienen ficha y cuántos están aprobados
+21. [GET /admin/portal/catalogo/deriva](#21-get-admin-portal-catalogo-deriva) — Deriva entre el DDL del modelo y las entidades del ORM
+22. [GET /admin/portal/catalogo/tablas](#22-get-admin-portal-catalogo-tablas) — Listar las tablas del catálogo de datos
+23. [GET /admin/portal/catalogo/tablas/{schema}/{tabla}](#23-get-admin-portal-catalogo-tablas-schema-tabla) — Ver la ficha de una tabla
+24. [GET /admin/portal/flujos](#24-get-admin-portal-flujos) — Listar los procesos de negocio
+25. [GET /admin/portal/flujos/{codigo}](#25-get-admin-portal-flujos-codigo) — Ver un proceso con sus etapas y máquinas de estado
+26. [GET /admin/portal/flujos/{codigo}/grafo](#26-get-admin-portal-flujos-codigo-grafo) — Ver el grafo de un proceso
+27. [GET /admin/portal/flujos/hallazgos](#27-get-admin-portal-flujos-hallazgos) — Resumen de hallazgos del mapa
+28. [GET /admin/portal/flujos/hallazgos/{id}](#28-get-admin-portal-flujos-hallazgos-id) — Ver los casos de un hallazgo
+29. [GET /admin/portal/flujos/mapa](#29-get-admin-portal-flujos-mapa) — Mapa de operaciones con sus señales
+30. [GET /admin/portal/glosario](#30-get-admin-portal-glosario) — Buscar en el glosario
+31. [GET /admin/portal/linaje](#31-get-admin-portal-linaje) — Métricas del linaje de datos
+32. [GET /admin/portal/linaje/tablas/{schema}/{tabla}](#32-get-admin-portal-linaje-tablas-schema-tabla) — Linaje de una tabla
+33. [GET /admin/portal/operaciones](#33-get-admin-portal-operaciones) — Listar las operaciones HTTP del sistema
+34. [GET /admin/portal/operaciones/{id}](#34-get-admin-portal-operaciones-id) — Ver la ficha de una operación
+35. [GET /admin/portal/operaciones/{id}/arbol](#35-get-admin-portal-operaciones-id-arbol) — Ver el árbol de decisión de una operación
+36. [GET /admin/portal/version](#36-get-admin-portal-version) — Versión y tamaño del inventario publicado
+37. [POST /internal/catalog/scans/run-next](#37-post-internal-catalog-scans-run-next) — Sonda: reclama y ejecuta el siguiente escaneo (worker)
 
 ---
 
@@ -88,7 +94,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -130,6 +136,7 @@ Content-Type: application/json
 | 422 | No está en revisión, falta evidencia o el rechazo no explica | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -141,7 +148,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Ficha no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
 | 409 | `CONCURRENCY_CONFLICT` | message | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
 | 409 | `CONCURRENCY_CONFLICT` | La ficha cambió mientras se revisaba | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
@@ -164,7 +171,517 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. GET /admin/catalog/coverage
+## 2. POST /admin/catalog/classification/run
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `admin-catalog`
+- **Nombre:** Corre la clasificación automática de sensibilidad sobre las columnas observadas
+- **Operation ID:** `AdminCatalogController_runClassification`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminCatalogController.runClassification](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+
+### Descripción de negocio
+
+Crea fichas de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda). Nunca baja un nivel ni pisa fichas escritas por una persona o que ya salieron de AUTO_DETECTED.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/catalog/classification/run` en `AdminCatalogController_runClassification`. El controlador delega en `CatalogClassificationService.run`. Valida el body como `ClassificationRunDto` y consume `application/json`. El tipo de retorno estático es `Promise<ClassificationRunResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ClassificationRunDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/catalog/classification/run HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `schema` | No | `string` | longitud máxima 100 | Limita la corrida a un schema | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/catalog/classification/run HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "schema": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClassificationRunResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "examined": 1,
+  "unclassified": 1,
+  "created": 1,
+  "raised": 1,
+  "sentToReview": 1,
+  "skippedManual": 1,
+  "skippedReviewed": 1,
+  "skippedNotHigher": 1,
+  "conflicts": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `examined` | Sí | `number` | Sin restricción adicional declarada | Columnas observadas que se miraron | `1` |
+| `unclassified` | Sí | `number` | Sin restricción adicional declarada | Columnas que ninguna regla reconoció: quedan sin clasificar | `1` |
+| `created` | Sí | `number` | Sin restricción adicional declarada | Fichas nuevas | `1` |
+| `raised` | Sí | `number` | Sin restricción adicional declarada | Fichas de la máquina subidas a un nivel más alto | `1` |
+| `sentToReview` | Sí | `number` | Sin restricción adicional declarada | De las creadas o subidas, las que quedaron en NEEDS_REVIEW por duda | `1` |
+| `skippedManual` | Sí | `number` | Sin restricción adicional declarada | No tocadas: las escribió una persona | `1` |
+| `skippedReviewed` | Sí | `number` | Sin restricción adicional declarada | No tocadas: ya salieron de AUTO_DETECTED | `1` |
+| `skippedNotHigher` | Sí | `number` | Sin restricción adicional declarada | No tocadas: la propuesta no era más alta (nunca baja) | `1` |
+| `conflicts` | Sí | `number` | Sin restricción adicional declarada | No escritas: otra petición cambió la ficha antes | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalog/classification/run"
+}
+```
+
+---
+
+## 3. PUT /admin/catalog/columns/{id}/annotation
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `admin-catalog`
+- **Nombre:** Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED
+- **Operation ID:** `AdminCatalogController_saveColumnAnnotation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminCatalogController.saveColumnAnnotation](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+
+### Descripción de negocio
+
+Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /admin/catalog/columns/{id}/annotation` en `AdminCatalogController_saveColumnAnnotation`. El controlador delega en `CatalogGovernanceService.saveColumnAnnotation`. Valida el body como `AnnotationPatchDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AnnotationPatchDto`; los campos opcionales se omiten.
+
+```http
+PUT /admin/catalog/columns/00000000-0000-4000-8000-000000000001/annotation HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedVersion` | Sí | `number` | mínimo 0 | Versión de la ficha que se leyó (`version`); 0 para crearla. Si cambió, 409 | `1` |
+| `submit` | No | `boolean` | Sin restricción adicional declarada | Enviarla a revisión: exige propósito, razón de existir y grano de fila (o declararlos como preguntas abiertas) | `true` |
+| `changeReason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `businessName` | No | `object` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `definition` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `purpose` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `existenceRationale` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `rowGrain` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `alternativesRationale` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `deletionImpact` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `businessOwner` | No | `object` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `dataSteward` | No | `object` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `technicalOwner` | No | `object` | longitud máxima 200; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `unit` | No | `object` | longitud máxima 100; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `valueDomain` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `nullSemantics` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sensitivity` | No | `string` | valores: `UNKNOWN`, `ANONYMIZED`, `PUBLIC`, `INTERNAL`, `PSEUDONYMIZED`, `PERSONAL`, `PHI_IDENTIFIER`, `PHI_SENSITIVE`, `PHI_SPECIAL`, `CREDENTIAL` | Sin descripción específica en el contrato OpenAPI. | `UNKNOWN` |
+| `consumers` | No | `array<string>` | longitud máxima 200; máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `openQuestions` | No | `array<OpenQuestionDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","question":"valor-ejemplo","owner":"valor-ejemplo","dueDate":"valor-ejemplo"}]` |
+| `openQuestions[].field` | No | `string` | longitud máxima 60 | Campo de la ficha sobre el que es la pregunta | `valor-ejemplo` |
+| `openQuestions[].question` | No | `string` | longitud mínima 3; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `openQuestions[].owner` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `openQuestions[].dueDate` | No | `string` | Sin restricción adicional declarada | Fecha ISO 8601 | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /admin/catalog/columns/00000000-0000-4000-8000-000000000001/annotation HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedVersion": 1,
+  "submit": true,
+  "changeReason": "Texto descriptivo de ejemplo",
+  "businessName": {},
+  "definition": {},
+  "purpose": {},
+  "existenceRationale": {},
+  "rowGrain": {},
+  "alternativesRationale": {},
+  "deletionImpact": {},
+  "businessOwner": {},
+  "dataSteward": {},
+  "technicalOwner": {},
+  "unit": {},
+  "valueDomain": {},
+  "nullSemantics": {},
+  "sensitivity": "UNKNOWN",
+  "consumers": [
+    "valor-ejemplo"
+  ],
+  "openQuestions": [
+    {
+      "field": "valor-ejemplo",
+      "question": "valor-ejemplo",
+      "owner": "valor-ejemplo",
+      "dueDate": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | No existe la columna | `no declarado` | No |
+| 409 | La ficha cambió desde que se leyó (`CONCURRENCY_CONFLICT`) | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | No puede enviarse a revisión: falta la definición (`VALIDATION_FAILED`, `details.violations`) | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | La ficha cambió desde que se leyó | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalog/columns/{id}/annotation"
+}
+```
+
+---
+
+## 4. GET /admin/catalog/columns/{id}/evidence
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `admin-catalog`
+- **Nombre:** Evidencia enlazada a una columna
+- **Operation ID:** `AdminCatalogController_columnEvidence`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminCatalogController.columnEvidence](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+
+### Descripción de negocio
+
+Evidencia enlazada a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/catalog/columns/{id}/evidence` en `AdminCatalogController_columnEvidence`. El controlador delega en `CatalogReadService.columnEvidence`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/catalog/columns/00000000-0000-4000-8000-000000000001/evidence HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/catalog/columns/00000000-0000-4000-8000-000000000001/evidence HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | No existe la columna | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalog/columns/{id}/evidence"
+}
+```
+
+---
+
+## 5. POST /admin/catalog/columns/{id}/evidence
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `admin-catalog`
+- **Nombre:** Enlaza evidencia a una columna
+- **Operation ID:** `AdminCatalogController_addColumnEvidence`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminCatalogController.addColumnEvidence](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+
+### Descripción de negocio
+
+Enlaza evidencia a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /admin/catalog/columns/{id}/evidence` en `AdminCatalogController_addColumnEvidence`. El controlador delega en `CatalogGovernanceService.addColumnEvidence`. Valida el body como `DataCatalogEvidenceInputDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DataCatalogEvidenceInputDto`; los campos opcionales se omiten.
+
+```http
+POST /admin/catalog/columns/00000000-0000-4000-8000-000000000001/evidence HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "SCHEMA_COMMENT",
+  "reference": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `string` | valores: `SCHEMA_COMMENT`, `VAULT_NOTE`, `MIGRATION`, `CODE_REFERENCE`, `OPENAPI`, `OWNER_STATEMENT`, `DOCUMENT` | Sin descripción específica en el contrato OpenAPI. | `SCHEMA_COMMENT` |
+| `reference` | Sí | `string` | longitud mínima 3; longitud máxima 2000 | Dónde está la evidencia: ruta, enlace, identificador | `valor-ejemplo` |
+| `excerpt` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `sourceRevision` | No | `string` | longitud máxima 200 | Revisión del documento o commit de donde se tomó | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /admin/catalog/columns/00000000-0000-4000-8000-000000000001/evidence HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "SCHEMA_COMMENT",
+  "reference": "valor-ejemplo",
+  "excerpt": "valor-ejemplo",
+  "sourceRevision": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | Sí |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | No existe la columna | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Columna del catálogo no encontrada | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalog/columns/{id}/evidence"
+}
+```
+
+---
+
+## 6. GET /admin/catalog/coverage
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -201,7 +718,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -227,6 +744,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -238,7 +756,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -256,7 +774,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /admin/catalog/objects
+## 7. GET /admin/catalog/objects
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -283,7 +801,7 @@ NestJS resuelve `GET /admin/catalog/objects` en `AdminCatalogController_objects`
 | `schema` | query | No | `string` | Sin restricción adicional declarada | Schema de PostgreSQL | `valor-ejemplo` |
 | `kind` | query | No | `string` | valores: `TABLE`, `PARTITIONED_TABLE`, `VIEW`, `MATERIALIZED_VIEW`, `FOREIGN_TABLE` | Sin descripción específica en OpenAPI. | `TABLE` |
 | `observationStatus` | query | No | `string` | valores: `OBSERVED`, `NOT_OBSERVED`, `RETIRED` | Sin descripción específica en OpenAPI. | `OBSERVED` |
-| `reviewStatus` | query | No | `string` | valores: `DRAFT`, `NEEDS_REVIEW`, `APPROVED`, `REJECTED`, `NONE` | `NONE`: objetos sin ficha | `DRAFT` |
+| `reviewStatus` | query | No | `string` | valores: `AUTO_DETECTED`, `DRAFT`, `NEEDS_REVIEW`, `APPROVED`, `REJECTED`, `NONE` | `NONE`: objetos sin ficha | `AUTO_DETECTED` |
 | `q` | query | No | `string` | longitud máxima 120 | Busca en `schema.objeto` y en el nombre de negocio | `valor-ejemplo` |
 | `missing` | query | No | `string` | valores: `purpose`, `existenceRationale`, `rowGrain`, `businessOwner` | Sólo los objetos a los que les falta ese dato de la ficha | `purpose` |
 
@@ -300,7 +818,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -311,7 +829,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /admin/catalog/objects?cursor=valor-ejemplo&limit=50&schema=valor-ejemplo&kind=TABLE&observationStatus=OBSERVED&reviewStatus=DRAFT&q=valor-ejemplo&missing=purpose HTTP/1.1
+GET /admin/catalog/objects?cursor=valor-ejemplo&limit=50&schema=valor-ejemplo&kind=TABLE&observationStatus=OBSERVED&reviewStatus=AUTO_DETECTED&q=valor-ejemplo&missing=purpose HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -326,6 +844,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -338,7 +857,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 400 | `VALIDATION_FAILED` | El cursor de paginación no es válido | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -356,7 +875,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /admin/catalog/objects/{id}
+## 8. GET /admin/catalog/objects/{id}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -393,7 +912,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -420,6 +939,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe el objeto | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -431,7 +951,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -450,7 +970,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. PUT /admin/catalog/objects/{id}/annotation
+## 9. PUT /admin/catalog/objects/{id}/annotation
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -492,7 +1012,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -515,7 +1035,7 @@ Content-Type: application/json
 | `unit` | No | `object` | longitud máxima 100; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `valueDomain` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `nullSemantics` | No | `object` | longitud máxima 4000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
-| `sensitivity` | No | `string` | valores: `UNKNOWN`, `NONE`, `INTERNAL`, `PII`, `PHI`, `SECRET` | Sin descripción específica en el contrato OpenAPI. | `UNKNOWN` |
+| `sensitivity` | No | `string` | valores: `UNKNOWN`, `ANONYMIZED`, `PUBLIC`, `INTERNAL`, `PSEUDONYMIZED`, `PERSONAL`, `PHI_IDENTIFIER`, `PHI_SENSITIVE`, `PHI_SPECIAL`, `CREDENTIAL` | Sin descripción específica en el contrato OpenAPI. | `UNKNOWN` |
 | `consumers` | No | `array<string>` | longitud máxima 200; máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `openQuestions` | No | `array<OpenQuestionDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"field":"valor-ejemplo","question":"valor-ejemplo","owner":"valor-ejemplo","dueDate":"valor-ejemplo"}]` |
 | `openQuestions[].field` | No | `string` | longitud máxima 60 | Campo de la ficha sobre el que es la pregunta | `valor-ejemplo` |
@@ -579,6 +1099,7 @@ Content-Type: application/json
 | 422 | No puede enviarse a revisión: faltan respuestas (`VALIDATION_FAILED`, `details.violations`) | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -590,7 +1111,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
 | 409 | `CONCURRENCY_CONFLICT` | La ficha cambió desde que se leyó | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -611,7 +1132,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /admin/catalog/objects/{id}/changes
+## 10. GET /admin/catalog/objects/{id}/changes
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -650,7 +1171,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -677,6 +1198,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -688,7 +1210,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -707,7 +1229,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. GET /admin/catalog/objects/{id}/columns
+## 11. GET /admin/catalog/objects/{id}/columns
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -744,7 +1266,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -771,6 +1293,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -782,7 +1305,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -801,7 +1324,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /admin/catalog/objects/{id}/evidence
+## 12. GET /admin/catalog/objects/{id}/evidence
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -838,7 +1361,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -865,6 +1388,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -876,7 +1400,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -895,7 +1419,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /admin/catalog/objects/{id}/evidence
+## 13. POST /admin/catalog/objects/{id}/evidence
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -938,7 +1462,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -982,6 +1506,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -993,7 +1518,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-governance.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1013,7 +1538,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /admin/catalog/objects/{id}/history
+## 14. GET /admin/catalog/objects/{id}/history
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -1050,7 +1575,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1077,6 +1602,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1088,7 +1614,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1107,7 +1633,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /admin/catalog/objects/{id}/impact
+## 15. GET /admin/catalog/objects/{id}/impact
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -1146,7 +1672,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1173,6 +1699,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1184,7 +1711,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Objeto del catálogo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1203,7 +1730,97 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /admin/catalog/scans
+## 16. GET /admin/catalog/permission-drift
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `admin-catalog`
+- **Nombre:** Deriva de permisos: roles que las rutas exigen contra los que la API siembra
+- **Operation ID:** `AdminCatalogController_permissionDrift`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AdminCatalogController.permissionDrift](../../src/modules/data_catalog/controllers/admin-catalog.controller.ts)
+
+### Descripción de negocio
+
+Compara los `@Roles(...)` de todas las rutas (leídos al arrancar) con los roles de los `*.roles.ts` y con `authz.roles`: roles usados sin sembrar, sembrados sin usar y rutas autenticadas sin `@Roles`.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/catalog/permission-drift` en `AdminCatalogController_permissionDrift`. El controlador delega en `PermissionDriftService.report`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/catalog/permission-drift HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/catalog/permission-drift HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/catalog/permission-drift"
+}
+```
+
+---
+
+## 17. GET /admin/catalog/scans
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -1241,7 +1858,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1267,6 +1884,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1278,7 +1896,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1296,7 +1914,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /admin/catalog/scans
+## 18. POST /admin/catalog/scans
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -1334,7 +1952,7 @@ Idempotency-Key: valor-ejemplo
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`.
+- Roles admitidos por `@Roles`: `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1363,6 +1981,7 @@ Idempotency-Key: valor-ejemplo
 | 422 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ScanAcceptedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1394,7 +2013,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | Ya hay un escaneo en curso de esta fuente | Excepción explícita en src/modules/data_catalog/services/catalog-scan.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1413,7 +2032,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /admin/catalog/scans/{id}
+## 19. GET /admin/catalog/scans/{id}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -1450,7 +2069,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1477,6 +2096,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1488,7 +2108,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Escaneo no encontrado | Excepción explícita en src/modules/data_catalog/services/catalog-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1507,7 +2127,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /admin/catalog/schemas
+## 20. GET /admin/catalog/schemas
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-catalog`
@@ -1542,7 +2162,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1568,6 +2188,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1578,7 +2199,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1596,7 +2217,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /admin/portal/catalogo/deriva
+## 21. GET /admin/portal/catalogo/deriva
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -1632,7 +2253,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1659,6 +2280,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 | 500 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `DerivaCatalogoDto` | No |
+| 504 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DerivaCatalogoDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1687,7 +2309,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1705,7 +2327,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /admin/portal/catalogo/tablas
+## 22. GET /admin/portal/catalogo/tablas
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -1748,7 +2370,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1775,6 +2397,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `TablasPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TablasPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1825,7 +2448,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1843,7 +2466,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
+## 23. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -1882,7 +2505,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -1910,6 +2533,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `TablaFichaDto` | No |
 | 500 | Consulta completada correctamente. | `TablaFichaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `TablaFichaDto` | No |
+| 504 | Consulta completada correctamente. | `TablaFichaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TablaFichaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1989,7 +2613,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Tabla no encontrada en el catálogo | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2008,7 +2632,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /admin/portal/flujos
+## 24. GET /admin/portal/flujos
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2051,7 +2675,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2078,6 +2702,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ProcesosPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcesosPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2136,7 +2761,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2154,7 +2779,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /admin/portal/flujos/{codigo}
+## 25. GET /admin/portal/flujos/{codigo}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2192,7 +2817,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2220,6 +2845,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ProcesoDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcesoDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2329,7 +2955,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Proceso no encontrado en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2348,7 +2974,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /admin/portal/flujos/{codigo}/grafo
+## 26. GET /admin/portal/flujos/{codigo}/grafo
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2386,7 +3012,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2414,6 +3040,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `GrafoDto` | No |
 | 500 | Consulta completada correctamente. | `GrafoDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `GrafoDto` | No |
+| 504 | Consulta completada correctamente. | `GrafoDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GrafoDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2455,7 +3082,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Proceso no encontrado en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2474,7 +3101,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /admin/portal/flujos/hallazgos
+## 27. GET /admin/portal/flujos/hallazgos
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2510,7 +3137,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2537,6 +3164,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 | 500 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `HallazgoResumenDto[]` | No |
+| 504 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HallazgoResumenDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2563,7 +3191,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2581,7 +3209,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /admin/portal/flujos/hallazgos/{id}
+## 28. GET /admin/portal/flujos/hallazgos/{id}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2621,7 +3249,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2649,6 +3277,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `HallazgoDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HallazgoDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2690,7 +3319,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Hallazgo no encontrado | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2709,7 +3338,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /admin/portal/flujos/mapa
+## 29. GET /admin/portal/flujos/mapa
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2755,7 +3384,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2782,6 +3411,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `MapaPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MapaPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2845,7 +3475,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2863,7 +3493,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /admin/portal/glosario
+## 30. GET /admin/portal/glosario
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -2903,7 +3533,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -2930,6 +3560,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `GlosarioPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlosarioPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2972,7 +3603,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2990,7 +3621,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /admin/portal/linaje
+## 31. GET /admin/portal/linaje
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -3026,7 +3657,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3053,6 +3684,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `LinajeDto` | No |
 | 500 | Consulta completada correctamente. | `LinajeDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `LinajeDto` | No |
+| 504 | Consulta completada correctamente. | `LinajeDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinajeDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3088,7 +3720,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3106,7 +3738,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /admin/portal/linaje/tablas/{schema}/{tabla}
+## 32. GET /admin/portal/linaje/tablas/{schema}/{tabla}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -3145,7 +3777,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3173,6 +3805,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 | 500 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `LinajeTablaDto` | No |
+| 504 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinajeTablaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3210,7 +3843,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Tabla no encontrada en el linaje | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3229,7 +3862,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /admin/portal/operaciones
+## 33. GET /admin/portal/operaciones
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -3275,7 +3908,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3302,6 +3935,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `OperacionesPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperacionesPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3373,7 +4007,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3391,7 +4025,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /admin/portal/operaciones/{id}
+## 34. GET /admin/portal/operaciones/{id}
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -3429,7 +4063,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3457,6 +4091,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `OperacionDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperacionDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3691,7 +4326,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Operación no encontrada en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3710,7 +4345,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /admin/portal/operaciones/{id}/arbol
+## 35. GET /admin/portal/operaciones/{id}/arbol
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -3748,7 +4383,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3776,6 +4411,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ArbolDto` | No |
 | 500 | Consulta completada correctamente. | `ArbolDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ArbolDto` | No |
+| 504 | Consulta completada correctamente. | `ArbolDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArbolDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3820,7 +4456,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | La operación no tiene árbol de decisión | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 404 | `NOT_FOUND` | Operación no encontrada en el inventario | Excepción explícita en src/modules/data_catalog/services/portal-inventory.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3840,7 +4476,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /admin/portal/version
+## 36. GET /admin/portal/version
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `admin-portal`
@@ -3876,7 +4512,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3903,6 +4539,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `PortalVersionDto` | No |
 | 500 | Consulta completada correctamente. | `PortalVersionDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `PortalVersionDto` | No |
+| 504 | Consulta completada correctamente. | `PortalVersionDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PortalVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3935,7 +4572,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3948,6 +4585,117 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/admin/portal/version"
+}
+```
+
+---
+
+## 37. POST /internal/catalog/scans/run-next
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `data-catalog-internal`
+- **Nombre:** Sonda: reclama y ejecuta el siguiente escaneo (worker)
+- **Operation ID:** `InternalCatalogScansController_runNext`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalCatalogScansController.runNext](../../src/modules/data_catalog/controllers/internal-catalog.controller.ts)
+
+### Descripción de negocio
+
+Cierra los escaneos abandonados, retoma el que está en cola o, si venció el intervalo de la sonda, pide uno nuevo. `claimed: 0` si no había nada que hacer. `fenced: true` si el escaneo perdió su lease.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/catalog/scans/run-next` en `InternalCatalogScansController_runNext`. El controlador delega en `CatalogScanService.runNext`. No recibe body. El tipo de retorno estático es `Promise<RunNextResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/catalog/scans/run-next HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/catalog/scans/run-next HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RunNextResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunNextResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "claimed": 1,
+  "scanId": "00000000-0000-4000-8000-000000000001",
+  "status": "QUEUED",
+  "fenced": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `claimed` | Sí | `number` | valores: `0`, `1` | 1 si este tick tomó un escaneo; 0 si no había nada que hacer | `1` |
+| `scanId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | No | `string` | valores: `QUEUED`, `RUNNING`, `SUCCEEDED`, `FAILED`, `CANCELLED` | Sin descripción específica en el contrato OpenAPI. | `QUEUED` |
+| `fenced` | No | `boolean` | Sin restricción adicional declarada | `true` si el escaneo perdió su lease y no se pisó lo que otro proceso cerró | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya hay un escaneo en curso de esta fuente | Excepción explícita en src/modules/data_catalog/services/catalog-scan.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/catalog/scans/run-next"
 }
 ```
 

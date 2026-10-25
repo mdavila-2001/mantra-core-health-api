@@ -1,19 +1,17 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
-  getCurrentTenantId,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { Practices } from '../../practice/entities';
 import { ACCT } from '../accounting.concepts';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import { SubledgerRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
+import { AccountingScopeService } from './accounting-scope.service';
 import { toCents, fromCents } from './money';
 import {
   CreateOpenItemDto,
@@ -35,12 +33,14 @@ export class SubledgerService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param subledgerRepo - Valor de subledger repo requerido por la operación.
    * @param posting - Valor de posting requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly subledgerRepo: SubledgerRepository,
     private readonly posting: PostingHelper,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SubledgerService.name);
@@ -59,22 +59,14 @@ export class SubledgerService {
       'Creating open item',
     );
     return this.em.transactional(async (tx) => {
-      const subledger = await this.subledgerRepo.findSubledgerById(
-        tx,
-        dto.subledgerAccountId,
-      );
-      if (!subledger) {
-        throw new ResourceNotFoundException(
-          'Subledger no encontrado',
-          {
-            subledgerAccountId: dto.subledgerAccountId,
-          },
-          AccountingErrorReason.SUBLEDGER_ACCOUNT_NOT_FOUND,
-        );
-      }
+      // ACC-01: el subledger y la línea del mayor son del tenant activo, y la
+      // partida hereda el tenant del subledger verificado, no el del cuerpo.
+      this.scope.activeTenantFor(dto.tenantId, 'subledger');
+      const subledger = await this.scope.subledger(tx, dto.subledgerAccountId);
+      await this.scope.ledgerEntry(tx, dto.ledgerEntryId);
 
       const item = this.subledgerRepo.createOpenItem(tx, {
-        tenantId: dto.tenantId,
+        tenantId: subledger.tenantId,
         subledgerAccountId: dto.subledgerAccountId,
         ledgerEntryId: dto.ledgerEntryId,
         documentTypeConceptId:
@@ -109,28 +101,19 @@ export class SubledgerService {
       'Clearing open items',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId = await this.resolveClearingTenant(
-        tx,
-        dto.practiceId,
-        dto.tenantId,
-      );
+      // ACC-01: la organización del documento es la de la sesión, y la práctica
+      // del asiento, las partidas, el subledger y la cuenta bancaria son suyas.
+      // Lo ajeno responde 404 idéntico a lo inexistente.
+      const tenantId = await this.scope.practice(dto.practiceId);
+      this.scope.activeTenantFor(dto.tenantId, 'practice');
+      if (dto.companyBankAccountId) {
+        await this.scope.companyBankAccount(tx, dto.companyBankAccountId);
+      }
       // Cargar y validar cada partida; todas deben pertenecer al mismo subledger.
       const loaded = [];
       let subledgerAccountId: string | null = null;
       for (const it of dto.items) {
-        const openItem = await this.subledgerRepo.findOpenItemById(
-          tx,
-          it.openItemId,
-        );
-        if (!openItem) {
-          throw new ResourceNotFoundException(
-            'Partida abierta no encontrada',
-            {
-              openItemId: it.openItemId,
-            },
-            AccountingErrorReason.OPEN_ITEM_NOT_FOUND,
-          );
-        }
+        const openItem = await this.scope.openItem(tx, it.openItemId);
         if (openItem.statusConceptId === ACCT.OPEN_ITEM_CLEARED) {
           throw new ConflictException(
             'La partida ya está compensada',
@@ -171,19 +154,10 @@ export class SubledgerService {
         });
       }
 
-      const subledger = await this.subledgerRepo.findSubledgerById(
+      const subledger = await this.scope.subledger(
         tx,
         subledgerAccountId as string,
       );
-      if (!subledger) {
-        throw new ResourceNotFoundException(
-          'Subledger no encontrado',
-          {
-            subledgerAccountId,
-          },
-          AccountingErrorReason.SUBLEDGER_ACCOUNT_NOT_FOUND,
-        );
-      }
 
       const totalCleared = loaded.reduce((acc, l) => acc + l.clearedCents, 0);
       const number = dto.clearingNumber ?? this.posting.generateNumber('CLR');
@@ -261,45 +235,5 @@ export class SubledgerService {
         clearedItems: loaded.length,
       };
     });
-  }
-
-  /**
-   * La organización del documento de compensación es la de la práctica que
-   * asienta (informe B, C9). Mismo criterio que la lectura del cockpit
-   * (`AccountingReadService`): 404 si la práctica no existe y 403 si es de
-   * otra organización que la de la sesión. Un `tenantId` declarado se
-   * confirma, nunca se usa para estampar otra organización.
-   *
-   * @param tx - Transacción de la compensación.
-   * @param practiceId - Práctica del asiento.
-   * @param declared - El `tenantId` del cuerpo, si vino.
-   * @returns La organización dueña de la práctica.
-   */
-  private async resolveClearingTenant(
-    tx: EntityManager,
-    practiceId: string,
-    declared: string | undefined,
-  ): Promise<string> {
-    const practice = await tx.findOne(
-      Practices,
-      { id: practiceId },
-      { fields: ['id', 'tenantId'] },
-    );
-    if (practice === null) {
-      throw new ResourceNotFoundException('Práctica no encontrada', {
-        practiceId,
-      });
-    }
-    const sessionTenantId = getCurrentTenantId();
-    const otherSessionTenant =
-      sessionTenantId !== undefined && practice.tenantId !== sessionTenantId;
-    const otherDeclaredTenant =
-      declared !== undefined && practice.tenantId !== declared;
-    if (otherSessionTenant || otherDeclaredTenant) {
-      throw new ForbiddenException(
-        'La práctica de la compensación pertenece a otra organización',
-      );
-    }
-    return practice.tenantId;
   }
 }

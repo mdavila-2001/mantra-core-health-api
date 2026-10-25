@@ -14,17 +14,6 @@ export class CreateDisclosureAcceptanceDto {
   trackingDisclosureVersionId!: string;
 
   /**
-   * Identificador asociado a user.
-   */
-  @ApiPropertyOptional({
-    description: 'Usuario que acepta (por defecto el autenticado)',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  userId?: string;
-
-  /**
    * Identificador asociado a session.
    */
   @ApiPropertyOptional({ description: 'Sesión asociada', format: 'uuid' })

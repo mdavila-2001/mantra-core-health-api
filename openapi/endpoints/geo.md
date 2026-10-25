@@ -111,6 +111,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GeofenceEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GeofenceEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -145,8 +146,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Geofence no encontrado | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
 | 409 | `CONFLICT` | El sujeto ya está en ese estado respecto al geofence | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El geofence no está activo | Excepción explícita en src/modules/geo/services/geo-geofences.service.ts |
@@ -200,7 +199,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "shapeType": "CIRCLE"
 }
@@ -216,7 +214,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario (RLS) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre único del geofence dentro del tenant | `Nombre de ejemplo` |
 | `shapeType` | Sí | `string` | valores: `CIRCLE`, `POLYGON` | Forma del geofence | `CIRCLE` |
 | `radiusM` | No | `number` | mayor que 0 | Radio en metros (obligatorio si CIRCLE) | `1` |
@@ -258,6 +256,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GeofenceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GeofenceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -363,7 +362,7 @@ Content-Type: application/json
 | `subjectId` | Sí | `string` | formato `uuid` | Id del recurso rastreado (ambulancia/persona) | `00000000-0000-4000-8000-000000000001` |
 | `subjectType` | No | `string` | valores: `PERSON`, `VEHICLE` | Tipo de sujeto (discriminador polimórfico) | `PERSON` |
 | `deviceId` | No | `string` | formato `uuid` | Dispositivo GPS asociado | `00000000-0000-4000-8000-000000000001` |
-| `tenantId` | No | `string` | formato `uuid` | Tenant propietario (RLS) | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad. | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -396,6 +395,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackedSubjectResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackedSubjectResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -512,6 +512,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LastPositionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LastPositionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -548,7 +549,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 404 | `NOT_FOUND` | El sujeto no tiene posiciones registradas | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -676,6 +676,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IngestPingsResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IngestPingsResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -700,7 +701,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sujeto no está activo para rastreo | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay una sesión de tracking abierta para el sujeto | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
@@ -788,6 +788,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -812,7 +813,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 422 | `PRECONDITION_FAILED` | El rastreo del sujeto ya está suspendido | Excepción explícita en src/modules/geo/services/geo-tracked-subjects.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -914,6 +914,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingSessionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -946,7 +947,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sujeto rastreado no encontrado | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 409 | `CONFLICT` | El sujeto ya tiene una sesión de tracking abierta | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sujeto no está activo para rastreo | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
@@ -1034,6 +1034,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TrackingSessionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TrackingSessionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1066,7 +1067,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de tracking no encontrada | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no está abierta | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión tiene viajes en progreso | Excepción explícita en src/modules/geo/services/geo-tracking-sessions.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1167,6 +1167,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TripResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1203,7 +1204,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de tracking no encontrada | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 409 | `CONFLICT` | La sesión ya tiene un viaje en progreso | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La sesión de tracking no está abierta | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
@@ -1305,6 +1305,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TripResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TripResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1341,7 +1342,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Viaje no encontrado | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El viaje no está en progreso | Excepción explícita en src/modules/geo/services/geo-trips.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

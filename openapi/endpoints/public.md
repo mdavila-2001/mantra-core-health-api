@@ -74,11 +74,10 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
 | 400 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
 | 404 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicPharmacyProductPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicPharmacyProductPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -204,11 +203,10 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
 | 400 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
 | 404 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PublicOfferedServicePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublicOfferedServicePageDto`. Ejemplo completo derivado de ese DTO:
 

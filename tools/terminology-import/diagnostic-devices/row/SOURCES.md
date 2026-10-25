@@ -1,0 +1,269 @@
+# Fuentes · equipos de diagnóstico · resto del mundo (ROW)
+
+Región `row/` del catálogo común (`../README.md`). Todo lo que hay en `out/`
+sale de las fuentes de esta tabla; lo que se buscó y no se pudo obtener está
+en `out/manifest.json` → `gaps` y en `docs/seed-research/diagnostic-devices-row.md`.
+
+## Cómo se obtuvieron
+
+En la pasada 1 el proxy de salida rechazaba (`403` en `CONNECT`) todos los
+portales oficiales y cada fuente se leyó de una **copia pública en GitHub del
+archivo oficial**, fijada a un commit y a un hash de contenido en `sources.mjs`.
+Desde la pasada 5 la red llega a los portales y casi todo sale de la descarga
+oficial (`fetch-official.mjs`, `fetch-pmda-jmdn.mjs`), con URL, `Last-Modified`,
+bytes y sha256 de cada archivo en `extra.officialFile`. Siguen de espejo
+`pmda-approvals`, `hc-mdall` (la API de Health Canada responde 503) y `tga-daen`
+(www.tga.gov.au no responde desde la nube). En las filas de espejo:
+
+- `sourceUrl`: la URL oficial cuando el espejo la publica por fila (PMDA: el
+  Excel del que sale cada trámite); si no, la URL del archivo en el espejo,
+  fijada al commit.
+- `sourceVersion`: la fecha de corte **del dato** (columna de actualización de
+  la fuente o último registro), más el espejo y su commit.
+- `retrievedAt`: cuándo se clonó el espejo.
+- `extra.mirror`: repo, commit, ruta y hash del archivo leído.
+- `extra.officialPortal`: el portal oficial de la fuente.
+
+Un espejo es una copia hecha por un tercero: no se pudo comparar contra el
+original. Los encabezados coinciden con los de la fuente oficial que cita cada
+espejo, los conteos son coherentes y ningún valor se tocó; aun así, cuando la
+red lo permita, conviene reemplazar cada espejo por la descarga oficial (los
+normalizadores leen el mismo formato).
+
+## Fuentes
+
+| `source`                  | Autoridad (país)      | Archivo oficial                                                                                                         | Espejo (commit)                                                                                                                                                    | Corte del dato                                                |     Filas |
+| ------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- | --------: |
+| `anvisa-produtos`         | ANVISA (BR)           | `TA_PRODUTO_SAUDE_SITE.csv`, datos abiertos                                                                             | — (descarga oficial, `fetch-official.mjs`)                                                                                                                         | `Last-Modified` 2026-10-13 (`DT_ATUALIZACAO_DADO` 2026-10-12) |   100 681 |
+| `anvisa-produtos-modelos` | ANVISA (BR)           | `TA_PRODUTO_SAUDE_MODELO.csv`, datos abiertos                                                                           | — (descarga oficial)                                                                                                                                               | `Last-Modified` 2025-12-29                                    | 3 274 089 |
+| `pmda-approvals`          | PMDA (JP)             | 医療機器の承認品目一覧 y 認証品目リスト (Excel por año fiscal)                                                          | [zoefcuk/pmda-medical-devices](https://github.com/zoefcuk/pmda-medical-devices) `d829883b` · `index.html`, JSON embebido (sha256 `3e14d600…`)                      | trámites hasta 2026                                           |    35 298 |
+| `hc-mdall`                | Health Canada (CA)    | MDALL, API pública (licencias, compañías, identificadores)                                                              | [misterrPink1/symmetric](https://github.com/misterrPink1/symmetric) `a43a1a58` · `datasets.zip` (sha256 `e2a3f451…`)                                               | 2020-02-07 (`last_refresh_dt`)                                | 2 333 236 |
+| `tga-daen`                | TGA (AU)              | DAEN, notificaciones de eventos adversos de dispositivos                                                                | [tobinsouth/MedicalDeviceNLP](https://github.com/tobinsouth/MedicalDeviceNLP) `868d2e2a` · `data/medical_device_summaries/*.csv` + `data/list_of_reports/*.pickle` | reportes hasta 2021                                           |    18 917 |
+| `cdsco-approved-devices`  | CDSCO (IN)            | «List of Approved Devices» de cdscomdonline.gov.in: MD e IVD, importación y fabricación (también autoridades estatales) | — (descarga oficial)                                                                                                                                               | descargada 2026-10-24                                         |   180 124 |
+| `tfda-devices`            | TFDA (TW)             | 醫療器材許可證資料集, data.gov.tw 9576 (export 68)                                                                      | — (descarga oficial)                                                                                                                                               | `modifiedDate` 2026-10-15                                     |    93 430 |
+| `tfda-tudid`              | TFDA (TW)             | 醫療器材單一識別碼 (TUDID), data.gov.tw 151955 (export 197)                                                             | — (descarga oficial)                                                                                                                                               | `modifiedDate` 2026-10-12                                     |   688 258 |
+| `invima-dispositivos`     | INVIMA (CO)           | Registros sanitarios de dispositivos médicos y otras tecnologías, datos.gov.co `y4qt-w6tk` (API Socrata, 9 páginas)     | — (descarga oficial)                                                                                                                                               | `rowsUpdatedAt` 2026-10-16                                    |    71 434 |
+| `who-pq-ivd`              | OMS (precalificación) | Lista de IVD precalificados, export CSV de extranet.who.int                                                             | — (descarga oficial)                                                                                                                                               | export 2026-10-24                                             |       435 |
+| `hsa-smdr`                | HSA (SG)              | Listing of Registered Medical Devices (SMDR, clases B–D), data.gov.sg `d_8cfe111e…`                                     | — (descarga oficial)                                                                                                                                               | `lastUpdatedAt` 2026-06-08 (cobertura hasta 2026-04-30)       |    20 857 |
+| `hsa-class-a`             | HSA (SG)              | Class A Medical Devices, data.gov.sg `d_55a59f68…`                                                                      | — (descarga oficial)                                                                                                                                               | `lastUpdatedAt` 2026-06-08 (cobertura hasta 2026-04-30)       | 1 127 525 |
+| `nmpa-udi`                | NMPA (CN)             | 医疗器械唯一标识数据库, `UDID_FULL_RELEASE_20261001.zip` (1259 XML, MD5 publicado y verificado)                         | — (descarga oficial)                                                                                                                                               | release completo 2026-10-01                                   | 6 294 994 |
+| `sahpra-covid-ivd`        | SAHPRA (ZA)           | Listas de kits de diagnóstico de COVID-19 autorizados (antígeno autotest y profesional, moleculares, serológicos; xlsx) | — (descarga oficial)                                                                                                                                               | listas al 24/05/2023 (serológicos 31/05/2022)                 |       283 |
+
+Conteos exactos y por archivo: `out/manifest.json`. Cobertura: `COVERAGE.md`.
+
+## Licencias y términos de uso
+
+| Fuente              | Datos (autoridad)                                                                                                                                                                                                   | Espejo                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| ANVISA              | Datos abiertos del Poder Ejecutivo federal de Brasil (Decreto nº 8.777/2016). La licencia exacta del conjunto no se pudo leer desde la nube: **por verificar** en la ficha del conjunto.                            | g.stec: sin licencia publicada. DHsys: MIT (cubre el código del repo; los CSV son datos de ANVISA).     |
+| PMDA                | Listados públicos de PMDA. Los términos de reutilización del sitio de PMDA no se pudieron leer desde la nube: **por verificar**.                                                                                    | Sin licencia publicada; el propio espejo se declara «参考用» (de referencia) y remite al Excel oficial. |
+| Health Canada       | MDALL figura en el Portal de Gobierno Abierto de Canadá (Open Government Licence – Canada según el portal; **por verificar** la ficha).                                                                             | Sin licencia publicada.                                                                                 |
+| TGA                 | Contenido de la TGA, con el aviso de DAEN de que una notificación no prueba que el dispositivo causó el evento. Términos de reutilización **por verificar**.                                                        | Sin licencia publicada.                                                                                 |
+| CDSCO               | Lista pública de cdscomdonline.gov.in (sin `robots.txt`: 404 al 2026-10-24). Términos de reutilización **por verificar**.                                                                                           | —                                                                                                       |
+| TFDA                | 政府資料開放授權條款 — 第1版 (Open Government Data License, Taiwán; `license: 1` en la ficha de data.gov.tw), compatible con CC BY 4.0: exige citar al proveedor (衛生福利部食品藥物管理署).                        | —                                                                                                       |
+| PMDA (maestro JMDN) | Contenido del sitio de PMDA (医療機器基準データベース). Los términos de reutilización del sitio no se pudieron confirmar: **por verificar**. Solo se usan nombre, código, clase y clasificación de cada 一般的名称. | —                                                                                                       |
+| INVIMA              | Creative Commons Attribution-ShareAlike 4.0 International (declarado en la ficha de datos.gov.co): exige atribución a INVIMA y que las obras derivadas se compartan con la misma licencia.                          | —                                                                                                       |
+| OMS PQ              | Contenido de la OMS; la lista es pública y se ofrece para descarga. Términos de reutilización del sitio **por verificar**.                                                                                          | —                                                                                                       |
+| HSA                 | Singapore Open Data Licence (data.gov.sg): uso libre, también comercial, con atribución a la fuente.                                                                                                                | —                                                                                                       |
+| NMPA                | Descarga pública del 医疗器械唯一标识数据库 («数据共享»). Términos de reutilización **por verificar**. No se copian los contactos (`contactList`).                                                                  | —                                                                                                       |
+| SAHPRA              | Listas públicas en sahpra.org.za. Términos de reutilización **por verificar**.                                                                                                                                      | —                                                                                                       |
+
+Ninguna fuente se usó para algo distinto de catalogar dispositivos. No se
+eludieron CAPTCHAs ni `robots.txt`: lo bloqueado quedó como hueco.
+
+## Qué se toma de cada fuente
+
+### `anvisa-produtos` y `anvisa-produtos-modelos` (Brasil)
+
+- Desde la pasada 5 salen de los archivos oficiales de `dados.anvisa.gov.br/dados/`
+  (windows-1252), con URL, `Last-Modified`, bytes y sha256 en `extra.officialFile`.
+  Los espejos de la pasada 1 dejaron de usarse.
+- **Marca de diagnóstico publicada por ANVISA**: `extra.anvisaPetitions` lleva las
+  áreas de interés (`DESC_AREA_INTERESSE`: «Dispositivos Médicos para Diagnóstico
+  in Vitro», «Produtos para diagnóstico de uso in vitro», «Dispositivos Médicos»,
+  «Produtos para Saúde (Correlatos)») y los asuntos de las peticiones primarias
+  (`DESC_ASSUNTO_PETICAO`: «IVD - Registro de produto», «EQUIPAMENTO - …»,
+  «MATERIAL - …») de los archivos `CICLO_ANALISE_PETICOES_PROD_SAUDE_IN_VITRO.CSV`,
+  `CICLO_ANALISE_PETICOES_PRODUTO_SAUDE(CORRELATOS).CSV` y
+  `CICLO_ANALISE_PETICOES_PRODUTO_SAUDE.CSV`, unidos por número de proceso exacto
+  (los modelos toman el proceso de su registro en `TA_PRODUTO_SAUDE_SITE.csv`).
+  Cruza el 86 % de los registros; el resto queda sin marca.
+
+- Clasificación del registro: **nombre técnico** ANVISA (`NOME_TECNICO`, sin
+  código publicado) → `deviceTypeSystem: br:anvisa-nome-tecnico`; clase de
+  riesgo I–IV → `br:I`…`br:IV`.
+- Fabricante: `NOME_FABRICANTE` y su país (`NOME_PAIS_FABRIC`, pasado a ISO por
+  la tabla cerrada `ANVISA_COUNTRY_ISO`; el nombre original va en
+  `extra.manufacturerCountryName`). Si el registro no trae fabricante, va el
+  titular y `extra.manufacturerNameFrom: DETENTOR_REGISTRO_CADASTRO`. Más de un
+  fabricante → `extra.otherManufacturers`.
+- El CNPJ publicado es del **titular**: va en `extra.holder.cnpj` y solo pasa a
+  `manufacturerRegistryId` (`cnpj:`) cuando el fabricante es la misma razón social.
+- `status`: `VALIDADE_REGISTRO_CADASTRO` verbatim («VIGENTE» o la fecha de vencimiento).
+- Modelos: `DS_MODELO_PRODUTO_MEDICO` verbatim (a veces es una presentación,
+  p. ej. «Kit para 90 testes»); el id de fila es `registro|modelo`.
+
+### `pmda-approvals` (Japón)
+
+- Desde la pasada 7, cuando el 一般的名称 es letra por letra un nombre del maestro
+  JMDN de PMDA (医療機器基準データベース, `std.pmda.go.jp`, 4496 nombres al
+  2026-09-30), `extra.deviceTypes` lleva código JMDN de 8 dígitos, clase (Ⅰ–Ⅳ),
+  類別 (p. ej. `器16` 体温計) y 中分類, con `joinedBy: exact-name`. Cruza el 95 %
+  (33 498 de 35 298). `deviceTypeCode` y `riskClass` siguen en null: la clase y el
+  código salen del nombre, no del trámite. El maestro completo va aparte en
+  `out/nomenclature-jmdn.json.gz` (listado en `manifest.nomenclatures`).
+  La base no tiene descarga masiva ni robots.txt: `fetch-pmda-jmdn.mjs` busca
+  por clase (Ⅰ–Ⅳ suman las 4496) y pide las fichas en 45 lotes de 100, con 2 s
+  de pausa; las páginas crudas quedan con su sha256 en `official/pmda-jmdn/index.json`.
+
+- Clasificación: **一般的名称** (término JMDN, sin código en la fuente) → `jmdn`.
+  Nombres en japonés, sin traducir.
+- `manufacturerName`: el titular japonés (製造販売業者); `manufacturerCountry`
+  queda en null porque no es necesariamente quien fabrica. `corporate_number`
+  → `jp-corporate-number:`.
+- La fuente no publica clase de riesgo: `riskClass` null. Categoría (新医療機器,
+  後発医療機器, 認証品目, …) en `extra.category`.
+- Un mismo trámite publicado en dos listados queda en una fila, con la segunda
+  cita en `extra.alsoListedIn`. 3 filas sin titular no salen.
+
+### `hc-mdall` (Canadá)
+
+- Una fila por identificador de dispositivo (número de modelo o catálogo) de
+  cada licencia, activa o archivada; `brandName` es el nombre de la licencia.
+- MDALL no publica nomenclatura de tipo: `deviceType*` en null; el tipo de
+  licencia (System, Test Kit, Single Device, …) en `extra.licenceType`.
+- Clase `appl_risk_class` 1–4 → `ca:I`…`ca:IV`; país e id de la compañía
+  (`hc-company:`) de `company.json`.
+- El espejo es de **2020-02-07**: licencias posteriores faltan (hueco en el manifiesto).
+
+### `tga-daen` (Australia)
+
+- No es el ARTG: son los dispositivos de las notificaciones de eventos adversos
+  (sobre todo implantables). Una fila por ARTG + nombre comercial + modelo.
+- Clasificación: término GMDN sin código → `gmdn-pt`; clase verbatim → `au:Class IIa`,
+  `au:Class 3 - IVD`, … (si un mismo dispositivo trae varias, van en `extra.deviceClassifications`).
+- Los pickles del espejo se convierten con un unpickler que rechaza toda clase
+  (`tga-daen-pickles.py`); la narrativa del evento no se exporta.
+
+### `cdsco-approved-devices` (India)
+
+- Desde la pasada 11 sale de la lista oficial de cdscomdonline.gov.in
+  (`/NewMedDev/viewListOfApprovedDevices`, la respuesta JSON que dibuja la
+  tabla de «List of Approved Devices»), en cuatro descargas: categoría
+  (`categval` 1 = dispositivo médico, 2 = IVD) × tipo de licencia
+  (`selectFormType` 1 = importación, 2 = fabricación). Reemplaza al espejo de
+  la pasada 1 (`cdsco-import-licences`, solo importación) y cubre lo que faltaba:
+  licencias de fabricación nacional y de autoridades estatales («SLA - …»).
+- Una fila por permiso × dispositivo × marca × modelo × clase; id
+  `<md|ivd>|<formid>|<permissionid>|<dispositivo>|<marca>|<modelo>|<clase>`
+  (ids internos de la fuente y textos verbatim; el `rownum` de la respuesta no
+  se usa porque es solo la posición). Copias idénticas se juntan; si solo
+  difieren en el uso previsto, el resto va en `extra.otherIntendedUses`.
+- **Marca IVD publicada por CDSCO**: `extra.cdscoCategory` (`md` o `ivd`), la
+  lista de la que vino.
+- Clasificación: nombre del dispositivo → `in:cdsco-device-name`; clase
+  `Class A`–`Class D` → `in:A`…`in:D`.
+- Fabricante: en importación, el sitio legal de `premises_add` (si no hay, el
+  real), con país por la tabla cerrada `CDSCO_COUNTRY_ISO`; todos los sitios en
+  `extra.manufacturingSites` y el importador en `extra.importer`. En fabricación,
+  el licenciatario (primera línea de `address`); país `IN` solo si la dirección
+  trae el «Pincode» de seis dígitos que escribe la fuente.
+- No se copian los campos de contacto («email:», «Contact Number:» y el
+  «Telephone No.»/«E-Mail» de los sitios) ni los correos escritos dentro de la
+  dirección. Un teléfono tecleado dentro de la dirección queda verbatim (2 filas,
+  número gratuito de una empresa).
+- «NIL» y «NA» en marca o modelo son vacío.
+
+### `tfda-devices` y `tfda-tudid` (Taiwán)
+
+- `tfda-devices`: una fila por licencia (許可證字號); las líneas repetidas por
+  fabricante quedan en `extra.otherManufacturers`. Clasificación del 醫療器材分類
+  分級管理辦法: 醫器次類別一 → `tw:tfda-classification` con código (p. ej.
+  `A.1485` 黃體激素試驗系統) y las categorías principales (p. ej. `A`
+  臨床化學及臨床毒理學, `B` 血液學、病理學及基因學, `C` 免疫學及微生物學, que son
+  las de diagnóstico in vitro) en `extra.deviceTypes`. Clase 1–3 → `tw:1`…`tw:3`.
+  País del fabricante tal cual (ya viene en ISO alfa-2). Registro QMS/QSD de la
+  planta → `tw-tfda-qms:`. Nombres en chino tal cual; el inglés en `extra.englishName`.
+- `tfda-tudid`: una fila por UDI-DI + modelo (型號) + licencia. El TUDID no
+  publica fabricante ni clase: se toman de la licencia por número exacto
+  (`extra.licenceFrom: tfda-devices`); 41 DI con licencia desconocida no salen.
+
+### `invima-dispositivos` (Colombia)
+
+- Una fila por registro sanitario + producto + marca (la exportación trae una
+  línea por presentación y por rol). Clasificación propia: `grupo` →
+  `co:invima-grupo` («REACTIVO DIAGNOSTICO» y «REACTIVOS IN VITRO» son los de
+  diagnóstico in vitro; «MEDICO QUIRURGICOS», «ODONTOLOGICOS»). Nivel de riesgo
+  verbatim → `co:I`, `co:IIa`, … El nombre del producto va en `extra.productName`
+  y la marca en `brandName` (el literal «null» es vacío).
+- Fabricante: el rol «FABRICANTE»; si el registro no lo publica, el titular con
+  `extra.manufacturerNameFrom: TITULAR` (27 869 filas). Todos los roles en
+  `extra.roles`. País por la tabla cerrada `INVIMA_COUNTRY_ISO` («ISLAS VIRGENES»
+  queda sin ISO por ambigua).
+
+### `who-pq-ivd` (OMS)
+
+- Una fila por código de producto (referencia de catálogo) de cada IVD
+  precalificado; todos son diagnóstico in vitro (`extra.inVitroDiagnostic: true`).
+  Tipo: formato del ensayo → `who:assay-format`; patógeno en `extra.target`;
+  versión regulatoria y año de precalificación en `extra`.
+
+### `hsa-smdr` y `hsa-class-a` (Singapur)
+
+- SMDR: una fila por número de registro. Tipo: área de especialidad de HSA →
+  `sg:hsa-speciality` («Clinical chemistry», «Immunology», «Microbiology»,
+  «Hematology», «Pathology», «Clinical toxicology» son las de laboratorio;
+  «Radiology / Imaging», …). Clase → `sg:B`…`sg:D`. Fabricante: el titular del
+  producto (_product owner_); el registrante local en `extra.registrant`. Los
+  modelos vienen en listas dentro de un texto y quedan verbatim en
+  `extra.modelNames` y `extra.modelIdentifiers`. 3 filas sin número de registro
+  («NOT_GENERATED») no salen.
+- Clase A: una fila por dispositivo notificado (notificación + nombre + UDI-DI;
+  una notificación puede cubrir varios dispositivos), con titular,
+  distribuidor (`extra.dealer`) y UDI-DI. `riskClass: sg:A`. El campo
+  `device_identifier` va verbatim en `extra.deviceIdentifier` (no se presenta
+  como GMDN porque la fuente no lo declara).
+- El país del titular solo está dentro de la dirección: queda en null.
+
+### `nmpa-udi` (China)
+
+- Release completo mensual del 医疗器械唯一标识数据库
+  (`UDID_FULL_RELEASE_20261001.zip`, https://udi.nmpa.gov.cn/download.html),
+  con el MD5 que publica la página comprobado al descargar. Se lee el zip sin
+  extraerlo (1259 XML, ~16 GB). Las actualizaciones diarias, semanales y
+  mensuales posteriores al 2026-10-01 no se aplican.
+- Una fila por 最小销售单元产品标识 (UDI-DI). El significado de cada etiqueta
+  sale del «数据共享API 标准文档 V2.1» de NMPA; `qxlb` (器械 / 体外诊断试剂)
+  y `cplb` (耗材 / 设备), que ese documento no define, van verbatim en `extra`.
+- **Marca IVD publicada por NMPA**: `extra.qxlb = 体外诊断试剂`.
+- Tipo: `flbm` («器械目录分类代码») → `cn:nmpa-classification`, sin nombre (la
+  fuente no lo trae); el código anterior en `extra.previousClassificationCode`.
+- Fabricante: `ylqxzcrbarmc` («注册/备案人名称») verbatim; nombre en inglés en
+  `extra.manufacturerNameEn`. Marca: `spmc` («商品名称»). Modelo: `ggxh`
+  («规格型号»); número de catálogo en `extra.catalogNumber`.
+- Clase y país no son campos de la fuente: quedan en null (no se deducen del
+  número de registro). `tyshxydm` (统一社会信用代码) va en `extra`, pero no
+  como id del fabricante: en los registros de importación es el de una empresa
+  china (la API lo describe como el del «注册人/代理人»).
+- No se copia `contactList` (correo y teléfono de contacto).
+
+### `sahpra-covid-ivd` (Sudáfrica)
+
+- Cuatro listas oficiales de kits de COVID-19 autorizados (xlsx). Una fila por
+  línea (`<lista>|<No.>`): el mismo producto aparece una vez por cada titular
+  de licencia local.
+- Fabricante: «Original Manufacturer»; titular local en `extra.licenceHolder`.
+  Marca: «Product Name». Tipo: la lista (`za:sahpra-covid-test-kit-list`, nombre
+  de la hoja); «Product Description» en `extra.description`.
+- Sin número de autorización ni clase en la fuente: quedan en null.
+- SAHPRA no publica un registro general de dispositivos descargable: el resto
+  queda como hueco.
+
+## Filtro «diagnóstico»
+
+No se recortó: `out/` lleva **todos** los dispositivos de cada registro, como
+permite el README común. El recorte lo hace `master/` con su taxonomía. Para
+eso, cada fuente aporta su propia clasificación: nombre técnico y clase de
+ANVISA, JMDN de PMDA, `qxlb` de NMPA, `cdscoCategory` de CDSCO, tipo de licencia de MDALL («Test Kit», «System») y
+GMDN más la marca «IVD» de la clase en DAEN, y nombre del dispositivo y
+clase de CDSCO.

@@ -38,8 +38,8 @@ El comentario en código apunta al issue, no lo reemplaza:
 // ❌ muere ahí
 // TODO: esto no maneja multi-moneda
 
-// ✅ rastreable, con contexto
-// TECH-DEBT(#214): asume una sola moneda; multi-moneda pendiente. Interés: bloquea a Contabilidad.
+// ✅ en presente, con su porqué, apuntando al issue
+// Asume una sola moneda: no convierte importes entre monedas. Ver #214.
 ```
 
 ## 3. Cuándo se paga

@@ -3,7 +3,7 @@
   Fuente real: src/modules/marketing/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `marketing`
@@ -27,7 +27,7 @@ inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-t
   find src/modules/marketing -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **2 controllers, 14 rutas HTTP, 14 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **2 controllers, 15 rutas HTTP, 14 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -48,6 +48,7 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`,
 | `POST /marketing/enrollments/:id/advance` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/enrollments/:id/exit` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/tracked-links` | MARKETING_MANAGER | `marketing` |
+| `POST /marketing/tracked-links/:id/recipient-tokens` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/touchpoints` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `POST /marketing/attribution/compute` | SYSTEM, MARKETING_MANAGER | `marketing` |
 | `GET /r/:code` | pública | `tracked-link-redirect` |
@@ -76,7 +77,7 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `attribution_touches`,
 `attribution_touches`.
 
 `campaign_dispatches`, `campaign_dispatch_recipients` y `campaign_schedules` pertenecen al envío
-efectivo, que vive en messaging: este módulo no las escribe (ver *Pendiente*).
+efectivo, que vive en messaging: este módulo no las escribe (ver *Fuera de este módulo*).
 
 ## Flujo general
 
@@ -94,7 +95,7 @@ journey (draft) ── steps ── activate ──> active + inscripciones (act
                                               ├─ advance sin siguiente ──> completed
                                               └─ exit ──> completed (meta) | exited (baja, rebote)
 
-enlace (active) ── GET /r/{code} ──> click_count++ [+ touchpoint si hay miembro]
+enlace (active) ── GET /r/{code}?t=<token> ──> click_count++ [+ touchpoint si el token es válido]
 
 touchpoints del miembro en ventana ── attribution/compute ──> reparto con SUM(weight) = 1
 ```
@@ -130,7 +131,21 @@ touchpoints del miembro en ventana ── attribution/compute ──> reparto co
 `MARKETING_MANAGER` en todo el módulo. `CONTENT_EDITOR` para publicar plantillas. `SYSTEM` en lo
 que ejecutan los workers: refresco de segmento, materialización, avance y salida de inscripciones,
 touchpoints y atribución. `GET /r/:code` es **público**: quien hace click es el destinatario del
-mensaje, no un usuario con sesión.
+mensaje, no un usuario con sesión; por eso no declara quién es: presenta el token que emite
+`POST /marketing/tracked-links/:id/recipient-tokens` (firmado, con vencimiento y ligado al enlace y
+al destinatario).
+
+## Alcance por tenant
+
+El tenant sale del contexto autenticado (`requireTenantId()`), nunca del cuerpo: `tenantId` en los
+DTO de alta es opcional y, si llega, debe coincidir con el activo (`412 MARKETING_TENANT_MISMATCH`).
+Segmentos, campañas, journeys y plantillas se buscan y bloquean por `id + tenantId`; las
+inscripciones heredan el tenant de su journey y los enlaces y touchpoints, el de su campaña. Un
+recurso de otro tenant responde igual que uno inexistente (`404`, mismo mensaje y `reason`
+`MARKETING_*_NOT_AVAILABLE`, sin `details`). Los endpoints `SYSTEM` también exigen un tenant activo
+(`X-Tenant-Id`). Los códigos de segmento, campaña y journey son únicos por tenant; la violación de
+unicidad de la base responde `409 MARKETING_CODE_ALREADY_EXISTS`
+(`database/SQL/patches/2026-10-24_marketing_code_unique_per_tenant.sql`).
 
 ## Concurrencia
 
@@ -154,15 +169,12 @@ ni el contenido de las plantillas.
 El módulo expone roles de marketing y bloqueos de concurrencia, pero actualmente recibe el tenant
 en el cuerpo y carga recursos por UUID sin comprobar la pertenencia del actor. También hay
 desacuerdo entre la unicidad por tenant que usa el servicio y los índices globales de `code`, y la
-ruta pública de enlaces permite aportar el miembro al que atribuir un click. Véase el informe con
-evidencia y plan: [revisión de marketing](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/marketing.md).
+ruta pública de enlaces permite aportar el miembro al que atribuir un click.
 
-## Pendiente
+## Fuera de este módulo
 
-- **Envío real**: `campaign_dispatches`, `campaign_dispatch_recipients` y `campaign_schedules` se
-  llenan cuando messaging materialice las peticiones de notificación. Aquí los campos que apuntan a
-  ellas (`first_dispatch_id`, `last_dispatch_id`, `notification_request_id`) quedan sin poblar.
-- **Outbox**: los eventos que declaran los casos de uso (`SegmentRefreshed`, `CampaignLaunched`,
-  `JourneyStepExecuted`, `AttributionComputed`…) se emitirán cuando exista el módulo 35.
+- **Envío real**: `campaign_dispatches`, `campaign_dispatch_recipients` y `campaign_schedules` los
+  llena messaging al materializar las peticiones de notificación. Este módulo no escribe los campos
+  que apuntan a ellas (`first_dispatch_id`, `last_dispatch_id`, `notification_request_id`).
 - **Consentimiento**: la base legal de marketing (`consent.consents`) y el `do_not_contact` se
   asumen resueltos por quien llama; este módulo respeta la lista de supresión que recibe.

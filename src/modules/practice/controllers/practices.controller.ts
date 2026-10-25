@@ -112,9 +112,15 @@ export class PracticesController {
     'CLINICIAN',
     'ACCOUNTING_APPROVER',
   )
-  @ApiOperation({ summary: 'Listar las prácticas activas del tenant' })
-  listPractices(): Promise<PracticeSummaryDto[]> {
-    return this.sitesService.listPractices(requireTenantId());
+  @ApiOperation({
+    summary: 'Listar las prácticas activas del tenant',
+    description:
+      'Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.',
+  })
+  listPractices(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PracticeSummaryDto[]> {
+    return this.sitesService.listPractices(requireTenantId(), actor);
   }
 
   /**
@@ -128,7 +134,7 @@ export class PracticesController {
    * Los roles son los mismos que ya admite `GET /practices`: quien puede
    * enumerar las prácticas del tenant puede ver la estructura de la suya. El
    * aislamiento real lo hace el servicio, que responde 404 ante una práctica de
-   * otra organización.
+   * otra organización o, para un `PRACTITIONER`, sin vinculación ACTIVE.
    */
   @Get(':practiceId/organization')
   @Roles(
@@ -145,10 +151,12 @@ export class PracticesController {
   })
   getOrganizationConsole(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MedicalOrganizationConsoleDto> {
     return this.organizationReadService.getConsole(
       practiceId,
       requireTenantId(),
+      actor,
     );
   }
 

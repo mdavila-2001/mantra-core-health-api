@@ -5,17 +5,14 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
 import { AccountingErrorReason } from '../accounting.error-reasons';
-import {
-  JournalRepository,
-  AccountsRepository,
-  FiscalRepository,
-} from '../repositories';
+import { JournalRepository, AccountsRepository } from '../repositories';
 import {
   PostJournalDto,
   LedgerLineDto,
@@ -33,8 +30,13 @@ import {
 } from '../dto';
 import { sumCents, fromCents } from './money';
 import { classify } from './journal-classification';
+import { flushJournalHeader } from './journal-number-conflict';
+import { AccountingScopeService } from './accounting-scope.service';
 import { AuditTrailService } from '../../audit/services';
-import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  PracticeTenantLookupService,
+  practiceAccessScope,
+} from '../../practice/services';
 
 /** Recurso sellado en la cadena WORM para cada transición contable (CAN-AUDIT-001). */
 const JOURNAL_AUDIT_ENTITY = 'journal_transaction';
@@ -99,16 +101,19 @@ export class LedgerService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param journalRepo - Valor de journal repo requerido por la operación.
    * @param accountsRepo - Valor de accounts repo requerido por la operación.
-   * @param fiscalRepo - Valor de fiscal repo requerido por la operación.
+   * @param auditTrail - Cadena de auditoría de las transiciones.
+   * @param practiceTenantLookup - Vínculo activo profesional↔práctica.
+   * @param scope - Política de alcance de tenant (ACC-01): toda práctica,
+   *   periodo, cuenta, dimensión o asiento referenciado debe ser del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly journalRepo: JournalRepository,
     private readonly accountsRepo: AccountsRepository,
-    private readonly fiscalRepo: FiscalRepository,
     private readonly auditTrail: AuditTrailService,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(LedgerService.name);
@@ -130,13 +135,9 @@ export class LedgerService {
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<void> {
-    if (
-      actor.roles.includes('SECURITY_ADMIN') ||
-      actor.roles.includes('ACCOUNTING_APPROVER')
-    ) {
-      return;
-    }
-    if (!actor.roles.includes('PRACTITIONER')) {
+    // La regla de roles vive en `practiceAccessScope` (un solo dueño); acá
+    // sólo se traduce a los errores 422 propios de contabilidad.
+    if (practiceAccessScope(actor.roles) !== 'ACTIVE_ASSIGNMENTS') {
       // Ningún otro rol llega hoy a estas rutas (el `@Roles` del controlador
       // ya lo impide); no-op defensivo, no un permiso implícito.
       return;
@@ -174,7 +175,9 @@ export class LedgerService {
    *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
    *     rol con autoridad de aprobación; equivale a auto-aprobar el asiento.
    *   - IDEMPOTENCIA: `transactionNumber` es único por práctica (409 si se repite),
-   *     de modo que un reintento no duplica el asiento.
+   *     de modo que un reintento no duplica el asiento. El índice único del DDL
+   *     cubre hoy sólo `transaction_number`: su violación (otra práctica o una
+   *     carrera) se traduce al mismo 409 en `flushJournalHeader`.
    * El posteo efectivo (líneas del mayor + `postedAt`) ocurre aquí, igual que en
    * `post`, aplicando las mismas validaciones (balance de partida doble y periodo
    * ABIERTO).
@@ -195,31 +198,24 @@ export class LedgerService {
     const { debitCents } = this.assertBalanced(dto.lines);
 
     return this.em.transactional(async (tx) => {
+      // ACC-01: práctica, periodo, cuentas y dimensiones del asiento son del
+      // tenant activo y de **esa** práctica, antes de leer o escribir nada más.
+      const period = await this.scope.assertPostingScope(tx, {
+        practiceId: dto.practiceId,
+        fiscalPeriodId: dto.fiscalPeriodId,
+        lines: dto.lines,
+      });
+
       // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO.
-      if (dto.fiscalPeriodId) {
-        const period = await this.fiscalRepo.findPeriodById(
-          tx,
-          dto.fiscalPeriodId,
+      if (period && period.statusConceptId !== ACCT.PERIOD_OPEN) {
+        throw new PreconditionFailedException(
+          'El periodo fiscal no está ABIERTO',
+          {
+            fiscalPeriodId: dto.fiscalPeriodId,
+            status: period.statusConceptId,
+          },
+          AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
         );
-        if (!period) {
-          throw new ResourceNotFoundException(
-            'Periodo fiscal no encontrado',
-            {
-              fiscalPeriodId: dto.fiscalPeriodId,
-            },
-            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
-          );
-        }
-        if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
-          throw new PreconditionFailedException(
-            'El periodo fiscal no está ABIERTO',
-            {
-              fiscalPeriodId: dto.fiscalPeriodId,
-              status: period.statusConceptId,
-            },
-            AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
-          );
-        }
       }
 
       const number = dto.transactionNumber ?? this.generateNumber('JT');
@@ -254,7 +250,7 @@ export class LedgerService {
         postedByUserId: actor.id,
         actorUserId: actor.id,
       });
-      await tx.flush();
+      await flushJournalHeader(tx, number);
 
       await this.writeLines(
         tx,
@@ -304,6 +300,12 @@ export class LedgerService {
     await this.assertPractitionerOwnsPractice(actor, dto.practiceId);
 
     return this.em.transactional(async (tx) => {
+      await this.scope.assertPostingScope(tx, {
+        practiceId: dto.practiceId,
+        fiscalPeriodId: dto.fiscalPeriodId,
+        lines: dto.lines,
+      });
+
       const number = dto.transactionNumber ?? this.generateNumber('JT');
       const clash = await this.journalRepo.findByTransactionNumber(
         tx,
@@ -333,7 +335,7 @@ export class LedgerService {
         sourceDocumentId: dto.sourceDocumentId,
         actorUserId: actor.id,
       });
-      await tx.flush();
+      await flushJournalHeader(tx, number);
 
       await this.writeLines(
         tx,
@@ -376,18 +378,13 @@ export class LedgerService {
     _dto: JournalTransitionDto,
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
-    const owner = await this.journalRepo.findTransactionById(this.em, id);
-    if (owner) {
-      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
-    }
+    // Primero el tenant: un asiento ajeno responde como inexistente, sin pasar
+    // por el chequeo de vinculación (que nombraría su práctica).
+    const owner = await this.scope.transaction(this.em, id);
+    await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
 
     return this.em.transactional(async (tx) => {
-      const txn = await this.journalRepo.findTransactionById(tx, id);
-      if (!txn) {
-        throw new ResourceNotFoundException('Asiento no encontrado', {
-          transactionId: id,
-        });
-      }
+      const txn = await this.scope.transaction(tx, id);
 
       const result = classify({
         sourceDocumentType: txn.sourceDocumentType,
@@ -487,48 +484,31 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<JournalTransactionResponseDto> {
     return this.em.transactional(async (tx) => {
-      const txn = await this.journalRepo.findTransactionById(tx, id);
-      if (!txn) {
-        throw new ResourceNotFoundException(
-          'Asiento no encontrado',
-          {
-            transactionId: id,
-          },
-          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
-        );
-      }
+      const txn = await this.scope.transaction(tx, id);
       this.assertTransition(txn.statusConceptId, ACCT.TXN_POSTED);
 
       // Permite enlazar el periodo en el posteo si el borrador no lo fijó.
-      if (dto.fiscalPeriodId && !txn.fiscalPeriodId) {
-        txn.fiscalPeriodId = dto.fiscalPeriodId;
-      }
+      const periodId = txn.fiscalPeriodId ?? dto.fiscalPeriodId;
 
-      // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO.
-      if (txn.fiscalPeriodId) {
-        const period = await this.fiscalRepo.findPeriodById(
+      // UC-16-05 (include): un asiento solo se postea en un periodo ABIERTO. El
+      // periodo es del ejercicio de la práctica del asiento (ACC-01).
+      if (periodId) {
+        const period = await this.scope.periodInPractice(
           tx,
-          txn.fiscalPeriodId,
+          periodId,
+          txn.practiceId,
         );
-        if (!period) {
-          throw new ResourceNotFoundException(
-            'Periodo fiscal no encontrado',
-            {
-              fiscalPeriodId: txn.fiscalPeriodId,
-            },
-            AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
-          );
-        }
         if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
           throw new PreconditionFailedException(
             'El periodo fiscal no está ABIERTO',
             {
-              fiscalPeriodId: txn.fiscalPeriodId,
+              fiscalPeriodId: periodId,
               status: period.statusConceptId,
             },
             AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
           );
         }
+        txn.fiscalPeriodId = periodId;
       }
 
       const entries = await this.journalRepo.ledgerEntriesForTransaction(
@@ -578,17 +558,13 @@ export class LedgerService {
     );
 
     return this.em.transactional(async (tx) => {
-      const original = await this.journalRepo.findTransactionById(
-        tx,
-        transactionId,
-      );
-      if (!original) {
-        throw new ResourceNotFoundException(
-          'Asiento no encontrado',
-          {
-            transactionId,
-          },
-          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
+      const original = await this.scope.transaction(tx, transactionId);
+      // El periodo de la reversa es del ejercicio de la práctica del original.
+      if (dto.fiscalPeriodId) {
+        await this.scope.periodInPractice(
+          tx,
+          dto.fiscalPeriodId,
+          original.practiceId,
         );
       }
       // ALOVIDA C-17: la reversa es la única transición desde POSTED (POSTED→REVERSED);
@@ -702,28 +678,11 @@ export class LedgerService {
     dto: AttachFileDto,
     actor: AuthenticatedUser,
   ): Promise<AccountingStatusDto> {
-    const owner = await this.journalRepo.findTransactionById(
-      this.em,
-      transactionId,
-    );
-    if (owner) {
-      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
-    }
+    const owner = await this.scope.transaction(this.em, transactionId);
+    await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
 
     return this.em.transactional(async (tx) => {
-      const transaction = await this.journalRepo.findTransactionById(
-        tx,
-        transactionId,
-      );
-      if (!transaction) {
-        throw new ResourceNotFoundException(
-          'Asiento no encontrado',
-          {
-            transactionId,
-          },
-          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
-        );
-      }
+      await this.scope.transaction(tx, transactionId);
       const file = this.journalRepo.createFile(tx, {
         transactionId,
         fileId: dto.fileId,
@@ -749,9 +708,11 @@ export class LedgerService {
     dto: DetermineAccountsDto,
   ): Promise<DeterminedAccountResponseDto> {
     const em = this.em.fork();
+    // Las reglas son del tenant activo: el del cuerpo no elige de quién se leen.
+    const tenantId = requireTenantId();
     const rule = await this.accountsRepo.findActiveRule(
       em,
-      dto.tenantId,
+      tenantId,
       dto.postingScenarioConceptId,
       ACCT.RULE_ACTIVE,
     );
@@ -759,7 +720,6 @@ export class LedgerService {
       throw new ResourceNotFoundException(
         'No hay regla de determinación vigente para el escenario',
         {
-          tenantId: dto.tenantId,
           postingScenarioConceptId: dto.postingScenarioConceptId,
         },
         AccountingErrorReason.POSTING_RULE_NOT_FOUND,
@@ -778,6 +738,7 @@ export class LedgerService {
     actor: AuthenticatedUser,
   ): Promise<AccountResponseDto> {
     return this.em.transactional(async (tx) => {
+      await this.scope.practice(dto.practiceId);
       const clash = await this.accountsRepo.findByCode(
         tx,
         dto.practiceId,
@@ -916,22 +877,11 @@ export class LedgerService {
   ): Promise<JournalTransactionResponseDto> {
     // Fuera de la transacción: es una lectura contra `practice`, no contra
     // `accounting`, y no necesita compartir el lock de la fila del asiento.
-    const owner = await this.journalRepo.findTransactionById(this.em, id);
-    if (owner) {
-      await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
-    }
+    const owner = await this.scope.transaction(this.em, id);
+    await this.assertPractitionerOwnsPractice(actor, owner.practiceId);
 
     return this.em.transactional(async (tx) => {
-      const txn = await this.journalRepo.findTransactionById(tx, id);
-      if (!txn) {
-        throw new ResourceNotFoundException(
-          'Asiento no encontrado',
-          {
-            transactionId: id,
-          },
-          AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
-        );
-      }
+      const txn = await this.scope.transaction(tx, id);
       guard?.(txn);
       this.assertTransition(txn.statusConceptId, to);
       txn.statusConceptId = to;

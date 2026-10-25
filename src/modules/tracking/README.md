@@ -108,7 +108,14 @@ abre sujetos, despacha, traspasa, cancela y registra eventos. `COURIER` registra
 entregas y excepciones desde la calle. `SYSTEM` recalcula estimaciones y corre el barrido de SLA.
 
 `POST /tracking/webhooks/carriers/:carrierCode` es **público**: el transportista es un tercero sin
-sesión en el sistema.
+sesión en el sistema, y se autentica con una firma HMAC-SHA256 por transportista. Cabeceras
+`X-Carrier-Signature` (hex, `sha256=` opcional) y `X-Carrier-Timestamp` (segundos desde la época o
+ISO-8601). Se firma el arreglo JSON `[timestamp, carrierCode, trackingNumber, externalStatusCode,
+externalEventId, occurredAt|null, locationText|null]` con el secreto `WEBHOOK_SECRET_CARRIER_<CÓDIGO>`
+del entorno (`_PREV` durante una rotación), dentro de una ventana de 5 minutos. Sin secreto, con
+transportista inactivo, firma inválida o ausente: `401 TRACKING_WEBHOOK_SIGNATURE_INVALID`; firma
+válida con marca vencida: `401 TRACKING_WEBHOOK_REPLAY_REJECTED`. El transportista sólo mueve envíos
+que tiene asignados (y de su tenant, si es de un tenant).
 
 ## Concurrencia
 
@@ -124,18 +131,16 @@ loguea qué se transporta ni datos del destinatario.
 
 ## Pruebas
 
-`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura actual no demuestra autenticación del webhook ni aislamiento entre tenants en mutaciones por UUID; ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
+`corepack yarn test src/modules/tracking --runInBand --silent` — 2 suites y 57 pruebas aprobadas durante la revisión. La cobertura demuestra la autenticación del webhook (firma, ventana anti-replay, transportista y tenant del envío).
 
-## Pendiente
+## Fuera de este módulo
 
-- **Firma del webhook**: la ruta es pública y hoy sólo valida que el código de transportista exista.
-  La verificación de firma HMAC del proveedor debe impedir mutaciones antes del conector de integraciones;
-  el riesgo y la corrección propuesta están en la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/tracking.md).
+- **Alta del secreto del transportista**: el secreto vive en el entorno del despliegue
+  (`WEBHOOK_SECRET_CARRIER_<CÓDIGO>`); el módulo no lo guarda ni lo genera, y el acuerdo del esquema
+  de firma con cada transportista real es externo.
 - **Geolocalización**: `location_ping_id` se acepta si llega, pero los pings viven en `geo` y los
-  produce el módulo de localización. `tracked_subject_id` del envío se poblará con esa integración.
+  produce el módulo de localización. Este módulo no escribe `tracked_subject_id` del envío.
 - **Cálculo del ETA**: el módulo registra y aplica la estimación, pero no la calcula. El motor
   —distancia, tráfico o dato del transportista— vive fuera y llama a este endpoint.
 - **Reprogramación del reintento**: `retry_scheduled` marca el estado; agendar el nuevo intento
   pertenece al planificador.
-- **Outbox**: `SubjectOpened`, `ShipmentDispatched`, `ShipmentDelivered`, `SlaBreached` se emitirán
-  cuando exista el módulo 35.

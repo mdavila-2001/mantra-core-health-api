@@ -1,0 +1,196 @@
+-   directed: true
+    graph:
+        _id: DB00619_MESH_D015464_1
+        disease: CML (ph+)
+        disease_mesh: MESH:D015464
+        drug: imatinib
+        drug_mesh: MESH:D000068877
+        drugbank: DB:DB00619
+    links:
+    -   key: decreases activity of
+        source: MESH:D000068877
+        target: UniProt:P00519
+    -   key: causes
+        source: UniProt:P00519
+        target: MESH:D015464
+    multigraph: true
+    nodes:
+    -   id: MESH:D000068877
+        label: Drug
+        name: imatinib
+    -   id: UniProt:P00519
+        label: Protein
+        name: BCR/ABL
+    -   id: MESH:D015464
+        label: Disease
+        name: CML (ph+)
+-   directed: true
+    graph:
+        _id: DB00619_MESH_D034721_1
+        disease: Systemic mast cell disease
+        disease_mesh: MESH:D034721
+        drug: imatinib
+        drug_mesh: MESH:D000068877
+        drugbank: DB:DB00619
+    links:
+    -   key: decreases activity of
+        source: MESH:D000068877
+        target: UniProt:P10721
+    -   key: decreases activity of
+        source: MESH:D000068877
+        target: UniProt:P16234
+    -   key: positively regulates
+        source: UniProt:P10721
+        target: GO:0008283
+    -   key: positively regulates
+        source: UniProt:P16234
+        target: GO:0008283
+    -   key: causes
+        source: GO:0008283
+        target: MESH:D034721
+    multigraph: true
+    nodes:
+    -   id: MESH:D000068877
+        label: Drug
+        name: imatinib
+    -   id: UniProt:P10721
+        label: Protein
+        name: c-Kit
+    -   id: UniProt:P16234
+        label: Protein
+        name: Pdgf
+    -   id: GO:0008283
+        label: BiologicalProcess
+        name: Cellular proliferation
+    -   id: MESH:D034721
+        label: Disease
+        name: Systemic mast cell disease
+-   directed: true
+    graph:
+        _id: DB01527_MESH_D000856_1
+        disease: Anorexia nervosa
+        disease_mesh: MESH:D000856
+        drug: clortermine
+        drug_mesh: null
+        drugbank: DB:DB01527
+    links:
+    -   key: treats
+        source: DB:DB01527
+        target: MESH:D000856
+    -   key: contraindicated for
+        source: DB:DB01527
+        target: MESH:D000856
+    multigraph: true
+    nodes:
+    -   id: DB:DB01527
+        label: Drug
+        name: clortermine
+    -   id: MESH:D000856
+        label: Disease
+        name: Anorexia nervosa
+-   directed: true
+    graph:
+        _id: DB00760_MESH_D016920_1
+        disease: Bacterial meningitis
+        disease_mesh: MESH:D016920
+        drug: meropenem
+        drug_mesh: MESH:C059500
+        drugbank: DB:DB00760
+    links:
+    -   key: decreases activity of
+        source: MESH:C059500
+        target: UniProt:Q8DR59
+    -   key: positively regulates
+        source: UniProt:Q8DR59
+        target: GO:0009252
+    -   key: positively regulates
+        source: GO:0009252
+        target: GO:0009273
+    -   key: part of
+        source: GO:0009273
+        target: GO:0051301
+    -   key: occurs in
+        source: GO:0051301
+        target: taxonomy:1313
+    -   key: causes
+        source: taxonomy:1313
+        target: MESH:D016920
+    multigraph: true
+    nodes:
+    -   id: MESH:C059500
+        label: Drug
+        name: meropenem
+    -   id: UniProt:Q8DR59
+        label: Protein
+        name: Penicillin-binding protein 1A (Streptococcus pneumoniae)
+    -   id: GO:0009252
+        label: BiologicalProcess
+        name: peptidoglycan biosynthetic process
+    -   id: GO:0009273
+        label: BiologicalProcess
+        name: peptidoglycan-based cell wall biogenesis
+    -   id: GO:0051301
+        label: BiologicalProcess
+        name: cell division
+    -   id: taxonomy:1313
+        label: OrganismTaxon
+        name: Streptococcus pneumoniae
+    -   id: MESH:D016920
+        label: Disease
+        name: Bacterial meningitis
+    reference:
+    - https://go.drugbank.com/drugs/DB00760#BE0000744
+    - https://en.wikipedia.org/wiki/Meningitis#Bacterial
+-   directed: true
+    graph:
+        _id: DB00760_MESH_D016920_2
+        disease: Bacterial meningitis
+        disease_mesh: MESH:D016920
+        drug: meropenem
+        drug_mesh: MESH:C059500
+        drugbank: DB:DB00760
+    links:
+    -   key: decreases activity of
+        source: MESH:C059500
+        target: UniProt:P0A0Z5
+    -   key: positively regulates
+        source: UniProt:P0A0Z5
+        target: GO:0009252
+    -   key: positively regulates
+        source: GO:0009252
+        target: GO:0009273
+    -   key: part of
+        source: GO:0009273
+        target: GO:0051301
+    -   key: occurs in
+        source: GO:0051301
+        target: taxonomy:487
+    -   key: causes
+        source: taxonomy:487
+        target: MESH:D016920
+    multigraph: true
+    nodes:
+    -   id: MESH:C059500
+        label: Drug
+        name: meropenem
+    -   id: UniProt:P0A0Z5
+        label: Protein
+        name: Penicillin-binding protein 1A (Neisseria meningitidis)
+    -   id: GO:0009252
+        label: BiologicalProcess
+        name: peptidoglycan biosynthetic process
+    -   id: GO:0009273
+        label: BiologicalProcess
+        name: peptidoglycan-based cell wall biogenesis
+    -   id: GO:0051301
+        label: BiologicalProcess
+        name: cell division
+    -   id: taxonomy:487
+        label: OrganismTaxon
+        name: Neisseria meningitidis
+    -   id: MESH:D016920
+        label: Disease
+        name: Bacterial meningitis
+    reference:
+    - https://go.drugbank.com/drugs/DB00760#BE0000744
+    - https://en.wikipedia.org/wiki/Meningitis#Bacterial

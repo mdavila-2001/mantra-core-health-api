@@ -1,0 +1,62 @@
+format-version: 1.2
+data-version: hp/releases/2026-09-01
+
+[Term]
+id: HP:0000118
+name: Phenotypic abnormality
+def: "A phenotypic abnormality." [https://orcid.org/0000-0002-0736-9199]
+comment: This is the root of the phenotypic abnormality subontology of the HPO.
+synonym: "Organ abnormality" EXACT []
+is_a: HP:0000001 ! All
+
+[Term]
+id: HP:0002715
+name: Abnormality of the immune system
+alt_id: HP:0003257
+alt_id: HP:0003346
+alt_id: HP:0010986
+def: "An abnormality of the immune system." [https://orcid.org/0000-0002-0736-9199]
+comment: The immune system is composed of organs and interdependent cell types that collectively protect the body from infections and from the growth of tumor cells. The organs of the immune system comprise the bone marrow, the spleen, the thymus,the lymph nodes, and the cell types comprise B cells, T cells, natural killer cells, granulocytes,dendritic cells, and macrophages.
+synonym: "Abnormality of the immune system" EXACT layperson []
+synonym: "Immunological abnormality" EXACT layperson []
+is_a: HP:0000118 ! Phenotypic abnormality
+
+[Term]
+id: HP:0012393
+name: Allergy
+def: "An allergy is an immune response or reaction to substances that are usually not harmful." [https://orcid.org/0000-0002-0736-9199]
+synonym: "Allergy" EXACT layperson []
+is_a: HP:0100326 ! Immunologic hypersensitivity
+property_value: terms:creator https://orcid.org/0000-0002-0736-9199
+property_value: terms:date "2013-11-07T07:47:22Z" xsd:dateTime
+
+[Term]
+id: HP:0012395
+name: Seasonal allergy
+def: "An allergy experienced at a particular time of year when trees or grasses pollinate and elicit an allergic reaction." [https://orcid.org/0000-0002-0736-9199]
+synonym: "Seasonal allergy" EXACT layperson []
+is_a: HP:0012393 ! Allergy
+property_value: terms:creator https://orcid.org/0000-0002-0736-9199
+property_value: terms:date "2013-11-07T07:51:48Z" xsd:dateTime
+
+[Term]
+id: HP:0001025
+name: Urticaria
+def: "Raised, well-circumscribed areas of erythema and edema involving the dermis and epidermis. Urticaria is intensely pruritic, and blanches completely with pressure." [https://orcid.org/0000-0002-0736-9199]
+synonym: "Hives" EXACT layperson []
+xref: MEDDRA:10046735 "Urticaria"
+is_a: HP:0011276 ! Vascular skin abnormality
+
+[Term]
+id: HP:0000001
+name: All
+comment: Root of all terms in the Human Phenotype Ontology.
+
+[Term]
+id: HP:0000008
+name: Abnormal morphology of female internal genitalia
+def: "An abnormality of the female internal genitalia." [https://orcid.org/0000-0002-0736-9199]
+synonym: "Abnormality of female internal genitalia" EXACT []
+is_a: HP:0000812 ! Abnormal internal genitalia
+is_a: HP:0010460 ! Abnormality of the female genitalia
+

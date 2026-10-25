@@ -3,13 +3,13 @@
   Fuente real: src/modules/diagnostics/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `diagnostics`
 
 **Fuente:** [`src/modules/diagnostics/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/diagnostics/README.md)
-· 7 controllers · 8 services · 7 repositories · 36 entidades · 9 DTO
+· 7 controllers · 10 services · 8 repositories · 36 entidades · 9 DTO
 
 ---
 
@@ -149,10 +149,19 @@ rechazos de regla de negocio.
 
 ## Auditoría vigente
 
-La revisión de octubre de 2026 registró autorizaciones incompletas para cadenas
-de tenant, paciente y recurso diagnóstico, además de límites ausentes en algunos
-DTO. El detalle, correcciones y pruebas propuestas están en
-[`docs/revision-backend-2026-10-04/modulos/diagnostics.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/diagnostics.md).
+Los writes clínicos (especímenes, acesiones, laboratorio, informes, críticos, imagen,
+media y calidad de datos) toman el tenant custodio del contexto (`requireTenantId()`):
+un `custodianTenantId` o `tenantId` del cuerpo solo se acepta si coincide. Cada recurso que
+enlazan (endpoint, estudio, espécimen, contenedor, acesión, informe, notificación,
+encuentro, orden, observación, archivo) se resuelve con `DiagnosticsScopeService` dentro
+del tenant y del mismo paciente antes de escribir; lo ajeno responde igual que lo inexistente
+(`404`, `reason` `DIAGNOSTICS_RESOURCE_NOT_AVAILABLE`, sin `details`). Un autor declarado en
+el cuerpo debe ser el profesional que firma cuando la cuenta tiene perfil profesional
+(`403` `DIAGNOSTICS_AUTHOR_NOT_ACTOR`). `GET /diagnostics/patients/:id/imaging-studies`
+exige una relación asistencial vigente entre el profesional y el paciente
+(`DiagnosticsPatientAccessService`; `404` `DIAGNOSTICS_PATIENT_NOT_AVAILABLE` sin vínculo).
+No existe un vínculo paciente–tenant: un paciente declarado sin encuentro, orden,
+observación o informe que lo ancle no se contrasta con el tenant.
 
 La ejecución dirigida actual fue:
 

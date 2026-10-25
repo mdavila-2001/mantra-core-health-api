@@ -5,6 +5,7 @@ import {
   VectorDocuments,
   VectorChunks,
   VectorEmbeddings,
+  VectorCollections,
   VectorDeletionJobs,
   VectorReconciliationRuns,
 } from '../entities';
@@ -179,12 +180,20 @@ export class VectorCorpusRepository {
   }
 
   /**
-   * Documentos alcanzados por un borrado. `SKIP LOCKED` porque el borrado es un
-   * barrido: quedarse esperando a un documento que otro proceso está tocando
-   * retrasaría todo el resto de la purga.
+   * Documentos alcanzados por un borrado, **sólo de las colecciones del tenant**.
+   *
+   * Los documentos no llevan `tenant_id`: pertenecen a una colección, y la
+   * colección al tenant. El borrado es físico e irreversible, así que la cadena
+   * de alcance se resuelve antes de seleccionar la primera fila: una referencia
+   * fuente (`source_document_id`, `patient_profile_id`) puede repetirse entre
+   * organizaciones y no identifica por sí sola a quién pertenece.
+   *
+   * `SKIP LOCKED` porque el borrado es un barrido: quedarse esperando a un
+   * documento que otro proceso está tocando retrasaría todo el resto de la purga.
    */
-  findDocumentsForDeletion(
+  async findDocumentsForDeletion(
     em: EntityManager,
+    tenantId: string,
     filter: {
       /**
        * Identificador asociado a source document.
@@ -196,7 +205,15 @@ export class VectorCorpusRepository {
     },
     limit: number,
   ): Promise<VectorDocuments[]> {
-    const where: Record<string, unknown> = {};
+    const collections = await em.find(
+      VectorCollections,
+      { tenantId },
+      { fields: ['id'] },
+    );
+    if (collections.length === 0) return [];
+    const where: Record<string, unknown> = {
+      vectorCollectionId: { $in: collections.map((c) => c.id) },
+    };
     if (filter.sourceDocumentId)
       where.sourceDocumentId = filter.sourceDocumentId;
     if (filter.patientProfileId)
@@ -205,6 +222,34 @@ export class VectorCorpusRepository {
       lockMode: LockMode.PESSIMISTIC_PARTIAL_WRITE,
       limit,
     });
+  }
+
+  /**
+   * Si el tenant ya pidió antes el borrado de esa misma referencia.
+   *
+   * Es lo que distingue la continuación legítima de un borrado por lotes (que
+   * puede llegar a «no queda nada») de una referencia que no resuelve a nada del
+   * tenant desde el primer momento.
+   */
+  async hasPriorDeletionJob(
+    em: EntityManager,
+    tenantId: string,
+    filter: {
+      /**
+       * Identificador asociado a source document.
+       */
+      sourceDocumentId?: string; /**
+       * Identificador asociado a patient profile.
+       */
+      patientProfileId?: string;
+    },
+  ): Promise<boolean> {
+    const where: Record<string, unknown> = { tenantId };
+    if (filter.sourceDocumentId)
+      where.sourceDocumentId = filter.sourceDocumentId;
+    if (filter.patientProfileId)
+      where.patientProfileId = filter.patientProfileId;
+    return (await em.count(VectorDeletionJobs, where)) > 0;
   }
 
   /** Documentos activos de la colección, para el manifiesto de reconciliación. */

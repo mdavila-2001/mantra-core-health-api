@@ -10,6 +10,7 @@ Agrupa los componentes relacionados con **alovida** y mantiene cohesionada esta 
 | --- | --- |
 | `coverage-report.mjs` | Informe estático de cobertura (`yarn alovida:coverage`). |
 | `guardrails.mjs` | Guardrails bloqueantes de CI (`yarn alovida:guardrails`). |
+| `exenciones.mjs` | Excepciones documentadas que comparten `guardrails.mjs` y `coverage-report.mjs`: endpoints mutantes sin `@Roles` ya triados (con quién impone el permiso) y entidades sin consumidor con lo que dice el modelo de ellas. |
 | `seed-dev-data.mjs` | Puebla un entorno de desarrollo por la API real (`yarn seed:dev`). Acumulativo: cada corrida agrega una tanda nueva a propósito, para ejercitar el dominio. |
 | `faker-worker.mjs` | Tráfico de aplicación realista y a escala — médicos con vitrina pública y publicaciones, pacientes — con disciplina **cache-first** (`yarn faker`): si el target ya tiene la tanda pedida, no genera de nuevo. Variables `FAKER_*` documentadas en `.env.example`. Ver `evidencias/faker-worker/`. |
 | `seed-vitrina-publica.mjs` | Puebla la **cara pública** por la API real (`yarn seed:vitrina`): 15 profesionales con vitrina, especialidad, trayectoria completa —universidades y hospitales bolivianos— y 4 publicaciones con imagen cada uno; 16 vecinos con documento y contraseña que las comentan y reaccionan; y clínicas, laboratorios y farmacias verificados. Los datos viven en `datos/`. `--solo-interaccion` sanea lo ya publicado sin crear nada nuevo. |

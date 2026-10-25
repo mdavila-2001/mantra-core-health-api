@@ -3,7 +3,7 @@
   Fuente real: src/modules/object_storage/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `object_storage`
@@ -179,7 +179,7 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
 
 ## Pruebas
 
-`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb todavía debe aplicar la misma política, como detalla la [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/object_storage.md).
+`corepack yarn test src/modules/object_storage --runInBand --silent` — 5 suites y 110 pruebas aprobadas durante la revisión (con dos advertencias preexistentes de imports JSON). La URL firmada aplica política clínica; DICOMweb no la aplica.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -192,7 +192,7 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
   proveedor, la versión de clave y la caducidad. Firmar es del adaptador de almacenamiento; este
   módulo autoriza y deja el rastro.
 
-## Pendiente
+## Fuera de este módulo
 
 - **Adaptador del proveedor**: subir las partes, firmar la URL, recomputar el hash y ejecutar el
   borrado son operaciones contra S3/MinIO/Azure. El módulo registra y gobierna; el adaptador
@@ -200,14 +200,8 @@ de borrado. No se loguean claves de objeto ni metadatos DICOM.
 - **Rehidratación desde frío**: se detecta y se rechaza; encolar la rehidratación corresponde al
   worker de ciclo de vida.
 - **Autorización y consentimiento** (`authz.*`, `consent.*`): la emisión y canje de URLs firmadas
-  ya reutilizan la política clínica; DICOMweb requiere el mismo control antes de exponer referencias.
+  reutilizan la política clínica; DICOMweb expone referencias sin ese control.
 - **Bloqueo distribuido** (`redis_runtime.distributed_lock_entries`) para las verificaciones de
-  integridad concurrentes: aquí lo cubre el `FOR UPDATE` sobre el manifiesto; el lock externo llegará
-  con el módulo 54.
-- **Caché de URLs firmadas** (`redis_runtime.signed_url_cache_entries`): la respuesta ya lleva la
-  caducidad; cachearla es del módulo 54.
-- **Outbox** (módulo 35, ya disponible): `MultipartUploadInitiated`, `ObjectVersionCommitted`,
-  `ObjectVersionSuperseded`, `DicomStudyCatalogued`, `DicomWebAccessRecorded`,
-  `LargePayloadRegistered`, `ObjectRetentionApplied`, `LegalHoldPlaced/Released`, `SignedUrlIssued`,
-  `ObjectIntegrityVerified`, `ObjectCorruptionDetected`, `ObjectsArchived`,
-  `ObjectDeletionRequested`. Quedan por cablear a `OutboxService.publishDomainEvent()`.
+  integridad concurrentes: aquí lo cubre el `FOR UPDATE` sobre el manifiesto.
+- **Caché de URLs firmadas** (`redis_runtime.signed_url_cache_entries`): la respuesta lleva la
+  caducidad; este módulo no la cachea.

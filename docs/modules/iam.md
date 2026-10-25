@@ -3,7 +3,7 @@
   Fuente real: src/modules/iam/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `iam`
@@ -16,8 +16,7 @@
 # IAM
 
 Identidad y acceso de ALOVIDA: cuentas, credenciales, sesiones y refresh tokens,
-MFA, dispositivos, roles globales, bloqueos y eventos de seguridad. La revisión de
-esta unidad está en [el informe de IAM](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/iam.md).
+MFA, dispositivos, roles globales, bloqueos y eventos de seguridad.
 
 ## Rutas HTTP y alcance (medido)
 

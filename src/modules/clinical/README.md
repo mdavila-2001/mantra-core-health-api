@@ -12,7 +12,7 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
   find src/modules/clinical -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **9 controllers, 39 rutas HTTP, 23 entidades y 17 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **10 controllers, 40 rutas HTTP, 23 entidades y 18 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -59,6 +59,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | `POST /clinical/procedures` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/procedures/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/immunizations` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/internal/prescription-expiry-notices` | SYSTEM, SYSTEM_WORKER | `clinical-prescription-expiry` |
 
 ## Endpoints por caso de uso (subconjunto: UC-08-01..14 y adiciones puntuales)
 
@@ -86,6 +87,27 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 > (`/check-in`, `/{id}/amend`, `/{id}/release`, `/{id}/close`) por compatibilidad
 > con el router (Express 5 / path-to-regexp v8, donde `:` es sintaxis de
 > parámetro). El método HTTP y la intención se preservan.
+
+## Aviso de receta por vencer (PAC-REC-002)
+
+`POST /clinical/internal/prescription-expiry-notices` lo dispara el job `prescription-expiry-notice`
+del worker `messaging` (cada hora). Es un barrido entre organizaciones, sin actor humano; sólo
+acepta `SYSTEM`/`SYSTEM_WORKER`.
+
+- **Qué receta avisa:** estado emitido (`MR_ISSUED`) con `valid_to` posterior a ahora y hasta
+  `PRESCRIPTION_EXPIRY_NOTICE_DAYS` (3) días. Sin `valid_to` no vence y no avisa; borrador,
+  invalidada, reemplazada, completada o ya vencida tampoco. La fuente (ALOVIDA PAC-REC-002) pide la
+  alerta sin fijar la antelación: los 3 días son el valor adoptado.
+- **A quién y por dónde:** a la cuenta activa del paciente, por la bandeja in-app (categoría
+  `CLINICAL`, destino `PRESCRIPTION_EXPIRING` con el `id` de la receta). El texto no nombra el
+  medicamento. Un paciente sin cuenta activa no recibe aviso hasta que la tenga, si la receta sigue
+  dentro de la ventana.
+- **Una sola vez:** el aviso usa la clave de idempotencia `clinical:PRESCRIPTION_EXPIRING:<receta>`;
+  `messaging.notification_requests` la guarda aun cuando la preferencia del paciente lo suprime, y el
+  barrido excluye las recetas con clave existente. Un aviso que falla no deja fila y se reintenta
+  en el barrido siguiente. Dos barridos simultáneos se excluyen con un bloqueo consultivo de
+  transacción.
+- **Respuesta:** `scanned`, `notified`, `suppressed`, `failed`, `skipped`.
 
 ## Entidades (schema `clinical`)
 
@@ -151,7 +173,7 @@ rechazos de regla de negocio. No se registran PHI ni secretos.
 
 ## Tests
 
-- Unit: `corepack yarn test src/modules/clinical --runInBand --silent` — 51 suites y 518 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). Incluye servicios, controladores y guards. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical.md).
+- Unit: `corepack yarn test src/modules/clinical --runInBand --silent` — 51 suites y 518 pruebas aprobadas durante la revisión (dos advertencias JSON preexistentes). Incluye servicios, controladores y guards.
 - Smoke de contrato: `test/smoke/modules/clinical.smoke.ts`
   (`CLINICAL_SMOKE: SmokeCase[]`), encadena episodio→encuentro→observación→orden→
   reporte→…→cierre y ejercita casos límite (401/400/404/409/422).

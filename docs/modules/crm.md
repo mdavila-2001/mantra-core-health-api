@@ -3,7 +3,7 @@
   Fuente real: src/modules/crm/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `crm`
@@ -17,7 +17,7 @@
 
 Gestiona cuentas, contactos, equipos, leads, oportunidades, actividades, alianzas, casos y preferencias de contacto mediante `CrmController` bajo `/crm`.
 
-Los roles `CRM_ADMIN` y `CRM_AGENT` habilitan las operaciones según la ruta. El módulo debe resolver además el tenant y cada relación comercial en el servidor; esa comprobación está incompleta y se detalla en la [revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/crm.md).
+Los roles `CRM_ADMIN` y `CRM_AGENT` habilitan las operaciones según la ruta. El tenant sale de `requireTenantId()`: el `tenantId` del cuerpo sólo se contrasta (403 `CRM_TENANT_SCOPE_REQUIRED` si difiere). Toda mutación o lectura por UUID carga la fila por `(id, tenantId)` y un recurso de otro tenant responde igual que uno inexistente (404, mismo mensaje y `reason`, sin `details`). Las referencias comerciales (cuenta, contacto, pipeline, etapa, sujeto de la actividad) se resuelven dentro del tenant antes de persistir, y la etapa tiene que ser del pipeline de la oportunidad (422 `CRM_STAGE_PIPELINE_MISMATCH`). `parentAccountId` apunta a `accounting.accounts` en el DDL y no se resuelve contra `crm_accounts`.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -93,4 +93,4 @@ Entidades (`tableName`, 32 de 32 archivos `*.entity.ts`): `account_contact_relat
 
 ## Pruebas
 
-`corepack yarn test src/modules/crm --runInBand --silent` aprobó 3 suites y 46 pruebas durante la revisión. Faltan escenarios de dos tenants y de pipeline/etapa cruzados.
+`node --experimental-vm-modules node_modules/jest-cli/bin/jest.js src/modules/crm` cubre dos tenants para cada cadena de UUID (lead, oportunidad, caso, cuenta, contacto, canal) y el cruce de pipeline/etapa.

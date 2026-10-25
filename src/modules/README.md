@@ -21,7 +21,7 @@ Medido el 2026-10-09 sobre `origin/test` (`687a7c20`). Los números envejecen: r
 |---|---|
 | Directorios de módulo en `src/modules/` | 70 |
 | Entidades MikroORM (`*.entity.ts`, todas dentro de `src/modules/`) | 1 261 |
-| `README.md` de módulo | 68 (faltan `public` y `ops_console`) |
+| `README.md` de módulo | 70 |
 | Entry points de worker (`src/worker-*.ts`) | 24 |
 | Archivos de job (`src/worker/jobs/**/*.job.ts`) | 38 |
 | Archivos de spec unitario bajo `src/` | 806 |
@@ -81,7 +81,7 @@ La cifra de workers de otros documentos (por ejemplo, el `CLAUDE.md` raíz) pued
 - [`education`](./education/README.md)
 - [`surveys`](./surveys/README.md)
 - [`content_packs`](./content_packs/README.md)
-- `public` — todavía sin README propio en esta base
+- [`public`](./public/README.md)
 - [`audio_assets`](./audio_assets/README.md)
 - [`tracking`](./tracking/README.md)
 - [`automation`](./automation/README.md)
@@ -95,7 +95,7 @@ La cifra de workers de otros documentos (por ejemplo, el `CLAUDE.md` raíz) pued
 - [`system_context`](./system_context/README.md)
 - [`system_ops`](./system_ops/README.md)
 - [`platform_ops`](./platform_ops/README.md)
-- `ops_console` — todavía sin README propio en esta base
+- [`ops_console`](./ops_console/README.md)
 - [`audit`](./audit/README.md)
 - [`telemetry`](./telemetry/README.md)
 - [`terminology`](./terminology/README.md)
@@ -122,4 +122,4 @@ La cifra de workers de otros documentos (por ejemplo, el `CLAUDE.md` raíz) pued
 - Los valores cerrados suelen referenciar `terminology.catalog_concepts`; consultá el catálogo antes de agregar un enum o una columna.
 - Para pruebas, usá el spec dirigido de la unidad con `corepack yarn test --runInBand <carpeta>`. La integración puede requerir servicios reales; véase [test/integration](../../test/integration/README.md).
 
-El [informe maestro de revisión](../../docs/revision-backend-2026-10-04/README.md) indica qué módulos fueron realmente leídos y cuáles siguen pendientes. Este índice no es una certificación de seguridad, contrato o esquema.
+Este índice no es una certificación de seguridad, contrato o esquema.

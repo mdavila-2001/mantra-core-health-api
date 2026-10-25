@@ -20,6 +20,7 @@ function build() {
     create: mockFn(),
     respond: mockFn(),
     listMine: mockFn(),
+    listByPatient: mockFn(),
   };
   const controller = new ReferralsController(referralsService as any);
   return { controller, referralsService };
@@ -38,6 +39,12 @@ describe('ReferralsController', () => {
     const dto = { decision: 'ACCEPT' };
     await d.controller.respond('ref1', dto as any, actor);
     expect(d.referralsService.respond).toHaveBeenCalledWith('ref1', dto, actor);
+  });
+
+  it('delegates listByPatient with the actor so the service can authorize', async () => {
+    const d = build();
+    await d.controller.listByPatient('p1', actor);
+    expect(d.referralsService.listByPatient).toHaveBeenCalledWith('p1', actor);
   });
 
   it('delegates listMine (CV-10) to the authenticated actor', async () => {

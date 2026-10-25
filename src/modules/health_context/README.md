@@ -117,16 +117,26 @@ cliente interno del worker.
 
 ## Errores y límites conocidos
 
-Los servicios usan `NOT_FOUND`, `CONFLICT` y `PRECONDITION_FAILED`, pero aún no
-tienen un catálogo propio de `reason` estable. También falta comprobar que una
-fuente localizada corresponda al país de la corrida y que su nivel de confianza
-sea admisible antes de aceptarla; una corrida con agenda permite hoy valores de
-agente o país enviados en el DTO, y un revisor humano puede enviar un
-`reviewerAgentId`. La carrera de dos claves de idempotencia iguales recibe el
-conflicto del índice en vez de recuperar la corrida ganadora.
+Los servicios usan `NOT_FOUND`, `CONFLICT` y `PRECONDITION_FAILED`; los casos
+de procedencia llevan `reason` estable (`health_context.error-reasons.ts`):
 
-El detalle, los planes de corrección y las matrices de cuatro casos están en el
-[informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/health_context.md).
+- `HEALTH_CONTEXT_SOURCE_NOT_ELIGIBLE` (422): una observación de una fuente
+  localizada en otro país que la corrida se rechaza siempre; aceptar exige una
+  fuente con nivel de confianza declarado. Sin país la fuente es global. No se
+  revela país ni fuente. Qué niveles de confianza bastan para aceptar es una
+  decisión de catálogo que el modelo aún no expresa.
+- `HEALTH_CONTEXT_SCHEDULE_BINDING_MISMATCH` (422): una corrida con
+  `scheduleId` toma agente y país de la programación bloqueada; un valor del
+  DTO que la contradice se rechaza antes de tocar `next_run_at`.
+- `HEALTH_CONTEXT_IDEMPOTENCY_RESOLUTION_FAILED` (409): ante la carrera de dos
+  claves de idempotencia iguales, quien pierde el índice único relee la corrida
+  ganadora y recibe `duplicate: true`; si el único violado es otro o la ganadora
+  no se recupera, responde este conflicto. Las altas de agente, fuente y
+  contexto que pierden su único responden el mismo conflicto de negocio que su
+  chequeo previo. El contexto (país, dominio, clave) no tiene índice único en
+  el DDL: la carrera sólo se cierra allí cuando el modelo lo declare.
+
+A un revisor humano todavía se le permite enviar un `reviewerAgentId`.
 
 ## Pruebas
 
@@ -134,6 +144,5 @@ El detalle, los planes de corrección y las matrices de cuatro casos están en e
 corepack yarn test src/modules/health_context --runInBand --silent
 ```
 
-Resultado verificado: **3 suites y 81 pruebas aprobadas**. Las specs son
-unitarias; falta integración para roles HTTP, carrera de idempotencia y las
-validaciones de procedencia documentadas en el informe.
+Las specs son unitarias; no cubren roles HTTP ni una carrera real entre dos
+transacciones (se simula la pérdida del índice único).

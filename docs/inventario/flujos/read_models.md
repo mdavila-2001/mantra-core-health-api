@@ -15,7 +15,7 @@
 
 ### Para qué sirve
 
-Contratos versionados de read model, materialized views, contratos de vista de frontend (portal, ruta, vista y sus hijos), preferencias de usuario y una proyección pública de directorio. La administración de contratos y las consultas públicas usan identificadores/columnas constantes o validadas; la proyección de datos autenticada todavía no ejecuta la materialized view ni pagina filas.
+Contratos versionados de read model, materialized views, contratos de vista de frontend (portal, ruta, vista y sus hijos), preferencias de usuario y una proyección pública de directorio. La administración de contratos y las consultas públicas usan identificadores/columnas constantes o validadas; la proyección de datos autenticada no ejecuta la materialized view ni pagina filas.
 
 _Fuente: `src/modules/read_models/README.md:3`_
 

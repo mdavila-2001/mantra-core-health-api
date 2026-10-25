@@ -1,0 +1,23 @@
+{
+  "_nota": "Corpus normalizado de servicios por especialidad. Lo escribe build-specialty-services.mjs; lo lee load-specialty-services.mjs cuando no hay armado local. Las fuentes crudas no se versionan: se vuelven a bajar con URL y SHA-256 fijos (SOURCES.md).",
+  "builtAt": "2026-10-24T02:51:35.135Z",
+  "rulesVersion": "2026.10.24",
+  "records": 4843,
+  "relations": 4923,
+  "corpus": [
+    {
+      "file": "specialty-services.part-001.ndjson.gz",
+      "lines": 4843,
+      "sha256": "2795793b842c2833c96c8c3a6ba4dcce5220117cf6e8bb2a23c2b42bb07d8c8a",
+      "bytes": 303311
+    }
+  ],
+  "meta": [
+    {
+      "file": "specialty-services.meta.part-001.ndjson.gz",
+      "lines": 1,
+      "sha256": "da9924edfd252e27238554c33423d57e3f481009454aa8467c700c6fb743aeba",
+      "bytes": 7276
+    }
+  ]
+}

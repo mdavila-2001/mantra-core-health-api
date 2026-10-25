@@ -28,6 +28,7 @@ describe('PracticesController', () => {
       createPractice: mockFn(),
       createSite: mockFn(),
       decommissionSite: mockFn(),
+      listPractices: mockFn(),
     };
     const accreditationsService = { create: mockFn() };
     const structureService = { publishHealthcareService: mockFn() };
@@ -128,14 +129,24 @@ describe('PracticesController', () => {
     );
   });
 
-  it('pasa el tenant del contexto a la consola de organización (C13)', async () => {
+  it('pasa el tenant del contexto y el actor a la consola de organización (C13)', async () => {
     const d = build();
     await runWithTenant('tenant-1', () =>
-      d.controller.getOrganizationConsole('p1'),
+      d.controller.getOrganizationConsole('p1', actor),
     );
     expect(d.organizationReadService.getConsole).toHaveBeenCalledWith(
       'p1',
       'tenant-1',
+      actor,
+    );
+  });
+
+  it('pasa el tenant del contexto y el actor al listar prácticas', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () => d.controller.listPractices(actor));
+    expect(d.sitesService.listPractices).toHaveBeenCalledWith(
+      'tenant-1',
+      actor,
     );
   });
 

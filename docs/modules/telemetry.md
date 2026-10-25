@@ -3,13 +3,13 @@
   Fuente real: src/modules/telemetry/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver README.md de la raíz, tabla "Arquitectura y mapa").
 -->
 
 # Módulo `telemetry`
 
 **Fuente:** [`src/modules/telemetry/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/telemetry/README.md)
-· 4 controllers · 5 services · 15 repositories · 14 entidades · 12 DTO
+· 4 controllers · 5 services · 16 repositories · 14 entidades · 12 DTO
 
 ---
 
@@ -173,11 +173,10 @@ Variables (ver `.env.example`): `TELEMETRY_WEB_ANALYTICS_ENABLED`,
 
 `corepack yarn test src/modules/telemetry --runInBand --silent` aprobó 14 suites y
 121 pruebas durante la revisión. Hay cobertura unitaria de controladores, servicios,
-ventanas, configuración y mapeo de GA4. Falta cobertura de integración para propiedad
-de consentimiento, referencias de ingesta y aislamiento de tenant.
+ventanas, configuración y mapeo de GA4. No hay integración que cubra propiedad de
+consentimiento, referencias de ingesta ni aislamiento de tenant.
 
 ## Limitaciones conocidas
 
-La revisión ALOVIDA documenta problemas críticos de propiedad de consentimiento,
-referencias de ingesta, validación de propiedades y aislamiento de tenant en la
-[revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/telemetry.md).
+La revisión ALOVIDA encontró problemas críticos de propiedad de consentimiento,
+referencias de ingesta, validación de propiedades y aislamiento de tenant.

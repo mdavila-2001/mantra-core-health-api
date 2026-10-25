@@ -1,0 +1,296 @@
+{
+  "region": "master",
+  "formatVersion": 1,
+  "generatedAt": "2026-10-24T20:12:38Z",
+  "regions": [
+    {
+      "region": "us",
+      "status": "consolidated",
+      "ref": "origin/justin/seed-dx-devices-us",
+      "commit": "b699958585e53ad25ee2d2f2db031a41dea7c26a",
+      "commitDate": "2026-10-24T14:00:48+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/inspiring-planck-xhpf4w",
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/claude/adoring-curie-xdkt83",
+        "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/dev",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/itzan/fix-forms-entity-registration"
+      ],
+      "manifestGeneratedAt": "2026-10-24T05:47:44.811Z",
+      "rowsRead": 215690,
+      "gaps": [
+        {
+          "source": "fda-gudid",
+          "url": "https://accessgudid.nlm.nih.gov/download/delimited",
+          "reason": "403 del proxy — GUDID completo inaccesible; sólo se usó el subconjunto dental del Full Release 2025-05-01 (espejo Delapro/GUDID). Faltan los demás paneles."
+        }
+      ]
+    },
+    {
+      "region": "eu",
+      "status": "consolidated",
+      "ref": "origin/claude/adoring-curie-xdkt83",
+      "commit": "0ac247f88b6549dbb123fd0f9deff2d8f3298f31",
+      "commitDate": "2026-10-24T18:01:37+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/claude/inspiring-planck-xhpf4w",
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/dev",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/test",
+        "origin/codex/upload-health-api-20261015",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/claude/adoring-curie-xdkt83-test",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/leonardo/carril-03-alta-paciente-test",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
+      ],
+      "manifestGeneratedAt": "2026-10-24T17:54:51Z",
+      "rowsRead": 503648,
+      "gaps": [
+        {
+          "source": "eudamed-certificates",
+          "reason": "sin descarga automática: Sin términos específicos leídos para la API interna. No se descarga en bloque hasta verificar el aviso legal del portal; el Data Lake es la vía oficial.",
+          "url": "https://ec.europa.eu/tools/eudamed/"
+        },
+        {
+          "source": "mhra-pard",
+          "reason": "sin descarga automática: Leído en vivo el 2026-10-24: pard.mhra.gov.uk solo muestra «© Crown Copyright» y no declara la Open Government Licence; los términos de GOV.UK (gov.uk/help/terms-conditions) dicen que la mayoría, no todo, del contenido de GOV.UK va bajo OGL, y PARD no está en GOV.UK. Además, los nombres de tipo GMDN son propiedad de la GMDN Agency con uso comercial restringido. Sin licencia abierta explícita: no se descarga (hueco).",
+          "url": "https://pard.mhra.gov.uk/"
+        },
+        {
+          "source": "swissmedic-swissdamed",
+          "reason": "sin descarga automática: Leído en vivo el 2026-10-24: las condiciones de uso de Swissmedic prohíben reproducir la información del sitio sin autorización expresa e incluyen expresamente toda extracción y almacenamiento automatizado (scraping/data mining), salvo las áreas pensadas para eso (RSS). No hay términos de reutilización propios de swissdamed. Sin autorización de Swissmedic NO se descarga ni se usa ningún dato derivado de swissdamed (incluido csv/srn_unique.csv de swissdamed2sqlite).",
+          "url": "https://swissdamed.ch/"
+        },
+        {
+          "source": "ec-nando",
+          "reason": "sin descarga automática: Reutilización con atribución (Decisión 2011/833/UE), pendiente confirmar en el aviso legal del sitio.",
+          "url": "https://webgate.ec.europa.eu/single-market-compliance-space/notified-bodies"
+        },
+        {
+          "source": "de-bfarm",
+          "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.bfarm.de/EN/Medical-devices/_node.html"
+        },
+        {
+          "source": "es-aemps-ccps",
+          "reason": "sin descarga automática: No evaluado: no hay descarga pública.",
+          "url": "https://www.aemps.gob.es/"
+        },
+        {
+          "source": "fr-ansm",
+          "reason": "sin descarga automática: No aplica.",
+          "url": "https://ansm.sante.fr/"
+        }
+      ]
+    },
+    {
+      "region": "row",
+      "status": "consolidated",
+      "ref": "origin/claude/inspiring-planck-xhpf4w",
+      "commit": "24cbabb54cbb33bbce3580b21eb2dd4a81f69398",
+      "commitDate": "2026-10-24T19:00:53+00:00",
+      "dir": null,
+      "alternatives": [
+        "origin/justin/seed-dx-devices-master-p10",
+        "origin/claude/adoring-curie-xdkt83",
+        "origin/master",
+        "origin/justin/seed-dx-devices-master-p8",
+        "origin/claude/fervent-galileo-t68vaj",
+        "origin/justin/seed-clinical-pharmacology",
+        "origin/justin/dictionaries-wikidata-es",
+        "origin/justin/seed-dx-devices-us-followup",
+        "origin/justin/seed-dx-devices-us-official",
+        "origin/claude/limpieza-pendientes",
+        "origin/dev",
+        "origin/justin/seed-dx-devices-master-p6",
+        "origin/claude/compassionate-brown-tr71nn",
+        "origin/justin/seed-dx-devices-us",
+        "origin/claude/eager-pasteur-hxks7i",
+        "origin/justin/practice-ownership-int-spec-blocker",
+        "origin/justin/practice-ownership-report",
+        "origin/justin/fix-dev-failing-specs",
+        "origin/itzan/fix-forms-entity-registration",
+        "origin/justin/fix-dev-red-gates",
+        "origin/leonardo/carril-03-alta-paciente-dev"
+      ],
+      "manifestGeneratedAt": "2026-10-24T18:30:58.088Z",
+      "rowsRead": 14239561,
+      "gaps": [
+        {
+          "source": "hc-mdall",
+          "reason": "503 en toda la API (health-products.canada.ca/api/medical-devices/…) al 2026-10-24; solo hay espejo de 2020-02-07",
+          "url": "https://health-products.canada.ca/api/documentation/mdall-documentation-en.html"
+        },
+        {
+          "source": "tga-artg",
+          "reason": "www.tga.gov.au no responde desde la nube (conexión cortada) al 2026-10-24; el ARTG completo no tiene espejo; solo hay DAEN parcial",
+          "url": "https://www.tga.gov.au/resources/artg"
+        },
+        {
+          "source": "mfds-devices",
+          "reason": "emedi.mfds.go.kr, udiportal.mfds.go.kr y www.data.go.kr no responden desde la nube (conexión cortada) al 2026-10-24",
+          "url": "https://udiportal.mfds.go.kr/"
+        },
+        {
+          "source": "amar-devices",
+          "reason": "data.gov.il no publica un conjunto de AMAR; el registro solo se consulta en gov.il",
+          "url": "https://data.gov.il/"
+        },
+        {
+          "source": "sfda-mdma",
+          "reason": "medicaldevice.sfda.gov.sa no responde desde la nube al 2026-10-24 (antes, 502)",
+          "url": "https://medicaldevice.sfda.gov.sa/"
+        },
+        {
+          "source": "thai-fda-devices",
+          "reason": "open.fda.moph.go.th no responde desde la nube al 2026-10-24 (antes, 502)",
+          "url": "https://open.fda.moph.go.th/"
+        },
+        {
+          "source": "mda-mdar",
+          "reason": "MDA publica el registro como buscador (mdar.mda.gov.my, «carian», exige un texto de búsqueda); el listado trae nombre, número de registro, establecimiento local y vigencia, pero no fabricante ni marca, que están en una ficha por registro",
+          "url": "https://mdar.mda.gov.my/"
+        },
+        {
+          "source": "cofepris-dispositivos",
+          "reason": "solo visor de consulta (registros.cofepris.gob.mx); datos.gob.mx no tiene conjuntos de dispositivos médicos (búsqueda CKAN, 0 resultados)",
+          "url": "https://registros.cofepris.gob.mx/"
+        },
+        {
+          "source": "anmat-productos-medicos",
+          "reason": "datos.gob.ar no tiene conjuntos de productos médicos de ANMAT (búsqueda CKAN «anmat»: solo vademécum y alimentos)",
+          "url": "https://datos.gob.ar/"
+        },
+        {
+          "source": "digemid-dispositivos",
+          "reason": "403 del propio servidor (www.digemid.minsa.gob.pe) al 2026-10-24",
+          "url": "https://www.digemid.minsa.gob.pe/"
+        },
+        {
+          "source": "isp-dispositivos",
+          "reason": "www.ispch.gob.cl no responde desde la nube al 2026-10-24",
+          "url": "https://www.ispch.gob.cl/"
+        },
+        {
+          "source": "agemed-dispositivos",
+          "reason": "el portal de AGEMED solo publica circulares y comunicados en PDF; sin listado de dispositivos registrados",
+          "url": "https://www.agemed.gob.bo/"
+        },
+        {
+          "source": "sahpra-devices",
+          "reason": "SAHPRA no publica un registro general de dispositivos descargable; solo las listas de kits de COVID-19 (cargadas) y licencias de establecimientos",
+          "url": "https://www.sahpra.org.za/medical-devices/"
+        },
+        {
+          "source": "unicef-supply",
+          "reason": "403 del propio servidor (supply.unicef.org → supplyhub.unicef.org) al 2026-10-24",
+          "url": "https://supply.unicef.org/"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "taxonomy-nodes.ndjson.gz",
+      "rows": 106607,
+      "bytes": 8269530,
+      "sha256": "8b7cc34a7f0418d3bdeaa5e7aaa951bf98c08a67cbf6a299fb475fa9d07071b6"
+    },
+    {
+      "path": "taxonomy-crosswalks.ndjson.gz",
+      "rows": 218,
+      "bytes": 6118,
+      "sha256": "693b9ff457457334ef14ebae655365ca92ca59fb5cff315ef6151a4c134691e7"
+    },
+    {
+      "path": "manufacturers.ndjson.gz",
+      "rows": 27736,
+      "bytes": 9745655,
+      "sha256": "74b06148f0b0cd2e32b3a4b4a7254332d7297b6769f150a3cfc0dfd7456577ca"
+    },
+    {
+      "path": "models-0001.ndjson.gz",
+      "rows": 140055,
+      "bytes": 11436309,
+      "sha256": "aa428b5f85feef62d6f8dcab8b3fcc15f06d6e3a5aae5dc85534e5d0fba15f52"
+    },
+    {
+      "path": "models-0002.ndjson.gz",
+      "rows": 137748,
+      "bytes": 11654703,
+      "sha256": "2e9cb0dd47f263a3fab345c13d9aa27260e1d8121b1fc0dab816b6967c0983a2"
+    },
+    {
+      "path": "models-0003.ndjson.gz",
+      "rows": 134249,
+      "bytes": 11101250,
+      "sha256": "064e309af0f5a1ca3bb2689f975bbac77e357f757e2973361b7693c6df504da3"
+    },
+    {
+      "path": "models-0004.ndjson.gz",
+      "rows": 133606,
+      "bytes": 11879077,
+      "sha256": "82448c88dae87078a3a91482f89ddbbacb6619808ba1c8b03b4d0ed8ae0de314"
+    },
+    {
+      "path": "models-0005.ndjson.gz",
+      "rows": 118518,
+      "bytes": 10641463,
+      "sha256": "e43a58bc4bab3496f3d82d8477224861e88f8babbe9ace5fa733612daf0fd1b4"
+    },
+    {
+      "path": "models-0006.ndjson.gz",
+      "rows": 64956,
+      "bytes": 5900410,
+      "sha256": "8fc2464678d4c15098b52bcfaf07ca978ac6db7b98443956c80a989114b22eb5"
+    },
+    {
+      "path": "review-manufacturers.ndjson.gz",
+      "rows": 12993,
+      "bytes": 1609464,
+      "sha256": "0687485f5da669d2caa13625578a64d189356779a9d2019787e4ac11f563e2b2"
+    },
+    {
+      "path": "industry-mentions.ndjson.gz",
+      "rows": 552,
+      "bytes": 27708,
+      "sha256": "d731bc1303884c6aae62c5a394ce5fa1cfd48e6c3833353fcd60081e06c063ff"
+    },
+    {
+      "path": "industry-candidates.ndjson.gz",
+      "rows": 149,
+      "bytes": 8361,
+      "sha256": "79fd644edfe5b974d575824c978f5a2da481300ae2a595d8de403281504197bf"
+    }
+  ]
+}

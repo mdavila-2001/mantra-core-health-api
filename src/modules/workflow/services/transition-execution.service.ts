@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConcurrencyConflictException,
   ConflictException,
+  DomainException,
+  ErrorCode,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { WorkflowErrorReason } from '../workflow.error-reasons';
 import type { StateMachineDefinitions, TransitionGuards } from '../entities';
 import {
   AggregateStateRepository,
@@ -85,6 +88,10 @@ export class TransitionExecutionService {
    * El orden importa y no es arbitrario: se bloquea el agregado *antes* de leer su
    * estado, porque si se leyera primero dos comandos concurrentes podrían partir
    * los dos del mismo estado de origen y aplicar los dos su transición.
+   *
+   * El propósito de uso que la transición exige (`purpose_of_use_concept_id`) debe
+   * venir declarado en el comando y coincidir; se comprueba en cuanto se resuelve
+   * la transición —antes de la idempotencia, las guardas y cualquier mutación—.
    */
   async triggerTransition(
     aggregateId: string,
@@ -124,6 +131,11 @@ export class TransitionExecutionService {
           { commandCode, currentStateConceptId: aggregate.stateConceptId },
         );
       }
+
+      this.assertPurposeOfUse(transition.purposeOfUseConceptId, dto, {
+        transitionId: transition.id,
+        actorId: actor.id,
+      });
 
       // UC-32-06: la clave corta antes de tocar nada. Reaplicar una transición ya
       // aplicada movería el agregado una segunda vez.
@@ -770,6 +782,48 @@ export class TransitionExecutionService {
    * exponer internos", y filtrar la expresión revelaría la regla de negocio a
    * quien acaba de chocar contra ella.
    */
+  /**
+   * Exige que el comando declare el propósito de uso que la transición requiere.
+   *
+   * Una transición sin propósito configurado conserva el flujo anterior. Con
+   * propósito, un comando sin él o con otro se rechaza con el mismo 403 y sin
+   * `details`, para no revelar cuál es el propósito requerido.
+   *
+   * @param required - Propósito configurado en la definición de la transición.
+   * @param dto - Comando recibido.
+   * @param log - Identificadores para el registro de la denegación.
+   * @throws DomainException 403 `WORKFLOW_PURPOSE_NOT_ALLOWED` si no coincide.
+   */
+  private assertPurposeOfUse(
+    required: string | null | undefined,
+    dto: TriggerTransitionDto,
+    log: { transitionId: string; actorId: string },
+  ): void {
+    if (
+      !required ||
+      dto.purposeOfUseConceptId?.toLowerCase() === required.toLowerCase()
+    ) {
+      return;
+    }
+    this.logger.warn(
+      {
+        operation: 'workflow.transition.trigger',
+        reason: WorkflowErrorReason.PURPOSE_NOT_ALLOWED,
+        transitionId: log.transitionId,
+        actorId: log.actorId,
+        declared: dto.purposeOfUseConceptId ? 'different' : 'missing',
+      },
+      'Transición rechazada: propósito de uso no admitido',
+    );
+    throw new DomainException(
+      HttpStatus.FORBIDDEN,
+      ErrorCode.FORBIDDEN,
+      'El propósito de uso declarado no está admitido para esta transición.',
+      undefined,
+      WorkflowErrorReason.PURPOSE_NOT_ALLOWED,
+    );
+  }
+
   private assertGuards(
     guards: TransitionGuards[],
     context: GuardContext,

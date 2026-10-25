@@ -40,6 +40,19 @@ export enum AuthzErrorReason {
 
   /** `validTo` no es posterior a `validFrom` en una relación asistencial. */
   CARE_RELATIONSHIP_INVALID_VALIDITY_WINDOW = 'CARE_RELATIONSHIP_INVALID_VALIDITY_WINDOW',
+  /**
+   * El paciente no existe o no tiene vínculo comprobable con el tenant activo
+   * (encuentro, turno, episodio o membresía de su cuenta). Es el mismo 404 en
+   * ambos casos: distinguirlos confirmaría que el UUID existe en otra organización.
+   */
+  AUTHZ_PATIENT_OUT_OF_SCOPE = 'AUTHZ_PATIENT_OUT_OF_SCOPE',
+  /** El encuentro no existe, es de otro tenant o pertenece a otro paciente. */
+  AUTHZ_ENCOUNTER_PATIENT_MISMATCH = 'AUTHZ_ENCOUNTER_PATIENT_MISMATCH',
+  /** El consentimiento no existe, es de otro tenant o pertenece a otro paciente. */
+  AUTHZ_CONSENT_PATIENT_MISMATCH = 'AUTHZ_CONSENT_PATIENT_MISMATCH',
+  /** El tenant del cuerpo no coincide con el tenant activo del actor. */
+  AUTHZ_TENANT_SCOPE_REQUIRED = 'AUTHZ_TENANT_SCOPE_REQUIRED',
+
   /** Ya existe una relación asistencial activa para ese (paciente, practicante). */
   CARE_RELATIONSHIP_ALREADY_ACTIVE = 'CARE_RELATIONSHIP_ALREADY_ACTIVE',
   /** No se encontró la relación asistencial a revocar. */
@@ -75,4 +88,13 @@ export enum AuthzErrorReason {
   RESOURCE_SCOPE_GRANT_PERMISSION_NOT_FOUND = 'RESOURCE_SCOPE_GRANT_PERMISSION_NOT_FOUND',
   /** Ya existe un grant de recurso para ese (sujeto, permiso, recurso). */
   RESOURCE_SCOPE_GRANT_ALREADY_EXISTS = 'RESOURCE_SCOPE_GRANT_ALREADY_EXISTS',
+
+  /** Un rol de ámbito global no se asigna con tenant, sede ni consultorio: dejaría de autorizar en las rutas sin tenant. */
+  ROLE_ASSIGNMENT_GLOBAL_ROLE_WITH_SCOPE = 'ROLE_ASSIGNMENT_GLOBAL_ROLE_WITH_SCOPE',
+  /** No se encontró la asignación de rol (o es de otro usuario). */
+  ROLE_ASSIGNMENT_NOT_FOUND = 'ROLE_ASSIGNMENT_NOT_FOUND',
+  /** La asignación de rol a revocar no está activa. */
+  ROLE_ASSIGNMENT_NOT_ACTIVE = 'ROLE_ASSIGNMENT_NOT_ACTIVE',
+  /** No se encontró el usuario cuyas asignaciones se piden. */
+  ROLE_ASSIGNMENT_USER_NOT_FOUND = 'ROLE_ASSIGNMENT_USER_NOT_FOUND',
 }

@@ -42,6 +42,12 @@ export class ObjectIdParamDto {
   id!: string;
 }
 
+export class ColumnIdParamDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  id!: string;
+}
+
 export class AnnotationIdParamDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
@@ -323,4 +329,13 @@ export class ReviewInputDto {
   @IsString()
   @MaxLength(2000)
   comment?: string;
+}
+
+/** Corrida de la clasificación automática: por omisión, todas las columnas observadas. */
+export class ClassificationRunDto {
+  @ApiPropertyOptional({ description: 'Limita la corrida a un schema' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  schema?: string;
 }

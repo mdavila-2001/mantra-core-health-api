@@ -27,6 +27,7 @@ import {
   UpdateProductDto,
 } from '../dto';
 import { displayName, toProductReadDto } from './pharmacy-read.service';
+import { requireManagedPharmacy } from './pharmacy-scope';
 
 /** Los datos descriptivos que el `PATCH` puede cambiar: los de `UpdateProductDto`. */
 const EDITABLE_FIELDS = [
@@ -121,11 +122,12 @@ export class PharmacyProductsService {
       'Publishing pharmacy product',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
         throw new PreconditionFailedException('La farmacia no está activa', {
           pharmacyId,
@@ -218,11 +220,12 @@ export class PharmacyProductsService {
       'Updating pharmacy product',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
       const product = await this.productsRepo.findById(tx, productId);
       if (!product || product.pharmacyId !== pharmacyId) {
         throw new ResourceNotFoundException('Producto no encontrado', {
@@ -394,6 +397,7 @@ export class PharmacyProductsService {
       'Retiring pharmacy product',
     );
     return this.em.transactional(async (tx) => {
+      await requireManagedPharmacy(this.pharmaciesRepo, tx, pharmacyId, actor);
       const product = await this.productsRepo.findById(tx, productId);
       if (!product || product.pharmacyId !== pharmacyId) {
         throw new ResourceNotFoundException('Producto no encontrado', {

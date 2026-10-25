@@ -121,7 +121,7 @@ export type NotificationDestinationType =
    * recordatorio, cancelación y cambio de cita. `APPOINTMENT` (arriba) no lo
    * emite ningún módulo hoy — se declaró antes de que la agenda tuviera
    * avisos propios y quedó como aspiracional; se deja tal cual (diff mínimo,
-   * decisión D-Notif en `DECISIONS.md`) y este es el literal real.
+   * decisión D-Notif) y este es el literal real.
    */
   | 'scheduling.appointment_bookings'
   /**
@@ -129,7 +129,22 @@ export type NotificationDestinationType =
    * `scheduling-agenda-notices.service.ts` vía `RECURSO_CUPO` cuando
    * `scheduling-waitlist.service.ts` promueve la lista de espera.
    */
-  | 'scheduling.bookable_slots';
+  | 'scheduling.bookable_slots'
+  /**
+   * Un reclamo a la aseguradora (carril 16, REQ-16-032): el cobro que se le
+   * emitió al paciente por un servicio con seguro. El `id` es el del reclamo.
+   * Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su
+   * ruta al conectar.
+   */
+  | 'INSURANCE_CLAIM'
+  /**
+   * Una receta próxima a vencer (PAC-REC-002). El `id` es el de la receta, el
+   * mismo que `PRESCRIPTION`; es otro literal para que el rebote por «aviso sin
+   * leer sobre el mismo objeto» no confunda este aviso con el de «receta
+   * lista». Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front
+   * lo enruta a la misma pantalla que `PRESCRIPTION`.
+   */
+  | 'PRESCRIPTION_EXPIRING';
 
 /**
  * A dónde lleva la notificación al abrirla.
