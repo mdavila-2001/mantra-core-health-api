@@ -7,6 +7,7 @@ import {
 } from '../../../common';
 import { AuditTrailService } from '../../audit/services';
 import { CLIN } from '../../clinical/clinical.concepts';
+import { ReceivedServicesProjector } from '../../clinical/services';
 import { PeriopDentalRepository } from '../repositories';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 import {
@@ -67,6 +68,7 @@ export class PeriopDentalService {
   constructor(
     private readonly em: EntityManager,
     private readonly dentalRepo: PeriopDentalRepository,
+    private readonly receivedServices: ReceivedServicesProjector,
     private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
   ) {
@@ -145,6 +147,11 @@ export class PeriopDentalService {
       // El sitio se crea tras flushear el procedimiento: `procedure_id` es una
       // clave foránea y las columnas uuid planas de este modelo no le dicen a
       // MikroORM en qué orden insertar.
+      await tx.flush();
+      // Este camino escribe `clinical.procedures` sin pasar por `ProceduresService`,
+      // así que proyecta por su cuenta: un tratamiento dental también es una
+      // intervención realizada.
+      await this.receivedServices.projectProcedure(tx, procedure, actor.id);
       await tx.flush();
 
       if (dto.toothSiteConceptId !== undefined) {

@@ -126,12 +126,16 @@ function build() {
   const procedures = {
     create: mockFn().mockResolvedValue({ id: 'proc-nuevo' }),
   };
+  const receivedServices = {
+    projectCompletedCase: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PeriopIntraopService(
     em as any,
     intraopRepo as any,
     casesRepo as any,
     procedures as any,
+    receivedServices as any,
     logger as any,
   );
   return {
@@ -141,6 +145,7 @@ function build() {
     intraopRepo,
     casesRepo,
     procedures,
+    receivedServices,
     logger,
   };
 }
@@ -525,6 +530,43 @@ describe('PeriopIntraopService', () => {
           milestoneTypeConceptId: CONCEPTS.MILESTONE_CASE_END,
         }),
       );
+    });
+
+    it('signing the report projects the completed case to received services, with the reported procedure', async () => {
+      const d = build();
+      d.intraopRepo.findReportForUpdate.mockResolvedValue({
+        id: REPORT,
+        procedureCaseId: CASE,
+        procedureId: PROCEDURE,
+        statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+      });
+      const surgicalCase = caseInProgress({ primaryProcedureId: undefined });
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+
+      await d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor);
+
+      expect(d.receivedServices.projectCompletedCase).toHaveBeenCalledWith(
+        d.tx,
+        surgicalCase,
+        actor.id,
+        PROCEDURE,
+      );
+    });
+
+    it('signing a report on an already completed case does not project it again', async () => {
+      const d = build();
+      d.intraopRepo.findReportForUpdate.mockResolvedValue({
+        id: REPORT,
+        procedureCaseId: CASE,
+        statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+      });
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        caseInProgress({ statusConceptId: CONCEPTS.CASE_COMPLETED }),
+      );
+
+      await d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor);
+
+      expect(d.receivedServices.projectCompletedCase).not.toHaveBeenCalled();
     });
 
     it('rejects signing twice', async () => {
