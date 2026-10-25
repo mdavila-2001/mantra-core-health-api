@@ -788,9 +788,20 @@ export class MedicalGroupsService {
       serviceIds.length > 0
         ? await em.find(ServiceCatalog, { id: { $in: serviceIds } })
         : [];
-    const profiles =
+    // El id de un perfil profesional ES el de su persona
+    // (`health_practitioner_profiles.profile_id → persons.id`); el de un
+    // paciente puede ser un `person_profiles.id`. Mismo orden que
+    // `ReferralNotifierService.personIdOf`: primero la persona, después el
+    // perfil que apunta a ella.
+    const direct =
       profileIds.length > 0
-        ? await em.find(PersonProfiles, { id: { $in: profileIds } })
+        ? await em.find(Persons, { id: { $in: profileIds } })
+        : [];
+    const directIds = new Set(direct.map((person) => person.id));
+    const viaProfile = profileIds.filter((id) => !directIds.has(id));
+    const profiles =
+      viaProfile.length > 0
+        ? await em.find(PersonProfiles, { id: { $in: viaProfile } })
         : [];
     const personIds = [...new Set(profiles.map((p) => p.personId))];
     const persons =
@@ -798,13 +809,17 @@ export class MedicalGroupsService {
         ? await em.find(Persons, { id: { $in: personIds } })
         : [];
     const nameByPerson = new Map(
-      persons
+      [...direct, ...persons]
         .map((person) => [person.id, personName(person)] as const)
         .filter(
           (entry): entry is readonly [string, string] => entry[1] !== null,
         ),
     );
     const people = new Map<string, string>();
+    for (const id of directIds) {
+      const name = nameByPerson.get(id);
+      if (name !== undefined) people.set(id, name);
+    }
     for (const profile of profiles) {
       const name = nameByPerson.get(profile.personId);
       if (name !== undefined) people.set(profile.id, name);
