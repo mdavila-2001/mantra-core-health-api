@@ -1751,7 +1751,7 @@
       ]
     },
     {
-      "name": "accounting (45)",
+      "name": "accounting (46)",
       "item": [
         {
           "name": "accounting-accruals",
@@ -4336,6 +4336,63 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.progressId);",
                       "  if (id) pm.environment.set('progressId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/practitioner/assets/{id}/depreciations · Histórico de depreciación de un activo propio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/assets/:id/depreciations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "assets",
+                    ":id",
+                    "depreciations"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.\n\n`GET /accounting/practitioner/assets/{id}/depreciations`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `AccountingPractitionerController_readAssetDepreciations`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.depreciations || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('depreciationId', first.id);",
                       "}"
                     ]
                   }
