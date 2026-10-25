@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1539 de 1539 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1547 de 1547 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -83,7 +83,8 @@ Esta referencia documenta **1539 de 1539 operaciones HTTP** registradas en `open
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
 | [lakehouse](lakehouse.md) | 13 | `lakehouse` | 2 |
 | [marketing](marketing.md) | 15 | `marketing` | 2 |
-| [medical_groups](medical-groups.md) | 8 | `medical-groups` | 1 |
+| [medical_centers](medical-centers.md) | 2 | `medical-centers` | 1 |
+| [medical_groups](medical-groups.md) | 9 | `medical-groups` | 1 |
 | [messaging](messaging.md) | 20 | `messaging`, `messaging-internal`, `messaging-webhooks` | 4 |
 | [object_storage](object-storage.md) | 14 | `dicomweb`, `object-storage` | 2 |
 | [ops_console](ops-console.md) | 9 | `ops-console` | 1 |
@@ -94,7 +95,7 @@ Esta referencia documenta **1539 de 1539 operaciones HTTP** registradas en `open
 | [pharmacy_inventory](pharmacy-inventory.md) | 29 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders` | 6 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
-| [practice](practice.md) | 30 | `practice` | 6 |
+| [practice](practice.md) | 35 | `practice` | 8 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
 | [profiles](profiles.md) | 57 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 5 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
@@ -123,4 +124,4 @@ Esta referencia documenta **1539 de 1539 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1539 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1547 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

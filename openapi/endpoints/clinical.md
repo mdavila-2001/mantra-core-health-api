@@ -5732,6 +5732,9 @@ Content-Type: application/json
 | `priorityConceptId` | No | `string` | formato `uuid` | Prioridad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `requesterProfileId` | No | `string` | formato `uuid` | Profesional solicitante | `00000000-0000-4000-8000-000000000001` |
 | `performerTenantId` | No | `string` | formato `uuid` | Tenant ejecutante | `00000000-0000-4000-8000-000000000001` |
+| `performerSelectionConceptId` | No | `string` | formato `uuid` | Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente | `00000000-0000-4000-8000-000000000001` |
+| `performerPractitionerProfileId` | No | `string` | formato `uuid` | Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos | `00000000-0000-4000-8000-000000000001` |
+| `suggestedPracticeSiteId` | No | `string` | formato `uuid` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `00000000-0000-4000-8000-000000000001` |
 | `previousDiagnosticReportId` | No | `string` | formato `uuid` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `00000000-0000-4000-8000-000000000001` |
 | `reusePreviousReport` | No | `boolean` | Sin restricción adicional declarada | Reutilizar el informe previo detectado en vez de repetir el estudio | `true` |
 | `duplicateOverrideReason` | No | `string` | longitud mínima 20; longitud máxima 1000 | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `Texto descriptivo de ejemplo` |
@@ -5756,6 +5759,9 @@ Content-Type: application/json
   "priorityConceptId": "00000000-0000-4000-8000-000000000001",
   "requesterProfileId": "00000000-0000-4000-8000-000000000001",
   "performerTenantId": "00000000-0000-4000-8000-000000000001",
+  "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+  "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
   "previousDiagnosticReportId": "00000000-0000-4000-8000-000000000001",
   "reusePreviousReport": true,
   "duplicateOverrideReason": "Texto descriptivo de ejemplo"
@@ -5786,6 +5792,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "formInstanceId": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001",
   "intent": "00000000-0000-4000-8000-000000000001",
+  "performerSelectionConceptId": "00000000-0000-4000-8000-000000000001",
+  "performerPractitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "suggestedPracticeSiteId": "00000000-0000-4000-8000-000000000001",
+  "suggestedPracticeSiteName": "Nombre de ejemplo",
   "createdAt": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -5799,6 +5809,10 @@ Campos de la respuesta:
 | `formInstanceId` | No | `string` | formato `uuid`; admite null | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Estado (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `intent` | Sí | `string` | formato `uuid` | Intención (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `performerSelectionConceptId` | Sí | `string` | formato `uuid` | Modo de ejecutor recomendado (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `performerPractitionerProfileId` | Sí | `string` | formato `uuid`; admite null | Médico ejecutor, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedPracticeSiteId` | Sí | `string` | formato `uuid`; admite null | Sede sugerida, o `null`. | `00000000-0000-4000-8000-000000000001` |
+| `suggestedPracticeSiteName` | Sí | `string` | admite null | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `Nombre de ejemplo` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -5817,6 +5831,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El modo de ejecutor no es válido | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si elige el paciente, la orden no lleva médico ni sede sugeridos | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | La orden necesita la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si se recomienda un centro, la orden no lleva médico ejecutor | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si lo hace el médico, la orden necesita el médico ejecutor | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El médico ejecutor debe ser quien pide la orden | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | La sede sugerida no ofrece ese procedimiento con precio | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

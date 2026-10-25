@@ -28550,6 +28550,7 @@
     },
     "/practices/{practiceId}/healthcare-services": {
       "post": {
+        "description": "El concepto debe ser del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) y coincidir con el del ítem de catálogo que fija el precio. Una sede no puede ofrecer dos veces el mismo procedimiento (409).",
         "operationId": "PracticesController_publishHealthcareService",
         "parameters": [
           {
@@ -28611,11 +28612,160 @@
             "bearer": []
           }
         ],
-        "summary": "Publicar un servicio de salud",
+        "summary": "Publicar un procedimiento del nomenclador en una sede",
+        "tags": [
+          "practice"
+        ]
+      },
+      "get": {
+        "operationId": "PracticesController_listHealthcareServices",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "practiceSiteId",
+            "required": false,
+            "in": "query",
+            "description": "Solo la oferta de esa sede",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthcareServiceOffersResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los procedimientos que ofrecen las sedes de la práctica",
         "tags": [
           "practice"
         ],
-        "description": "Publicar un servicio de salud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Listar los procedimientos que ofrecen las sedes de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practices/{practiceId}/healthcare-services/{id}": {
+      "patch": {
+        "operationId": "PracticesController_updateHealthcareService",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHealthcareServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthcareServiceOfferDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar el precio o el estado de un procedimiento de la sede",
+        "tags": [
+          "practice"
+        ],
+        "description": "Actualizar el precio o el estado de un procedimiento de la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/practices/{practiceId}/settings/{settingKey}": {
@@ -29926,6 +30076,190 @@
           "practice"
         ],
         "description": "Registrar un movimiento de inventario (ajuste de stock). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practices/{practiceId}/role-assignments/invitations": {
+      "post": {
+        "description": "Crea una vinculación INVITED por procedimiento. Ninguna llega a ACTIVE sin que el profesional la acepte.",
+        "operationId": "PracticeInvitationsController_invite",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitePractitionerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invitar a un profesional a procedimientos de una sede",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/practitioners/me/role-assignments/{roleId}/accept": {
+      "post": {
+        "operationId": "PractitionerInvitationsController_accept",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aceptar una invitación de un centro",
+        "tags": [
+          "practice"
+        ],
+        "description": "Aceptar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioners/me/role-assignments/{roleId}/decline": {
+      "post": {
+        "operationId": "PractitionerInvitationsController_decline",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Declinar una invitación de un centro",
+        "tags": [
+          "practice"
+        ],
+        "description": "Declinar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/diagnostic-units": {
@@ -48176,6 +48510,217 @@
         "description": "Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/medical-centers/search": {
+      "get": {
+        "description": "Cada sede dice si ofrece todo lo pedido (`complete`) y cuáles le faltan. Completos primero, después por distancia en línea recta desde `lat`/`lng`, después por precio total y por nombre. Solo aparecen los que publicaron precio.",
+        "operationId": "MedicalCentersController_search",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "includePartial",
+            "required": false,
+            "in": "query",
+            "description": "Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "procedureConceptIds",
+            "required": true,
+            "in": "query",
+            "description": "Conceptos de procedimiento separados por coma (uuid).",
+            "schema": {
+              "example": "1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+              "type": "string"
+            }
+          },
+          {
+            "name": "specialty",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 120,
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 120,
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalCenterPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar centros médicos por procedimientos",
+        "tags": [
+          "medical-centers"
+        ]
+      }
+    },
+    "/medical-centers/search/for-my-orders": {
+      "get": {
+        "description": "Los procedimientos salen de las órdenes. Marca si el médico trabaja en la sede y si la sugirió, sin cambiar qué sedes aparecen ni su orden. Una orden ajena responde 404.",
+        "operationId": "MedicalCentersController_searchForMyOrders",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "includePartial",
+            "required": false,
+            "in": "query",
+            "description": "Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "serviceRequestIds",
+            "required": true,
+            "in": "query",
+            "description": "Ids de órdenes de servicio del titular, separados por coma.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalCenterPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar centros médicos para mis órdenes",
+        "tags": [
+          "medical-centers"
+        ]
+      }
+    },
     "/diagnostics/specimens": {
       "post": {
         "operationId": "DiagnosticsSpecimensController_createSpecimen",
@@ -62414,6 +62959,54 @@
           "medical-groups"
         ],
         "description": "Crear grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/medical-groups/eligible-members": {
+      "get": {
+        "operationId": "MedicalGroupsController_listEligibleMembers",
+        "parameters": [
+          {
+            "name": "serviceCatalogId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Colegas que se pueden invitar a un grupo de este servicio",
+        "tags": [
+          "medical-groups"
+        ],
+        "description": "Colegas que se pueden invitar a un grupo de este servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/medical-groups/patients/{patientProfileId}/conditions": {
@@ -98116,6 +98709,10 @@
       "description": "Operaciones del dominio funcional marketing. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "medical-centers",
+      "description": "Operaciones del dominio funcional medical centers. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "medical-groups",
       "description": "Operaciones del dominio funcional medical groups. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -108092,6 +108689,21 @@
             "description": "Tenant ejecutante",
             "format": "uuid"
           },
+          "performerSelectionConceptId": {
+            "type": "string",
+            "description": "Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente",
+            "format": "uuid"
+          },
+          "performerPractitionerProfileId": {
+            "type": "string",
+            "description": "Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos",
+            "format": "uuid"
+          },
+          "suggestedPracticeSiteId": {
+            "type": "string",
+            "description": "Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden",
+            "format": "uuid"
+          },
           "previousDiagnosticReportId": {
             "type": "string",
             "description": "Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason.",
@@ -114036,7 +114648,12 @@
           },
           "serviceConceptId": {
             "type": "string",
-            "description": "Concepto de servicio",
+            "description": "Procedimiento del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) que se ofrece",
+            "format": "uuid"
+          },
+          "serviceCatalogId": {
+            "type": "string",
+            "description": "Ítem del catálogo de precios de la práctica; su concepto debe ser el mismo `serviceConceptId`",
             "format": "uuid"
           },
           "specialtyConceptId": {
@@ -114055,6 +114672,110 @@
           "telehealthAvailable": {
             "type": "boolean",
             "description": "¿Disponible por telesalud?"
+          }
+        },
+        "required": [
+          "practiceSiteId",
+          "serviceConceptId",
+          "serviceCatalogId"
+        ],
+        "additionalProperties": false
+      },
+      "HealthcareServiceOfferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceDisplay": {
+            "type": "string"
+          },
+          "serviceCatalogId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referencePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceUnit": {
+            "type": "string",
+            "enum": [
+              "UMA",
+              "USD"
+            ],
+            "nullable": true
+          },
+          "overMargin": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "visibleInSearch": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "practiceSiteId",
+          "serviceConceptId",
+          "serviceDisplay",
+          "serviceCatalogId",
+          "price",
+          "currencyConceptId",
+          "referencePrice",
+          "referenceUnit",
+          "overMargin",
+          "visibleInSearch",
+          "active"
+        ]
+      },
+      "HealthcareServiceOffersResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthcareServiceOfferDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "UpdateHealthcareServiceDto": {
+        "type": "object",
+        "properties": {
+          "serviceCatalogId": {
+            "type": "string",
+            "description": "Nuevo ítem del catálogo de precios de la práctica; su concepto debe coincidir con el del servicio",
+            "format": "uuid"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "¿El procedimiento está activo?"
           }
         },
         "additionalProperties": false
@@ -114158,6 +114879,11 @@
           "validFrom": {
             "type": "string",
             "description": "Vigente desde (ISO date)"
+          },
+          "healthcareServiceId": {
+            "type": "string",
+            "description": "Servicio de salud (procedimiento) de la sede",
+            "format": "uuid"
           },
           "note": {
             "type": "string",
@@ -114420,6 +115146,34 @@
         "required": [
           "direction",
           "quantity"
+        ],
+        "additionalProperties": false
+      },
+      "InvitePractitionerDto": {
+        "type": "object",
+        "properties": {
+          "practitionerProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "healthcareServiceIds": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "practitionerProfileId",
+          "practiceSiteId",
+          "healthcareServiceIds"
         ],
         "additionalProperties": false
       },
@@ -124736,6 +125490,147 @@
         ],
         "additionalProperties": false
       },
+      "MedicalCenterOfferDto": {
+        "type": "object",
+        "properties": {
+          "procedureConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "procedureDisplay": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "currencyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referencePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceUnit": {
+            "type": "string",
+            "enum": [
+              "UMA",
+              "USD"
+            ],
+            "nullable": true
+          },
+          "overMargin": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "procedureConceptId",
+          "procedureDisplay",
+          "price",
+          "currencyConceptId",
+          "referencePrice",
+          "referenceUnit",
+          "overMargin"
+        ]
+      },
+      "MedicalCenterItemDto": {
+        "type": "object",
+        "properties": {
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "missingProcedureConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicalCenterOfferDto"
+            }
+          },
+          "totalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "practitionerWorksHere": {
+            "type": "boolean"
+          },
+          "suggestedByPractitioner": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "practiceId",
+          "practiceSiteId",
+          "name",
+          "addressText",
+          "latitude",
+          "longitude",
+          "distanceKm",
+          "complete",
+          "missingProcedureConceptIds",
+          "offers",
+          "totalPrice"
+        ]
+      },
+      "MedicalCenterPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicalCenterItemDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "offset": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
       "CreateSpecimenDto": {
         "type": "object",
         "properties": {
@@ -125806,6 +126701,25 @@
             "type": "string",
             "format": "uuid"
           },
+          "performerSelectionConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "performerPractitionerProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "suggestedPracticeSiteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "suggestedPracticeSiteName": {
+            "type": "string",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -125827,6 +126741,10 @@
           "id",
           "codeConceptId",
           "statusConceptId",
+          "performerSelectionConceptId",
+          "performerPractitionerProfileId",
+          "suggestedPracticeSiteId",
+          "suggestedPracticeSiteName",
           "createdAt",
           "hasReleasedResult"
         ]

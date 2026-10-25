@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1263 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1270 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1198/1263** entidades tienen descripción de negocio
+> repositorio. **1186/1270** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
-> Este es el catálogo de lo **implementado**. La bóveda describe 1356 entidades en total
-> — la diferencia (93) son entidades diseñadas pero no materializadas aún en
+> Este es el catálogo de lo **implementado**. La bóveda describe 1331 entidades en total
+> — la diferencia (61) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (63 schemas · 1263 entidades)
+## Por schema (63 schemas · 1270 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -143,10 +143,10 @@
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `audio_assets` | `AudioAssets` | 33 | `id` | — | audio_assets es la caché de audio ya sintetizado. Una fila = una frase concreta convertida en voz, con dónde están sus bytes y en qué estado quedó la generación. |
-| `audio_generation_events` | `AudioGenerationEvents` | 13 | `id` | — | audio_generation_events es la bitácora de qué pasó en cada intento de generar audio: qué se pidió, contra qué proveedor, cómo salió y cuánto tardó. |
-| `audio_generation_usage` | `AudioGenerationUsage` | 10 | `id` | — | audio_generation_usage es el contador de consumo del proveedor de voz, una fila por mes y por proveedor. Es lo que decide si todavía se puede generar audio nuevo o si hay que degradar a fallback. |
-| `audio_templates` | `AudioTemplates` | 13 | `id` | — | audio_templates es el catálogo de frases que la plataforma tiene permiso de sintetizar. Cada fila es una plantilla registrada con su texto, su versión, su idioma y los campos dinámicos que admite. |
+| `audio_assets` | `AudioAssets` | 33 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_generation_events` | `AudioGenerationEvents` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_generation_usage` | `AudioGenerationUsage` | 10 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `audio_templates` | `AudioTemplates` | 13 | `id` | — | _sin descripción verificada en la bóveda_ |
 
 ### `audit` (131 entidades, módulo `audit`)
 
@@ -339,7 +339,7 @@
 | `workflow_steps` | `WorkflowSteps` | 15 | `id` | ✅ | workflow_steps es un registro central de negocio del módulo 48 · automation (automatización y orquestación multi-agente), dominio Operaciones de Plataforma. |
 | `workflows` | `Workflows` | 14 | `id` | ✅ | workflows es un registro central de negocio del módulo 48 · automation (automatización y orquestación multi-agente), dominio Operaciones de Plataforma. |
 
-### `billing` (22 entidades, módulo `billing`)
+### `billing` (24 entidades, módulo `billing`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -357,13 +357,13 @@
 | `payable_payment_allocations` | `PayablePaymentAllocations` | 11 | `id` | — | payable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payments_made` | `PaymentsMade` | 17 | `id` | ✅ | payments_made es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payments_received` | `PaymentsReceived` | 18 | `id` | ✅ | payments_received es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
-| `quotation_installments` | `QuotationInstallments` | 8 | `id` | ✅ | quotation_installments es cada cuota del plan de pagos de una cotización, congelada al momento de cotizar: número de cuota, vencimiento y monto. Sin interés desde v4.2.18: los montos no tienen por qué ser iguales —quien … |
-| `quotations` | `Quotations` | 20 | `id` | ✅ | quotations es la cotización que un profesional le ofrece a un paciente antes de la atención: un servicio del catálogo, un precio ofrecido y un plan de pagos flexible y sin interés —anticipo, frecuencia y cuotas con fecha… |
+| `quotation_installments` | `QuotationInstallments` | 8 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `quotations` | `Quotations` | 20 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `receivable_payment_allocations` | `ReceivablePaymentAllocations` | 11 | `id` | — | receivable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `reimbursements` | `Reimbursements` | 11 | `id` | ✅ | reimbursements es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `service_catalog` | `ServiceCatalog` | 17 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
-| `siat_simulated_invoices` | `SiatSimulatedInvoices` | 25 | `id` | ✅ | siat_simulated_invoices guarda la factura fiscal SIMULADA (SIAT) que cuelga de una factura real de 17 · billing. No es un documento tributario válido: el CUF, el CUFD y el XML son ficticios y deterministas, y cada fila d… |
-| `siat_simulated_outbox` | `SiatSimulatedOutbox` | 7 | `id` | — | siat_simulated_outbox es la bandeja de salida SIMULADA de las facturas SIAT simuladas: registra a quién *se enviaría* la factura y con qué adjuntos, pero nunca envía nada (el CHECK `ck_siat_simulated_outbox_status` fija … |
+| `siat_simulated_invoices` | `SiatSimulatedInvoices` | 25 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `siat_simulated_outbox` | `SiatSimulatedOutbox` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `tax_codes` | `TaxCodes` | 14 | `id` | ✅ | tax_codes es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `tax_periods` | `TaxPeriods` | 13 | `id` | ✅ | tax_periods es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `vendors` | `Vendors` | 14 | `id` | ✅ | vendors es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
@@ -409,7 +409,7 @@
 | `patient_reported_health_statements` | `PatientReportedHealthStatements` | 14 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `prescription_signature_policies` | `PrescriptionSignaturePolicies` | 13 | `id` | ✅ | prescription_signature_policies registra cuándo una receta exige firma, de forma configurable por tenant. |
 | `procedures` | `Procedures` | 28 | `id` | ✅ | procedures es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
-| `service_requests` | `ServiceRequests` | 19 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
+| `service_requests` | `ServiceRequests` | 22 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
 | `social_history` | `SocialHistory` | 16 | `id` | ✅ | social_history es el historial auditable de `social` dentro del módulo 08 · clinical (dominio Clínico y Diagnóstico). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
 
 ### `clinical_ext` (13 entidades, módulo `clinical_ext`)
@@ -425,7 +425,7 @@
 | `immunization_schedules` | `ImmunizationSchedules` | 14 | `id` | ✅ | immunization_schedules es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 | `order_set_items` | `OrderSetItems` | 14 | `id` | ✅ | order_set_items es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 | `order_sets` | `OrderSets` | 14 | `id` | ✅ | order_sets es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
-| `prescription_favorites` | `PrescriptionFavorites` | 16 | `id` | ✅ | los favoritos de prescripción de un profesional: la indicación que repite todos los días —«Amoxicilina 500 mg cada 8 h por 7 días»— guardada con un rótulo propio para no volver a tipearla. Es una comodidad de captura, no… |
+| `prescription_favorites` | `PrescriptionFavorites` | 16 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `reference_ranges` | `ReferenceRanges` | 18 | `id` | ✅ | reference_ranges es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 | `referrals` | `Referrals` | 19 | `id` | ✅ | referrals es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
 | `virtual_encounters` | `VirtualEncounters` | 14 | `id` | ✅ | virtual_encounters es un registro central de negocio del módulo 18 · clinical_ext (coordinación de cuidado, alertas y soporte de decisión), dominio Clínico y Diagnóstico. |
@@ -565,7 +565,7 @@
 | `schema_migration_jobs` | `SchemaMigrationJobs` | 11 | `id` | — | schema_migration_jobs registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 62 · cross_store_consistency (dominio Datos y NoSQL): responde a '¿qué está pasando ahora mismo?'. |
 | `store_consistency_slos` | `StoreConsistencySlos` | 8 | `id` | — | store_consistency_slos es un registro central de negocio del módulo 62 · cross_store_consistency (proyección outbox, reconciliación y propagación de borrado), dominio Datos y NoSQL. |
 
-### `data_catalog` (8 entidades, módulo `data_catalog`)
+### `data_catalog` (13 entidades, módulo `data_catalog`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -575,6 +575,11 @@
 | `catalog_columns` | `CatalogColumns` | 24 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `catalog_evidence_items` | `CatalogEvidenceItems` | 9 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `catalog_objects` | `CatalogObjects` | 22 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_operation_impacts` | `CatalogOperationImpacts` | 14 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_operations` | `CatalogOperations` | 21 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_process_step_operations` | `CatalogProcessStepOperations` | 9 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_process_steps` | `CatalogProcessSteps` | 10 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_processes` | `CatalogProcesses` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `catalog_review_decisions` | `CatalogReviewDecisions` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `catalog_scan_runs` | `CatalogScanRuns` | 34 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 
@@ -891,8 +896,8 @@
 | `coverage_eligibility_responses` | `CoverageEligibilityResponses` | 10 | `id` | — | coverage_eligibility_responses es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `employer_groups` | `EmployerGroups` | 11 | `id` | ✅ | employer_groups es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_brokers` | `InsuranceBrokers` | 14 | `id` | ✅ | insurance_brokers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_campaign_partners` | `InsuranceCampaignPartners` | 12 | `id` | ✅ | insurance_campaign_partners es una tabla de asociación del módulo 26 · insurance (dominio Financiero y ERP): registra a los aliados —laboratorios, farmacias, centros de diagnóstico (PROVIDER) o importadoras y fabricantes… |
-| `insurance_campaigns` | `InsuranceCampaigns` | 17 | `id` | ✅ | insurance_campaigns es el registro de campañas de prevención que una aseguradora publica junto a laboratorios, farmacias e importadoras/fabricantes de medicamentos, del módulo 26 · insurance (redes de seguros, operacione… |
+| `insurance_campaign_partners` | `InsuranceCampaignPartners` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `insurance_campaigns` | `InsuranceCampaigns` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `insurance_carriers` | `InsuranceCarriers` | 19 | `id` | ✅ | insurance_carriers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_claim_lines` | `InsuranceClaimLines` | 12 | `id` | — | insurance_claim_lines es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_claims` | `InsuranceClaims` | 20 | `id` | ✅ | insurance_claims es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
@@ -916,7 +921,7 @@
 | `contract_webhook_subscriptions` | `ContractWebhookSubscriptions` | 14 | `id` | ✅ | contract_webhook_subscriptions es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_auth_profiles` | `IntegrationAuthProfiles` | 17 | `id` | ✅ | integration_auth_profiles es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_contract_versions` | `IntegrationContractVersions` | 13 | `id` | — | integration_contract_versions es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
-| `integration_contracts` | `IntegrationContracts` | 14 | `id` | ✅ | integration_contracts es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
+| `integration_contracts` | `IntegrationContracts` | 15 | `id` | ✅ | integration_contracts es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_exchange_attempts` | `IntegrationExchangeAttempts` | 13 | `id` | — | integration_exchange_attempts es un ledger inmutable (append-only) del módulo 31 · integration_contracts (dominio Integraciones y Contratos): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `integration_exchange_records` | `IntegrationExchangeRecords` | 16 | `id` | — | integration_exchange_records es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
 | `integration_idempotency_records` | `IntegrationIdempotencyRecords` | 10 | `id` | — | integration_idempotency_records es un registro central de negocio del módulo 31 · integration_contracts (contratos gobernados backend-a-backend), dominio Integraciones y Contratos. |
@@ -1175,7 +1180,7 @@
 | `pharmacy_goods_receipts` | `PharmacyGoodsReceipts` | 15 | `id` | ✅ | pharmacy_goods_receipts es un registro central de negocio del módulo 25 · pharmacy_inventory (inventario de farmacia, abastecimiento y dispensación), dominio Farmacia. |
 | `pharmacy_inventory_sync_batches` | `PharmacyInventorySyncBatches` | 15 | `id` | ✅ | pharmacy_inventory_sync_batches es un registro central de negocio del módulo 25 · pharmacy_inventory (inventario de farmacia, abastecimiento y dispensación), dominio Farmacia. |
 | `pharmacy_inventory_sync_items` | `PharmacyInventorySyncItems` | 13 | `id` | — | pharmacy_inventory_sync_items es un registro central de negocio del módulo 25 · pharmacy_inventory (inventario de farmacia, abastecimiento y dispensación), dominio Farmacia. |
-| `pharmacy_order_substitutions` | `PharmacyOrderSubstitutions` | 15 | `id` | ✅ | las propuestas de sustitución de un pedido de farmacia, renglón por renglón. «Te proponen genérico X (Bs 25) en lugar de marca Y (Bs 60)»: la farmacia lo ofrece al revisar el pedido y la decisión es siempre del paciente … |
+| `pharmacy_order_substitutions` | `PharmacyOrderSubstitutions` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `pharmacy_purchase_order_lines` | `PharmacyPurchaseOrderLines` | 13 | `id` | ✅ | pharmacy_purchase_order_lines es un registro central de negocio del módulo 25 · pharmacy_inventory (inventario de farmacia, abastecimiento y dispensación), dominio Farmacia. |
 | `pharmacy_purchase_orders` | `PharmacyPurchaseOrders` | 16 | `id` | ✅ | pharmacy_purchase_orders es un registro central de negocio del módulo 25 · pharmacy_inventory (inventario de farmacia, abastecimiento y dispensación), dominio Farmacia. |
 | `pharmacy_suppliers` | `PharmacySuppliers` | 12 | `id` | ✅ | pharmacy_suppliers es un registro central de negocio del módulo 25 · pharmacy_inventory (inventario de farmacia, abastecimiento y dispensación), dominio Farmacia. |
@@ -1255,7 +1260,7 @@
 |---|---|---:|---|:---:|---|
 | `care_spaces` | `CareSpaces` | 15 | `id` | ✅ | care_spaces es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `clinical_units` | `ClinicalUnits` | 14 | `id` | ✅ | clinical_units es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
-| `healthcare_services` | `HealthcareServices` | 15 | `id` | ✅ | healthcare_services es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
+| `healthcare_services` | `HealthcareServices` | 16 | `id` | ✅ | healthcare_services es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `inventory_items` | `InventoryItems` | 15 | `id` | ✅ | inventory_items es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `inventory_movements` | `InventoryMovements` | 9 | `id` | — | inventory_movements es un ledger inmutable (append-only) del módulo 14 · practice (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `practice_accreditations` | `PracticeAccreditations` | 16 | `id` | ✅ | practice_accreditations es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
@@ -1323,7 +1328,7 @@
 | `person_account_links` | `PersonAccountLinks` | 13 | `id` | ✅ | person_account_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`persons`) para representar relaciones muchos-a-muchos. |
 | `person_profiles` | `PersonProfiles` | 9 | `id` | ✅ | person_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `persons` | `Persons` | 27 | `id` | ✅ | persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `practitioner_affiliations` | `PractitionerAffiliations` | 17 | `id` | ✅ | practitioner_affiliations es el historial laboral del profesional dentro del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. Guarda dónde ejerció: la institución, el c… |
+| `practitioner_affiliations` | `PractitionerAffiliations` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `practitioner_languages` | `PractitionerLanguages` | 10 | `id` | ✅ | practitioner_languages es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `practitioner_specialties` | `PractitionerSpecialties` | 16 | `id` | ✅ | practitioner_specialties es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `professional_credentials` | `ProfessionalCredentials` | 23 | `id` | ✅ | professional_credentials es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
@@ -1425,7 +1430,7 @@
 | `booking_reschedules` | `BookingReschedules` | 9 | `id` | — | booking_reschedules es un ledger inmutable (append-only) del módulo 41 · scheduling (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `calendar_absences` | `CalendarAbsences` | 24 | `id` | ✅ | calendar_absences es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `practitioner_schedules` | `PractitionerSchedules` | 16 | `id` | ✅ | practitioner_schedules es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `practitioner_service_offerings` | `PractitionerServiceOfferings` | 16 | `id` | ✅ | declara cómo ofrece un profesional un servicio del catálogo de su práctica: cuánto tarda como mínimo y como máximo, cuánto necesita antes y después, si el paciente puede reservarlo por su cuenta y si cada reserva requier… |
+| `practitioner_service_offerings` | `PractitionerServiceOfferings` | 16 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `schedulable_resources` | `SchedulableResources` | 15 | `id` | ✅ | schedulable_resources es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `schedule_rules` | `ScheduleRules` | 16 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `schedule_templates` | `ScheduleTemplates` | 15 | `id` | ✅ | schedule_templates guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
@@ -1596,7 +1601,7 @@
 
 ## Entidades diseñadas, no implementadas
 
-148 entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en `src/modules/**/entities` al momento de esta generación. No se documentan como catálogo activo: son diseño del modelo sin materializar, no entidades utilizables.
+145 entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en `src/modules/**/entities` al momento de esta generación. No se documentan como catálogo activo: son diseño del modelo sin materializar, no entidades utilizables.
 
 <details><summary>Ver lista completa</summary>
 
@@ -1631,9 +1636,6 @@
 - `messaging.outbox_events`
 - `payments.invoices`
 - `payments.journal_transactions`
-- `payments.subscription_invoices`
-- `payments.subscription_ledger_bridge`
-- `payments.subscription_seats`
 - `platform_ops.services`
 - `read_models.adapter_health_summary`
 - `read_models.ads_campaign_delivery_dashboard_v`
