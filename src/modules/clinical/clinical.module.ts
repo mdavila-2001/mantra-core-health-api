@@ -88,6 +88,7 @@ import {
   ProceduresRepository,
   ProcedureCentersReadRepository,
   ImmunizationsRepository,
+  ReceivedServicesRepository,
   PrescriptionExpiryRepository,
 } from './repositories';
 // Los dos repositorios con los que la lectura comprueba que una historia es de
@@ -221,6 +222,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ProceduresRepository,
     ProcedureCentersReadRepository,
     ImmunizationsRepository,
+    ReceivedServicesRepository,
     PrescriptionExpiryRepository,
     ClinicalNotesRepository,
     CarePlansRepository,
