@@ -4,8 +4,8 @@
 
 - **Bloque:** Marketing y Crecimiento (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 - **Operaciones:** 16 (16 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 15 · BAJO 1
-- **Tablas distintas que tocan:** 16
+- **Riesgo:** ALTO 0 · MEDIO 14 · BAJO 2
+- **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/crm.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,18 +15,18 @@
 | 1 | POST | `/crm/accounts` | Crear una cuenta con su contacto principal | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
 | 2 | GET | `/crm/accounts/{id}/360` | Vista 360 de la cuenta | BAJO | 3 | CRM_ADMIN, CRM_AGENT |
 | 3 | POST | `/crm/accounts/{id}/team-members` | Sumar un usuario al equipo de la cuenta | MEDIO | 3 | CRM_ADMIN |
-| 4 | POST | `/crm/activities` | Registrar una actividad y su subtipo | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
-| 5 | POST | `/crm/cases` | Abrir un caso de servicio | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
+| 4 | POST | `/crm/activities` | Registrar una actividad y su subtipo | MEDIO | 7 | CRM_ADMIN, CRM_AGENT |
+| 5 | POST | `/crm/cases` | Abrir un caso de servicio | MEDIO | 5 | CRM_ADMIN, CRM_AGENT |
 | 6 | POST | `/crm/cases/{id}/comments` | Comentar el caso | MEDIO | 2 | CRM_ADMIN, CRM_AGENT |
-| 7 | POST | `/crm/cases/{id}/resolve` | Resolver el caso | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
-| 8 | PATCH | `/crm/cases/{id}/status` | Transicionar el estado del caso | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
+| 7 | POST | `/crm/cases/{id}/resolve` | Resolver el caso | MEDIO | 2 | CRM_ADMIN, CRM_AGENT |
+| 8 | PATCH | `/crm/cases/{id}/status` | Transicionar el estado del caso | MEDIO | 2 | CRM_ADMIN, CRM_AGENT |
 | 9 | PATCH | `/crm/contacts/{id}/channels/{cid}/opt-in` | Registrar el consentimiento del canal de contacto | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
 | 10 | POST | `/crm/leads` | Capturar un lead | MEDIO | 1 | CRM_ADMIN, CRM_AGENT |
-| 11 | POST | `/crm/leads/{id}/convert` | Convertir el lead en oportunidad | MEDIO | 4 | CRM_ADMIN, CRM_AGENT |
-| 12 | PATCH | `/crm/leads/{id}/qualify` | Calificar o descartar el lead | MEDIO | 2 | CRM_ADMIN, CRM_AGENT |
+| 11 | POST | `/crm/leads/{id}/convert` | Convertir el lead en oportunidad | MEDIO | 6 | CRM_ADMIN, CRM_AGENT |
+| 12 | PATCH | `/crm/leads/{id}/qualify` | Calificar o descartar el lead | BAJO | 1 | CRM_ADMIN, CRM_AGENT |
 | 13 | POST | `/crm/opportunities/{id}/advance-stage` | Avanzar la oportunidad de etapa | MEDIO | 4 | CRM_ADMIN, CRM_AGENT |
-| 14 | POST | `/crm/opportunities/{id}/lose` | Marcar la oportunidad como perdida con su motivo | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
-| 15 | POST | `/crm/opportunities/{id}/win` | Marcar la oportunidad como ganada | MEDIO | 3 | CRM_ADMIN, CRM_AGENT |
+| 14 | POST | `/crm/opportunities/{id}/lose` | Marcar la oportunidad como perdida con su motivo | MEDIO | 2 | CRM_ADMIN, CRM_AGENT |
+| 15 | POST | `/crm/opportunities/{id}/win` | Marcar la oportunidad como ganada | MEDIO | 2 | CRM_ADMIN, CRM_AGENT |
 | 16 | POST | `/crm/partnerships` | Registrar una alianza y su acuerdo marco | MEDIO | 2 | CRM_ADMIN |
 
 ---
@@ -38,7 +38,7 @@
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.createAccount` — `src/modules/crm/controllers/crm.controller.ts:59`
+- **Implementación:** `CrmController.createAccount` — `src/modules/crm/controllers/crm.controller.ts:64`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -48,14 +48,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/accounts` la atiende `CrmController.createAccount` (src/modules/crm/controllers/crm.controller.ts:59). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CrmCreateAccountDto` (8 campos, 3 obligatorios). Delega en `CrmSalesService.createAccount`. Crea filas en crm.account_team_members, crm.contacts, crm.crm_accounts.
+`POST /crm/accounts` la atiende `CrmController.createAccount` (src/modules/crm/controllers/crm.controller.ts:64). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CrmCreateAccountDto` (8 campos, 3 obligatorios). Delega en `CrmSalesService.createAccount`. Crea filas en crm.account_team_members, crm.contacts, crm.crm_accounts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:59` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:64` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -65,9 +65,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.account_team_members` | ESCRIBE | CREA | DIRECTA | CrmController.createAccount → CrmSalesService.createAccount → CrmSalesRepository.createTeamMember | `src/modules/crm/repositories/crm-sales.repository.ts:236` |
-| `crm.contacts` | ESCRIBE | CREA | DIRECTA | CrmController.createAccount → CrmSalesService.createAccount → CrmSalesRepository.createContact | `src/modules/crm/repositories/crm-sales.repository.ts:304` |
-| `crm.crm_accounts` | ESCRIBE | CREA | DIRECTA | CrmController.createAccount → CrmSalesService.createAccount → CrmSalesRepository.createAccount | `src/modules/crm/repositories/crm-sales.repository.ts:197` |
+| `crm.account_team_members` | ESCRIBE | CREA | DIRECTA | CrmController.createAccount → CrmSalesService.createAccount → CrmSalesRepository.createTeamMember | `src/modules/crm/repositories/crm-sales.repository.ts:242` |
+| `crm.contacts` | ESCRIBE | CREA | DIRECTA | CrmController.createAccount → CrmSalesService.createAccount → CrmSalesRepository.createContact | `src/modules/crm/repositories/crm-sales.repository.ts:310` |
+| `crm.crm_accounts` | ESCRIBE | CREA | DIRECTA | CrmController.createAccount → CrmSalesService.createAccount → CrmSalesRepository.createAccount | `src/modules/crm/repositories/crm-sales.repository.ts:198` |
 
 ### Cuerpo — DTO `CrmCreateAccountDto` · `application/json`
 
@@ -149,7 +149,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.getAccount360` — `src/modules/crm/controllers/crm.controller.ts:84`
+- **Implementación:** `CrmController.getAccount360` — `src/modules/crm/controllers/crm.controller.ts:99`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -159,25 +159,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /crm/accounts/{id}/360` la atiende `CrmController.getAccount360` (src/modules/crm/controllers/crm.controller.ts:84). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Delega en `CrmServiceService.getAccount360`. Lee crm.crm_accounts, crm.crm_activities, crm.crm_cases.
+`GET /crm/accounts/{id}/360` la atiende `CrmController.getAccount360` (src/modules/crm/controllers/crm.controller.ts:99). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Delega en `CrmServiceService.getAccount360`. Lee crm.crm_accounts, crm.crm_activities, crm.crm_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:84` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:99` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:84` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:99` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.getAccount360 → CrmServiceService.getAccount360 → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:222` |
-| `crm.crm_activities` | LEE | LEE | DIRECTA | CrmController.getAccount360 → CrmServiceService.getAccount360 → CrmServiceRepository.findActivitiesByAccount | `src/modules/crm/repositories/crm-service.repository.ts:537` |
-| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.getAccount360 → CrmServiceService.getAccount360 → CrmServiceRepository.findCasesByAccount | `src/modules/crm/repositories/crm-service.repository.ts:557` |
+| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.getAccount360 → CrmServiceService.getAccount360 → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:228` |
+| `crm.crm_activities` | LEE | LEE | DIRECTA | CrmController.getAccount360 → CrmServiceService.getAccount360 → CrmServiceRepository.findActivitiesByAccount | `src/modules/crm/repositories/crm-service.repository.ts:556` |
+| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.getAccount360 → CrmServiceService.getAccount360 → CrmServiceRepository.findCasesByAccount | `src/modules/crm/repositories/crm-service.repository.ts:577` |
 
 ### Parámetros
 
@@ -206,7 +206,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/crm.md).
@@ -230,7 +229,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.addTeamMember` — `src/modules/crm/controllers/crm.controller.ts:71`
+- **Implementación:** `CrmController.addTeamMember` — `src/modules/crm/controllers/crm.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -240,16 +239,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/accounts/{id}/team-members` la atiende `CrmController.addTeamMember` (src/modules/crm/controllers/crm.controller.ts:71). Exige sesión con alguno de los roles CRM_ADMIN. Valida el cuerpo como `AddTeamMemberDto` (3 campos, 2 obligatorios). Delega en `CrmSalesService.addTeamMember`. Crea filas en crm.account_team_members. Lee crm.account_team_members, crm.crm_accounts.
+`POST /crm/accounts/{id}/team-members` la atiende `CrmController.addTeamMember` (src/modules/crm/controllers/crm.controller.ts:81). Exige sesión con alguno de los roles CRM_ADMIN. Valida el cuerpo como `AddTeamMemberDto` (3 campos, 2 obligatorios). Delega en `CrmSalesService.addTeamMember`. Crea filas en crm.account_team_members. Lee crm.account_team_members, crm.crm_accounts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN | `src/modules/crm/controllers/crm.controller.ts:71` |
+| ROL | Alguno de: CRM_ADMIN | `src/modules/crm/controllers/crm.controller.ts:81` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:71` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:81` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -258,9 +257,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.account_team_members` | ESCRIBE | CREA | DIRECTA | CrmController.addTeamMember → CrmSalesService.addTeamMember → CrmSalesRepository.createTeamMember | `src/modules/crm/repositories/crm-sales.repository.ts:236` |
-| `crm.account_team_members` | LEE | LEE | DIRECTA | CrmController.addTeamMember → CrmSalesService.addTeamMember → CrmSalesRepository.findTeamMember | `src/modules/crm/repositories/crm-sales.repository.ts:257` |
-| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.addTeamMember → CrmSalesService.addTeamMember → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:222` |
+| `crm.account_team_members` | ESCRIBE | CREA | DIRECTA | CrmController.addTeamMember → CrmSalesService.addTeamMember → CrmSalesRepository.createTeamMember | `src/modules/crm/repositories/crm-sales.repository.ts:242` |
+| `crm.account_team_members` | LEE | LEE | DIRECTA | CrmController.addTeamMember → CrmSalesService.addTeamMember → CrmSalesRepository.findTeamMember | `src/modules/crm/repositories/crm-sales.repository.ts:263` |
+| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.addTeamMember → CrmSalesService.addTeamMember → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:228` |
 
 ### Parámetros
 
@@ -314,7 +313,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
 | 409 | `CONFLICT` | ConflictException: El usuario ya pertenece al equipo de la cuenta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -339,7 +337,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.createActivity` — `src/modules/crm/controllers/crm.controller.ts:137`
+- **Implementación:** `CrmController.createActivity` — `src/modules/crm/controllers/crm.controller.ts:167`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -349,14 +347,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/activities` la atiende `CrmController.createActivity` (src/modules/crm/controllers/crm.controller.ts:137). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CreateActivityDto` (10 campos, 5 obligatorios). Delega en `CrmServiceService.createActivity`. Crea filas en crm.crm_activities, crm.crm_notes, crm.crm_tasks.
+`POST /crm/activities` la atiende `CrmController.createActivity` (src/modules/crm/controllers/crm.controller.ts:167). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CreateActivityDto` (10 campos, 5 obligatorios). Delega en `CrmServiceService.createActivity`. Crea filas en crm.crm_activities, crm.crm_notes, crm.crm_tasks. Lee crm.contacts, crm.crm_accounts, crm.crm_cases, crm.opportunities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:137` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:167` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -366,9 +364,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `crm.contacts` | LEE | LEE | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceService.assertActivityReferences → CrmSalesRepository.findContactById | `src/modules/crm/repositories/crm-sales.repository.ts:340` |
+| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceService.assertActivityReferences → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:228` |
 | `crm.crm_activities` | ESCRIBE | CREA | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceRepository.createActivity | `src/modules/crm/repositories/crm-service.repository.ts:143` |
-| `crm.crm_notes` | ESCRIBE | CREA | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceRepository.createNote | `src/modules/crm/repositories/crm-service.repository.ts:245` |
-| `crm.crm_tasks` | ESCRIBE | CREA | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceRepository.createTask | `src/modules/crm/repositories/crm-service.repository.ts:208` |
+| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceService.assertActivityReferences → CrmServiceRepository.findCaseById | `src/modules/crm/repositories/crm-service.repository.ts:455` |
+| `crm.crm_notes` | ESCRIBE | CREA | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceRepository.createNote | `src/modules/crm/repositories/crm-service.repository.ts:246` |
+| `crm.crm_tasks` | ESCRIBE | CREA | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceRepository.createTask | `src/modules/crm/repositories/crm-service.repository.ts:209` |
+| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.createActivity → CrmServiceService.createActivity → CrmServiceService.assertActivityReferences → CrmSalesRepository.findOpportunityById | `src/modules/crm/repositories/crm-sales.repository.ts:471` |
 
 ### Cuerpo — DTO `CreateActivityDto` · `application/json`
 
@@ -456,7 +458,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.createCase` — `src/modules/crm/controllers/crm.controller.ts:202`
+- **Implementación:** `CrmController.createCase` — `src/modules/crm/controllers/crm.controller.ts:257`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -466,14 +468,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/cases` la atiende `CrmController.createCase` (src/modules/crm/controllers/crm.controller.ts:202). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CreateCaseDto` (8 campos, 3 obligatorios). Delega en `CrmServiceService.createCase`. Crea filas en crm.crm_case_status_history, crm.crm_cases. Lee crm.crm_cases.
+`POST /crm/cases` la atiende `CrmController.createCase` (src/modules/crm/controllers/crm.controller.ts:257). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CreateCaseDto` (8 campos, 3 obligatorios). Delega en `CrmServiceService.createCase`. Crea filas en crm.crm_case_status_history, crm.crm_cases. Lee crm.contacts, crm.crm_accounts, crm.crm_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:202` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:257` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -483,9 +485,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.crm_case_status_history` | ESCRIBE | CREA | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmServiceRepository.recordCaseStatusChange | `src/modules/crm/repositories/crm-service.repository.ts:516` |
-| `crm.crm_cases` | ESCRIBE | CREA | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmServiceRepository.createCase | `src/modules/crm/repositories/crm-service.repository.ts:401` |
-| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmServiceRepository.findCaseByNumber | `src/modules/crm/repositories/crm-service.repository.ts:446` |
+| `crm.contacts` | LEE | LEE | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmSalesRepository.findContactById | `src/modules/crm/repositories/crm-sales.repository.ts:340` |
+| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:228` |
+| `crm.crm_case_status_history` | ESCRIBE | CREA | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmServiceRepository.recordCaseStatusChange | `src/modules/crm/repositories/crm-service.repository.ts:534` |
+| `crm.crm_cases` | ESCRIBE | CREA | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmServiceRepository.createCase | `src/modules/crm/repositories/crm-service.repository.ts:402` |
+| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.createCase → CrmServiceService.createCase → CrmServiceRepository.findCaseByNumber | `src/modules/crm/repositories/crm-service.repository.ts:464` |
 
 ### Cuerpo — DTO `CreateCaseDto` · `application/json`
 
@@ -569,7 +573,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.addCaseComment` — `src/modules/crm/controllers/crm.controller.ts:214`
+- **Implementación:** `CrmController.addCaseComment` — `src/modules/crm/controllers/crm.controller.ts:274`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -579,16 +583,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/cases/{id}/comments` la atiende `CrmController.addCaseComment` (src/modules/crm/controllers/crm.controller.ts:214). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `AddCaseCommentDto` (2 campos, 1 obligatorio). Delega en `CrmServiceService.addCaseComment`. Crea filas en crm.crm_case_comments. Lee crm.crm_cases.
+`POST /crm/cases/{id}/comments` la atiende `CrmController.addCaseComment` (src/modules/crm/controllers/crm.controller.ts:274). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `AddCaseCommentDto` (2 campos, 1 obligatorio). Delega en `CrmServiceService.addCaseComment`. Crea filas en crm.crm_case_comments. Lee crm.crm_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:214` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:274` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:214` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -597,8 +601,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.crm_case_comments` | ESCRIBE | CREA | DIRECTA | CrmController.addCaseComment → CrmServiceService.addCaseComment → CrmServiceRepository.createCaseComment | `src/modules/crm/repositories/crm-service.repository.ts:477` |
-| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.addCaseComment → CrmServiceService.addCaseComment → CrmServiceRepository.findCaseByIdForUpdate | `src/modules/crm/repositories/crm-service.repository.ts:433` |
+| `crm.crm_case_comments` | ESCRIBE | CREA | DIRECTA | CrmController.addCaseComment → CrmServiceService.addCaseComment → CrmServiceRepository.createCaseComment | `src/modules/crm/repositories/crm-service.repository.ts:495` |
+| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.addCaseComment → CrmServiceService.addCaseComment → CrmServiceRepository.findCaseByIdForUpdate | `src/modules/crm/repositories/crm-service.repository.ts:435` |
 
 ### Parámetros
 
@@ -644,7 +648,6 @@ _No se identificó un DTO de respuesta con campos._
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se comenta un caso cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -667,7 +670,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.resolveCase` — `src/modules/crm/controllers/crm.controller.ts:248`
+- **Implementación:** `CrmController.resolveCase` — `src/modules/crm/controllers/crm.controller.ts:318`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -677,25 +680,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/cases/{id}/resolve` la atiende `CrmController.resolveCase` (src/modules/crm/controllers/crm.controller.ts:248). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Delega en `CrmServiceService.changeCaseStatus`. Crea filas en crm.crm_case_status_history. Actualiza crm.crm_cases. Lee crm.crm_cases.
+`POST /crm/cases/{id}/resolve` la atiende `CrmController.resolveCase` (src/modules/crm/controllers/crm.controller.ts:318). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Delega en `CrmServiceService.changeCaseStatus`. Crea filas en crm.crm_case_status_history. Lee crm.crm_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:248` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:318` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:248` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:318` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.crm_case_status_history` | ESCRIBE | CREA | DIRECTA | CrmController.resolveCase → CrmServiceService.changeCaseStatus → CrmServiceRepository.recordCaseStatusChange | `src/modules/crm/repositories/crm-service.repository.ts:516` |
-| `crm.crm_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.resolveCase → CrmServiceService.changeCaseStatus | `src/modules/crm/services/crm-service.service.ts:352` |
-| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.resolveCase → CrmServiceService.changeCaseStatus → CrmServiceRepository.findCaseByIdForUpdate | `src/modules/crm/repositories/crm-service.repository.ts:433` |
+| `crm.crm_case_status_history` | ESCRIBE | CREA | DIRECTA | CrmController.resolveCase → CrmServiceService.changeCaseStatus → CrmServiceRepository.recordCaseStatusChange | `src/modules/crm/repositories/crm-service.repository.ts:534` |
+| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.resolveCase → CrmServiceService.changeCaseStatus → CrmServiceRepository.findCaseByIdForUpdate | `src/modules/crm/repositories/crm-service.repository.ts:435` |
 
 ### Parámetros
 
@@ -723,7 +725,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: Un caso cerrado no se reabre por esta vía |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso ya está en ese estado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -749,7 +750,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.changeCaseStatus` — `src/modules/crm/controllers/crm.controller.ts:235`
+- **Implementación:** `CrmController.changeCaseStatus` — `src/modules/crm/controllers/crm.controller.ts:300`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -759,16 +760,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /crm/cases/{id}/status` la atiende `CrmController.changeCaseStatus` (src/modules/crm/controllers/crm.controller.ts:235). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `ChangeCaseStatusDto` (2 campos, 1 obligatorio). Delega en `CrmServiceService.changeCaseStatus`. Crea filas en crm.crm_case_status_history. Actualiza crm.crm_cases. Lee crm.crm_cases.
+`PATCH /crm/cases/{id}/status` la atiende `CrmController.changeCaseStatus` (src/modules/crm/controllers/crm.controller.ts:300). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `ChangeCaseStatusDto` (2 campos, 1 obligatorio). Delega en `CrmServiceService.changeCaseStatus`. Crea filas en crm.crm_case_status_history. Lee crm.crm_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:235` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:300` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:235` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:300` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -777,9 +778,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.crm_case_status_history` | ESCRIBE | CREA | DIRECTA | CrmController.changeCaseStatus → CrmServiceService.changeCaseStatus → CrmServiceRepository.recordCaseStatusChange | `src/modules/crm/repositories/crm-service.repository.ts:516` |
-| `crm.crm_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.changeCaseStatus → CrmServiceService.changeCaseStatus | `src/modules/crm/services/crm-service.service.ts:352` |
-| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.changeCaseStatus → CrmServiceService.changeCaseStatus → CrmServiceRepository.findCaseByIdForUpdate | `src/modules/crm/repositories/crm-service.repository.ts:433` |
+| `crm.crm_case_status_history` | ESCRIBE | CREA | DIRECTA | CrmController.changeCaseStatus → CrmServiceService.changeCaseStatus → CrmServiceRepository.recordCaseStatusChange | `src/modules/crm/repositories/crm-service.repository.ts:534` |
+| `crm.crm_cases` | LEE | LEE | DIRECTA | CrmController.changeCaseStatus → CrmServiceService.changeCaseStatus → CrmServiceRepository.findCaseByIdForUpdate | `src/modules/crm/repositories/crm-service.repository.ts:435` |
 
 ### Parámetros
 
@@ -829,7 +829,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: Un caso cerrado no se reabre por esta vía |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso ya está en ese estado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -853,7 +852,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.setChannelOptIn` — `src/modules/crm/controllers/crm.controller.ts:264`
+- **Implementación:** `CrmController.setChannelOptIn` — `src/modules/crm/controllers/crm.controller.ts:339`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -863,16 +862,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /crm/contacts/{id}/channels/{cid}/opt-in` la atiende `CrmController.setChannelOptIn` (src/modules/crm/controllers/crm.controller.ts:264). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `ChannelOptInDto` (1 campo, 1 obligatorio). Delega en `CrmServiceService.setChannelOptIn`. Actualiza crm.contact_channel_endpoints. Lee crm.contact_channel_endpoints, crm.contacts.
+`PATCH /crm/contacts/{id}/channels/{cid}/opt-in` la atiende `CrmController.setChannelOptIn` (src/modules/crm/controllers/crm.controller.ts:339). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `ChannelOptInDto` (1 campo, 1 obligatorio). Delega en `CrmServiceService.setChannelOptIn`. Actualiza crm.contact_channel_endpoints. Lee crm.contact_channel_endpoints, crm.contacts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:264` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:339` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, cid | `src/modules/crm/controllers/crm.controller.ts:264` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, cid | `src/modules/crm/controllers/crm.controller.ts:339` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -881,9 +880,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.contact_channel_endpoints` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.setChannelOptIn → CrmServiceService.setChannelOptIn | `src/modules/crm/services/crm-service.service.ts:451` |
-| `crm.contact_channel_endpoints` | LEE | LEE | DIRECTA | CrmController.setChannelOptIn → CrmServiceService.setChannelOptIn → CrmSalesRepository.findChannelEndpointForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:343` |
-| `crm.contacts` | LEE | LEE | DIRECTA | CrmController.setChannelOptIn → CrmServiceService.setChannelOptIn → CrmSalesRepository.findContactById | `src/modules/crm/repositories/crm-sales.repository.ts:329` |
+| `crm.contact_channel_endpoints` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.setChannelOptIn → CrmServiceService.setChannelOptIn | `src/modules/crm/services/crm-service.service.ts:599` |
+| `crm.contact_channel_endpoints` | LEE | LEE | DIRECTA | CrmController.setChannelOptIn → CrmServiceService.setChannelOptIn → CrmSalesRepository.findChannelEndpointForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:354` |
+| `crm.contacts` | LEE | LEE | DIRECTA | CrmController.setChannelOptIn → CrmServiceService.setChannelOptIn → CrmSalesRepository.findContactById | `src/modules/crm/repositories/crm-sales.repository.ts:340` |
 
 ### Parámetros
 
@@ -931,7 +930,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Contacto no encontrado; ResourceNotFoundException: Canal de contacto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El canal no pertenece a ese contacto |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -956,7 +954,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.createLead` — `src/modules/crm/controllers/crm.controller.ts:99`
+- **Implementación:** `CrmController.createLead` — `src/modules/crm/controllers/crm.controller.ts:114`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -966,14 +964,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/leads` la atiende `CrmController.createLead` (src/modules/crm/controllers/crm.controller.ts:99). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CreateLeadDto` (6 campos, 2 obligatorios). Delega en `CrmSalesService.createLead`. Crea filas en crm.leads.
+`POST /crm/leads` la atiende `CrmController.createLead` (src/modules/crm/controllers/crm.controller.ts:114). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `CreateLeadDto` (6 campos, 2 obligatorios). Delega en `CrmSalesService.createLead`. Crea filas en crm.leads.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:99` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:114` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -983,7 +981,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.leads` | ESCRIBE | CREA | DIRECTA | CrmController.createLead → CrmSalesService.createLead → CrmSalesRepository.createLead | `src/modules/crm/repositories/crm-sales.repository.ts:358` |
+| `crm.leads` | ESCRIBE | CREA | DIRECTA | CrmController.createLead → CrmSalesService.createLead → CrmSalesRepository.createLead | `src/modules/crm/repositories/crm-sales.repository.ts:369` |
 
 ### Cuerpo — DTO `CreateLeadDto` · `application/json`
 
@@ -1057,7 +1055,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.convertLead` — `src/modules/crm/controllers/crm.controller.ts:124`
+- **Implementación:** `CrmController.convertLead` — `src/modules/crm/controllers/crm.controller.ts:149`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1067,16 +1065,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/leads/{id}/convert` la atiende `CrmController.convertLead` (src/modules/crm/controllers/crm.controller.ts:124). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `ConvertLeadDto` (6 campos, 3 obligatorios). Delega en `CrmSalesService.convertLead`. Crea filas en crm.opportunities, crm.opportunity_stage_history. Actualiza crm.leads. Lee crm.leads.
+`POST /crm/leads/{id}/convert` la atiende `CrmController.convertLead` (src/modules/crm/controllers/crm.controller.ts:149). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `ConvertLeadDto` (6 campos, 3 obligatorios). Delega en `CrmSalesService.convertLead`. Crea filas en crm.opportunities, crm.opportunity_stage_history. Lee crm.crm_accounts, crm.leads, crm.pipeline_stages, crm.pipelines.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:124` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:149` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:124` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:149` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1085,10 +1083,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.leads` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.convertLead → CrmSalesService.convertLead | `src/modules/crm/services/crm-sales.service.ts:303` |
-| `crm.leads` | LEE | LEE | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.findLeadByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:385` |
-| `crm.opportunities` | ESCRIBE | CREA | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.createOpportunity | `src/modules/crm/repositories/crm-sales.repository.ts:399` |
-| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:481` |
+| `crm.crm_accounts` | LEE | LEE | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.findAccountById | `src/modules/crm/repositories/crm-sales.repository.ts:228` |
+| `crm.leads` | LEE | LEE | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.findLeadByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:401` |
+| `crm.opportunities` | ESCRIBE | CREA | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.createOpportunity | `src/modules/crm/repositories/crm-sales.repository.ts:419` |
+| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:550` |
+| `crm.pipeline_stages` | LEE | LEE | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.findStageById | `src/modules/crm/repositories/crm-sales.repository.ts:507` |
+| `crm.pipelines` | LEE | LEE | DIRECTA | CrmController.convertLead → CrmSalesService.convertLead → CrmSalesRepository.findPipelineById | `src/modules/crm/repositories/crm-sales.repository.ts:487` |
 
 ### Parámetros
 
@@ -1147,7 +1147,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lead no encontrado |
 | 409 | `CONFLICT` | ConflictException: El lead ya fue convertido |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se convierte un lead calificado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1171,9 +1170,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Origen:** CONTRATO
 - **Nombre:** Calificar o descartar el lead
 - **Bloque:** Marketing y Crecimiento
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.qualifyLead` — `src/modules/crm/controllers/crm.controller.ts:111`
+- **Implementación:** `CrmController.qualifyLead` — `src/modules/crm/controllers/crm.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1183,16 +1182,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /crm/leads/{id}/qualify` la atiende `CrmController.qualifyLead` (src/modules/crm/controllers/crm.controller.ts:111). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `QualifyLeadDto` (2 campos, 2 obligatorios). Delega en `CrmSalesService.qualifyLead`. Actualiza crm.leads. Lee crm.leads.
+`PATCH /crm/leads/{id}/qualify` la atiende `CrmController.qualifyLead` (src/modules/crm/controllers/crm.controller.ts:131). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `QualifyLeadDto` (2 campos, 2 obligatorios). Delega en `CrmSalesService.qualifyLead`. Lee crm.leads.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:111` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:131` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:111` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:131` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1201,8 +1200,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.leads` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.qualifyLead → CrmSalesService.qualifyLead | `src/modules/crm/services/crm-sales.service.ts:239` |
-| `crm.leads` | LEE | LEE | DIRECTA | CrmController.qualifyLead → CrmSalesService.qualifyLead → CrmSalesRepository.findLeadByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:385` |
+| `crm.leads` | LEE | LEE | DIRECTA | CrmController.qualifyLead → CrmSalesService.qualifyLead → CrmSalesRepository.findLeadByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:401` |
 
 ### Parámetros
 
@@ -1253,7 +1251,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lead no encontrado |
 | 409 | `CONFLICT` | ConflictException: El lead ya fue convertido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1278,7 +1275,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.advanceStage` — `src/modules/crm/controllers/crm.controller.ts:152`
+- **Implementación:** `CrmController.advanceStage` — `src/modules/crm/controllers/crm.controller.ts:187`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1288,16 +1285,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/opportunities/{id}/advance-stage` la atiende `CrmController.advanceStage` (src/modules/crm/controllers/crm.controller.ts:152). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `AdvanceStageDto` (1 campo, 1 obligatorio). Delega en `CrmSalesService.advanceStage`. Crea filas en crm.opportunity_stage_history. Actualiza crm.opportunities. Lee crm.opportunities, crm.pipeline_stages.
+`POST /crm/opportunities/{id}/advance-stage` la atiende `CrmController.advanceStage` (src/modules/crm/controllers/crm.controller.ts:187). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `AdvanceStageDto` (1 campo, 1 obligatorio). Delega en `CrmSalesService.advanceStage`. Crea filas en crm.opportunity_stage_history. Lee crm.opportunities, crm.pipeline_stages, crm.pipelines.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:152` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:187` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:152` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:187` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1306,10 +1303,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.opportunities` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.advanceStage → CrmSalesService.advanceStage | `src/modules/crm/services/crm-sales.service.ts:373` |
-| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.findOpportunityByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:429` |
-| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:481` |
-| `crm.pipeline_stages` | LEE | LEE | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.findStageById | `src/modules/crm/repositories/crm-sales.repository.ts:444` |
+| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.findOpportunityByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:451` |
+| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:550` |
+| `crm.pipeline_stages` | LEE | LEE | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.findStageById | `src/modules/crm/repositories/crm-sales.repository.ts:507` |
+| `crm.pipelines` | LEE | LEE | DIRECTA | CrmController.advanceStage → CrmSalesService.advanceStage → CrmSalesRepository.findStageById | `src/modules/crm/repositories/crm-sales.repository.ts:509` |
 
 ### Parámetros
 
@@ -1357,7 +1354,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada; ResourceNotFoundException: Etapa no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La oportunidad ya está cerrada; PreconditionFailedException: La oportunidad ya está en esa etapa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1382,7 +1378,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.loseOpportunity` — `src/modules/crm/controllers/crm.controller.ts:177`
+- **Implementación:** `CrmController.loseOpportunity` — `src/modules/crm/controllers/crm.controller.ts:222`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1392,16 +1388,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/opportunities/{id}/lose` la atiende `CrmController.loseOpportunity` (src/modules/crm/controllers/crm.controller.ts:177). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `LoseOpportunityDto` (1 campo, 1 obligatorio). Delega en `CrmSalesService.loseOpportunity`. Crea filas en crm.opportunity_stage_history. Actualiza crm.opportunities. Lee crm.opportunities.
+`POST /crm/opportunities/{id}/lose` la atiende `CrmController.loseOpportunity` (src/modules/crm/controllers/crm.controller.ts:222). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Valida el cuerpo como `LoseOpportunityDto` (1 campo, 1 obligatorio). Delega en `CrmSalesService.loseOpportunity`. Crea filas en crm.opportunity_stage_history. Lee crm.opportunities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:177` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:222` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:177` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:222` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1410,9 +1406,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.opportunities` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.loseOpportunity → CrmSalesService.loseOpportunity → CrmSalesService.closeOpportunity | `src/modules/crm/services/crm-sales.service.ts:454` |
-| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.loseOpportunity → CrmSalesService.loseOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.findOpportunityByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:429` |
-| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.loseOpportunity → CrmSalesService.loseOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:481` |
+| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.loseOpportunity → CrmSalesService.loseOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.findOpportunityByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:451` |
+| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.loseOpportunity → CrmSalesService.loseOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:550` |
 
 ### Parámetros
 
@@ -1460,7 +1455,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada |
 | 409 | `CONFLICT` | ConflictException: La oportunidad ya está cerrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1485,7 +1479,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.winOpportunity` — `src/modules/crm/controllers/crm.controller.ts:165`
+- **Implementación:** `CrmController.winOpportunity` — `src/modules/crm/controllers/crm.controller.ts:205`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1495,25 +1489,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/opportunities/{id}/win` la atiende `CrmController.winOpportunity` (src/modules/crm/controllers/crm.controller.ts:165). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Delega en `CrmSalesService.winOpportunity`. Crea filas en crm.opportunity_stage_history. Actualiza crm.opportunities. Lee crm.opportunities.
+`POST /crm/opportunities/{id}/win` la atiende `CrmController.winOpportunity` (src/modules/crm/controllers/crm.controller.ts:205). Exige sesión con alguno de los roles CRM_ADMIN, CRM_AGENT. Delega en `CrmSalesService.winOpportunity`. Crea filas en crm.opportunity_stage_history. Lee crm.opportunities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:165` |
+| ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:205` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:165` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:205` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.opportunities` | ESCRIBE | ACTUALIZA | POR_TIPO | CrmController.winOpportunity → CrmSalesService.winOpportunity → CrmSalesService.closeOpportunity | `src/modules/crm/services/crm-sales.service.ts:454` |
-| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.winOpportunity → CrmSalesService.winOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.findOpportunityByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:429` |
-| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.winOpportunity → CrmSalesService.winOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:481` |
+| `crm.opportunities` | LEE | LEE | DIRECTA | CrmController.winOpportunity → CrmSalesService.winOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.findOpportunityByIdForUpdate | `src/modules/crm/repositories/crm-sales.repository.ts:451` |
+| `crm.opportunity_stage_history` | ESCRIBE | CREA | DIRECTA | CrmController.winOpportunity → CrmSalesService.winOpportunity → CrmSalesService.closeOpportunity → CrmSalesRepository.recordStageChange | `src/modules/crm/repositories/crm-sales.repository.ts:550` |
 
 ### Parámetros
 
@@ -1541,7 +1534,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada |
 | 409 | `CONFLICT` | ConflictException: La oportunidad ya está cerrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1566,7 +1558,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrmController.createPartnership` — `src/modules/crm/controllers/crm.controller.ts:190`
+- **Implementación:** `CrmController.createPartnership` — `src/modules/crm/controllers/crm.controller.ts:240`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1576,14 +1568,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /crm/partnerships` la atiende `CrmController.createPartnership` (src/modules/crm/controllers/crm.controller.ts:190). Exige sesión con alguno de los roles CRM_ADMIN. Valida el cuerpo como `CreatePartnershipDto` (7 campos, 5 obligatorios). Delega en `CrmServiceService.createPartnership`. Crea filas en crm.partnership_agreements, crm.partnerships.
+`POST /crm/partnerships` la atiende `CrmController.createPartnership` (src/modules/crm/controllers/crm.controller.ts:240). Exige sesión con alguno de los roles CRM_ADMIN. Valida el cuerpo como `CreatePartnershipDto` (7 campos, 5 obligatorios). Delega en `CrmServiceService.createPartnership`. Crea filas en crm.partnership_agreements, crm.partnerships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CRM_ADMIN | `src/modules/crm/controllers/crm.controller.ts:190` |
+| ROL | Alguno de: CRM_ADMIN | `src/modules/crm/controllers/crm.controller.ts:240` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1593,8 +1585,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `crm.partnership_agreements` | ESCRIBE | CREA | DIRECTA | CrmController.createPartnership → CrmServiceService.createPartnership → CrmServiceRepository.createAgreement | `src/modules/crm/repositories/crm-service.repository.ts:377` |
-| `crm.partnerships` | ESCRIBE | CREA | DIRECTA | CrmController.createPartnership → CrmServiceService.createPartnership → CrmServiceRepository.createPartnership | `src/modules/crm/repositories/crm-service.repository.ts:314` |
+| `crm.partnership_agreements` | ESCRIBE | CREA | DIRECTA | CrmController.createPartnership → CrmServiceService.createPartnership → CrmServiceRepository.createAgreement | `src/modules/crm/repositories/crm-service.repository.ts:378` |
+| `crm.partnerships` | ESCRIBE | CREA | DIRECTA | CrmController.createPartnership → CrmServiceService.createPartnership → CrmServiceRepository.createPartnership | `src/modules/crm/repositories/crm-service.repository.ts:315` |
 
 ### Cuerpo — DTO `CreatePartnershipDto` · `application/json`
 

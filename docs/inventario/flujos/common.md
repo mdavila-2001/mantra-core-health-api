@@ -394,7 +394,7 @@ Borrar lógicamente un archivo (UC-02-10)
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está bajo retención legal y no puede borrarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -515,14 +515,21 @@ flowchart TD
   n53 --> n54
   n55(["404 NOT_FOUND Archivo no encontrado"]):::error
   n54 -->|"sí"| n55
-  n56{"file.legalHoldUntil && file.legalHoldUntil.getTime() › Date.now()"}:::decision
+  n56["Llama a FilesService.assertCanMutateFile"]:::llamada
   n54 -->|"no"| n56
-  n57(["422 PRECONDITION_FAILED El archivo está bajo retención legal y no puede borrarse"]):::error
-  n56 -->|"sí"| n57
-  n58[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
-  n56 -->|"no"| n58
-  n59(("200 Responde con éxito")):::ok
-  n58 --> n59
+  n57{"!canActorReadOwnFile(file, actor)"}:::decision
+  n56 --> n57
+  n58(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n57 -->|"sí"| n58
+  n59(["403 FORBIDDEN No tiene permiso para modificar este archivo"]):::error
+  n57 -->|"no"| n59
+  n60{"file.legalHoldUntil && file.legalHoldUntil.getTime() › Date.now()"}:::decision
+  n61(["422 PRECONDITION_FAILED El archivo está bajo retención legal y no puede borrarse"]):::error
+  n60 -->|"sí"| n61
+  n62[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
+  n60 -->|"no"| n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -545,7 +552,7 @@ Descargar el contenido vigente de un archivo
 | 410 | — | GoneException: {{ // Sin `code` propio el filtro global lo dejaba como INTE…} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 ```mermaid
 flowchart TD
@@ -640,7 +647,7 @@ flowchart TD
   n44 --> n45
   n46{"!this.env.s3.bucket"}:::decision
   n45 --> n46
-  n47(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n47(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n46 -->|"sí"| n47
   n48["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
   n46 -->|"no"| n48
@@ -746,7 +753,7 @@ Vincular un archivo a un propietario (UC-02-08)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT |
@@ -866,12 +873,19 @@ flowchart TD
   n53 --> n54
   n55(["404 NOT_FOUND Archivo no encontrado"]):::error
   n54 -->|"sí"| n55
-  n56["Llama a FileLinksRepository.create"]:::llamada
+  n56["Llama a FilesService.assertCanMutateFile"]:::llamada
   n54 -->|"no"| n56
-  n57[("CREA common.file_links")]:::efecto
+  n57{"!canActorReadOwnFile(file, actor)"}:::decision
   n56 --> n57
-  n58(("201 Responde con éxito")):::ok
-  n57 --> n58
+  n58(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n57 -->|"sí"| n58
+  n59(["403 FORBIDDEN No tiene permiso para modificar este archivo"]):::error
+  n57 -->|"no"| n59
+  n60["Llama a FileLinksRepository.create"]:::llamada
+  n61[("CREA common.file_links")]:::efecto
+  n60 --> n61
+  n62(("201 Responde con éxito")):::ok
+  n61 --> n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -889,7 +903,7 @@ Añadir una versión a un archivo (UC-02-06)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: STORE_RECEIPT_UNKNOWN; StorageLifecycleDenied: RESERVATION_MISSING; StorageLifecycleDenied: RESERVATION_OWNER_MISMATCH; StorageLifecycleDenied: PUBLICATION_IDENTITY_CHANGED; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
@@ -1060,8 +1074,8 @@ Generar un derivado de una versión (UC-02-07)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Versión de archivo no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: No tiene permiso para modificar este archivo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: Versión de archivo no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se pueden generar derivados de versiones con escaneo limpio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PURGE_IN_FLIGHT; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: STORE_RECEIPT_UNKNOWN; StorageLifecycleDenied: RESERVATION_MISSING; StorageLifecycleDenied: RESERVATION_OWNER_MISMATCH; StorageLifecycleDenied: PUBLICATION_IDENTITY_CHANGED; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
@@ -1289,7 +1303,7 @@ Subir el contenido de un archivo (multipart)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: El contenido no corresponde a ningún formato de archivo permitido; PreconditionFailedException: El formato del archivo no está permitido para esta categoría |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
 
 ```mermaid
 flowchart TD
@@ -1369,7 +1383,7 @@ flowchart TD
   n35 --> n36
   n37{"!this.env.s3.bucket"}:::decision
   n36 --> n37
-  n38(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n38(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n37 -->|"sí"| n38
   n39{"this.env.lifecycleBinding"}:::decision
   n37 -->|"no"| n39

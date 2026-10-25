@@ -238,6 +238,61 @@ jobs:
       - name: Guardrails ALOVIDA — antipatrones prohibidos por las reglas canónicas
         run: yarn alovida:guardrails
 
+      # El inventario (`inventario/`, `docs/inventario/`) se genera desde el código Y
+      # desde el repo del modelo (propósito, dominio y tablas de cada módulo), así que
+      # verificarlo exige tener el modelo al lado. El repo es público: no hace falta
+      # token. Va fijado a un commit y no a `dev`: el inventario versionado es función
+      # del código de este PR y de ese commit del modelo, y un cambio ajeno del modelo
+      # no debe poner en rojo un PR que no lo toca. Subirlo = regenerar el inventario
+      # (`yarn inventario:endpoints`, `:flujos` y `:catalogo` con
+      # MODEL_ROOT y FRONT_ROOT) y cambiar este SHA en el mismo PR.
+      - name: Modelo de datos — insumo del inventario (commit fijado)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: mantra-core-technologies/mantra-core-health-model
+          ref: 33c01919039ea98cc8bbb9e2d6b91d3bffc7b359
+          path: _modelo
+          persist-credentials: false
+
+      # El frontend aporta su glosario y su inventario de clientes HTTP (solo esos dos
+      # archivos: sparse-checkout). Mismo criterio: commit fijado. Sin él, el inventario
+      # regenerado diría «sin dato» donde el versionado trae el cruce, y no coincidiría.
+      - name: Frontend — glosario e inventario de clientes (commit fijado)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: mdavila-2001/mantra-core-health
+          ref: 4afab7a30e6d48077078e7b9b38c88ee2f59b69b
+          path: _frontend
+          persist-credentials: false
+          sparse-checkout: |
+            docs/business/glossary.md
+            docs/reports/generated/api-inventory.md
+          sparse-checkout-cone-mode: false
+
+      # Regenerar el inventario con los generadores del repo y comparar con lo
+      # versionado: un endpoint, un flujo o una tabla del catálogo que cambió sin que
+      # el inventario viaje en el mismo PR deja el paso en rojo, y dice cuál.
+      - name: Inventario al día — lo versionado coincide con el código y el modelo
+        env:
+          MODEL_ROOT: ${{ github.workspace }}/_modelo
+          FRONT_ROOT: ${{ github.workspace }}/_frontend
+        run: yarn inventario:verificar
+
+      # NO bloqueante por ahora: sobre `dev` limpio y con el inventario ya regenerado,
+      # 8 de 121 pruebas están rojas por expectativas que el código dejó atrás (no por
+      # el inventario escrito, que `inventario:verificar` ya cubre): el controlador con
+      # ruta en arreglo `InsuranceCampaignsController` (`@Controller([...])`) que el
+      # generador no resuelve, el check-in de la cita, `PUT /scheduling/bookings/{id}/payment-state`
+      # y el límite global de validación. Ponerlas en rojo bloquearía todo PR por
+      # una deuda ajena. Cuando se arreglen (generador o expectativas), quitar la
+      # línea `continue-on-error` y el paso pasa a bloquear.
+      - name: Pruebas del inventario
+        continue-on-error: true
+        env:
+          MODEL_ROOT: ${{ github.workspace }}/_modelo
+          FRONT_ROOT: ${{ github.workspace }}/_frontend
+        run: yarn inventario:test
+
       # El DDL canónico se edita en `../SQL`, fuera del repositorio, y el
       # despliegue monta la copia versionada de `database/`. Aquí solo se clona
       # este repositorio, así que no hay con qué comparar: lo que se comprueba

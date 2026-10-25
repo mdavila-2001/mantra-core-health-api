@@ -26,7 +26,7 @@
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SearchPlatformController.requireTenant` — `src/modules/search_platform/controllers/search-platform.controller.ts:102`
+- **Implementación:** `SearchPlatformController.requireTenant` — `src/modules/search_platform/controllers/search-platform.controller.ts:114`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -36,20 +36,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`DESCONOCIDO /search` la atiende `SearchPlatformController.requireTenant` (src/modules/search_platform/controllers/search-platform.controller.ts:102). Exige sesión; el controlador no declara roles. No toca tablas relacionales: el handler no invoca ningún servicio.
+`DESCONOCIDO /search` la atiende `SearchPlatformController.requireTenant` (src/modules/search_platform/controllers/search-platform.controller.ts:114). Exige sesión; el controlador no declara roles. No toca tablas relacionales: el handler no invoca ningún servicio.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/search_platform/controllers/search-platform.controller.ts:102` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/search_platform/controllers/search-platform.controller.ts:114` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
-No toca tablas relacionales: el handler no invoca ningún servicio. _(automática; fuente: `src/modules/search_platform/controllers/search-platform.controller.ts:102`)_
+No toca tablas relacionales: el handler no invoca ningún servicio. _(automática; fuente: `src/modules/search_platform/controllers/search-platform.controller.ts:114`)_
 
 ### Cuerpo
 
@@ -87,7 +87,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SearchPlatformController.search` — `src/modules/search_platform/controllers/search-platform.controller.ts:63`
+- **Implementación:** `SearchPlatformController.search` — `src/modules/search_platform/controllers/search-platform.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -97,14 +97,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /search/{index}/_search` la atiende `SearchPlatformController.search` (src/modules/search_platform/controllers/search-platform.controller.ts:63). Exige sesión con alguno de los roles PLATFORM_ADMIN, SEARCH_ADMIN, SEARCH_READER, SYSTEM. Valida el cuerpo como `SearchRequestDto` (7 campos, 0 obligatorios). Delega en `SearchIndexService.search`. No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionales.
+`POST /search/{index}/_search` la atiende `SearchPlatformController.search` (src/modules/search_platform/controllers/search-platform.controller.ts:67). Exige sesión con alguno de los roles PLATFORM_ADMIN, SEARCH_ADMIN, SEARCH_READER, SYSTEM. Valida el cuerpo como `SearchRequestDto` (7 campos, 0 obligatorios). Delega en `SearchIndexService.search`. No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionales.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SEARCH_ADMIN, SEARCH_READER, SYSTEM | `src/modules/search_platform/controllers/search-platform.controller.ts:63` |
+| ROL | Alguno de: PLATFORM_ADMIN, SEARCH_ADMIN, SEARCH_READER, SYSTEM | `src/modules/search_platform/controllers/search-platform.controller.ts:67` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -310,7 +310,7 @@ El árbol de decisión completo está en [flujos](../flujos/search_platform.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SearchPlatformController.deleteDocument` — `src/modules/search_platform/controllers/search-platform.controller.ts:88`
+- **Implementación:** `SearchPlatformController.deleteDocument` — `src/modules/search_platform/controllers/search-platform.controller.ts:96`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -320,14 +320,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /search/{index}/documents/{id}` la atiende `SearchPlatformController.deleteDocument` (src/modules/search_platform/controllers/search-platform.controller.ts:88). Exige sesión con alguno de los roles PLATFORM_ADMIN, SEARCH_ADMIN, SYSTEM. Delega en `SearchIndexService.deleteDocument`. No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionales.
+`DELETE /search/{index}/documents/{id}` la atiende `SearchPlatformController.deleteDocument` (src/modules/search_platform/controllers/search-platform.controller.ts:96). Exige sesión con alguno de los roles PLATFORM_ADMIN, SEARCH_ADMIN, SYSTEM. Delega en `SearchIndexService.deleteDocument`. No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionales.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SEARCH_ADMIN, SYSTEM | `src/modules/search_platform/controllers/search-platform.controller.ts:88` |
+| ROL | Alguno de: PLATFORM_ADMIN, SEARCH_ADMIN, SYSTEM | `src/modules/search_platform/controllers/search-platform.controller.ts:96` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 

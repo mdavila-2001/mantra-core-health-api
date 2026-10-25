@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 125 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 128 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
 | [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 17 | COINCIDE |
 | [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 14 | COINCIDE |
@@ -21,9 +21,9 @@
 | [tenant_catalog_policies](#tenant_catalog_policies) | Define políticas de catálogo por tenant para gobernar qué terminologías se habilitan en cada organización sanitaria. | 14 | 6 | 3 | COINCIDE |
 | [tenant_concept_config](#tenant_concept_config) | Guarda configuraciones de conceptos por tenant para permitir ajustes locales sin alterar el concepto canónico compartido. | 12 | 5 | 3 | COINCIDE |
 | [terminology_sources](#terminology_sources) | Identifica fuentes de terminología sanitaria para registrar procedencia y gobierno de los catálogos clínicos. | 14 | 7 | 4 | COINCIDE |
-| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 37 | COINCIDE |
+| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 39 | COINCIDE |
 | [value_set_rules](#value_set_rules) | Describe reglas de inclusión o selección de miembros de conjuntos de valores usadas por catálogos clínicos. | 12 | 5 | 2 | COINCIDE |
-| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 35 | COINCIDE |
+| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 37 | COINCIDE |
 | [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 36 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -196,7 +196,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 125 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 128 operaciones
 
 #### Columnas
 
@@ -2876,7 +2876,10 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /promotions/me | LEE | DIRECTA |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 | GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | GET /scheduling/bookings | LEE | DIRECTA |
+| POST /admin/governance/tenant-residency-bindings | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | POST /terminology/ConceptMap/$translate | LEE | DIRECTA |
@@ -3729,7 +3732,7 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_members`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetMembers` — `src/modules/terminology/entities/value_set_members.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 37 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 39 operaciones
 
 #### Columnas
 
@@ -3759,11 +3762,11 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_value_set_members_value_set_version_id` | no | value_set_version_id | Soporta la clave foránea fk_value_set_members_value_set_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_version_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_value_set_members_value_set_version_id` | no | value_set_version_id | Soporta la clave foránea fk_value_set_members_value_set_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_version_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_value_set_members_concept_id` | no | concept_id | Soporta la clave foránea fk_value_set_members_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_value_set_members_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_value_set_members_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_set_members_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_value_set_members_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_value_set_members_version_concept` | sí | value_set_version_id, concept_id | Garantiza que no se repita la combinación (value_set_version_id, concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_members_value_set_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_version_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_value_set_members_version_concept` | sí | value_set_version_id, concept_id | Garantiza que no se repita la combinación (value_set_version_id, concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_members_value_set_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_version_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -3801,6 +3804,8 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
 | PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/$deprecate | ACTUALIZA | POR_TIPO |
@@ -3905,7 +3910,7 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetVersions` — `src/modules/terminology/entities/value_set_versions.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 35 operaciones
+- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 37 operaciones
 
 #### Columnas
 
@@ -3940,12 +3945,12 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_value_set_versions_value_set_id` | no | value_set_id | Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_value_set_versions_value_set_id` | no | value_set_id | Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_value_set_versions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_value_set_versions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_set_versions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_value_set_versions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_set_versions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_value_set_versions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_value_set_versions_value_set_id_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_value_set_versions_set_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_value_set_versions_value_set_id_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_value_set_versions_set_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -3983,6 +3988,8 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
 | PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |

@@ -85,6 +85,24 @@ function build() {
     ]),
     setAutomated: mockFn().mockResolvedValue({ id: 'as1', automated: false }),
     findDepreciation: mockFn().mockResolvedValue({ amount: '16.67' }),
+    listDepreciations: mockFn().mockResolvedValue([
+      {
+        id: 'dep-1',
+        fiscalPeriodId: 'period-1',
+        amount: '16.67',
+        bookValueAfter: '983.33',
+        transactionId: 'tx-dep-1',
+        createdAt: new Date('2026-02-01T12:00:00Z'),
+      },
+      {
+        id: 'dep-2',
+        fiscalPeriodId: 'period-gone',
+        amount: '16.66',
+        bookValueAfter: undefined,
+        transactionId: undefined,
+        createdAt: new Date('2026-03-01T12:00:00Z'),
+      },
+    ]),
   };
   const accountsRepo = {
     findByIds: mockFn().mockResolvedValue([
@@ -170,6 +188,14 @@ function build() {
   };
   const fiscalRepo = {
     findOpenPeriodForPractice: mockFn().mockResolvedValue({ id: 'period-1' }),
+    findPeriodsByIds: mockFn().mockResolvedValue([
+      {
+        id: 'period-1',
+        code: '2026-01',
+        startDate: new Date('2026-01-01T00:00:00Z'),
+        endDate: new Date('2026-01-31T00:00:00Z'),
+      },
+    ]),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
 
@@ -275,6 +301,52 @@ describe('PractitionerAccountingService — FT-26 (activos y pasivos)', () => {
         statusConceptId: ACCT.LIABILITY_ACTIVE,
         automated: true,
       });
+    });
+  });
+
+  describe('readAssetDepreciations (criterio 6)', () => {
+    it('devuelve el histórico en orden de registro, con su período y el valor que dejó', async () => {
+      const d = build();
+      const res = await d.service.readAssetDepreciations('as1', actor);
+      expect(d.fiscalRepo.findPeriodsByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        ['period-1', 'period-gone'],
+      );
+      expect(res.depreciations[0]).toEqual({
+        id: 'dep-1',
+        fiscalPeriodId: 'period-1',
+        fiscalPeriodCode: '2026-01',
+        periodStartDate: '2026-01-01',
+        periodEndDate: '2026-01-31',
+        amount: '16.67',
+        bookValueAfter: '983.33',
+        transactionId: 'tx-dep-1',
+        registeredAt: '2026-02-01T12:00:00.000Z',
+      });
+      // Un período que ya no se resuelve no rompe el histórico: viaja en null.
+      expect(res.depreciations[1]).toMatchObject({
+        fiscalPeriodCode: null,
+        periodStartDate: null,
+        bookValueAfter: null,
+        transactionId: null,
+      });
+    });
+
+    it('rechaza (422) el histórico de un activo de una práctica ajena, sin leer sus filas', async () => {
+      const d = build();
+      d.assetRepo.findById.mockResolvedValue({ id: 'as1', practiceId: 'p2' });
+      await expect(
+        d.service.readAssetDepreciations('as1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.assetRepo.listDepreciations).not.toHaveBeenCalled();
+    });
+
+    it('rechaza (404) un activo inexistente', async () => {
+      const d = build();
+      d.assetRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.readAssetDepreciations('nope', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 

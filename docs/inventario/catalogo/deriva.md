@@ -7,20 +7,28 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1263 |
+| Entidades del ORM | 1271 |
 | Tablas del DDL con entidad | 1230 |
 | Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 33 |
+| Entidades del ORM **sin** tabla en el DDL | 41 |
 | Columnas del DDL ausentes en su entidad | 1 |
 | Columnas con nulabilidad divergente | 24 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 9 |
+| Columnas de la entidad que el DDL no tiene | 17 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
+| `billing.siat_simulated_invoices` | SiatSimulatedInvoices | **en ninguna fuente de DDL del modelo** |
+| `billing.siat_simulated_outbox` | SiatSimulatedOutbox | **en ninguna fuente de DDL del modelo** |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
+| `clinical.received_services` | ReceivedServices | **en ninguna fuente de DDL del modelo** |
+| `data_catalog.catalog_operation_impacts` | CatalogOperationImpacts | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_operations` | CatalogOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_process_step_operations` | CatalogProcessStepOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_process_steps` | CatalogProcessSteps | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_processes` | CatalogProcesses | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
