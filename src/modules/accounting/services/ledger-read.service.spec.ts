@@ -30,6 +30,7 @@ function build() {
     findTransactionById: mockFn(() => Promise.resolve(null)),
     findEntriesByTransaction: mockFn(() => Promise.resolve([])),
     findEntriesByTransactions: mockFn(() => Promise.resolve([])),
+    assignmentsForEntries: mockFn(() => Promise.resolve([])),
   };
   const accountsRepo = { findByPractice: mockFn(() => Promise.resolve([])) };
 
@@ -320,6 +321,36 @@ describe('LedgerReadService', () => {
       expect(filters.from).toBeInstanceOf(Date);
       expect(filters.to).toBeInstanceOf(Date);
     });
+
+    it('publica el código del estado: un reversado no se lee como posteado', async () => {
+      const d = build();
+      d.journalRepo.findTransactions.mockResolvedValue([
+        {
+          id: 'd',
+          statusConceptId: ACCT.TXN_DRAFT,
+          transactionDate: new Date(),
+        },
+        {
+          id: 'r',
+          statusConceptId: ACCT.TXN_REVERSED,
+          transactionDate: new Date(),
+          postedAt: new Date(),
+        },
+        {
+          id: 'x',
+          statusConceptId: 'concepto-ajeno',
+          transactionDate: new Date(),
+        },
+      ]);
+
+      const res = await d.service.listJournal({ practiceId: PRACTICE });
+
+      expect(res.items.map((i) => i.status)).toEqual([
+        'DRAFT',
+        'REVERSED',
+        null,
+      ]);
+    });
   });
 
   describe('getJournalTransaction (UC-16-01·D)', () => {
@@ -346,6 +377,41 @@ describe('LedgerReadService', () => {
 
       expect(res.lines).toHaveLength(2);
       expect(res.lines[0]?.amountBase).toBe('100.00');
+      expect(res.lines[0]?.assetId).toBeNull();
+      expect(res.status).toBe('POSTED');
+    });
+
+    it('devuelve, por línea, el activo y el centro de beneficio imputados', async () => {
+      const d = build();
+      d.journalRepo.findTransactionById.mockResolvedValue({
+        id: 't-1',
+        practiceId: PRACTICE,
+        transactionDate: new Date('2026-01-31'),
+        statusConceptId: ACCT.TXN_DRAFT,
+      });
+      const debit = line('equipo', true, '50.00');
+      d.journalRepo.findEntriesByTransaction.mockResolvedValue([
+        debit,
+        line('caja', false, '50.00'),
+      ]);
+      d.journalRepo.assignmentsForEntries.mockResolvedValue([
+        { ledgerEntryId: debit.id, assetId: 'asset-1', profitCenterId: 'pc-1' },
+      ]);
+
+      const res = await d.service.getJournalTransaction('t-1');
+
+      expect(d.journalRepo.assignmentsForEntries).toHaveBeenCalledWith(d.tx, [
+        debit.id,
+        'l-caja-50.00',
+      ]);
+      expect(res.lines[0]).toMatchObject({
+        assetId: 'asset-1',
+        profitCenterId: 'pc-1',
+      });
+      expect(res.lines[1]).toMatchObject({
+        assetId: null,
+        profitCenterId: null,
+      });
     });
   });
 });
