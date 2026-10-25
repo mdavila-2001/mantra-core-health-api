@@ -14,7 +14,11 @@ import {
   PeriopIntraopRepository,
 } from '../repositories';
 import { SEVERITY_CONCEPT } from './periop-preop.service';
-import { isCaseInScope, loadCaseForUpdateInScope } from './periop-scope';
+import {
+  assertProcedureOfCasePatient,
+  isCaseInScope,
+  loadCaseForUpdateInScope,
+} from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 // El procedimiento que el informe describe vive en la historia clínica: se pide
 // a su dueño en vez de escribir `clinical.procedures` desde este módulo.
@@ -471,6 +475,17 @@ export class PeriopIntraopService {
             caseId,
           },
           ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
+      }
+
+      // El procedimiento que cita el informe lo manda el cliente: tiene que ser
+      // del paciente del caso y del tenant (404 uniforme si no lo es).
+      if (dto.procedureId) {
+        await assertProcedureOfCasePatient(
+          this.casesRepo,
+          tx,
+          dto.procedureId,
+          surgicalCase.patientProfileId,
         );
       }
 

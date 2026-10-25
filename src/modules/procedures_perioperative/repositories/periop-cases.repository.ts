@@ -13,6 +13,9 @@ import {
   ProcedureChargeItems,
 } from '../entities';
 import { createdBy } from '../../../common';
+// El procedimiento vive en la historia clínica: acá solo se lee, para probar que
+// el id que manda el cliente es del paciente y del tenant del caso.
+import { Procedures } from '../../clinical/entities';
 
 /**
  * Describe el contrato estructural de create case data.
@@ -140,6 +143,30 @@ export interface CreateChargeItemData {
  */
 @Injectable()
 export class PeriopCasesRepository {
+  /**
+   * Carga un procedimiento solo si es de este paciente y de este tenant.
+   *
+   * El filtro va en la consulta: un procedimiento ajeno ni siquiera se trae.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param procedureId - Procedimiento que mandó el cliente.
+   * @param patientProfileId - Paciente del caso.
+   * @param custodianTenantId - Tenant activo.
+   * @returns El procedimiento, o `null` si no existe o no es del paciente y tenant.
+   */
+  findProcedureOfPatient(
+    em: EntityManager,
+    procedureId: string,
+    patientProfileId: string,
+    custodianTenantId: string,
+  ): Promise<Procedures | null> {
+    return em.findOne(Procedures, {
+      id: procedureId,
+      patientProfileId,
+      custodianTenantId,
+    });
+  }
+
   // --- Caso (UC-53-01, UC-53-13) ---
 
   /**

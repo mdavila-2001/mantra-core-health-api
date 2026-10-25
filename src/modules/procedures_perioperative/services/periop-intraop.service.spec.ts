@@ -27,6 +27,7 @@ const SITE = '55555555-5555-5555-5555-555555555555';
 const REPORT = '66666666-6666-6666-6666-666666666666';
 const STAY = '77777777-7777-7777-7777-777777777777';
 const PROFILE = '88888888-8888-8888-8888-888888888888';
+const PATIENT = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const SPACE = '99999999-9999-9999-9999-999999999999';
 const TENANT_A = '11111111-1111-1111-1111-111111111111';
 const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
@@ -118,6 +119,15 @@ function build() {
     createMilestone: mockFn(),
     createLocation: mockFn(),
     findOpenLocation: mockFn(),
+    // Procedimiento del paciente y tenant pedidos, salvo que el test diga otra cosa.
+    findProcedureOfPatient: mockFn(
+      (_tx: unknown, id: string, patientProfileId: string, tenantId: string) =>
+        Promise.resolve({
+          id,
+          patientProfileId,
+          custodianTenantId: tenantId,
+        }),
+    ),
   };
   // Por defecto el caso existe y es del tenant activo; los tests que prueban su
   // ausencia o un caso ajeno lo sobreescriben.
@@ -159,6 +169,7 @@ function build() {
 function caseInProgress(overrides: Record<string, unknown> = {}): any {
   return {
     id: CASE,
+    patientProfileId: PATIENT,
     statusConceptId: CONCEPTS.SURGICAL_CASE_IN_PROGRESS,
     primaryProcedureId: PROCEDURE,
     ...overrides,
@@ -459,6 +470,81 @@ describe('PeriopIntraopService', () => {
         id: REPORT,
         reportVersion: 1,
         statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+      });
+    });
+
+    describe('procedureId del cliente (#864)', () => {
+      it('busca el procedimiento con el paciente del caso y el tenant del contexto', async () => {
+        const d = build();
+        d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
+        d.intraopRepo.findLastReport.mockResolvedValue(null);
+        d.intraopRepo.createReport.mockReturnValue({ id: REPORT });
+
+        await d.service.draftReport(CASE, dto(), actor);
+
+        expect(d.casesRepo.findProcedureOfPatient).toHaveBeenCalledWith(
+          d.tx,
+          PROCEDURE,
+          PATIENT,
+          TENANT_A,
+        );
+      });
+
+      it('rechaza con 404 el procedimiento de otro paciente o de otro tenant y no escribe el informe', async () => {
+        const d = build();
+        d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
+        d.casesRepo.findProcedureOfPatient.mockResolvedValue(null);
+
+        const error = await d.service
+          .draftReport(CASE, dto(), actor)
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect((error as ResourceNotFoundException).reason).toBe(
+          ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND,
+        );
+        expect(d.intraopRepo.createReport).not.toHaveBeenCalled();
+        expect(d.intraopRepo.createComplication).not.toHaveBeenCalled();
+      });
+
+      it('no se fía del filtro de la consulta: una fila de otro paciente o tenant también es 404', async () => {
+        for (const foreign of [
+          { patientProfileId: 'otro-paciente', custodianTenantId: TENANT_A },
+          { patientProfileId: PATIENT, custodianTenantId: TENANT_B },
+        ]) {
+          const d = build();
+          d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
+          d.casesRepo.findProcedureOfPatient.mockResolvedValue({
+            id: PROCEDURE,
+            ...foreign,
+          });
+
+          await expect(
+            d.service.draftReport(CASE, dto(), actor),
+          ).rejects.toMatchObject({
+            reason: ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND,
+          });
+          expect(d.intraopRepo.createReport).not.toHaveBeenCalled();
+        }
+      });
+
+      it('sin procedureId (informe por código) no valida: el procedimiento se crea con el paciente del caso', async () => {
+        const d = build();
+        d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
+        d.intraopRepo.findLastReport.mockResolvedValue(null);
+        d.intraopRepo.createReport.mockReturnValue({ id: REPORT });
+
+        await d.service.draftReport(
+          CASE,
+          dto({ procedureId: undefined, procedureCodeConceptId: SITE }),
+          actor,
+        );
+
+        expect(d.casesRepo.findProcedureOfPatient).not.toHaveBeenCalled();
+        expect(d.procedures.create).toHaveBeenCalledWith(
+          expect.objectContaining({ patientProfileId: PATIENT }),
+          actor,
+        );
       });
     });
 
