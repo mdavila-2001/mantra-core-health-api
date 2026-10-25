@@ -5,12 +5,16 @@ import {
   CONCEPTS,
   SEED,
   canonicalJson,
-  deriveWebhookSecret,
   signPayload,
 } from '../../../src/common';
 
 /**
  * Fixture compartido por las pruebas de pagos de F05 (MCH-011/017/036).
+ *
+ * Desde MCH-019 el callback se verifica con el secreto de la conexión
+ * configurada en la intención (`gateway_connections.webhook_secret_ref`), sin
+ * retroceso al secreto derivado por gateway: el fixture crea su conexión, la
+ * referencia por `env:WEBHOOK_SECRET_*` y firma con ese secreto.
  *
  * Mismo criterio que `mch-003.int-spec.ts`: no trunca ni borra. El gateway y
  * las intenciones llevan un sufijo propio, así que cada corrida es
@@ -21,6 +25,12 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
   const http = () => request(ctx().app.getHttpServer());
   const sufijo = randomUUID().slice(0, 8);
   const gatewayId = randomUUID();
+  const connectionId = randomUUID();
+  // El resolvedor lee el entorno del proceso al verificar, así que basta con
+  // definirlo antes del primer callback. Nombre: sólo [A-Z0-9_]; valor: >= 32.
+  const secretEnvName = `WEBHOOK_SECRET_PAGOS_${etiqueta.toUpperCase().replace(/[^A-Z0-9]/g, '')}_${sufijo.toUpperCase().replace(/[^A-Z0-9]/g, '')}`;
+  const webhookSecret = `secreto-fixture-pagos-${etiqueta}-${sufijo}-${randomUUID()}`;
+  process.env[secretEnvName] = webhookSecret;
   let intenciones = 0;
   let referencias = 0;
 
@@ -34,6 +44,7 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
     http,
     sql,
     gatewayId,
+    connectionId,
 
     /** Referencia única de gateway para esta corrida. */
     ref(): string {
@@ -58,6 +69,23 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
           TEST_ADMIN_ID,
         ],
       );
+      await sql(
+        `insert into payments.gateway_connections
+           (id, gateway_id, tenant_id, environment_concept_id, merchant_ref,
+            webhook_secret_ref, state_concept_id, created_at, updated_at,
+            created_by_user_id, row_version)
+         values (?, ?, ?, ?, ?, ?, ?, now(), now(), ?, 1)`,
+        [
+          connectionId,
+          gatewayId,
+          SEED.tenantId,
+          CONCEPTS.QA_ENV_DEV,
+          `${etiqueta.toUpperCase()}-${sufijo}`,
+          `env:${secretEnvName}`,
+          CONCEPTS.STATE_ACTIVE,
+          TEST_ADMIN_ID,
+        ],
+      );
     },
 
     /** Intención con riesgo aprobado, lista para cobrar. */
@@ -68,6 +96,7 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
         .send({
           tenantId: SEED.tenantId,
           gatewayId,
+          gatewayConnectionId: connectionId,
           amount,
           currency: 'BOB',
           purpose: 'OTHER',
@@ -99,7 +128,7 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
     callback(ref: string, outcome: 'AUTHORIZED' | 'CAPTURED' | 'FAILED') {
       const body = { gatewayTransactionRef: ref, outcome };
       const signature = signPayload(
-        deriveWebhookSecret('payments-gateway', gatewayId),
+        webhookSecret,
         canonicalJson({ ...body, authorizationCode: undefined }),
       );
       return http()
