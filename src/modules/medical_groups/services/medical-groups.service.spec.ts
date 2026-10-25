@@ -53,9 +53,35 @@ function build() {
   const members = new Map<string, any>();
   let seq = 0;
 
+  // Los nombres que el DTO resuelve en lote: un servicio, un perfil y una
+  // persona por id, con el nombre derivado del id para poder aseverarlo.
   const tx = {
     persist: mockFn(),
     flush: mockFn().mockResolvedValue(undefined),
+    find: mockFn(async (entity: any, where: any) => {
+      const ids: string[] = where.id?.$in ?? [];
+      if (entity.name === 'ServiceCatalog') {
+        return ids.map((id) => ({ id, name: `Servicio ${id}` }));
+      }
+      if (entity.name === 'PractitionerRoleAssignments') {
+        // Vinculaciones activas: el creador y el invitado en la práctica A,
+        // el ajeno en la B. Se filtra por las prácticas que pide el servicio.
+        const all = [
+          { practitionerProfileId: 'pract-creator', practiceId: PRACTICE_A },
+          { practitionerProfileId: 'pract-invitee', practiceId: PRACTICE_A },
+          { practitionerProfileId: 'pract-foreign', practiceId: PRACTICE_B },
+        ];
+        return all.filter((a) => where.practiceId.$in.includes(a.practiceId));
+      }
+      if (entity.name === 'PersonProfiles') {
+        return ids.map((id) => ({ id, personId: `person-${id}` }));
+      }
+      // Persons: sólo existen las `person-*`. Un id de profesional que fuera
+      // directamente una persona se prueba aparte.
+      return ids
+        .filter((id) => id.startsWith('person-') || id === 'pract-persona')
+        .map((id) => ({ id, displayName: `Nombre de ${id}` }));
+    }),
   };
   const em: any = {
     transactional: mockFn((cb: any) => cb(tx)),
@@ -122,6 +148,13 @@ function build() {
           isActive: true,
           descriptionText: 'Términos base',
         };
+      if (id === 'service-sin-descripcion')
+        return {
+          id,
+          practiceId: PRACTICE_A,
+          isActive: true,
+          descriptionText: null,
+        };
       if (id === 'service-b')
         return {
           id,
@@ -134,7 +167,11 @@ function build() {
   };
   const practiceTenantLookup = {
     findActivePracticeIdsForPractitioner: mockFn(async (id: string) => {
-      if (id === 'pract-creator' || id === 'pract-invitee') {
+      if (
+        id === 'pract-creator' ||
+        id === 'pract-invitee' ||
+        id === 'pract-persona'
+      ) {
         return [PRACTICE_A];
       }
       if (id === 'pract-foreign') return [PRACTICE_B];
@@ -195,6 +232,7 @@ function build() {
     members,
     tx,
     groupsRepo,
+    membersRepo,
     clinicalRead,
     practiceTenantLookup,
   };
@@ -448,7 +486,211 @@ describe('MedicalGroupsService', () => {
     });
   });
 
+  it('un servicio sin descripción (null en la base) no rompe el alta', async () => {
+    const d = build();
+    const created = await d.service.create(
+      baseDto({ serviceCatalogId: 'service-sin-descripcion' }),
+      creator,
+    );
+    expect(created.termsText).toBe('');
+  });
+
+  it('un grupo leído de la base (closed_at y paciente null) no figura cerrado', async () => {
+    const d = build();
+    const created = await d.service.create(baseDto(), creator);
+    // Lo que MikroORM hidrata desde Postgres: null, no undefined.
+    const stored = d.groups.get(created.id);
+    stored.closedAt = null;
+    stored.patientProfileId = null;
+
+    const group = await d.service.findOne(created.id, creator);
+    expect(group.isClosed).toBe(false);
+    expect(group.status).not.toBe('CLOSED');
+    expect(group.patientName).toBeNull();
+  });
+
+  it('al aceptar, guarda la respuesta antes de contar las invitaciones pendientes en la base', async () => {
+    const d = build();
+    const created = await d.service.create(
+      baseDto({
+        members: [
+          {
+            practitionerProfileId: 'pract-invitee',
+            roleTitle: 'Anestesista',
+            agreedPaymentAmount: '100.00',
+          },
+        ],
+      }),
+      creator,
+    );
+    const memberId = created.members.find((m) => !m.isCreator)!.id;
+    d.tx.flush.mockClear();
+    const hasPending = (d as any).membersRepo.hasPendingInvites;
+    hasPending.mockClear();
+
+    await d.service.respondToInvitation(
+      created.id,
+      memberId,
+      'ACCEPTED',
+      invitee,
+    );
+
+    expect(d.tx.flush.mock.invocationCallOrder[0]).toBeLessThan(
+      hasPending.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('el listado dice CLOSED de un grupo pasada la semana, igual que la consulta', async () => {
+    const d = build();
+    const created = await d.service.create(
+      baseDto({
+        scheduledAt: new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString(),
+      }),
+      creator,
+    );
+    const page = await d.service.list('historico', creator, {});
+    expect(page.items.find((item) => item.id === created.id)?.status).toBe(
+      'CLOSED',
+    );
+  });
+
+  describe('colegas que se pueden invitar', () => {
+    it('ofrece a los de la misma organización del servicio, sin quien pregunta', async () => {
+      const d = build();
+      const eligible = await d.service.listEligibleMembers(
+        'service-a',
+        creator,
+      );
+      expect(eligible).toEqual([
+        {
+          practitionerProfileId: 'pract-invitee',
+          name: 'Nombre de person-pract-invitee',
+        },
+      ]);
+    });
+
+    it('un servicio de otra práctica responde 404, como al crear', async () => {
+      const d = build();
+      await expect(
+        d.service.listEligibleMembers('service-b', creator),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('findOne y list', () => {
+    it('el grupo trae el nombre del servicio, de cada miembro y del paciente', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({
+          patientProfileId: PATIENT_A,
+          members: [
+            {
+              practitionerProfileId: 'pract-invitee',
+              roleTitle: 'Anestesista',
+              agreedPaymentAmount: '100.00',
+            },
+          ],
+        }),
+        creator,
+      );
+
+      const group = await d.service.findOne(created.id, creator);
+      expect(group.serviceName).toBe(`Servicio ${group.serviceCatalogId}`);
+      expect(group.patientName).toBe(`Nombre de person-${PATIENT_A}`);
+      expect(
+        group.members.map((m) => [m.practitionerProfileId, m.practitionerName]),
+      ).toEqual(
+        expect.arrayContaining([
+          ['pract-creator', 'Nombre de person-pract-creator'],
+          ['pract-invitee', 'Nombre de person-pract-invitee'],
+        ]),
+      );
+
+      const page = await d.service.list('historico', creator, {});
+      expect(page.items[0]?.serviceName).toBe(
+        `Servicio ${group.serviceCatalogId}`,
+      );
+    });
+
+    it('el invitado ve al paciente recién cuando acepta; pendiente o rechazado, no', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({
+          patientProfileId: PATIENT_A,
+          members: [
+            {
+              practitionerProfileId: 'pract-invitee',
+              roleTitle: 'Anestesista',
+              agreedPaymentAmount: '100.00',
+            },
+          ],
+        }),
+        creator,
+      );
+      const memberId = created.members.find((m) => !m.isCreator)!.id;
+
+      const pendiente = await d.service.findOne(created.id, invitee);
+      expect(pendiente.patientProfileId).toBe(PATIENT_A);
+      expect(pendiente.patientName).toBeNull();
+
+      const aceptado = await d.service.respondToInvitation(
+        created.id,
+        memberId,
+        'ACCEPTED',
+        invitee,
+      );
+      expect(aceptado.patientName).toBe(`Nombre de person-${PATIENT_A}`);
+    });
+
+    it('quien rechaza la invitación no recibe el nombre del paciente', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({
+          patientProfileId: PATIENT_A,
+          members: [
+            {
+              practitionerProfileId: 'pract-invitee',
+              roleTitle: 'Anestesista',
+              agreedPaymentAmount: '100.00',
+            },
+          ],
+        }),
+        creator,
+      );
+      const memberId = created.members.find((m) => !m.isCreator)!.id;
+      const rechazado = await d.service.respondToInvitation(
+        created.id,
+        memberId,
+        'REJECTED',
+        invitee,
+      );
+      expect(rechazado.patientName).toBeNull();
+    });
+
+    it('un perfil profesional cuyo id es el de su persona se nombra sin pasar por person_profiles', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(), {
+        ...creator,
+        practitionerProfileId: 'pract-persona',
+      });
+      expect(created.members[0]?.practitionerName).toBe(
+        'Nombre de pract-persona',
+      );
+    });
+
+    it('sin nombre cargado el miembro viaja con null, no con el id', async () => {
+      const d = build();
+      // Ningún perfil resuelve a una persona: cuenta a medio crear.
+      d.tx.find.mockImplementation(async (entity: any, where: any) =>
+        entity.name === 'ServiceCatalog'
+          ? where.id.$in.map((id: string) => ({ id, name: 'Servicio' }))
+          : [],
+      );
+      const created = await d.service.create(baseDto(), creator);
+      expect(created.members[0]?.practitionerName).toBeNull();
+      expect(created.patientName).toBeNull();
+    });
+
     it('el creador y el invitado ven el grupo; un tercero recibe 404', async () => {
       const d = build();
       const created = await d.service.create(
