@@ -15,12 +15,14 @@ export class ProvisionConnectionDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({
-    description: 'Tenant propietario de la conexión',
+  @ApiPropertyOptional({
+    description:
+      'Opcional: el tenant propietario sale del contexto autenticado; si se envía debe coincidir con él',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de environment mantenido por la instancia.

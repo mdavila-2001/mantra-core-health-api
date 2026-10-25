@@ -6,7 +6,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -17,6 +19,9 @@ import { conceptId, designationsFor, displayOf, glossaryEnabled, glossaryFor, is
 import { applyTag, readObo } from '../lib/obo.mjs';
 import { ncitRows, sympRows } from '../lib/obo-sources.mjs';
 import { REL, phenotypeResolver, relationsPlan } from '../lib/relations-plan.mjs';
+import { crosswalkRows, dedupeMap, duplicatesAgainst, glossaryEquivalents, wikidataSintomaConceptId, wikidataSintomaSlug } from '../lib/glossary-dedupe.mjs';
+import { buildPlan } from '../load-symptoms.mjs';
+import { CROSSWALK_FILE, CROSSWALK_MANIFEST } from '../lib/sources.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const fx = (f) => readFileSync(join(FX, f), 'utf8');
@@ -225,4 +230,82 @@ test('glosario activado por defecto; --no-glossary lo apaga', () => {
   assert.equal(glossaryEnabled(['--apply']), true);
   assert.equal(glossaryEnabled(['--apply', '--glossary']), true);
   assert.equal(glossaryEnabled(['--apply', '--no-glossary']), false);
+});
+
+// --- Duplicados glosario: HPO ↔ wikidata-sintoma-* (#831) ----------------------
+
+// Pares REALES de query.wikidata.org (P3841, 2026-10-24): Q6279182 = convulsión, Q38933 = fiebre.
+const SPARQL_P3841 = {
+  results: {
+    bindings: [
+      { x: { value: 'http://www.wikidata.org/entity/Q6279182' }, hpo: { value: 'HP:0001250' } },
+      { x: { value: 'http://www.wikidata.org/entity/Q38933' }, hpo: { value: 'HP:0001945' } },
+      { x: { value: 'http://www.wikidata.org/entity/Q6279182' }, hpo: { value: 'HP:0001250' } },
+      { x: { value: 'http://www.wikidata.org/entity/Q1' }, hpo: { value: 'no-es-un-id' } },
+    ],
+  },
+};
+
+test('cruce P3841: filas únicas ordenadas; lo que no parece Q-id o HP:n se descarta y se cuenta', () => {
+  const { rows, invalid } = crosswalkRows(SPARQL_P3841);
+  assert.deepEqual(rows, [{ q: 'Q38933', hpo: 'HP:0001945' }, { q: 'Q6279182', hpo: 'HP:0001250' }]);
+  assert.equal(invalid, 1);
+});
+
+test('duplicados: sólo cuenta el cruce por código (principal o id alternativo del propio HPO), nunca el nombre', () => {
+  const { rows } = hpoRows(hp, babelon, PROV);
+  const seizure = rows.find((r) => r.code === 'HP:0001250');
+  assert.ok(seizure.altIds.includes('HP:0001275'));
+  const { rows: cw } = crosswalkRows(SPARQL_P3841);
+  // Sintético sólo en el id alternativo: otro ítem declara el id viejo de «Seizure».
+  const eq = glossaryEquivalents([...cw, { q: 'Q999999999', hpo: 'HP:0001275' }], rows, isGlossaryTerm);
+  assert.deepEqual(eq.get('HP:0001250'), ['Q6279182', 'Q999999999']);
+  // Un HP que no es del glosario (frecuencia) o que no está en el corpus no genera equivalente.
+  assert.equal(glossaryEquivalents([{ q: 'Q5', hpo: 'HP:0040281' }, { q: 'Q6', hpo: 'HP:9999999' }], rows, isGlossaryTerm).size, 0);
+  // Un nombre idéntico sin cruce publicado no es duplicado.
+  assert.equal(glossaryEquivalents([], rows, isGlossaryTerm).size, 0);
+});
+
+test('duplicados: sin ficha wikidata-sintoma en el glosario no hay duplicado; con ella, el término HPO sale del glosario y se enlaza', () => {
+  const { rows, version } = hpoRows(hp, babelon, PROV);
+  const { rows: cw } = crosswalkRows(SPARQL_P3841);
+  const eq = glossaryEquivalents(cw, rows, isGlossaryTerm);
+  const bySystem = { hpo: rows };
+  const base = buildPlan(bySystem, { glossary: true })[0];
+  const glossaryOf = (p, code) => p.glossaryMemberships.filter((m) => m[2] === conceptId('hpo', code)).length;
+  assert.equal(glossaryOf(base, 'HP:0001250'), 2, 'sin dedupe entra a los dos value sets');
+
+  assert.equal(duplicatesAgainst(eq, new Set()).size, 0, 'sin ficha en el glosario no hay duplicado');
+
+  const dups = duplicatesAgainst(eq, new Set([wikidataSintomaConceptId('Q6279182')]));
+  assert.deepEqual([...dups.keys()], ['HP:0001250']);
+  const plan = buildPlan(bySystem, { glossary: true, duplicates: dups })[0];
+  assert.equal(glossaryOf(plan, 'HP:0001250'), 0, 'el duplicado no se suma al glosario');
+  assert.equal(plan.glossaryProperties.some((x) => x[1] === conceptId('hpo', 'HP:0001250')), false);
+  assert.equal(plan.concepts.length, base.concepts.length, 'el concepto sigue en el code system hpo');
+  const map = plan.maps.find((m) => m[1] === conceptId('hpo', 'HP:0001250') && m[2] === wikidataSintomaConceptId('Q6279182'));
+  assert.ok(map, 'queda enlazado a la ficha');
+  assert.match(map[4], /Q6279182 declara P3841 \(Human Phenotype Ontology ID\) = HP:0001250/);
+  assert.equal(map[3], null, 'no afirma equivalencia exacta');
+  assert.equal(map[5], version);
+  assert.equal(plan.glossaryMemberships.length, base.glossaryMemberships.length - 2);
+});
+
+test('duplicados: ids deterministas (slug de la ficha y fila de concept_maps)', () => {
+  assert.equal(wikidataSintomaSlug('Q38933'), 'wikidata-sintoma-q38933');
+  assert.equal(wikidataSintomaConceptId('Q38933'), wikidataSintomaConceptId('Q38933'));
+  const row = { code: 'HP:0001945', version: '2026-09-01' };
+  const dup = { q: 'Q38933', wikidataConceptId: wikidataSintomaConceptId('Q38933') };
+  assert.equal(dedupeMap(row, dup, 'x').id, dedupeMap(row, dup, 'x').id);
+});
+
+test('cruce P3841 versionado: coincide con su MANIFEST (SHA-256, filas) y todas las filas son Q-id + HP:n', () => {
+  const manifest = JSON.parse(readFileSync(CROSSWALK_MANIFEST, 'utf8'));
+  const gz = readFileSync(CROSSWALK_FILE);
+  assert.equal(createHash('sha256').update(gz).digest('hex'), manifest.gzSha256);
+  const rows = gunzipSync(gz).toString('utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+  assert.equal(rows.length, manifest.rows);
+  assert.equal(new Set(rows.map((r) => `${r.q}|${r.hpo}`)).size, rows.length, 'sin pares repetidos');
+  assert.ok(rows.every((r) => /^Q[1-9]\d*$/.test(r.q) && /^HP:\d{7}$/.test(r.hpo)));
+  assert.equal(manifest.license, 'CC0 1.0');
 });

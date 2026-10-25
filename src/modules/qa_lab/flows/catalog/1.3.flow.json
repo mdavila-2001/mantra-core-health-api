@@ -7,11 +7,7 @@
     "document": "SALUD/📋 Registro de procesos por módulo.md",
     "section": "1.3 · Agendar Hora para Consultas Medicas"
   },
-  "actors": [
-    "PATIENT",
-    "PRACTITIONER",
-    "SYSTEM"
-  ],
+  "actors": ["PATIENT", "PRACTITIONER", "SYSTEM"],
   "frontRoutes": [
     "/directory",
     "/directory/:profileId",
@@ -325,9 +321,7 @@
         "method": "POST",
         "path": "/scheduling/bookings/{id}/delay"
       },
-      "effects": [
-        "Sólo la informa quien atiende esa agenda"
-      ],
+      "effects": ["Sólo la informa quien atiende esa agenda"],
       "sourceRef": "ítem 5",
       "branches": [
         {

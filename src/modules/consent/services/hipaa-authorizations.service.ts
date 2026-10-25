@@ -4,11 +4,13 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
-  SEED,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
+import { ConsentScopeService } from './consent-scope.service';
+import { ConsentErrorReason } from '../consent.error-reasons';
 import {
   HipaaAuthorizationsRepository,
   ConsentEventsRepository,
@@ -33,12 +35,14 @@ export class HipaaAuthorizationsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param authRepo - Valor de auth repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param scope - Política común de tenant y referencias de la decisión.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly authRepo: HipaaAuthorizationsRepository,
     private readonly eventsRepo: ConsentEventsRepository,
+    private readonly scope: ConsentScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(HipaaAuthorizationsService.name);
@@ -71,11 +75,19 @@ export class HipaaAuthorizationsService {
       );
     }
 
+    // El tenant sale del contexto verificado, nunca del cuerpo.
+    const tenantId = this.scope.resolveTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
+      await this.scope.assertPatientExists(tx, dto.patientProfileId);
+      await this.scope.assertPurposeScope(
+        tx,
+        tenantId,
+        dto.processingPurposeId,
+      );
       const now = new Date();
       const auth = this.authRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
-        tenantId: dto.tenantId ?? SEED.tenantId,
+        tenantId,
         processingPurposeId: dto.processingPurposeId,
         recipientDescription: dto.recipientDescription,
         informationDescription: dto.informationDescription,
@@ -113,19 +125,35 @@ export class HipaaAuthorizationsService {
     });
   }
 
-  /** UC-07-05: revoca una autorización HIPAA activa. */
+  /**
+   * UC-07-05: revoca una autorización HIPAA activa.
+   *
+   * La autorización se carga por `(id, tenant activo)`: una de otro tenant
+   * responde igual que una inexistente (404, mismo mensaje y `reason`, sin
+   * `details`) y queda registrada la denegación.
+   */
   async revoke(id: string, actor: AuthenticatedUser): Promise<StatusResultDto> {
     this.logger.info(
       { operation: 'consent.hipaa.revoke', authId: id },
       'Revoking HIPAA authorization',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const auth = await this.authRepo.findById(tx, id);
-      if (!auth)
-        throw new ResourceNotFoundException(
-          'Autorización HIPAA no encontrada',
-          { id },
+      const loaded = await this.authRepo.findById(tx, id);
+      if (!loaded || loaded.tenantId !== tenantId) {
+        this.logger.warn(
+          {
+            operation: 'consent.hipaa.revoke',
+            authId: id,
+            reason: 'out-of-scope',
+          },
+          'Autorización HIPAA inexistente o fuera del alcance del actor',
         );
+      }
+      const auth = assertResourceInTenant(loaded, loaded?.tenantId, tenantId, {
+        message: 'Autorización HIPAA no encontrada',
+        reason: ConsentErrorReason.HIPAA_AUTHORIZATION_NOT_FOUND,
+      });
       if (auth.statusConceptId !== CONS.HIPAA_ACTIVE) {
         throw new ConflictException('La autorización no está activa', {
           id,

@@ -403,6 +403,10 @@ jobs:
           MINIO_BUCKET: mantra-redesa-health-files-ci
           JWT_SECRET: ci-only-secret-not-a-real-credential
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+          # El Postgres de `services:` es efímero aunque se llame como el de
+          # desarrollo; sin esto `lane16-patient-invoice-flow` se niega a correr
+          # (deja historial de sólo inserción: ver test/integration/disposable-database.ts).
+          ALLOW_PERMANENT_TEST_RESIDUE: "yes"
         run: yarn test:integration --ci
 
       - name: Generar documentación detallada de endpoints

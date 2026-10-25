@@ -35,6 +35,7 @@ import {
   FunnelStepsRepository,
   ConversionEventsRepository,
   TelemetryAnalyticsRepository,
+  ActorSessionsRepository,
 } from './repositories';
 
 /**
@@ -73,6 +74,7 @@ import {
     FunnelStepsRepository,
     ConversionEventsRepository,
     TelemetryAnalyticsRepository,
+    ActorSessionsRepository,
     // Analítica web externa: adaptadores concretos y selección por entorno.
     DisabledWebAnalyticsAdapter,
     GoogleAnalyticsHttpClient,

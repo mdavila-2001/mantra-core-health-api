@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -30,6 +30,7 @@ import {
   MEDICAL_GROUP_MEMBER_INVITATION_STATUS,
   MedicalGroupMembers,
 } from '../entities/medical_group_members.entity';
+import { MedicalGroupsErrorReason } from '../medical_groups.error-reasons';
 import type {
   CreateMedicalGroupDto,
   MedicalGroupConditionOptionDto,
@@ -39,6 +40,9 @@ import type {
 
 /** Ventana en la que el expediente admite notas del procedimiento (AC-21-18/19). */
 const EXERCISE_NOTES_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+const PATIENT_NOT_AVAILABLE_MESSAGE = 'Paciente no encontrado';
+const PRACTITIONER_NOT_AVAILABLE_MESSAGE = 'Profesional no encontrado';
 
 /** Tope por página cuando el cliente no pide uno. */
 const DEFAULT_PAGE_SIZE = 25;
@@ -116,23 +120,20 @@ export class MedicalGroupsService {
       }
 
       if (dto.patientProfileId !== undefined) {
+        // La política clínica corre siempre que haya paciente, con o sin
+        // diagnóstico y antes de persistir: asociar un paciente revela su
+        // identidad al equipo invitado, así que exige la misma base de lectura
+        // que `/clinical/patients/:id/summary`. Un paciente inexistente y uno
+        // sin base clínica responden igual (404, mismo mensaje y reason).
         const patient = await this.patientProfilesRepo.findById(
           tx,
           dto.patientProfileId,
         );
         if (patient === null) {
-          throw new ResourceNotFoundException('Paciente no encontrado', {
-            patientProfileId: dto.patientProfileId,
-          });
+          throw this.patientNotAvailable();
         }
+        await this.assertCanReadPatientHistory(dto.patientProfileId, actor);
         if (dto.conditionId !== undefined) {
-          // El mismo gate que `/clinical/patients/:id/summary`: el solicitante
-          // tiene que poder leer la historia de este paciente para poder
-          // referenciar uno de sus diagnósticos (AC-21-06/07).
-          await this.clinicalRead.assertCanReadHistory(
-            dto.patientProfileId,
-            actor,
-          );
           const condition = await this.conditionsRepo.findById(
             tx,
             dto.conditionId,
@@ -148,6 +149,11 @@ export class MedicalGroupsService {
         }
       }
 
+      const tenantPracticeIds = new Set(
+        await this.practiceTenantLookup.findActivePracticeIdsForTenant(
+          tenantId,
+        ),
+      );
       const seenPractitioners = new Set<string>([requestingPractitionerId]);
       for (const member of dto.members) {
         if (seenPractitioners.has(member.practitionerProfileId)) {
@@ -162,9 +168,17 @@ export class MedicalGroupsService {
           member.practitionerProfileId,
         );
         if (invited === null) {
-          throw new ResourceNotFoundException('Profesional no encontrado', {
-            practitionerProfileId: member.practitionerProfileId,
-          });
+          throw this.practitionerNotAvailable();
+        }
+        // Un invitado sólo entra si está vinculado a una práctica de la misma
+        // organización del grupo: invitar a un profesional de otro tenant le
+        // mostraría el paciente, el servicio y los términos del equipo.
+        const invitedPracticeIds =
+          await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+            member.practitionerProfileId,
+          );
+        if (!invitedPracticeIds.some((id) => tenantPracticeIds.has(id))) {
+          throw this.practitionerNotAvailable();
         }
       }
 
@@ -562,6 +576,41 @@ export class MedicalGroupsService {
   }
 
   /* ==================== helpers ============================================ */
+
+  /**
+   * Exige base clínica para leer la historia del paciente. El 403 del gate
+   * clínico se traduce a 404 uniforme: distinguirlo confirmaría que el UUID
+   * pertenece a un paciente real de otra organización.
+   */
+  private async assertCanReadPatientHistory(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    try {
+      await this.clinicalRead.assertCanReadHistory(patientProfileId, actor);
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw this.patientNotAvailable();
+      }
+      throw error;
+    }
+  }
+
+  private patientNotAvailable(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      PATIENT_NOT_AVAILABLE_MESSAGE,
+      undefined,
+      MedicalGroupsErrorReason.MEDICAL_GROUP_PATIENT_NOT_AVAILABLE,
+    );
+  }
+
+  private practitionerNotAvailable(): ResourceNotFoundException {
+    return new ResourceNotFoundException(
+      PRACTITIONER_NOT_AVAILABLE_MESSAGE,
+      undefined,
+      MedicalGroupsErrorReason.MEDICAL_GROUP_PRACTITIONER_NOT_AVAILABLE,
+    );
+  }
 
   private requirePractitioner(actor: AuthenticatedUser): string {
     if (actor.practitionerProfileId === undefined) {

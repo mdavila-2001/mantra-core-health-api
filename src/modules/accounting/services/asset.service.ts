@@ -11,6 +11,7 @@ import { ACCT } from '../accounting.concepts';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import { AssetRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
+import { AccountingScopeService } from './accounting-scope.service';
 import { toCents, fromCents } from './money';
 import {
   CapitalizeAssetDto,
@@ -33,12 +34,14 @@ export class AssetService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param assetRepo - Valor de asset repo requerido por la operación.
    * @param posting - Valor de posting requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly assetRepo: AssetRepository,
     private readonly posting: PostingHelper,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AssetService.name);
@@ -54,6 +57,30 @@ export class AssetService {
       'Capitalizing asset',
     );
     return this.em.transactional(async (tx) => {
+      // ACC-01: práctica, periodo, cuentas, dimensiones y área de depreciación
+      // son del tenant activo (y de esa práctica) antes de escribir el activo.
+      await this.scope.practice(dto.practiceId);
+      if (dto.fiscalPeriodId) {
+        await this.scope.periodInPractice(
+          tx,
+          dto.fiscalPeriodId,
+          dto.practiceId,
+        );
+      }
+      await this.scope.accountsInPractice(
+        tx,
+        [dto.acquisitionAccountId, dto.offsetAccountId],
+        dto.practiceId,
+      );
+      await this.scope.costCentersInPractice(
+        tx,
+        [dto.costCenterId],
+        dto.practiceId,
+      );
+      if (dto.depreciationAreaId) {
+        await this.scope.depreciationArea(tx, dto.depreciationAreaId);
+      }
+
       const clash = await this.assetRepo.findByCode(
         tx,
         dto.practiceId,
@@ -164,6 +191,12 @@ export class AssetService {
       'Running depreciation batch',
     );
     return this.em.transactional(async (tx) => {
+      // ACC-01: la práctica y el periodo son del tenant activo antes de leer o
+      // bloquear un solo activo; las cuentas las acota el posteo, que se
+      // ejecuta antes de escribir cada asiento.
+      await this.scope.practice(dto.practiceId);
+      await this.scope.periodInPractice(tx, dto.fiscalPeriodId, dto.practiceId);
+
       // Las filas de los activos se leen bloqueadas (`FOR UPDATE`) ANTES de
       // comprobar o crear la depreciación del periodo. Dos corridas
       // concurrentes sobre el mismo (activo, periodo) se serializan en esta

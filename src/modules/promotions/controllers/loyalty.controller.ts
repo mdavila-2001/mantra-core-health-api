@@ -22,6 +22,7 @@ import {
   getCurrentTenantId,
   PreconditionFailedException,
   Roles,
+  roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
 import { PromotionsErrorReason } from '../promotions.error-reasons';
@@ -78,7 +79,7 @@ export class LoyaltyController {
     // El worker SYSTEM barre todos los tenants; cualquier otro rol debe
     // acotarse al tenant del contexto (X-Tenant-Id), igual que el resto de
     // endpoints de administración de lealtad.
-    if (actor.roles.includes('SYSTEM')) {
+    if (roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
       return this.loyaltyService.listActivePrograms(query.limit);
     }
     const tenantId = getCurrentTenantId();

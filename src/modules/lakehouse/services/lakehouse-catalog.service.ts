@@ -10,6 +10,12 @@ import {
 import { OutboxService } from '../../messaging/services';
 import { LakehouseCatalogRepository } from '../repositories';
 import {
+  activeLakehouseTenant,
+  assertLakehouseFound,
+  lakehouseOutsideTenant,
+  requireFields,
+} from '../lakehouse.tenant-scope';
+import {
   DefineZoneDto,
   ZoneResponseDto,
   RegisterCatalogDto,
@@ -19,6 +25,12 @@ import {
   RegisterDatasetDto,
   DatasetResponseDto,
 } from '../dto';
+
+/** Formato de almacenamiento por defecto cuando ni el dataset ni el catálogo lo declaran. */
+const DEFAULT_STORAGE_FORMAT = 'parquet';
+
+/** Compresión por defecto de un catálogo que no declara una. */
+const DEFAULT_COMPRESSION = 'snappy';
 
 /**
  * Catálogo del lakehouse (UC-63-01 … 04): dónde vive el dato, contra qué
@@ -49,6 +61,12 @@ export class LakehouseCatalogService {
     dto: DefineZoneDto,
     actor: AuthenticatedUser,
   ): Promise<ZoneResponseDto> {
+    // La tabla exige los tres y no hay un default de negocio para ellos.
+    requireFields(
+      dto,
+      ['namespaceId', 'encryptionProfileCode', 'retentionPolicyCode'],
+      'definir la zona del data lake',
+    );
     return this.em.transactional(async (tx) => {
       const duplicate = await this.catalogRepo.findZoneByCode(tx, dto.code);
       if (duplicate) {
@@ -110,8 +128,9 @@ export class LakehouseCatalogService {
         code: dto.code,
         catalogType: dto.catalogType,
         metastoreUri: dto.metastoreUri,
-        defaultFormat: dto.defaultFormat,
-        defaultCompression: dto.defaultCompression,
+        // Defaults de negocio del lakehouse: Parquet comprimido con Snappy.
+        defaultFormat: dto.defaultFormat ?? DEFAULT_STORAGE_FORMAT,
+        defaultCompression: dto.defaultCompression ?? DEFAULT_COMPRESSION,
         state: 'active',
       });
 
@@ -150,25 +169,45 @@ export class LakehouseCatalogService {
     dto: PublishProductVersionDto,
     actor: AuthenticatedUser,
   ): Promise<ProductVersionResponseDto> {
+    // El tenant es el del contexto; el del cuerpo sólo puede coincidir con él.
+    const tenantId = activeLakehouseTenant(dto.tenantId);
+    // Todo versión necesita contrato; no existe un contrato por defecto.
+    requireFields(dto, ['contractSchemaJson'], 'publicar la versión');
     return this.em.transactional(async (tx) => {
-      let product = await this.catalogRepo.findProductForUpdate(tx, productId);
+      // El upsert por id no puede colisionar con la fila de otro tenant ni
+      // confirmar que existe: un id ajeno responde igual que uno inexistente.
+      const occupied = await this.catalogRepo.findProductById(tx, productId);
+      if (occupied && occupied.tenantId !== tenantId) {
+        throw lakehouseOutsideTenant('Producto de datos no encontrado.');
+      }
+      let product = await this.catalogRepo.findProductForUpdate(
+        tx,
+        tenantId,
+        productId,
+      );
       if (!product) {
         // El código es la clave natural: si ya hay un producto con él, el id de la
         // ruta está equivocado y crear otro rompería la unicidad.
         const byCode = await this.catalogRepo.findProductByCode(
           tx,
-          dto.tenantId,
+          tenantId,
           dto.code,
         );
         if (byCode) {
           throw new ConflictException(
             'Ya existe un producto con ese código para el tenant, con otro identificador.',
-            { tenantId: dto.tenantId, code: dto.code, existingId: byCode.id },
+            { tenantId, code: dto.code, existingId: byCode.id },
           );
         }
+        // El alta del producto exige lo que la tabla declara NOT NULL.
+        requireFields(
+          dto,
+          ['ownerTeamId', 'businessPurpose', 'classificationCode'],
+          'crear el producto de datos',
+        );
         product = this.catalogRepo.createProduct(tx, {
           id: productId,
-          tenantId: dto.tenantId,
+          tenantId,
           code: dto.code,
           name: dto.name,
           ownerTeamId: dto.ownerTeamId,
@@ -178,9 +217,9 @@ export class LakehouseCatalogService {
           lifecycleState: 'published',
         });
       } else {
-        if (product.code !== dto.code || product.tenantId !== dto.tenantId) {
+        if (product.code !== dto.code) {
           throw new ConflictException(
-            'El producto existente tiene otro código o pertenece a otro tenant.',
+            'El producto existente tiene otro código.',
             { productId, code: product.code },
           );
         }
@@ -225,7 +264,8 @@ export class LakehouseCatalogService {
         dataProductId: product.id,
         version: dto.version,
         contractSchemaJson: dto.contractSchemaJson,
-        qualitySloJson: dto.qualitySloJson,
+        // Sin objetivos declarados el SLO es vacío: no hay umbral que exigir.
+        qualitySloJson: dto.qualitySloJson ?? {},
         effectiveFrom: now,
         state: 'active',
       });
@@ -247,16 +287,18 @@ export class LakehouseCatalogService {
           dataProductVersionId: version.id,
           ruleCode: rule.ruleCode,
           dimension: rule.dimension,
-          expression: rule.expression,
+          // Una regla sin expresión se evalúa fuera de la API; sin umbral,
+          // cualquier registro fallido la incumple (umbral 0).
+          expression: rule.expression ?? '',
           severity: rule.severity,
-          threshold: rule.threshold,
+          threshold: rule.threshold ?? '0',
           state: 'active',
         });
         qualityRulesCreated += 1;
       }
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'DataProductVersionPublished',
         aggregateType: 'lakehouse.data_product_versions',
         aggregateId: version.id,
@@ -304,19 +346,18 @@ export class LakehouseCatalogService {
     dto: RegisterDatasetDto,
     actor: AuthenticatedUser,
   ): Promise<DatasetResponseDto> {
+    const tenantId = activeLakehouseTenant(dto.tenantId);
     return this.em.transactional(async (tx) => {
-      const productVersion = await this.catalogRepo.findProductVersionById(
-        tx,
-        dto.dataProductVersionId,
+      // Versión → producto → tenant: una versión de otro tenant responde igual
+      // que una inexistente.
+      const productVersion = assertLakehouseFound(
+        await this.catalogRepo.findProductVersionInTenant(
+          tx,
+          tenantId,
+          dto.dataProductVersionId,
+        ),
+        'Versión de producto no encontrada.',
       );
-      if (!productVersion) {
-        throw new ResourceNotFoundException(
-          'Versión de producto no encontrada.',
-          {
-            dataProductVersionId: dto.dataProductVersionId,
-          },
-        );
-      }
       if (productVersion.state !== 'active') {
         throw new PreconditionFailedException(
           'La versión del producto ya no es la vigente.',
@@ -356,6 +397,7 @@ export class LakehouseCatalogService {
 
       const duplicate = await this.catalogRepo.findDatasetByTable(
         tx,
+        tenantId,
         dto.lakehouseCatalogId,
         dto.databaseName,
         dto.tableName,
@@ -371,7 +413,7 @@ export class LakehouseCatalogService {
       }
 
       const dataset = this.catalogRepo.createDataset(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         dataProductVersionId: dto.dataProductVersionId,
         dataLakeZoneId: dto.dataLakeZoneId,
         lakehouseCatalogId: dto.lakehouseCatalogId,
@@ -379,9 +421,12 @@ export class LakehouseCatalogService {
         tableName: dto.tableName,
         // Del catálogo si no se declara: el formato por defecto existe para no
         // repetirlo en cada tabla.
-        storageFormat: dto.storageFormat ?? catalog.defaultFormat ?? 'parquet',
-        partitionSpecJson: dto.partitionSpecJson,
-        sourceDatasetCode: dto.sourceDatasetCode,
+        storageFormat:
+          dto.storageFormat ?? catalog.defaultFormat ?? DEFAULT_STORAGE_FORMAT,
+        // Tabla sin particionar: especificación vacía. Sin dataset de origen:
+        // código vacío (la tabla es el origen).
+        partitionSpecJson: dto.partitionSpecJson ?? {},
+        sourceDatasetCode: dto.sourceDatasetCode ?? '',
         lifecycleState: 'active',
       });
 
@@ -395,7 +440,7 @@ export class LakehouseCatalogService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'LakehouseDatasetRegistered',
         aggregateType: 'lakehouse.lakehouse_datasets',
         aggregateId: dataset.id,

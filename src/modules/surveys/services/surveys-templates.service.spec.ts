@@ -7,7 +7,9 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { SurveysTemplatesService } from './surveys-templates.service';
+import { SurveysErrorReason } from '../surveys.error-reasons';
 import { SURVEYS, ANSWER_TYPE_BY_CODE } from '../surveys.concepts';
 import {
   ConflictException,
@@ -47,6 +49,7 @@ function build() {
     // CL-60: el editor.
     findQuestionById: mockFn(),
     removeQuestion: mockFn(),
+    lockTemplate: mockFn().mockResolvedValue(undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new SurveysTemplatesService(
@@ -714,6 +717,87 @@ describe('SurveysTemplatesService', () => {
       await expect(
         withTenant(() => d.service.createNextVersion('tpl-1', actor)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    describe('numeración bajo concurrencia (SURV-02)', () => {
+      const published = {
+        id: 'ver-1',
+        versionNumber: 1,
+        publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED,
+        responseWindowDays: 45,
+      };
+
+      it('bloquea la plantilla antes de leer la última versión', async () => {
+        const d = build();
+        d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+        d.templatesRepo.findLatestVersion.mockResolvedValue(published);
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-2',
+          versionNumber: 2,
+        });
+
+        await withTenant(() => d.service.createNextVersion('tpl-1', actor));
+
+        expect(d.templatesRepo.lockTemplate).toHaveBeenCalledWith(
+          d.tx,
+          'tpl-1',
+        );
+        expect(
+          d.templatesRepo.lockTemplate.mock.invocationCallOrder[0],
+        ).toBeLessThan(
+          d.templatesRepo.findLatestVersion.mock.invocationCallOrder[0],
+        );
+      });
+
+      it('la segunda apertura ve el borrador de la primera y recibe el conflicto', async () => {
+        const d = build();
+        d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+        d.templatesRepo.findLatestVersion
+          .mockResolvedValueOnce(published)
+          .mockResolvedValueOnce({
+            id: 'ver-2',
+            versionNumber: 2,
+            publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+          });
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-2',
+          versionNumber: 2,
+        });
+
+        const first = await withTenant(() =>
+          d.service.createNextVersion('tpl-1', actor),
+        );
+        const second = await withTenant(() =>
+          d.service.createNextVersion('tpl-1', actor),
+        ).catch((e) => e);
+
+        expect(first.versionNumber).toBe(2);
+        expect(second).toBeInstanceOf(ConflictException);
+        expect(d.templatesRepo.createVersion).toHaveBeenCalledTimes(1);
+      });
+
+      it('si el modelo respalda el número, perder la carrera es 409/SURVEY_VERSION_NUMBER_TAKEN', async () => {
+        const d = build();
+        d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
+        d.templatesRepo.findLatestVersion.mockResolvedValue(published);
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-2',
+          versionNumber: 2,
+        });
+        d.tx.flush.mockRejectedValueOnce(
+          new UniqueConstraintViolationException(
+            new Error('duplicate key value violates unique constraint'),
+          ),
+        );
+
+        const error = await withTenant(() =>
+          d.service.createNextVersion('tpl-1', actor),
+        ).catch((e) => e);
+
+        expect(error).toBeInstanceOf(ConflictException);
+        expect(error.getStatus()).toBe(409);
+        expect(error.reason).toBe(SurveysErrorReason.VERSION_NUMBER_TAKEN);
+      });
     });
   });
 

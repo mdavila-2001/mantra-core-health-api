@@ -1,9 +1,6 @@
-import {
-  ArgumentMetadata,
-  BadRequestException,
-  Injectable,
-  PipeTransform,
-} from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { badRequestWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Valida y acota un query param `limit` opcional (`?limit=100`) antes de que
@@ -27,8 +24,11 @@ export class ParseOptionalLimitPipe implements PipeTransform<
     }
     const parsed = Number(value);
     if (!Number.isInteger(parsed) || parsed < 1 || parsed > this.max) {
-      throw new BadRequestException(
+      // El valor recibido no se repite: el cliente ya sabe qué mandó.
+      throw badRequestWithReason(
         `limit debe ser un entero entre 1 y ${this.max}`,
+        SystemErrorReason.INVALID_LIMIT,
+        { parameter: 'limit', max: this.max },
       );
     }
     return parsed;

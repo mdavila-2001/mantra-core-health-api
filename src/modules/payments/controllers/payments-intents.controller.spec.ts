@@ -197,11 +197,12 @@ describe('PaymentsOperationsController', () => {
     const dto = { gatewayTransactionRef: 'ref-1', outcome: 'CAPTURED' } as any;
     d.transactionsService.applyCallback.mockResolvedValue({ duplicate: false });
 
-    await d.controller.applyCallback('libelula', dto);
+    await d.controller.applyCallback('libelula', dto, '203.0.113.7');
 
     expect(d.transactionsService.applyCallback).toHaveBeenCalledWith(
       'libelula',
       dto,
+      '203.0.113.7',
     );
   });
 

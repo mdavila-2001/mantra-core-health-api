@@ -130,9 +130,16 @@ export class PeriopController {
     'SURGERY_SCHEDULER',
     'PERIOP_ADMIN',
   )
-  @ApiOperation({ summary: 'Detalle completo del caso quirúrgico' })
-  getCase(@Param('id', ParseUUIDPipe) id: string): Promise<CaseDetailDto> {
-    return this.casesService.getCaseDetail(id);
+  @ApiOperation({
+    summary: 'Detalle completo del caso quirúrgico',
+    description:
+      'Acotado al tenant del contexto. Un caso de otro tenant, inexistente o sin base de acceso para el actor responde el mismo 404.',
+  })
+  getCase(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CaseDetailDto> {
+    return this.casesService.getCaseDetail(id, actor);
   }
 
   /** UC-53-01. */

@@ -12,8 +12,44 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { DiagnosticUnitsErrorReason } from '../diagnostic_units.error-reasons';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
+
+const T1 = '11111111-1111-4111-8111-111111111111';
+const T2 = '22222222-2222-4222-8222-222222222222';
+
+/**
+ * Devuelve el servicio con cada método ejecutándose dentro del contexto de
+ * `tenantId`, como lo deja el interceptor de tenant en una petición real.
+ */
+function inTenant<T extends object>(service: T, tenantId: string = T1): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/** Exige el 404 uniforme: mismo `reason`, sin `details`. */
+async function expectOutOfScope(promise: Promise<unknown>) {
+  const error: any = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.reason).toBe(
+    DiagnosticUnitsErrorReason.DIAGNOSTIC_UNIT_RESOURCE_OUT_OF_SCOPE,
+  );
+  expect(error.details).toBeUndefined();
+  return error;
+}
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -24,6 +60,9 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const unitsRepo = {
+    findById: mockFn().mockResolvedValue({ id: 'u1', tenantId: T1 }),
+  };
   const sitesRepo = { findById: mockFn() };
   const equipmentRepo = {
     findById: mockFn(),
@@ -32,13 +71,24 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
-  const service = new DiagnosticEquipmentService(
-    em as any,
+  const scope = new DiagnosticUnitScopeService(
+    unitsRepo as any,
     sitesRepo as any,
-    equipmentRepo,
-    logger as any,
+    {} as any,
+    equipmentRepo as any,
+    {} as any,
+    {} as any,
+    {} as any,
   );
-  return { service, tx, sitesRepo, equipmentRepo };
+  const service = inTenant(
+    new DiagnosticEquipmentService(
+      em as any,
+      scope,
+      equipmentRepo,
+      logger as any,
+    ),
+  );
+  return { service, tx, unitsRepo, sitesRepo, equipmentRepo };
 }
 
 /**
@@ -47,6 +97,7 @@ function build() {
  */
 const activeSite = () => ({
   id: 's1',
+  diagnosticUnitId: 'u1',
   statusConceptId: DUNIT.SITE_ACTIVE,
   imagingAvailable: false,
   updatedAt: new Date(),
@@ -58,6 +109,7 @@ describe('DiagnosticEquipmentService', () => {
       const d = build();
       d.sitesRepo.findById.mockResolvedValue({
         id: 's1',
+        diagnosticUnitId: 'u1',
         statusConceptId: 'other',
       });
       await expect(
@@ -111,6 +163,7 @@ describe('DiagnosticEquipmentService', () => {
 
     it('updates the operational status', async () => {
       const d = build();
+      d.sitesRepo.findById.mockResolvedValue(activeSite());
       const equipment = {
         id: 'e1',
         diagnosticUnitSiteId: 's1',
@@ -124,6 +177,75 @@ describe('DiagnosticEquipmentService', () => {
         actor,
       );
       expect(res.operationalStatus).toBe(DUNIT.EQUIPMENT_MAINTENANCE);
+    });
+  });
+
+  describe('alcance de tenant (DUNIT-01)', () => {
+    const foreignUnit = { id: 'uB', tenantId: T2 };
+
+    it('agregar equipo a un sitio de otro tenant responde 404 uniforme y no escribe', async () => {
+      const d = build();
+      const site = activeSite();
+      d.sitesRepo.findById.mockResolvedValue(site);
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      await expectOutOfScope(
+        d.service.addEquipment(
+          's1',
+          { equipmentTypeConceptId: 'et1', modalityConceptId: 'm1' } as any,
+          actor,
+        ),
+      );
+      expect(d.equipmentRepo.create).not.toHaveBeenCalled();
+      expect(site.imagingAvailable).toBe(false);
+    });
+
+    it('un sitio ajeno responde igual que uno inexistente', async () => {
+      const ajeno = build();
+      ajeno.sitesRepo.findById.mockResolvedValue(activeSite());
+      ajeno.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      const inexistente = build();
+      inexistente.sitesRepo.findById.mockResolvedValue(null);
+      const dto = { equipmentTypeConceptId: 'et1' } as any;
+      const a = await expectOutOfScope(
+        ajeno.service.addEquipment('s1', dto, actor),
+      );
+      const b = await expectOutOfScope(
+        inexistente.service.addEquipment('s1', dto, actor),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('actualizar un equipo de otro tenant no cambia su estado', async () => {
+      const d = build();
+      const equipment: any = {
+        id: 'eB',
+        diagnosticUnitSiteId: 's1',
+        operationalStatusConceptId: DUNIT.EQUIPMENT_OPERATIONAL,
+        updatedAt: new Date(),
+      };
+      d.equipmentRepo.findById.mockResolvedValue(equipment);
+      d.sitesRepo.findById.mockResolvedValue(activeSite());
+      d.unitsRepo.findById.mockResolvedValue(foreignUnit);
+      await expectOutOfScope(
+        d.service.updateEquipment(
+          'eB',
+          { operationalStatusConceptId: DUNIT.EQUIPMENT_MAINTENANCE },
+          actor,
+        ),
+      );
+      expect(equipment.operationalStatusConceptId).toBe(
+        DUNIT.EQUIPMENT_OPERATIONAL,
+      );
+    });
+
+    it('un equipo cuyo sitio no existe responde 404 uniforme', async () => {
+      const d = build();
+      d.equipmentRepo.findById.mockResolvedValue({
+        id: 'e1',
+        diagnosticUnitSiteId: 'sX',
+      });
+      d.sitesRepo.findById.mockResolvedValue(null);
+      await expectOutOfScope(d.service.updateEquipment('e1', {}, actor));
     });
   });
 });

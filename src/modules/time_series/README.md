@@ -124,9 +124,14 @@ CONSULTA
   historial del paciente mostraría dos tomas donde hubo una.
 - **La vital y su observación clínica se confirman juntas.** Si no, quedaría una vital marcada como
   promovida apuntando a una observación que no existe.
-- **La ubicación exige consentimiento** como campo obligatorio de la petición, no como comprobación
-  aparte. Es el dato más fácil de recoger sin darse cuenta de que hace falta permiso, y el permiso
-  viaja en el evento para que quien proyecte pueda comprobarlo.
+- **La ubicación exige un consentimiento verificado.** `consentId` es obligatorio y además se
+  contrasta con `consent.consents` antes de insertar (`LocationConsentPolicy`): del tenant del
+  contexto, `ACTIVE` y no retirado, con vigencia `[valid_from, valid_to)` que cubre el instante de
+  ingesta y cada ping (`valid_to` es exclusivo), de un propósito con `code` `LOCATION_TRACKING`
+  activo, y con todos los sujetos del lote siendo el titular (su perfil de paciente) o un
+  dispositivo de una cuenta con vínculo vigente a él. Cualquier fallo es `403 FORBIDDEN /
+  TIME_SERIES_LOCATION_CONSENT_INVALID`, idéntico para todas las causas y sin persistir nada. El
+  tenant sale del contexto autenticado, no del cuerpo. El permiso además viaja en el evento.
 - **El backfill exige justificación y ventana.** Una corrección sin motivo declarado es
   indistinguible de una manipulación, y una corrección fuera de la ventana aprobada no es la
   corrección que se aprobó.
@@ -222,8 +227,9 @@ aprobadas durante la revisión.
   aquí viven en `ROLLUPS`, dentro del módulo.
 - **`redis_runtime.idempotency_entries` y `distributed_lock_entries`** (UC-58-01, 05, 12): aquí lo
   cubren las claves naturales y la clave de idempotencia del outbox.
-- **Comprobación de consentimiento contra `consent.consents`** (UC-58-09, 13): el consentimiento se
-  exige y se propaga, pero no se contrasta contra el módulo 07.
+- **Consentimiento en la lectura** (UC-58-09): la consulta de rango no contrasta consentimiento; sólo
+  la ingesta de ubicación (UC-58-13) lo hace. El propósito `LOCATION_TRACKING` debe existir en
+  `consent.processing_purposes` (no hay semilla): sin él, la ingesta de ubicación se rechaza.
 - **`audit.audit_events` en la lectura de datos sensibles** (UC-58-09): el caso de uso pide registrar
   la consulta. El registro de auditoría es del módulo 06.
 - **Re-materialización automática de los rollups afectados por un backfill** (UC-58-12): el evento
@@ -233,5 +239,5 @@ aprobadas durante la revisión.
 
 ## Revisión ALOVIDA
 
-La referencia de consentimiento de ubicación se exige pero no se verifica contra la política
-canónica.
+La referencia de consentimiento de ubicación se verifica contra `consent.consents` (TS-01); ver
+«Reglas de negocio».

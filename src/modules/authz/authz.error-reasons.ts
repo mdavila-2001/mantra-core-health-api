@@ -40,6 +40,19 @@ export enum AuthzErrorReason {
 
   /** `validTo` no es posterior a `validFrom` en una relación asistencial. */
   CARE_RELATIONSHIP_INVALID_VALIDITY_WINDOW = 'CARE_RELATIONSHIP_INVALID_VALIDITY_WINDOW',
+  /**
+   * El paciente no existe o no tiene vínculo comprobable con el tenant activo
+   * (encuentro, turno, episodio o membresía de su cuenta). Es el mismo 404 en
+   * ambos casos: distinguirlos confirmaría que el UUID existe en otra organización.
+   */
+  AUTHZ_PATIENT_OUT_OF_SCOPE = 'AUTHZ_PATIENT_OUT_OF_SCOPE',
+  /** El encuentro no existe, es de otro tenant o pertenece a otro paciente. */
+  AUTHZ_ENCOUNTER_PATIENT_MISMATCH = 'AUTHZ_ENCOUNTER_PATIENT_MISMATCH',
+  /** El consentimiento no existe, es de otro tenant o pertenece a otro paciente. */
+  AUTHZ_CONSENT_PATIENT_MISMATCH = 'AUTHZ_CONSENT_PATIENT_MISMATCH',
+  /** El tenant del cuerpo no coincide con el tenant activo del actor. */
+  AUTHZ_TENANT_SCOPE_REQUIRED = 'AUTHZ_TENANT_SCOPE_REQUIRED',
+
   /** Ya existe una relación asistencial activa para ese (paciente, practicante). */
   CARE_RELATIONSHIP_ALREADY_ACTIVE = 'CARE_RELATIONSHIP_ALREADY_ACTIVE',
   /** No se encontró la relación asistencial a revocar. */

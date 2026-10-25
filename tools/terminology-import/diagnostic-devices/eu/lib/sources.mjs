@@ -113,8 +113,8 @@ export const SOURCES = {
     access:
       'CSV mensual con código, descripción, nivel, nivel terminal y referencias CIVAB. La CND es la base de la EMDN.',
     terms: {
-      verified: false,
-      text: 'Italian Open Data License v2.0 según la ficha (leída vía buscador). Pendiente confirmar.',
+      verified: true,
+      text: 'Italian Open Data Licence v2.0, leída en vivo el 2026-10-24 en la ficha del conjunto (campo «Licenza»); el pie del portal dice además que los contenidos del sitio están bajo IODL. Atribución: Ministero della Salute.',
     },
     autoFetch: true,
   },

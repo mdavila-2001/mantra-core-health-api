@@ -128,6 +128,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConsentEvidenceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConsentEvidenceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -295,6 +296,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConsentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConsentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConsentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConsentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -327,8 +329,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
+| 404 | `NOT_FOUND` | Propósito de tratamiento no encontrado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
+| 404 | `NOT_FOUND` | Base legal no encontrada | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
 | 409 | `CONFLICT` | Ya existe un consentimiento activo para este propósito | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La base legal no corresponde al propósito indicado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -452,6 +458,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -476,7 +483,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 409 | `CONFLICT` | El consentimiento no está activo | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -575,6 +581,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -599,7 +606,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 409 | `CONFLICT` | El consentimiento no está activo | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -685,6 +691,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyTreatmentConsentListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -833,6 +840,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -980,6 +988,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HipaaAuthorizationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HipaaAuthorizationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HipaaAuthorizationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HipaaAuthorizationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HipaaAuthorizationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1010,9 +1019,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
+| 404 | `NOT_FOUND` | Propósito de tratamiento no encontrado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
+| 404 | `NOT_FOUND` | Base legal no encontrada | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | expiresAt es obligatorio cuando expirationType=DATE | Excepción explícita en src/modules/consent/services/hipaa-authorizations.service.ts |
 | 422 | `PRECONDITION_FAILED` | expirationEventText es obligatorio cuando expirationType=EVENT | Excepción explícita en src/modules/consent/services/hipaa-authorizations.service.ts |
+| 422 | `PRECONDITION_FAILED` | La base legal no corresponde al propósito indicado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1097,6 +1110,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1121,7 +1135,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Autorización HIPAA no encontrada | Excepción explícita en src/modules/consent/services/hipaa-authorizations.service.ts |
 | 409 | `CONFLICT` | La autorización no está activa | Excepción explícita en src/modules/consent/services/hipaa-authorizations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1203,6 +1216,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ExpirationSweepResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpirationSweepResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpirationSweepResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpirationSweepResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpirationSweepResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1309,6 +1323,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyConsentListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyConsentListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyConsentListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyConsentListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyConsentListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1455,6 +1470,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1479,7 +1495,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/consent/services/consents.service.ts |
+| 404 | `NOT_FOUND` | Consentimiento no encontrado | Excepción explícita en src/modules/consent/services/consent-me.service.ts |
+| 404 | `NOT_FOUND` | CONSENT_NOT_FOUND.message | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 409 | `CONFLICT` | El consentimiento no está activo | Excepción explícita en src/modules/consent/services/consents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1561,6 +1578,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyHipaaAuthorizationListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyHipaaAuthorizationListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyHipaaAuthorizationListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyHipaaAuthorizationListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyHipaaAuthorizationListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1689,6 +1707,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyObjectionListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyObjectionListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyObjectionListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyObjectionListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyObjectionListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1813,6 +1832,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyTreatmentConsentListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyTreatmentConsentListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1958,6 +1978,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PatientObjectionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PatientObjectionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PatientObjectionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientObjectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientObjectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2092,6 +2113,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2223,6 +2245,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerAccessRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2372,6 +2395,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerAccessRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerAccessRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2499,6 +2523,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PractitionerAccessRequestResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerAccessRequestResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2642,6 +2667,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PrivacyRestrictionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PrivacyRestrictionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PrivacyRestrictionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PrivacyRestrictionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrivacyRestrictionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2672,6 +2698,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/consent/services/consent-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2779,6 +2806,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProcessingLegalBasisResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProcessingLegalBasisResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProcessingLegalBasisResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProcessingLegalBasisResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcessingLegalBasisResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2922,6 +2950,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TreatmentInformedConsentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TreatmentInformedConsentResponseDto`. Ejemplo completo derivado de ese DTO:
 

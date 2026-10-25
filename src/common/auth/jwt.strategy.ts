@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWT_ALGORITHM, loadAuthEnv } from './auth.env';
 import type { JwtPayload } from './jwt-payload.interface';
 import type { AuthenticatedUser } from './authenticated-user.interface';
 import { SessionValidator } from './session-validator';
+import { unauthorizedWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Reconstruye el `AuthenticatedUser` a partir de un payload ya verificado.
@@ -52,8 +54,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
     if (payload.typ !== 'access') {
-      throw new UnauthorizedException(
+      throw unauthorizedWithReason(
         'Tipo de token no válido para autenticación',
+        SystemErrorReason.TOKEN_TYPE_INVALID,
       );
     }
     await this.sessions.assertActive(payload);

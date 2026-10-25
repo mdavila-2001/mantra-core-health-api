@@ -131,11 +131,12 @@ rechazo se publican en su propia transacción: la del intento rechazado no se co
 |---|---|
 | `OrderPlaced` | `outbox.service.ts` |
 
-### `procedures_perioperative` (1 evento)
+### `procedures_perioperative` (2 eventos)
 
 | Evento | Servicio productor |
 |---|---|
 | `periop.case.confirmation_blocked` | `periop-cases.service.ts` |
+| `periop.case.reacceptance_required` | `periop-reacceptance.service.ts` |
 
 ### `time_series` (9 eventos)
 

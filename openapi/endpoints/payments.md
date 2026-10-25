@@ -82,6 +82,7 @@ Content-Type: application/json
 | `outcome` | Sí | `string` | valores: `CAPTURED`, `FAILED`, `AUTHORIZED` | Resultado informado por el gateway | `CAPTURED` |
 | `authorizationCode` | No | `string` | longitud máxima 100 | Código de autorización | `CODIGO_EJEMPLO` |
 | `signature` | No | `string` | longitud máxima 500 | Firma del proveedor para verificar el origen | `valor-ejemplo` |
+| `timestamp` | No | `string` | formato `date-time` | Instante de emisión del evento (ISO-8601), firmado junto con el resto | `2026-07-31T12:00:00.000Z` |
 
 ### Payload completo de ejemplo
 
@@ -97,7 +98,8 @@ Content-Type: application/json
   "gatewayTransactionRef": "valor-ejemplo",
   "outcome": "CAPTURED",
   "authorizationCode": "CODIGO_EJEMPLO",
-  "signature": "valor-ejemplo"
+  "signature": "valor-ejemplo",
+  "timestamp": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -115,6 +117,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CallbackResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CallbackResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CallbackResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CallbackResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CallbackResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -149,6 +152,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 401 | `UNAUTHENTICATED` | Firma del webhook inválida | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 401 | `UNAUTHENTICATED` | Callback no autorizado para este endpoint | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | No hay transacción para la referencia informada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -272,6 +276,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise< CheckoutSessionResponseDto & { /** * Valor de session token mantenido por la instancia. */ sessionToken: string; } >` | No |
 | 429 | Operación completada correctamente. | `Promise< CheckoutSessionResponseDto & { /** * Valor de session token mantenido por la instancia. */ sessionToken: string; } >` | No |
 | 500 | Operación completada correctamente. | `Promise< CheckoutSessionResponseDto & { /** * Valor de session token mantenido por la instancia. */ sessionToken: string; } >` | No |
+| 504 | Operación completada correctamente. | `Promise< CheckoutSessionResponseDto & { /** * Valor de session token mantenido por la instancia. */ sessionToken: string; } >` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CheckoutSessionResponseDto & { /** * Valor de session token mantenido por la instancia. */ sessionToken: string; }`. Ejemplo completo derivado de ese DTO:
 
@@ -305,7 +310,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Deuda no encontrada | Excepción explícita en src/modules/payments/services/payments-checkout.service.ts |
+| 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-checkout.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El tenantId del cuerpo no coincide con el tenant activo | Excepción explícita en src/modules/payments/services/payments-checkout.service.ts |
 | 422 | `PRECONDITION_FAILED` | La deuda ya tiene un checkout abierto | Excepción explícita en src/modules/payments/services/payments-checkout.service.ts |
 | 422 | `PRECONDITION_FAILED` | La deuda ya está saldada | Excepción explícita en src/modules/payments/services/payments-checkout.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -381,8 +388,8 @@ Content-Type: application/json
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `feeType` | Sí | `string` | valores: `GATEWAY`, `PLATFORM` | Quién cobra la tarifa | `GATEWAY` |
 | `method` | Sí | `string` | valores: `PERCENTAGE`, `FIXED` | Modo de cálculo | `PERCENTAGE` |
-| `percentage` | No | `string` | Sin restricción adicional declarada | Porcentaje cuando method=PERCENTAGE | `2.9` |
-| `fixedAmount` | No | `string` | Sin restricción adicional declarada | Importe fijo cuando method=FIXED | `0.30` |
+| `percentage` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Porcentaje cuando method=PERCENTAGE | `2.9` |
+| `fixedAmount` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Importe fijo cuando method=FIXED | `0.30` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 
@@ -422,6 +429,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FeeScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FeeScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FeeScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FeeScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FeeScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -526,7 +534,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario del cobro | `00000000-0000-4000-8000-000000000001` |
 | `gatewayId` | Sí | `string` | formato `uuid` | Gateway a través del cual se cobrará | `00000000-0000-4000-8000-000000000001` |
-| `amount` | Sí | `string` | Sin restricción adicional declarada | Importe a cobrar, como cadena decimal para no perder precisión | `150.00` |
+| `amount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Importe a cobrar, como cadena decimal para no perder precisión | `150.00` |
 | `currency` | Sí | `string` | valores: `BOB`, `USD` | Moneda ISO-4217 del cobro | `BOB` |
 | `purpose` | Sí | `string` | valores: `INVOICE`, `DEBT`, `OTHER` | Propósito del cobro | `INVOICE` |
 | `idempotencyKey` | Sí | `string` | longitud máxima 200 | Clave de idempotencia del cliente. Repetirla devuelve el intent existente en lugar de cobrar dos veces. | `valor-ejemplo` |
@@ -576,6 +584,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PaymentIntentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PaymentIntentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PaymentIntentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PaymentIntentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentIntentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -683,7 +692,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `fromCurrency` | Sí | `string` | valores: `BOB`, `USD` | Moneda de origen | `BOB` |
 | `toCurrency` | Sí | `string` | valores: `BOB`, `USD` | Moneda destino | `BOB` |
-| `lockedRate` | Sí | `string` | Sin restricción adicional declarada | Cotización bloqueada | `6.96` |
+| `lockedRate` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Cotización bloqueada | `6.96` |
 | `expiresAt` | Sí | `string` | formato `date-time` | Vigencia del bloqueo | `2026-07-31T12:00:00.000Z` |
 | `providerRef` | No | `string` | longitud máxima 200 | Referencia del proveedor de FX | `valor-ejemplo` |
 
@@ -720,6 +729,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FxLockResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FxLockResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FxLockResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FxLockResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FxLockResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -823,7 +833,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `riskScore` | Sí | `string` | Sin restricción adicional declarada | Score de riesgo (0-100) | `12.5` |
+| `riskScore` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Score de riesgo (0-100) | `12.5` |
 | `decision` | Sí | `string` | valores: `APPROVE`, `REVIEW`, `DECLINE` | Decisión del motor | `APPROVE` |
 | `threeDsAuthenticated` | No | `boolean` | Sin restricción adicional declarada | true si el pagador completó 3-D Secure | `true` |
 | `providerRef` | No | `string` | longitud máxima 200 | Referencia del proveedor antifraude | `valor-ejemplo` |
@@ -862,6 +872,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RiskAssessmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RiskAssessmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RiskAssessmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RiskAssessmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RiskAssessmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -964,8 +975,8 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `payeeConnectedAccountId` | Sí | `string` | formato `uuid` | Cuenta conectada que recibe el reparto | `00000000-0000-4000-8000-000000000001` |
 | `splitType` | Sí | `string` | valores: `AMOUNT`, `PERCENTAGE` | Modo de reparto | `AMOUNT` |
-| `amount` | No | `string` | Sin restricción adicional declarada | Importe fijo cuando splitType=AMOUNT | `valor-ejemplo` |
-| `percentage` | No | `string` | Sin restricción adicional declarada | Porcentaje cuando splitType=PERCENTAGE | `15.00` |
+| `amount` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Importe fijo cuando splitType=AMOUNT | `valor-ejemplo` |
+| `percentage` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Porcentaje cuando splitType=PERCENTAGE | `15.00` |
 | `isPlatformFee` | No | `boolean` | Sin restricción adicional declarada | true si el reparto es la comisión de la plataforma | `true` |
 | `destinationWalletId` | No | `string` | formato `uuid` | Wallet destino | `00000000-0000-4000-8000-000000000001` |
 
@@ -1003,6 +1014,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SplitResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SplitResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SplitResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SplitResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SplitResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1038,6 +1050,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un reparto por importe exige `amount` | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un reparto por porcentaje exige `percentage` | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
+| 422 | `PRECONDITION_FAILED` | El reparto debe ser un importe positivo | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1142,6 +1155,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransactionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1267,8 +1281,8 @@ Content-Type: application/json
 | `periodEnd` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `items` | Sí | `array<PayoutItemDto>` | mínimo 1 elemento(s) | Ítems a liquidar | `[{"sourceRefId":"00000000-0000-4000-8000-000000000001","amount":"100.00","commissionAmount":"5.00","description":"Texto descriptivo de ejemplo"}]` |
 | `items[].sourceRefId` | Sí | `string` | formato `uuid` | Transacción que origina el ítem | `00000000-0000-4000-8000-000000000001` |
-| `items[].amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `100.00` |
-| `items[].commissionAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `5.00` |
+| `items[].amount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `100.00` |
+| `items[].commissionAmount` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `5.00` |
 | `items[].description` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 | `gatewayPayoutRef` | No | `string` | longitud máxima 200 | Referencia del payout en el gateway | `valor-ejemplo` |
 
@@ -1314,6 +1328,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PayoutResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PayoutResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PayoutResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PayoutResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PayoutResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1429,10 +1444,10 @@ Content-Type: application/json
 | `periodEnd` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `providerRecords` | Sí | `array<ProviderRecordDto>` | Sin restricción adicional declarada | Extracto del proveedor | `[{"externalTransactionId":"00000000-0000-4000-8000-000000000001","providerAmount":"150.00","providerStatusCode":"CODIGO_EJEMPLO","providerCurrencyCode":"BOB","providerFeeAmount":"4.65"}]` |
 | `providerRecords[].externalTransactionId` | Sí | `string` | longitud máxima 200 | Id de la transacción en el proveedor | `00000000-0000-4000-8000-000000000001` |
-| `providerRecords[].providerAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `providerRecords[].providerAmount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `150.00` |
 | `providerRecords[].providerStatusCode` | Sí | `string` | longitud máxima 50 | Código de estado informado por el proveedor | `CODIGO_EJEMPLO` |
 | `providerRecords[].providerCurrencyCode` | Sí | `string` | valores: `BOB`, `USD` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
-| `providerRecords[].providerFeeAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `4.65` |
+| `providerRecords[].providerFeeAmount` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `4.65` |
 
 ### Payload completo de ejemplo
 
@@ -1475,6 +1490,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReconciliationRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReconciliationRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReconciliationRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReconciliationRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReconciliationRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1588,16 +1604,16 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `gatewayId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `settlementRef` | Sí | `string` | longitud máxima 200 | Referencia del lote en el gateway (única) | `valor-ejemplo` |
-| `grossAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1500.00` |
-| `feeAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `46.50` |
-| `netAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1453.50` |
+| `grossAmount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `1500.00` |
+| `feeAmount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `46.50` |
+| `netAmount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `1453.50` |
 | `currency` | Sí | `string` | valores: `BOB`, `USD` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 | `settledAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `lines` | Sí | `array<SettlementLineDto>` | mínimo 1 elemento(s) | Detalle de la liquidación | `[{"paymentTransactionId":"00000000-0000-4000-8000-000000000001","refundId":"00000000-0000-4000-8000-000000000001","amount":"150.00","feeAmount":"4.65"}]` |
 | `lines[].paymentTransactionId` | No | `string` | formato `uuid` | Transacción liquidada | `00000000-0000-4000-8000-000000000001` |
 | `lines[].refundId` | No | `string` | formato `uuid` | Reembolso liquidado | `00000000-0000-4000-8000-000000000001` |
-| `lines[].amount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `150.00` |
-| `lines[].feeAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `4.65` |
+| `lines[].amount` | Sí | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `lines[].feeAmount` | No | `string` | patrón runtime `BOUNDED_DECIMAL_REGEX` | Sin descripción específica en el contrato OpenAPI. | `4.65` |
 
 ### Payload completo de ejemplo
 
@@ -1641,6 +1657,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SettlementResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SettlementResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SettlementResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SettlementResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SettlementResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1780,6 +1797,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CancellationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CancellationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CancellationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CancellationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CancellationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1913,6 +1931,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RefundResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefundResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefundResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefundResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefundResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2032,6 +2051,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusInquiryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusInquiryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusInquiryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusInquiryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusInquiryResponseDto`. Ejemplo completo derivado de ese DTO:
 

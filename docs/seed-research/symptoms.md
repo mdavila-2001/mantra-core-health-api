@@ -265,12 +265,29 @@ OMS). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
   `glossary-slug` (`hpo-hp-0001250`), `glossary-external-ids`,
   `glossary-provenance`. Es el **mismo concepto** del sistema `hpo`, no una copia.
   `--no-glossary` lo apaga.
-- **Riesgo de duplicado visible:** las fichas `wikidata-sintoma-*` del glosario
-  (destinos de Wikidata P780) no declaran su id HPO, así que hoy no se puede saber
-  por código cuáles son el mismo síntoma que un término HPO. El cruce existe en
-  Wikidata (P3841 *Human Phenotype Ontology ID*), pero `query.wikidata.org` está
-  bloqueado en este entorno. El propietario lo activó **aceptando ese riesgo**;
-  se resuelve cuando se traiga P3841 (dedupe por código).
+- **Duplicados: cruce por código con Wikidata P3841.** Las fichas
+  `wikidata-sintoma-*` del glosario (destinos de Wikidata P780) no declaran su id
+  HPO, pero Wikidata sí lo declara con la propiedad P3841 *Human Phenotype
+  Ontology ID*. `fetch-hpo-wikidata-crosswalk.mjs` guarda ese cruce en
+  `tools/terminology-import/symptoms/crosswalk/` (4 873 pares, 4 798 ítems, 4 865
+  ids de HPO; consulta del 2026-10-24, CC0). Regla de `load-symptoms.mjs`: si el ítem
+  `Q` de una ficha `wikidata-sintoma-q<n>` que **ya es miembro de
+  `glossary-all-terms` en la base** declara el id del fenotipo (o uno de sus ids
+  alternativos, que publica el propio HPO), el término HPO no se suma al
+  glosario. Sigue completo en el code system `hpo` y queda enlazado a la ficha con un
+  `concept_maps` (`context` = «Wikidata Q… declara P3841 … = HP:…», sin
+  equivalencia exacta declarada). Nunca por nombre. `--no-dedupe` la apaga y
+  `--prune-duplicates` quita sólo las membresías HPO duplicadas de una corrida anterior.
+  Hay que cargar el glosario antes: la regla mira lo que ya está en la base.
+- **Cuántos duplicados salen.** 4 799 de los 18 646 fenotipos del glosario tienen
+  ítem de Wikidata. Cuántos de ellos coinciden con una ficha `wikidata-sintoma-*`
+  depende del corpus del glosario. Con los 891 destinos P780 de Wikidata que tienen
+  etiqueta en castellano, 501 llevan P3841 a un fenotipo del glosario (cota
+  superior: algunos resuelven por CIE-10 o MeSH a otra ficha y no crean
+  `wikidata-sintoma`). De ellos, 87 no declaran código CIE-10 y 35 tampoco MeSH; con el
+  conjunto de 87 como fichas, la carga omite 87 términos y el glosario queda en
+  18 888 miembros (18 646 − 87 + 329 fichas) en la base desechable. La primera
+  corrida da 87 omitidos y 87 `concept_maps`; la segunda, 0 filas nuevas.
 
 ## Corrida en Postgres desechable
 
@@ -286,6 +303,7 @@ como sustituto de `seed-diseases`.
 | `load-disease-phenotypes.mjs --apply` sin la tabla propuesta | 0 (aborta, salida 2) | 5 s | — |
 | idem con la tabla propuesta aplicada en la base desechable | 345 258 aristas · 372 928 evidencias (andamio Mondo) | 52 s | 0 filas, 31 s |
 | idem con el catálogo real de #688 (57f23f9c) | 402 633 aristas · 403 959 evidencias | 59 s | 0 filas, 33 s |
+| idem sobre el DDL vendorizado de `database/SQL` (2026-10-25), enfermedades simuladas al 100 % | 402 729 aristas · 404 055 evidencias | 99 s | 0 filas, 55 s |
 
 Tamaño de la base tras todo (incluido el andamio de Mondo): 639 MB. `catalog_import_batches` suma una fila por
 corrida y sistema (es el registro de cada corrida, no dato).
@@ -297,13 +315,11 @@ corrida y sistema (es el registro de cada corrida, no dato).
 | Orphadata `en_product4.xml` / `es_product4.xml` | fenotipos de enfermedades raras directo de Orphanet (y nombres ES de Orphanet) | 403 del proxy de red. Su contenido llega vía HPOA (filas `ORPHA:`, 116 661) |
 | CIE-11 capítulo 21 en castellano | nombres ES oficiales de síntomas, signos y hallazgos (OMS/OPS) | La MMS 2026-01 en inglés **ya la carga `seed-diseases`** (47 bloques + 1 241 categorías del cap. 21). La versión ES: `icd.who.int` / `icdcdn.who.int` bloqueados; la API de la OMS exige cuenta |
 | CIE-10 capítulo R | signos y síntomas | **Ya está** en el glosario (CIE-10-ES) y en `icd10cm`; no se duplica |
-| MeSH C23 y DeCS (BIREME) | descriptores de signos y síntomas, en castellano (DeCS) | `nlm.nih.gov` bloqueado; DeCS exige solicitar licencia y token a BIREME/OPS |
-| Wikidata P3841 | cruce HPO ↔ fichas `wikidata-sintoma` del glosario | `query.wikidata.org` bloqueado |
+| MeSH C23 y DeCS (BIREME) | descriptores de signos y síntomas, en castellano (DeCS) | DeCS se entrega sólo bajo un contrato de licencia con BIREME/OPS (descarga XML o token de la API; ver `tools/terminology-import/dictionaries/SOURCES.md`) |
 | SNOMED CT (incluido el Global Patient Set) | hallazgos clínicos | Bolivia no es miembro; el GPS se distribuye por snomed.org/MLDS (cuenta). No se crean cuentas |
 | UMLS / MedDRA / OMIM API | sinónimos y cruces | requieren licencia o cuenta |
 | CIAP-2 / ICPC-2 (WONCA) | motivos de consulta de atención primaria | © WONCA; uso comercial con licencia. No se usaron copias de terceros |
 | PubMed / Europe PMC | detectar huecos en la literatura | `eutils.ncbi.nlm.nih.gov` y `www.ebi.ac.uk` bloqueados |
-| Página de licencia de HPO; reconfirmar términos de uso del NCIt | texto vigente de las condiciones | `hpo.jax.org` y `evs.nci.nih.gov` bloqueados. NCIt figura como CC BY 4.0 en `docs/terminology-expansion/SOURCE-REGISTER.md` (revisión anterior): reconfirmar antes de publicar |
 
 ## Cómo correr
 
