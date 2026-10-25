@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `practice`.
- * 80 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 81 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
@@ -27,6 +27,7 @@ export const practiceForeignKeys: readonly ForeignKeyTuple[] = [
   ['healthcare_services', 'created_by_user_id', 'iam', 'users', 'id'],
   ['healthcare_services', 'practice_id', 'practice', 'practices', 'id'],
   ['healthcare_services', 'practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['healthcare_services', 'service_catalog_id', 'billing', 'service_catalog', 'id'],
   ['healthcare_services', 'service_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['healthcare_services', 'specialty_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['healthcare_services', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
