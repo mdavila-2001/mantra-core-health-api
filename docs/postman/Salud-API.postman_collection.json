@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1530 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1530 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1532 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1532 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -2505,7 +2505,7 @@
                     "exchange-rates"
                   ]
                 },
-                "description": "Registrar tipo de cambio para conversión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /accounting/exchange-rates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingExchangeRateController_register`",
+                "description": "Tabla de plataforma compartida por todas las organizaciones: la registra un actor de plataforma (SYSTEM o SUPERADMIN); un administrador de tenant recibe 403.\n\n`POST /accounting/exchange-rates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingExchangeRateController_register`",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"fromCurrencyConceptId\": \"<fromCurrencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"toCurrencyConceptId\": \"<toCurrencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"rate\": \"3.75\",\n  \"validOn\": \"2026-01-31\",\n  \"source\": \"source-ejemplo\"\n}",
@@ -12778,649 +12778,739 @@
       ]
     },
     {
-      "name": "audit (9)",
+      "name": "audit (10)",
       "item": [
         {
-          "name": "GET /audit/data-access · Lecturas de datos sensibles (`audit.data_access_log`), con filtros",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/data-access",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "data-access"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-10-01T00:00:00.000Z",
-                  "description": "Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días",
-                  "disabled": true
-                },
-                {
-                  "key": "to",
-                  "value": "2026-10-24T00:00:00.000Z",
-                  "description": "Hasta (ISO 8601, excluido)",
-                  "disabled": true
-                },
-                {
-                  "key": "userId",
-                  "value": "{{userId}}",
-                  "description": "Quién actuó",
-                  "disabled": true
-                },
-                {
-                  "key": "tenantId",
-                  "value": "{{tenantId}}",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "limit",
-                  "value": "50",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "cursor",
-                  "value": "cursor-ejemplo",
-                  "description": "`nextCursor` de la página anterior",
-                  "disabled": true
-                },
-                {
-                  "key": "operation",
-                  "value": "READ",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "resourceType",
-                  "value": "resourceType-ejemplo",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "patientProfileId",
-                  "value": "{{patientProfileId}}",
-                  "description": "Paciente cuyo dato se leyó",
-                  "disabled": true
-                }
-              ]
-            },
-            "description": "Filtra por actor, rango de fechas, tenant, paciente, tipo de recurso y operación. Sin rango, mira los últimos 30 días.\n\n`GET /audit/data-access`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AuditQueryController_dataAccess`"
-          },
-          "response": [],
-          "event": [
+          "name": "audit",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.dataAccess || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('dataAccessId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /audit/log · Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/log",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "log"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2026-10-01T00:00:00.000Z",
-                  "description": "Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días",
-                  "disabled": true
+              "name": "GET /audit/data-access · Lecturas de datos sensibles (`audit.data_access_log`), con filtros",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/data-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "data-access"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01T00:00:00.000Z",
+                      "description": "Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-24T00:00:00.000Z",
+                      "description": "Hasta (ISO 8601, excluido)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "userId",
+                      "value": "{{userId}}",
+                      "description": "Quién actuó",
+                      "disabled": true
+                    },
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "`nextCursor` de la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "operation",
+                      "value": "READ",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "resourceType",
+                      "value": "resourceType-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "patientProfileId",
+                      "value": "{{patientProfileId}}",
+                      "description": "Paciente cuyo dato se leyó",
+                      "disabled": true
+                    }
+                  ]
                 },
-                {
-                  "key": "to",
-                  "value": "2026-10-24T00:00:00.000Z",
-                  "description": "Hasta (ISO 8601, excluido)",
-                  "disabled": true
-                },
-                {
-                  "key": "userId",
-                  "value": "{{userId}}",
-                  "description": "Quién actuó",
-                  "disabled": true
-                },
-                {
-                  "key": "tenantId",
-                  "value": "{{tenantId}}",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "limit",
-                  "value": "50",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "cursor",
-                  "value": "cursor-ejemplo",
-                  "description": "`nextCursor` de la página anterior",
-                  "disabled": true
-                },
-                {
-                  "key": "result",
-                  "value": "SUCCESS",
-                  "description": "",
-                  "disabled": true
-                },
-                {
-                  "key": "action",
-                  "value": "action-ejemplo",
-                  "description": "Acción exacta: el código de negocio (`CATALOG_ANNOTATION_SAVED`) o `HTTP <VERBO> <plantilla>`",
-                  "disabled": true
-                },
-                {
-                  "key": "method",
-                  "value": "POST",
-                  "description": "Verbo HTTP, derivado de la acción; las acciones de negocio salen del mapa de rutas armado al arrancar",
-                  "disabled": true
-                },
-                {
-                  "key": "route",
-                  "value": "/admin/catalog/objects/:id/annotation",
-                  "description": "Plantilla exacta de la ruta, con `:parámetros`",
-                  "disabled": true
-                },
-                {
-                  "key": "entity",
-                  "value": "entity-ejemplo",
-                  "description": "Entidad afectada",
-                  "disabled": true
-                }
-              ]
-            },
-            "description": "Filtra por actor, rango de fechas, resultado, tenant, acción, verbo y ruta. El verbo y la ruta se derivan de la acción; para las acciones de negocio, del mapa de rutas armado al arrancar (`null` si la acción sella varias rutas). El riesgo se deriva al leer y no se guarda. Sin rango, mira los últimos 30 días.\n\n`GET /audit/log`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AuditQueryController_log`"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('logId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /audit/anomaly/scan · Detectar acceso anómalo",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+                "description": "Filtra por actor, rango de fechas, tenant, paciente, tipo de recurso y operación. Sin rango, mira los últimos 30 días.\n\n`GET /audit/data-access`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AuditQueryController_dataAccess`"
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/anomaly/scan",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "anomaly",
-                "scan"
-              ]
-            },
-            "description": "Detectar acceso anómalo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/anomaly/scan`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_scanAnomaly`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"since\": \"2026-01-01T00:00:00.000Z\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.scanId);",
-                  "  if (id) pm.environment.set('scanId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /audit/data-access · Registrar acceso/lectura clínica (accounting WORM)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/data-access",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "data-access"
-              ]
-            },
-            "description": "Registrar acceso/lectura clínica (accounting WORM). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/data-access`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_recordDataAccess`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"resourceType\": \"resourceType-ejemplo\",\n  \"resourceId\": \"{{resourceId}}\",\n  \"purpose\": \"purpose-ejemplo\",\n  \"purposeOfUse\": \"TREATMENT\",\n  \"legalBasis\": \"TREATMENT\",\n  \"requestId\": \"{{requestId}}\",\n  \"policyVersion\": \"policyVersion-ejemplo\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dataAccessId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.dataAccessId);",
-                  "  if (id) pm.environment.set('dataAccessId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /audit/events · Registrar provenance de un cambio y sellar la cadena hash",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/events",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "events"
-              ]
-            },
-            "description": "Registrar provenance de un cambio y sellar la cadena hash. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/events`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_recordEvent`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"action\": \"action-ejemplo\",\n  \"entity\": \"entity-ejemplo\",\n  \"outcome\": \"SUCCESS\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"branchId\": \"{{branchId}}\",\n  \"ip\": \"ip-ejemplo\",\n  \"deviceId\": \"{{deviceId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{eventId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.eventId);",
-                  "  if (id) pm.environment.set('eventId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /audit/integrity/verify · Verificar integridad tamper-evidence de la cadena",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/integrity/verify",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "integrity",
-                "verify"
-              ]
-            },
-            "description": "Verificar integridad tamper-evidence de la cadena. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/integrity/verify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_verifyIntegrity`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"limit\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{verifyId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.verifyId);",
-                  "  if (id) pm.environment.set('verifyId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /audit/retention/apply · Aplicar retención / archivado / litigation-hold",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/retention/apply",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "retention",
-                "apply"
-              ]
-            },
-            "description": "Aplicar retención / archivado / litigation-hold. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/retention/apply`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_applyRetention`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"scope\": \"scope-ejemplo\",\n  \"olderThan\": \"olderThan-ejemplo\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{applyId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.applyId);",
-                  "  if (id) pm.environment.set('applyId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /audit/third-party-access · Registrar acceso delegado / de tercero gobernado",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/third-party-access",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "third-party-access"
-              ]
-            },
-            "description": "Registrar acceso delegado / de tercero gobernado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/third-party-access`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_recordThirdPartyAccess`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"channel\": \"DELEGATED\",\n  \"outcome\": \"SUCCESS\",\n  \"purposeOfUse\": \"TREATMENT\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"resourceId\": \"{{resourceId}}\",\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"verificationCaseId\": \"{{verificationCaseId}}\",\n  \"pharmacyId\": \"{{pharmacyId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{thirdPartyAccessId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.thirdPartyAccessId);",
-                  "  if (id) pm.environment.set('thirdPartyAccessId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /audit/history/{entity}/{id} · Consultar historial / línea de tiempo de un registro",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/audit/history/:entity/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "audit",
-                "history",
-                ":entity",
-                ":id"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "entity",
-                  "value": "{{entity}}",
-                  "description": "Identificador de ruta · variable `{{entity}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dataAccess || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dataAccessId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /audit/log · Bitácora de acciones que mutaron, con filtros y riesgo para la seguridad de la salud",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/log",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "log"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01T00:00:00.000Z",
+                      "description": "Desde (ISO 8601, incluido). Sin rango, la consulta mira los últimos 30 días",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-24T00:00:00.000Z",
+                      "description": "Hasta (ISO 8601, excluido)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "userId",
+                      "value": "{{userId}}",
+                      "description": "Quién actuó",
+                      "disabled": true
+                    },
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "`nextCursor` de la página anterior",
+                      "disabled": true
+                    },
+                    {
+                      "key": "result",
+                      "value": "SUCCESS",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "action",
+                      "value": "action-ejemplo",
+                      "description": "Acción exacta: el código de negocio (`CATALOG_ANNOTATION_SAVED`) o `HTTP <VERBO> <plantilla>`",
+                      "disabled": true
+                    },
+                    {
+                      "key": "method",
+                      "value": "POST",
+                      "description": "Verbo HTTP, derivado de la acción; las acciones de negocio salen del mapa de rutas armado al arrancar",
+                      "disabled": true
+                    },
+                    {
+                      "key": "route",
+                      "value": "/admin/catalog/objects/:id/annotation",
+                      "description": "Plantilla exacta de la ruta, con `:parámetros`",
+                      "disabled": true
+                    },
+                    {
+                      "key": "entity",
+                      "value": "entity-ejemplo",
+                      "description": "Entidad afectada",
+                      "disabled": true
+                    }
+                  ]
                 },
+                "description": "Filtra por actor, rango de fechas, resultado, tenant, acción, verbo y ruta. El verbo y la ruta se derivan de la acción; para las acciones de negocio, del mapa de rutas armado al arrancar (`null` si la acción sella varias rutas). El riesgo se deriva al leer y no se guarda. Sin rango, mira los últimos 30 días.\n\n`GET /audit/log`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AuditQueryController_log`"
+              },
+              "response": [],
+              "event": [
                 {
-                  "key": "id",
-                  "value": "{{historyId}}",
-                  "description": "Identificador de ruta · variable `{{historyId}}`"
-                }
-              ],
-              "query": [
-                {
-                  "key": "as_of",
-                  "value": "2026-01-01T00:00:00.000Z",
-                  "description": "Reconstrucción point-in-time: fila vigente a esta fecha ISO-8601",
-                  "disabled": true
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('logId', first.id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
             },
-            "description": "Consultar historial / línea de tiempo de un registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /audit/history/{entity}/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `AuditController_getHistory`"
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('historyId', first.id);",
-                  "}"
-                ]
-              }
+              "name": "POST /audit/anomaly/scan · Detectar acceso anómalo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/anomaly/scan",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "anomaly",
+                    "scan"
+                  ]
+                },
+                "description": "Detectar acceso anómalo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/anomaly/scan`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_scanAnomaly`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"since\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.scanId);",
+                      "  if (id) pm.environment.set('scanId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /audit/data-access · Registrar acceso/lectura clínica (accounting WORM)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/data-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "data-access"
+                  ]
+                },
+                "description": "Registrar acceso/lectura clínica (accounting WORM). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/data-access`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_recordDataAccess`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"resourceType\": \"resourceType-ejemplo\",\n  \"resourceId\": \"{{resourceId}}\",\n  \"purpose\": \"purpose-ejemplo\",\n  \"purposeOfUse\": \"TREATMENT\",\n  \"legalBasis\": \"TREATMENT\",\n  \"requestId\": \"{{requestId}}\",\n  \"policyVersion\": \"policyVersion-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{dataAccessId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.dataAccessId);",
+                      "  if (id) pm.environment.set('dataAccessId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /audit/events · Registrar provenance de un cambio y sellar la cadena hash",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "events"
+                  ]
+                },
+                "description": "Registrar provenance de un cambio y sellar la cadena hash. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/events`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_recordEvent`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"action-ejemplo\",\n  \"entity\": \"entity-ejemplo\",\n  \"outcome\": \"SUCCESS\",\n  \"tenantId\": \"{{tenantId}}\",\n  \"branchId\": \"{{branchId}}\",\n  \"ip\": \"ip-ejemplo\",\n  \"deviceId\": \"{{deviceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{eventId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.eventId);",
+                      "  if (id) pm.environment.set('eventId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /audit/integrity/verify · Verificar integridad tamper-evidence de la cadena",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/integrity/verify",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "integrity",
+                    "verify"
+                  ]
+                },
+                "description": "Verificar integridad tamper-evidence de la cadena. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/integrity/verify`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_verifyIntegrity`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"limit\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{verifyId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.verifyId);",
+                      "  if (id) pm.environment.set('verifyId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /audit/retention/apply · Aplicar retención / archivado / litigation-hold",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/retention/apply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "retention",
+                    "apply"
+                  ]
+                },
+                "description": "Aplicar retención / archivado / litigation-hold. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/retention/apply`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_applyRetention`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"scope\": \"scope-ejemplo\",\n  \"olderThan\": \"olderThan-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{applyId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.applyId);",
+                      "  if (id) pm.environment.set('applyId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /audit/third-party-access · Registrar acceso delegado / de tercero gobernado",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/third-party-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "third-party-access"
+                  ]
+                },
+                "description": "Registrar acceso delegado / de tercero gobernado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /audit/third-party-access`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AuditController_recordThirdPartyAccess`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": \"DELEGATED\",\n  \"outcome\": \"SUCCESS\",\n  \"purposeOfUse\": \"TREATMENT\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"resourceId\": \"{{resourceId}}\",\n  \"insuranceCarrierId\": \"{{insuranceCarrierId}}\",\n  \"verificationCaseId\": \"{{verificationCaseId}}\",\n  \"pharmacyId\": \"{{pharmacyId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{thirdPartyAccessId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.thirdPartyAccessId);",
+                      "  if (id) pm.environment.set('thirdPartyAccessId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /audit/history/{entity}/{id} · Consultar historial / línea de tiempo de un registro",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/history/:entity/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "history",
+                    ":entity",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "entity",
+                      "value": "{{entity}}",
+                      "description": "Identificador de ruta · variable `{{entity}}`"
+                    },
+                    {
+                      "key": "id",
+                      "value": "{{historyId}}",
+                      "description": "Identificador de ruta · variable `{{historyId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "as_of",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Reconstrucción point-in-time: fila vigente a esta fecha ISO-8601",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Consultar historial / línea de tiempo de un registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /audit/history/{entity}/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `AuditController_getHistory`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('historyId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "audit-me",
+          "item": [
+            {
+              "name": "GET /audit/me/data-access · Quién accedió a mi historia y con qué finalidad",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/me/data-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "me",
+                    "data-access"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01T00:00:00.000Z",
+                      "description": "Desde (ISO 8601, incluido). Sin él, desde el primer acceso",
+                      "disabled": true
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-25T00:00:00.000Z",
+                      "description": "Hasta (ISO 8601, excluido)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "excludeOwn",
+                      "value": "False",
+                      "description": "Si es `true`, omite los accesos del propio titular y deja sólo los de terceros",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "25",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "`nextCursor` de la página anterior",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Del más reciente al más antiguo, paginado por cursor. Cada acceso trae quién lo hizo (tipo y nombre), cuándo, la operación, el tipo de dato y la finalidad declarada. No trae contenido clínico, IP ni identificadores de otras cuentas. Consultar este registro es en sí un acceso y queda anotado.\n\n`GET /audit/me/data-access`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `AuditMeController_list`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.dataAccess || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('dataAccessId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
@@ -21765,7 +21855,7 @@
       ]
     },
     {
-      "name": "clinical (38)",
+      "name": "clinical (39)",
       "item": [
         {
           "name": "clinical-encounters",
@@ -22557,6 +22647,71 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.diagnosticReportId);",
                       "  if (id) pm.environment.set('diagnosticReportId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "clinical-prescription-expiry",
+          "item": [
+            {
+              "name": "POST /clinical/internal/prescription-expiry-notices · Avisar al paciente de las recetas por vencer (barrido)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clinical/internal/prescription-expiry-notices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clinical",
+                    "internal",
+                    "prescription-expiry-notices"
+                  ]
+                },
+                "description": "Recetas emitidas cuyo `valid_to` cae en los próximos 3 días y que todavía no tienen aviso. Un aviso por receta, por la bandeja in-app.\n\n`POST /clinical/internal/prescription-expiry-notices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ClinicalPrescriptionExpiryController_sweep`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"limit\": 200\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{prescriptionExpiryNoticeId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.prescriptionExpiryNoticeId);",
+                      "  if (id) pm.environment.set('prescriptionExpiryNoticeId', id);",
                       "}"
                     ]
                   }

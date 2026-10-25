@@ -8,12 +8,12 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`insurance`](insurance.md) | 19 | 27 | 14 | 31 | 23 |
-| [`community`](community.md) | 14 | 33 | 19 | 41 | 33 |
+| [`community`](community.md) | 14 | 34 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`consent`](consent.md) | 11 | 12 | 10 | 10 | 16 |
-| [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
-| [`authz`](authz.md) | 9 | 11 | 15 | 15 | 21 |
-| [`clinical`](clinical.md) | 9 | 17 | 15 | 23 | 15 |
+| [`clinical`](clinical.md) | 10 | 18 | 16 | 23 | 16 |
+| [`accounting`](accounting.md) | 9 | 11 | 9 | 42 | 12 |
+| [`authz`](authz.md) | 9 | 12 | 16 | 15 | 21 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
@@ -21,11 +21,11 @@
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
 | [`scheduling`](scheduling.md) | 7 | 14 | 7 | 18 | 8 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 15 | 19 |
+| [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 17 | 21 | 17 |
 | [`practice`](practice.md) | 6 | 11 | 12 | 11 | 17 |
-| [`audit`](audit.md) | 5 | 7 | 8 | 131 | 10 |
 | [`billing`](billing.md) | 5 | 13 | 11 | 24 | 14 |
 | [`delegated_access`](delegated_access.md) | 5 | 6 | 8 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
@@ -54,7 +54,7 @@
 | [`lakehouse`](lakehouse.md) | 2 | 3 | 3 | 18 | 1 |
 | [`marketing`](marketing.md) | 2 | 2 | 2 | 14 | 1 |
 | [`object_storage`](object_storage.md) | 2 | 3 | 3 | 17 | 1 |
-| [`procedures_perioperative`](procedures_perioperative.md) | 2 | 4 | 5 | 37 | 2 |
+| [`procedures_perioperative`](procedures_perioperative.md) | 2 | 5 | 5 | 37 | 2 |
 | [`promotions`](promotions.md) | 2 | 3 | 2 | 11 | 1 |
 | [`time_series`](time_series.md) | 2 | 4 | 2 | 12 | 1 |
 | [`vector_rag`](vector_rag.md) | 2 | 4 | 3 | 14 | 1 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **279** | **445** | **424** | **1265** | **524** |
+| **Total** | **281** | **451** | **427** | **1265** | **526** |

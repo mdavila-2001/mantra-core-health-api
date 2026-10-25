@@ -9828,6 +9828,107 @@
         "description": "Registrar acceso delegado / de tercero gobernado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/audit/me/data-access": {
+      "get": {
+        "description": "Del más reciente al más antiguo, paginado por cursor. Cada acceso trae quién lo hizo (tipo y nombre), cuándo, la operación, el tipo de dato y la finalidad declarada. No trae contenido clínico, IP ni identificadores de otras cuentas. Consultar este registro es en sí un acceso y queda anotado.",
+        "operationId": "AuditMeController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Desde (ISO 8601, incluido). Sin él, desde el primer acceso",
+            "schema": {
+              "example": "2026-10-01T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Hasta (ISO 8601, excluido)",
+            "schema": {
+              "example": "2026-10-25T00:00:00.000Z",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeOwn",
+            "required": false,
+            "in": "query",
+            "description": "Si es `true`, omite los accesos del propio titular y deja sólo los de terceros",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "`nextCursor` de la página anterior",
+            "schema": {
+              "maxLength": 400,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyDataAccessPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "description": "La cuenta no es la de un paciente"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quién accedió a mi historia y con qué finalidad",
+        "tags": [
+          "audit-me"
+        ]
+      }
+    },
     "/audit/log": {
       "get": {
         "description": "Filtra por actor, rango de fechas, resultado, tenant, acción, verbo y ruta. El verbo y la ruta se derivan de la acción; para las acciones de negocio, del mapa de rutas armado al arrancar (`null` si la acción sella varias rutas). El riesgo se deriva al leer y no se guarda. Sin rango, mira los últimos 30 días.",
@@ -22660,6 +22761,71 @@
         "security": []
       }
     },
+    "/clinical/internal/prescription-expiry-notices": {
+      "post": {
+        "description": "Recetas emitidas cuyo `valid_to` cae en los próximos 3 días y que todavía no tienen aviso. Un aviso por receta, por la bandeja in-app.",
+        "operationId": "ClinicalPrescriptionExpiryController_sweep",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrescriptionExpirySweepDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrescriptionExpirySweepResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Avisar al paciente de las recetas por vencer (barrido)",
+        "tags": [
+          "clinical-prescription-expiry"
+        ]
+      }
+    },
     "/search/{index}/documents": {
       "post": {
         "description": "El servidor sella el documento con el `tenantId` del contexto; el del cuerpo se ignora.",
@@ -34331,6 +34497,7 @@
     },
     "/accounting/exchange-rates": {
       "post": {
+        "description": "Tabla de plataforma compartida por todas las organizaciones: la registra un actor de plataforma (SYSTEM o SUPERADMIN); un administrador de tenant recibe 403.",
         "operationId": "AccountingExchangeRateController_register",
         "parameters": [],
         "requestBody": {
@@ -34383,8 +34550,7 @@
         "summary": "Registrar tipo de cambio para conversión",
         "tags": [
           "accounting-fx"
-        ],
-        "description": "Registrar tipo de cambio para conversión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       }
     },
     "/accounting/practitioner/paid-consultations": {
@@ -97001,6 +97167,10 @@
       "description": "Operaciones del dominio funcional audit compliance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "audit-me",
+      "description": "Operaciones del dominio funcional audit me. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "audit-moderation",
       "description": "Operaciones del dominio funcional audit moderation. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -97147,6 +97317,10 @@
     {
       "name": "clinical-orders",
       "description": "Operaciones del dominio funcional clinical orders. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "clinical-prescription-expiry",
+      "description": "Operaciones del dominio funcional clinical prescription expiry. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "clinical-prescription-policies",
@@ -104012,6 +104186,93 @@
         ],
         "additionalProperties": false
       },
+      "DataAccessorDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "SELF",
+              "PRACTITIONER",
+              "OTHER"
+            ],
+            "description": "`SELF` es el propio titular; `PRACTITIONER`, un profesional de la salud; `OTHER`, cualquier otra cuenta"
+          },
+          "displayName": {
+            "type": "object",
+            "nullable": true,
+            "description": "Nombre a mostrar de la persona vinculada a la cuenta; `null` si no tiene o si es el propio titular"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "MyDataAccessEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identificador del registro"
+          },
+          "accessedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accessor": {
+            "$ref": "#/components/schemas/DataAccessorDto"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "READ",
+              "CREATE",
+              "UPDATE",
+              "DELETE",
+              "EXPORT"
+            ]
+          },
+          "resourceType": {
+            "type": "object",
+            "nullable": true,
+            "description": "Tipo de dato al que se accedió (código, p. ej. `DIAGNOSTIC_RESULTS`)"
+          },
+          "purpose": {
+            "type": "object",
+            "nullable": true,
+            "description": "Finalidad con que se declaró el acceso (código, p. ej. `TREATMENT`, `PATIENT_ACCESS`)"
+          }
+        },
+        "required": [
+          "id",
+          "accessedAt",
+          "accessor",
+          "operation"
+        ]
+      },
+      "MyDataAccessPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyDataAccessEntryDto"
+            }
+          },
+          "nextCursor": {
+            "type": "object",
+            "nullable": true
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "limit"
+        ]
+      },
       "AuditLogEntryDto": {
         "type": "object",
         "properties": {
@@ -106633,11 +106894,14 @@
           },
           "visibility": {
             "type": "string",
-            "description": "Visibilidad",
+            "description": "Visibilidad y público autorizado. `PUBLIC` es el público general y `PRIVATE` el ingreso por invitación o aprobación; `VERIFIED_DOCTORS`, `ORGANIZATION_STAFF` y `ATTENDED_PATIENTS` restringen el foro a ese público: quien no pertenece a él no lo ve (404).",
             "enum": [
               "PUBLIC",
               "PRIVATE",
-              "SECRET"
+              "SECRET",
+              "VERIFIED_DOCTORS",
+              "ORGANIZATION_STAFF",
+              "ATTENDED_PATIENTS"
             ]
           },
           "groupType": {
@@ -108402,6 +108666,51 @@
           "id",
           "status",
           "issuedAt"
+        ]
+      },
+      "PrescriptionExpirySweepDto": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Tamaño máximo del lote",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 200
+          }
+        },
+        "additionalProperties": false
+      },
+      "PrescriptionExpirySweepResultDto": {
+        "type": "object",
+        "properties": {
+          "scanned": {
+            "type": "number",
+            "description": "Recetas por vencer sin aviso previo que se consideraron"
+          },
+          "notified": {
+            "type": "number",
+            "description": "Avisos entregados a la bandeja del paciente"
+          },
+          "suppressed": {
+            "type": "number",
+            "description": "Avisos que la preferencia del paciente detuvo; quedan registrados y no se reintentan"
+          },
+          "failed": {
+            "type": "number",
+            "description": "Avisos que no se pudieron emitir; el siguiente barrido los reintenta"
+          },
+          "skipped": {
+            "type": "boolean",
+            "description": "`true` si otro barrido estaba en curso y éste no hizo nada"
+          }
+        },
+        "required": [
+          "scanned",
+          "notified",
+          "suppressed",
+          "failed",
+          "skipped"
         ]
       },
       "IndexDocumentDto": {
