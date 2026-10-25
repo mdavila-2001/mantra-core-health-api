@@ -562,6 +562,47 @@
         "GET /terminology/concepts/glossary-graph",
         "POST /terminology/ConceptMap/$translate"
       ]
+    },
+    {
+      "reason": "Administración de la organización por membresía: la regla es «quien administra ESA organización» (A-6) o la plataforma, no un rol global — un `SECURITY_ADMIN` global dejaría a la clínica recién registrada sin poder abrir su práctica ni gestionar su oferta, plantilla e invitaciones. El servicio autoriza con `assertCanAdministerPractice` / `assertCanAdminister` (404 si la práctica no existe, 403 si el actor administra otra) antes de leer o escribir.",
+      "evidence": [
+        "src/modules/practice/services/practice-administration.service.ts#assertCanAdministerPractice",
+        "src/modules/practice/services/healthcare-service-offers.service.ts#listOffers",
+        "src/modules/practice/services/clinical-structure.service.ts#publishHealthcareService",
+        "src/modules/practice/services/practice-workforce.service.ts#listPracticeAssignments",
+        "src/modules/practice/services/practice-workforce.service.ts#approveAssignment",
+        "src/modules/practice/services/practice-affiliation-invitations.service.ts#invite",
+        "src/modules/practice/services/organization-practice-provisioning.service.ts#provision"
+      ],
+      "routes": [
+        "GET /practices/:practiceId/healthcare-services",
+        "GET /practices/:practiceId/role-assignments",
+        "PATCH /practices/:practiceId/healthcare-services/:id",
+        "POST /practices/:practiceId/healthcare-services",
+        "POST /practices/:practiceId/role-assignments/invitations",
+        "POST /role-assignments/:roleId/approve",
+        "POST /role-assignments/:roleId/reject",
+        "POST /tenants/:tenantId/practices"
+      ]
+    },
+    {
+      "reason": "Directorio de centros médicos por procedimiento: lista prestadores y precios que ellos mismos publicaron (solo aparecen los que fijaron precio), no datos de ningún paciente. Exige sesión válida (no es `@Public`) y es `@TenantAgnostic` porque busca entre organizaciones; la variante que cruza las órdenes de un paciente (`search/for-my-orders`) sí declara `@Roles('PATIENT')`.",
+      "evidence": [
+        "src/modules/medical_centers/controllers/medical-centers.controller.ts",
+        "src/modules/medical_centers/services/medical-centers-search.service.ts"
+      ],
+      "routes": [
+        "GET /medical-centers/search"
+      ]
+    },
+    {
+      "reason": "Imagen de un servicio del catálogo (decisión P-22-8): sesión autenticada y autorización por contexto en el servicio — el servicio debe existir, estar activo y ser de una práctica del tenant activo; en cualquier otro caso responde el mismo 404 uniforme, y el archivo se valida con `assertUsableForAuthorizedContext`.",
+      "evidence": [
+        "src/modules/billing/services/billing-service-catalog.service.ts#getImageContent"
+      ],
+      "routes": [
+        "GET /billing/service-catalog/:id/image"
+      ]
     }
   ]
 }

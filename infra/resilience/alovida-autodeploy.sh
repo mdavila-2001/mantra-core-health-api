@@ -25,7 +25,7 @@ CONF="${ALOVIDA_AD_CONF:-/etc/alovida-resilience/autodeploy.conf}"
 TOKEN_FILE="${ALOVIDA_AD_TOKEN:-/etc/alovida-resilience/coolify.token}"
 STATE="${ALOVIDA_AD_STATE:-/var/lib/alovida-resilience/autodeploy}"
 LOG="${ALOVIDA_AD_LOG:-/var/log/alovida-autodeploy.log}"
-TELEGRAM_ENV="${ALOVIDA_TELEGRAM_ENV:-/opt/alovida-monitoring/.env}"
+TELEGRAM_BOT="${ALOVIDA_TELEGRAM_BOT:-alovida-monitoring-telegram-bot-1}"
 COOLIFY="http://localhost:8000/api/v1"
 QUIET="${QUIET:-600}"
 MAX_WAIT="${MAX_WAIT:-1800}"
@@ -35,15 +35,19 @@ mkdir -p "$STATE"; chmod 700 "$STATE"
 
 log() { printf '%s %s\n' "$(date -u +%FT%TZ)" "$*" >>"$LOG"; printf '%s\n' "$*"; }
 
+# Las credenciales salen del contenedor del bot de monitoreo (AloAdminbot):
+# es lo que usa de verdad. El .env de /opt/alovida-monitoring no se lee bien
+# con sed (verificado el 25/10/2026: getMe falla con ese valor y anda con el
+# del contenedor).
 notify() {
-  local token chat
-  [ -f "$TELEGRAM_ENV" ] || return 0
-  token="$(sed -n 's/^TELEGRAM_BOT_TOKEN=//p' "$TELEGRAM_ENV" | tr -d "'\"")"
-  chat="$(sed -n 's/^TELEGRAM_CHAT_ID=//p' "$TELEGRAM_ENV" | tr -d "'\"")"
-  [ -n "$token" ] && [ -n "$chat" ] || return 0
+  local env token chat
+  env="$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$TELEGRAM_BOT" 2>/dev/null)" || return 0
+  token="$(sed -n 's/^TELEGRAM_BOT_TOKEN=//p' <<<"$env")"
+  chat="$(sed -n 's/^TELEGRAM_CHAT_ID=//p' <<<"$env")"
+  [ -n "$token" ] && [ -n "$chat" ] || { log "AVISO: no hay credenciales de Telegram en $TELEGRAM_BOT"; return 0; }
   # La URL lleva el token: va por la config en stdin, no por argv (lo vería `ps`).
   printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "$token" |
-    curl -s -m 15 -o /dev/null -K - --data-urlencode "chat_id=$chat" --data-urlencode "text=$1" || true
+    curl -s -m 15 -o /dev/null -w '%{http_code}' -K - --data-urlencode "chat_id=$chat" --data-urlencode "text=$1" || true
 }
 
 db() { docker exec coolify-db psql -U coolify -d coolify -tAc "$1" 2>/dev/null; }
@@ -127,6 +131,7 @@ status() {
 }
 
 [ "${1:-}" = "--status" ] && { status; exit 0; }
+[ "${1:-}" = "--test-alert" ] && { echo "telegram: $(notify "${2:-Prueba de alerta de alovida-autodeploy}")"; exit 0; }
 
 [ -r "$TOKEN_FILE" ] || { log "ERROR: falta $TOKEN_FILE"; exit 1; }
 exec 9>"$STATE/.lock"; flock -n 9 || exit 0
