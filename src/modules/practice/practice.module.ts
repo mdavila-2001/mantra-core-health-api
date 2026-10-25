@@ -8,6 +8,7 @@ import {
   PractitionerSitesController,
   RoleAssignmentsController,
   InventoryItemsController,
+  OrganizationPracticesController,
   PracticeInvitationsController,
   PractitionerInvitationsController,
 } from './controllers';
@@ -23,6 +24,7 @@ import {
   OwnSiteProvisioningService,
   PracticeOrganizationReadService,
   PracticeAccessService,
+  OrganizationPracticeProvisioningService,
   PracticeAdministrationService,
   HealthcareServiceOffersService,
   PracticeAffiliationInvitationsService,
@@ -44,6 +46,7 @@ import {
 import { ServiceCatalogRepository } from '../billing/repositories';
 import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { TenantsRepository } from '../directory/repositories';
 import { AddressesRepository } from '../common/repositories';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
@@ -77,6 +80,7 @@ import {
     PractitionerSitesController,
     RoleAssignmentsController,
     InventoryItemsController,
+    OrganizationPracticesController,
     PracticeInvitationsController,
     PractitionerInvitationsController,
   ],
@@ -103,6 +107,8 @@ import {
     // Lector sin estado del nomenclador: se registra la clase, no `BillingModule`.
     ProcedureReferenceReader,
     AddressesRepository,
+    // Stateless: sólo lee la verificación de la organización (CM-11).
+    TenantsRepository,
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
     PatientProfilesRepository,
@@ -119,6 +125,7 @@ import {
     OwnSiteProvisioningService,
     PracticeOrganizationReadService,
     PracticeAccessService,
+    OrganizationPracticeProvisioningService,
     PracticeAdministrationService,
     HealthcareServiceOffersService,
     PracticeAffiliationInvitationsService,

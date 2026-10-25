@@ -4,6 +4,10 @@ import { validate, type ValidationError } from 'class-validator';
 
 import { RegisterOrganizationDto } from './register-organization.dto';
 import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import {
+  TENANT_TYPE_CODES,
+  TENANT_TYPE_CONCEPT_BY_CODE,
+} from '../../../directory/directory.concepts';
 
 /**
  * El alta mínima que el DTO exige, para no repetirla en cada caso.
@@ -85,6 +89,47 @@ describe('RegisterOrganizationDto · alta mínima', () => {
         },
       }),
     ).toEqual([]);
+  });
+});
+
+/**
+ * CM-11 · A-3: un centro médico se registra con un tipo de salud que ya
+ * existe (`HOSPITAL`), sin tipo nuevo en IAM.
+ */
+describe('RegisterOrganizationDto · centro médico (CM-11, A-3)', () => {
+  const MEDICAL_CENTER = {
+    organization: {
+      code: 'CENTRO_MEDICO_Z',
+      legalName: 'Centro Médico Z S.R.L.',
+      tenantType: 'HOSPITAL',
+      countryConceptId: '22222222-2222-4222-8222-222222222222',
+      jurisdictionConceptId: '33333333-3333-4333-8333-333333333333',
+    },
+    owner: MINIMAL_REGISTRATION.owner,
+  };
+
+  it('acepta HOSPITAL con país y jurisdicción', async () => {
+    expect(await propertiesWithError(MEDICAL_CENTER)).toEqual([]);
+  });
+
+  it('no agrega un tipo de organización nuevo para el centro médico', () => {
+    expect(TENANT_TYPE_CODES).toContain('HOSPITAL');
+    expect([...TENANT_TYPE_CODES].sort()).toEqual(
+      Object.keys(TENANT_TYPE_CONCEPT_BY_CODE).sort(),
+    );
+    expect(TENANT_TYPE_CODES).not.toContain('MEDICAL_CENTER');
+  });
+
+  it('rechaza un tipo que no existe', async () => {
+    expect(
+      await propertiesWithError({
+        ...MEDICAL_CENTER,
+        organization: {
+          ...MEDICAL_CENTER.organization,
+          tenantType: 'MEDICAL_CENTER',
+        },
+      }),
+    ).toEqual(['organization.tenantType']);
   });
 });
 

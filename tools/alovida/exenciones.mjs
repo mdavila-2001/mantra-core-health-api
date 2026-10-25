@@ -66,6 +66,11 @@ const SIN_ROLES_AUTORIZADOS = [
     endpoints: ['PUT '],
   },
   {
+    file: 'src/modules/practice/controllers/organization-practices.controller.ts',
+    why: 'Membresía administrativa en el tenant de la ruta: `OrganizationPracticeProvisioningService.provision` llama a `assertCanAdminister(tenantId, actor)` antes de tocar nada (403 al administrador de otra organización) y exige la organización verificada (422). Un rol global dejaría a la clínica recién registrada sin poder abrir su propia práctica.',
+    endpoints: ['POST :tenantId/practices'],
+  },
+  {
     file: 'src/modules/iam/presentation/controllers/iam-account-security.controller.ts',
     why: 'Sobre la propia cuenta: `IamAccountSecurityService` opera con `actor.id` (la credencial es la del token) y una sesión ajena responde 404 (`session.userId !== actor.id`). `@TenantAgnostic`: no toca datos de un tenant.',
     endpoints: ['POST auth/change-password', 'POST me/sessions/:id/revoke'],
