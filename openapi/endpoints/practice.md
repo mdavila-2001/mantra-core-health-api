@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 35 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 36 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
-- **Controladores:** `AccreditationsController`, `InventoryItemsController`, `PracticeInvitationsController`, `PracticesController`, `PractitionerInvitationsController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
+- **Controladores:** `AccreditationsController`, `InventoryItemsController`, `OrganizationPracticesController`, `PracticeInvitationsController`, `PracticesController`, `PractitionerInvitationsController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -46,6 +46,7 @@ Referencia exhaustiva de 35 operación(es) del módulo `practice`, derivada del 
 33. [GET /sites/{siteId}/care-spaces](#33-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
 34. [POST /sites/{siteId}/care-spaces](#34-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
 35. [POST /sites/{siteId}/clinical-units](#35-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+36. [POST /tenants/{tenantId}/practices](#36-post-tenants-tenantid-practices) — Crear la práctica y la primera sede de una organización
 
 ---
 
@@ -5124,6 +5125,155 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/sites/{siteId}/clinical-units"
+}
+```
+
+---
+
+## 36. POST /tenants/{tenantId}/practices
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Crear la práctica y la primera sede de una organización
+- **Operation ID:** `OrganizationPracticesController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OrganizationPracticesController.create](../../src/modules/practice/controllers/organization-practices.controller.ts)
+
+### Descripción de negocio
+
+Exige que la organización esté verificada (422 si no) y que el actor administre esa organización (403 si no). Dos prácticas con el mismo nombre en la misma organización responden 409.
+
+Contexto declarado en el controlador: Una organización verificada abre su práctica con la primera sede.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /tenants/{tenantId}/practices` en `OrganizationPracticesController_create`. El controlador delega en `OrganizationPracticeProvisioningService.provision`. Valida el body como `CreateOrganizationPracticeDto` y consume `application/json`. El tipo de retorno estático es `Promise<OrganizationPracticeResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateOrganizationPracticeDto`; los campos opcionales se omiten.
+
+```http
+POST /tenants/00000000-0000-4000-8000-000000000001/practices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "site": {
+    "name": "Nombre de ejemplo",
+    "addressText": "Av. San Martín 123",
+    "latitude": -17.7833,
+    "longitude": -63.1821
+  }
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `tenantId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 2; longitud máxima 200 | Nombre del centro médico | `Nombre de ejemplo` |
+| `site` | Sí | `CreateOrganizationPracticeSiteDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","addressText":"Av. San Martín 123","latitude":-17.7833,"longitude":-63.1821,"cityText":"Santa Cruz de la Sierra"}` |
+| `site.name` | Sí | `string` | longitud mínima 2; longitud máxima 200 | Nombre de la sede | `Nombre de ejemplo` |
+| `site.addressText` | Sí | `string` | longitud mínima 2; longitud máxima 500 | Dirección en una línea | `Av. San Martín 123` |
+| `site.latitude` | Sí | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `-17.7833` |
+| `site.longitude` | Sí | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `-63.1821` |
+| `site.cityText` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `Santa Cruz de la Sierra` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /tenants/00000000-0000-4000-8000-000000000001/practices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "site": {
+    "name": "Nombre de ejemplo",
+    "addressText": "Av. San Martín 123",
+    "latitude": -17.7833,
+    "longitude": -63.1821,
+    "cityText": "Santa Cruz de la Sierra"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OrganizationPracticeResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OrganizationPracticeResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practiceId` | Sí | `string` | formato `uuid` | Identificador de la práctica creada. | `00000000-0000-4000-8000-000000000001` |
+| `practiceSiteId` | Sí | `string` | formato `uuid` | Identificador de su primera sede. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/practice/services/organization-practice-provisioning.service.ts |
+| 409 | `CONFLICT` | La organización ya tiene una práctica con ese nombre | Excepción explícita en src/modules/practice/services/organization-practice-provisioning.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La organización todavía no fue verificada | Excepción explícita en src/modules/practice/services/organization-practice-provisioning.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/{tenantId}/practices"
 }
 ```
 

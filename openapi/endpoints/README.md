@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1549 de 1549 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1564 de 1564 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -44,7 +44,7 @@ Esta referencia documenta **1549 de 1549 operaciones HTTP** registradas en `open
 
 | Módulo | Endpoints | Etiquetas OpenAPI | Controladores |
 |---|---:|---|---:|
-| [accounting](accounting.md) | 46 | `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 9 |
+| [accounting](accounting.md) | 59 | `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger` | 10 |
 | [ads](ads.md) | 18 | `ads` | 1 |
 | [app](app.md) | 6 | `app` | 2 |
 | [audio_assets](audio-assets.md) | 10 | `audio-assets`, `audio-assets-internal` | 2 |
@@ -54,7 +54,7 @@ Esta referencia documenta **1549 de 1549 operaciones HTTP** registradas en `open
 | [automation](automation.md) | 17 | `automation` | 2 |
 | [billing](billing.md) | 34 | `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated` | 5 |
 | [chart](chart.md) | 23 | `chart-care-plans`, `chart-documents`, `chart-encounters`, `chart-me`, `chart-notes`, `chart-read`, `chart-templates` | 7 |
-| [clinical](clinical.md) | 41 | `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records` | 10 |
+| [clinical](clinical.md) | 42 | `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records` | 11 |
 | [clinical_ext](clinical-ext.md) | 27 | `clinical-ext-alerts`, `clinical-ext-care-gaps`, `clinical-ext-care-teams`, `clinical-ext-cds`, `clinical-ext-order-sets`, `clinical-ext-prescription-favorites`, `clinical-ext-referrals`, `clinical-ext-virtual-encounters` | 8 |
 | [common](common.md) | 19 | `common/addresses`, `common/contact-points`, `common/files`, `common/identifiers`, `internal/files`, `internal/storage-lifecycle` | 6 |
 | [community](community.md) | 98 | `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline` | 14 |
@@ -95,7 +95,7 @@ Esta referencia documenta **1549 de 1549 operaciones HTTP** registradas en `open
 | [pharmacy_inventory](pharmacy-inventory.md) | 29 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders` | 6 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
-| [practice](practice.md) | 35 | `practice` | 8 |
+| [practice](practice.md) | 36 | `practice` | 9 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
 | [profiles](profiles.md) | 57 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 5 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
@@ -124,4 +124,4 @@ Esta referencia documenta **1549 de 1549 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1549 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1564 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

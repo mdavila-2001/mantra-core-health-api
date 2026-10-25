@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 41 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 42 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
-- **Controladores:** `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionExpiryController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalReadController`, `ClinicalRecordsController`
+- **Controladores:** `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionExpiryController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalProcedureCentersController`, `ClinicalReadController`, `ClinicalRecordsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,29 +29,30 @@ Referencia exhaustiva de 41 operación(es) del módulo `clinical`, derivada del 
 16. [POST /clinical/internal/prescription-expiry-notices](#16-post-clinical-internal-prescription-expiry-notices) — Avisar al paciente de las recetas por vencer (barrido)
 17. [GET /clinical/me/medical-aspects](#17-get-clinical-me-medical-aspects) — Ver mis aspectos médicos declarados
 18. [PUT /clinical/me/medical-aspects](#18-put-clinical-me-medical-aspects) — Guardar mis aspectos médicos declarados
-19. [POST /clinical/medication-records](#19-post-clinical-medication-records) — Administrar/registrar medicación
-20. [POST /clinical/medication-requests](#20-post-clinical-medication-requests) — Prescribir medicación
-21. [GET /clinical/medication-requests/{id}/attachments](#21-get-clinical-medication-requests-id-attachments) — Listar los adjuntos de una receta
-22. [POST /clinical/medication-requests/{id}/attachments](#22-post-clinical-medication-requests-id-attachments) — Adjuntar un archivo ya subido a una receta
-23. [POST /clinical/medication-requests/{id}/edit](#23-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
-24. [POST /clinical/medication-requests/{id}/invalidate](#24-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
-25. [POST /clinical/medication-requests/{id}/issue](#25-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
-26. [POST /clinical/medication-requests/{id}/renew](#26-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
-27. [POST /clinical/medication-requests/{id}/replace](#27-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
-28. [POST /clinical/medication-requests/{id}/sign](#28-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
-29. [POST /clinical/observations](#29-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
-30. [PATCH /clinical/observations/{id}/amend](#30-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-31. [GET /clinical/patients/{patientProfileId}/received-services](#31-get-clinical-patients-patientprofileid-received-services) — Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
-32. [GET /clinical/patients/{patientProfileId}/summary](#32-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
-33. [GET /clinical/prescription-signature-policies](#33-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-34. [POST /clinical/prescription-signature-policies](#34-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-35. [POST /clinical/prescription-signature-policies/{id}/deactivate](#35-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-36. [GET /clinical/prescriptions/{id}/pdf](#36-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
-37. [POST /clinical/procedures](#37-post-clinical-procedures) — Registrar un procedimiento
-38. [POST /clinical/procedures/{id}/attachments](#38-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
-39. [POST /clinical/service-requests](#39-post-clinical-service-requests) — Crear una orden de servicio
-40. [POST /clinical/service-requests/duplicate-check](#40-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
-41. [GET /public/prescriptions/{id}/verify](#41-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
+19. [GET /clinical/me/procedure-centers](#19-get-clinical-me-procedure-centers) — Dónde hacerme los procedimientos que me pidieron
+20. [POST /clinical/medication-records](#20-post-clinical-medication-records) — Administrar/registrar medicación
+21. [POST /clinical/medication-requests](#21-post-clinical-medication-requests) — Prescribir medicación
+22. [GET /clinical/medication-requests/{id}/attachments](#22-get-clinical-medication-requests-id-attachments) — Listar los adjuntos de una receta
+23. [POST /clinical/medication-requests/{id}/attachments](#23-post-clinical-medication-requests-id-attachments) — Adjuntar un archivo ya subido a una receta
+24. [POST /clinical/medication-requests/{id}/edit](#24-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
+25. [POST /clinical/medication-requests/{id}/invalidate](#25-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
+26. [POST /clinical/medication-requests/{id}/issue](#26-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
+27. [POST /clinical/medication-requests/{id}/renew](#27-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
+28. [POST /clinical/medication-requests/{id}/replace](#28-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
+29. [POST /clinical/medication-requests/{id}/sign](#29-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
+30. [POST /clinical/observations](#30-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
+31. [PATCH /clinical/observations/{id}/amend](#31-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
+32. [GET /clinical/patients/{patientProfileId}/received-services](#32-get-clinical-patients-patientprofileid-received-services) — Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
+33. [GET /clinical/patients/{patientProfileId}/summary](#33-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+34. [GET /clinical/prescription-signature-policies](#34-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+35. [POST /clinical/prescription-signature-policies](#35-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+36. [POST /clinical/prescription-signature-policies/{id}/deactivate](#36-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+37. [GET /clinical/prescriptions/{id}/pdf](#37-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
+38. [POST /clinical/procedures](#38-post-clinical-procedures) — Registrar un procedimiento
+39. [POST /clinical/procedures/{id}/attachments](#39-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
+40. [POST /clinical/service-requests](#40-post-clinical-service-requests) — Crear una orden de servicio
+41. [POST /clinical/service-requests/duplicate-check](#41-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+42. [GET /public/prescriptions/{id}/verify](#42-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
 
 ---
 
@@ -2714,7 +2715,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /clinical/medication-records
+## 19. GET /clinical/me/procedure-centers
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-me`
+- **Nombre:** Dónde hacerme los procedimientos que me pidieron
+- **Operation ID:** `ClinicalProcedureCentersController_findOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalProcedureCentersController.findOwn](../../src/modules/clinical/controllers/clinical-procedure-centers.controller.ts)
+
+### Descripción de negocio
+
+Las órdenes vigentes de procedimiento y cardiología del titular, y las sedes que declaran ofrecerlos: primero las que tienen todos, después la más cercana en línea recta al origen elegido.
+
+Contexto declarado en el controlador: Mis procedimientos pendientes y las sedes que los ofrecen.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/me/procedure-centers` en `ClinicalProcedureCentersController_findOwn`. El controlador delega en `ProcedureCentersService.findForOwnOrders`. No recibe body. El tipo de retorno estático es `Promise<ProcedureCentersResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `lat` | query | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en OpenAPI. | `1` |
+| `lng` | query | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en OpenAPI. | `1` |
+| `limit` | query | No | `number` | máximo 50 | Sin descripción específica en OpenAPI. | `20` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/me/procedure-centers HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/me/procedure-centers?lat=1&lng=1&limit=20 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ProcedureCentersResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ProcedureCentersResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ProcedureCentersResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ProcedureCentersResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ProcedureCentersResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ProcedureCentersResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ProcedureCentersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcedureCentersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "procedures": [
+    {
+      "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+      "conceptId": "00000000-0000-4000-8000-000000000001",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "requestedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "centers": [
+    {
+      "siteId": "00000000-0000-4000-8000-000000000001",
+      "practiceId": "00000000-0000-4000-8000-000000000001",
+      "practiceName": "Nombre de ejemplo",
+      "siteName": "Nombre de ejemplo",
+      "complete": true,
+      "missingProcedureConceptIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "distanceKm": 1,
+      "addressText": "valor-ejemplo",
+      "latitude": 1,
+      "longitude": 1
+    }
+  ],
+  "total": 1,
+  "limit": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `procedures` | Sí | `array<PendingProcedureDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"serviceRequestId":"00000000-0000-4000-8000-000000000001","conceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","requestedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `procedures[].serviceRequestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `procedures[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `procedures[].categoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `procedures[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `centers` | Sí | `array<ProcedureCenterDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"siteId":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","practiceName":"Nombre de ejemplo","siteName":"Nombre de ejemplo","complete":true,"missingProcedureConceptIds":["00000000-0000-4000-8000-000000000001"],"distanceKm":1,"addressText":"valor-ejemplo","latitude":1,"longitude":1}]` |
+| `centers[].siteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `centers[].practiceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `centers[].practiceName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `centers[].siteName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `centers[].complete` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `centers[].missingProcedureConceptIds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `centers[].distanceKm` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `centers[].addressText` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `centers[].latitude` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `centers[].longitude` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | WITHOUT_PATIENT_PROFILE | Excepción explícita en src/modules/clinical/services/procedure-centers.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/me/procedure-centers"
+}
+```
+
+---
+
+## 20. POST /clinical/medication-records
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2860,7 +3012,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /clinical/medication-requests
+## 21. POST /clinical/medication-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3034,7 +3186,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /clinical/medication-requests/{id}/attachments
+## 22. GET /clinical/medication-requests/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3179,7 +3331,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /clinical/medication-requests/{id}/attachments
+## 23. POST /clinical/medication-requests/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3315,7 +3467,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/medication-requests/{id}/edit
+## 24. POST /clinical/medication-requests/{id}/edit
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3487,7 +3639,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /clinical/medication-requests/{id}/invalidate
+## 25. POST /clinical/medication-requests/{id}/invalidate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3631,7 +3783,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /clinical/medication-requests/{id}/issue
+## 26. POST /clinical/medication-requests/{id}/issue
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3768,7 +3920,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /clinical/medication-requests/{id}/renew
+## 27. POST /clinical/medication-requests/{id}/renew
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3918,7 +4070,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /clinical/medication-requests/{id}/replace
+## 28. POST /clinical/medication-requests/{id}/replace
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -4080,7 +4232,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /clinical/medication-requests/{id}/sign
+## 29. POST /clinical/medication-requests/{id}/sign
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -4210,7 +4362,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /clinical/observations
+## 30. POST /clinical/observations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -4427,7 +4579,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. PATCH /clinical/observations/{id}/amend
+## 31. PATCH /clinical/observations/{id}/amend
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -4577,7 +4729,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /clinical/patients/{patientProfileId}/received-services
+## 32. GET /clinical/patients/{patientProfileId}/received-services
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -4732,7 +4884,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /clinical/patients/{patientProfileId}/summary
+## 33. GET /clinical/patients/{patientProfileId}/summary
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -5050,7 +5202,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /clinical/prescription-signature-policies
+## 34. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5163,7 +5315,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /clinical/prescription-signature-policies
+## 35. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5311,7 +5463,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 36. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5436,7 +5588,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /clinical/prescriptions/{id}/pdf
+## 37. GET /clinical/prescriptions/{id}/pdf
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions`
@@ -5534,7 +5686,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /clinical/procedures
+## 38. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5694,7 +5846,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /clinical/procedures/{id}/attachments
+## 39. POST /clinical/procedures/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5830,7 +5982,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /clinical/service-requests
+## 40. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -6014,7 +6166,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /clinical/service-requests/duplicate-check
+## 41. POST /clinical/service-requests/duplicate-check
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -6178,7 +6330,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /public/prescriptions/{id}/verify
+## 42. GET /public/prescriptions/{id}/verify
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions-public`

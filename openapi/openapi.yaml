@@ -15298,6 +15298,58 @@ paths:
       description: >-
         Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Requiere JWT y los roles o
         alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/me/procedure-centers:
+    get:
+      description: >-
+        Las órdenes vigentes de procedimiento y cardiología del titular, y las sedes que declaran ofrecerlos: primero
+        las que tienen todos, después la más cercana en línea recta al origen elegido.
+      operationId: ClinicalProcedureCentersController_findOwn
+      parameters:
+        - name: lat
+          required: false
+          in: query
+          schema:
+            minimum: -90
+            maximum: 90
+            type: number
+        - name: lng
+          required: false
+          in: query
+          schema:
+            minimum: -180
+            maximum: 180
+            type: number
+        - name: limit
+          required: false
+          in: query
+          schema:
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcedureCentersResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Dónde hacerme los procedimientos que me pidieron
+      tags:
+        - clinical-me
   /clinical/prescriptions/{id}/pdf:
     get:
       description: Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.
@@ -20103,6 +20155,52 @@ paths:
       description: >-
         Registrar un movimiento de inventario (ajuste de stock). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /tenants/{tenantId}/practices:
+    post:
+      description: >-
+        Exige que la organización esté verificada (422 si no) y que el actor administre esa organización (403 si no).
+        Dos prácticas con el mismo nombre en la misma organización responden 409.
+      operationId: OrganizationPracticesController_create
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationPracticeDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear la práctica y la primera sede de una organización
+      tags:
+        - practice
   /practices/{practiceId}/role-assignments/invitations:
     post:
       description: Crea una vinculación INVITED por procedimiento. Ninguna llega a ACTIVE sin que el profesional la acepte.
@@ -23952,6 +24050,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Pacientes atendidos, cobrado y esperado de las aseguradoras
@@ -23983,6 +24083,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Cuentas de la contabilidad simple de una práctica
@@ -24017,6 +24119,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Crear una cuenta (o un tipo de gasto, activo o deuda)
@@ -24061,6 +24165,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Renombrar una cuenta
@@ -24094,6 +24200,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Borrar una cuenta propia
@@ -24133,6 +24241,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Gastos, activos y deudas de una práctica
@@ -24169,6 +24279,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Registrar un gasto, un activo o una deuda
@@ -24210,6 +24322,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Editar un gasto, un activo o una deuda
@@ -24245,6 +24359,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Borrar un gasto, un activo o una deuda
@@ -24277,6 +24393,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Transacciones debe/haber de una práctica
@@ -24311,6 +24429,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Registrar una transacción debe/haber
@@ -24352,6 +24472,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Editar una transacción debe/haber
@@ -24387,6 +24509,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Borrar una transacción debe/haber
@@ -74359,6 +74483,89 @@ components:
         - patientProfileId
         - vaccineConceptId
       additionalProperties: false
+    PendingProcedureDto:
+      type: object
+      properties:
+        serviceRequestId:
+          type: string
+          format: uuid
+        conceptId:
+          type: string
+          format: uuid
+        categoryConceptId:
+          type: string
+          format: uuid
+        requestedAt:
+          format: date-time
+          type: string
+      required:
+        - serviceRequestId
+        - conceptId
+        - categoryConceptId
+        - requestedAt
+    ProcedureCenterDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        practiceId:
+          type: string
+          format: uuid
+        practiceName:
+          type: string
+        siteName:
+          type: string
+        complete:
+          type: boolean
+        missingProcedureConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        distanceKm:
+          type: number
+          nullable: true
+        addressText:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+      required:
+        - siteId
+        - practiceId
+        - practiceName
+        - siteName
+        - complete
+        - missingProcedureConceptIds
+        - distanceKm
+        - addressText
+        - latitude
+        - longitude
+    ProcedureCentersResponseDto:
+      type: object
+      properties:
+        procedures:
+          type: array
+          items:
+            $ref: '#/components/schemas/PendingProcedureDto'
+        centers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcedureCenterDto'
+        total:
+          type: number
+        limit:
+          type: number
+      required:
+        - procedures
+        - centers
+        - total
+        - limit
     PrescriberLicenseDto:
       type: object
       properties:
@@ -78474,6 +78681,51 @@ components:
       required:
         - direction
         - quantity
+      additionalProperties: false
+    CreateOrganizationPracticeSiteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la sede
+          maxLength: 200
+        addressText:
+          type: string
+          description: Dirección en una línea
+          maxLength: 500
+          example: Av. San Martín 123
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.7833
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.1821
+        cityText:
+          type: string
+          maxLength: 255
+          example: Santa Cruz de la Sierra
+      required:
+        - name
+        - addressText
+        - latitude
+        - longitude
+      additionalProperties: false
+    CreateOrganizationPracticeDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del centro médico
+          maxLength: 200
+        site:
+          $ref: '#/components/schemas/CreateOrganizationPracticeSiteDto'
+      required:
+        - name
+        - site
       additionalProperties: false
     InvitePractitionerDto:
       type: object
@@ -88430,6 +88682,16 @@ components:
           type: object
           description: Ayuda bajo la pregunta; null la quita
           maxLength: 1000
+          nullable: true
+        cardinalityMin:
+          type: object
+          description: Mínimo de respuestas; null quita el tope
+          minimum: 0
+          nullable: true
+        cardinalityMax:
+          type: object
+          description: Máximo de respuestas; null quita el tope
+          minimum: 1
           nullable: true
       additionalProperties: false
     CreateFieldDependencyDto:
