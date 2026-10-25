@@ -494,6 +494,20 @@ describe('MedicalGroupsService', () => {
     expect(created.termsText).toBe('');
   });
 
+  it('un grupo leído de la base (closed_at y paciente null) no figura cerrado', async () => {
+    const d = build();
+    const created = await d.service.create(baseDto(), creator);
+    // Lo que MikroORM hidrata desde Postgres: null, no undefined.
+    const stored = d.groups.get(created.id);
+    stored.closedAt = null;
+    stored.patientProfileId = null;
+
+    const group = await d.service.findOne(created.id, creator);
+    expect(group.isClosed).toBe(false);
+    expect(group.status).not.toBe('CLOSED');
+    expect(group.patientName).toBeNull();
+  });
+
   describe('colegas que se pueden invitar', () => {
     it('ofrece a los de la misma organización del servicio, sin quien pregunta', async () => {
       const d = build();
