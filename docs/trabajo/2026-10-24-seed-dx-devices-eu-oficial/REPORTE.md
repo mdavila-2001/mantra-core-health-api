@@ -30,7 +30,7 @@ ninguna
 | H1.S2.M2 | BLOQUEADO | `yarn typecheck` sale con exit 2 por imports duplicados en `src/modules/insurance/insurance-patient-settlement.module.ts`, que ya están en `origin/dev` (9337e964). Esta rama no toca `src/`. Lo tiene que arreglar quien hizo ese cambio; sobre `dev`, `yarn lint` y prettier están en verde. Sobre la base `test` pasa al revés: typecheck exit 0 y `yarn lint` exit 1 por prettier en `src/modules/iam/…` y `src/modules/telemetry/…`, también ajenos. |
 
 ## Evidencia
-Salidas literales en [`evidencia/`](./evidencia/):
+Salidas literales en `evidencia/`:
 - `fetch-oficial.txt`: corridas de `fetch.mjs`, carpetas completas y control de códigos múltiples.
 - `build-load.txt`: `build.mjs` (`exit 0`), sha256 de dos corridas idénticas y `load.mjs` en dry-run.
 - `pii-y-tests.txt`: controles de datos personales sobre `out/` y salida de `node --test`.
