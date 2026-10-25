@@ -5,7 +5,7 @@ import {
   ResourceNotFoundException,
   runWithTenant,
 } from '../../../../common';
-import { InsurancePlanBenefits } from '../../entities';
+import { InsurancePlanBenefits, PatientCoverages } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
 import { ClaimCoveragePolicy } from './claim-coverage-policy';
 import { ClaimsService } from './claims.service';
@@ -23,11 +23,18 @@ const CONSULT = 'service-consult';
 function build(
   benefits: Record<string, unknown>[],
   practiceIds: string[] = ['practice-1'],
+  coveragePlan: string = PLAN,
 ) {
   const createdLines: Record<string, unknown>[] = [];
   const tx = {
     flush: fn().mockResolvedValue(undefined),
-    findOne: fn().mockResolvedValue(null),
+    // La política relee la cobertura del cobro (PatientCoverages) y exige que
+    // sea del plan.
+    findOne: fn().mockImplementation(async (entity: unknown) =>
+      entity === PatientCoverages
+        ? { id: 'coverage-1', insurancePlanId: coveragePlan }
+        : null,
+    ),
     find: fn().mockImplementation(async (entity: unknown) =>
       entity === InsurancePlanBenefits ? benefits : [],
     ),
@@ -140,6 +147,16 @@ describe('ClaimsService — cobro directo contrastado con el plan', () => {
     await expect(submit(claimDto())).rejects.toBeInstanceOf(
       PreconditionFailedException,
     );
+    expect(repo.createClaim).not.toHaveBeenCalled();
+  });
+});
+
+describe('ClaimsService — la cobertura del cobro es del plan', () => {
+  it('una cobertura que no es del plan contra el que se reparte se rechaza y no se crea nada', async () => {
+    const { submit, repo } = build([activeBenefit], undefined, 'plan-ajeno');
+    await expect(submit(claimDto())).rejects.toMatchObject({
+      details: { reason: 'COVERAGE_PLAN_MISMATCH' },
+    });
     expect(repo.createClaim).not.toHaveBeenCalled();
   });
 });

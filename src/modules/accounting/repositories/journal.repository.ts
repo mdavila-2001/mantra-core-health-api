@@ -629,6 +629,25 @@ export class JournalRepository {
   }
 
   /**
+   * Imputaciones (centro de costo, de beneficio, activo…) de varias líneas en
+   * una sola consulta: la lectura del detalle de un asiento las devuelve junto
+   * a cada línea sin una consulta por fila.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ledgerEntryIds - Líneas del mayor cuyas imputaciones se piden.
+   * @returns Las imputaciones encontradas, sin orden garantizado.
+   */
+  assignmentsForEntries(
+    em: EntityManager,
+    ledgerEntryIds: readonly string[],
+  ): Promise<JournalEntryAssignments[]> {
+    if (ledgerEntryIds.length === 0) return Promise.resolve([]);
+    return em.find(JournalEntryAssignments, {
+      ledgerEntryId: { $in: [...ledgerEntryIds] },
+    });
+  }
+
+  /**
    * Crea create file.
    *
    * @param em - Contexto de persistencia o transacción activa.

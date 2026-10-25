@@ -7,12 +7,14 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -33,6 +35,7 @@ import {
   PracticeWorkforceService,
   PracticeInventoryService,
   PracticeOrganizationReadService,
+  HealthcareServiceOffersService,
 } from '../services';
 import {
   CreatePracticeDto,
@@ -55,7 +58,12 @@ import {
   SelfRequestRoleAssignmentDto,
   MedicalOrganizationConsoleDto,
   ListPracticeRoleAssignmentsResponseDto,
+  UpdateHealthcareServiceDto,
 } from '../dto';
+import {
+  HealthcareServiceOfferDto,
+  HealthcareServiceOffersResponseDto,
+} from '../dto/healthcare-service-offer.dto';
 
 /**
  * Endpoints con raíz en `/practices`. Capa fina: valida parámetros y delega en el
@@ -85,6 +93,7 @@ export class PracticesController {
     private readonly workforceService: PracticeWorkforceService,
     private readonly inventoryService: PracticeInventoryService,
     private readonly organizationReadService: PracticeOrganizationReadService,
+    private readonly offersService: HealthcareServiceOffersService,
   ) {}
 
   /** Bootstrap: alta de la práctica (organización raíz). */
@@ -287,16 +296,22 @@ export class PracticesController {
     return this.accreditationsService.create(practiceId, dto, actor);
   }
 
-  /** UC-14-06. */
+  /**
+   * UC-14-06. Sin `@Roles`: lo publica quien administra **esa** organización
+   * (A-6) o un rol de plataforma, y eso lo decide el servicio por la membresía.
+   */
   @Audited({
     action: 'HEALTHCARE_SERVICE_PUBLISHED',
     entity: 'healthcare_service',
     entityId: 'result.id',
   })
   @Post(':practiceId/healthcare-services')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Publicar un servicio de salud' })
+  @ApiOperation({
+    summary: 'Publicar un procedimiento del nomenclador en una sede',
+    description:
+      'El concepto debe ser del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) y coincidir con el del ítem de catálogo que fija el precio. Una sede no puede ofrecer dos veces el mismo procedimiento (409).',
+  })
   publishHealthcareService(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
     @Body() dto: CreateHealthcareServiceDto,
@@ -307,6 +322,47 @@ export class PracticesController {
       dto,
       actor,
     );
+  }
+
+  /** Lo que la práctica ofrece del nomenclador, con precio y referencia. */
+  @Get(':practiceId/healthcare-services')
+  @ApiOperation({
+    summary: 'Listar los procedimientos que ofrecen las sedes de la práctica',
+  })
+  @ApiQuery({
+    name: 'practiceSiteId',
+    required: false,
+    description: 'Solo la oferta de esa sede',
+  })
+  @ApiOkResponse({ type: HealthcareServiceOffersResponseDto })
+  listHealthcareServices(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('practiceSiteId', new ParseUUIDPipe({ optional: true }))
+    practiceSiteId?: string,
+  ): Promise<HealthcareServiceOffersResponseDto> {
+    return this.offersService.listOffers(practiceId, practiceSiteId, actor);
+  }
+
+  /** Cambia el precio de la sede o activa/desactiva el procedimiento. */
+  @Audited({
+    action: 'HEALTHCARE_SERVICE_UPDATED',
+    entity: 'healthcare_service',
+    entityId: 'param:id',
+  })
+  @Patch(':practiceId/healthcare-services/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Actualizar el precio o el estado de un procedimiento de la sede',
+  })
+  @ApiOkResponse({ type: HealthcareServiceOfferDto })
+  updateHealthcareService(
+    @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateHealthcareServiceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<HealthcareServiceOfferDto> {
+    return this.offersService.updateOffer(practiceId, id, dto, actor);
   }
 
   /** UC-14-07. */

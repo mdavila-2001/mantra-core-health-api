@@ -33,7 +33,7 @@ import {
 // la clase en runtime para instanciar el anidado antes de validarlo. Se
 // importa el archivo hoja, no el barrel de `practice/dto`, para no arrastrar
 // DTOs ajenos a este alta.
-import { CreateOwnSiteDto } from '../../../practice/dto/create-own-site.dto';
+import { CreateOwnSiteDto } from '../../../../common/dto/create-own-site.dto';
 
 /** Formato aceptado por los cuatro campos telefónicos del alta. */
 const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;

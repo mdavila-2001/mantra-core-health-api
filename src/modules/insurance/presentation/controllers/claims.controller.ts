@@ -97,13 +97,13 @@ export class ClaimsController {
   }
 
   /** UC-26-06. El servicio exige membresía OWNER/ADMIN por origen; conserva roles históricos para reclamos genéricos. */
-  @Post()
-  @Roles()
   @Audited({
     action: 'INSURANCE_CLAIM_SUBMITTED',
     entity: 'insurance_claim',
     entityId: 'result.id',
   })
+  @Post()
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enviar reclamo con líneas (837)' })
   @ApiCreatedResponse({ type: CreatedClaimDto })
@@ -217,14 +217,14 @@ export class ClaimsController {
    * organización, así que esta ruta no le exige un tenant. Para el resto la
    * resolución del tenant y sus roles acotados son las de siempre.
    */
-  @Post(':id/disputes')
-  @Roles('BILLING_OPERATOR', 'SECURITY_ADMIN', 'PATIENT')
-  @PlatformTenantOptional('PATIENT')
   @Audited({
-    action: 'INSURANCE_CLAIM_DISPUTE_OPENED',
+    action: 'CLAIM_DISPUTE_OPENED',
     entity: 'claim_dispute',
     entityId: 'result.id',
   })
+  @Post(':id/disputes')
+  @Roles('BILLING_OPERATOR', 'SECURITY_ADMIN', 'PATIENT')
+  @PlatformTenantOptional('PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir disputa sobre adjudicación' })
   // Explícito porque declarar el 403 de abajo apaga el 201 implícito de Swagger

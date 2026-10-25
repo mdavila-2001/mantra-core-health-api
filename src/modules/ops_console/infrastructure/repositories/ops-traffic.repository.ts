@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS, SEED } from '../../common';
-import { HTTP_SLI_CODE } from '../../observability/http-sli/http-sli.aggregator';
-import type { CumulativeBuckets } from './domain/latency-buckets';
+import { CONCEPTS, SEED } from '../../../../common';
+import { HTTP_SLI_CODE } from '../../../../observability/http-sli/http-sli.aggregator';
+import type { CumulativeBuckets } from '../../domain/latency-buckets';
 
 /** Intervalo de los cubos de la serie. Se incrusta en el SQL: sólo estos dos valores. */
 export type TrafficInterval = 'hour' | 'day';

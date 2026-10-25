@@ -3,6 +3,7 @@ import {
   InsuranceClaimLines,
   InsuranceClaims,
   InsurancePlanBenefits,
+  PatientCoverages,
   PriorAuthorizationDeterminations,
   PriorAuthorizationItems,
   PriorAuthorizationRequests,
@@ -149,6 +150,7 @@ const determination = (overrides: Row = {}): Row => ({
 });
 
 function setup(rows: {
+  coverages?: Row[];
   benefits?: Row[];
   requests?: Row[];
   items?: Row[];
@@ -157,6 +159,10 @@ function setup(rows: {
   claimLines?: Row[];
 }) {
   const tables = new Map<unknown, Row[]>([
+    [
+      PatientCoverages,
+      rows.coverages ?? [{ id: COVERAGE, insurancePlanId: PLAN }],
+    ],
     [InsurancePlanBenefits, rows.benefits ?? [benefit()]],
     [PriorAuthorizationRequests, rows.requests ?? []],
     [PriorAuthorizationItems, rows.items ?? []],
@@ -353,6 +359,47 @@ describe('ClaimCoveragePolicy', () => {
         ),
       );
       expect(reason).toBe(CLAIM_COVERAGE_REASON.INVALID_AMOUNT);
+    });
+  });
+
+  describe('la cobertura es del plan del cobro', () => {
+    it.each([
+      [
+        'la cobertura es de otro plan',
+        [{ id: COVERAGE, insurancePlanId: OTHER_PLAN }],
+      ],
+      ['la cobertura no existe', []],
+      [
+        'la cobertura es de otro paciente y no la de este cobro',
+        [{ id: 'coverage-ajena', insurancePlanId: PLAN }],
+      ],
+    ])(
+      '%s: 422 COVERAGE_PLAN_MISMATCH y no se calcula nada',
+      async (_name, coverages) => {
+        const { policy, em } = setup({ coverages });
+        expect(await rejectionOf(policy.evaluate(em, claim()))).toBe(
+          CLAIM_COVERAGE_REASON.COVERAGE_PLAN_MISMATCH,
+        );
+      },
+    );
+
+    it('el desajuste se rechaza antes que el servicio no cubierto', async () => {
+      const { policy, em } = setup({
+        coverages: [{ id: COVERAGE, insurancePlanId: OTHER_PLAN }],
+        benefits: [],
+      });
+      expect(await rejectionOf(policy.evaluate(em, claim()))).toBe(
+        CLAIM_COVERAGE_REASON.COVERAGE_PLAN_MISMATCH,
+      );
+    });
+
+    it('con el par plan/cobertura correcto reparte igual que antes', async () => {
+      const { policy, em } = setup({});
+      const [line] = await policy.evaluate(em, claim());
+      expect(line).toMatchObject({
+        patientAmount: '140.00',
+        insurerAmount: '360.00',
+      });
     });
   });
 
@@ -1028,6 +1075,20 @@ describe('ClaimCoveragePolicy.quoteLine', () => {
         reason: CLAIM_COVERAGE_REASON.PRIOR_AUTH_AMOUNT_EXCEEDED,
       });
       expect(ctx.memory.locks).toEqual([]);
+    });
+  });
+
+  describe('cobertura de otro plan', () => {
+    it('la cotización lo informa en reason y no calcula importes', async () => {
+      const ctx = setup({
+        coverages: [{ id: COVERAGE, insurancePlanId: OTHER_PLAN }],
+      });
+      expect(await quote(ctx, claim())).toMatchObject({
+        reason: CLAIM_COVERAGE_REASON.COVERAGE_PLAN_MISMATCH,
+        benefitId: null,
+        patientAmount: null,
+        insurerAmount: null,
+      });
     });
   });
 
