@@ -4,7 +4,7 @@
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 21 (21 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 13 · BAJO 8
+- **Riesgo:** ALTO 0 · MEDIO 10 · BAJO 11
 - **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/qa-lab.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -21,18 +21,18 @@
 | 7 | GET | `/admin/qa/suites` | Suites con conteo de casos y última corrida | BAJO | 3 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
 | 8 | GET | `/admin/qa/suites/{suiteId}` | Suite con casos y aserciones | BAJO | 3 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
 | 9 | POST | `/internal/qa/schedules/run-due` | Evaluar programaciones vencidas y encolar sus corridas | MEDIO | 7 | SYSTEM, QA_ADMIN |
-| 10 | POST | `/qa/case-results/{resultId}/evaluate` | Evaluar las aserciones y fijar el resultado del caso | MEDIO | 5 | SYSTEM, QA_ENGINEER |
-| 11 | POST | `/qa/defects` | Registrar un defecto detectado | MEDIO | 4 | SYSTEM, QA_ENGINEER, QA_ADMIN |
-| 12 | PATCH | `/qa/defects/{defectId}` | Triage y transición de estado del defecto | MEDIO | 2 | QA_ADMIN, QA_ENGINEER |
+| 10 | POST | `/qa/case-results/{resultId}/evaluate` | Evaluar las aserciones y fijar el resultado del caso | MEDIO | 6 | SYSTEM, QA_ENGINEER |
+| 11 | POST | `/qa/defects` | Registrar un defecto detectado | MEDIO | 7 | SYSTEM, QA_ENGINEER, QA_ADMIN |
+| 12 | PATCH | `/qa/defects/{defectId}` | Triage y transición de estado del defecto | BAJO | 1 | QA_ADMIN, QA_ENGINEER |
 | 13 | POST | `/qa/environments` | Registrar un entorno de pruebas gobernado | MEDIO | 2 | QA_ADMIN |
 | 14 | POST | `/qa/runs` | Disparar una corrida de pruebas | MEDIO | 5 | QA_ADMIN, QA_ENGINEER, SYSTEM |
 | 15 | POST | `/qa/runs/{runId}/artifacts` | Adjuntar un artefacto de evidencia a la corrida | MEDIO | 3 | SYSTEM, QA_ENGINEER |
 | 16 | POST | `/qa/runs/{runId}/cases/{caseId}/execute` | Registrar la ejecución del caso con sus payloads | MEDIO | 8 | SYSTEM, QA_ENGINEER |
-| 17 | POST | `/qa/runs/{runId}/finalize` | Cerrar la corrida y consolidar totales | MEDIO | 3 | SYSTEM, QA_ENGINEER |
-| 18 | POST | `/qa/runs/{runId}/link-release` | Enlazar la evidencia de la corrida a un release | MEDIO | 3 | RELEASE_MANAGER, QA_ADMIN |
+| 17 | POST | `/qa/runs/{runId}/finalize` | Cerrar la corrida y consolidar totales | BAJO | 2 | SYSTEM, QA_ENGINEER |
+| 18 | POST | `/qa/runs/{runId}/link-release` | Enlazar la evidencia de la corrida a un release | BAJO | 2 | RELEASE_MANAGER, QA_ADMIN |
 | 19 | POST | `/qa/schedules` | Programar la ejecución automática de la suite | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
 | 20 | POST | `/qa/suites/{suiteId}/cases` | Definir un caso de prueba con sus aserciones | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
-| 21 | POST | `/qa/suites/{suiteId}/publish` | Publicar la suite y activar sus casos | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
+| 21 | POST | `/qa/suites/{suiteId}/publish` | Publicar la suite y activar sus casos | MEDIO | 3 | QA_ADMIN, QA_ENGINEER |
 
 ---
 
@@ -68,7 +68,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabReadController.defects → QaLabReadService.listDefects | `src/modules/qa_lab/services/qa-lab-read.service.ts:218` |
+| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabReadController.defects → QaLabReadService.listDefects | `src/modules/qa_lab/services/qa-lab-read.service.ts:236` |
 
 ### Parámetros
 
@@ -137,7 +137,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabReadController.environments → QaLabReadService.listEnvironments | `src/modules/qa_lab/services/qa-lab-read.service.ts:30` |
+| `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabReadController.environments → QaLabReadService.listEnvironments | `src/modules/qa_lab/services/qa-lab-read.service.ts:32` |
 
 ### Cuerpo
 
@@ -349,7 +349,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabReadController.runs → QaLabReadService.listRuns | `src/modules/qa_lab/services/qa-lab-read.service.ts:148` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabReadController.runs → QaLabReadService.listRuns | `src/modules/qa_lab/services/qa-lab-read.service.ts:162` |
 
 ### Parámetros
 
@@ -420,10 +420,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:188` |
-| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:183` |
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:191` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:180` |
+| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:205` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:200` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:208` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:196` |
 
 ### Parámetros
 
@@ -447,7 +447,6 @@ _No se identificó un DTO de respuesta con campos._
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
@@ -494,9 +493,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:52` |
-| `qa_lab.test_runs` | LEE | LEE | POR_SQL | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:64` |
-| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:47` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:55` |
+| `qa_lab.test_runs` | LEE | LEE | POR_SQL | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:72` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:50` |
 
 ### Cuerpo
 
@@ -560,9 +559,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:109` |
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:104` |
-| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:101` |
+| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:122` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:117` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:113` |
 
 ### Parámetros
 
@@ -586,7 +585,6 @@ _No se identificó un DTO de respuesta con campos._
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
@@ -608,7 +606,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabInternalController.runDueSchedules` — `src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:31`
+- **Implementación:** `QaLabInternalController.runDueSchedules` — `src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:36`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -618,14 +616,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/qa/schedules/run-due` la atiende `QaLabInternalController.runDueSchedules` (src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:31). Exige sesión con alguno de los roles SYSTEM, QA_ADMIN. Valida el cuerpo como `QaLabRunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `QaCatalogService.runDueSchedules`. Crea filas en qa_lab.test_runs. Actualiza qa_lab.test_schedules. Lee qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_schedules, qa_lab.test_suites.
+`POST /internal/qa/schedules/run-due` la atiende `QaLabInternalController.runDueSchedules` (src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:36). Exige sesión con alguno de los roles SYSTEM, QA_ADMIN. Valida el cuerpo como `QaLabRunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `QaCatalogService.runDueSchedules`. Crea filas en qa_lab.test_runs. Actualiza qa_lab.test_schedules. Lee qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_schedules, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:31` |
+| ROL | Alguno de: SYSTEM, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:36` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -635,12 +633,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaCatalogRepository.countActiveCases | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:349` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaCatalogRepository.countActiveCases | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:355` |
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaCatalogRepository.findEnvironmentById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:218` |
 | `qa_lab.test_runs` | ESCRIBE | CREA | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaRunsRepository.createRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:131` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaRunsRepository.findRunsInProgress | `src/modules/qa_lab/repositories/qa-runs.repository.ts:211` |
-| `qa_lab.test_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule | `src/modules/qa_lab/services/qa-catalog.service.ts:561` |
-| `qa_lab.test_schedules` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogRepository.claimDueSchedules | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:483` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaRunsRepository.findRunsInProgress | `src/modules/qa_lab/repositories/qa-runs.repository.ts:217` |
+| `qa_lab.test_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule | `src/modules/qa_lab/services/qa-catalog.service.ts:585` |
+| `qa_lab.test_schedules` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogRepository.claimDueSchedules | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:490` |
 | `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaCatalogRepository.findSuiteById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:245` |
 
 ### Cuerpo — DTO `QaLabRunDueSchedulesDto` · `application/json`
@@ -711,37 +709,38 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.evaluateResult` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:139`
+- **Implementación:** `QaLabController.evaluateResult` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:169`
 
 ### Qué es y para qué sirve (negocio)
 
 Evaluar las aserciones y fijar el resultado del caso. Caso de uso UC-36-06: Evaluar aserciones. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/case-results/{resultId}/evaluate` la atiende `QaLabController.evaluateResult` (src/modules/qa_lab/controllers/qa-lab.controller.ts:139). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Delega en `QaRunsService.evaluateResult`. Crea filas en qa_lab.assertion_results. Actualiza qa_lab.test_case_results. Lee qa_lab.assertion_results, qa_lab.test_assertions, qa_lab.test_case_results.
+`POST /qa/case-results/{resultId}/evaluate` la atiende `QaLabController.evaluateResult` (src/modules/qa_lab/controllers/qa-lab.controller.ts:169). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Delega en `QaRunsService.evaluateResult`. Crea filas en qa_lab.assertion_results. Actualiza qa_lab.test_case_results. Lee qa_lab.assertion_results, qa_lab.test_assertions, qa_lab.test_case_results, qa_lab.test_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:139` |
+| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:169` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: resultId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:139` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: resultId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:169` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.assertion_results` | ESCRIBE | CREA | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.createAssertionResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:364` |
-| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.countAssertionResults | `src/modules/qa_lab/repositories/qa-runs.repository.ts:390` |
-| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaCatalogRepository.findAssertionsByCase | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:420` |
-| `qa_lab.test_case_results` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.evaluateResult → QaRunsService.evaluateResult | `src/modules/qa_lab/services/qa-runs.service.ts:443` |
-| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.findCaseResultForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:310` |
+| `qa_lab.assertion_results` | ESCRIBE | CREA | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.createAssertionResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:370` |
+| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.countAssertionResults | `src/modules/qa_lab/repositories/qa-runs.repository.ts:396` |
+| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaCatalogRepository.findAssertionsByCase | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:426` |
+| `qa_lab.test_case_results` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.evaluateResult → QaRunsService.evaluateResult | `src/modules/qa_lab/services/qa-runs.service.ts:468` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.findCaseResultById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:302` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.findRunById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:161` |
 
 ### Parámetros
 
@@ -772,7 +771,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Resultado no encontrado |
 | 409 | `CONFLICT` | ConflictException: El resultado ya fue evaluado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso falló en transporte: no hay respuesta que evaluar; PreconditionFailedException: El caso no tiene aserciones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -798,24 +796,24 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.registerDefect` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:183`
+- **Implementación:** `QaLabController.registerDefect` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:228`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un defecto detectado. Caso de uso UC-36-09: Registrar y deduplicar defecto. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/defects` la atiende `QaLabController.registerDefect` (src/modules/qa_lab/controllers/qa-lab.controller.ts:183). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER, QA_ADMIN. Valida el cuerpo como `RegisterDefectDto` (8 campos, 5 obligatorios). Delega en `QaRunsService.registerDefect`. Crea filas en qa_lab.test_defects. Actualiza qa_lab.test_defects. Lee qa_lab.test_cases, qa_lab.test_defects.
+`POST /qa/defects` la atiende `QaLabController.registerDefect` (src/modules/qa_lab/controllers/qa-lab.controller.ts:228). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER, QA_ADMIN. Valida el cuerpo como `RegisterDefectDto` (8 campos, 5 obligatorios). Delega en `QaRunsService.registerDefect`. Crea filas en qa_lab.test_defects. Actualiza qa_lab.test_defects. Lee qa_lab.test_case_results, qa_lab.test_cases, qa_lab.test_defects, qa_lab.test_runs, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, QA_ENGINEER, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:183` |
+| ROL | Alguno de: SYSTEM, QA_ENGINEER, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:228` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -825,10 +823,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaCatalogRepository.findCaseById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:300` |
-| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.registerDefect → QaRunsService.registerDefect | `src/modules/qa_lab/services/qa-runs.service.ts:635` |
-| `qa_lab.test_defects` | ESCRIBE | CREA | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.createDefect | `src/modules/qa_lab/repositories/qa-runs.repository.ts:598` |
-| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.findDefectBySignatureForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:649` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.findCaseResultById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:302` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaCatalogRepository.findCaseById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:306` |
+| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.registerDefect → QaRunsService.registerDefect | `src/modules/qa_lab/services/qa-runs.service.ts:693` |
+| `qa_lab.test_defects` | ESCRIBE | CREA | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.createDefect | `src/modules/qa_lab/repositories/qa-runs.repository.ts:604` |
+| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.findDefectBySignatureForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:658` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.findRunById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:161` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaCatalogRepository.findSuiteById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:245` |
 
 ### Cuerpo — DTO `RegisterDefectDto` · `application/json`
 
@@ -890,8 +891,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: No se pudo asignar número de defecto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El resultado pertenece a otro caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
@@ -913,28 +914,28 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Origen:** CONTRATO
 - **Nombre:** Triage y transición de estado del defecto
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.triageDefect` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:199`
+- **Implementación:** `QaLabController.triageDefect` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:249`
 
 ### Qué es y para qué sirve (negocio)
 
 Triage y transición de estado del defecto. Caso de uso UC-36-10: Triage y transición. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /qa/defects/{defectId}` la atiende `QaLabController.triageDefect` (src/modules/qa_lab/controllers/qa-lab.controller.ts:199). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `TriageDefectDto` (5 campos, 1 obligatorio). Delega en `QaRunsService.triageDefect`. Actualiza qa_lab.test_defects. Lee qa_lab.test_defects.
+`PATCH /qa/defects/{defectId}` la atiende `QaLabController.triageDefect` (src/modules/qa_lab/controllers/qa-lab.controller.ts:249). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `TriageDefectDto` (5 campos, 1 obligatorio). Delega en `QaRunsService.triageDefect`. Lee qa_lab.test_defects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:199` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:249` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: defectId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:199` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: defectId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:249` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -943,8 +944,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.triageDefect → QaRunsService.triageDefect | `src/modules/qa_lab/services/qa-runs.service.ts:740` |
-| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabController.triageDefect → QaRunsService.triageDefect → QaRunsRepository.findDefectForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:633` |
+| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabController.triageDefect → QaRunsService.triageDefect → QaRunsRepository.findDefectForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:642` |
 
 ### Parámetros
 
@@ -1001,7 +1001,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Defecto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El defecto está en un estado desconocido; PreconditionFailedException: La transición de estado no está permitida; PreconditionFailedException: Un defecto en curso necesita responsable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1026,24 +1025,24 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.createEnvironment` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:56`
+- **Implementación:** `QaLabController.createEnvironment` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:61`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un entorno de pruebas gobernado. Caso de uso UC-36-01: Registrar entorno gobernado. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/environments` la atiende `QaLabController.createEnvironment` (src/modules/qa_lab/controllers/qa-lab.controller.ts:56). Exige sesión con alguno de los roles QA_ADMIN. Valida el cuerpo como `CreateEnvironmentDto` (7 campos, 3 obligatorios). Delega en `QaCatalogService.createEnvironment`. Crea filas en qa_lab.test_environments. Lee qa_lab.test_environments.
+`POST /qa/environments` la atiende `QaLabController.createEnvironment` (src/modules/qa_lab/controllers/qa-lab.controller.ts:61). Exige sesión con alguno de los roles QA_ADMIN. Valida el cuerpo como `CreateEnvironmentDto` (7 campos, 3 obligatorios). Delega en `QaCatalogService.createEnvironment`. Crea filas en qa_lab.test_environments. Lee qa_lab.test_environments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:56` |
+| ROL | Alguno de: QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:61` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1136,24 +1135,24 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.createRun` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:105`
+- **Implementación:** `QaLabController.createRun` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:125`
 
 ### Qué es y para qué sirve (negocio)
 
 Disparar una corrida de pruebas. Caso de uso UC-36-04: Disparar corrida. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/runs` la atiende `QaLabController.createRun` (src/modules/qa_lab/controllers/qa-lab.controller.ts:105). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, SYSTEM. Valida el cuerpo como `CreateRunDto` (6 campos, 3 obligatorios). Delega en `QaRunsService.createRun`. Crea filas en qa_lab.test_runs. Lee qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_suites.
+`POST /qa/runs` la atiende `QaLabController.createRun` (src/modules/qa_lab/controllers/qa-lab.controller.ts:125). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, SYSTEM. Valida el cuerpo como `CreateRunDto` (6 campos, 3 obligatorios). Delega en `QaRunsService.createRun`. Crea filas en qa_lab.test_runs. Lee qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, SYSTEM | `src/modules/qa_lab/controllers/qa-lab.controller.ts:105` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, SYSTEM | `src/modules/qa_lab/controllers/qa-lab.controller.ts:125` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1163,11 +1162,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaCatalogRepository.countActiveCases | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:349` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaCatalogRepository.countActiveCases | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:355` |
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaCatalogRepository.findEnvironmentById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:218` |
 | `qa_lab.test_runs` | ESCRIBE | CREA | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaRunsRepository.createRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:131` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaRunsRepository.findRunsInProgress | `src/modules/qa_lab/repositories/qa-runs.repository.ts:211` |
-| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaCatalogRepository.findSuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:253` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaRunsRepository.findRunsInProgress | `src/modules/qa_lab/repositories/qa-runs.repository.ts:217` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.createRun → QaRunsService.createRun → QaCatalogRepository.findSuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:259` |
 
 ### Cuerpo — DTO `CreateRunDto` · `application/json`
 
@@ -1222,7 +1221,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
 | 409 | `CONFLICT` | ConflictException: La suite ya tiene una corrida en marcha; ConflictException: No se pudo asignar número de corrida |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suite no está publicada; PreconditionFailedException: El entorno no está activo; PreconditionFailedException: La suite no tiene casos activos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1248,26 +1246,26 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.attachArtifact` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:170`
+- **Implementación:** `QaLabController.attachArtifact` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:210`
 
 ### Qué es y para qué sirve (negocio)
 
 Adjuntar un artefacto de evidencia a la corrida. Caso de uso UC-36-08: Adjuntar evidencia. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/runs/{runId}/artifacts` la atiende `QaLabController.attachArtifact` (src/modules/qa_lab/controllers/qa-lab.controller.ts:170). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Valida el cuerpo como `AttachArtifactDto` (4 campos, 2 obligatorios). Delega en `QaRunsService.attachArtifact`. Crea filas en qa_lab.run_artifacts. Lee qa_lab.test_case_results, qa_lab.test_runs.
+`POST /qa/runs/{runId}/artifacts` la atiende `QaLabController.attachArtifact` (src/modules/qa_lab/controllers/qa-lab.controller.ts:210). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Valida el cuerpo como `AttachArtifactDto` (4 campos, 2 obligatorios). Delega en `QaRunsService.attachArtifact`. Crea filas en qa_lab.run_artifacts. Lee qa_lab.test_case_results, qa_lab.test_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:170` |
+| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:210` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:170` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:210` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1276,8 +1274,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.run_artifacts` | ESCRIBE | CREA | DIRECTA | QaLabController.attachArtifact → QaRunsService.attachArtifact → QaRunsRepository.createArtifact | `src/modules/qa_lab/repositories/qa-runs.repository.ts:566` |
-| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.attachArtifact → QaRunsService.attachArtifact → QaRunsRepository.findCaseResultById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:296` |
+| `qa_lab.run_artifacts` | ESCRIBE | CREA | DIRECTA | QaLabController.attachArtifact → QaRunsService.attachArtifact → QaRunsRepository.createArtifact | `src/modules/qa_lab/repositories/qa-runs.repository.ts:572` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.attachArtifact → QaRunsService.attachArtifact → QaRunsRepository.findCaseResultById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:302` |
 | `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.attachArtifact → QaRunsService.attachArtifact → QaRunsRepository.findRunById | `src/modules/qa_lab/repositories/qa-runs.repository.ts:161` |
 
 ### Parámetros
@@ -1333,7 +1331,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Resultado no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El resultado pertenece a otra corrida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1358,26 +1355,26 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.executeCase` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:121`
+- **Implementación:** `QaLabController.executeCase` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:146`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar la ejecución del caso con sus payloads. Caso de uso UC-36-05: Capturar ejecución y payloads. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/runs/{runId}/cases/{caseId}/execute` la atiende `QaLabController.executeCase` (src/modules/qa_lab/controllers/qa-lab.controller.ts:121). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Valida el cuerpo como `ExecuteCaseDto` (8 campos, 2 obligatorios). Delega en `QaRunsService.executeCase`. Crea filas en qa_lab.request_payloads, qa_lab.response_payloads, qa_lab.test_case_results. Actualiza qa_lab.test_runs. Lee qa_lab.test_case_results, qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs.
+`POST /qa/runs/{runId}/cases/{caseId}/execute` la atiende `QaLabController.executeCase` (src/modules/qa_lab/controllers/qa-lab.controller.ts:146). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Valida el cuerpo como `ExecuteCaseDto` (8 campos, 2 obligatorios). Delega en `QaRunsService.executeCase`. Crea filas en qa_lab.request_payloads, qa_lab.response_payloads, qa_lab.test_case_results. Lee qa_lab.test_case_results, qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:121` |
+| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:146` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: runId, caseId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:121` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: runId, caseId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:146` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1386,14 +1383,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.request_payloads` | ESCRIBE | CREA | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.createRequestPayload | `src/modules/qa_lab/repositories/qa-runs.repository.ts:441` |
-| `qa_lab.response_payloads` | ESCRIBE | CREA | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.createResponsePayload | `src/modules/qa_lab/repositories/qa-runs.repository.ts:509` |
-| `qa_lab.test_case_results` | ESCRIBE | CREA | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.createCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:267` |
-| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.findCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:323` |
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaCatalogRepository.findCaseById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:300` |
+| `qa_lab.request_payloads` | ESCRIBE | CREA | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.createRequestPayload | `src/modules/qa_lab/repositories/qa-runs.repository.ts:447` |
+| `qa_lab.response_payloads` | ESCRIBE | CREA | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.createResponsePayload | `src/modules/qa_lab/repositories/qa-runs.repository.ts:515` |
+| `qa_lab.test_case_results` | ESCRIBE | CREA | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.createCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:273` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.findCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:329` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaCatalogRepository.findCaseById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:306` |
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaCatalogRepository.findEnvironmentById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:218` |
-| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.executeCase → QaRunsService.executeCase | `src/modules/qa_lab/services/qa-runs.service.ts:349` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:172` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:178` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaCatalogRepository.findSuiteById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:245` |
 
 ### Parámetros
 
@@ -1459,7 +1456,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada; ConflictException: El caso ya se ejecutó en esta corrida |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso pertenece a otra suite |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1483,37 +1479,36 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar la corrida y consolidar totales
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.finalizeRun` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:155`
+- **Implementación:** `QaLabController.finalizeRun` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:190`
 
 ### Qué es y para qué sirve (negocio)
 
 Cerrar la corrida y consolidar totales. Caso de uso UC-36-07: Cerrar corrida y consolidar. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/runs/{runId}/finalize` la atiende `QaLabController.finalizeRun` (src/modules/qa_lab/controllers/qa-lab.controller.ts:155). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Delega en `QaRunsService.finalizeRun`. Actualiza qa_lab.test_runs. Lee qa_lab.test_case_results, qa_lab.test_runs.
+`POST /qa/runs/{runId}/finalize` la atiende `QaLabController.finalizeRun` (src/modules/qa_lab/controllers/qa-lab.controller.ts:190). Exige sesión con alguno de los roles SYSTEM, QA_ENGINEER. Delega en `QaRunsService.finalizeRun`. Lee qa_lab.test_case_results, qa_lab.test_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:155` |
+| ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:190` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:155` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:190` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.finalizeRun → QaRunsService.finalizeRun → QaRunsRepository.findResultsByRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:331` |
-| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.finalizeRun → QaRunsService.finalizeRun | `src/modules/qa_lab/services/qa-runs.service.ts:515` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.finalizeRun → QaRunsService.finalizeRun → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:172` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.finalizeRun → QaRunsService.finalizeRun → QaRunsRepository.findResultsByRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:337` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.finalizeRun → QaRunsService.finalizeRun → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:178` |
 
 ### Parámetros
 
@@ -1545,7 +1540,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
 | 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1568,28 +1562,28 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Origen:** CONTRATO
 - **Nombre:** Enlazar la evidencia de la corrida a un release
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.linkRelease` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:227`
+- **Implementación:** `QaLabController.linkRelease` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:287`
 
 ### Qué es y para qué sirve (negocio)
 
 Enlazar la evidencia de la corrida a un release. Caso de uso UC-36-12: Enlazar evidencia a release. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/runs/{runId}/link-release` la atiende `QaLabController.linkRelease` (src/modules/qa_lab/controllers/qa-lab.controller.ts:227). Exige sesión con alguno de los roles RELEASE_MANAGER, QA_ADMIN. Valida el cuerpo como `LinkReleaseDto` (2 campos, 1 obligatorio). Delega en `QaRunsService.linkRelease`. Actualiza qa_lab.test_runs. Lee qa_lab.run_artifacts, qa_lab.test_runs.
+`POST /qa/runs/{runId}/link-release` la atiende `QaLabController.linkRelease` (src/modules/qa_lab/controllers/qa-lab.controller.ts:287). Exige sesión con alguno de los roles RELEASE_MANAGER, QA_ADMIN. Valida el cuerpo como `LinkReleaseDto` (2 campos, 1 obligatorio). Delega en `QaRunsService.linkRelease`. Lee qa_lab.run_artifacts, qa_lab.test_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RELEASE_MANAGER, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:227` |
+| ROL | Alguno de: RELEASE_MANAGER, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:287` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:227` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:287` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1598,9 +1592,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.run_artifacts` | LEE | LEE | DIRECTA | QaLabController.linkRelease → QaRunsService.linkRelease → QaRunsRepository.findArtifactsByRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:585` |
-| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.linkRelease → QaRunsService.linkRelease | `src/modules/qa_lab/services/qa-runs.service.ts:799` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.linkRelease → QaRunsService.linkRelease → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:172` |
+| `qa_lab.run_artifacts` | LEE | LEE | DIRECTA | QaLabController.linkRelease → QaRunsService.linkRelease → QaRunsRepository.findArtifactsByRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:591` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.linkRelease → QaRunsService.linkRelease → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:178` |
 
 ### Parámetros
 
@@ -1651,7 +1644,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo una corrida que pasó puede respaldar un release; PreconditionFailedException: La corrida no tiene evidencia adjunta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1676,24 +1668,24 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.createSchedule` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:215`
+- **Implementación:** `QaLabController.createSchedule` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:270`
 
 ### Qué es y para qué sirve (negocio)
 
 Programar la ejecución automática de la suite. Caso de uso UC-36-11: Programar ejecución automática. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/schedules` la atiende `QaLabController.createSchedule` (src/modules/qa_lab/controllers/qa-lab.controller.ts:215). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `CreateTestScheduleDto` (9 campos, 6 obligatorios). Delega en `QaCatalogService.createSchedule`. Crea filas en qa_lab.test_schedules. Lee qa_lab.test_environments, qa_lab.test_schedules, qa_lab.test_suites.
+`POST /qa/schedules` la atiende `QaLabController.createSchedule` (src/modules/qa_lab/controllers/qa-lab.controller.ts:270). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `CreateTestScheduleDto` (9 campos, 6 obligatorios). Delega en `QaCatalogService.createSchedule`. Crea filas en qa_lab.test_schedules. Lee qa_lab.test_environments, qa_lab.test_schedules, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:215` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:270` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1704,8 +1696,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabController.createSchedule → QaCatalogService.createSchedule → QaCatalogRepository.findEnvironmentById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:218` |
-| `qa_lab.test_schedules` | ESCRIBE | CREA | DIRECTA | QaLabController.createSchedule → QaCatalogService.createSchedule → QaCatalogRepository.createSchedule | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:437` |
-| `qa_lab.test_schedules` | LEE | LEE | DIRECTA | QaLabController.createSchedule → QaCatalogService.createSchedule → QaCatalogRepository.findScheduleByCode | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:465` |
+| `qa_lab.test_schedules` | ESCRIBE | CREA | DIRECTA | QaLabController.createSchedule → QaCatalogService.createSchedule → QaCatalogRepository.createSchedule | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:443` |
+| `qa_lab.test_schedules` | LEE | LEE | DIRECTA | QaLabController.createSchedule → QaCatalogService.createSchedule → QaCatalogRepository.findScheduleByCode | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:471` |
 | `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.createSchedule → QaCatalogService.createSchedule → QaCatalogRepository.findSuiteById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:245` |
 
 ### Cuerpo — DTO `CreateTestScheduleDto` · `application/json`
@@ -1770,7 +1762,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una programación con ese código para la suite y el entorno |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suite no está publicada; PreconditionFailedException: El entorno no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1796,26 +1787,26 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.createTestCase` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:72`
+- **Implementación:** `QaLabController.createTestCase` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:82`
 
 ### Qué es y para qué sirve (negocio)
 
 Definir un caso de prueba con sus aserciones. Caso de uso UC-36-02: Definir caso con aserciones. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/suites/{suiteId}/cases` la atiende `QaLabController.createTestCase` (src/modules/qa_lab/controllers/qa-lab.controller.ts:72). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `CreateTestCaseDto` (16 campos, 4 obligatorios). Delega en `QaCatalogService.createTestCase`. Crea filas en qa_lab.test_assertions, qa_lab.test_cases. Lee qa_lab.test_cases, qa_lab.test_suites.
+`POST /qa/suites/{suiteId}/cases` la atiende `QaLabController.createTestCase` (src/modules/qa_lab/controllers/qa-lab.controller.ts:82). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `CreateTestCaseDto` (16 campos, 4 obligatorios). Delega en `QaCatalogService.createTestCase`. Crea filas en qa_lab.test_assertions, qa_lab.test_cases. Lee qa_lab.test_cases, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:72` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:82` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:72` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:82` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1824,10 +1815,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_assertions` | ESCRIBE | CREA | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.createAssertion | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:399` |
-| `qa_lab.test_cases` | ESCRIBE | CREA | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.createCase | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:270` |
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.findCaseByCode | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:316` |
-| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.findSuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:253` |
+| `qa_lab.test_assertions` | ESCRIBE | CREA | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.createAssertion | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:405` |
+| `qa_lab.test_cases` | ESCRIBE | CREA | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.createCase | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:276` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.findCaseByCode | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:322` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.createTestCase → QaCatalogService.createTestCase → QaCatalogRepository.findSuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:259` |
 
 ### Parámetros
 
@@ -1916,7 +1907,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un caso con ese código en la suite |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una aserción JSON_PATH necesita su ruta; PreconditionFailedException: La aserción necesita valor esperado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1942,26 +1932,26 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QaLabController.publishSuite` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:88`
+- **Implementación:** `QaLabController.publishSuite` — `src/modules/qa_lab/controllers/qa-lab.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
 Publicar la suite y activar sus casos. Caso de uso UC-36-03: Publicar suite y activar casos. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /qa/suites/{suiteId}/publish` la atiende `QaLabController.publishSuite` (src/modules/qa_lab/controllers/qa-lab.controller.ts:88). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `PublishSuiteDto` (1 campo, 0 obligatorios). Delega en `QaCatalogService.publishSuite`. Actualiza qa_lab.test_cases, qa_lab.test_suites. Lee qa_lab.test_cases, qa_lab.test_suites.
+`POST /qa/suites/{suiteId}/publish` la atiende `QaLabController.publishSuite` (src/modules/qa_lab/controllers/qa-lab.controller.ts:103). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER. Valida el cuerpo como `PublishSuiteDto` (1 campo, 0 obligatorios). Delega en `QaCatalogService.publishSuite`. Actualiza qa_lab.test_cases. Lee qa_lab.test_cases, qa_lab.test_suites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:88` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:103` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:88` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:103` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1970,10 +1960,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.publishSuite → QaCatalogService.publishSuite | `src/modules/qa_lab/services/qa-catalog.service.ts:313` |
-| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.publishSuite → QaCatalogService.publishSuite → QaCatalogRepository.findCasesBySuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:329` |
-| `qa_lab.test_suites` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.publishSuite → QaCatalogService.publishSuite | `src/modules/qa_lab/services/qa-catalog.service.ts:319` |
-| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.publishSuite → QaCatalogService.publishSuite → QaCatalogRepository.findSuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:253` |
+| `qa_lab.test_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.publishSuite → QaCatalogService.publishSuite | `src/modules/qa_lab/services/qa-catalog.service.ts:326` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.publishSuite → QaCatalogService.publishSuite → QaCatalogRepository.findCasesBySuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:335` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabController.publishSuite → QaCatalogService.publishSuite → QaCatalogRepository.findSuiteForUpdate | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:259` |
 
 ### Parámetros
 
@@ -2020,7 +2009,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una suite sin casos no puede publicarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

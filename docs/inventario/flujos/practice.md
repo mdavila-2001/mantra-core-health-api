@@ -23,19 +23,19 @@ _Fuente: `src/modules/practice/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-14-01` | Alta de sitio (op. status PLANNED) | POST /practices/{practiceId}/sites | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-14-02` | Registrar acreditación (PENDING) | POST /practices/{practiceId}/accreditations | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-14-03` | Verificar (→VERIFIED) o caducar (→EXPIRED) | POST /accreditations/{id}/verify | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-14-04` | Crear unidad clínica jerárquica | POST /sites/{siteId}/clinical-units | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-14-05` | Crear espacio de atención (AVAILABLE) | POST /sites/{siteId}/care-spaces | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-14-06` | Publicar servicio de salud | POST /practices/{practiceId}/healthcare-services | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-14-07` | Configurar ajuste (upsert) | PUT /practices/{practiceId}/settings/{settingKey} | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-14-08` | Asignar rol de profesional | POST /practices/{practiceId}/role-assignments | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-14-09` | Adjuntar personal de apoyo | POST /role-assignments/{roleId}/support-assignments | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-14-01` | Alta de sitio (op. status PLANNED) | POST /practices/{practiceId}/sites | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-14-02` | Registrar acreditación (PENDING) | POST /practices/{practiceId}/accreditations | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-14-03` | Verificar (→VERIFIED) o caducar (→EXPIRED) | POST /accreditations/{id}/verify | SECURITY_ADMIN | BAJO | 2 |
+| `UC-14-04` | Crear unidad clínica jerárquica | POST /sites/{siteId}/clinical-units | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-14-05` | Crear espacio de atención (AVAILABLE) | POST /sites/{siteId}/care-spaces | SECURITY_ADMIN | MEDIO | 3 |
+| `UC-14-06` | Publicar servicio de salud | POST /practices/{practiceId}/healthcare-services | SECURITY_ADMIN | MEDIO | 3 |
+| `UC-14-07` | Configurar ajuste (upsert) | PUT /practices/{practiceId}/settings/{settingKey} | SECURITY_ADMIN | MEDIO | 3 |
+| `UC-14-08` | Asignar rol de profesional | POST /practices/{practiceId}/role-assignments | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-14-09` | Adjuntar personal de apoyo | POST /role-assignments/{roleId}/support-assignments | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-14-10` | Alta de insumo (stock 0) | POST /practices/{practiceId}/inventory-items | SECURITY_ADMIN | MEDIO | 1 |
 | `UC-14-11` | Movimiento de stock (IN/OUT/ADJUST) | POST /inventory-items/{itemId}/movements | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-14-12` | Desmantelar sitio en cascada | DELETE /practices/{practiceId}/sites/{siteId} | SECURITY_ADMIN | MEDIO | 10 |
-| `ctrl:PracticesController` | Operaciones de PracticesController que el README no asigna a un caso de uso | GET /practices | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 1 |
+| `ctrl:PracticesController` | Operaciones de PracticesController que el README no asigna a un caso de uso | GET /practices | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 2 |
 |  |  | POST /practices | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | GET /practices/{practiceId}/organization | SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 9 |
 |  |  | GET /practices/{practiceId}/role-assignments | SECURITY_ADMIN | BAJO | 2 |
@@ -48,10 +48,10 @@ _Fuente: `src/modules/practice/README.md:3`_
 |  |  | PATCH /practitioners/me/sites/{siteId} | PRACTITIONER · CLINICIAN | MEDIO | 9 |
 |  |  | PUT /practitioners/me/sites/{siteId}/bank-qr | PRACTITIONER · CLINICIAN | BAJO | 6 |
 |  |  | PUT /practitioners/me/sites/{siteId}/contact-phone | PRACTITIONER · CLINICIAN | MEDIO | 7 |
-| `ctrl:RoleAssignmentsController` | Operaciones de RoleAssignmentsController que el README no asigna a un caso de uso | POST /role-assignments/{roleId}/approve | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /role-assignments/{roleId}/end | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /role-assignments/{roleId}/reject | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /role-assignments/{roleId}/suspend | SECURITY_ADMIN | MEDIO | 2 |
+| `ctrl:RoleAssignmentsController` | Operaciones de RoleAssignmentsController que el README no asigna a un caso de uso | POST /role-assignments/{roleId}/approve | SECURITY_ADMIN | BAJO | 2 |
+|  |  | POST /role-assignments/{roleId}/end | SECURITY_ADMIN | BAJO | 2 |
+|  |  | POST /role-assignments/{roleId}/reject | SECURITY_ADMIN | BAJO | 2 |
+|  |  | POST /role-assignments/{roleId}/suspend | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:SitesController` | Operaciones de SitesController que el README no asigna a un caso de uso | GET /sites/{siteId}/care-spaces | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN | BAJO | 3 |
 
 ### Diagrama 1 de 2 — etapas `UC-14-01`, `UC-14-02`, `UC-14-03`…
@@ -64,8 +64,8 @@ flowchart LR
   a35(["PRACTITIONER"]):::actor
   a37(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
   t3[("practice.practice_sites")]:::tabla
-  t4[("practice.practices")]:::tabla
-  t6[("practice.practice_accreditations")]:::tabla
+  t5[("practice.practice_accreditations")]:::tabla
+  t7[("practice.practices")]:::tabla
   t9[("practice.clinical_units")]:::tabla
   t11[("practice.care_spaces")]:::tabla
   t13[("practice.healthcare_services")]:::tabla
@@ -79,10 +79,10 @@ flowchart LR
     o1["POST /practices/{practiceId}/sites"]:::op
   end
   subgraph s1["UC-14-02 · Registrar acreditación (PENDING)"]
-    o5["POST /practices/{practiceId}/accreditations"]:::op
+    o4["POST /practices/{practiceId}/accreditations"]:::op
   end
   subgraph s2["UC-14-03 · Verificar (→VERIFIED) o caducar (→EXPIRED)"]
-    o7["POST /accreditations/{id}/verify"]:::op
+    o6["POST /accreditations/{id}/verify"]:::op
   end
   subgraph s3["UC-14-04 · Crear unidad clínica jerárquica"]
     o8["POST /sites/{siteId}/clinical-units"]:::op
@@ -124,46 +124,42 @@ flowchart LR
   a2 --> o1
   o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"CREA"| t6
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t4
-  a2 --> o7
-  o7 -->|"ACTUALIZA"| t6
-  o7 -->|"LEE"| t6
+  a2 --> o4
+  o4 -->|"CREA"| t5
+  o4 -->|"LEE"| t3
+  a2 --> o6
+  o6 -->|"LEE"| t5
+  o6 -->|"LEE"| t7
   a2 --> o8
   o8 -->|"CREA"| t9
   o8 -->|"LEE"| t9
-  o8 -->|"LEE"| t3
   a2 --> o10
   o10 -->|"CREA"| t11
   o10 -->|"LEE"| t11
   o10 -->|"LEE"| t9
-  o10 -->|"LEE"| t3
   a2 --> o12
   o12 -->|"LEE"| t9
   o12 -->|"CREA"| t13
   o12 -->|"LEE"| t3
-  o12 -->|"LEE"| t4
   a2 --> o14
   o14 -->|"ACTUALIZA"| t15
   o14 -->|"CREA"| t15
   o14 -->|"LEE"| t15
-  o14 -->|"LEE"| t4
   a2 --> o16
+  o16 -->|"LEE"| t9
+  o16 -->|"LEE"| t13
   o16 -->|"LEE"| t3
-  o16 -->|"LEE"| t4
   o16 -->|"CREA"| t17
   a2 --> o18
+  o18 -->|"LEE"| t7
   o18 -->|"LEE"| t17
   o18 -->|"CREA"| t19
   a2 --> o20
   o20 -->|"CREA"| t21
   a2 --> o22
-  o22 -->|"ACTUALIZA"| t21
   o22 -->|"LEE"| t21
   o22 -->|"CREA"| t23
+  o22 -->|"LEE"| t7
   a2 --> o24
   o24 -->|"ACTUALIZA"| t11
   o24 -->|"LEE"| t11
@@ -173,28 +169,29 @@ flowchart LR
   o24 -->|"LEE"| t13
   o24 -.-> t25
   a27 --> o26
-  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t7
+  o26 -->|"LEE"| t17
   a2 --> o28
   o28 -->|"CREA"| t29
-  o28 -->|"CREA"| t4
+  o28 -->|"CREA"| t7
   a31 --> o30
   o30 -->|"LEE"| t11
   o30 -->|"LEE"| t9
   o30 -->|"LEE"| t13
   o30 -->|"LEE"| t21
-  o30 -->|"LEE"| t6
+  o30 -->|"LEE"| t5
   o30 -->|"LEE"| t3
   o30 -.-> t32
   a2 --> o33
-  o33 -->|"LEE"| t4
+  o33 -->|"LEE"| t7
   o33 -->|"LEE"| t17
   a35 --> o34
   o34 -->|"LEE"| t3
-  o34 -->|"LEE"| t4
+  o34 -->|"LEE"| t7
   o34 -->|"CREA"| t17
   a37 --> o36
   o36 -->|"LEE"| t3
-  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t7
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -286,16 +283,16 @@ flowchart LR
   o19 -->|"LEE"| t15
   o19 -.-> t20
   a22 --> o21
-  o21 -->|"ACTUALIZA"| t6
+  o21 -->|"LEE"| t5
   o21 -->|"LEE"| t6
   a22 --> o23
-  o23 -->|"ACTUALIZA"| t6
+  o23 -->|"LEE"| t5
   o23 -->|"LEE"| t6
   a22 --> o24
-  o24 -->|"ACTUALIZA"| t6
+  o24 -->|"LEE"| t5
   o24 -->|"LEE"| t6
   a22 --> o25
-  o25 -->|"ACTUALIZA"| t6
+  o25 -->|"LEE"| t5
   o25 -->|"LEE"| t6
   a27 --> o26
   o26 -->|"LEE"| t28
@@ -311,7 +308,7 @@ flowchart LR
 
 ### Máquina de estados `ASSIGNMENT_TRANSITIONS`
 
-Declarada en `src/modules/practice/services/practice-workforce.service.ts:35`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/practice/services/practice-workforce.service.ts:43`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -351,7 +348,6 @@ Verificar o caducar una acreditación (transición de estado)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Acreditación no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acreditación no está pendiente de verificación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -368,23 +364,23 @@ flowchart TD
   n4 --> n5
   n6[("LEE practice.practice_accreditations")]:::efecto
   n5 --> n6
-  n7{"!accreditation"}:::decision
+  n7["Llama a PracticesRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Acreditación no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"decision === 'VERIFIED'"}:::decision
-  n7 -->|"no"| n9
-  n10{"accreditation.verificationStatusConceptId !== PRAC.ACCRED_PENDING"}:::decision
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!found || !owner"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
   n9 -->|"sí"| n10
-  n11(["422 PRECONDITION_FAILED La acreditación no está pendiente de verificación"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA practice.practice_accreditations")]:::efecto
-  n10 -->|"no"| n12
-  n13[("ACTUALIZA practice.practice_accreditations")]:::efecto
-  n9 -->|"no"| n13
+  n11{"decision === 'VERIFIED'"}:::decision
+  n9 -->|"no"| n11
+  n12{"accreditation.verificationStatusConceptId !== PRAC.ACCRED_PENDING"}:::decision
+  n11 -->|"sí"| n12
+  n13(["422 PRECONDITION_FAILED La acreditación no está pendiente de verificación"]):::error
+  n12 -->|"sí"| n13
   n14(("200 Responde con éxito")):::ok
-  n12 --> n14
-  n13 --> n14
+  n12 -->|"no"| n14
+  n11 -->|"no"| n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -403,7 +399,6 @@ Registrar un movimiento de inventario (ajuste de stock)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Insumo de inventario no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El insumo no está activo; PreconditionFailedException: Stock insuficiente para la salida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -420,26 +415,28 @@ flowchart TD
   n4 --> n5
   n6[("LEE practice.inventory_items")]:::efecto
   n5 --> n6
-  n7{"!item"}:::decision
+  n7["Llama a PracticesRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Insumo de inventario no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"item.statusConceptId !== PRAC.INVENTORY_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El insumo no está activo"]):::error
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!found || !owner"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
   n9 -->|"sí"| n10
-  n11{"next ‹ 0"}:::decision
+  n11{"item.statusConceptId !== PRAC.INVENTORY_ACTIVE"}:::decision
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Stock insuficiente para la salida"]):::error
+  n12(["422 PRECONDITION_FAILED El insumo no está activo"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a InventoryMovementsRepository.create"]:::llamada
+  n13{"next ‹ 0"}:::decision
   n11 -->|"no"| n13
-  n14[("CREA practice.inventory_movements")]:::efecto
-  n13 --> n14
-  n15[("ACTUALIZA practice.inventory_items")]:::efecto
-  n14 --> n15
-  n16(("201 Responde con éxito")):::ok
+  n14(["422 PRECONDITION_FAILED Stock insuficiente para la salida"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InventoryMovementsRepository.create"]:::llamada
+  n13 -->|"no"| n15
+  n16[("CREA practice.inventory_movements")]:::efecto
   n15 --> n16
+  n17(("201 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -458,7 +455,6 @@ Registrar una acreditación con evidencia
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no pertenece a la práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -471,31 +467,23 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticesRepository.findById"]:::llamada
+  n5{"dto.practiceSiteId"}:::decision
   n4 --> n5
-  n6[("LEE practice.practices")]:::efecto
-  n5 --> n6
-  n7{"!practice"}:::decision
+  n6["Llama a PracticeSitesRepository.findById"]:::llamada
+  n5 -->|"sí"| n6
+  n7[("LEE practice.practice_sites")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"dto.practiceSiteId"}:::decision
-  n7 -->|"no"| n9
-  n10["Llama a PracticeSitesRepository.findById"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE practice.practice_sites")]:::efecto
+  n8{"!site || site.practiceId !== practiceId"}:::decision
+  n7 --> n8
+  n9(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PracticeAccreditationsRepository.create"]:::llamada
+  n8 -->|"no"| n10
+  n5 -->|"no"| n10
+  n11[("CREA practice.practice_accreditations")]:::efecto
   n10 --> n11
-  n12{"!site || site.practiceId !== practiceId"}:::decision
+  n12(("201 Responde con éxito")):::ok
   n11 --> n12
-  n13(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a PracticeAccreditationsRepository.create"]:::llamada
-  n12 -->|"no"| n14
-  n9 -->|"no"| n14
-  n15[("CREA practice.practice_accreditations")]:::efecto
-  n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -514,7 +502,6 @@ Publicar un servicio de salud
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad clínica no existe |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -527,46 +514,42 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticesRepository.findById"]:::llamada
+  n5{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE practice.practices")]:::efecto
-  n5 --> n6
-  n7{"!practice"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n6(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7{"dto.practiceSiteId"}:::decision
+  n5 -->|"no"| n7
+  n8["Llama a PracticeSitesRepository.findById"]:::llamada
   n7 -->|"sí"| n8
-  n9{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.practiceSiteId"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a PracticeSitesRepository.findById"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE practice.practice_sites")]:::efecto
-  n12 --> n13
-  n14{"!site || site.practiceId !== practiceId"}:::decision
+  n9[("LEE practice.practice_sites")]:::efecto
+  n8 --> n9
+  n10{"!site || site.practiceId !== practiceId"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
+  n10 -->|"sí"| n11
+  n12{"dto.clinicalUnitId"}:::decision
+  n10 -->|"no"| n12
+  n7 -->|"no"| n12
+  n13["Llama a ClinicalUnitsRepository.findById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE practice.clinical_units")]:::efecto
   n13 --> n14
-  n15(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
-  n14 -->|"sí"| n15
-  n16{"dto.clinicalUnitId"}:::decision
-  n14 -->|"no"| n16
-  n11 -->|"no"| n16
-  n17["Llama a ClinicalUnitsRepository.findById"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE practice.clinical_units")]:::efecto
-  n17 --> n18
-  n19{"!unit"}:::decision
-  n18 --> n19
-  n20(["422 PRECONDITION_FAILED La unidad clínica no existe"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a HealthcareServicesRepository.create"]:::llamada
-  n19 -->|"no"| n21
-  n16 -->|"no"| n21
-  n22[("CREA practice.healthcare_services")]:::efecto
-  n21 --> n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
+  n15["Llama a PracticeSitesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practice_sites")]:::efecto
+  n15 --> n16
+  n17{"!unit || !unitSite || unitSite.practiceId !== practiceId"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED La unidad clínica no existe"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a HealthcareServicesRepository.create"]:::llamada
+  n17 -->|"no"| n19
+  n12 -->|"no"| n19
+  n20[("CREA practice.healthcare_services")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -599,7 +582,7 @@ flowchart TD
   n3 --> n4
   n5[("LEE practice.practices")]:::efecto
   n4 --> n5
-  n6{"!practice || practice.tenantId !== tenantId"}:::decision
+  n6{"!practice || practice.tenantId !== tenantId || !allowed"}:::decision
   n5 --> n6
   n7(["404 NOT_FOUND Práctica no encontrada"]):::error
   n6 -->|"sí"| n7
@@ -697,8 +680,7 @@ Asignar un rol de profesional a sitio/unidad/servicio
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad no pertenece a la práctica; PreconditionFailedException: El servicio no pertenece a la práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -710,35 +692,53 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticesRepository.findById"]:::llamada
+  n5{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE practice.practices")]:::efecto
-  n5 --> n6
-  n7{"!practice"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n6(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7{"dto.practiceSiteId"}:::decision
+  n5 -->|"no"| n7
+  n8["Llama a PracticeSitesRepository.findById"]:::llamada
   n7 -->|"sí"| n8
-  n9{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.practiceSiteId"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a PracticeSitesRepository.findById"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE practice.practice_sites")]:::efecto
-  n12 --> n13
-  n14{"!site || site.practiceId !== practiceId"}:::decision
+  n9[("LEE practice.practice_sites")]:::efecto
+  n8 --> n9
+  n10{"!site || site.practiceId !== practiceId"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
+  n10 -->|"sí"| n11
+  n12{"dto.clinicalUnitId"}:::decision
+  n10 -->|"no"| n12
+  n7 -->|"no"| n12
+  n13["Llama a ClinicalUnitsRepository.findById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE practice.clinical_units")]:::efecto
   n13 --> n14
-  n15(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
-  n14 -->|"no"| n16
-  n11 -->|"no"| n16
-  n17[("CREA practice.practitioner_role_assignments")]:::efecto
+  n15["Llama a PracticeSitesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practice_sites")]:::efecto
+  n15 --> n16
+  n17{"!unit || !unitSite || unitSite.practiceId !== practiceId"}:::decision
   n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
+  n18(["422 PRECONDITION_FAILED La unidad no pertenece a la práctica"]):::error
+  n17 -->|"sí"| n18
+  n19{"dto.healthcareServiceId"}:::decision
+  n17 -->|"no"| n19
+  n12 -->|"no"| n19
+  n20["Llama a HealthcareServicesRepository.findById"]:::llamada
+  n19 -->|"sí"| n20
+  n21[("LEE practice.healthcare_services")]:::efecto
+  n20 --> n21
+  n22{"!service || service.practiceId !== practiceId"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED El servicio no pertenece a la práctica"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
+  n22 -->|"no"| n24
+  n19 -->|"no"| n24
+  n25[("CREA practice.practitioner_role_assignments")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -821,7 +821,6 @@ Configurar un ajuste de práctica (upsert)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -833,29 +832,21 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticesRepository.findById"]:::llamada
+  n5["Llama a PracticeSettingsRepository.findByPracticeAndKey"]:::llamada
   n4 --> n5
-  n6[("LEE practice.practices")]:::efecto
+  n6[("LEE practice.practice_settings")]:::efecto
   n5 --> n6
-  n7{"!practice"}:::decision
+  n7{"existing"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n8[("ACTUALIZA practice.practice_settings · ACTUALIZA practice.practice_settings")]:::efecto
   n7 -->|"sí"| n8
-  n9["Llama a PracticeSettingsRepository.findByPracticeAndKey"]:::llamada
+  n9["Llama a PracticeSettingsRepository.create"]:::llamada
+  n8 --> n9
   n7 -->|"no"| n9
-  n10[("LEE practice.practice_settings")]:::efecto
+  n10[("CREA practice.practice_settings")]:::efecto
   n9 --> n10
-  n11{"existing"}:::decision
+  n11(("200 Responde con éxito")):::ok
   n10 --> n11
-  n12[("ACTUALIZA practice.practice_settings · ACTUALIZA practice.practice_settings")]:::efecto
-  n11 -->|"sí"| n12
-  n13["Llama a PracticeSettingsRepository.create"]:::llamada
-  n12 --> n13
-  n11 -->|"no"| n13
-  n14[("CREA practice.practice_settings")]:::efecto
-  n13 --> n14
-  n15(("200 Responde con éxito")):::ok
-  n14 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -916,7 +907,6 @@ Dar de alta un sitio de práctica
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un sitio con ese código en la práctica |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -930,32 +920,24 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticesRepository.findById"]:::llamada
+  n5{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE practice.practices")]:::efecto
-  n5 --> n6
-  n7{"!practice"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
+  n6(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE practice.practice_sites")]:::efecto
+  n7 --> n8
+  n9{"clash"}:::decision
+  n8 --> n9
+  n10(["409 CONFLICT Ya existe un sitio con ese código en la práctica"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
+  n11["Llama a PracticeSitesRepository.create"]:::llamada
   n9 -->|"no"| n11
-  n12[("LEE practice.practice_sites")]:::efecto
+  n12[("CREA practice.practice_sites")]:::efecto
   n11 --> n12
-  n13{"clash"}:::decision
+  n13(("201 Responde con éxito")):::ok
   n12 --> n13
-  n14(["409 CONFLICT Ya existe un sitio con ese código en la práctica"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a PracticeSitesRepository.create"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA practice.practice_sites")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1548,7 +1530,6 @@ Aprobar una vinculación pendiente
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1563,26 +1544,25 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
   n5 --> n6
-  n7[("LEE practice.practitioner_role_assignments")]:::efecto
+  n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!role"}:::decision
+  n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Vinculación profesional-organización no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"!allowed.includes(toStatus)"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA practice.practitioner_role_assignments · ACTUALIZA practice.practitioner_role_assignments · ACTUALI…")]:::efecto
-  n10 -->|"no"| n12
-  n13{"toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED || toStatus === PRAC.ROLE_ASSIGNMENT_ENDED"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA practice.practitioner_role_assignments")]:::efecto
+  n9["Llama a PracticesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE practice.practices")]:::efecto
+  n9 --> n10
+  n11{"!role || !practice"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"!allowed.includes(toStatus)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
   n13 -->|"sí"| n14
   n15(("200 Responde con éxito")):::ok
-  n14 --> n15
   n13 -->|"no"| n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -1602,7 +1582,6 @@ Finalizar una vinculación
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1617,26 +1596,25 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
   n5 --> n6
-  n7[("LEE practice.practitioner_role_assignments")]:::efecto
+  n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!role"}:::decision
+  n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Vinculación profesional-organización no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"!allowed.includes(toStatus)"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA practice.practitioner_role_assignments · ACTUALIZA practice.practitioner_role_assignments · ACTUALI…")]:::efecto
-  n10 -->|"no"| n12
-  n13{"toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED || toStatus === PRAC.ROLE_ASSIGNMENT_ENDED"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA practice.practitioner_role_assignments")]:::efecto
+  n9["Llama a PracticesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE practice.practices")]:::efecto
+  n9 --> n10
+  n11{"!role || !practice"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"!allowed.includes(toStatus)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
   n13 -->|"sí"| n14
   n15(("200 Responde con éxito")):::ok
-  n14 --> n15
   n13 -->|"no"| n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -1656,7 +1634,6 @@ Rechazar una vinculación pendiente
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1671,26 +1648,25 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
   n5 --> n6
-  n7[("LEE practice.practitioner_role_assignments")]:::efecto
+  n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!role"}:::decision
+  n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Vinculación profesional-organización no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"!allowed.includes(toStatus)"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA practice.practitioner_role_assignments · ACTUALIZA practice.practitioner_role_assignments · ACTUALI…")]:::efecto
-  n10 -->|"no"| n12
-  n13{"toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED || toStatus === PRAC.ROLE_ASSIGNMENT_ENDED"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA practice.practitioner_role_assignments")]:::efecto
+  n9["Llama a PracticesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE practice.practices")]:::efecto
+  n9 --> n10
+  n11{"!role || !practice"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"!allowed.includes(toStatus)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
   n13 -->|"sí"| n14
   n15(("200 Responde con éxito")):::ok
-  n14 --> n15
   n13 -->|"no"| n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -1710,7 +1686,6 @@ Adjuntar personal de apoyo a un rol de profesional
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Rol de profesional no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rol de profesional no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1723,24 +1698,30 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n5["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
   n4 --> n5
-  n6[("LEE practice.practitioner_role_assignments")]:::efecto
+  n6["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!role"}:::decision
+  n7[("LEE practice.practitioner_role_assignments")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Rol de profesional no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"role.statusConceptId !== PRAC.ROLE_ASSIGNMENT_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El rol de profesional no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a PractitionerSupportAssignmentsRepository.create"]:::llamada
-  n9 -->|"no"| n11
-  n12[("CREA practice.practitioner_support_assignments")]:::efecto
-  n11 --> n12
-  n13(("201 Responde con éxito")):::ok
-  n12 --> n13
+  n8["Llama a PracticesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practices")]:::efecto
+  n8 --> n9
+  n10{"!role || !practice"}:::decision
+  n9 --> n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12{"role.statusConceptId !== PRAC.ROLE_ASSIGNMENT_ACTIVE"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED El rol de profesional no está activo"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerSupportAssignmentsRepository.create"]:::llamada
+  n12 -->|"no"| n14
+  n15[("CREA practice.practitioner_support_assignments")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1759,7 +1740,6 @@ Suspender una vinculación activa
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1774,26 +1754,25 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
   n5 --> n6
-  n7[("LEE practice.practitioner_role_assignments")]:::efecto
+  n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!role"}:::decision
+  n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Vinculación profesional-organización no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"!allowed.includes(toStatus)"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n10 -->|"sí"| n11
-  n12[("ACTUALIZA practice.practitioner_role_assignments · ACTUALIZA practice.practitioner_role_assignments · ACTUALI…")]:::efecto
-  n10 -->|"no"| n12
-  n13{"toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED || toStatus === PRAC.ROLE_ASSIGNMENT_ENDED"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA practice.practitioner_role_assignments")]:::efecto
+  n9["Llama a PracticesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE practice.practices")]:::efecto
+  n9 --> n10
+  n11{"!role || !practice"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"!allowed.includes(toStatus)"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
   n13 -->|"sí"| n14
   n15(("200 Responde con éxito")):::ok
-  n14 --> n15
   n13 -->|"no"| n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -1863,7 +1842,6 @@ Crear un espacio de atención bajo una unidad/sitio
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe un espacio con ese código en el sitio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no está activo; PreconditionFailedException: La unidad no pertenece al sitio; PreconditionFailedException: El espacio padre no pertenece al sitio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1877,54 +1855,46 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticeSitesRepository.findById"]:::llamada
+  n5{"site.statusConceptId !== PRAC.SITE_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE practice.practice_sites")]:::efecto
-  n5 --> n6
-  n7{"!site"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n6(["422 PRECONDITION_FAILED El sitio no está activo"]):::error
+  n5 -->|"sí"| n6
+  n7{"dto.clinicalUnitId"}:::decision
+  n5 -->|"no"| n7
+  n8["Llama a ClinicalUnitsRepository.findById"]:::llamada
   n7 -->|"sí"| n8
-  n9{"site.statusConceptId !== PRAC.SITE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El sitio no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.clinicalUnitId"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a ClinicalUnitsRepository.findById"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE practice.clinical_units")]:::efecto
-  n12 --> n13
-  n14{"!unit || unit.practiceSiteId !== siteId"}:::decision
+  n9[("LEE practice.clinical_units")]:::efecto
+  n8 --> n9
+  n10{"!unit || unit.practiceSiteId !== siteId"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED La unidad no pertenece al sitio"]):::error
+  n10 -->|"sí"| n11
+  n12{"dto.parentSpaceId"}:::decision
+  n10 -->|"no"| n12
+  n7 -->|"no"| n12
+  n13["Llama a CareSpacesRepository.findById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE practice.care_spaces")]:::efecto
   n13 --> n14
-  n15(["422 PRECONDITION_FAILED La unidad no pertenece al sitio"]):::error
-  n14 -->|"sí"| n15
-  n16{"dto.parentSpaceId"}:::decision
-  n14 -->|"no"| n16
-  n11 -->|"no"| n16
-  n17["Llama a CareSpacesRepository.findById"]:::llamada
-  n16 -->|"sí"| n17
+  n15{"!parent || parent.practiceSiteId !== siteId"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED El espacio padre no pertenece al sitio"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a CareSpacesRepository.findBySite"]:::llamada
+  n15 -->|"no"| n17
+  n12 -->|"no"| n17
   n18[("LEE practice.care_spaces")]:::efecto
   n17 --> n18
-  n19{"!parent || parent.practiceSiteId !== siteId"}:::decision
+  n19{"clash"}:::decision
   n18 --> n19
-  n20(["422 PRECONDITION_FAILED El espacio padre no pertenece al sitio"]):::error
+  n20(["409 CONFLICT Ya existe un espacio con ese código en el sitio"]):::error
   n19 -->|"sí"| n20
-  n21["Llama a CareSpacesRepository.findBySite"]:::llamada
+  n21["Llama a CareSpacesRepository.create"]:::llamada
   n19 -->|"no"| n21
-  n16 -->|"no"| n21
-  n22[("LEE practice.care_spaces")]:::efecto
+  n22[("CREA practice.care_spaces")]:::efecto
   n21 --> n22
-  n23{"clash"}:::decision
+  n23(("201 Responde con éxito")):::ok
   n22 --> n23
-  n24(["409 CONFLICT Ya existe un espacio con ese código en el sitio"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a CareSpacesRepository.create"]:::llamada
-  n23 -->|"no"| n25
-  n26[("CREA practice.care_spaces")]:::efecto
-  n25 --> n26
-  n27(("201 Responde con éxito")):::ok
-  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1943,7 +1913,6 @@ Crear una unidad clínica jerárquica
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una unidad con ese código en el sitio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no está activo; PreconditionFailedException: La unidad padre no pertenece al sitio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1957,43 +1926,35 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PracticeSitesRepository.findById"]:::llamada
+  n5{"site.statusConceptId !== PRAC.SITE_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE practice.practice_sites")]:::efecto
-  n5 --> n6
-  n7{"!site"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n6(["422 PRECONDITION_FAILED El sitio no está activo"]):::error
+  n5 -->|"sí"| n6
+  n7{"dto.parentUnitId"}:::decision
+  n5 -->|"no"| n7
+  n8["Llama a ClinicalUnitsRepository.findById"]:::llamada
   n7 -->|"sí"| n8
-  n9{"site.statusConceptId !== PRAC.SITE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El sitio no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.parentUnitId"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a ClinicalUnitsRepository.findById"]:::llamada
-  n11 -->|"sí"| n12
+  n9[("LEE practice.clinical_units")]:::efecto
+  n8 --> n9
+  n10{"!parent || parent.practiceSiteId !== siteId"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED La unidad padre no pertenece al sitio"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a ClinicalUnitsRepository.findBySite"]:::llamada
+  n10 -->|"no"| n12
+  n7 -->|"no"| n12
   n13[("LEE practice.clinical_units")]:::efecto
   n12 --> n13
-  n14{"!parent || parent.practiceSiteId !== siteId"}:::decision
+  n14{"clash"}:::decision
   n13 --> n14
-  n15(["422 PRECONDITION_FAILED La unidad padre no pertenece al sitio"]):::error
+  n15(["409 CONFLICT Ya existe una unidad con ese código en el sitio"]):::error
   n14 -->|"sí"| n15
-  n16["Llama a ClinicalUnitsRepository.findBySite"]:::llamada
+  n16["Llama a ClinicalUnitsRepository.create"]:::llamada
   n14 -->|"no"| n16
-  n11 -->|"no"| n16
-  n17[("LEE practice.clinical_units")]:::efecto
+  n17[("CREA practice.clinical_units")]:::efecto
   n16 --> n17
-  n18{"clash"}:::decision
+  n18(("201 Responde con éxito")):::ok
   n17 --> n18
-  n19(["409 CONFLICT Ya existe una unidad con ese código en el sitio"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a ClinicalUnitsRepository.create"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA practice.clinical_units")]:::efecto
-  n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2008,6 +1969,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /practices | 200, 401, 403, 429 | 1 |
+| GET /practices | 200, 401, 403, 429 | 2 |
 | POST /practices | 201, 400, 401, 403, 429 | 2 |
 | POST /practices/{practiceId}/inventory-items | 201, 400, 401, 403, 429 | 1 |

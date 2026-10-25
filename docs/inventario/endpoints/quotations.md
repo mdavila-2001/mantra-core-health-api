@@ -5,15 +5,15 @@
 - **Bloque:** —
 - **Operaciones:** 3 (3 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 1 · BAJO 2
-- **Tablas distintas que tocan:** 5
+- **Tablas distintas que tocan:** 24
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/quotations.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/quotations` | Listar las cotizaciones de un paciente | BAJO | 4 | sesión (sin roles) |
-| 2 | POST | `/quotations` | Crear una cotización | MEDIO | 5 | PRACTITIONER, CLINICIAN |
+| 1 | GET | `/quotations` | Listar las cotizaciones de un paciente | BAJO | 22 | sesión (sin roles) |
+| 2 | POST | `/quotations` | Crear una cotización | MEDIO | 24 | PRACTITIONER, CLINICIAN |
 | 3 | GET | `/quotations/{id}` | Buscar una cotización por id | BAJO | 4 | sesión (sin roles) |
 
 ---
@@ -25,7 +25,7 @@
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QuotationsController.listByPatient` — `src/modules/quotations/controllers/quotations.controller.ts:70`
+- **Implementación:** `QuotationsController.listByPatient` — `src/modules/quotations/controllers/quotations.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -35,14 +35,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /quotations` la atiende `QuotationsController.listByPatient` (src/modules/quotations/controllers/quotations.controller.ts:70). Exige sesión; el controlador no declara roles. Delega en `QuotationsService.listQuotationsByPatient`. Lee billing.quotation_installments, billing.quotations, practice.practices, practice.practitioner_role_assignments.
+`GET /quotations` la atiende `QuotationsController.listByPatient` (src/modules/quotations/controllers/quotations.controller.ts:80). Exige sesión; el controlador no declara roles. Delega en `QuotationsService.listQuotationsByPatient`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/quotations/controllers/quotations.controller.ts:70` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/quotations/controllers/quotations.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -51,10 +51,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `billing.quotation_installments` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationInstallmentsRepository.findByQuotationIds | `src/modules/quotations/repositories/quotation-installments.repository.ts:56` |
-| `billing.quotations` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsRepository.findByPatient | `src/modules/quotations/repositories/quotations.repository.ts:102` |
-| `practice.practices` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePractices → PracticeTenantLookupService.findActivePracticeIdsForTenant → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePractices → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `billing.quotations` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsRepository.findByPatient | `src/modules/quotations/repositories/quotations.repository.ts:118` |
+| `practice.practices` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → PracticeTenantLookupService.findActivePracticeIdsForTenant → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | QuotationsController.listByPatient → QuotationsService.listQuotationsByPatient → QuotationsService.reachablePracticesForPatient → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Parámetros
 
@@ -99,6 +117,7 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {PATIENT_NOT_AVAILABLE.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/quotations.md).
@@ -120,7 +139,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QuotationsController.create` — `src/modules/quotations/controllers/quotations.controller.ts:50`
+- **Implementación:** `QuotationsController.create` — `src/modules/quotations/controllers/quotations.controller.ts:55`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -130,14 +149,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /quotations` la atiende `QuotationsController.create` (src/modules/quotations/controllers/quotations.controller.ts:50). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateQuotationDto` (15 campos, 13 obligatorios). Delega en `QuotationsService.createQuotation`. Crea filas en billing.quotation_installments, billing.quotations. Lee billing.service_catalog, practice.practices, practice.practitioner_role_assignments.
+`POST /quotations` la atiende `QuotationsController.create` (src/modules/quotations/controllers/quotations.controller.ts:55). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateQuotationDto` (15 campos, 13 obligatorios). Delega en `QuotationsService.createQuotation`. Crea filas en billing.quotation_installments, billing.quotations. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 14 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/quotations/controllers/quotations.controller.ts:50` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/quotations/controllers/quotations.controller.ts:55` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -147,11 +166,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `authz.access_policies` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
 | `billing.quotation_installments` | ESCRIBE | CREA | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationInstallmentsRepository.createMany | `src/modules/quotations/repositories/quotation-installments.repository.ts:75` |
-| `billing.quotations` | ESCRIBE | CREA | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsRepository.create | `src/modules/quotations/repositories/quotations.repository.ts:117` |
+| `billing.quotations` | ESCRIBE | CREA | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsRepository.create | `src/modules/quotations/repositories/quotations.repository.ts:133` |
 | `billing.service_catalog` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → ServiceCatalogRepository.findById | `src/modules/billing/repositories/service-catalog.repository.ts:89` |
+| `clinical.appointments` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsRepository.findAppointmentById | `src/modules/quotations/repositories/quotations.repository.ts:97` |
 | `practice.practices` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.reachesPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.reachesPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | QuotationsController.create → QuotationsService.createQuotation → QuotationsService.assertPatientAndAppointmentAvailable → QuotationsService.hasClinicalBasis → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Cuerpo — DTO `CreateQuotationDto` · `application/json`
 
@@ -279,7 +317,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `QuotationsController.findById` — `src/modules/quotations/controllers/quotations.controller.ts:96`
+- **Implementación:** `QuotationsController.findById` — `src/modules/quotations/controllers/quotations.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -289,16 +327,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /quotations/{id}` la atiende `QuotationsController.findById` (src/modules/quotations/controllers/quotations.controller.ts:96). Exige sesión; el controlador no declara roles. Delega en `QuotationsService.getQuotation`. Lee billing.quotation_installments, billing.quotations, practice.practices, practice.practitioner_role_assignments.
+`GET /quotations/{id}` la atiende `QuotationsController.findById` (src/modules/quotations/controllers/quotations.controller.ts:106). Exige sesión; el controlador no declara roles. Delega en `QuotationsService.getQuotation`. Lee billing.quotation_installments, billing.quotations, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/quotations/controllers/quotations.controller.ts:96` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/quotations/controllers/quotations.controller.ts:106` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/quotations/controllers/quotations.controller.ts:96` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/quotations/controllers/quotations.controller.ts:106` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -306,7 +344,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.quotation_installments` | LEE | LEE | DIRECTA | QuotationsController.findById → QuotationsService.getQuotation → QuotationInstallmentsRepository.findByQuotationId | `src/modules/quotations/repositories/quotation-installments.repository.ts:33` |
-| `billing.quotations` | LEE | LEE | DIRECTA | QuotationsController.findById → QuotationsService.getQuotation → QuotationsRepository.findById | `src/modules/quotations/repositories/quotations.repository.ts:81` |
+| `billing.quotations` | LEE | LEE | DIRECTA | QuotationsController.findById → QuotationsService.getQuotation → QuotationsRepository.findById | `src/modules/quotations/repositories/quotations.repository.ts:82` |
 | `practice.practices` | LEE | LEE | DIRECTA | QuotationsController.findById → QuotationsService.getQuotation → QuotationsService.reachesPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | QuotationsController.findById → QuotationsService.getQuotation → QuotationsService.reachesPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 

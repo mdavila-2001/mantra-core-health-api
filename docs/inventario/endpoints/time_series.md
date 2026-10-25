@@ -5,7 +5,7 @@
 - **Bloque:** Datos y NoSQL (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 - **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 11 · BAJO 3
-- **Tablas distintas que tocan:** 8
+- **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/time-series.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -20,7 +20,7 @@
 | 6 | POST | `/ts/admin/rollups/audit-daily/refresh` | Refrescar el rollup de conteos diarios de auditoría | MEDIO | 4 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
 | 7 | POST | `/ts/ads/events/batch-ingest` | Ingerir eventos de entrega de publicidad | MEDIO | 6 | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN |
 | 8 | POST | `/ts/devices/{deviceId}/readings/ingest` | Ingerir lecturas de un dispositivo médico | MEDIO | 6 | INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN |
-| 9 | POST | `/ts/location/pings/batch-ingest` | Ingerir pings de ubicación | MEDIO | 5 | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN |
+| 9 | POST | `/ts/location/pings/batch-ingest` | Ingerir pings de ubicación | MEDIO | 9 | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN |
 | 10 | POST | `/ts/metrics/{dataset}/batch-ingest` | Ingerir métricas de runtime de IA, pipeline o SLI | MEDIO | 4 | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN |
 | 11 | POST | `/ts/normalize/run` | Normalizar una lectura cruda y promoverla al registro clínico | MEDIO | 9 | SYSTEM, PLATFORM_ADMIN |
 | 12 | POST | `/ts/series/{seriesId}/backfill/governed` | Backfill gobernado de una serie | MEDIO | 4 | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
@@ -36,7 +36,7 @@
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TimescaleAdminController.runCompression` — `src/modules/time_series/controllers/timescale-admin.controller.ts:79`
+- **Implementación:** `TimescaleAdminController.runCompression` — `src/modules/time_series/controllers/timescale-admin.controller.ts:92`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -46,14 +46,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/compression/run` la atiende `TimescaleAdminController.runCompression` (src/modules/time_series/controllers/timescale-admin.controller.ts:79). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RunCompressionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.runCompression`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica ChunksCompressed.
+`POST /ts/admin/compression/run` la atiende `TimescaleAdminController.runCompression` (src/modules/time_series/controllers/timescale-admin.controller.ts:92). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RunCompressionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.runCompression`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica ChunksCompressed.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:79` |
+| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:92` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -64,8 +64,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
@@ -148,7 +148,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TimescaleAdminController.configureHypertable` — `src/modules/time_series/controllers/timescale-admin.controller.ts:45`
+- **Implementación:** `TimescaleAdminController.configureHypertable` — `src/modules/time_series/controllers/timescale-admin.controller.ts:50`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -158,14 +158,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/hypertables` la atiende `TimescaleAdminController.configureHypertable` (src/modules/time_series/controllers/timescale-admin.controller.ts:45). Exige sesión con alguno de los roles DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ConfigureHypertableDto` (4 campos, 1 obligatorio). Delega en `TimescaleAdminService.configureHypertable`. No toca tablas relacionales: Convierte en hypertable la tabla que indica la petición (`dto.table`); el nombre no se conoce antes de ejecutar..
+`POST /ts/admin/hypertables` la atiende `TimescaleAdminController.configureHypertable` (src/modules/time_series/controllers/timescale-admin.controller.ts:50). Exige sesión con alguno de los roles DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ConfigureHypertableDto` (4 campos, 1 obligatorio). Delega en `TimescaleAdminService.configureHypertable`. No toca tablas relacionales: Convierte en hypertable la tabla que indica la petición (`dto.table`); el nombre no se conoce antes de ejecutar..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:45` |
+| ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:50` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -244,7 +244,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TimescaleAdminController.updateHypertable` — `src/modules/time_series/controllers/timescale-admin.controller.ts:61`
+- **Implementación:** `TimescaleAdminController.updateHypertable` — `src/modules/time_series/controllers/timescale-admin.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -254,14 +254,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`PATCH /ts/admin/hypertables/{table}` la atiende `TimescaleAdminController.updateHypertable` (src/modules/time_series/controllers/timescale-admin.controller.ts:61). Exige sesión con alguno de los roles DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdateHypertableDto` (1 campo, 1 obligatorio). Delega en `TimescaleAdminService.updateHypertable`. No toca tablas relacionales: Modifica la hypertable que indica la ruta (`{table}`); el nombre no se conoce antes de ejecutar..
+`PATCH /ts/admin/hypertables/{table}` la atiende `TimescaleAdminController.updateHypertable` (src/modules/time_series/controllers/timescale-admin.controller.ts:70). Exige sesión con alguno de los roles DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdateHypertableDto` (1 campo, 1 obligatorio). Delega en `TimescaleAdminService.updateHypertable`. No toca tablas relacionales: Modifica la hypertable que indica la ruta (`{table}`); el nombre no se conoce antes de ejecutar..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:61` |
+| ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:70` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -340,7 +340,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TimescaleAdminController.applyRetention` — `src/modules/time_series/controllers/timescale-admin.controller.ts:95`
+- **Implementación:** `TimescaleAdminController.applyRetention` — `src/modules/time_series/controllers/timescale-admin.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -350,14 +350,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/retention/policies` la atiende `TimescaleAdminController.applyRetention` (src/modules/time_series/controllers/timescale-admin.controller.ts:95). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ApplyRetentionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.applyRetention`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica ChunksDropped.
+`POST /ts/admin/retention/policies` la atiende `TimescaleAdminController.applyRetention` (src/modules/time_series/controllers/timescale-admin.controller.ts:112). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ApplyRetentionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.applyRetention`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica ChunksDropped.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:95` |
+| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:112` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -368,8 +368,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
@@ -450,7 +450,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TimescaleAdminController.refreshRollup` — `src/modules/time_series/controllers/timescale-admin.controller.ts:134`
+- **Implementación:** `TimescaleAdminController.refreshRollup` — `src/modules/time_series/controllers/timescale-admin.controller.ts:159`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -460,7 +460,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/rollups/{name}/refresh` la atiende `TimescaleAdminController.refreshRollup` (src/modules/time_series/controllers/timescale-admin.controller.ts:134). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
+`POST /ts/admin/rollups/{name}/refresh` la atiende `TimescaleAdminController.refreshRollup` (src/modules/time_series/controllers/timescale-admin.controller.ts:159). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
             ? 'AuditDailyRollupRefreshed'
             : 'SliRollupMaterialized').
 
@@ -469,7 +469,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:134` |
+| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:159` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -480,8 +480,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
@@ -568,7 +568,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TimescaleAdminController.refreshAuditDaily` — `src/modules/time_series/controllers/timescale-admin.controller.ts:114`
+- **Implementación:** `TimescaleAdminController.refreshAuditDaily` — `src/modules/time_series/controllers/timescale-admin.controller.ts:135`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -578,7 +578,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/rollups/audit-daily/refresh` la atiende `TimescaleAdminController.refreshAuditDaily` (src/modules/time_series/controllers/timescale-admin.controller.ts:114). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
+`POST /ts/admin/rollups/audit-daily/refresh` la atiende `TimescaleAdminController.refreshAuditDaily` (src/modules/time_series/controllers/timescale-admin.controller.ts:135). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
             ? 'AuditDailyRollupRefreshed'
             : 'SliRollupMaterialized').
 
@@ -587,7 +587,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:114` |
+| ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:135` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -598,8 +598,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
@@ -680,7 +680,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.batchIngestAdsEvents` — `src/modules/time_series/controllers/series.controller.ts:136`
+- **Implementación:** `SeriesController.batchIngestAdsEvents` — `src/modules/time_series/controllers/series.controller.ts:157`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -690,14 +690,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/ads/events/batch-ingest` la atiende `SeriesController.batchIngestAdsEvents` (src/modules/time_series/controllers/series.controller.ts:136). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestAdsDto` (14 campos, 8 obligatorios). Delega en `SeriesIngestService.batchIngestAdsEvents`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ads_delivery_event_series, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages, time_series.ads_delivery_event_series. Publica AdsEventsIngested.
+`POST /ts/ads/events/batch-ingest` la atiende `SeriesController.batchIngestAdsEvents` (src/modules/time_series/controllers/series.controller.ts:157). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestAdsDto` (14 campos, 8 obligatorios). Delega en `SeriesIngestService.batchIngestAdsEvents`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ads_delivery_event_series, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages, time_series.ads_delivery_event_series. Publica AdsEventsIngested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:136` |
+| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:157` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -708,8 +708,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ads_delivery_event_series` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → SeriesIngestRepository.createAdsEvent | `src/modules/time_series/repositories/series-ingest.repository.ts:343` |
 | `time_series.ads_delivery_event_series` | LEE | LEE | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → SeriesIngestRepository.findAdsEvent | `src/modules/time_series/repositories/series-ingest.repository.ts:324` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestAdsEvents → SeriesIngestService.batchIngestAdsEvents → SeriesIngestService.recordPipelineMetric → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
@@ -718,7 +718,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AdsEventsIngested` | `src/modules/time_series/services/series-ingest.service.ts:287` |
+| Evento de dominio | `AdsEventsIngested` | `src/modules/time_series/services/series-ingest.service.ts:291` |
 
 ### Cuerpo — DTO `BatchIngestAdsDto` · `application/json`
 
@@ -821,7 +821,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.ingestDeviceReadings` — `src/modules/time_series/controllers/series.controller.ts:103`
+- **Implementación:** `SeriesController.ingestDeviceReadings` — `src/modules/time_series/controllers/series.controller.ts:116`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -831,16 +831,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/devices/{deviceId}/readings/ingest` la atiende `SeriesController.ingestDeviceReadings` (src/modules/time_series/controllers/series.controller.ts:103). Exige sesión con alguno de los roles INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `IngestDeviceReadingsDto` (12 campos, 6 obligatorios). Delega en `SeriesIngestService.ingestDeviceReadings`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.device_raw_reading_series, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages, time_series.device_raw_reading_series. Publica DeviceRawReadingReceived.
+`POST /ts/devices/{deviceId}/readings/ingest` la atiende `SeriesController.ingestDeviceReadings` (src/modules/time_series/controllers/series.controller.ts:116). Exige sesión con alguno de los roles INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `IngestDeviceReadingsDto` (12 campos, 6 obligatorios). Delega en `SeriesIngestService.ingestDeviceReadings`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.device_raw_reading_series, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages, time_series.device_raw_reading_series. Publica DeviceRawReadingReceived.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:103` |
+| ROL | Alguno de: INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:116` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: deviceId | `src/modules/time_series/controllers/series.controller.ts:103` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: deviceId | `src/modules/time_series/controllers/series.controller.ts:116` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -850,8 +850,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.device_raw_reading_series` | ESCRIBE | CREA | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → SeriesIngestRepository.createDeviceReading | `src/modules/time_series/repositories/series-ingest.repository.ts:256` |
 | `time_series.device_raw_reading_series` | LEE | LEE | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → SeriesIngestRepository.findDeviceReadingBySequence | `src/modules/time_series/repositories/series-ingest.repository.ts:200` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.ingestDeviceReadings → SeriesIngestService.ingestDeviceReadings → SeriesIngestService.recordPipelineMetric → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
@@ -860,7 +860,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `DeviceRawReadingReceived` | `src/modules/time_series/services/series-ingest.service.ts:199` |
+| Evento de dominio | `DeviceRawReadingReceived` | `src/modules/time_series/services/series-ingest.service.ts:203` |
 
 ### Parámetros
 
@@ -963,7 +963,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.batchIngestLocationPings` — `src/modules/time_series/controllers/series.controller.ts:177`
+- **Implementación:** `SeriesController.batchIngestLocationPings` — `src/modules/time_series/controllers/series.controller.ts:206`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -973,14 +973,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/location/pings/batch-ingest` la atiende `SeriesController.batchIngestLocationPings` (src/modules/time_series/controllers/series.controller.ts:177). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestLocationDto` (14 campos, 9 obligatorios). Delega en `SeriesIngestService.batchIngestLocationPings`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series, time_series.location_ping_series. Lee messaging.outbox_messages. Publica LocationPingsIngested.
+`POST /ts/location/pings/batch-ingest` la atiende `SeriesController.batchIngestLocationPings` (src/modules/time_series/controllers/series.controller.ts:206). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestLocationDto` (14 campos, 9 obligatorios). Delega en `SeriesIngestService.batchIngestLocationPings`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series, time_series.location_ping_series. Lee consent.consents, consent.processing_purposes, iam.devices, messaging.outbox_messages, profiles.person_account_links. Publica LocationPingsIngested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:177` |
+| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:206` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -990,9 +990,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `consent.consents` | LEE | LEE | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → LocationConsentPolicy.assertAllowed | `src/modules/time_series/services/location-consent.policy.ts:73` |
+| `consent.processing_purposes` | LEE | LEE | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → LocationConsentPolicy.assertAllowed | `src/modules/time_series/services/location-consent.policy.ts:93` |
+| `iam.devices` | LEE | LEE | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → LocationConsentPolicy.assertAllowed → LocationConsentPolicy.holderSubjectIds | `src/modules/time_series/services/location-consent.policy.ts:132` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → LocationConsentPolicy.assertAllowed → LocationConsentPolicy.holderSubjectIds | `src/modules/time_series/services/location-consent.policy.ts:124` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → SeriesIngestService.recordPipelineMetric → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 | `time_series.location_ping_series` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestLocationPings → SeriesIngestService.batchIngestLocationPings → SeriesIngestRepository.createLocationPing | `src/modules/time_series/repositories/series-ingest.repository.ts:359` |
 
@@ -1000,7 +1004,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `LocationPingsIngested` | `src/modules/time_series/services/series-ingest.service.ts:421` |
+| Evento de dominio | `LocationPingsIngested` | `src/modules/time_series/services/series-ingest.service.ts:442` |
 
 ### Cuerpo — DTO `BatchIngestLocationDto` · `application/json`
 
@@ -1084,6 +1088,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/time_series.md).
 
@@ -1104,7 +1109,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.batchIngestMetrics` — `src/modules/time_series/controllers/series.controller.ts:151`
+- **Implementación:** `SeriesController.batchIngestMetrics` — `src/modules/time_series/controllers/series.controller.ts:176`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1114,14 +1119,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/metrics/{dataset}/batch-ingest` la atiende `SeriesController.batchIngestMetrics` (src/modules/time_series/controllers/series.controller.ts:151). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestMetricsDto` (6 campos, 5 obligatorios). Delega en `SeriesIngestService.batchIngestMetrics`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica RuntimeMetricsIngested.
+`POST /ts/metrics/{dataset}/batch-ingest` la atiende `SeriesController.batchIngestMetrics` (src/modules/time_series/controllers/series.controller.ts:176). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestMetricsDto` (6 campos, 5 obligatorios). Delega en `SeriesIngestService.batchIngestMetrics`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica RuntimeMetricsIngested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:151` |
+| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:176` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1132,15 +1137,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestMetrics → SeriesIngestService.batchIngestMetrics → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestMetrics → SeriesIngestService.batchIngestMetrics → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestMetrics → SeriesIngestService.batchIngestMetrics → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestMetrics → SeriesIngestService.batchIngestMetrics → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestMetrics → SeriesIngestService.batchIngestMetrics → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestMetrics → SeriesIngestService.batchIngestMetrics → SeriesIngestService.recordPipelineMetric → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RuntimeMetricsIngested` | `src/modules/time_series/services/series-ingest.service.ts:351` |
+| Evento de dominio | `RuntimeMetricsIngested` | `src/modules/time_series/services/series-ingest.service.ts:355` |
 
 ### Parámetros
 
@@ -1230,7 +1235,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.normalizeReading` — `src/modules/time_series/controllers/series.controller.ts:120`
+- **Implementación:** `SeriesController.normalizeReading` — `src/modules/time_series/controllers/series.controller.ts:137`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1240,14 +1245,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/normalize/run` la atiende `SeriesController.normalizeReading` (src/modules/time_series/controllers/series.controller.ts:120). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `NormalizeReadingDto` (10 campos, 7 obligatorios). Delega en `VitalNormalizationService.normalizeReading`. Crea filas en clinical.observations, messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series, time_series.normalized_vital_series. Actualiza time_series.normalized_vital_series. Lee messaging.outbox_messages, time_series.device_raw_reading_series, time_series.normalized_vital_series. Publica VitalNormalizedAndPromoted.
+`POST /ts/normalize/run` la atiende `SeriesController.normalizeReading` (src/modules/time_series/controllers/series.controller.ts:137). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `NormalizeReadingDto` (10 campos, 7 obligatorios). Delega en `VitalNormalizationService.normalizeReading`. Crea filas en clinical.observations, messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series, time_series.normalized_vital_series. Actualiza time_series.normalized_vital_series. Lee messaging.outbox_messages, time_series.device_raw_reading_series, time_series.normalized_vital_series. Publica VitalNormalizedAndPromoted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:120` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:137` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1259,8 +1264,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|---|---|---|
 | `clinical.observations` | ESCRIBE | CREA | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → ObservationsRepository.create | `src/modules/clinical/repositories/observations.repository.ts:300` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.device_raw_reading_series` | LEE | LEE | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → SeriesIngestRepository.findDeviceReadingForUpdate | `src/modules/time_series/repositories/series-ingest.repository.ts:275` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 | `time_series.normalized_vital_series` | ESCRIBE | ACTUALIZA | POR_TIPO | SeriesController.normalizeReading → VitalNormalizationService.normalizeReading | `src/modules/time_series/services/vital-normalization.service.ts:144` |
@@ -1362,7 +1367,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.governedBackfill` — `src/modules/time_series/controllers/series.controller.ts:86`
+- **Implementación:** `SeriesController.governedBackfill` — `src/modules/time_series/controllers/series.controller.ts:95`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1372,14 +1377,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/series/{seriesId}/backfill/governed` la atiende `SeriesController.governedBackfill` (src/modules/time_series/controllers/series.controller.ts:86). Exige sesión con alguno de los roles DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `GovernedBackfillDto` (9 campos, 9 obligatorios). Delega en `SeriesIngestService.governedBackfill`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica GovernedBackfillApplied.
+`POST /ts/series/{seriesId}/backfill/governed` la atiende `SeriesController.governedBackfill` (src/modules/time_series/controllers/series.controller.ts:95). Exige sesión con alguno de los roles DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `GovernedBackfillDto` (9 campos, 9 obligatorios). Delega en `SeriesIngestService.governedBackfill`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica GovernedBackfillApplied.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:86` |
+| ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:95` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1390,15 +1395,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.governedBackfill → SeriesIngestService.governedBackfill → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.governedBackfill → SeriesIngestService.governedBackfill → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.governedBackfill → SeriesIngestService.governedBackfill → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.governedBackfill → SeriesIngestService.governedBackfill → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.governedBackfill → SeriesIngestService.governedBackfill → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.governedBackfill → SeriesIngestService.governedBackfill → SeriesIngestService.recordPipelineMetric → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `GovernedBackfillApplied` | `src/modules/time_series/services/series-ingest.service.ts:527` |
+| Evento de dominio | `GovernedBackfillApplied` | `src/modules/time_series/services/series-ingest.service.ts:548` |
 
 ### Parámetros
 
@@ -1498,7 +1503,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.batchIngestPoints` — `src/modules/time_series/controllers/series.controller.ts:70`
+- **Implementación:** `SeriesController.batchIngestPoints` — `src/modules/time_series/controllers/series.controller.ts:75`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1508,14 +1513,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/series/{seriesId}/points/batch-ingest` la atiende `SeriesController.batchIngestPoints` (src/modules/time_series/controllers/series.controller.ts:70). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestPointsDto` (7 campos, 6 obligatorios). Delega en `SeriesIngestService.batchIngestPoints`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica SeriesBatchIngested.
+`POST /ts/series/{seriesId}/points/batch-ingest` la atiende `SeriesController.batchIngestPoints` (src/modules/time_series/controllers/series.controller.ts:75). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestPointsDto` (7 campos, 6 obligatorios). Delega en `SeriesIngestService.batchIngestPoints`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica SeriesBatchIngested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:70` |
+| ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:75` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1526,15 +1531,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestPoints → SeriesIngestService.batchIngestPoints → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestPoints → SeriesIngestService.batchIngestPoints → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestPoints → SeriesIngestService.batchIngestPoints → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestPoints → SeriesIngestService.batchIngestPoints → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | SeriesController.batchIngestPoints → SeriesIngestService.batchIngestPoints → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `time_series.ingestion_pipeline_metric_series` | ESCRIBE | CREA | DIRECTA | SeriesController.batchIngestPoints → SeriesIngestService.batchIngestPoints → SeriesIngestService.recordPipelineMetric → SeriesIngestRepository.createPipelineMetric | `src/modules/time_series/repositories/series-ingest.repository.ts:165` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `SeriesBatchIngested` | `src/modules/time_series/services/series-ingest.service.ts:100` |
+| Evento de dominio | `SeriesBatchIngested` | `src/modules/time_series/services/series-ingest.service.ts:104` |
 
 ### Parámetros
 
@@ -1627,7 +1632,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SeriesController.queryRange` — `src/modules/time_series/controllers/series.controller.ts:55`
+- **Implementación:** `SeriesController.queryRange` — `src/modules/time_series/controllers/series.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1637,14 +1642,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`GET /ts/series/{seriesId}/query` la atiende `SeriesController.queryRange` (src/modules/time_series/controllers/series.controller.ts:55). Exige sesión con alguno de los roles ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN. Delega en `SeriesQueryService.queryRange`. No toca tablas relacionales: Lee series temporales de una tabla que elige la petición (`query.dataset`) o de un rollup; el nombre no se conoce antes de ejecutar..
+`GET /ts/series/{seriesId}/query` la atiende `SeriesController.queryRange` (src/modules/time_series/controllers/series.controller.ts:60). Exige sesión con alguno de los roles ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN. Delega en `SeriesQueryService.queryRange`. No toca tablas relacionales: Lee series temporales de una tabla que elige la petición (`query.dataset`) o de un rollup; el nombre no se conoce antes de ejecutar..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:55` |
+| ROL | Alguno de: ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:60` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | dataset (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
