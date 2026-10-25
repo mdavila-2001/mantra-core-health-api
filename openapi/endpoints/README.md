@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1539 de 1539 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **72 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -62,7 +62,7 @@ Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `open
 | [content_packs](content-packs.md) | 2 | `content-packs` | 1 |
 | [crm](crm.md) | 16 | `crm` | 1 |
 | [cross_store_consistency](cross-store-consistency.md) | 16 | `cross_store_consistency` | 2 |
-| [data_catalog](data-catalog.md) | 37 | `admin-catalog`, `admin-portal`, `data-catalog-internal` | 3 |
+| [data_catalog](data-catalog.md) | 38 | `admin-catalog`, `admin-portal`, `data-catalog-internal` | 4 |
 | [delegated_access](delegated-access.md) | 12 | `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests` | 5 |
 | [diagnostic_units](diagnostic-units.md) | 21 | `diagnostic-equipment`, `diagnostic-pricing`, `diagnostic-unit-accreditations`, `diagnostic-unit-sites`, `diagnostic-units` | 5 |
 | [diagnostics](diagnostics.md) | 31 | `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens` | 7 |
@@ -75,7 +75,7 @@ Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `open
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
-| [iam](iam.md) | 35 | `iam-auth`, `iam-users` | 3 |
+| [iam](iam.md) | 38 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 4 |
 | [identity_assurance](identity-assurance.md) | 28 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 55 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 18 |
 | [insurance-campaigns](insurance-campaigns.md) | 16 | `insurance-campaigns` | 0 |
@@ -110,7 +110,7 @@ Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `open
 | [surveys](surveys.md) | 17 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
 | [system_ops](system-ops.md) | 24 | `system-ops-assessments`, `system-ops-backup`, `system-ops-drafts`, `system-ops-governance`, `system-ops-legal-holds`, `system-ops-residency`, `system-ops-restore`, `system-ops-retention` | 8 |
-| [telemetry](telemetry.md) | 22 | `telemetry-analytics`, `telemetry-consent`, `telemetry-events`, `telemetry-governance` | 4 |
+| [telemetry](telemetry.md) | 25 | `telemetry-analytics`, `telemetry-consent`, `telemetry-events`, `telemetry-governance`, `telemetry-onboarding-analytics` | 5 |
 | [terminology](terminology.md) | 25 | `terminology` | 7 |
 | [time_series](time-series.md) | 14 | `time_series` | 2 |
 | [tracking](tracking.md) | 11 | `tracking` | 1 |
@@ -123,4 +123,4 @@ Esta referencia documenta **1532 de 1532 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1532 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1539 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

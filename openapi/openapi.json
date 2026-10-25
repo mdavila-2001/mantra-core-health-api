@@ -3855,12 +3855,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3869,13 +3863,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Recupera un borrador de alta guardado por identificador y tipo de formulario",
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "put": {
         "operationId": "IamOnboardingDraftsController_saveDraft",
@@ -3904,12 +3902,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3924,13 +3916,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Guarda o actualiza el avance del formulario de alta en borrador",
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "description": "Guarda o actualiza el avance del formulario de alta en borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "delete": {
         "operationId": "IamOnboardingDraftsController_deleteDraft",
@@ -3959,12 +3955,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3979,13 +3969,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/practitioners/me/signature-assets": {
@@ -88437,6 +88431,61 @@
         ]
       }
     },
+    "/internal/catalog/inventory/import": {
+      "post": {
+        "description": "Lee `inventario/` y escribe `catalog_operations`, `catalog_operation_impacts`, `catalog_processes`, `catalog_process_steps` y `catalog_process_step_operations` en una transacción. Idempotente: lo que no cambió no se toca. Corre después de un escaneo, porque cada impacto apunta a un objeto de `catalog_objects`. Una operación que deja de aparecer queda `NOT_OBSERVED`. 503 si la instancia no tiene el inventario.",
+        "operationId": "InternalCatalogInventoryController_importInventory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryImportResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "503": {
+            "description": "El inventario no está disponible en esta instancia"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Importa el inventario de la API a las tablas de operaciones y procesos (worker)",
+        "tags": [
+          "data-catalog-internal"
+        ]
+      }
+    },
     "/system-context/dynamic-enums/bindings": {
       "get": {
         "description": "Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.",
@@ -93308,12 +93357,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
@@ -93328,13 +93371,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Captura eventos de telemetría de alta y avance en formularios de registro",
         "tags": [
           "telemetry-onboarding-analytics"
         ],
-        "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/admin/analytics/onboarding/funnel": {
@@ -93359,6 +93406,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
@@ -93404,6 +93454,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
@@ -147764,6 +147817,159 @@
         },
         "required": [
           "claimed"
+        ]
+      },
+      "InventoryImportSourceDto": {
+        "type": "object",
+        "properties": {
+          "hash": {
+            "type": "string",
+            "description": "Huella del inventario (la misma de `GET /admin/portal/version`)"
+          },
+          "operaciones": {
+            "type": "number"
+          },
+          "procesos": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "hash",
+          "operaciones",
+          "procesos"
+        ]
+      },
+      "InventoryImportOperationsDto": {
+        "type": "object",
+        "properties": {
+          "added": {
+            "type": "number",
+            "description": "Operaciones nuevas en la base"
+          },
+          "changed": {
+            "type": "number",
+            "description": "Operaciones cuya huella técnica cambió"
+          },
+          "reappeared": {
+            "type": "number",
+            "description": "Operaciones `NOT_OBSERVED` que volvieron a aparecer"
+          },
+          "unchanged": {
+            "type": "number",
+            "description": "Operaciones que no cambiaron: no se tocó su fila"
+          },
+          "notObserved": {
+            "type": "number",
+            "description": "Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran)"
+          }
+        },
+        "required": [
+          "added",
+          "changed",
+          "reappeared",
+          "unchanged",
+          "notObserved"
+        ]
+      },
+      "InventoryImportImpactsDto": {
+        "type": "object",
+        "properties": {
+          "written": {
+            "type": "number",
+            "description": "Impactos escritos en esta corrida"
+          },
+          "skippedNotCataloged": {
+            "type": "number",
+            "description": "Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta corrida)"
+          },
+          "skippedUnresolved": {
+            "type": "number",
+            "description": "Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar"
+          }
+        },
+        "required": [
+          "written",
+          "skippedNotCataloged",
+          "skippedUnresolved"
+        ]
+      },
+      "InventoryImportProcessesDto": {
+        "type": "object",
+        "properties": {
+          "added": {
+            "type": "number"
+          },
+          "changed": {
+            "type": "number"
+          },
+          "unchanged": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "added",
+          "changed",
+          "unchanged"
+        ]
+      },
+      "InventoryImportStepsDto": {
+        "type": "object",
+        "properties": {
+          "written": {
+            "type": "number",
+            "description": "Etapas escritas en esta corrida"
+          }
+        },
+        "required": [
+          "written"
+        ]
+      },
+      "InventoryImportStepOperationsDto": {
+        "type": "object",
+        "properties": {
+          "written": {
+            "type": "number",
+            "description": "Enlaces etapa-operación escritos"
+          },
+          "skippedUnresolved": {
+            "type": "number",
+            "description": "Enlaces cuya operación no está en el inventario de endpoints"
+          }
+        },
+        "required": [
+          "written",
+          "skippedUnresolved"
+        ]
+      },
+      "InventoryImportResultDto": {
+        "type": "object",
+        "properties": {
+          "inventory": {
+            "$ref": "#/components/schemas/InventoryImportSourceDto"
+          },
+          "operations": {
+            "$ref": "#/components/schemas/InventoryImportOperationsDto"
+          },
+          "impacts": {
+            "$ref": "#/components/schemas/InventoryImportImpactsDto"
+          },
+          "processes": {
+            "$ref": "#/components/schemas/InventoryImportProcessesDto"
+          },
+          "steps": {
+            "$ref": "#/components/schemas/InventoryImportStepsDto"
+          },
+          "stepOperations": {
+            "$ref": "#/components/schemas/InventoryImportStepOperationsDto"
+          }
+        },
+        "required": [
+          "inventory",
+          "operations",
+          "impacts",
+          "processes",
+          "steps",
+          "stepOperations"
         ]
       },
       "CreateEnumDefinitionDto": {
