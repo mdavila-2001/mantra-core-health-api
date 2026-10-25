@@ -398,6 +398,10 @@ services:
   # MOTORES DE DATOS
   # =======================================================================
   postgres:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: timescale/timescaledb-ha:pg18
     restart: always
     logging: *logging
@@ -456,10 +460,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
   mongodb:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: mongo:8.2.12
     restart: always
     logging: *logging
@@ -489,10 +498,15 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
   redis:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: redis:8.10-alpine
     restart: always
     logging: *logging
@@ -511,6 +525,10 @@ services:
       - alovida
 
   opensearch:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: opensearchproject/opensearch:3.8.0
     restart: always
     logging: *logging
@@ -552,10 +570,15 @@ services:
     depends_on:
       opensearch:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
   minio:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     # quay.io y Docker Hub ya no sirven `minio/minio` sin autenticación: un
     # `docker pull` de este tag devuelve 401 (quay.io) o «pull access denied»
     # (Docker Hub), comprobado el 2026-10-07 desde 62.169.18.132. Coolify corre
@@ -631,6 +654,7 @@ services:
     depends_on:
       minio:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
@@ -668,20 +692,24 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
       postgres-init:
         condition: service_completed_successfully
       mongodb:
         condition: service_healthy
+        required: false
       mongo-init:
         condition: service_completed_successfully
       opensearch:
         condition: service_healthy
+        required: false
       opensearch-init:
         condition: service_completed_successfully
       minio-init:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
