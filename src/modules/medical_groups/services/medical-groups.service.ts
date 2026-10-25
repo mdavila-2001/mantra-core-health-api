@@ -326,7 +326,9 @@ export class MedicalGroupsService {
           serviceName: names.services.get(row.serviceCatalogId) ?? null,
           scheduledAt: row.scheduledAt,
           locationText: row.locationText,
-          status: row.status,
+          // Mismo cierre que la consulta: pasada la semana el grupo está
+          // cerrado aunque nadie lo haya abierto todavía para persistirlo.
+          status: isClosedNow(row) ? MEDICAL_GROUP_STATUS.CLOSED : row.status,
           isCreator: row.requestingPractitionerId === practitionerProfileId,
           patientProfileId: row.patientProfileId,
           pendingMembersCount: rowMembers.filter(
