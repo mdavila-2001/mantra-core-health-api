@@ -8,6 +8,7 @@ import {
   PractitionerSitesController,
   RoleAssignmentsController,
   InventoryItemsController,
+  OrganizationPracticesController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -21,6 +22,7 @@ import {
   OwnSiteProvisioningService,
   PracticeOrganizationReadService,
   PracticeAccessService,
+  OrganizationPracticeProvisioningService,
 } from './services';
 import {
   PracticesRepository,
@@ -37,6 +39,8 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
+import { TenantsRepository } from '../directory/repositories';
 import { AddressesRepository } from '../common/repositories';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
@@ -57,7 +61,12 @@ import {
  * ajustes e inventario. Implementa UC-14-01..12 (más un bootstrap de práctica).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // Regla de administración por organización (CM-11), sin importar
+    // `DirectoryModule` entero.
+    DirectoryAuthorizationModule,
+  ],
   controllers: [
     PracticesController,
     SitesController,
@@ -65,6 +74,7 @@ import {
     PractitionerSitesController,
     RoleAssignmentsController,
     InventoryItemsController,
+    OrganizationPracticesController,
   ],
   providers: [
     // Repositorios
@@ -87,6 +97,8 @@ import {
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
     AddressesRepository,
+    // Stateless: sólo lee la verificación de la organización (CM-11).
+    TenantsRepository,
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
     PatientProfilesRepository,
@@ -103,6 +115,7 @@ import {
     OwnSiteProvisioningService,
     PracticeOrganizationReadService,
     PracticeAccessService,
+    OrganizationPracticeProvisioningService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
