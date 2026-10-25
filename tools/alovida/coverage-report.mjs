@@ -26,6 +26,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { HUERFANAS_DOCUMENTADAS, sinRolesAutorizado } from './exenciones.mjs';
 
 const ROOT = process.cwd();
 const MODULES = join(ROOT, 'src', 'modules');
@@ -51,7 +52,7 @@ const moduleOf = (p) => p.match(/modules\/([^/]+)\//)?.[1] ?? '';
  * el triage 2026-07). Ver comentario equivalente en `guardrails.mjs`.
  */
 const AUTHN_NON_ROLE_ALLOWLIST =
-  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts/;
+  /modules\/(telemetry|community|common)\/controllers\/|modules\/identity_assurance\/controllers\/identity-self-service\.controller\.ts|modules\/audio_assets\/controllers\/audio-assets\.controller\.ts/;
 const GLOBAL_JWT_GUARD = (() => {
   try {
     const m = readFileSync(
@@ -94,17 +95,34 @@ const historyMirrorPresent = existsSync(
 const isMirroredHistory = (e) =>
   historyMirrorPresent && e.module === 'audit' && /History$/.test(e.cls);
 
+// Consumo por SQL crudo: hay módulos (data_catalog) que leen y escriben sus
+// tablas con `schema.tabla` en una cadena SQL y jamás nombran la clase de la
+// entidad. Sólo cuenta código: las líneas de comentario no son consumo.
+const sqlText = nonEntityText.map(({ text }) =>
+  text
+    .split(/\r?\n/)
+    .filter((l) => !/^\s*(\*|\/\/|\/\*)/.test(l))
+    .join('\n'),
+);
+const usedBySql = (tableKey) =>
+  sqlText.some(
+    (text) =>
+      text.includes(tableKey) &&
+      new RegExp(`(?<![\\w.])${tableKey.replace('.', '\\.')}\\b`).test(text),
+  );
+
 // Consumo DIRECTO: la clase de la entidad se referencia en código no-entidad
-// (repositorio/servicio/job/seed/etc.) o la cubre el mirror de historial.
+// (repositorio/servicio/job/seed/etc.), su tabla se nombra en SQL crudo o la
+// cubre el mirror de historial.
 const directlyConsumed = new Set();
 for (const e of entities) {
   if (isMirroredHistory(e)) {
     if (e.tableKey) directlyConsumed.add(e.tableKey);
     continue;
   }
-  const used = nonEntityText.some(({ text }) =>
-    new RegExp(`\\b${e.cls}\\b`).test(text),
-  );
+  const used =
+    nonEntityText.some(({ text }) => new RegExp(`\\b${e.cls}\\b`).test(text)) ||
+    (e.tableKey !== null && usedBySql(e.tableKey));
   if (used && e.tableKey) directlyConsumed.add(e.tableKey);
 }
 
@@ -196,7 +214,8 @@ for (const f of controllers) {
       ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
       !roles &&
       !pub &&
-      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(f))
+      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(f)) &&
+      !(GLOBAL_JWT_GUARD && sinRolesAutorizado(rel(f), verb, m[2]))
     ) {
       orphanEndpoints.push({ file: rel(f), line: i + 1, verb, path: m[2] });
     }
@@ -293,8 +312,11 @@ p(
 p(
   '> Heurística estática: la entidad puede consumirse por catálogo ORM/migración; revisar antes de eliminar.',
 );
-for (const e of orphanTables.slice(0, 60))
+for (const e of orphanTables.slice(0, 60)) {
   p(`- \`${e.module}\` · ${e.cls} (${rel(e.file)})`);
+  const why = HUERFANAS_DOCUMENTADAS.get(e.cls);
+  if (why) p(`  - Por qué está: ${why}`);
+}
 if (orphanTables.length > 60) p(`- … +${orphanTables.length - 60} más`);
 p('');
 p(
