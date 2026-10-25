@@ -1,6 +1,6 @@
 # Actores y roles
 
-> Fase 9. **120 códigos de rol** distintos, extraídos de todos los usos reales de `@Roles(...)`
+> Fase 9. **124 códigos de rol** distintos, extraídos de todos los usos reales de `@Roles(...)`
 > en el código (`grep -rhoE "@Roles\('[^)]+\)" src/modules`), no de un documento de diseño
 > aparte — si un rol no se usa en ningún `@Roles(...)`, no aparece aquí. Agrupados por área
 > funcional para lectura; el código fuente es la lista canónica.
@@ -28,11 +28,11 @@ dentro del mismo PDP clínico.
 ## Financiero y facturación
 
 `ACCOUNTANT`, `ACCOUNTING_APPROVER`, `ACCOUNTS_PAYABLE`, `BILLING`, `BILLING_AGENT`,
-`CASHIER`, `FINANCE`, `FINOPS_ANALYST`, `PAYMENTS_ADMIN`, `CONTRACT_MANAGER`, `BUYER`, `SALES`.
+`BILLING_OPERATOR`, `CASHIER`, `FINANCE`, `FINOPS_ANALYST`, `PAYMENTS_ADMIN`, `CONTRACT_MANAGER`, `BUYER`, `SALES`.
 
 ## Cadena de suministro / operación de práctica
 
-`WAREHOUSE`, `LOGISTICS_OPERATOR`, `COURIER`, `MAINTENANCE_WORKER`, `SCHEDULER`,
+`WAREHOUSE`, `PHARMACY_STAFF`, `LOGISTICS_OPERATOR`, `COURIER`, `MAINTENANCE_WORKER`, `SCHEDULER`,
 `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`, `CAPACITY_PLANNER`.
 
 ## Gobierno, cumplimiento y privacidad
@@ -48,11 +48,11 @@ dentro del mismo PDP clínico.
 `DATA_PLATFORM_ADMIN`, `DATA_PLATFORM_ENGINEER`, `DATA_PRODUCT_OWNER`, `DATA_STEWARD`,
 `MPI_STEWARD`, `STORAGE_ADMIN`, `STORAGE_CLIENT`, `MESSAGING_ADMIN`, `SEARCH_ADMIN`,
 `SEARCH_READER`, `TRACKING_ADMIN`, `REPORTING_ADMIN`, `HEALTH_DATA_ADMIN`, `ERP_ADMIN`,
-`CRM_ADMIN`, `EDUCATION_ADMIN`, `PROMOTIONS_ADMIN`, `ADS_ADMIN`, `RAG_COLLECTION_ADMIN`,
+`CRM_ADMIN`, `EDUCATION_ADMIN`, `PROMOTIONS_ADMIN`, `ADS_ADMIN`, `AD_OPS`, `RAG_COLLECTION_ADMIN`,
 `SOURCE_ADMIN`, `MODULE_OWNER`, `WORKFLOW_ARCHITECT`, `AUTOMATION_ENGINEER`, `MLOPS_ENGINEER`,
 `TERMINOLOGY_ENGINEER`, `QA_ADMIN`, `QA_ENGINEER`, `GRAPH_ANALYST`, `ANALYST`, `REPORT_AUTHOR`,
 `REPORT_VIEWER`, `CONTENT_EDITOR`, `COURSE_AUTHOR`, `LEARNER`, `CONTEXT_CONSUMER`,
-`CONTEXT_CURATOR`, `INTEROP_CONSUMER`, `CRM_AGENT`, `MARKETING_MANAGER`, `HR_ADMIN`,
+`CONTEXT_CURATOR`, `INTEROP_CONSUMER`, `API_CONSUMER`, `CRM_AGENT`, `MARKETING_MANAGER`, `HR_ADMIN`,
 `BUSINESS_ADMIN`, `EMPLOYEE`, `USER`.
 
 ## Sujetos de servicio-a-servicio (no humanos)
@@ -73,3 +73,22 @@ no de usuario final, con su propio ciclo de vida y rotación — ver
 `UserRoleAssignmentsRepository` (módulo `authz`) — asignación por usuario, con posible expiración
 y excepciones. `UserGlobalRoles` (módulo `iam`) es la entidad de asignación global observada en el
 grafo de dependencias (`docs/reports/graphify-audit.md` §9, "Surprising Connections").
+
+## Cómo existe cada rol
+
+Un rol que una ruta exige solo se ejerce si alguien puede recibirlo. Hay cuatro orígenes:
+
+- **Globales de `iam`** (`USER`, `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SECURITY_ADMIN`,
+  `SUPERADMIN`): viajan en `iam.user_global_roles`.
+- **Sembrados en `authz.roles`** y asignables con `POST /authz/users/:userId/role-assignments`: los
+  asistenciales (`authz.seed.ts`), los de negocio de seguros y contabilidad
+  (`authz.business-roles.seed.ts`), los de cada módulo (`*.roles.ts`) y el resto de los roles
+  operativos, de plataforma y de servicio (`authz.platform-roles.seed.ts`). Los de ámbito `GLOBAL`
+  (plataforma, datos transversales, cuentas de servicio) se asignan sin tenant; los de ámbito
+  `TENANT` pueden acotarse a una organización.
+- **Derivado del login**: `PHARMACY_STAFF` lo agrega el login a quien tiene una membresía activa
+  en un tenant de tipo `PHARMACY`; no se siembra para que no pueda asignarse a mano.
+- **Firmado por el proceso**: `SYSTEM`, la cuenta de servicio de los workers; no se asigna.
+
+`GET /admin/catalog/permission-drift` y `yarn catalog:permission-drift` comparan lo que las rutas
+exigen con estos orígenes.

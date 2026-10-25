@@ -3,12 +3,12 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 36 (30 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 39 (33 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
 
-- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 36
+- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 39
 - **Actores:** CLINICIAN · Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/iam/README.md`
@@ -42,6 +42,9 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/upload-registration-document | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/upload-registration-signature-image | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/verify-email | Público (sin sesión) | ALTO | 4 |
+| `ctrl:IamOnboardingDraftsController` | Operaciones de IamOnboardingDraftsController que el README no asigna a un caso de uso | DELETE /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
+|  |  | GET /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
+|  |  | PUT /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 | `ctrl:IamUsersController` | Operaciones de IamUsersController que el README no asigna a un caso de uso | GET /iam/users | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users | SECURITY_ADMIN | MEDIO | 6 |
 |  |  | GET /iam/users/{id} | SECURITY_ADMIN | BAJO | 1 |
@@ -57,10 +60,10 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | GET /iam/users/{id}/mfa-factors | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/{id}/mfa-factors | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /iam/users/{id}/sessions | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | MEDIO | 45 |
+|  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | MEDIO | 42 |
 |  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
 
-### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`
+### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`, `ctrl:IamOnboardingDraftsController`
 
 ```mermaid
 flowchart LR
@@ -122,6 +125,11 @@ flowchart LR
     o51["POST /iam/auth/upload-registration-document"]:::op
     o54["POST /iam/auth/upload-registration-signature-image"]:::op
     o55["POST /iam/auth/verify-email"]:::op
+  end
+  subgraph s2["ctrl:IamOnboardingDraftsController · Operaciones de IamOnboardingDraftsControll…"]
+    o56["DELETE /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o57["GET /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o58["PUT /iam/onboarding-drafts/{formType}/{draftId}"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -243,6 +251,9 @@ flowchart LR
   o55 -->|"LEE"| t16
   o55 -->|"ACTUALIZA"| t13
   o55 -->|"LEE"| t13
+  a11 --> o56
+  a11 --> o57
+  a11 --> o58
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -274,7 +285,7 @@ flowchart LR
   t13[("+2 tablas más")]
   t23[("+2 tablas más")]
   t26[("+1 tablas más")]
-  t36[("+39 tablas más")]
+  t36[("+36 tablas más")]
   t40[("+4 tablas más")]
   subgraph s0["ctrl:IamUsersController · Operaciones de IamUsersController que el README no as…"]
     o1["GET /iam/users"]:::op
@@ -629,59 +640,42 @@ flowchart TD
   n18 -->|"sí"| n19
   n20["Intenta"]:::intento
   n19 --> n20
-  n21["Llama a NotificationsService.createRequest"]:::llamada
+  n21["Llama a MessagingEmailNoticeAdapter.enqueueEmail"]:::llamada
   n20 --> n21
-  n22{"!recipientUserId"}:::decision
+  n22["Llama a NotificationsService.createRequest"]:::llamada
   n21 --> n22
-  n23(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n22 -->|"sí"| n23
-  n24["Transacción: transactional(…)"]:::transaccion
-  n22 -->|"no"| n24
-  n25["Llama a NotificationsRepository.findChannelById"]:::llamada
-  n24 --> n25
-  n26[("LEE messaging.message_channels")]:::efecto
+  n23{"!recipientUserId"}:::decision
+  n22 --> n23
+  n24(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n23 -->|"sí"| n24
+  n25["Transacción: transactional(…)"]:::transaccion
+  n23 -->|"no"| n25
+  n26{"!channel"}:::decision
   n25 --> n26
-  n27{"!channel"}:::decision
-  n26 --> n27
-  n28(["404 NOT_FOUND Canal no encontrado"]):::error
-  n27 -->|"sí"| n28
-  n29{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n27 -->|"no"| n29
-  n30(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n29 -->|"sí"| n30
-  n31{"dto.templateId"}:::decision
-  n29 -->|"no"| n31
-  n32["Llama a NotificationsRepository.findTemplateById"]:::llamada
+  n27(["404 NOT_FOUND Canal no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n28 -->|"sí"| n29
+  n30{"dto.templateId"}:::decision
+  n28 -->|"no"| n30
+  n31{"!template"}:::decision
+  n30 -->|"sí"| n31
+  n32(["404 NOT_FOUND Plantilla no encontrada"]):::error
   n31 -->|"sí"| n32
-  n33[("LEE messaging.message_templates")]:::efecto
-  n32 --> n33
-  n34{"!template"}:::decision
-  n33 --> n34
-  n35(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n34 -->|"sí"| n35
-  n36{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n34 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n36 -->|"sí"| n37
-  n38{"template.channelId !== dto.channelId"}:::decision
-  n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n38 -->|"sí"| n39
-  n40{"dto.debounceKey"}:::decision
-  n38 -->|"no"| n40
-  n31 -->|"no"| n40
-  n41["Llama a NotificationsRepository.findLiveRequestByDebounceKey"]:::llamada
-  n40 -->|"sí"| n41
-  n42[("LEE messaging.notification_requests")]:::efecto
-  n41 --> n42
-  n43["Llama a NotificationsRepository.createNotificationRequest"]:::llamada
-  n42 --> n43
-  n40 -->|"no"| n43
-  n44[("CREA messaging.notification_requests")]:::efecto
-  n43 --> n44
-  n45(("202 Responde con éxito")):::ok
-  n44 --> n45
-  n18 -->|"no"| n45
+  n33{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n33 -->|"sí"| n34
+  n35{"template.channelId !== dto.channelId"}:::decision
+  n33 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n35 -->|"sí"| n36
+  n37(("202 Responde con éxito")):::ok
+  n35 -->|"no"| n37
+  n30 -->|"no"| n37
+  n18 -->|"no"| n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -832,19 +826,19 @@ flowchart TD
   n62 --> n63
   n64[("LEE iam.user_global_roles")]:::efecto
   n63 --> n64
-  n65["Llama a IamAuthService.mergeRoleCodes"]:::llamada
+  n65["Llama a IamAuthService.loadActiveTenantIds"]:::llamada
   n64 --> n65
-  n66["Llama a AuthzEffectiveRolesService.scopedAssignmentsForUser"]:::llamada
+  n66["Llama a DirectoryTenantClaimsAdapter.listActiveTenantIds"]:::llamada
   n65 --> n66
-  n67[("LEE authz.roles")]:::efecto
+  n67[("LEE directory.tenant_memberships")]:::efecto
   n66 --> n67
-  n68["Llama a IamAuthService.loadActiveTenantIds"]:::llamada
+  n68["Llama a IamAuthService.loadTenantDisplay"]:::llamada
   n67 --> n68
-  n69[("LEE directory.tenant_memberships")]:::efecto
+  n69["Llama a DirectoryTenantClaimsAdapter.describeTenants"]:::llamada
   n68 --> n69
-  n70["Llama a IamAuthService.loadTenantDisplay"]:::llamada
+  n70[("LEE directory.tenants")]:::efecto
   n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n71["… el resto del árbol (10 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -863,9 +857,8 @@ Registrar una organización con su cuenta owner
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: El código de organización ya existe; ConflictException: Ya existe una cuenta con ese correo |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología; PreconditionFailedException: Un mismo archivo no puede respaldar dos documentos distintos; PreconditionFailedException: El documento {label} ya está vinculado a una organización; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -879,145 +872,126 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a TenantsRepository.findByCode"]:::llamada
+  n6["Llama a DirectoryRegistrationAdapter.findTenantByCode"]:::llamada
   n5 --> n6
-  n7[("LEE directory.tenants")]:::efecto
+  n7["Llama a TenantsRepository.findByCode"]:::llamada
   n6 --> n7
-  n8{"codeClash"}:::decision
+  n8[("LEE directory.tenants")]:::efecto
   n7 --> n8
-  n9(["409 CONFLICT El código de organización ya existe"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
-  n8 -->|"no"| n10
-  n11[("LEE iam.authentication_credentials")]:::efecto
-  n10 --> n11
-  n12{"emailClash"}:::decision
+  n9{"codeClash"}:::decision
+  n8 --> n9
+  n10(["409 CONFLICT El código de organización ya existe"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE iam.authentication_credentials")]:::efecto
   n11 --> n12
-  n13(["409 CONFLICT Ya existe una cuenta con ese correo"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a TenantTypeProfileService.assertProfileMatchesType"]:::llamada
-  n12 -->|"no"| n14
-  n15{"tenantType === 'PAYER' && !input.payer"}:::decision
-  n14 --> n15
-  n16(["422 PRECONDITION_FAILED Un tenant de tipo PAYER exige el bloque `payer`"]):::error
-  n15 -->|"sí"| n16
-  n17{"tenantType === 'BROKER' && !input.broker"}:::decision
-  n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED Un tenant de tipo BROKER exige el bloque `broker`"]):::error
+  n13{"emailClash"}:::decision
+  n12 --> n13
+  n14(["409 CONFLICT Ya existe una cuenta con ese correo"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a DirectoryRegistrationAdapter.assertProfileMatchesType"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a TenantTypeProfileService.assertProfileMatchesType"]:::llamada
+  n15 --> n16
+  n17{"tenantType === 'PAYER' && !input.payer"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED Un tenant de tipo PAYER exige el bloque `payer`"]):::error
   n17 -->|"sí"| n18
-  n19{"TERRITORIAL_TENANT_TYPES.includes(tenantType)"}:::decision
+  n19{"tenantType === 'BROKER' && !input.broker"}:::decision
   n17 -->|"no"| n19
-  n20{"missing.length › 0"}:::decision
+  n20(["422 PRECONDITION_FAILED Un tenant de tipo BROKER exige el bloque `broker`"]):::error
   n19 -->|"sí"| n20
-  n21(["422 PRECONDITION_FAILED Un tenant de tipo {tenantType} exige país y jurisdicción"]):::error
-  n20 -->|"sí"| n21
-  n22{"input.legalEntityType && input.countryConceptId"}:::decision
-  n20 -->|"no"| n22
-  n19 -->|"no"| n22
-  n23{"expectedCountryConceptId && expectedCountryConceptId !== input.countryConceptId"}:::decision
+  n21{"TERRITORIAL_TENANT_TYPES.includes(tenantType)"}:::decision
+  n19 -->|"no"| n21
+  n22{"missing.length › 0"}:::decision
+  n21 -->|"sí"| n22
+  n23(["422 PRECONDITION_FAILED Un tenant de tipo {tenantType} exige país y jurisdicción"]):::error
   n22 -->|"sí"| n23
-  n24(["422 PRECONDITION_FAILED El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el p…"]):::error
-  n23 -->|"sí"| n24
-  n25{"tenantType !== 'PAYER' && input.payer"}:::decision
-  n23 -->|"no"| n25
-  n22 -->|"no"| n25
-  n26(["422 PRECONDITION_FAILED El bloque `payer` sólo corresponde a un tenant de tipo PAYER"]):::error
+  n24{"input.legalEntityType && input.countryConceptId"}:::decision
+  n22 -->|"no"| n24
+  n21 -->|"no"| n24
+  n25{"expectedCountryConceptId && expectedCountryConceptId !== input.countryConceptId"}:::decision
+  n24 -->|"sí"| n25
+  n26(["422 PRECONDITION_FAILED El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el p…"]):::error
   n25 -->|"sí"| n26
-  n27{"tenantType !== 'BROKER' && input.broker"}:::decision
+  n27{"tenantType !== 'PAYER' && input.payer"}:::decision
   n25 -->|"no"| n27
-  n28(["422 PRECONDITION_FAILED El bloque `broker` sólo corresponde a un tenant de tipo BROKER"]):::error
+  n24 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED El bloque `payer` sólo corresponde a un tenant de tipo PAYER"]):::error
   n27 -->|"sí"| n28
-  n29{"tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
+  n29{"tenantType !== 'BROKER' && input.broker"}:::decision
   n27 -->|"no"| n29
-  n30(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
+  n30(["422 PRECONDITION_FAILED El bloque `broker` sólo corresponde a un tenant de tipo BROKER"]):::error
   n29 -->|"sí"| n30
-  n31{"input.diagnosticUnit"}:::decision
+  n31{"tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit"}:::decision
   n29 -->|"no"| n31
-  n32{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n32(["422 PRECONDITION_FAILED El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER"]):::error
   n31 -->|"sí"| n32
-  n33(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
-  n32 -->|"sí"| n33
-  n34{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && unitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
-  n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
+  n33{"input.diagnosticUnit"}:::decision
+  n31 -->|"no"| n33
+  n34{"unitTypeConceptId !== undefined && !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)"}:::decision
+  n33 -->|"sí"| n34
+  n35(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
   n34 -->|"sí"| n35
-  n36{"invalidModalities.length › 0"}:::decision
+  n36{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && unitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
   n34 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n37(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
   n36 -->|"sí"| n37
-  n38["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n38{"invalidModalities.length › 0"}:::decision
   n36 -->|"no"| n38
-  n31 -->|"no"| n38
-  n39["Llama a CatalogConceptsRepository.findByIds"]:::llamada
-  n38 --> n39
-  n40[("LEE terminology.catalog_concepts")]:::efecto
-  n39 --> n40
-  n41{"unknown.length › 0"}:::decision
+  n39(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a DirectoryRegistrationAdapter.assertConceptsExist"]:::llamada
+  n38 -->|"no"| n40
+  n33 -->|"no"| n40
+  n41["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
   n40 --> n41
-  n42(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
-  n41 -->|"sí"| n42
-  n43["Llama a UsersRepository.create"]:::llamada
-  n41 -->|"no"| n43
-  n44[("CREA iam.users")]:::efecto
-  n43 --> n44
-  n45["Llama a CredentialsRepository.createPassword"]:::llamada
+  n42{"unknown.length › 0"}:::decision
+  n41 --> n42
+  n43(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a UsersRepository.create"]:::llamada
+  n42 -->|"no"| n44
+  n45[("CREA iam.users")]:::efecto
   n44 --> n45
-  n46[("CREA iam.authentication_credentials")]:::efecto
+  n46["Llama a CredentialsRepository.createPassword"]:::llamada
   n45 --> n46
-  n47["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n47[("CREA iam.authentication_credentials")]:::efecto
   n46 --> n47
-  n48[("CREA iam.user_global_roles")]:::efecto
+  n48["Llama a UserGlobalRolesRepository.create"]:::llamada
   n47 --> n48
-  n49["Llama a TenantsRepository.create"]:::llamada
+  n49[("CREA iam.user_global_roles")]:::efecto
   n48 --> n49
-  n50[("CREA directory.tenants")]:::efecto
+  n50["Llama a DirectoryRegistrationAdapter.createTenant"]:::llamada
   n49 --> n50
-  n51["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
+  n51["Llama a TenantsRepository.create"]:::llamada
   n50 --> n51
-  n52{"input.tenantType === 'PAYER' && input.payer"}:::decision
+  n52[("CREA directory.tenants")]:::efecto
   n51 --> n52
-  n53["Llama a CatalogRepository.createCarrier"]:::llamada
-  n52 -->|"sí"| n53
-  n54[("CREA insurance.insurance_carriers")]:::efecto
-  n53 --> n54
-  n55{"input.tenantType === 'BROKER' && input.broker"}:::decision
+  n53{"dto.organization.tenantType === 'PHARMACY'"}:::decision
+  n52 --> n53
+  n54["Llama a PharmacyRegistrationAdapter.createPharmacy"]:::llamada
+  n53 -->|"sí"| n54
+  n55[("CREA pharmacy.pharmacies")]:::efecto
   n54 --> n55
-  n52 -->|"no"| n55
-  n56["Llama a CatalogRepository.createBroker"]:::llamada
-  n55 -->|"sí"| n56
-  n57[("CREA insurance.insurance_brokers")]:::efecto
+  n56["Llama a DirectoryRegistrationAdapter.createTenantMembership"]:::llamada
+  n55 --> n56
+  n53 -->|"no"| n56
+  n57["Llama a TenantMembershipsRepository.create"]:::llamada
   n56 --> n57
-  n58{"dto.organization.tenantType === 'PHARMACY'"}:::decision
+  n58[("CREA directory.tenant_memberships")]:::efecto
   n57 --> n58
-  n55 -->|"no"| n58
-  n59["Llama a IamOrganizationSelfRegistrationService.createPharmacyBranches"]:::llamada
-  n58 -->|"sí"| n59
-  n60["Llama a BranchesRepository.create"]:::llamada
+  n59["Llama a EmailVerificationsRepository.create"]:::llamada
+  n58 --> n59
+  n60[("CREA iam.email_verifications")]:::efecto
   n59 --> n60
-  n61[("CREA directory.branches")]:::efecto
+  n61["Llama a SecurityEventsRepository.record"]:::llamada
   n60 --> n61
-  n62[("CREA pharmacy.pharmacies")]:::efecto
+  n62[("CREA iam.security_events")]:::efecto
   n61 --> n62
-  n63["Llama a TenantMembershipsRepository.create"]:::llamada
+  n63(("201 Responde con éxito")):::ok
   n62 --> n63
-  n58 -->|"no"| n63
-  n64[("CREA directory.tenant_memberships")]:::efecto
-  n63 --> n64
-  n65["Llama a TenantAffiliationDocumentsService.attachRegistrationDocuments"]:::llamada
-  n64 --> n65
-  n66["Llama a TenantAffiliationDocumentsService.assertNoRepeatedFile"]:::llamada
-  n65 --> n66
-  n67["Repite: por cada const [fileId, roles] de seen"]:::bucle
-  n66 --> n67
-  n68{"roles.length › 1"}:::decision
-  n67 -->|"cada elemento"| n68
-  n69(["422 PRECONDITION_FAILED Un mismo archivo no puede respaldar dos documentos distintos"]):::error
-  n68 -->|"sí"| n69
-  n70["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
-  n68 -->|"no"| n70
-  n67 -->|"al terminar"| n70
-  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1035,9 +1009,8 @@ Registrarse como paciente con documento de identidad
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese documento de identidad |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1059,127 +1032,103 @@ flowchart TD
   n7 --> n8
   n9(["409 CONFLICT Ya existe una cuenta con ese documento de identidad"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
+  n10["Llama a ProfilesRegistrationAdapter.assertIsAdministrativeArea"]:::llamada
   n8 -->|"no"| n10
-  n11["Llama a AdministrativeAreaCatalogService.listMemberIds"]:::llamada
+  n11["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
   n10 --> n11
-  n12{"members === null"}:::decision
+  n12{"!members.has(conceptId)"}:::decision
   n11 --> n12
-  n13(["422 PRECONDITION_FAILED El catálogo de departamentos no está disponible"]):::error
+  n13(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
   n12 -->|"sí"| n13
-  n14{"!members.has(conceptId)"}:::decision
+  n14["Llama a UsersRepository.create"]:::llamada
   n12 -->|"no"| n14
-  n15(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a UsersRepository.create"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA iam.users")]:::efecto
+  n15[("CREA iam.users")]:::efecto
+  n14 --> n15
+  n16["Llama a CredentialsRepository.createPassword"]:::llamada
+  n15 --> n16
+  n17[("CREA iam.authentication_credentials")]:::efecto
   n16 --> n17
-  n18["Llama a CredentialsRepository.createPassword"]:::llamada
+  n18["Llama a UserGlobalRolesRepository.create"]:::llamada
   n17 --> n18
-  n19[("CREA iam.authentication_credentials")]:::efecto
+  n19[("CREA iam.user_global_roles")]:::efecto
   n18 --> n19
   n20["Llama a UserGlobalRolesRepository.create"]:::llamada
   n19 --> n20
   n21[("CREA iam.user_global_roles")]:::efecto
   n20 --> n21
-  n22["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n22["Llama a ProfilesRegistrationAdapter.createPerson"]:::llamada
   n21 --> n22
-  n23[("CREA iam.user_global_roles")]:::efecto
+  n23["Llama a PersonsRepository.create"]:::llamada
   n22 --> n23
-  n24["Llama a PersonsRepository.create"]:::llamada
+  n24[("CREA profiles.persons")]:::efecto
   n23 --> n24
-  n25[("CREA profiles.persons")]:::efecto
+  n25["Llama a ProfilesRegistrationAdapter.createPersonProfile"]:::llamada
   n24 --> n25
   n26["Llama a PersonProfilesRepository.create"]:::llamada
   n25 --> n26
   n27[("CREA profiles.person_profiles")]:::efecto
   n26 --> n27
-  n28["Llama a PatientProfilesRepository.create"]:::llamada
+  n28["Llama a ProfilesRegistrationAdapter.createPatientProfile"]:::llamada
   n27 --> n28
-  n29[("CREA profiles.patient_profiles")]:::efecto
+  n29["Llama a PatientProfilesRepository.create"]:::llamada
   n28 --> n29
-  n30["Llama a PersonAccountLinksRepository.create"]:::llamada
+  n30[("CREA profiles.patient_profiles")]:::efecto
   n29 --> n30
-  n31[("CREA profiles.person_account_links")]:::efecto
+  n31["Llama a ProfilesRegistrationAdapter.createAccountLink"]:::llamada
   n30 --> n31
-  n32["Llama a IdentifiersRepository.create"]:::llamada
+  n32["Llama a PersonAccountLinksRepository.create"]:::llamada
   n31 --> n32
-  n33[("CREA common.identifiers")]:::efecto
+  n33[("CREA profiles.person_account_links")]:::efecto
   n32 --> n33
-  n34{"dto.billingTaxId"}:::decision
+  n34["Llama a CommonRecordsAdapter.createIdentifier"]:::llamada
   n33 --> n34
   n35["Llama a IdentifiersRepository.create"]:::llamada
-  n34 -->|"sí"| n35
+  n34 --> n35
   n36[("CREA common.identifiers")]:::efecto
   n35 --> n36
-  n37["Llama a TenantMembershipsRepository.create"]:::llamada
+  n37{"dto.billingTaxId"}:::decision
   n36 --> n37
-  n34 -->|"no"| n37
-  n38[("CREA directory.tenant_memberships")]:::efecto
-  n37 --> n38
-  n39["Repite: forEach(…)"]:::bucle
+  n38["Llama a CommonRecordsAdapter.createIdentifier"]:::llamada
+  n37 -->|"sí"| n38
+  n39["Llama a IdentifiersRepository.create"]:::llamada
   n38 --> n39
-  n40["Llama a ContactPointsRepository.create"]:::llamada
-  n39 -->|"cada elemento"| n40
-  n41[("CREA common.contact_points")]:::efecto
+  n40[("CREA common.identifiers")]:::efecto
+  n39 --> n40
+  n41["Llama a DirectoryRegistrationAdapter.createTenantMembership"]:::llamada
   n40 --> n41
-  n42{"dto.email"}:::decision
+  n37 -->|"no"| n41
+  n42["Llama a TenantMembershipsRepository.create"]:::llamada
   n41 --> n42
-  n39 -->|"al terminar"| n42
-  n43["Llama a ContactPointsRepository.create"]:::llamada
-  n42 -->|"sí"| n43
-  n44[("CREA common.contact_points")]:::efecto
+  n43[("CREA directory.tenant_memberships")]:::efecto
+  n42 --> n43
+  n44["Repite: forEach(…)"]:::bucle
   n43 --> n44
-  n45["Llama a EmailVerificationsRepository.create"]:::llamada
-  n44 --> n45
-  n46[("CREA iam.email_verifications")]:::efecto
+  n45["Llama a CommonRecordsAdapter.createContactPoint"]:::llamada
+  n44 -->|"cada elemento"| n45
+  n46["Llama a ContactPointsRepository.create"]:::llamada
   n45 --> n46
-  n47["Llama a SecurityEventsRepository.record"]:::llamada
+  n47[("CREA common.contact_points")]:::efecto
   n46 --> n47
-  n42 -->|"no"| n47
-  n48[("CREA iam.security_events")]:::efecto
+  n48{"dto.email"}:::decision
   n47 --> n48
-  n49{"dto.email && created.emailVerificationToken"}:::decision
-  n48 --> n49
-  n50["Llama a IamPatientSelfRegistrationService.sendVerificationEmail"]:::llamada
-  n49 -->|"sí"| n50
-  n51["Intenta"]:::intento
+  n44 -->|"al terminar"| n48
+  n49["Llama a CommonRecordsAdapter.createContactPoint"]:::llamada
+  n48 -->|"sí"| n49
+  n50["Llama a ContactPointsRepository.create"]:::llamada
+  n49 --> n50
+  n51[("CREA common.contact_points")]:::efecto
   n50 --> n51
-  n52["Llama a NotificationsService.createRequest"]:::llamada
+  n52["Llama a EmailVerificationsRepository.create"]:::llamada
   n51 --> n52
-  n53{"!recipientUserId"}:::decision
+  n53[("CREA iam.email_verifications")]:::efecto
   n52 --> n53
-  n54(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n53 -->|"sí"| n54
-  n55["Transacción: transactional(…)"]:::transaccion
-  n53 -->|"no"| n55
-  n56{"!channel"}:::decision
+  n54["Llama a SecurityEventsRepository.record"]:::llamada
+  n53 --> n54
+  n48 -->|"no"| n54
+  n55[("CREA iam.security_events")]:::efecto
+  n54 --> n55
+  n56(("201 Responde con éxito")):::ok
   n55 --> n56
-  n57(["404 NOT_FOUND Canal no encontrado"]):::error
-  n56 -->|"sí"| n57
-  n58{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n56 -->|"no"| n58
-  n59(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n58 -->|"sí"| n59
-  n60{"dto.templateId"}:::decision
-  n58 -->|"no"| n60
-  n61{"!template"}:::decision
-  n60 -->|"sí"| n61
-  n62(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n61 -->|"sí"| n62
-  n63{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n61 -->|"no"| n63
-  n64(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n63 -->|"sí"| n64
-  n65{"template.channelId !== dto.channelId"}:::decision
-  n63 -->|"no"| n65
-  n66(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n65 -->|"sí"| n66
-  n67(("201 Responde con éxito")):::ok
-  n65 -->|"no"| n67
-  n60 -->|"no"| n67
-  n49 -->|"no"| n67
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1197,11 +1146,10 @@ Registrarse como profesional de salud con su matrícula
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
 ```mermaid
 flowchart TD
@@ -1224,128 +1172,129 @@ flowchart TD
   n7 -->|"no"| n9
   n10["Intenta"]:::intento
   n9 --> n10
-  n11["Llama a FileUploadService.uploadAnonymous"]:::llamada
-  n10 --> n11
-  n12{"!file?.buffer?.byteLength"}:::decision
-  n11 --> n12
-  n13(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n12 -->|"sí"| n13
-  n14{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n12 -->|"no"| n14
-  n15(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n14 -->|"sí"| n15
-  n16{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n11{"err instanceof PreconditionFailedException"}:::decision
+  n10 -->|"si falla"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13["Transacción: transactional(…)"]:::transaccion
+  n10 --> n13
+  n11 -->|"no"| n13
+  n14["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n13 --> n14
+  n15[("LEE iam.authentication_credentials")]:::efecto
+  n14 --> n15
+  n16{"clash"}:::decision
+  n15 --> n16
+  n17(["409 CONFLICT Ya existe una cuenta con ese correo"]):::error
   n16 -->|"sí"| n17
-  n18{"loadStorageEnv().lifecycleBinding"}:::decision
+  n18["Llama a ProfilesRegistrationAdapter.findPractitionerByCode"]:::llamada
   n16 -->|"no"| n18
-  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n18 -->|"sí"| n19
-  n20{"err instanceof PreconditionFailedException"}:::decision
-  n10 -->|"si falla"| n20
-  n21(["↩ (relanza el error capturado)"]):::error
-  n20 -->|"sí"| n21
-  n22["Transacción: transactional(…)"]:::transaccion
-  n18 -->|"no"| n22
-  n20 -->|"no"| n22
-  n23["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
-  n22 --> n23
-  n24[("LEE iam.authentication_credentials")]:::efecto
+  n19["Llama a HealthPractitionerProfilesRepository.findByCode"]:::llamada
+  n18 --> n19
+  n20[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n19 --> n20
+  n21{"clashCode"}:::decision
+  n20 --> n21
+  n22(["409 CONFLICT El practitioner_code ya está en uso"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a IamPractitionerSelfRegistrationService.assertIssuerDepartment"]:::llamada
+  n21 -->|"no"| n23
+  n24{"conceptId === undefined"}:::decision
   n23 --> n24
-  n25{"clash"}:::decision
-  n24 --> n25
-  n26(["409 CONFLICT Ya existe una cuenta con ese correo"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a HealthPractitionerProfilesRepository.findByCode"]:::llamada
-  n25 -->|"no"| n27
-  n28[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n25(["422 PRECONDITION_FAILED El departamento emisor es obligatorio para el alta del profesional"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a UsersRepository.create"]:::llamada
+  n24 -->|"no"| n26
+  n27[("CREA iam.users")]:::efecto
+  n26 --> n27
+  n28{"assisted"}:::decision
   n27 --> n28
-  n29{"clashCode"}:::decision
-  n28 --> n29
-  n30(["409 CONFLICT El practitioner_code ya está en uso"]):::error
-  n29 -->|"sí"| n30
-  n31["Llama a IamPractitionerSelfRegistrationService.assertIssuerDepartment"]:::llamada
-  n29 -->|"no"| n31
-  n32{"conceptId === undefined"}:::decision
+  n29["Llama a CredentialsRepository.createPendingPassword"]:::llamada
+  n28 -->|"sí"| n29
+  n30[("CREA iam.authentication_credentials")]:::efecto
+  n29 --> n30
+  n31["Llama a CredentialsRepository.createPassword"]:::llamada
+  n28 -->|"no"| n31
+  n32[("CREA iam.authentication_credentials")]:::efecto
   n31 --> n32
-  n33(["422 PRECONDITION_FAILED El departamento emisor es obligatorio para el alta del profesional"]):::error
-  n32 -->|"sí"| n33
-  n34["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
-  n32 -->|"no"| n34
-  n35{"!members.has(conceptId)"}:::decision
+  n33["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n30 --> n33
+  n32 --> n33
+  n34[("CREA iam.user_global_roles")]:::efecto
+  n33 --> n34
+  n35["Llama a UserGlobalRolesRepository.create"]:::llamada
   n34 --> n35
-  n36(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n35 -->|"sí"| n36
-  n37["Llama a UsersRepository.create"]:::llamada
-  n35 -->|"no"| n37
-  n38[("CREA iam.users")]:::efecto
+  n36[("CREA iam.user_global_roles")]:::efecto
+  n35 --> n36
+  n37["Llama a ProfilesRegistrationAdapter.createPerson"]:::llamada
+  n36 --> n37
+  n38["Llama a PersonsRepository.create"]:::llamada
   n37 --> n38
-  n39{"assisted"}:::decision
+  n39[("CREA profiles.persons")]:::efecto
   n38 --> n39
-  n40["Llama a CredentialsRepository.createPendingPassword"]:::llamada
-  n39 -->|"sí"| n40
-  n41[("CREA iam.authentication_credentials")]:::efecto
+  n40["Llama a ProfilesRegistrationAdapter.createPersonProfile"]:::llamada
+  n39 --> n40
+  n41["Llama a PersonProfilesRepository.create"]:::llamada
   n40 --> n41
-  n42["Llama a CredentialsRepository.createPassword"]:::llamada
-  n39 -->|"no"| n42
-  n43[("CREA iam.authentication_credentials")]:::efecto
+  n42[("CREA profiles.person_profiles")]:::efecto
+  n41 --> n42
+  n43["Repite: por cada const fileId de [dto.signatureFileId, dto.sealFileId]"]:::bucle
   n42 --> n43
-  n44["Llama a UserGlobalRolesRepository.create"]:::llamada
-  n41 --> n44
-  n43 --> n44
-  n45[("CREA iam.user_global_roles")]:::efecto
+  n44["Llama a CommonRegistrationFilesAdapter.claimAnonymousUpload"]:::llamada
+  n43 -->|"cada elemento"| n44
+  n45["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
   n44 --> n45
-  n46["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n46{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
   n45 --> n46
-  n47[("CREA iam.user_global_roles")]:::efecto
-  n46 --> n47
-  n48["Llama a IamPractitionerSelfRegistrationService.claimProfilePhoto"]:::llamada
-  n47 --> n48
-  n49["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
-  n48 --> n49
-  n50{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
-  n49 --> n50
-  n51(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n47(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n46 -->|"sí"| n47
+  n48{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n46 -->|"no"| n48
+  n49(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
+  n48 -->|"sí"| n49
+  n50{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
+  n48 -->|"no"| n50
+  n51(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
   n50 -->|"sí"| n51
-  n52{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n52[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
   n50 -->|"no"| n52
-  n53(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n52 -->|"sí"| n53
-  n54{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
-  n52 -->|"no"| n54
-  n55(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n54 -->|"sí"| n55
-  n56[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
-  n54 -->|"no"| n56
-  n57["Llama a PersonsRepository.create"]:::llamada
+  n53{"file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || BigInt(version.sizeBytes) › BigInt(2 * 1024 * 1024)"}:::decision
+  n52 --> n53
+  n54(["422 PRECONDITION_FAILED La firma y el sello requieren una imagen privada de hasta 2 MB"]):::error
+  n53 -->|"sí"| n54
+  n55["Llama a ProfilesRegistrationAdapter.createPractitionerProfile"]:::llamada
+  n53 -->|"no"| n55
+  n43 -->|"al terminar"| n55
+  n56["Llama a HealthPractitionerProfilesRepository.create"]:::llamada
+  n55 --> n56
+  n57[("CREA profiles.health_practitioner_profiles")]:::efecto
   n56 --> n57
-  n58[("CREA profiles.persons")]:::efecto
+  n58["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
   n57 --> n58
-  n59["Llama a PersonProfilesRepository.create"]:::llamada
+  n59["Llama a JurisdictionAuthorizationsRepository.create"]:::llamada
   n58 --> n59
-  n60[("CREA profiles.person_profiles")]:::efecto
+  n60[("CREA profiles.jurisdiction_authorizations")]:::efecto
   n59 --> n60
-  n61["Repite: por cada const fileId de [dto.signatureFileId, dto.sealFileId]"]:::bucle
+  n61["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
   n60 --> n61
-  n62["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
-  n61 -->|"cada elemento"| n62
-  n63{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
+  n62["Llama a JurisdictionAuthorizationsRepository.create"]:::llamada
+  n61 --> n62
+  n63[("CREA profiles.jurisdiction_authorizations")]:::efecto
   n62 --> n63
-  n64(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n63 -->|"sí"| n64
-  n65["Llama a StoragePublicationService.guardFile"]:::llamada
-  n63 -->|"no"| n65
-  n66[("LEE common.files")]:::efecto
+  n64["Llama a ProfilesRegistrationAdapter.createProfessionalCredential"]:::llamada
+  n63 --> n64
+  n65["Llama a ProfessionalCredentialsRepository.create"]:::llamada
+  n64 --> n65
+  n66[("CREA profiles.professional_credentials")]:::efecto
   n65 --> n66
-  n67{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
+  n67["Repite: por cada const declared de dto.credentials ?? []"]:::bucle
   n66 --> n67
-  n68(["500 INTERNAL FILE_NOT_LIVE"]):::error
-  n67 -->|"sí"| n68
-  n69[("LEE common.file_versions")]:::efecto
-  n67 -->|"no"| n69
-  n70{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
-  n69 --> n70
+  n68{"!CREDENTIAL_TYPES.includes(declared.credentialTypeConceptId)"}:::decision
+  n67 -->|"cada elemento"| n68
+  n69(["422 PRECONDITION_FAILED Ese concepto no es un tipo de credencial profesional"]):::error
+  n68 -->|"sí"| n69
+  n70{"registrationNumber === ''"}:::decision
+  n68 -->|"no"| n70
   n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
   n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
@@ -1400,59 +1349,42 @@ flowchart TD
   n13 -->|"sí"| n14
   n15["Intenta"]:::intento
   n14 --> n15
-  n16["Llama a NotificationsService.createRequest"]:::llamada
+  n16["Llama a MessagingEmailNoticeAdapter.enqueueEmail"]:::llamada
   n15 --> n16
-  n17{"!recipientUserId"}:::decision
+  n17["Llama a NotificationsService.createRequest"]:::llamada
   n16 --> n17
-  n18(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
-  n17 -->|"sí"| n18
-  n19["Transacción: transactional(…)"]:::transaccion
-  n17 -->|"no"| n19
-  n20["Llama a NotificationsRepository.findChannelById"]:::llamada
-  n19 --> n20
-  n21[("LEE messaging.message_channels")]:::efecto
+  n18{"!recipientUserId"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n18 -->|"sí"| n19
+  n20["Transacción: transactional(…)"]:::transaccion
+  n18 -->|"no"| n20
+  n21{"!channel"}:::decision
   n20 --> n21
-  n22{"!channel"}:::decision
-  n21 --> n22
-  n23(["404 NOT_FOUND Canal no encontrado"]):::error
-  n22 -->|"sí"| n23
-  n24{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n22 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED El canal no está activo"]):::error
-  n24 -->|"sí"| n25
-  n26{"dto.templateId"}:::decision
-  n24 -->|"no"| n26
-  n27["Llama a NotificationsRepository.findTemplateById"]:::llamada
+  n22(["404 NOT_FOUND Canal no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n23 -->|"sí"| n24
+  n25{"dto.templateId"}:::decision
+  n23 -->|"no"| n25
+  n26{"!template"}:::decision
+  n25 -->|"sí"| n26
+  n27(["404 NOT_FOUND Plantilla no encontrada"]):::error
   n26 -->|"sí"| n27
-  n28[("LEE messaging.message_templates")]:::efecto
-  n27 --> n28
-  n29{"!template"}:::decision
-  n28 --> n29
-  n30(["404 NOT_FOUND Plantilla no encontrada"]):::error
-  n29 -->|"sí"| n30
-  n31{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n29 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
-  n31 -->|"sí"| n32
-  n33{"template.channelId !== dto.channelId"}:::decision
-  n31 -->|"no"| n33
-  n34(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
-  n33 -->|"sí"| n34
-  n35{"dto.debounceKey"}:::decision
-  n33 -->|"no"| n35
-  n26 -->|"no"| n35
-  n36["Llama a NotificationsRepository.findLiveRequestByDebounceKey"]:::llamada
-  n35 -->|"sí"| n36
-  n37[("LEE messaging.notification_requests")]:::efecto
-  n36 --> n37
-  n38["Llama a NotificationsRepository.createNotificationRequest"]:::llamada
-  n37 --> n38
-  n35 -->|"no"| n38
-  n39[("CREA messaging.notification_requests")]:::efecto
-  n38 --> n39
-  n40(("202 Responde con éxito")):::ok
-  n39 --> n40
-  n13 -->|"no"| n40
+  n28{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n28 -->|"sí"| n29
+  n30{"template.channelId !== dto.channelId"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n30 -->|"sí"| n31
+  n32(("202 Responde con éxito")):::ok
+  n30 -->|"no"| n32
+  n25 -->|"no"| n32
+  n13 -->|"no"| n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1595,15 +1527,15 @@ flowchart TD
   n20 --> n21
   n22["Llama a IamAuthService.mergeRoleCodes"]:::llamada
   n21 --> n22
-  n23["Llama a AuthzEffectiveRolesService.scopedAssignmentsForUser"]:::llamada
+  n23["Llama a AuthzBusinessRolesAdapter.scopedAssignmentsForUser"]:::llamada
   n22 --> n23
-  n24["Llama a UserRoleAssignmentsRepository.findActiveForUser"]:::llamada
+  n24["Llama a AuthzEffectiveRolesService.scopedAssignmentsForUser"]:::llamada
   n23 --> n24
-  n25[("LEE authz.user_role_assignments")]:::efecto
+  n25[("LEE authz.roles")]:::efecto
   n24 --> n25
-  n26[("LEE authz.roles")]:::efecto
+  n26["Llama a IamAuthService.loadActiveTenantIds"]:::llamada
   n25 --> n26
-  n27["Llama a IamAuthService.loadActiveTenantIds"]:::llamada
+  n27["Llama a DirectoryTenantClaimsAdapter.listActiveTenantIds"]:::llamada
   n26 --> n27
   n28[("LEE directory.tenant_memberships")]:::efecto
   n27 --> n28
@@ -1613,47 +1545,53 @@ flowchart TD
   n29 --> n30
   n31["Llama a IamAuthService.loadTenantDisplay"]:::llamada
   n30 --> n31
-  n32[("LEE directory.tenants")]:::efecto
+  n32["Llama a DirectoryTenantClaimsAdapter.describeTenants"]:::llamada
   n31 --> n32
-  n33["Llama a IamAuthService.loadPatientProfileId"]:::llamada
+  n33[("LEE directory.tenants")]:::efecto
   n32 --> n33
-  n34["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n34["Llama a IamAuthService.loadPatientProfileId"]:::llamada
   n33 --> n34
-  n35[("LEE profiles.person_account_links")]:::efecto
+  n35["Llama a ProfilesAccountProfileIdsAdapter.findPatientProfileId"]:::llamada
   n34 --> n35
-  n36["Llama a PatientProfilesRepository.findById"]:::llamada
+  n36["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
   n35 --> n36
-  n37[("LEE profiles.patient_profiles")]:::efecto
+  n37[("LEE profiles.person_account_links")]:::efecto
   n36 --> n37
-  n38["Llama a IamAuthService.loadPractitionerProfileId"]:::llamada
+  n38["Llama a PatientProfilesRepository.findById"]:::llamada
   n37 --> n38
-  n39["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n39[("LEE profiles.patient_profiles")]:::efecto
   n38 --> n39
-  n40[("LEE profiles.person_account_links")]:::efecto
+  n40["Llama a IamAuthService.loadPractitionerProfileId"]:::llamada
   n39 --> n40
-  n41["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n41["Llama a ProfilesAccountProfileIdsAdapter.findPractitionerProfileId"]:::llamada
   n40 --> n41
-  n42[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n42["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
   n41 --> n42
-  n43[("ACTUALIZA iam.refresh_tokens")]:::efecto
+  n43[("LEE profiles.person_account_links")]:::efecto
   n42 --> n43
-  n44["Llama a RefreshTokensRepository.create"]:::llamada
+  n44["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n43 --> n44
-  n45[("CREA iam.refresh_tokens")]:::efecto
+  n45[("LEE profiles.health_practitioner_profiles")]:::efecto
   n44 --> n45
-  n46["Llama a SecurityEventsRepository.record"]:::llamada
+  n46[("ACTUALIZA iam.refresh_tokens")]:::efecto
   n45 --> n46
-  n47[("CREA iam.security_events")]:::efecto
+  n47["Llama a RefreshTokensRepository.create"]:::llamada
   n46 --> n47
-  n48{"según outcome.kind"}:::decision
+  n48[("CREA iam.refresh_tokens")]:::efecto
   n47 --> n48
-  n49(["401 UNAUTHENTICATED Reuso de refresh token detectado"]):::error
-  n48 -->|"'reuse'"| n49
-  n50(["401 UNAUTHENTICATED Refresh token expirado"]):::error
-  n48 -->|"'expired'"| n50
-  n51(["401 UNAUTHENTICATED Refresh token inválido"]):::error
-  n48 -->|"por defecto"| n51
-  n52(("200 Responde con éxito")):::ok
+  n49["Llama a SecurityEventsRepository.record"]:::llamada
+  n48 --> n49
+  n50[("CREA iam.security_events")]:::efecto
+  n49 --> n50
+  n51{"según outcome.kind"}:::decision
+  n50 --> n51
+  n52(["401 UNAUTHENTICATED Reuso de refresh token detectado"]):::error
+  n51 -->|"'reuse'"| n52
+  n53(["401 UNAUTHENTICATED Refresh token expirado"]):::error
+  n51 -->|"'expired'"| n53
+  n54(["401 UNAUTHENTICATED Refresh token inválido"]):::error
+  n51 -->|"por defecto"| n54
+  n55(("200 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1673,7 +1611,7 @@ Pre-cargar un PDF para un registro de organización o profesional
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED |
 
 ```mermaid
 flowchart TD
@@ -1682,110 +1620,55 @@ flowchart TD
   n1 --> n2
   n3["Llama a IamRegistrationDocumentUploadService.upload"]:::llamada
   n2 --> n3
-  n4["Llama a FileUploadService.uploadAnonymous"]:::llamada
+  n4["Llama a CommonRegistrationFilesAdapter.uploadAnonymous"]:::llamada
   n3 --> n4
-  n5{"!file?.buffer?.byteLength"}:::decision
+  n5["Llama a FileUploadService.uploadAnonymous"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n5 -->|"sí"| n6
-  n7{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n5 -->|"no"| n7
-  n8(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n7 -->|"sí"| n8
-  n9{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
-  n9 -->|"sí"| n10
-  n11{"this.publication"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a FileUploadService.publishUpload"]:::llamada
-  n11 -->|"sí"| n12
-  n13{"!this.publication"}:::decision
-  n12 --> n13
-  n14(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a StoragePublicationService.publish"]:::llamada
-  n13 -->|"no"| n15
-  n16{"!plan || plan.identity.kind === 'UNKNOWN' || !this.storage.inspect"}:::decision
-  n15 --> n16
-  n17(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n6{"!file?.buffer?.byteLength"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
+  n6 -->|"sí"| n7
+  n8{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
+  n8 -->|"sí"| n9
+  n10{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n10 -->|"sí"| n11
+  n12{"this.publication"}:::decision
+  n10 -->|"no"| n12
+  n13["Llama a FileUploadService.publishUpload"]:::llamada
+  n12 -->|"sí"| n13
+  n14{"!this.publication"}:::decision
+  n13 --> n14
+  n15(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n14 -->|"sí"| n15
+  n16{"loadStorageEnv().lifecycleBinding"}:::decision
+  n14 -->|"no"| n16
+  n12 -->|"no"| n16
+  n17(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
   n16 -->|"sí"| n17
-  n18["Intenta"]:::intento
+  n18["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
   n16 -->|"no"| n18
-  n19{"presence.state === 'UNKNOWN'"}:::decision
+  n19{"this.lifecycleBinding"}:::decision
   n18 --> n19
-  n20(["500 INTERNAL REMOTE_STATE_UNKNOWN"]):::error
+  n20{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n19 -->|"sí"| n20
-  n21{"presence.state === 'PRESENT'"}:::decision
-  n19 -->|"no"| n21
-  n22{"!attemptId"}:::decision
-  n21 -->|"no"| n22
-  n23(["500 INTERNAL ADAPTER_DID_NOT_CONSUME_PERMIT"]):::error
-  n22 -->|"sí"| n23
-  n24{"result.duplicate || result.result === undefined"}:::decision
-  n21 -->|"sí"| n24
-  n22 -->|"no"| n24
-  n25(["500 INTERNAL PUBLICATION_RESULT_REQUIRES_RELOAD"]):::error
+  n21(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a S3FileStorageAdapter.store"]:::llamada
+  n20 -->|"no"| n22
+  n19 -->|"no"| n22
+  n23{"this.env.lifecycleBinding"}:::decision
+  n22 --> n23
+  n24{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
+  n23 -->|"sí"| n24
+  n25(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
   n24 -->|"sí"| n25
-  n26(["↩ (relanza el error capturado)"]):::error
-  n18 -->|"si falla"| n26
-  n27{"loadStorageEnv().lifecycleBinding"}:::decision
-  n24 -->|"no"| n27
-  n11 -->|"no"| n27
-  n28(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n27 -->|"sí"| n28
-  n29["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
-  n27 -->|"no"| n29
-  n30{"this.lifecycleBinding"}:::decision
-  n29 --> n30
-  n31{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n30 -->|"sí"| n31
-  n32(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
-  n31 -->|"sí"| n32
-  n33["Llama a S3FileStorageAdapter.store"]:::llamada
-  n31 -->|"no"| n33
-  n30 -->|"no"| n33
-  n34["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
-  n33 --> n34
-  n35{"!this.env.s3.bucket"}:::decision
-  n34 --> n35
-  n36(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
-  n35 -->|"sí"| n36
-  n37{"this.env.lifecycleBinding"}:::decision
-  n35 -->|"no"| n37
-  n38{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n37 -->|"sí"| n38
-  n39(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a FilesService.createFile"]:::llamada
-  n38 -->|"no"| n40
-  n37 -->|"no"| n40
-  n41["Llama a FilesService.assertLifecycleWired"]:::llamada
-  n40 --> n41
-  n42{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
-  n41 --> n42
-  n43(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n42 -->|"sí"| n43
-  n44["Llama a StoragePublicationService.guardLocator"]:::llamada
-  n42 -->|"no"| n44
-  n45{"!presence || presence.state !== 'PRESENT'"}:::decision
-  n44 --> n45
-  n46(["500 INTERNAL REFERENCE_OBJECT_UNPROVEN"]):::error
-  n45 -->|"sí"| n46
-  n47{"expected && (receipt.contentHash !== expected.contentHash || receipt.sizeBytes !== expected.sizeBytes)"}:::decision
-  n45 -->|"no"| n47
-  n48(["500 INTERNAL REFERENCE_METADATA_MISMATCH"]):::error
-  n47 -->|"sí"| n48
-  n49["Llama a FilesRepository.create"]:::llamada
-  n47 -->|"no"| n49
-  n50[("CREA common.files")]:::efecto
-  n49 --> n50
-  n51["Llama a FileVersionsRepository.create"]:::llamada
-  n50 --> n51
-  n52[("CREA common.file_versions")]:::efecto
-  n51 --> n52
-  n53(("201 Responde con éxito")):::ok
-  n52 --> n53
+  n26(("201 Responde con éxito")):::ok
+  n24 -->|"no"| n26
+  n23 -->|"no"| n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1805,7 +1688,7 @@ Pre-cargar una imagen de firma o sello para el registro
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La imagen supera el límite de 2 MB; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED |
 
 ```mermaid
 flowchart TD
@@ -1818,110 +1701,55 @@ flowchart TD
   n3 --> n4
   n5(["422 PRECONDITION_FAILED La imagen supera el límite de 2 MB"]):::error
   n4 -->|"sí"| n5
-  n6["Llama a FileUploadService.uploadAnonymous"]:::llamada
+  n6["Llama a CommonRegistrationFilesAdapter.uploadAnonymous"]:::llamada
   n4 -->|"no"| n6
-  n7{"!file?.buffer?.byteLength"}:::decision
+  n7["Llama a FileUploadService.uploadAnonymous"]:::llamada
   n6 --> n7
-  n8(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n7 -->|"sí"| n8
-  n9{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n9 -->|"sí"| n10
-  n11{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
-  n11 -->|"sí"| n12
-  n13{"this.publication"}:::decision
-  n11 -->|"no"| n13
-  n14["Llama a FileUploadService.publishUpload"]:::llamada
-  n13 -->|"sí"| n14
-  n15{"!this.publication"}:::decision
-  n14 --> n15
-  n16(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a StoragePublicationService.publish"]:::llamada
-  n15 -->|"no"| n17
-  n18{"!plan || plan.identity.kind === 'UNKNOWN' || !this.storage.inspect"}:::decision
-  n17 --> n18
-  n19(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n8{"!file?.buffer?.byteLength"}:::decision
+  n7 --> n8
+  n9(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
+  n8 -->|"sí"| n9
+  n10{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
+  n10 -->|"sí"| n11
+  n12{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n12 -->|"sí"| n13
+  n14{"this.publication"}:::decision
+  n12 -->|"no"| n14
+  n15["Llama a FileUploadService.publishUpload"]:::llamada
+  n14 -->|"sí"| n15
+  n16{"!this.publication"}:::decision
+  n15 --> n16
+  n17(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n16 -->|"sí"| n17
+  n18{"loadStorageEnv().lifecycleBinding"}:::decision
+  n16 -->|"no"| n18
+  n14 -->|"no"| n18
+  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
   n18 -->|"sí"| n19
-  n20["Intenta"]:::intento
+  n20["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
   n18 -->|"no"| n20
-  n21{"presence.state === 'UNKNOWN'"}:::decision
+  n21{"this.lifecycleBinding"}:::decision
   n20 --> n21
-  n22(["500 INTERNAL REMOTE_STATE_UNKNOWN"]):::error
+  n22{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
   n21 -->|"sí"| n22
-  n23{"presence.state === 'PRESENT'"}:::decision
-  n21 -->|"no"| n23
-  n24{"!attemptId"}:::decision
-  n23 -->|"no"| n24
-  n25(["500 INTERNAL ADAPTER_DID_NOT_CONSUME_PERMIT"]):::error
-  n24 -->|"sí"| n25
-  n26{"result.duplicate || result.result === undefined"}:::decision
-  n23 -->|"sí"| n26
-  n24 -->|"no"| n26
-  n27(["500 INTERNAL PUBLICATION_RESULT_REQUIRES_RELOAD"]):::error
+  n23(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a S3FileStorageAdapter.store"]:::llamada
+  n22 -->|"no"| n24
+  n21 -->|"no"| n24
+  n25{"this.env.lifecycleBinding"}:::decision
+  n24 --> n25
+  n26{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
+  n25 -->|"sí"| n26
+  n27(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
   n26 -->|"sí"| n27
-  n28(["↩ (relanza el error capturado)"]):::error
-  n20 -->|"si falla"| n28
-  n29{"loadStorageEnv().lifecycleBinding"}:::decision
-  n26 -->|"no"| n29
-  n13 -->|"no"| n29
-  n30(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n29 -->|"sí"| n30
-  n31["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
-  n29 -->|"no"| n31
-  n32{"this.lifecycleBinding"}:::decision
-  n31 --> n32
-  n33{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n32 -->|"sí"| n33
-  n34(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
-  n33 -->|"sí"| n34
-  n35["Llama a S3FileStorageAdapter.store"]:::llamada
-  n33 -->|"no"| n35
-  n32 -->|"no"| n35
-  n36["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
-  n35 --> n36
-  n37{"!this.env.s3.bucket"}:::decision
-  n36 --> n37
-  n38(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
-  n37 -->|"sí"| n38
-  n39{"this.env.lifecycleBinding"}:::decision
-  n37 -->|"no"| n39
-  n40{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n39 -->|"sí"| n40
-  n41(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
-  n40 -->|"sí"| n41
-  n42["Llama a FilesService.createFile"]:::llamada
-  n40 -->|"no"| n42
-  n39 -->|"no"| n42
-  n43["Llama a FilesService.assertLifecycleWired"]:::llamada
-  n42 --> n43
-  n44{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
-  n43 --> n44
-  n45(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n44 -->|"sí"| n45
-  n46["Llama a StoragePublicationService.guardLocator"]:::llamada
-  n44 -->|"no"| n46
-  n47{"!presence || presence.state !== 'PRESENT'"}:::decision
-  n46 --> n47
-  n48(["500 INTERNAL REFERENCE_OBJECT_UNPROVEN"]):::error
-  n47 -->|"sí"| n48
-  n49{"expected && (receipt.contentHash !== expected.contentHash || receipt.sizeBytes !== expected.sizeBytes)"}:::decision
-  n47 -->|"no"| n49
-  n50(["500 INTERNAL REFERENCE_METADATA_MISMATCH"]):::error
-  n49 -->|"sí"| n50
-  n51["Llama a FilesRepository.create"]:::llamada
-  n49 -->|"no"| n51
-  n52[("CREA common.files")]:::efecto
-  n51 --> n52
-  n53["Llama a FileVersionsRepository.create"]:::llamada
-  n52 --> n53
-  n54[("CREA common.file_versions")]:::efecto
-  n53 --> n54
-  n55(("201 Responde con éxito")):::ok
-  n54 --> n55
+  n28(("201 Responde con éxito")):::ok
+  n26 -->|"no"| n28
+  n25 -->|"no"| n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2043,7 +1871,143 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /iam/users
+#### 15. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+
+Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamOnboardingDraftsService.deleteDraft"]:::llamada
+  n2 --> n3
+  n4["Llama a IamOnboardingDraftsService.authorize"]:::llamada
+  n3 --> n4
+  n5{"!entry || !matches || secret === undefined || secret === ''"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7(("200 Responde con éxito")):::ok
+  n5 -->|"no"| n7
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. GET /iam/onboarding-drafts/{formType}/{draftId}
+
+Recupera un borrador de alta guardado por identificador y tipo de formulario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamOnboardingDraftsService.getDraft"]:::llamada
+  n2 --> n3
+  n4["Llama a IamOnboardingDraftsService.authorize"]:::llamada
+  n3 --> n4
+  n5{"!entry || !matches || secret === undefined || secret === ''"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7(("200 Responde con éxito")):::ok
+  n5 -->|"no"| n7
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 17. PUT /iam/onboarding-drafts/{formType}/{draftId}
+
+Guarda o actualiza el avance del formulario de alta en borrador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST}; DomainException: {HttpStatus.PAYLOAD_TOO_LARGE}; DomainException: {HttpStatus.TOO_MANY_REQUESTS}; DraftStoreFullError: {retryAfterSeconds} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Intenta"]:::intento
+  n2 --> n3
+  n4["Llama a IamOnboardingDraftsService.saveDraft"]:::llamada
+  n3 --> n4
+  n5{"!this.validKey(formType, draftId)"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a IamOnboardingDraftsService.assertPayloadShape"]:::llamada
+  n5 -->|"no"| n7
+  n8{"!isRecord(payload) || !isRecord(payload.data) || (payload.extraData !== undefined && !isRecord(payload.extraD…"}:::decision
+  n7 --> n8
+  n9(["500 INTERNAL {HttpStatus.BAD_REQUEST}"]):::error
+  n8 -->|"sí"| n9
+  n10{"Buffer.byteLength(JSON.stringify(payload), 'utf8') › MAX_DRAFT_BYTES"}:::decision
+  n8 -->|"no"| n10
+  n11(["500 INTERNAL {HttpStatus.PAYLOAD_TOO_LARGE}"]):::error
+  n10 -->|"sí"| n11
+  n12{"secret === undefined || secret === ''"}:::decision
+  n10 -->|"no"| n12
+  n13{"existing"}:::decision
+  n12 -->|"sí"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a IamOnboardingDraftsService.assertCapacity"]:::llamada
+  n13 -->|"no"| n15
+  n16{"(this.perOrigin.get(origin) ?? 0) ›= MAX_DRAFTS_PER_ORIGIN"}:::decision
+  n15 --> n16
+  n17(["500 INTERNAL {HttpStatus.TOO_MANY_REQUESTS}"]):::error
+  n16 -->|"sí"| n17
+  n18{"(this.perAggregate.get(aggregate) ?? 0) ›= MAX_DRAFTS_PER_AGGREGATE"}:::decision
+  n16 -->|"no"| n18
+  n19(["500 INTERNAL {HttpStatus.TOO_MANY_REQUESTS}"]):::error
+  n18 -->|"sí"| n19
+  n20(["500 INTERNAL {retryAfterSeconds}"]):::error
+  n18 -->|"no"| n20
+  n21["Llama a IamOnboardingDraftsService.authorize"]:::llamada
+  n12 -->|"no"| n21
+  n22{"!entry || !matches || secret === undefined || secret === ''"}:::decision
+  n21 --> n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"sí"| n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n3 -->|"si falla"| n24
+  n25(("200 Responde con éxito")):::ok
+  n22 -->|"no"| n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. POST /iam/users
 
 Crear un usuario con credencial de contraseña y rol inicial
 
@@ -2083,21 +2047,23 @@ flowchart TD
   n11 --> n12
   n13{"dto.phone"}:::decision
   n12 --> n13
-  n14["Llama a ContactPointsRepository.create"]:::llamada
+  n14["Llama a CommonRecordsAdapter.createContactPoint"]:::llamada
   n13 -->|"sí"| n14
-  n15[("CREA common.contact_points")]:::efecto
+  n15["Llama a ContactPointsRepository.create"]:::llamada
   n14 --> n15
-  n16["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n16[("CREA common.contact_points")]:::efecto
   n15 --> n16
-  n13 -->|"no"| n16
-  n17[("CREA iam.user_global_roles")]:::efecto
+  n17["Llama a UserGlobalRolesRepository.create"]:::llamada
   n16 --> n17
-  n18["Llama a SecurityEventsRepository.record"]:::llamada
+  n13 -->|"no"| n17
+  n18[("CREA iam.user_global_roles")]:::efecto
   n17 --> n18
-  n19[("CREA iam.security_events")]:::efecto
+  n19["Llama a SecurityEventsRepository.record"]:::llamada
   n18 --> n19
-  n20(("201 Responde con éxito")):::ok
+  n20[("CREA iam.security_events")]:::efecto
   n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2106,7 +2072,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /iam/users/{id}
+#### 19. GET /iam/users/{id}
 
 Ficha de un usuario
 
@@ -2144,7 +2110,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /iam/users/{id}/anonymize
+#### 20. POST /iam/users/{id}/anonymize
 
 Anonimizar (DSAR) la cuenta
 
@@ -2210,7 +2176,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /iam/users/{id}/credentials
+#### 21. GET /iam/users/{id}/credentials
 
 Credenciales del usuario
 
@@ -2254,7 +2220,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /iam/users/{id}/credentials/{cid}/revoke
+#### 22. POST /iam/users/{id}/credentials/{cid}/revoke
 
 Revocar una credencial del usuario
 
@@ -2300,7 +2266,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /iam/users/{id}/credentials/federated
+#### 23. POST /iam/users/{id}/credentials/federated
 
 Enlazar una credencial de identidad federada
 
@@ -2357,7 +2323,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /iam/users/{id}/devices
+#### 24. GET /iam/users/{id}/devices
 
 Dispositivos del usuario
 
@@ -2401,7 +2367,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /iam/users/{id}/devices
+#### 25. POST /iam/users/{id}/devices
 
 Registrar un dispositivo del usuario
 
@@ -2410,7 +2376,7 @@ Registrar un dispositivo del usuario
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No tiene acceso a los dispositivos de esta cuenta |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2421,29 +2387,33 @@ flowchart TD
   n1 --> n2
   n3["Llama a IamDevicesService.register"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"actor.id !== userId && !actor.roles.some((role) =› ROLES_THAT_MANAGE_DEVICES.includes(role))"}:::decision
   n3 --> n4
-  n5["Llama a UsersRepository.findById"]:::llamada
-  n4 --> n5
-  n6[("LEE iam.users")]:::efecto
-  n5 --> n6
-  n7{"!user"}:::decision
+  n5(["403 FORBIDDEN No tiene acceso a los dispositivos de esta cuenta"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a UsersRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Usuario no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a DevicesRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA iam.devices")]:::efecto
-  n9 --> n10
-  n11{"trusted"}:::decision
-  n10 --> n11
-  n12["Llama a SecurityEventsRepository.record"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("CREA iam.security_events")]:::efecto
+  n8[("LEE iam.users")]:::efecto
+  n7 --> n8
+  n9{"!user"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Usuario no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a DevicesRepository.create"]:::llamada
+  n9 -->|"no"| n11
+  n12[("CREA iam.devices")]:::efecto
+  n11 --> n12
+  n13{"trusted"}:::decision
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
-  n11 -->|"no"| n14
+  n14["Llama a SecurityEventsRepository.record"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("CREA iam.security_events")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  n13 -->|"no"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2452,7 +2422,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /iam/users/{id}/global-roles
+#### 26. GET /iam/users/{id}/global-roles
 
 Roles globales del usuario
 
@@ -2496,7 +2466,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /iam/users/{id}/global-roles
+#### 27. POST /iam/users/{id}/global-roles
 
 Conceder o revocar un rol global
 
@@ -2578,7 +2548,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /iam/users/{id}/lock
+#### 28. POST /iam/users/{id}/lock
 
 Bloquear la cuenta y revocar sus sesiones
 
@@ -2640,7 +2610,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /iam/users/{id}/mfa-factors
+#### 29. GET /iam/users/{id}/mfa-factors
 
 Factores de MFA del usuario
 
@@ -2684,7 +2654,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /iam/users/{id}/mfa-factors
+#### 30. POST /iam/users/{id}/mfa-factors
 
 Enrolar o verificar un factor MFA
 
@@ -2783,7 +2753,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /iam/users/{id}/sessions
+#### 31. GET /iam/users/{id}/sessions
 
 Sesiones del usuario
 
@@ -2827,7 +2797,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /iam/users/assisted-practitioner-registration
+#### 32. POST /iam/users/assisted-practitioner-registration
 
 Alta administrativa de un profesional (devuelve token de activación)
 
@@ -2837,11 +2807,10 @@ Alta administrativa de un profesional (devuelve token de activación)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
 ```mermaid
 flowchart TD
@@ -2864,128 +2833,129 @@ flowchart TD
   n7 -->|"no"| n9
   n10["Intenta"]:::intento
   n9 --> n10
-  n11["Llama a FileUploadService.uploadAnonymous"]:::llamada
-  n10 --> n11
-  n12{"!file?.buffer?.byteLength"}:::decision
-  n11 --> n12
-  n13(["422 PRECONDITION_FAILED No se recibió contenido en el campo 'file'"]):::error
-  n12 -->|"sí"| n13
-  n14{"file.buffer.byteLength › this.maxSizeBytes"}:::decision
-  n12 -->|"no"| n14
-  n15(["422 PRECONDITION_FAILED El archivo excede el tamaño máximo permitido"]):::error
-  n14 -->|"sí"| n15
-  n16{"!detectedMimeType || !policy.allowedMimeTypes.includes(detectedMimeType)"}:::decision
-  n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED Solo se admiten documentos PDF"]):::error
+  n11{"err instanceof PreconditionFailedException"}:::decision
+  n10 -->|"si falla"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13["Transacción: transactional(…)"]:::transaccion
+  n10 --> n13
+  n11 -->|"no"| n13
+  n14["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n13 --> n14
+  n15[("LEE iam.authentication_credentials")]:::efecto
+  n14 --> n15
+  n16{"clash"}:::decision
+  n15 --> n16
+  n17(["409 CONFLICT Ya existe una cuenta con ese correo"]):::error
   n16 -->|"sí"| n17
-  n18{"loadStorageEnv().lifecycleBinding"}:::decision
+  n18["Llama a ProfilesRegistrationAdapter.findPractitionerByCode"]:::llamada
   n16 -->|"no"| n18
-  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n18 -->|"sí"| n19
-  n20{"err instanceof PreconditionFailedException"}:::decision
-  n10 -->|"si falla"| n20
-  n21(["↩ (relanza el error capturado)"]):::error
-  n20 -->|"sí"| n21
-  n22["Transacción: transactional(…)"]:::transaccion
-  n18 -->|"no"| n22
-  n20 -->|"no"| n22
-  n23["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
-  n22 --> n23
-  n24[("LEE iam.authentication_credentials")]:::efecto
+  n19["Llama a HealthPractitionerProfilesRepository.findByCode"]:::llamada
+  n18 --> n19
+  n20[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n19 --> n20
+  n21{"clashCode"}:::decision
+  n20 --> n21
+  n22(["409 CONFLICT El practitioner_code ya está en uso"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a IamPractitionerSelfRegistrationService.assertIssuerDepartment"]:::llamada
+  n21 -->|"no"| n23
+  n24{"conceptId === undefined"}:::decision
   n23 --> n24
-  n25{"clash"}:::decision
-  n24 --> n25
-  n26(["409 CONFLICT Ya existe una cuenta con ese correo"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a HealthPractitionerProfilesRepository.findByCode"]:::llamada
-  n25 -->|"no"| n27
-  n28[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n25(["422 PRECONDITION_FAILED El departamento emisor es obligatorio para el alta del profesional"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a UsersRepository.create"]:::llamada
+  n24 -->|"no"| n26
+  n27[("CREA iam.users")]:::efecto
+  n26 --> n27
+  n28{"assisted"}:::decision
   n27 --> n28
-  n29{"clashCode"}:::decision
-  n28 --> n29
-  n30(["409 CONFLICT El practitioner_code ya está en uso"]):::error
-  n29 -->|"sí"| n30
-  n31["Llama a IamPractitionerSelfRegistrationService.assertIssuerDepartment"]:::llamada
-  n29 -->|"no"| n31
-  n32{"conceptId === undefined"}:::decision
+  n29["Llama a CredentialsRepository.createPendingPassword"]:::llamada
+  n28 -->|"sí"| n29
+  n30[("CREA iam.authentication_credentials")]:::efecto
+  n29 --> n30
+  n31["Llama a CredentialsRepository.createPassword"]:::llamada
+  n28 -->|"no"| n31
+  n32[("CREA iam.authentication_credentials")]:::efecto
   n31 --> n32
-  n33(["422 PRECONDITION_FAILED El departamento emisor es obligatorio para el alta del profesional"]):::error
-  n32 -->|"sí"| n33
-  n34["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
-  n32 -->|"no"| n34
-  n35{"!members.has(conceptId)"}:::decision
+  n33["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n30 --> n33
+  n32 --> n33
+  n34[("CREA iam.user_global_roles")]:::efecto
+  n33 --> n34
+  n35["Llama a UserGlobalRolesRepository.create"]:::llamada
   n34 --> n35
-  n36(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n35 -->|"sí"| n36
-  n37["Llama a UsersRepository.create"]:::llamada
-  n35 -->|"no"| n37
-  n38[("CREA iam.users")]:::efecto
+  n36[("CREA iam.user_global_roles")]:::efecto
+  n35 --> n36
+  n37["Llama a ProfilesRegistrationAdapter.createPerson"]:::llamada
+  n36 --> n37
+  n38["Llama a PersonsRepository.create"]:::llamada
   n37 --> n38
-  n39{"assisted"}:::decision
+  n39[("CREA profiles.persons")]:::efecto
   n38 --> n39
-  n40["Llama a CredentialsRepository.createPendingPassword"]:::llamada
-  n39 -->|"sí"| n40
-  n41[("CREA iam.authentication_credentials")]:::efecto
+  n40["Llama a ProfilesRegistrationAdapter.createPersonProfile"]:::llamada
+  n39 --> n40
+  n41["Llama a PersonProfilesRepository.create"]:::llamada
   n40 --> n41
-  n42["Llama a CredentialsRepository.createPassword"]:::llamada
-  n39 -->|"no"| n42
-  n43[("CREA iam.authentication_credentials")]:::efecto
+  n42[("CREA profiles.person_profiles")]:::efecto
+  n41 --> n42
+  n43["Repite: por cada const fileId de [dto.signatureFileId, dto.sealFileId]"]:::bucle
   n42 --> n43
-  n44["Llama a UserGlobalRolesRepository.create"]:::llamada
-  n41 --> n44
-  n43 --> n44
-  n45[("CREA iam.user_global_roles")]:::efecto
+  n44["Llama a CommonRegistrationFilesAdapter.claimAnonymousUpload"]:::llamada
+  n43 -->|"cada elemento"| n44
+  n45["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
   n44 --> n45
-  n46["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n46{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
   n45 --> n46
-  n47[("CREA iam.user_global_roles")]:::efecto
-  n46 --> n47
-  n48["Llama a IamPractitionerSelfRegistrationService.claimProfilePhoto"]:::llamada
-  n47 --> n48
-  n49["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
-  n48 --> n49
-  n50{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
-  n49 --> n50
-  n51(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n47(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n46 -->|"sí"| n47
+  n48{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n46 -->|"no"| n48
+  n49(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
+  n48 -->|"sí"| n49
+  n50{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
+  n48 -->|"no"| n50
+  n51(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
   n50 -->|"sí"| n51
-  n52{"!file || // `!= null` a propósito: MikroORM hidrata una FK nullable sin valor // como `null` (verificado cont…"}:::decision
+  n52[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
   n50 -->|"no"| n52
-  n53(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n52 -->|"sí"| n53
-  n54{"options.allowedCategoryConceptId && file.categoryConceptId !== options.allowedCategoryConceptId"}:::decision
-  n52 -->|"no"| n54
-  n55(["422 PRECONDITION_FAILED {labels.subject} no corresponde a un archivo subido en este registro"]):::error
-  n54 -->|"sí"| n55
-  n56[("ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files · ACTUALIZA common.files")]:::efecto
-  n54 -->|"no"| n56
-  n57["Llama a PersonsRepository.create"]:::llamada
+  n53{"file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI || BigInt(version.sizeBytes) › BigInt(2 * 1024 * 1024)"}:::decision
+  n52 --> n53
+  n54(["422 PRECONDITION_FAILED La firma y el sello requieren una imagen privada de hasta 2 MB"]):::error
+  n53 -->|"sí"| n54
+  n55["Llama a ProfilesRegistrationAdapter.createPractitionerProfile"]:::llamada
+  n53 -->|"no"| n55
+  n43 -->|"al terminar"| n55
+  n56["Llama a HealthPractitionerProfilesRepository.create"]:::llamada
+  n55 --> n56
+  n57[("CREA profiles.health_practitioner_profiles")]:::efecto
   n56 --> n57
-  n58[("CREA profiles.persons")]:::efecto
+  n58["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
   n57 --> n58
-  n59["Llama a PersonProfilesRepository.create"]:::llamada
+  n59["Llama a JurisdictionAuthorizationsRepository.create"]:::llamada
   n58 --> n59
-  n60[("CREA profiles.person_profiles")]:::efecto
+  n60[("CREA profiles.jurisdiction_authorizations")]:::efecto
   n59 --> n60
-  n61["Repite: por cada const fileId de [dto.signatureFileId, dto.sealFileId]"]:::bucle
+  n61["Llama a ProfilesRegistrationAdapter.createJurisdictionAuthorization"]:::llamada
   n60 --> n61
-  n62["Llama a AttachableFileService.claimAnonymousUpload"]:::llamada
-  n61 -->|"cada elemento"| n62
-  n63{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
+  n62["Llama a JurisdictionAuthorizationsRepository.create"]:::llamada
+  n61 --> n62
+  n63[("CREA profiles.jurisdiction_authorizations")]:::efecto
   n62 --> n63
-  n64(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n63 -->|"sí"| n64
-  n65["Llama a StoragePublicationService.guardFile"]:::llamada
-  n63 -->|"no"| n65
-  n66[("LEE common.files")]:::efecto
+  n64["Llama a ProfilesRegistrationAdapter.createProfessionalCredential"]:::llamada
+  n63 --> n64
+  n65["Llama a ProfessionalCredentialsRepository.create"]:::llamada
+  n64 --> n65
+  n66[("CREA profiles.professional_credentials")]:::efecto
   n65 --> n66
-  n67{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
+  n67["Repite: por cada const declared de dto.credentials ?? []"]:::bucle
   n66 --> n67
-  n68(["500 INTERNAL FILE_NOT_LIVE"]):::error
-  n67 -->|"sí"| n68
-  n69[("LEE common.file_versions")]:::efecto
-  n67 -->|"no"| n69
-  n70{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
-  n69 --> n70
+  n68{"!CREDENTIAL_TYPES.includes(declared.credentialTypeConceptId)"}:::decision
+  n67 -->|"cada elemento"| n68
+  n69(["422 PRECONDITION_FAILED Ese concepto no es un tipo de credencial profesional"]):::error
+  n68 -->|"sí"| n69
+  n70{"registrationNumber === ''"}:::decision
+  n68 -->|"no"| n70
   n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
   n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
@@ -2996,7 +2966,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /iam/users/assisted-registration
+#### 33. POST /iam/users/assisted-registration
 
 Registro asistido de un paciente (devuelve token de activación)
 
@@ -3038,32 +3008,40 @@ flowchart TD
   n12 --> n13
   n14[("CREA iam.user_global_roles")]:::efecto
   n13 --> n14
-  n15["Llama a PersonsRepository.create"]:::llamada
+  n15["Llama a ProfilesRegistrationAdapter.createPerson"]:::llamada
   n14 --> n15
-  n16[("CREA profiles.persons")]:::efecto
+  n16["Llama a PersonsRepository.create"]:::llamada
   n15 --> n16
-  n17["Llama a PersonProfilesRepository.create"]:::llamada
+  n17[("CREA profiles.persons")]:::efecto
   n16 --> n17
-  n18[("CREA profiles.person_profiles")]:::efecto
+  n18["Llama a ProfilesRegistrationAdapter.createPersonProfile"]:::llamada
   n17 --> n18
-  n19["Llama a PatientProfilesRepository.create"]:::llamada
+  n19["Llama a PersonProfilesRepository.create"]:::llamada
   n18 --> n19
-  n20[("CREA profiles.patient_profiles")]:::efecto
+  n20[("CREA profiles.person_profiles")]:::efecto
   n19 --> n20
-  n21["Llama a PersonAccountLinksRepository.create"]:::llamada
+  n21["Llama a ProfilesRegistrationAdapter.createPatientProfile"]:::llamada
   n20 --> n21
-  n22[("CREA profiles.person_account_links")]:::efecto
+  n22["Llama a PatientProfilesRepository.create"]:::llamada
   n21 --> n22
-  n23["Llama a AccountActivationsRepository.create"]:::llamada
+  n23[("CREA profiles.patient_profiles")]:::efecto
   n22 --> n23
-  n24[("CREA iam.account_activations")]:::efecto
+  n24["Llama a ProfilesRegistrationAdapter.createAccountLink"]:::llamada
   n23 --> n24
-  n25["Llama a SecurityEventsRepository.record"]:::llamada
+  n25["Llama a PersonAccountLinksRepository.create"]:::llamada
   n24 --> n25
-  n26[("CREA iam.security_events")]:::efecto
+  n26[("CREA profiles.person_account_links")]:::efecto
   n25 --> n26
-  n27(("201 Responde con éxito")):::ok
+  n27["Llama a AccountActivationsRepository.create"]:::llamada
   n26 --> n27
+  n28[("CREA iam.account_activations")]:::efecto
+  n27 --> n28
+  n29["Llama a SecurityEventsRepository.record"]:::llamada
+  n28 --> n29
+  n30[("CREA iam.security_events")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -54,17 +54,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DICOM_VIEWER, CLINICIAN, STORAGE_ADMIN | `src/modules/object_storage/controllers/dicomweb.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findInstanceByUid | `src/modules/object_storage/repositories/dicom.repository.ts:318` |
-| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findSeriesByUid | `src/modules/object_storage/repositories/dicom.repository.ts:230` |
+| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findInstanceByUid | `src/modules/object_storage/repositories/dicom.repository.ts:336` |
+| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findSeriesByUid | `src/modules/object_storage/repositories/dicom.repository.ts:248` |
 | `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findStudyByUid | `src/modules/object_storage/repositories/dicom.repository.ts:113` |
-| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:424` |
+| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:442` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
 
 ### Parámetros
@@ -138,10 +138,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:320` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -256,22 +256,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PACS_GATEWAY, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `diagnostics.imaging_studies` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomCatalogService.assertClinicalReferences → DicomRepository.imagingStudyInScope | `src/modules/object_storage/repositories/dicom.repository.ts:136` |
-| `object_storage.dicom_instance_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.createInstance | `src/modules/object_storage/repositories/dicom.repository.ts:296` |
-| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.findInstanceByUid | `src/modules/object_storage/repositories/dicom.repository.ts:318` |
-| `object_storage.dicom_series_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy | `src/modules/object_storage/services/dicom-catalog.service.ts:167` |
-| `object_storage.dicom_series_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.createSeries | `src/modules/object_storage/repositories/dicom.repository.ts:182` |
-| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.findSeriesByUidForUpdate | `src/modules/object_storage/repositories/dicom.repository.ts:210` |
-| `object_storage.dicom_study_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy | `src/modules/object_storage/services/dicom-catalog.service.ts:172` |
+| `object_storage.dicom_instance_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.createInstance | `src/modules/object_storage/repositories/dicom.repository.ts:314` |
+| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.findInstanceByUid | `src/modules/object_storage/repositories/dicom.repository.ts:336` |
+| `object_storage.dicom_series_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy | `src/modules/object_storage/services/dicom-catalog.service.ts:169` |
+| `object_storage.dicom_series_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.createSeries | `src/modules/object_storage/repositories/dicom.repository.ts:200` |
+| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.findSeriesByUidForUpdate | `src/modules/object_storage/repositories/dicom.repository.ts:228` |
+| `object_storage.dicom_study_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy | `src/modules/object_storage/services/dicom-catalog.service.ts:174` |
 | `object_storage.dicom_study_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.createStudy | `src/modules/object_storage/repositories/dicom.repository.ts:65` |
 | `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomRepository.findStudyByUidForUpdate | `src/modules/object_storage/repositories/dicom.repository.ts:92` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.catalogDicomStudy → DicomCatalogService.catalogStudy → DicomCatalogService.requireManifestInTenant → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
@@ -417,10 +417,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -530,10 +530,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -644,11 +644,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:339` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:339` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -757,11 +757,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:119` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -905,11 +905,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/object_storage/controllers/object-storage.controller.ts:99` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1062,9 +1062,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:273` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:273` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1073,10 +1073,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:360` |
-| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:364` |
-| `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:368` |
-| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:424` |
+| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:378` |
+| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:382` |
+| `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:386` |
+| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:442` |
 | `object_storage.object_checksums` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:435` |
 | `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findPrimaryLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:580` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
@@ -1152,11 +1152,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:299` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1263,11 +1263,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:199` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:199` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1369,9 +1369,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId, holdId | `src/modules/object_storage/controllers/object-storage.controller.ts:220` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1457,11 +1457,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:178` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1571,11 +1571,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:242` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:242` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1584,10 +1584,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:360` |
-| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:364` |
-| `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:368` |
-| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:424` |
+| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:378` |
+| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:382` |
+| `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:386` |
+| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:442` |
 | `object_storage.object_checksums` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:435` |
 | `object_storage.object_encryption_envelopes` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageRepository.findEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:501` |
 | `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findPrimaryLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:580` |

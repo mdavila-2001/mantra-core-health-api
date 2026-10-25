@@ -817,6 +817,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Curar un mapeo exige un rol de terminología | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
 | 404 | `NOT_FOUND` | Concepto origen no encontrado | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
 | 404 | `NOT_FOUND` | Concepto destino no encontrado | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |
 | 404 | `NOT_FOUND` | El mapeo dejó de existir durante el curado | Excepción explícita en src/modules/terminology/services/concept-maps.service.ts |

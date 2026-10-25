@@ -61,9 +61,9 @@ import type { ProcedureCases } from '../entities';
 import { PERIOP } from '../procedures_perioperative.concepts';
 import {
   assertCaseInScope,
+  assertProcedureOfCasePatient,
   loadCaseForUpdateInScope,
   periopCaseNotFound,
-  assertProcedureOfCasePatient,
 } from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
@@ -270,17 +270,14 @@ export class PeriopCasesService {
     const custodianTenantId = requireTenantId();
 
     return this.em.transactional(async (tx) => {
-      // El id del procedimiento viene del cliente: tiene que ser del paciente
-      // del caso y de este tenant antes de enlazarlo.
+      // El procedimiento principal lo manda el cliente: se cruza con el paciente
+      // del caso y el tenant antes de enlazarlo (404 uniforme si no es suyo).
       if (dto.primaryProcedureId) {
         await assertProcedureOfCasePatient(
           this.casesRepo,
           tx,
           dto.primaryProcedureId,
-          {
-            patientProfileId: dto.patientProfileId,
-            custodianTenantId,
-          },
+          dto.patientProfileId,
         );
       }
       const overlapping = await this.casesRepo.findOverlappingCases(

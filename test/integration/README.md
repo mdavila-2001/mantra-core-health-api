@@ -9,6 +9,20 @@ yarn test:integration --ci --runInBand
 
 Requiere los servicios locales de `docker-compose.yml`, pero no descarga
 catálogos masivos, no llama proveedores reales y no aplica RLS por defecto.
+
+Requiere además `dist/` compilado (`yarn build`): las globs de entidades de
+`buildOrmConfig()` apuntan a `dist/`, y con `dist/` vacío MikroORM no descubre
+ninguna (`lane16-patient-invoice-flow`, que inicia el ORM por su cuenta, no
+encuentra con qué probar).
+
+Las suites que llaman a `bootstrapTestApp({ reset: true })`
+(`patient-coverage-copays` y el smoke) vacían los esquemas
+de negocio de la base indicada: exigen `ALLOW_DESTRUCTIVE_DB_RESET=yes`, un host
+local o de `TEST_DB_ALLOWED_HOSTS` y un `DB_NAME` descartable (`test`, `smoke`,
+`ci`, `tmp`, `scratch` o `disposable` como palabra). Sin las tres condiciones se
+niegan antes de enviar un solo `TRUNCATE`; el detalle está en
+[`disposable-database.ts`](./disposable-database.ts) y en el
+[README del smoke](../smoke/README.md).
 `harness.ts` firma un token `SUPERADMIN` con el tenant seed determinista; los
 tests fail-closed disponen además de un token intencionalmente sin membresías.
 

@@ -3846,17 +3846,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "x-onboarding-draft-secret",
+            "required": false,
+            "in": "header",
+            "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "El borrador guardado."
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
           "404": {
-            "$ref": "#/components/responses/NotFound"
+            "description": "Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en todos los casos)."
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
@@ -3876,6 +3885,7 @@
         "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "put": {
+        "description": "Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; una segunda escritura con el secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a 30 días. Con el almacén lleno, el origen sólo puede desalojar su propio borrador no confirmado; si no tiene, 503 con Retry-After.",
         "operationId": "IamOnboardingDraftsController_saveDraft",
         "parameters": [
           {
@@ -3893,17 +3903,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "x-onboarding-draft-secret",
+            "required": false,
+            "in": "header",
+            "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "`{ ok, savedAt }`; al crear el borrador agrega `draftSecret`, que no se vuelve a mostrar."
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
           "404": {
-            "$ref": "#/components/responses/NotFound"
+            "description": "Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en todos los casos)."
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
@@ -3925,8 +3944,7 @@
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "security": [],
-        "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": []
       },
       "delete": {
         "operationId": "IamOnboardingDraftsController_deleteDraft",
@@ -3946,17 +3964,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "x-onboarding-draft-secret",
+            "required": false,
+            "in": "header",
+            "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "`{ ok: true }`."
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
           "404": {
-            "$ref": "#/components/responses/NotFound"
+            "description": "Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en todos los casos)."
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
@@ -38045,6 +38072,57 @@
           }
         ],
         "summary": "Dar de alta un servicio en el catálogo maestro",
+        "tags": [
+          "billing-service-catalog"
+        ]
+      }
+    },
+    "/billing/service-catalog/{id}/image": {
+      "get": {
+        "description": "Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.",
+        "operationId": "BillingServiceCatalogController_getImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Descargar la imagen de un servicio que el actor puede ver",
         "tags": [
           "billing-service-catalog"
         ]

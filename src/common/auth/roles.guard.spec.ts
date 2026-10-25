@@ -36,6 +36,22 @@ describe('RolesGuard', () => {
     ).toBe(true);
   });
 
+  it('un SUPERADMIN acotado a un tenant (scopedRoles) no es comodín', () => {
+    const { guard } = build(['STORAGE_ADMIN']);
+    expect(() =>
+      guard.canActivate(
+        contextFor(
+          {
+            id: 'u1',
+            roles: ['SUPERADMIN'],
+            scopedRoles: { t1: ['SUPERADMIN'] },
+          } as AuthenticatedUser,
+          't1',
+        ),
+      ),
+    ).toThrow(ForbiddenException);
+  });
+
   it('SUPERADMIN pasa cualquier chequeo de rol', () => {
     const { guard } = build(['STORAGE_ADMIN']);
     expect(

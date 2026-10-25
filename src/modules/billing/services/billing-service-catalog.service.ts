@@ -13,7 +13,13 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { BillingErrorReason } from '../billing.error-reasons';
+import {
+  AttachableFileService,
+  FileUploadService,
+} from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { PractitionerRoleAssignments } from '../../practice/entities';
 import { PRAC } from '../../practice/practice.concepts';
@@ -36,6 +42,18 @@ const DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS = 30;
 
 /** Tope de servicios por página cuando el cliente no pide uno. */
 const DEFAULT_PAGE_SIZE = 50;
+
+/**
+ * Lo que puede servir la ruta de imagen de un servicio: una imagen de la
+ * categoría «imagen» y de tipo web. Es lo que impide que un `imageFileId`
+ * apuntado a otro archivo (evidencia de identidad, un PDF clínico) se
+ * convierta en una descarga por esta ruta.
+ */
+const SERVICE_IMAGE_OPTIONS = {
+  allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+  operation: 'billing.service-catalog.image',
+} as const;
 
 /**
  * Sigla de las monedas globales, por concepto.
@@ -70,6 +88,8 @@ export class BillingServiceCatalogService {
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly templatesRepo: TemplatesRepository,
     private readonly assignmentsRepo: AssignmentsRepository,
+    private readonly attachableFiles: AttachableFileService,
+    private readonly fileUpload: FileUploadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BillingServiceCatalogService.name);
@@ -129,6 +149,99 @@ export class BillingServiceCatalogService {
   }
 
   /**
+   * Bytes de la imagen de un servicio, para quien puede ver ese servicio
+   * (decisión P-22-8, opción 1).
+   *
+   * `common.files` solo entrega un archivo a quien lo subió o a un rol de
+   * revisión (`canActorReadOwnFile`), así que un paciente que consulta el
+   * servicio recibiría 403. La política global de archivos no se abre: esta
+   * ruta autoriza **por contexto**, que es el patrón de chat y de community.
+   *
+   * «Puede ver el servicio» significa, acá y sin más: sesión autenticada con
+   * tenant verificado, servicio **activo** y la práctica que lo ofrece
+   * pertenece a ese tenant. El tenant sale de `requireTenantId()`, nunca del
+   * cliente. Un servicio inactivo, ajeno o inexistente responde el mismo 404;
+   * también el que no tiene imagen, o cuyo archivo no es una imagen de
+   * sensibilidad normal con versión vigente utilizable, para no decirle a
+   * quien prueba uuids cuáles existen.
+   *
+   * No hay variante anónima: el catálogo público sigue sin exponer
+   * `image_file_id` (opción 2, no elegida).
+   *
+   * @param id - Servicio del catálogo (`billing.service_catalog.id`).
+   * @returns Bytes y tipo MIME de la imagen.
+   * @throws ResourceNotFoundException (404 uniforme) en cualquier caso en que el actor no deba verla.
+   */
+  async getImageContent(id: string): Promise<FileContentDto> {
+    const tenantId = requireTenantId();
+    const notVisible = {
+      message: 'Imagen no encontrada',
+      reason: BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_VISIBLE,
+    };
+    const em = this.em.fork();
+    const item = await this.serviceCatalogRepo.findById(em, id);
+    const practiceTenantId = item
+      ? await this.practiceTenantLookup.findTenantOfPractice(item.practiceId)
+      : null;
+    // Lanza el 404 uniforme si el servicio no existe o su práctica es ajena.
+    const visible = assertResourceInTenant(
+      item,
+      practiceTenantId,
+      tenantId,
+      notVisible,
+    );
+    const imageFileId = visible.isActive ? visible.imageFileId : undefined;
+    if (!imageFileId) {
+      throw new ResourceNotFoundException(
+        notVisible.message,
+        undefined,
+        notVisible.reason,
+      );
+    }
+
+    try {
+      const { file } =
+        await this.attachableFiles.assertUsableForAuthorizedContext(
+          em,
+          imageFileId,
+          SERVICE_IMAGE_OPTIONS,
+        );
+      // Pertenencia: el `imageFileId` guardado no prueba que el archivo sea de
+      // esta organización (el alta lo aceptaba sin validar). Un archivo de otro
+      // tenant no se sirve aunque el servicio ya lo apunte.
+      if (
+        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+        file.tenantId === tenantId
+      ) {
+        const content = await this.fileUpload.downloadForAuthorizedContext(
+          imageFileId,
+          SERVICE_IMAGE_OPTIONS.operation,
+        );
+        // Se valida una versión y se descarga la vigente: se vuelve a comprobar
+        // sobre lo que de verdad se va a enviar.
+        const allowed: readonly string[] =
+          SERVICE_IMAGE_OPTIONS.allowedMimeTypes;
+        if (allowed.includes(content.mimeType)) {
+          return content;
+        }
+      }
+    } catch {
+      // Archivo inexistente, borrado, infectado o de otro tipo: para quien
+      // pregunta es lo mismo que «el servicio no tiene imagen». Los detalles
+      // (el uuid del archivo) no salen en la respuesta.
+    }
+    this.logger.warn(
+      { operation: SERVICE_IMAGE_OPTIONS.operation, serviceCatalogId: id },
+      'Service image is not servable',
+    );
+    throw new ResourceNotFoundException(
+      notVisible.message,
+      undefined,
+      notVisible.reason,
+    );
+  }
+
+  /**
    * Crea un servicio nuevo en el catálogo maestro.
    *
    * @param dto - Datos validados de la operación.
@@ -150,6 +263,9 @@ export class BillingServiceCatalogService {
       'Creating service catalog item',
     );
     await this.assertRegistrationCanRegister(actor, dto.practiceId);
+    if (dto.imageFileId !== undefined) {
+      await this.assertImageUsable(dto.imageFileId, actor);
+    }
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -191,6 +307,45 @@ export class BillingServiceCatalogService {
       );
       return toItemDto(item);
     });
+  }
+
+  /**
+   * Exige que el archivo que se quiere poner como imagen del servicio sea del
+   * actor, de su organización, una imagen de sensibilidad normal y utilizable.
+   *
+   * Es la misma regla que aplica el logo de la organización
+   * (`assertUsableBy`: propio, vivo, con versión vigente sin infectar y del tipo
+   * admitido) más la sensibilidad y el tenant. Sin esto, `imageFileId` apuntaba a
+   * cualquier uuid y la ruta de imagen lo habría servido a toda la organización.
+   * Cualquier incumplimiento —archivo inexistente, ajeno, de otro tenant o de
+   * otro tipo— responde el mismo 404, para no confirmar qué uuids existen.
+   */
+  private async assertImageUsable(
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const tenantId = requireTenantId();
+    try {
+      const { file } = await this.attachableFiles.assertUsableBy(
+        this.em.fork(),
+        fileId,
+        actor,
+        SERVICE_IMAGE_OPTIONS,
+      );
+      if (
+        file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL &&
+        file.tenantId === tenantId
+      ) {
+        return;
+      }
+    } catch {
+      // Se uniforma abajo: el motivo concreto no sale en la respuesta.
+    }
+    throw new ResourceNotFoundException(
+      'Imagen no encontrada',
+      undefined,
+      BillingErrorReason.SERVICE_CATALOG_IMAGE_NOT_USABLE,
+    );
   }
 
   /**

@@ -14,9 +14,9 @@
 | [branches](#branches) | Identifica sedes de una organización sanitaria para ubicar prestación, operación y configuración local. | 14 | 7 | 11 | DIVERGE |
 | [tenant_affiliation_documents](#tenant_affiliation_documents) | Conserva documentos que respaldan afiliaciones de tenants con organizaciones o redes del sistema médico. | 23 | 8 | 3 | COINCIDE |
 | [tenant_legal_representatives](#tenant_legal_representatives) | Identifica representantes legales asociados a organizaciones para sostener trámites y responsabilidades institucionales. | 16 | 4 | 3 | COINCIDE |
-| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 15 | 10 | 114 | COINCIDE |
+| [tenant_memberships](#tenant_memberships) | Relaciona usuarios o perfiles con una organización para delimitar pertenencia y acceso institucional. | 15 | 10 | 129 | COINCIDE |
 | [tenant_web_configs](#tenant_web_configs) | Almacena configuración web por tenant para presentar y dirigir servicios institucionales bajo sus dominios. | 18 | 3 | 0 | COINCIDE |
-| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 46 | COINCIDE |
+| [tenants](#tenants) | Representa organizaciones o espacios administrativos aislados que operan dentro del sistema médico multi-tenant. | 19 | 13 | 51 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -470,7 +470,7 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenant_memberships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `TenantMemberships` — `src/modules/directory/entities/tenant_memberships.entity.ts`
-- **Resumen:** 15 columnas · 10 índices · 9 FK salientes · 2 entrantes · 114 operaciones
+- **Resumen:** 15 columnas · 10 índices · 9 FK salientes · 2 entrantes · 129 operaciones
 
 #### Columnas
 
@@ -596,11 +596,11 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /internal/identity/checks/dispatchable | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | DIRECTA |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | DIRECTA |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | DIRECTA |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | DIRECTA |
+| GET /insurance-campaigns | LEE | DIRECTA |
+| POST /insurance-campaigns | LEE | DIRECTA |
+| GET /insurance-campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance-campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance-campaigns/{id}/status | LEE | DIRECTA |
 | GET /insurance-carriers | LEE | DIRECTA |
 | GET /insurance-carriers/{id} | LEE | DIRECTA |
 | PUT /insurance-carriers/{id}/contact-channels | LEE | DIRECTA |
@@ -614,6 +614,11 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | PUT /insurance-plans/{planId}/premium | LEE | DIRECTA |
 | POST /insurance-products/{productId}/plans | LEE | DIRECTA |
 | GET /insurance/analytics/loss-ratio | LEE | DIRECTA |
+| GET /insurance/campaigns | LEE | DIRECTA |
+| POST /insurance/campaigns | LEE | DIRECTA |
+| GET /insurance/campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance/campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance/campaigns/{id}/status | LEE | DIRECTA |
 | POST /insurance/patients/conversation | LEE | DIRECTA |
 | GET /insurance/patients/options | LEE | DIRECTA |
 | POST /insurance/patients/search | LEE | DIRECTA |
@@ -630,6 +635,16 @@ Relaciona usuarios o perfiles con una organización para delimitar pertenencia y
 | GET /pharmacy/pharmacies/{id}/licenses | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/summary | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
+| POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
+| PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | DIRECTA |
+| GET /practices/{practiceId}/role-assignments | LEE | DIRECTA |
+| POST /practices/{practiceId}/role-assignments/invitations | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/approve | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/end | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/reject | LEE | DIRECTA |
+| POST /role-assignments/{roleId}/suspend | LEE | DIRECTA |
+| POST /tenants/{tenantId}/practices | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /tenants/{tenantId}/practitioner-requests | LEE | DIRECTA |
@@ -741,7 +756,7 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_04_directory.puml: tenants`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_04_directory.puml` · **DDL:** `SQL/04_directory/02_tables.sql`
 - **Entidad del ORM:** `Tenants` — `src/modules/directory/entities/tenants.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 299 entrantes · 46 operaciones
+- **Resumen:** 19 columnas · 13 índices · 11 FK salientes · 299 entrantes · 51 operaciones
 
 #### Columnas
 
@@ -1153,9 +1168,14 @@ Representa organizaciones o espacios administrativos aislados que operan dentro 
 | POST /insurance/portability/export | LEE | POR_SQL |
 | POST /pharma-labs | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
+| POST /tenants/{tenantId}/practices | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 | POST /admin/governance/tenant-residency-bindings | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
+| POST /ts/admin/compression/run | LEE | DIRECTA |
+| POST /ts/admin/retention/policies | LEE | DIRECTA |
+| POST /ts/admin/rollups/{name}/refresh | LEE | DIRECTA |
+| POST /ts/admin/rollups/audit-daily/refresh | LEE | DIRECTA |
 
 #### Gobierno
 

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD, DiscoveryModule } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
@@ -22,7 +22,7 @@ import { CatalogGovernanceService } from '../../src/modules/data_catalog/service
 import { CatalogReadService } from '../../src/modules/data_catalog/services/catalog-read.service';
 import { CatalogScanService } from '../../src/modules/data_catalog/services/catalog-scan.service';
 import { PermissionDriftService } from '../../src/modules/data_catalog/services/permission-drift.service';
-import { RouteMetadataService } from '../../src/observability/route-index/route-metadata.service';
+import { RouteIndexModule } from '../../src/observability/route-index/route-index.module';
 import { TracingService } from '../../src/observability';
 
 /**
@@ -117,7 +117,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
     await sql(`create table public.${tabla} (id int primary key, ref int)`);
 
     const modulo = await Test.createTestingModule({
-      imports: [PassportModule, AuthTokenModule, DiscoveryModule],
+      imports: [PassportModule, AuthTokenModule, RouteIndexModule],
       controllers: [AdminCatalogController],
       providers: [
         { provide: EntityManager, useValue: orm.em },
@@ -126,7 +126,6 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
         CatalogGovernanceService,
         CatalogClassificationService,
         CatalogScanService,
-        RouteMetadataService,
         PermissionDriftService,
         JwtStrategy,
         // Lo que se prueba es el catálogo, no la sesión: se da por activa.

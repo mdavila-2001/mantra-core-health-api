@@ -125,33 +125,51 @@ export async function isCaseInScope(
 }
 
 /**
- * Exige que un procedimiento que mandó el cliente sea del paciente y del tenant
- * custodio del caso. Sin esto, el id de un procedimiento de otro paciente quedaría
- * enlazado al caso.
+ * Cómo informa el módulo «el procedimiento no existe para el paciente del caso».
+ *
+ * Un procedimiento de otro paciente o de otro tenant responde con **exactamente**
+ * esto, igual que uno inexistente: sin `details` y con el mismo `reason`.
+ */
+export const PERIOP_PROCEDURE_NOT_FOUND: ResourceScopeFailure = {
+  message: 'Procedimiento no encontrado para el paciente del caso',
+  reason:
+    ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+};
+
+/**
+ * Exige que un id de procedimiento que manda el cliente exista y sea del
+ * paciente del caso y del tenant activo. Sin esto, el id de un procedimiento de
+ * otro paciente quedaría enlazado al caso.
+ *
+ * El paciente sale del caso (o del cuerpo, al programarlo) y el tenant del
+ * contexto verificado: ninguno se toma del procedimiento que se está probando.
  *
  * @param casesRepo - Repositorio de casos.
  * @param tx - Transacción activa.
- * @param procedureId - Procedimiento pedido por el cliente.
- * @param owner - Paciente y tenant custodio del caso.
+ * @param procedureId - Procedimiento citado por el cliente.
+ * @param patientProfileId - Paciente del caso quirúrgico.
+ * @throws PreconditionFailedException si la petición no tiene tenant activo.
  * @throws ResourceNotFoundException (`PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT`) si no existe, es de otro paciente o de otro tenant.
  */
 export async function assertProcedureOfCasePatient(
   casesRepo: PeriopCasesRepository,
   tx: EntityManager,
   procedureId: string,
-  owner: { patientProfileId: string; custodianTenantId: string },
+  patientProfileId: string,
 ): Promise<void> {
+  const tenantId = requireTenantId();
   const procedure = await casesRepo.findProcedureOfPatient(
     tx,
     procedureId,
-    owner.patientProfileId,
-    owner.custodianTenantId,
+    patientProfileId,
+    tenantId,
   );
-  if (!procedure) {
-    throw new ResourceNotFoundException(
-      'Procedimiento no encontrado para el paciente del caso',
-      undefined,
-      ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
-    );
-  }
+  // Se vuelve a comprobar sobre lo cargado: el filtro de la consulta no es la
+  // única barrera, y el paciente ajeno responde igual que el tenant ajeno.
+  assertResourceInTenant(
+    procedure?.patientProfileId === patientProfileId ? procedure : null,
+    procedure?.custodianTenantId,
+    tenantId,
+    PERIOP_PROCEDURE_NOT_FOUND,
+  );
 }

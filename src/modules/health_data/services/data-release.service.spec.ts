@@ -859,6 +859,32 @@ describe('DataReleaseService', () => {
       expect(d.releaseRepo.createExportJob).not.toHaveBeenCalled();
     });
 
+    it('HD-03: el archivo del manifiesto de exportación de otro tenant responde como inexistente y no deja salida', async () => {
+      const d = build();
+      d.db.files[MANIFEST_FILE] = {
+        id: MANIFEST_FILE,
+        tenantId: OTHER_TENANT,
+      };
+      await expectNotAvailable(
+        d.service.exportBundle({ ...exportDto, fileId: MANIFEST_FILE }, actor),
+        HealthDataErrorReason.FILE_NOT_AVAILABLE,
+      );
+      expect(d.releaseRepo.createExportJob).not.toHaveBeenCalled();
+      expect(d.releaseRepo.createExportManifest).not.toHaveBeenCalled();
+      expect(d.provenanceRepo.createProvenanceRecord).not.toHaveBeenCalled();
+
+      // El del tenant se acepta y queda en el manifiesto.
+      d.db.files[MANIFEST_FILE] = { id: MANIFEST_FILE, tenantId: TENANT };
+      await d.service.exportBundle(
+        { ...exportDto, fileId: MANIFEST_FILE },
+        actor,
+      );
+      expect(d.releaseRepo.createExportManifest).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ fileId: MANIFEST_FILE }),
+      );
+    });
+
     it('HD-03: una cohorte cuyo perfil es de otro tenant responde como inexistente', async () => {
       const d = build();
       d.db.cohort = { id: COHORT, deidentificationProfileId: PROFILE };

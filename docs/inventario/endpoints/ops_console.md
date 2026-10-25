@@ -31,7 +31,7 @@
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.backups` — `src/modules/ops_console/ops-console.controller.ts:153`
+- **Implementación:** `OpsConsoleController.backups` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:81`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -41,23 +41,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/backups` la atiende `OpsConsoleController.backups` (src/modules/ops_console/ops-console.controller.ts:153). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listBackups`. Lee system_ops.backup_policies, system_ops.restore_test_runs.
+`GET /admin/ops/backups` la atiende `OpsConsoleController.backups` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:81). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listBackups`. Lee system_ops.backup_policies, system_ops.restore_test_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:81` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `system_ops.backup_policies` | LEE | LEE | POR_SQL | OpsConsoleController.backups → OpsConsoleService.listBackups → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/ops-console.repository.ts:193` |
-| `system_ops.restore_test_runs` | LEE | LEE | POR_SQL | OpsConsoleController.backups → OpsConsoleService.listBackups → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/ops-console.repository.ts:193` |
+| `system_ops.backup_policies` | LEE | LEE | POR_SQL | OpsConsoleController.backups → OpsConsoleService.listBackups → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:193` |
+| `system_ops.restore_test_runs` | LEE | LEE | POR_SQL | OpsConsoleController.backups → OpsConsoleService.listBackups → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:193` |
 
 ### Cuerpo
 
@@ -95,7 +95,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.changeRequests` — `src/modules/ops_console/ops-console.controller.ts:137`
+- **Implementación:** `OpsConsoleController.changeRequests` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:65`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -105,22 +105,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/change-requests` la atiende `OpsConsoleController.changeRequests` (src/modules/ops_console/ops-console.controller.ts:137). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listChangeRequests`. Lee platform_ops.change_requests.
+`GET /admin/ops/change-requests` la atiende `OpsConsoleController.changeRequests` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:65). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listChangeRequests`. Lee platform_ops.change_requests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:65` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `platform_ops.change_requests` | LEE | LEE | POR_SQL | OpsConsoleController.changeRequests → OpsConsoleService.listChangeRequests → OpsConsoleRepository.listChangeRequests | `src/modules/ops_console/ops-console.repository.ts:138` |
+| `platform_ops.change_requests` | LEE | LEE | POR_SQL | OpsConsoleController.changeRequests → OpsConsoleService.listChangeRequests → OpsConsoleRepository.listChangeRequests | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:138` |
 
 ### Parámetros
 
@@ -164,7 +164,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.deployments` — `src/modules/ops_console/ops-console.controller.ts:130`
+- **Implementación:** `OpsConsoleController.deployments` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:58`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -174,23 +174,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/deployments` la atiende `OpsConsoleController.deployments` (src/modules/ops_console/ops-console.controller.ts:130). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listDeployments`. Lee platform_ops.deployments, platform_ops.service_components.
+`GET /admin/ops/deployments` la atiende `OpsConsoleController.deployments` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:58). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listDeployments`. Lee platform_ops.deployments, platform_ops.service_components.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:130` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:58` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `platform_ops.deployments` | LEE | LEE | POR_SQL | OpsConsoleController.deployments → OpsConsoleService.listDeployments → OpsConsoleRepository.listDeployments | `src/modules/ops_console/ops-console.repository.ts:117` |
-| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.deployments → OpsConsoleService.listDeployments → OpsConsoleRepository.listDeployments | `src/modules/ops_console/ops-console.repository.ts:117` |
+| `platform_ops.deployments` | LEE | LEE | POR_SQL | OpsConsoleController.deployments → OpsConsoleService.listDeployments → OpsConsoleRepository.listDeployments | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:117` |
+| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.deployments → OpsConsoleService.listDeployments → OpsConsoleRepository.listDeployments | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:117` |
 
 ### Parámetros
 
@@ -234,7 +234,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.incidents` — `src/modules/ops_console/ops-console.controller.ts:116`
+- **Implementación:** `OpsConsoleController.incidents` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:44`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -244,23 +244,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/incidents` la atiende `OpsConsoleController.incidents` (src/modules/ops_console/ops-console.controller.ts:116). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listIncidents`. Lee platform_ops.health_incidents, platform_ops.service_components.
+`GET /admin/ops/incidents` la atiende `OpsConsoleController.incidents` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:44). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listIncidents`. Lee platform_ops.health_incidents, platform_ops.service_components.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `platform_ops.health_incidents` | LEE | LEE | POR_SQL | OpsConsoleController.incidents → OpsConsoleService.listIncidents → OpsConsoleRepository.listIncidents | `src/modules/ops_console/ops-console.repository.ts:52` |
-| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.incidents → OpsConsoleService.listIncidents → OpsConsoleRepository.listIncidents | `src/modules/ops_console/ops-console.repository.ts:52` |
+| `platform_ops.health_incidents` | LEE | LEE | POR_SQL | OpsConsoleController.incidents → OpsConsoleService.listIncidents → OpsConsoleRepository.listIncidents | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:52` |
+| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.incidents → OpsConsoleService.listIncidents → OpsConsoleRepository.listIncidents | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:52` |
 
 ### Parámetros
 
@@ -305,7 +305,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.incident` — `src/modules/ops_console/ops-console.controller.ts:123`
+- **Implementación:** `OpsConsoleController.incident` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:51`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -315,25 +315,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/incidents/{id}` la atiende `OpsConsoleController.incident` (src/modules/ops_console/ops-console.controller.ts:123). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.getIncident`. Lee platform_ops.health_incidents, platform_ops.incident_timeline_events, platform_ops.service_components.
+`GET /admin/ops/incidents/{id}` la atiende `OpsConsoleController.incident` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:51). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.getIncident`. Lee platform_ops.health_incidents, platform_ops.incident_timeline_events, platform_ops.service_components.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ops_console/ops-console.controller.ts:123` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:51` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:51` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `platform_ops.health_incidents` | LEE | LEE | POR_SQL | OpsConsoleController.incident → OpsConsoleService.getIncident → OpsConsoleRepository.findIncident | `src/modules/ops_console/ops-console.repository.ts:78` |
-| `platform_ops.incident_timeline_events` | LEE | LEE | POR_SQL | OpsConsoleController.incident → OpsConsoleService.getIncident → OpsConsoleRepository.findIncident | `src/modules/ops_console/ops-console.repository.ts:94` |
-| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.incident → OpsConsoleService.getIncident → OpsConsoleRepository.findIncident | `src/modules/ops_console/ops-console.repository.ts:78` |
+| `platform_ops.health_incidents` | LEE | LEE | POR_SQL | OpsConsoleController.incident → OpsConsoleService.getIncident → OpsConsoleRepository.findIncident | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:78` |
+| `platform_ops.incident_timeline_events` | LEE | LEE | POR_SQL | OpsConsoleController.incident → OpsConsoleService.getIncident → OpsConsoleRepository.findIncident | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:94` |
+| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.incident → OpsConsoleService.getIncident → OpsConsoleRepository.findIncident | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:78` |
 
 ### Parámetros
 
@@ -379,7 +379,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.readiness` — `src/modules/ops_console/ops-console.controller.ts:104`
+- **Implementación:** `OpsConsoleController.readiness` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:32`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -389,35 +389,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/readiness` la atiende `OpsConsoleController.readiness` (src/modules/ops_console/ops-console.controller.ts:104). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.readiness`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs, platform_ops.deployments, platform_ops.health_incidents, platform_ops.service_components, platform_ops.service_level_indicators, platform_ops.service_level_objectives y 6 más.
+`GET /admin/ops/readiness` la atiende `OpsConsoleController.readiness` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:32). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.readiness`. Lee data_catalog.catalog_annotations, data_catalog.catalog_objects, data_catalog.catalog_scan_runs, platform_ops.deployments, platform_ops.health_incidents, platform_ops.service_components, platform_ops.service_level_indicators, platform_ops.service_level_objectives y 6 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:32` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.catalogReview | `src/modules/ops_console/ops-console.repository.ts:271` |
-| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.catalogReview | `src/modules/ops_console/ops-console.repository.ts:271` |
-| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.catalogReview | `src/modules/ops_console/ops-console.repository.ts:271` |
-| `platform_ops.deployments` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.lastProductionDeployment | `src/modules/ops_console/ops-console.repository.ts:255` |
-| `platform_ops.health_incidents` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listIncidents | `src/modules/ops_console/ops-console.repository.ts:52` |
-| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listIncidents | `src/modules/ops_console/ops-console.repository.ts:52` |
-| `platform_ops.service_level_indicators` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listSlos | `src/modules/ops_console/ops-console.repository.ts:160` |
-| `platform_ops.service_level_objectives` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listSlos | `src/modules/ops_console/ops-console.repository.ts:160` |
-| `platform_ops.slo_measurements` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listSlos | `src/modules/ops_console/ops-console.repository.ts:160` |
-| `qa_execution.execution_plans` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.lastPlanPerActiveSuite | `src/modules/ops_console/ops-console.repository.ts:236` |
-| `qa_lab.test_defects` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listOpenDefects | `src/modules/ops_console/ops-console.repository.ts:221` |
-| `qa_lab.test_suites` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.lastPlanPerActiveSuite | `src/modules/ops_console/ops-console.repository.ts:236` |
-| `system_ops.backup_policies` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/ops-console.repository.ts:193` |
-| `system_ops.restore_test_runs` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/ops-console.repository.ts:193` |
+| `data_catalog.catalog_annotations` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.catalogReview | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:271` |
+| `data_catalog.catalog_objects` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.catalogReview | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:271` |
+| `data_catalog.catalog_scan_runs` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.catalogReview | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:271` |
+| `platform_ops.deployments` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.lastProductionDeployment | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:255` |
+| `platform_ops.health_incidents` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listIncidents | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:52` |
+| `platform_ops.service_components` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listIncidents | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:52` |
+| `platform_ops.service_level_indicators` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listSlos | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:160` |
+| `platform_ops.service_level_objectives` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listSlos | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:160` |
+| `platform_ops.slo_measurements` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listSlos | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:160` |
+| `qa_execution.execution_plans` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.lastPlanPerActiveSuite | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:236` |
+| `qa_lab.test_defects` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listOpenDefects | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:221` |
+| `qa_lab.test_suites` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.lastPlanPerActiveSuite | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:236` |
+| `system_ops.backup_policies` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:193` |
+| `system_ops.restore_test_runs` | LEE | LEE | POR_SQL | OpsConsoleController.readiness → OpsConsoleService.readiness → OpsConsoleRepository.listBackupPolicies | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:193` |
 
 ### Cuerpo
 
@@ -455,7 +455,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.slos` — `src/modules/ops_console/ops-console.controller.ts:144`
+- **Implementación:** `OpsConsoleController.slos` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -465,24 +465,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/slos` la atiende `OpsConsoleController.slos` (src/modules/ops_console/ops-console.controller.ts:144). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listSlos`. Lee platform_ops.service_level_indicators, platform_ops.service_level_objectives, platform_ops.slo_measurements.
+`GET /admin/ops/slos` la atiende `OpsConsoleController.slos` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:72). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsConsoleService.listSlos`. Lee platform_ops.service_level_indicators, platform_ops.service_level_objectives, platform_ops.slo_measurements.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:72` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `platform_ops.service_level_indicators` | LEE | LEE | POR_SQL | OpsConsoleController.slos → OpsConsoleService.listSlos → OpsConsoleRepository.listSlos | `src/modules/ops_console/ops-console.repository.ts:160` |
-| `platform_ops.service_level_objectives` | LEE | LEE | POR_SQL | OpsConsoleController.slos → OpsConsoleService.listSlos → OpsConsoleRepository.listSlos | `src/modules/ops_console/ops-console.repository.ts:160` |
-| `platform_ops.slo_measurements` | LEE | LEE | POR_SQL | OpsConsoleController.slos → OpsConsoleService.listSlos → OpsConsoleRepository.listSlos | `src/modules/ops_console/ops-console.repository.ts:160` |
+| `platform_ops.service_level_indicators` | LEE | LEE | POR_SQL | OpsConsoleController.slos → OpsConsoleService.listSlos → OpsConsoleRepository.listSlos | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:160` |
+| `platform_ops.service_level_objectives` | LEE | LEE | POR_SQL | OpsConsoleController.slos → OpsConsoleService.listSlos → OpsConsoleRepository.listSlos | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:160` |
+| `platform_ops.slo_measurements` | LEE | LEE | POR_SQL | OpsConsoleController.slos → OpsConsoleService.listSlos → OpsConsoleRepository.listSlos | `src/modules/ops_console/infrastructure/repositories/ops-console.repository.ts:160` |
 
 ### Cuerpo
 
@@ -520,7 +520,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.trafficOverview` — `src/modules/ops_console/ops-console.controller.ts:162`
+- **Implementación:** `OpsConsoleController.trafficOverview` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -530,23 +530,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/traffic` la atiende `OpsConsoleController.trafficOverview` (src/modules/ops_console/ops-console.controller.ts:162). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsTrafficService.traffic`. Lee iam.sessions, time_series.service_sli_series.
+`GET /admin/ops/traffic` la atiende `OpsConsoleController.trafficOverview` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:90). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsTrafficService.traffic`. Lee iam.sessions, time_series.service_sli_series.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:162` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `iam.sessions` | LEE | LEE | POR_SQL | OpsConsoleController.trafficOverview → OpsTrafficService.traffic → OpsTrafficRepository.readActiveUsers | `src/modules/ops_console/ops-traffic.repository.ts:190` |
-| `time_series.service_sli_series` | LEE | LEE | POR_SQL | OpsConsoleController.trafficOverview → OpsTrafficService.traffic → OpsTrafficRepository.readWindow | `src/modules/ops_console/ops-traffic.repository.ts:110` |
+| `iam.sessions` | LEE | LEE | POR_SQL | OpsConsoleController.trafficOverview → OpsTrafficService.traffic → OpsTrafficRepository.readActiveUsers | `src/modules/ops_console/infrastructure/repositories/ops-traffic.repository.ts:190` |
+| `time_series.service_sli_series` | LEE | LEE | POR_SQL | OpsConsoleController.trafficOverview → OpsTrafficService.traffic → OpsTrafficRepository.readWindow | `src/modules/ops_console/infrastructure/repositories/ops-traffic.repository.ts:110` |
 
 ### Parámetros
 
@@ -593,7 +593,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OpsConsoleController.trafficEndpoints` — `src/modules/ops_console/ops-console.controller.ts:174`
+- **Implementación:** `OpsConsoleController.trafficEndpoints` — `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -603,22 +603,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/ops/traffic/endpoints` la atiende `OpsConsoleController.trafficEndpoints` (src/modules/ops_console/ops-console.controller.ts:174). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsTrafficService.endpoints`. Lee time_series.service_sli_series.
+`GET /admin/ops/traffic/endpoints` la atiende `OpsConsoleController.trafficEndpoints` (src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. Delega en `OpsTrafficService.endpoints`. Lee time_series.service_sli_series.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/ops-console.controller.ts:174` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `time_series.service_sli_series` | LEE | LEE | POR_SQL | OpsConsoleController.trafficEndpoints → OpsTrafficService.endpoints → OpsTrafficRepository.readEndpoints | `src/modules/ops_console/ops-traffic.repository.ts:158` |
+| `time_series.service_sli_series` | LEE | LEE | POR_SQL | OpsConsoleController.trafficEndpoints → OpsTrafficService.endpoints → OpsTrafficRepository.readEndpoints | `src/modules/ops_console/infrastructure/repositories/ops-traffic.repository.ts:158` |
 
 ### Parámetros
 
