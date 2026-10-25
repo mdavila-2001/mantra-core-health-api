@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IntegrationsConnectionsService } from '../services';
 import {
   RotateCredentialDto,
@@ -36,6 +41,11 @@ export class IntegrationsConnectionsController {
   ) {}
 
   /** UC-12-03. */
+  @Audited({
+    action: 'PROVIDER_CREDENTIAL_ROTATED',
+    entity: 'provider_credential',
+    entityId: 'param:id',
+  })
   @Post('connections/:id/credentials\\:rotate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -49,6 +59,11 @@ export class IntegrationsConnectionsController {
   }
 
   /** UC-12-12. */
+  @Audited({
+    action: 'PROVIDER_CONNECTION_PAUSED',
+    entity: 'provider_connection',
+    entityId: 'param:id',
+  })
   @Post('connections/:id\\:pause')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

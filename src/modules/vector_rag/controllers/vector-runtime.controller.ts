@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -74,6 +75,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-05. */
+  @Audited({
+    action: 'EMBEDDING_JOB_RUN',
+    entity: 'embedding_job',
+    entityId: 'param:id',
+  })
   @Post('embedding-jobs/:id/run')
   @Roles('SYSTEM', 'EMBEDDING_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -91,6 +97,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-06. */
+  @Audited({
+    action: 'RETRIEVAL_SESSION_OPENED',
+    entity: 'retrieval_session',
+    entityId: 'result.id',
+  })
   @Post('retrieval-sessions')
   @Roles('CLINICIAN', 'AGENT_RUNTIME', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -107,6 +118,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-07. */
+  @Audited({
+    action: 'RETRIEVAL_CANDIDATES_RANKED',
+    entity: 'retrieval_session',
+    entityId: 'param:id',
+  })
   @Post('retrieval-sessions/:id/search')
   @Roles('SYSTEM', 'RETRIEVAL_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -125,6 +141,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-08. */
+  @Audited({
+    action: 'RETRIEVAL_EVIDENCE_MATERIALIZED',
+    entity: 'retrieval_evidence',
+    entityId: 'result.id',
+  })
   @Post('retrieval-sessions/:id/evidence')
   @Roles('SYSTEM', 'RETRIEVAL_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -142,6 +163,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-09. */
+  @Audited({
+    action: 'RETRIEVAL_FEEDBACK_CAPTURED',
+    entity: 'retrieval_feedback_event',
+    entityId: 'result.id',
+  })
   @Post('retrieval-sessions/:id/feedback')
   @Roles('CLINICIAN', 'AGENT_RUNTIME', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -159,6 +185,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-10. */
+  @Audited({
+    action: 'VECTOR_DELETION_PROPAGATED',
+    entity: 'vector_deletion_job',
+    entityId: 'result.id',
+  })
   @Post('deletion-jobs')
   @Roles('PRIVACY_OFFICER', 'DPO', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -175,6 +206,11 @@ export class VectorRuntimeController {
   }
 
   /** UC-59-12. */
+  @Audited({
+    action: 'VECTOR_COLLECTION_RECONCILED',
+    entity: 'vector_reconciliation_run',
+    entityId: 'result.id',
+  })
   @Post('collections/:id/reconciliation')
   @Roles('SYSTEM', 'RECONCILIATION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)

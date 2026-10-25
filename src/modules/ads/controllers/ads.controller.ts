@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   AdsAccountsService,
   AdsCampaignsService,
@@ -75,6 +80,11 @@ export class AdsController {
   ) {}
 
   /** UC-43-01. */
+  @Audited({
+    action: 'AD_ACCOUNT_PROVISIONED',
+    entity: 'ad_account',
+    entityId: 'result.id',
+  })
   @Post('business-managers/:bmId/ad-accounts')
   @Roles('ADS_ADMIN', 'BUSINESS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -91,6 +101,11 @@ export class AdsController {
   }
 
   /** UC-43-02. */
+  @Audited({
+    action: 'AD_PARTNER_LINKED',
+    entity: 'ad_partner',
+    entityId: 'result.id',
+  })
   @Post('business-managers/:bmId/partners')
   @Roles('ADS_ADMIN', 'BUSINESS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -108,6 +123,11 @@ export class AdsController {
   }
 
   /** UC-43-03. */
+  @Audited({
+    action: 'AD_PLATFORM_CONNECTED',
+    entity: 'ad_platform_connection',
+    entityId: 'result.id',
+  })
   @Post('platform-connections')
   @Roles('ADS_ADMIN', 'BUSINESS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -124,6 +144,11 @@ export class AdsController {
   }
 
   /** UC-43-04. */
+  @Audited({
+    action: 'AD_CAMPAIGN_LAUNCHED',
+    entity: 'campaign',
+    entityId: 'result.id',
+  })
   @Post('ad-accounts/:id/campaigns/launch')
   @Roles('AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -140,6 +165,11 @@ export class AdsController {
   }
 
   /** UC-43-05. */
+  @Audited({
+    action: 'AD_TARGETING_SPEC_CREATED',
+    entity: 'targeting_spec',
+    entityId: 'result.id',
+  })
   @Post('ad-accounts/:id/targeting')
   @Roles('AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -157,6 +187,11 @@ export class AdsController {
   }
 
   /** UC-43-05. */
+  @Audited({
+    action: 'AD_SET_IDENTITY_ASSIGNED',
+    entity: 'ad_identity_asset_assignment',
+    entityId: 'result.id',
+  })
   @Post('ad-sets/:id/identity')
   @Roles('AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -174,6 +209,11 @@ export class AdsController {
   }
 
   /** UC-43-06. */
+  @Audited({
+    action: 'AD_EVENT_DATA_POLICY_CREATED',
+    entity: 'ad_event_data_policy',
+    entityId: 'result.id',
+  })
   @Post('event-data-policies')
   @Roles('DATA_PRIVACY_OFFICER', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -190,6 +230,10 @@ export class AdsController {
   }
 
   /** UC-43-07. */
+  @Audited({
+    action: 'AD_INSIGHTS_INGESTED',
+    entity: 'insights_daily',
+  })
   @Post('ingest/insights')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -206,6 +250,11 @@ export class AdsController {
   }
 
   /** UC-43-08. */
+  @Audited({
+    action: 'AD_CONVERSION_EVENT_SENT',
+    entity: 'server_conversion_event',
+    entityId: 'result.id',
+  })
   @Post('datasets/:id/events')
   @Roles('SYSTEM', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -223,6 +272,11 @@ export class AdsController {
   }
 
   /** UC-43-09. */
+  @Audited({
+    action: 'AD_OFFLINE_CONVERSIONS_UPLOADED',
+    entity: 'offline_conversion_set',
+    entityId: 'result.id',
+  })
   @Post('offline-conversion-sets/upload')
   @Roles('AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -238,6 +292,11 @@ export class AdsController {
   }
 
   /** UC-43-10. */
+  @Audited({
+    action: 'AD_EXPERIMENT_CREATED',
+    entity: 'ad_experiment',
+    entityId: 'result.id',
+  })
   @Post('ad-accounts/:id/experiments')
   @Roles('AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -254,6 +313,11 @@ export class AdsController {
   }
 
   /** UC-43-11. */
+  @Audited({
+    action: 'AD_AUTOMATED_RULE_EVALUATED',
+    entity: 'automated_rule',
+    entityId: 'param:id',
+  })
   @Post('automated-rules/:id/evaluate')
   @Roles('SYSTEM', 'ADS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -271,6 +335,11 @@ export class AdsController {
   }
 
   /** UC-43-12. */
+  @Audited({
+    action: 'AD_REVIEW_EVENT_RECORDED',
+    entity: 'ad_review_event',
+    entityId: 'result.id',
+  })
   @Post('ads/:id/review-events')
   @Roles('POLICY_REVIEWER', 'SYSTEM', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -287,6 +356,11 @@ export class AdsController {
   }
 
   /** UC-43-12. */
+  @Audited({
+    action: 'AD_POLICY_APPEAL_SUBMITTED',
+    entity: 'ad_policy_appeal',
+    entityId: 'result.id',
+  })
   @Post('policy-violations/:id/appeals')
   @Roles('POLICY_REVIEWER', 'AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -300,6 +374,11 @@ export class AdsController {
   }
 
   /** UC-43-13. */
+  @Audited({
+    action: 'AD_CATALOG_FEED_RUN',
+    entity: 'catalog_feed',
+    entityId: 'param:feedId',
+  })
   @Post('catalogs/:id/feeds/:feedId/run')
   @Roles('SYSTEM', 'ADS_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -318,6 +397,11 @@ export class AdsController {
   }
 
   /** UC-43-14. */
+  @Audited({
+    action: 'AD_INVOICE_ISSUED',
+    entity: 'ad_invoice',
+    entityId: 'result.id',
+  })
   @Post('ad-accounts/:id/invoices/issue')
   @Roles('FINANCE', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -335,6 +419,11 @@ export class AdsController {
   }
 
   /** UC-43-15. */
+  @Audited({
+    action: 'AD_LEAD_SUBMITTED',
+    entity: 'lead_submission',
+    entityId: 'result.id',
+  })
   @Post('lead-forms/:id/submissions')
   @Roles('SYSTEM', 'AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -352,6 +441,11 @@ export class AdsController {
   }
 
   /** UC-43-16. */
+  @Audited({
+    action: 'AD_BUDGET_SCHEDULE_CREATED',
+    entity: 'budget_schedule',
+    entityId: 'result.id',
+  })
   @Post('ad-sets/:id/budget-schedules')
   @Roles('AD_OPS', 'ADS_ADMIN')
   @HttpCode(HttpStatus.CREATED)

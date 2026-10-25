@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common';
+import { Audited, CurrentUser } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { AddressesService } from '../services';
 import { AddressResponseDto, CreateAddressDto } from '../dto';
@@ -18,6 +18,11 @@ export class CommonAddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
   /** UC-02-04: registra una dirección postal. */
+  @Audited({
+    action: 'ADDRESS_CREATED',
+    entity: 'address',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar una dirección (UC-02-04)' })

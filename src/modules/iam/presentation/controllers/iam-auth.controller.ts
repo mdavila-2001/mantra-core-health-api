@@ -22,6 +22,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
+  Audited,
   CurrentUser,
   NotAudited,
   Public,
@@ -441,6 +442,10 @@ export class IamAuthController {
    * aplicación sólo limpiaba el navegador y el refresh token seguía sirviendo
    * hasta caducar.
    */
+  @Audited({
+    action: 'SESSION_LOGGED_OUT',
+    entity: 'session',
+  })
   @Post('logout')
   @ApiBearerAuth()
   // Cerrar la sesión propia no toca datos de ningún tenant: exigir contexto de
@@ -461,6 +466,10 @@ export class IamAuthController {
   }
 
   /** UC-01-08. */
+  @Audited({
+    action: 'ALL_SESSIONS_LOGGED_OUT',
+    entity: 'session',
+  })
   @Post('logout-all')
   @ApiBearerAuth()
   @TenantAgnostic()
@@ -473,6 +482,10 @@ export class IamAuthController {
   }
 
   /** UC-01-11. */
+  @Audited({
+    action: 'SESSIONS_PURGED',
+    entity: 'session',
+  })
   @Post('sessions/purge')
   @Roles('SECURITY_ADMIN')
   @ApiBearerAuth()

@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CancelVisitDto,
   CreateVisitRequestDto,
@@ -42,6 +47,11 @@ export class VisitRequestsController {
   constructor(private readonly service: VisitRequestsService) {}
 
   /** UC-17-13. */
+  @Audited({
+    action: 'VISIT_REQUEST_CREATED',
+    entity: 'visit_request',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Roles('MEDICAL_VISITOR')
@@ -88,6 +98,11 @@ export class VisitRequestsController {
   }
 
   /** UC-17-14. */
+  @Audited({
+    action: 'VISIT_REQUEST_ACCEPTED',
+    entity: 'visit_request',
+    entityId: 'param:visitRequestId',
+  })
   @Post(':visitRequestId/accept')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Aceptar la visita' })
@@ -100,6 +115,11 @@ export class VisitRequestsController {
   }
 
   /** UC-17-14. */
+  @Audited({
+    action: 'VISIT_REQUEST_REJECTED',
+    entity: 'visit_request',
+    entityId: 'param:visitRequestId',
+  })
   @Post(':visitRequestId/reject')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Rechazar la visita' })
@@ -112,6 +132,11 @@ export class VisitRequestsController {
   }
 
   /** UC-17-14. */
+  @Audited({
+    action: 'VISIT_REQUEST_INFO_REQUESTED',
+    entity: 'visit_request',
+    entityId: 'param:visitRequestId',
+  })
   @Post(':visitRequestId/request-info')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Solicitar información adicional al visitador' })
@@ -124,6 +149,11 @@ export class VisitRequestsController {
   }
 
   /** UC-17-15. */
+  @Audited({
+    action: 'VISIT_REQUEST_TIME_PROPOSED',
+    entity: 'visit_request',
+    entityId: 'param:visitRequestId',
+  })
   @Post(':visitRequestId/propose-time')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Proponer otro horario' })
@@ -136,6 +166,11 @@ export class VisitRequestsController {
   }
 
   /** UC-17-16. */
+  @Audited({
+    action: 'VISIT_REQUEST_RESCHEDULED',
+    entity: 'visit_request',
+    entityId: 'param:visitRequestId',
+  })
   @Post(':visitRequestId/reschedule')
   @Roles('MEDICAL_VISITOR')
   @ApiOperation({ summary: 'Reprogramar la visita dentro del plazo permitido' })
@@ -148,6 +183,11 @@ export class VisitRequestsController {
   }
 
   /** UC-17-17. */
+  @Audited({
+    action: 'VISIT_REQUEST_CANCELLED',
+    entity: 'visit_request',
+    entityId: 'param:visitRequestId',
+  })
   @Post(':visitRequestId/cancel')
   @Roles('MEDICAL_VISITOR', 'PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Cancelar la visita' })

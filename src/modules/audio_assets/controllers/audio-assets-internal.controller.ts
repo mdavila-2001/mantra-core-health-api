@@ -7,7 +7,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AudioGenerationUseCase } from '../application/audio-generation.use-case';
 import { AudioMaintenanceService } from '../application/audio-maintenance.service';
 import { PregenerateAudioAssetsUseCase } from '../application/pregenerate-audio-assets.use-case';
@@ -38,6 +43,10 @@ export class AudioAssetsInternalController {
     return this.maintenance.status();
   }
 
+  @Audited({
+    action: 'AUDIO_ASSETS_PREGENERATED',
+    entity: 'audio_asset',
+  })
   @Post('pregenerate')
   @ApiOperation({
     summary: 'Pre-genera STATIC, ENUMERATED y fallbacks de forma idempotente',
@@ -49,12 +58,20 @@ export class AudioAssetsInternalController {
     return this.pregenerate.execute(actor, dto.templateKeys);
   }
 
+  @Audited({
+    action: 'AUDIO_ASSETS_VERIFIED',
+    entity: 'audio_asset',
+  })
   @Post('verify')
   @ApiOperation({ summary: 'Verifica existencia y checksum de assets READY' })
   verify(@Body() dto: AudioMaintenanceDto) {
     return this.maintenance.verify(dto.limit ?? 250);
   }
 
+  @Audited({
+    action: 'AUDIO_ASSETS_GARBAGE_COLLECTED',
+    entity: 'audio_asset',
+  })
   @Post('garbage-collect')
   @ApiOperation({
     summary:
@@ -64,6 +81,11 @@ export class AudioAssetsInternalController {
     return this.maintenance.garbageCollect(dto.limit ?? 100);
   }
 
+  @Audited({
+    action: 'AUDIO_ASSET_DEPRECATED',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post(':assetId/deprecate')
   @ApiOperation({
     summary: 'Depreca un asset no-fallback sin eliminarlo inmediatamente',
@@ -72,12 +94,22 @@ export class AudioAssetsInternalController {
     return this.maintenance.deprecate(assetId);
   }
 
+  @Audited({
+    action: 'AUDIO_GENERATION_PREPARED',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post(':assetId/prepare-generation')
   @ApiOperation({ summary: 'Prepara un asset de audio para generación' })
   prepare(@Param('assetId', new ParseUUIDPipe()) assetId: string) {
     return this.generation.prepare(assetId);
   }
 
+  @Audited({
+    action: 'AUDIO_ASSET_GENERATED',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post(':assetId/generated')
   @ApiOperation({ summary: 'Registra un asset de audio generado' })
   async generated(
@@ -88,6 +120,11 @@ export class AudioAssetsInternalController {
     return { ok: true };
   }
 
+  @Audited({
+    action: 'AUDIO_GENERATION_FAILED',
+    entity: 'audio_asset',
+    entityId: 'param:assetId',
+  })
   @Post(':assetId/generation-failed')
   @ApiOperation({ summary: 'Registra un fallo de generación de audio' })
   async failed(

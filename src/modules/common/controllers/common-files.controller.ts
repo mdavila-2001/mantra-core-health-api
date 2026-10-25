@@ -23,7 +23,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, loadStorageEnv } from '../../../common';
+import { Audited, CurrentUser, loadStorageEnv } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { FileUploadService, FilesService } from '../services';
 import type { UploadedFileBytes } from '../services';
@@ -68,6 +68,11 @@ export class CommonFilesController {
    * `storageUri`; éste recibe los bytes y deja que el adaptador de
    * almacenamiento decida dónde viven.
    */
+  @Audited({
+    action: 'FILE_UPLOADED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post('upload')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(
@@ -141,6 +146,11 @@ export class CommonFilesController {
   }
 
   /** UC-02-05: crea un archivo y su primera versión. */
+  @Audited({
+    action: 'FILE_CREATED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -154,6 +164,11 @@ export class CommonFilesController {
   }
 
   /** UC-02-06: añade una nueva versión. */
+  @Audited({
+    action: 'FILE_VERSION_CREATED',
+    entity: 'file_version',
+    entityId: 'result.id',
+  })
   @Post(':id/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Añadir una versión a un archivo (UC-02-06)' })
@@ -166,6 +181,11 @@ export class CommonFilesController {
   }
 
   /** UC-02-07: genera un derivado de una versión limpia. */
+  @Audited({
+    action: 'FILE_DERIVATIVE_CREATED',
+    entity: 'file_derivative',
+    entityId: 'result.id',
+  })
   @Post(':id/versions/:vid/derivatives')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generar un derivado de una versión (UC-02-07)' })
@@ -179,6 +199,11 @@ export class CommonFilesController {
   }
 
   /** UC-02-08: vincula un archivo a un propietario. */
+  @Audited({
+    action: 'FILE_LINK_CREATED',
+    entity: 'file_link',
+    entityId: 'result.id',
+  })
   @Post(':id/links')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Vincular un archivo a un propietario (UC-02-08)' })
@@ -191,6 +216,11 @@ export class CommonFilesController {
   }
 
   /** UC-02-10: borrado lógico del archivo. */
+  @Audited({
+    action: 'FILE_DELETED',
+    entity: 'file',
+    entityId: 'param:id',
+  })
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Borrar lógicamente un archivo (UC-02-10)' })
@@ -208,6 +238,11 @@ export class CommonFilesController {
    * autorizar, y esta ruta era el camino paralelo que rodeaba el control de
    * `:id/content`. La regla que aplica es la misma que la del contenido.
    */
+  @Audited({
+    action: 'FILE_DOWNLOAD_URL_ISSUED',
+    entity: 'file',
+    entityId: 'param:id',
+  })
   @Post(':id/download-url')
   @HttpCode(HttpStatus.CREATED)
   @Header('Cache-Control', 'private, no-store')

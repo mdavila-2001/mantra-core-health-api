@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -216,6 +217,11 @@ export class PracticesController {
     );
   }
 
+  @Audited({
+    action: 'PRACTICE_CREATED',
+    entity: 'practice',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -228,6 +234,11 @@ export class PracticesController {
   }
 
   /** UC-14-01. */
+  @Audited({
+    action: 'PRACTICE_SITE_CREATED',
+    entity: 'practice_site',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/sites')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -241,6 +252,11 @@ export class PracticesController {
   }
 
   /** UC-14-12. */
+  @Audited({
+    action: 'PRACTICE_SITE_DECOMMISSIONED',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
   @Delete(':practiceId/sites/:siteId')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -254,6 +270,11 @@ export class PracticesController {
   }
 
   /** UC-14-02. */
+  @Audited({
+    action: 'PRACTICE_ACCREDITATION_CREATED',
+    entity: 'practice_accreditation',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/accreditations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -267,6 +288,11 @@ export class PracticesController {
   }
 
   /** UC-14-06. */
+  @Audited({
+    action: 'HEALTHCARE_SERVICE_PUBLISHED',
+    entity: 'healthcare_service',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/healthcare-services')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -284,6 +310,11 @@ export class PracticesController {
   }
 
   /** UC-14-07. */
+  @Audited({
+    action: 'PRACTICE_SETTING_UPSERTED',
+    entity: 'practice_setting',
+    entityId: 'result.id',
+  })
   @Put(':practiceId/settings/:settingKey')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -298,6 +329,11 @@ export class PracticesController {
   }
 
   /** UC-14-08. */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_ASSIGNED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/role-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -317,6 +353,11 @@ export class PracticesController {
    * cuenta; queda `PENDING` hasta que la organización la apruebe (ver
    * `/role-assignments/:roleId/approve` en `RoleAssignmentsController`).
    */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_SELF_REQUESTED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/role-assignments/self-request')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -334,6 +375,11 @@ export class PracticesController {
   }
 
   /** UC-14-10. */
+  @Audited({
+    action: 'PRACTICE_INVENTORY_ITEM_CREATED',
+    entity: 'inventory_item',
+    entityId: 'result.id',
+  })
   @Post(':practiceId/inventory-items')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

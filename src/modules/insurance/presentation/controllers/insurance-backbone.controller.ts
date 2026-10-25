@@ -14,7 +14,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { InsuranceBackboneService } from '../../application/services';
 import {
   CarrierContactChannelsDto,
@@ -60,6 +65,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create carrier conforme al contrato `Promise<ResourceStatusDto>`.
    */
+  @Audited({
+    action: 'INSURANCE_CARRIER_CREATED',
+    entity: 'insurance_carrier',
+    entityId: 'result.id',
+  })
   @Post('insurance-carriers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +95,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Los canales resultantes.
    */
+  @Audited({
+    action: 'INSURANCE_CARRIER_CONTACT_CHANNELS_UPDATED',
+    entity: 'insurance_carrier',
+    entityId: 'param:id',
+  })
   @Put('insurance-carriers/:id/contact-channels')
   @ApiOperation({
     summary:
@@ -107,6 +122,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create product conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'INSURANCE_PRODUCT_CREATED',
+    entity: 'insurance_product',
+    entityId: 'result.id',
+  })
   @Post('insurance-carriers/:id/products')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -127,6 +147,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create plan conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'INSURANCE_PLAN_CREATED',
+    entity: 'insurance_plan',
+    entityId: 'result.id',
+  })
   @Post('insurance-products/:productId/plans')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un plan del carrier del tenant activo' })
@@ -146,6 +171,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create benefit conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'INSURANCE_PLAN_BENEFIT_CREATED',
+    entity: 'insurance_plan_benefit',
+    entityId: 'result.id',
+  })
   @Post('insurance-plans/:planId/benefits')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una cobertura de un plan administrable' })
@@ -158,6 +188,11 @@ export class InsuranceBackboneController {
   }
 
   /** Reemplaza los importes administrables de una cobertura. */
+  @Audited({
+    action: 'INSURANCE_PLAN_BENEFIT_UPDATED',
+    entity: 'insurance_plan_benefit',
+    entityId: 'param:benefitId',
+  })
   @Put('insurance-plans/:planId/benefits/:benefitId')
   @ApiOperation({ summary: 'Editar importes de una cobertura' })
   updateBenefit(
@@ -170,6 +205,11 @@ export class InsuranceBackboneController {
   }
 
   /** Reemplaza autorización previa, documentos y exclusión. */
+  @Audited({
+    action: 'INSURANCE_PLAN_BENEFIT_RULES_UPDATED',
+    entity: 'insurance_plan_benefit',
+    entityId: 'param:benefitId',
+  })
   @Put('insurance-plans/:planId/benefits/:benefitId/rules')
   @ApiOperation({ summary: 'Editar reglas de aprobación de una cobertura' })
   updateBenefitRules(
@@ -187,6 +227,11 @@ export class InsuranceBackboneController {
    * quita. Sin `@Roles`, como `createPlan`: la barrera es la membresía
    * OWNER/ADMIN del tenant de la aseguradora (`administrableCarrier`).
    */
+  @Audited({
+    action: 'INSURANCE_PLAN_PREMIUM_UPDATED',
+    entity: 'insurance_plan',
+    entityId: 'param:planId',
+  })
   @Put('insurance-plans/:planId/premium')
   @ApiOperation({
     summary: 'Declarar la prima de lista mensual de un plan administrable',
@@ -207,6 +252,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create provider network conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'PROVIDER_NETWORK_CREATED',
+    entity: 'provider_network',
+    entityId: 'result.id',
+  })
   @Post('provider-networks')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -219,6 +269,11 @@ export class InsuranceBackboneController {
   }
 
   /** UC-26-01. */
+  @Audited({
+    action: 'NETWORK_PROVIDER_MEMBERSHIP_ADDED',
+    entity: 'network_provider_membership',
+    entityId: 'result.id',
+  })
   @Post('provider-networks/:id/memberships')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -238,6 +293,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create broker conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'INSURANCE_BROKER_CREATED',
+    entity: 'insurance_broker',
+    entityId: 'result.id',
+  })
   @Post('insurance-brokers')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -257,6 +317,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create agreement conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'BROKER_CARRIER_AGREEMENT_CREATED',
+    entity: 'broker_carrier_agreement',
+    entityId: 'result.id',
+  })
   @Post('insurance-brokers/:id/agreements')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -276,6 +341,11 @@ export class InsuranceBackboneController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create employer group conforme al contrato `Promise<CreatedResourceDto>`.
    */
+  @Audited({
+    action: 'EMPLOYER_GROUP_CREATED',
+    entity: 'employer_group',
+    entityId: 'result.id',
+  })
   @Post('employer-groups')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
