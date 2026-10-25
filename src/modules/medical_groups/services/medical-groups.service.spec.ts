@@ -540,6 +540,20 @@ describe('MedicalGroupsService', () => {
     );
   });
 
+  it('el listado dice CLOSED de un grupo pasada la semana, igual que la consulta', async () => {
+    const d = build();
+    const created = await d.service.create(
+      baseDto({
+        scheduledAt: new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString(),
+      }),
+      creator,
+    );
+    const page = await d.service.list('historico', creator, {});
+    expect(page.items.find((item) => item.id === created.id)?.status).toBe(
+      'CLOSED',
+    );
+  });
+
   describe('colegas que se pueden invitar', () => {
     it('ofrece a los de la misma organización del servicio, sin quien pregunta', async () => {
       const d = build();
