@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1551 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1552 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -911,6 +911,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/medical-groups/{id}/members/{memberId}/respond` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/medical-groups/{id}/reschedule-requests` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/medical-groups/{id}/reschedule-requests/respond` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/medical-groups/eligible-members` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | BAJO | PRACTITIONER · CLINICIAN | — | CONTRATO_AUSENTE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/medical-groups/patients/{patientProfileId}/conditions` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/event-deliveries/{id}/ack` | Módulo 35 — Mensajería (outbox, colas y notificación multicanal) (UC-35-04) | messaging | MEDIO | SYSTEM · MESSAGING_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/events/{domainEventId}/dispatch` | Módulo 35 — Mensajería (outbox, colas y notificación multicanal) (UC-35-03) | messaging | MEDIO | SYSTEM · MESSAGING_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |

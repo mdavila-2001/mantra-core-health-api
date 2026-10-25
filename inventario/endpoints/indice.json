@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1551,
+    "total": 1552,
     "porOrigen": {
       "CONTRATO": 1533,
-      "CONTRATO_AUSENTE": 18
+      "CONTRATO_AUSENTE": 19
     },
     "porRiesgo": {
-      "BAJO": 497,
+      "BAJO": 498,
       "MEDIO": 875,
       "ALTO": 179
     },
-    "conTablas": 1479,
+    "conTablas": 1480,
     "sinTablasSinDeterminar": 19,
     "sinExplicacionDeNegocio": 0,
     "conPruebas": 882,
-    "conRequerimientos": 1551
+    "conRequerimientos": 1552
   },
   "endpoints": [
     {
@@ -16275,7 +16275,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 2,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16294,7 +16294,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 25,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16313,7 +16313,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16332,7 +16332,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16351,7 +16351,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 4,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16370,7 +16370,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16389,7 +16389,26 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalGroupsController_listEligibleMembers",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "GET",
+      "ruta": "/medical-groups/eligible-members",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Los colegas que se pueden invitar a un grupo del servicio elegido. Va antes de `:id` por el mismo motivo que `patients/...`: el router de Nest resuelve en orden de declaración.",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

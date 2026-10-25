@@ -7145,6 +7145,14 @@
         "fuente": null
       },
       {
+        "operacion": "MedicalGroupsController_listEligibleMembers",
+        "metodo": "GET",
+        "ruta": "/medical-groups/eligible-members",
+        "modulo": "medical_groups",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "MedicalGroupsController_listPatientConditions",
         "metodo": "GET",
         "ruta": "/medical-groups/patients/{patientProfileId}/conditions",
@@ -10825,7 +10833,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1055
+    "cuenta": 1056
   },
   {
     "id": "FLU-08",
@@ -10946,6 +10954,14 @@
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129"
       },
       {
+        "operacion": "MedicalGroupsController_listEligibleMembers",
+        "metodo": "GET",
+        "ruta": "/medical-groups/eligible-members",
+        "modulo": "medical_groups",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/medical_groups/controllers/medical-groups.controller.ts:84"
+      },
+      {
         "operacion": "WebPushController_assertKnownPushService",
         "metodo": "DESCONOCIDO",
         "ruta": "/notifications/web-push",
@@ -10978,7 +10994,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 18
+    "cuenta": 19
   },
   {
     "id": "FLU-09",

@@ -3,12 +3,12 @@
 # Flujos del módulo `medical_groups`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 8 (8 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 9 (9 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [medical_groups](../endpoints/medical_groups.md)
 
 ## Proceso: Módulo Medical Groups — Grupos médicos (FT-21)
 
-- **Código:** `medical_groups` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 8
+- **Código:** `medical_groups` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 9
 - **Actores:** CLINICIAN · PRACTITIONER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/medical_groups/README.md`
@@ -23,13 +23,14 @@ _Fuente: `src/modules/medical_groups/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:MedicalGroupsController` | Operaciones de MedicalGroupsController que el README no asigna a un caso de uso | GET /medical-groups | PRACTITIONER · CLINICIAN | BAJO | 2 |
-|  |  | POST /medical-groups | PRACTITIONER · CLINICIAN | MEDIO | 25 |
-|  |  | GET /medical-groups/{id} | PRACTITIONER · CLINICIAN | MEDIO | 3 |
-|  |  | PATCH /medical-groups/{id}/exercise-notes | PRACTITIONER · CLINICIAN | MEDIO | 3 |
-|  |  | POST /medical-groups/{id}/members/{memberId}/respond | PRACTITIONER · CLINICIAN | MEDIO | 4 |
-|  |  | POST /medical-groups/{id}/reschedule-requests | PRACTITIONER · CLINICIAN | MEDIO | 3 |
-|  |  | POST /medical-groups/{id}/reschedule-requests/respond | PRACTITIONER · CLINICIAN | MEDIO | 3 |
+| `ctrl:MedicalGroupsController` | Operaciones de MedicalGroupsController que el README no asigna a un caso de uso | GET /medical-groups | PRACTITIONER · CLINICIAN | BAJO | 5 |
+|  |  | POST /medical-groups | PRACTITIONER · CLINICIAN | MEDIO | 27 |
+|  |  | GET /medical-groups/{id} | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | PATCH /medical-groups/{id}/exercise-notes | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | POST /medical-groups/{id}/members/{memberId}/respond | PRACTITIONER · CLINICIAN | MEDIO | 7 |
+|  |  | POST /medical-groups/{id}/reschedule-requests | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | POST /medical-groups/{id}/reschedule-requests/respond | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | GET /medical-groups/eligible-members | PRACTITIONER · CLINICIAN | BAJO | 5 |
 |  |  | GET /medical-groups/patients/{patientProfileId}/conditions | PRACTITIONER · CLINICIAN | BAJO | 20 |
 
 ### Diagrama — etapas `ctrl:MedicalGroupsController`
@@ -37,66 +38,97 @@ _Fuente: `src/modules/medical_groups/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["PRACTITIONER · CLINICIAN"]):::actor
-  t3[("medical_groups.group_members")]:::tabla
-  t4[("medical_groups.groups")]:::tabla
-  t6[("authz.access_policies")]:::tabla
-  t7[("authz.care_relationships")]:::tabla
-  t8[("authz.clinical_access_grants")]:::tabla
-  t9[("authz.field_permissions")]:::tabla
-  t10[("authz.patient_legal_representations")]:::tabla
-  t11[("authz.permissions")]:::tabla
-  t12[("+19 tablas más")]
-  t19[("+14 tablas más")]
+  t3[("billing.service_catalog")]:::tabla
+  t4[("medical_groups.group_members")]:::tabla
+  t5[("medical_groups.groups")]:::tabla
+  t6[("profiles.person_profiles")]:::tabla
+  t7[("profiles.persons")]:::tabla
+  t9[("authz.access_policies")]:::tabla
+  t10[("authz.care_relationships")]:::tabla
+  t11[("authz.clinical_access_grants")]:::tabla
+  t12[("authz.field_permissions")]:::tabla
+  t13[("authz.patient_legal_representations")]:::tabla
+  t14[("authz.permissions")]:::tabla
+  t23[("practice.practices")]:::tabla
+  t24[("practice.practitioner_role_assignments")]:::tabla
+  t15[("+21 tablas más")]
+  t19[("+1 tablas más")]
+  t26[("+14 tablas más")]
   subgraph s0["ctrl:MedicalGroupsController · Operaciones de MedicalGroupsController que el RE…"]
     o1["GET /medical-groups"]:::op
-    o5["POST /medical-groups"]:::op
-    o13["GET /medical-groups/{id}"]:::op
-    o14["PATCH /medical-groups/{id}/exercise-notes"]:::op
-    o15["POST /medical-groups/{id}/members/{memberId}/respond"]:::op
-    o16["POST /medical-groups/{id}/reschedule-requests"]:::op
-    o17["POST /medical-groups/{id}/reschedule-requests/respond"]:::op
-    o18["GET /medical-groups/patients/{patientProfileId}/conditions"]:::op
+    o8["POST /medical-groups"]:::op
+    o16["GET /medical-groups/{id}"]:::op
+    o17["PATCH /medical-groups/{id}/exercise-notes"]:::op
+    o18["POST /medical-groups/{id}/members/{memberId}/respond"]:::op
+    o20["POST /medical-groups/{id}/reschedule-requests"]:::op
+    o21["POST /medical-groups/{id}/reschedule-requests/respond"]:::op
+    o22["GET /medical-groups/eligible-members"]:::op
+    o25["GET /medical-groups/patients/{patientProfileId}/conditions"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"LEE"| t6
-  o5 -->|"LEE"| t7
-  o5 -->|"LEE"| t8
-  o5 -->|"LEE"| t9
-  o5 -->|"LEE"| t10
-  o5 -->|"LEE"| t11
-  o5 -.-> t12
-  a2 --> o13
-  o13 -->|"LEE"| t3
-  o13 -->|"ACTUALIZA"| t4
-  o13 -->|"LEE"| t4
-  a2 --> o14
-  o14 -->|"LEE"| t3
-  o14 -->|"ACTUALIZA"| t4
-  o14 -->|"LEE"| t4
-  a2 --> o15
-  o15 -->|"ACTUALIZA"| t3
-  o15 -->|"LEE"| t3
-  o15 -->|"ACTUALIZA"| t4
-  o15 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -->|"LEE"| t7
+  a2 --> o8
+  o8 -->|"LEE"| t9
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t11
+  o8 -->|"LEE"| t12
+  o8 -->|"LEE"| t13
+  o8 -->|"LEE"| t14
+  o8 -.-> t15
   a2 --> o16
   o16 -->|"LEE"| t3
-  o16 -->|"ACTUALIZA"| t4
   o16 -->|"LEE"| t4
+  o16 -->|"ACTUALIZA"| t5
+  o16 -->|"LEE"| t5
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t7
   a2 --> o17
   o17 -->|"LEE"| t3
-  o17 -->|"ACTUALIZA"| t4
   o17 -->|"LEE"| t4
+  o17 -->|"ACTUALIZA"| t5
+  o17 -->|"LEE"| t5
+  o17 -->|"LEE"| t6
+  o17 -->|"LEE"| t7
   a2 --> o18
+  o18 -->|"LEE"| t3
+  o18 -->|"ACTUALIZA"| t4
+  o18 -->|"LEE"| t4
+  o18 -->|"ACTUALIZA"| t5
+  o18 -->|"LEE"| t5
   o18 -->|"LEE"| t6
-  o18 -->|"LEE"| t7
-  o18 -->|"LEE"| t8
-  o18 -->|"LEE"| t9
-  o18 -->|"LEE"| t10
-  o18 -->|"LEE"| t11
   o18 -.-> t19
+  a2 --> o20
+  o20 -->|"LEE"| t3
+  o20 -->|"LEE"| t4
+  o20 -->|"ACTUALIZA"| t5
+  o20 -->|"LEE"| t5
+  o20 -->|"LEE"| t6
+  o20 -->|"LEE"| t7
+  a2 --> o21
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t4
+  o21 -->|"ACTUALIZA"| t5
+  o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t6
+  o21 -->|"LEE"| t7
+  a2 --> o22
+  o22 -->|"LEE"| t3
+  o22 -->|"LEE"| t23
+  o22 -->|"LEE"| t24
+  o22 -->|"LEE"| t6
+  o22 -->|"LEE"| t7
+  a2 --> o25
+  o25 -->|"LEE"| t9
+  o25 -->|"LEE"| t10
+  o25 -->|"LEE"| t11
+  o25 -->|"LEE"| t12
+  o25 -->|"LEE"| t13
+  o25 -->|"LEE"| t14
+  o25 -.-> t26
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -169,8 +201,12 @@ flowchart TD
   n21 --> n22
   n23[("LEE medical_groups.group_members")]:::efecto
   n22 --> n23
-  n24(("200 Responde con éxito")):::ok
+  n24["Llama a MedicalGroupsService.namesFor"]:::llamada
   n23 --> n24
+  n25[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -395,9 +431,15 @@ flowchart TD
   n14 --> n15
   n16[("ACTUALIZA medical_groups.groups")]:::efecto
   n15 -->|"sí"| n16
-  n17(("200 Responde con éxito")):::ok
+  n17["Llama a MedicalGroupsService.toDto"]:::llamada
   n16 --> n17
   n15 -->|"no"| n17
+  n18["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n17 --> n18
+  n19[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n18 --> n19
+  n20(("200 Responde con éxito")):::ok
+  n19 --> n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -472,8 +514,14 @@ flowchart TD
   n23 -->|"sí"| n24
   n25[("ACTUALIZA medical_groups.groups · ACTUALIZA medical_groups.groups")]:::efecto
   n23 -->|"no"| n25
-  n26(("200 Responde con éxito")):::ok
+  n26["Llama a MedicalGroupsService.toDto"]:::llamada
   n25 --> n26
+  n27["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n26 --> n27
+  n28[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -547,14 +595,20 @@ flowchart TD
   n23 --> n24
   n25[("ACTUALIZA medical_groups.groups")]:::efecto
   n24 -->|"sí"| n25
-  n26["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n26["Llama a MedicalGroupsService.toDto"]:::llamada
   n25 --> n26
   n24 -->|"no"| n26
   n21 -->|"no"| n26
-  n27[("LEE medical_groups.group_members")]:::efecto
+  n27["Llama a MedicalGroupsService.namesFor"]:::llamada
   n26 --> n27
-  n28(("201 Responde con éxito")):::ok
+  n28[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
   n27 --> n28
+  n29["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n28 --> n29
+  n30[("LEE medical_groups.group_members")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -637,9 +691,15 @@ flowchart TD
   n27 -->|"sí"| n28
   n29[("ACTUALIZA medical_groups.groups · ACTUALIZA medical_groups.groups · ACTUALIZA medical_groups.groups")]:::efecto
   n27 -->|"no"| n29
-  n30(("201 Responde con éxito")):::ok
+  n30["Llama a MedicalGroupsService.toDto"]:::llamada
   n28 --> n30
   n29 --> n30
+  n31["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n30 --> n31
+  n32[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n31 --> n32
+  n33(("201 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -700,12 +760,18 @@ flowchart TD
   n18[("ACTUALIZA medical_groups.groups · ACTUALIZA medical_groups.groups · ACTUALIZA medical_groups.groups")]:::efecto
   n17 --> n18
   n16 -->|"no"| n18
-  n19["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n19["Llama a MedicalGroupsService.toDto"]:::llamada
   n18 --> n19
-  n20[("LEE medical_groups.group_members")]:::efecto
+  n20["Llama a MedicalGroupsService.namesFor"]:::llamada
   n19 --> n20
-  n21(("201 Responde con éxito")):::ok
+  n21[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
   n20 --> n21
+  n22["Llama a MedicalGroupMembersRepository.findByGroup"]:::llamada
+  n21 --> n22
+  n23[("LEE medical_groups.group_members")]:::efecto
+  n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -714,7 +780,74 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /medical-groups/patients/{patientProfileId}/conditions
+#### 8. GET /medical-groups/eligible-members
+
+Los colegas que se pueden invitar a un grupo del servicio elegido. Va antes de `:id` por el mismo motivo que `patients/...`: el router de Nest resuelve en orden de declaración.
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La cuenta no tiene un perfil profesional asociado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Servicio médico no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MedicalGroupsService.listEligibleMembers"]:::llamada
+  n2 --> n3
+  n4["Llama a MedicalGroupsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"actor.practitionerProfileId === undefined"}:::decision
+  n4 --> n5
+  n6(["401 UNAUTHENTICATED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE billing.service_catalog")]:::efecto
+  n7 --> n8
+  n9["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n8 --> n9
+  n10["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n9 --> n10
+  n11[("LEE practice.practitioner_role_assignments")]:::efecto
+  n10 --> n11
+  n12{"service === null || !service.isActive || !own.includes(service.practiceId)"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Servicio médico no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PracticesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practices")]:::efecto
+  n15 --> n16
+  n17["Llama a PracticeTenantLookupService.findActivePracticeIdsForTenant"]:::llamada
+  n16 --> n17
+  n18["Llama a PracticesRepository.findByTenant"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.practices")]:::efecto
+  n18 --> n19
+  n20[("LEE practice.practitioner_role_assignments")]:::efecto
+  n19 --> n20
+  n21["Llama a MedicalGroupsService.namesFor"]:::llamada
+  n20 --> n21
+  n22[("LEE billing.service_catalog · LEE profiles.persons · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n21 --> n22
+  n23(("200 Responde con éxito")):::ok
+  n22 --> n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. GET /medical-groups/patients/{patientProfileId}/conditions
 
 Diagnósticos del paciente para el selector del formulario
 

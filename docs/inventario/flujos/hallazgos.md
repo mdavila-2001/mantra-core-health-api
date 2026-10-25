@@ -12,8 +12,8 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 121 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1055 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 18 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1056 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 19 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
 | [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 107 |
 
@@ -366,7 +366,7 @@ _Ninguno._
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1055 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1056 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
@@ -573,11 +573,11 @@ _Ninguno._
 | POST /common/files/{id}/versions/{vid}/derivatives | common | ningún cliente del frontend la declara | — |
 | POST /common/identifiers | common | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1055; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1056; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 18 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 19 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
@@ -597,6 +597,7 @@ _Se muestran 200 de 1055; la lista completa está en `inventario/flujos/hallazgo
 | GET /['insurance/campaigns', 'insurance-campaigns']/active | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93` |
 | GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
 | GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
+| GET /medical-groups/eligible-members | medical_groups | handler sin operación en openapi.json | `src/modules/medical_groups/controllers/medical-groups.controller.ts:84` |
 | DESCONOCIDO /notifications/web-push | messaging | handler sin operación en openapi.json | `src/modules/messaging/controllers/web-push.controller.ts:78` |
 | DESCONOCIDO / | promotions | handler sin operación en openapi.json | `src/modules/promotions/controllers/loyalty.controller.ts:185` |
 | DESCONOCIDO /redis-runtime | redis_runtime | handler sin operación en openapi.json | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:44` |
